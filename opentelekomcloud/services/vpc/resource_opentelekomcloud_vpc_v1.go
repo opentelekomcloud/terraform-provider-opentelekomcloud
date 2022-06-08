@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
@@ -34,7 +35,7 @@ func ResourceVirtualPrivateCloudV1() *schema.Resource {
 			Delete: schema.DefaultTimeout(3 * time.Minute),
 		},
 
-		Schema: map[string]*schema.Schema{ // request and response parameters
+		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -44,19 +45,20 @@ func ResourceVirtualPrivateCloudV1() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ForceNew:     false,
 				ValidateFunc: common.ValidateName,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"cidr": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ForceNew:     false,
-				ValidateFunc: common.ValidateCIDR,
+				ValidateFunc: validation.IsCIDR,
 			},
 			"shared": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: false,
 				Computed: true,
 			},
 			"status": {
@@ -74,11 +76,11 @@ func addNetworkingTags(d *schema.ResourceData, config *cfg.Config, res string) e
 	if len(tagRaw) > 0 {
 		vpcV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf(errCreationV2Client, err)
 		}
 
-		taglist := common.ExpandResourceTags(tagRaw)
-		if tagErr := tags.Create(vpcV2Client, res, d.Id(), taglist).ExtractErr(); tagErr != nil {
+		tagList := common.ExpandResourceTags(tagRaw)
+		if tagErr := tags.Create(vpcV2Client, res, d.Id(), tagList).ExtractErr(); tagErr != nil {
 			return fmt.Errorf("error setting tags of VirtualPrivateCloud %s: %s", d.Id(), tagErr)
 		}
 	}
@@ -86,11 +88,11 @@ func addNetworkingTags(d *schema.ResourceData, config *cfg.Config, res string) e
 }
 
 func readNetworkingTags(d *schema.ResourceData, config *cfg.Config, resource string) error {
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	vpcV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmt.Errorf(errCreationV2Client, err)
 	}
-	resourceTags, err := tags.Get(client, resource, d.Id()).Extract()
+	resourceTags, err := tags.Get(vpcV2Client, resource, d.Id()).Extract()
 	if err != nil {
 		return fmt.Errorf("error fetching tags: %s", err)
 	}
@@ -104,40 +106,40 @@ func readNetworkingTags(d *schema.ResourceData, config *cfg.Config, resource str
 
 func resourceVirtualPrivateCloudV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
-
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	createOpts := vpcs.CreateOpts{
-		Name: d.Get("name").(string),
-		CIDR: d.Get("cidr").(string),
+		Name:        d.Get("name").(string),
+		Description: d.Get("description").(string),
+		CIDR:        d.Get("cidr").(string),
 	}
 
-	n, err := vpcs.Create(vpcClient, createOpts).Extract()
-
+	n, err := vpcs.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud VPC: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC: %w", err)
 	}
+
 	d.SetId(n.ID)
 
-	log.Printf("[INFO] Vpc ID: %s", n.ID)
+	log.Printf("[INFO] VPC ID: %s", n.ID)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"CREATING"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForVpcActive(vpcClient, n.ID),
+		Refresh:    waitForVpcActive(client, n.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, stateErr := stateConf.WaitForStateContext(ctx)
-	if stateErr != nil {
-		return fmterr.Errorf(
-			"Error waiting for Vpc (%s) to become ACTIVE: %s",
-			n.ID, stateErr)
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for VPC (%s) to become ACTIVE: %w", n.ID, err)
 	}
 
 	if common.HasFilledOpt(d, "shared") {
@@ -145,9 +147,9 @@ func resourceVirtualPrivateCloudV1Create(ctx context.Context, d *schema.Resource
 		updateOpts := vpcs.UpdateOpts{
 			EnableSharedSnat: &snat,
 		}
-		_, err = vpcs.Update(vpcClient, d.Id(), updateOpts).Extract()
+		_, err = vpcs.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
-			log.Printf("[WARN] Error updating shared snat for OpenTelekomCloud Vpc: %s", err)
+			log.Printf("[WARN] Error updating shared SNAT for OpenTelekomCloud VPC: %s", err)
 		}
 	}
 
@@ -157,28 +159,27 @@ func resourceVirtualPrivateCloudV1Create(ctx context.Context, d *schema.Resource
 
 	d.SetId(n.ID)
 
-	return resourceVirtualPrivateCloudV1Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
+	return resourceVirtualPrivateCloudV1Read(clientCtx, d, meta)
 }
 
-func resourceVirtualPrivateCloudV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVirtualPrivateCloudV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud Vpc client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
-	n, err := vpcs.Get(vpcClient, d.Id()).Extract()
+	n, err := vpcs.Get(client, d.Id()).Extract()
 	if err != nil {
-		if _, ok := err.(golangsdk.ErrDefault404); ok {
-			d.SetId("")
-			return nil
-		}
-
-		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc: %s", err)
+		return common.CheckDeletedDiag(d, err, "vpc")
 	}
 
 	mErr := multierror.Append(
 		d.Set("name", n.Name),
+		d.Set("description", n.Description),
 		d.Set("cidr", n.CIDR),
 		d.Set("status", n.Status),
 		d.Set("shared", n.EnableSharedSnat),
@@ -197,15 +198,21 @@ func resourceVirtualPrivateCloudV1Read(_ context.Context, d *schema.ResourceData
 
 func resourceVirtualPrivateCloudV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud Vpc: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	var updateOpts vpcs.UpdateOpts
 
 	if d.HasChange("name") {
 		updateOpts.Name = d.Get("name").(string)
+	}
+	if d.HasChange("description") {
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 	if d.HasChange("cidr") {
 		updateOpts.CIDR = d.Get("cidr").(string)
@@ -215,38 +222,41 @@ func resourceVirtualPrivateCloudV1Update(ctx context.Context, d *schema.Resource
 		updateOpts.EnableSharedSnat = &snat
 	}
 
-	_, err = vpcs.Update(vpcClient, d.Id(), updateOpts).Extract()
+	_, err = vpcs.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error updating OpenTelekomCloud Vpc: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud VPC: %s", err)
 	}
 
 	// update tags
 	if d.HasChange("tags") {
 		vpcV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
 		if err != nil {
-			return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+			return fmterr.Errorf(errCreationV2Client, err)
 		}
 
 		tagErr := common.UpdateResourceTags(vpcV2Client, d, "vpcs", d.Id())
 		if tagErr != nil {
-			return fmterr.Errorf("error updating tags of VPC %s: %s", d.Id(), tagErr)
+			return fmterr.Errorf("error updating tags of VPC %s: %w", d.Id(), tagErr)
 		}
 	}
 
-	return resourceVirtualPrivateCloudV1Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
+	return resourceVirtualPrivateCloudV1Read(clientCtx, d, meta)
 }
 
 func resourceVirtualPrivateCloudV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud vpc: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForVpcDelete(vpcClient, d.Id()),
+		Refresh:    waitForVpcDelete(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -254,16 +264,16 @@ func resourceVirtualPrivateCloudV1Delete(ctx context.Context, d *schema.Resource
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("error deleting OpenTelekomCloud Vpc: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud VPC: %s", err)
 	}
 
 	d.SetId("")
 	return nil
 }
 
-func waitForVpcActive(vpcClient *golangsdk.ServiceClient, vpcId string) resource.StateRefreshFunc {
+func waitForVpcActive(client *golangsdk.ServiceClient, vpcID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := vpcs.Get(vpcClient, vpcId).Extract()
+		n, err := vpcs.Get(client, vpcID).Extract()
 		if err != nil {
 			return nil, "", err
 		}
@@ -274,29 +284,27 @@ func waitForVpcActive(vpcClient *golangsdk.ServiceClient, vpcId string) resource
 
 		// If vpc status is other than Ok, send error
 		if n.Status == "DOWN" {
-			return nil, "", fmt.Errorf("vpc status: '%s'", n.Status)
+			return nil, "", fmt.Errorf("VPC status: %s", n.Status)
 		}
 
 		return n, n.Status, nil
 	}
 }
 
-func waitForVpcDelete(vpcClient *golangsdk.ServiceClient, vpcId string) resource.StateRefreshFunc {
+func waitForVpcDelete(client *golangsdk.ServiceClient, vpcID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		r, err := vpcs.Get(vpcClient, vpcId).Extract()
+		r, err := vpcs.Get(client, vpcID).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[INFO] Successfully deleted OpenTelekomCloud vpc %s", vpcId)
+				log.Printf("[INFO] Successfully deleted OpenTelekomCloud VPC %s", vpcID)
 				return r, "DELETED", nil
 			}
 			return r, "ACTIVE", err
 		}
 
-		err = vpcs.Delete(vpcClient, vpcId).ExtractErr()
-
-		if err != nil {
+		if err = vpcs.Delete(client, vpcID).ExtractErr(); err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[INFO] Successfully deleted OpenTelekomCloud vpc %s", vpcId)
+				log.Printf("[INFO] Successfully deleted OpenTelekomCloud VPC %s", vpcID)
 				return r, "DELETED", nil
 			}
 			if errCode, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {
