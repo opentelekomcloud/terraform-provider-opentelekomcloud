@@ -45,7 +45,6 @@ func ResourceVirtualPrivateCloudV1() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ForceNew:     false,
 				ValidateFunc: common.ValidateName,
 			},
 			"description": {
@@ -55,13 +54,11 @@ func ResourceVirtualPrivateCloudV1() *schema.Resource {
 			"cidr": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ForceNew:     false,
 				ValidateFunc: validation.IsCIDR,
 			},
 			"shared": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: false,
 				Computed: true,
 			},
 			"status": {
@@ -118,8 +115,8 @@ func resourceVirtualPrivateCloudV1Create(ctx context.Context, d *schema.Resource
 
 	createOpts := vpcs.CreateOpts{
 		Name:        d.Get("name").(string),
-		CIDR:        d.Get("cidr").(string),
 		Description: d.Get("description").(string),
+		CIDR:        d.Get("cidr").(string),
 	}
 
 	n, err := vpcs.Create(client, createOpts).Extract()
@@ -274,9 +271,9 @@ func resourceVirtualPrivateCloudV1Delete(ctx context.Context, d *schema.Resource
 	return nil
 }
 
-func waitForVpcActive(client *golangsdk.ServiceClient, vpcId string) resource.StateRefreshFunc {
+func waitForVpcActive(client *golangsdk.ServiceClient, vpcID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := vpcs.Get(client, vpcId).Extract()
+		n, err := vpcs.Get(client, vpcID).Extract()
 		if err != nil {
 			return nil, "", err
 		}
@@ -287,7 +284,7 @@ func waitForVpcActive(client *golangsdk.ServiceClient, vpcId string) resource.St
 
 		// If vpc status is other than Ok, send error
 		if n.Status == "DOWN" {
-			return nil, "", fmt.Errorf("vpc status: '%s'", n.Status)
+			return nil, "", fmt.Errorf("VPC status: %s", n.Status)
 		}
 
 		return n, n.Status, nil
@@ -299,7 +296,7 @@ func waitForVpcDelete(client *golangsdk.ServiceClient, vpcID string) resource.St
 		r, err := vpcs.Get(client, vpcID).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[INFO] Successfully deleted OpenTelekomCloud vpc %s", vpcID)
+				log.Printf("[INFO] Successfully deleted OpenTelekomCloud VPC %s", vpcID)
 				return r, "DELETED", nil
 			}
 			return r, "ACTIVE", err
@@ -307,7 +304,7 @@ func waitForVpcDelete(client *golangsdk.ServiceClient, vpcID string) resource.St
 
 		if err = vpcs.Delete(client, vpcID).ExtractErr(); err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[INFO] Successfully deleted OpenTelekomCloud vpc %s", vpcID)
+				log.Printf("[INFO] Successfully deleted OpenTelekomCloud VPC %s", vpcID)
 				return r, "DELETED", nil
 			}
 			if errCode, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {

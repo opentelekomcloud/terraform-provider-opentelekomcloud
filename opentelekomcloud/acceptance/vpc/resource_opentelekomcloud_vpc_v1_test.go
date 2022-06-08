@@ -25,13 +25,14 @@ func TestAccVpcV1_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCVpcV1Destroy,
+		CheckDestroy:      testAccCheckVpcV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVpcV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCVpcV1Exists(resourceVPCName, &vpc),
+					testAccCheckVpcV1Exists(resourceVPCName, &vpc),
 					resource.TestCheckResourceAttr(resourceVPCName, "name", "terraform_provider_test"),
+					resource.TestCheckResourceAttr(resourceVPCName, "description", "simple description"),
 					resource.TestCheckResourceAttr(resourceVPCName, "cidr", "192.168.0.0/16"),
 					resource.TestCheckResourceAttr(resourceVPCName, "status", "OK"),
 					resource.TestCheckResourceAttr(resourceVPCName, "shared", "true"),
@@ -42,8 +43,9 @@ func TestAccVpcV1_basic(t *testing.T) {
 			{
 				Config: testAccVpcV1Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCVpcV1Exists(resourceVPCName, &vpc),
+					testAccCheckVpcV1Exists(resourceVPCName, &vpc),
 					resource.TestCheckResourceAttr(resourceVPCName, "name", "terraform_provider_test1"),
+					resource.TestCheckResourceAttr(resourceVPCName, "description", "simple description updated"),
 					resource.TestCheckResourceAttr(resourceVPCName, "shared", "false"),
 					resource.TestCheckResourceAttr(resourceVPCName, "tags.key", "value_update"),
 				),
@@ -60,12 +62,12 @@ func TestAccVpcV1_timeout(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCVpcV1Destroy,
+		CheckDestroy:      testAccCheckVpcV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVpcV1Timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCVpcV1Exists(resourceVPCName, &vpc),
+					testAccCheckVpcV1Exists(resourceVPCName, &vpc),
 				),
 			},
 		},
@@ -79,7 +81,7 @@ func TestAccVpcV1_import(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCVpcV1Destroy,
+		CheckDestroy:      testAccCheckVpcV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVpcV1Import,
@@ -93,11 +95,11 @@ func TestAccVpcV1_import(t *testing.T) {
 	})
 }
 
-func testAccCheckOTCVpcV1Destroy(s *terraform.State) error {
+func testAccCheckVpcV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	vpcClient, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+	client, err := config.NetworkingV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -105,7 +107,7 @@ func testAccCheckOTCVpcV1Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := vpcs.Get(vpcClient, rs.Primary.ID).Extract()
+		_, err := vpcs.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("vpc still exists")
 		}
@@ -114,7 +116,7 @@ func testAccCheckOTCVpcV1Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckOTCVpcV1Exists(n string, vpc *vpcs.Vpc) resource.TestCheckFunc {
+func testAccCheckVpcV1Exists(n string, vpc *vpcs.Vpc) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -126,12 +128,12 @@ func testAccCheckOTCVpcV1Exists(n string, vpc *vpcs.Vpc) resource.TestCheckFunc 
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		vpcClient, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+		client, err := config.NetworkingV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
 		}
 
-		found, err := vpcs.Get(vpcClient, rs.Primary.ID).Extract()
+		found, err := vpcs.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -148,9 +150,10 @@ func testAccCheckOTCVpcV1Exists(n string, vpc *vpcs.Vpc) resource.TestCheckFunc 
 
 const testAccVpcV1Basic = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name   = "terraform_provider_test"
-  cidr   = "192.168.0.0/16"
-  shared = true
+  name        = "terraform_provider_test"
+  description = "simple description"
+  cidr        = "192.168.0.0/16"
+  shared      = true
 
   tags = {
     foo = "bar"
@@ -161,9 +164,10 @@ resource "opentelekomcloud_vpc_v1" "vpc_1" {
 
 const testAccVpcV1Update = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name   = "terraform_provider_test1"
-  cidr   = "192.168.0.0/16"
-  shared = false
+  name        = "terraform_provider_test1"
+  description = "simple description updated"
+  cidr        = "192.168.0.0/16"
+  shared      = false
 
   tags = {
     foo = "bar"
