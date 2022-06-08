@@ -4,7 +4,7 @@ subcategory: "Virtual Private Cloud (VPC)"
 
 # opentelekomcloud_vpc_subnet_v1
 
-Provides an VPC subnet resource within OpenTelekomCloud.
+Provides an VPC v1 subnet resource within OpenTelekomCloud.
 
 ## Example Usage
 
@@ -48,11 +48,13 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_with_tags" {
 
 The following arguments are supported:
 
-* `name` - (Required) The subnet name. The value is a string of 1 to 64 characters that can contain letters,
-  digits, underscores (_), and hyphens (-).
+* `name` - (Required) The subnet name. The value is a string of `1` to `64` characters that can contain letters,
+  digits, underscores (`_`), and hyphens (`-`).
+
+* `description` - (Optional) A description of the VPC subnet.
 
 * `cidr` - (Required) Specifies the network segment on which the subnet resides. The value must be in CIDR format.
-  The value must be within the CIDR block of the VPC. The subnet mask cannot be greater than 28.
+  The value must be within the CIDR block of the VPC. The subnet mask cannot be greater than `28`.
   Changing this creates a new Subnet.
 
 * `gateway_ip` - (Required) Specifies the gateway of the subnet. The value must be a valid IP address.
