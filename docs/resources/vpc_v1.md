@@ -43,28 +43,27 @@ resource "opentelekomcloud_vpc_v1" "vpc_with_tags" {
 
 The following arguments are supported:
 
-* `cidr` - (Required) The range of available subnets in the VPC. The value ranges from 10.0.0.0/8 to 10.255.255.0/24, 172.16.0.0/12 to 172.31.255.0/24, or 192.168.0.0/16 to 192.168.255.0/24.
+* `cidr` - (Required) The range of available subnets in the VPC. The value ranges from
+  `10.0.0.0/8` to `10.255.255.0/24`, `172.16.0.0/12` to `172.31.255.0/24`,
+  or `192.168.0.0/16` to `192.168.255.0/24`.
 
-* `name` - (Required) The name of the VPC. The name must be unique for a tenant. The value is a string of no more than 64 characters and can contain digits, letters, underscores (_), and hyphens (-). Changing this updates the name of the existing VPC.
+* `name` - (Required) The name of the VPC. The name must be unique for a tenant. The value is a string of
+  no more than `64` characters and can contain digits, letters, underscores (`_`), and hyphens (`-`).
 
-* `shared` - (Optional) Specifies whether the shared SNAT should be used or not. Is also required  for cross-tenant sharing.
+* `description` - (Optional) A description of the VPC.
+
+* `shared` - (Optional) Specifies whether the shared SNAT should be used or not. Is also
+  required for cross-tenant sharing.
 
 * `tags` - (Optional) The key/value pairs to associate with the VPC.
 
 
 ## Attributes Reference
 
-The following attributes are exported:
+All above argument parameters can be exported as attribute parameters.
 
-* `id` -  ID of the VPC.
-
-* `name` - See Argument Reference above.
-
-* `cidr` - See Argument Reference above.
-
-* `tags` - See Argument Reference above.
-
-* `status` - The current status of the desired VPC. Can be either CREATING, OK, DOWN, PENDING_UPDATE, PENDING_DELETE, or ERROR.
+* `status` - The current status of the desired VPC. Can be either `CREATING`,
+  `OK`, `DOWN`, `PENDING_UPDATE`, `PENDING_DELETE` or `ERROR`.
 
 ## Import
 
