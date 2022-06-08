@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -43,14 +43,17 @@ func ResourceVpcSubnetV1() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ForceNew:     false,
 				ValidateFunc: common.ValidateName,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"cidr": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: common.ValidateCIDR,
+				ValidateFunc: validation.IsCIDR,
 			},
 			"dns_list": {
 				Type:     schema.TypeList,
@@ -58,32 +61,31 @@ func ResourceVpcSubnetV1() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
-					ValidateFunc: common.ValidateIP,
+					ValidateFunc: validation.IsIPv4Address,
 				},
 			},
 			"gateway_ip": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: common.ValidateIP,
+				ValidateFunc: validation.IsIPv4Address,
 			},
 			"dhcp_enable": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
-				ForceNew: false,
 			},
 			"primary_dns": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: common.ValidateIP,
+				ValidateFunc: validation.IsIPv4Address,
 			},
 			"secondary_dns": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: common.ValidateIP,
+				ValidateFunc: validation.IsIPv4Address,
 			},
 			"availability_zone": {
 				Type:     schema.TypeString,
@@ -92,9 +94,10 @@ func ResourceVpcSubnetV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"vpc_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"tags": common.TagsSchema(),
 			"ntp_addresses": {
@@ -115,9 +118,11 @@ func ResourceVpcSubnetV1() *schema.Resource {
 
 func resourceVpcSubnetV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	primaryDNS := d.Get("primary_dns").(string)
@@ -131,6 +136,7 @@ func resourceVpcSubnetV1Create(ctx context.Context, d *schema.ResourceData, meta
 	enableDHCP := d.Get("dhcp_enable").(bool)
 	createOpts := subnets.CreateOpts{
 		Name:             d.Get("name").(string),
+		Description:      d.Get("description").(string),
 		CIDR:             d.Get("cidr").(string),
 		AvailabilityZone: d.Get("availability_zone").(string),
 		GatewayIP:        d.Get("gateway_ip").(string),
@@ -170,44 +176,33 @@ func resourceVpcSubnetV1Create(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf("error waiting for Subnet (%s) to become ACTIVE: %w", subnet.ID, err)
 	}
 
-	// set tags
-	tagRaw := d.Get("tags").(map[string]interface{})
-	if len(tagRaw) > 0 {
-		networkingV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
-		if err != nil {
-			return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
-		}
-
-		tagList := common.ExpandResourceTags(tagRaw)
-		if err := tags.Create(networkingV2Client, "subnets", subnet.ID, tagList).ExtractErr(); err != nil {
-			return fmterr.Errorf("error setting tags of VPC subnet %s: %w", subnet.ID, err)
-		}
+	if err := addNetworkingTags(d, config, "subnets"); err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId(subnet.ID)
 
-	return resourceVpcSubnetV1Read(ctx, d, config)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
+	return resourceVpcSubnetV1Read(clientCtx, d, config)
 }
 
-func resourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpcSubnetV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	subnet, err := subnets.Get(client, d.Id()).Extract()
 	if err != nil {
-		if _, ok := err.(golangsdk.ErrDefault404); ok {
-			d.SetId("")
-			return nil
-		}
-
-		return fmterr.Errorf("error retrieving OpenTelekomCloud Subnet: %w", err)
+		return common.CheckDeletedDiag(d, err, "vpc subnet")
 	}
 
 	mErr := multierror.Append(
 		d.Set("name", subnet.Name),
+		d.Set("description", subnet.Description),
 		d.Set("cidr", subnet.CIDR),
 		d.Set("dns_list", subnet.DNSList),
 		d.Set("gateway_ip", subnet.GatewayIP),
@@ -232,20 +227,8 @@ func resourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta int
 		return fmterr.Errorf("error setting subnet fields: %w", mErr)
 	}
 
-	// save VpcSubnet tags
-	networkingV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
-	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
-	}
-
-	resourceTags, err := tags.Get(networkingV2Client, "subnets", d.Id()).Extract()
-	if err != nil {
-		return fmterr.Errorf("error fetching OpenTelekomCloud VPC Subnet tags: %s", err)
-	}
-
-	tagMap := common.TagsToMap(resourceTags)
-	if err := d.Set("tags", tagMap); err != nil {
-		return fmterr.Errorf("error saving tags for OpenTelekomCloud VPC Subnet %s: %w", d.Id(), err)
+	if err := readNetworkingTags(d, config, "subnets"); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -253,9 +236,11 @@ func resourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta int
 
 func resourceVpcSubnetV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %w", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	var updateOpts subnets.UpdateOpts
@@ -263,6 +248,9 @@ func resourceVpcSubnetV1Update(ctx context.Context, d *schema.ResourceData, meta
 	// as name is mandatory while updating subnet
 	updateOpts.Name = d.Get("name").(string)
 
+	if d.HasChange("description") {
+		updateOpts.Description = d.Get("description").(string)
+	}
 	if d.HasChange("primary_dns") {
 		updateOpts.PrimaryDNS = d.Get("primary_dns").(string)
 	}
@@ -305,15 +293,19 @@ func resourceVpcSubnetV1Update(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
-	return resourceVpcSubnetV1Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
+	return resourceVpcSubnetV1Read(clientCtx, d, meta)
 }
 
 func resourceVpcSubnetV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
+
 	vpcID := d.Get("vpc_id").(string)
 
 	stateConf := &resource.StateChangeConf{
