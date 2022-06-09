@@ -31,43 +31,40 @@ func ResourceIdentityUserV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-
 			"domain_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"password": {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
 			},
-
 			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-
 			"email": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				DiffSuppressFunc: common.SuppressCaseInsensitive,
 			},
-
 			"send_welcome_email": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -85,20 +82,21 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 
 	enabled := d.Get("enabled").(bool)
 	createOpts := users.CreateOpts{
+		Name:             d.Get("name").(string),
 		DefaultProjectID: d.Get("default_project_id").(string),
 		DomainID:         d.Get("domain_id").(string),
 		Enabled:          &enabled,
-		Name:             d.Get("name").(string),
+		Description:      d.Get("description").(string),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	// Add password here so it wouldn't go in the above log entry
+	// Add password here, so it wouldn't go in the above log entry
 	createOpts.Password = d.Get("password").(string)
 
 	user, err := users.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud user: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud user: %w", err)
 	}
 
 	d.SetId(user.ID)
@@ -125,6 +123,7 @@ func resourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("domain_id", user.DomainID),
 		d.Set("enabled", user.Enabled),
 		d.Set("name", user.Name),
+		d.Set("description", user.Description),
 		d.Set("region", config.GetRegion(d)),
 	)
 
@@ -204,6 +203,11 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 	if d.HasChange("name") {
 		hasChange = true
 		updateOpts.Name = d.Get("name").(string)
+	}
+
+	if d.HasChange("description") {
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 
 	if hasChange {

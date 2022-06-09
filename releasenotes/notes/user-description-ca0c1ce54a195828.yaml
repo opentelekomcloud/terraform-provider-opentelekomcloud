@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[IAM]** Add ``description`` field in ``resource/opentelekomcloud_identity_user_v3`` (`#1761 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1761>`_)
