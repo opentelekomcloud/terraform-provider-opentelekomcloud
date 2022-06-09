@@ -249,7 +249,8 @@ func resourceVpcSubnetV1Update(ctx context.Context, d *schema.ResourceData, meta
 	updateOpts.Name = d.Get("name").(string)
 
 	if d.HasChange("description") {
-		updateOpts.Description = d.Get("description").(string)
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 	if d.HasChange("primary_dns") {
 		updateOpts.PrimaryDNS = d.Get("primary_dns").(string)
