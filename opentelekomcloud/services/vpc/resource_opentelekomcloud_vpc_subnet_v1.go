@@ -176,11 +176,11 @@ func resourceVpcSubnetV1Create(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf("error waiting for Subnet (%s) to become ACTIVE: %w", subnet.ID, err)
 	}
 
+	d.SetId(subnet.ID)
+
 	if err := addNetworkingTags(d, config, "subnets"); err != nil {
 		return diag.FromErr(err)
 	}
-
-	d.SetId(subnet.ID)
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
 	return resourceVpcSubnetV1Read(clientCtx, d, config)
