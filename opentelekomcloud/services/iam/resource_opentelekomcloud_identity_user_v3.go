@@ -157,10 +157,6 @@ func setExtendedOpts(ctx context.Context, d *schema.ResourceData, meta interface
 		hasChange = true
 		updateOpts.Email = d.Get("email").(string)
 	}
-	if d.HasChange("description") {
-		description := d.Get("description").(string)
-		updateOpts.Description = &description
-	}
 
 	if hasChange {
 		_, err := users.ExtendedUpdate(client, d.Id(), updateOpts).Extract()
@@ -207,6 +203,11 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 	if d.HasChange("name") {
 		hasChange = true
 		updateOpts.Name = d.Get("name").(string)
+	}
+
+	if d.HasChange("description") {
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 
 	if hasChange {
