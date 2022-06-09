@@ -26,6 +26,8 @@ The following arguments are supported:
   characters. It can contain only uppercase letters, lowercase letters,
   digits, spaces, and special characters (-_) and cannot start with a digit.
 
+* `description` - (Optional) The description of the Identity User.
+
 * `default_project_id` - (Optional) The default project this user belongs to.
 
 * `domain_id` - (Optional) The domain this user belongs to.
