@@ -102,10 +102,9 @@ func ResourceDdsInstanceV3() *schema.Resource {
 				Required:  true,
 			},
 			"disk_encryption_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IsUUID,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"mode": {
 				Type:     schema.TypeString,
