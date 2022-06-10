@@ -113,7 +113,7 @@ The following arguments are supported:
   Changing this creates a new instance.
 
 * `mode` - (Required) Specifies the mode of the database instance. Changing this creates
-	a new instance.
+  a new instance.
 
 * `flavor` - (Required) Specifies the flavors information. The structure is described below.
   Changing this creates a new instance.
@@ -123,7 +123,7 @@ The following arguments are supported:
 
 * `ssl` - (Optional) Specifies whether to enable or disable SSL. Defaults to true.
 
--> **Note:** The instance will be restarted in the background when switching SSL. Please operate with caution.
+-> The instance will be restarted in the background when switching SSL. Please operate with caution.
 
 The `datastore` block supports:
 
@@ -142,21 +142,23 @@ The `flavor` block supports:
   * For a replica set instance, the value is `replica`.
 
 * `num` - (Required) Specifies the node quantity. Valid value:
-  * `mongos`: The value ranges from 2 to 16.
-  * `shard`: The value ranges from 2 to 16.
-  * `config`: The value is 1.
-  * `replica`: The value is 1.
+  * `mongos`: The value ranges from `2` to `16`.
+  * `shard`: The value ranges from `2` to `16`.
+  * `config`: The value is `1`.
+  * `replica`: The value is `1`.
 
 * `storage` - (Optional) Specifies the disk type. Valid value: `ULTRAHIGH` which indicates the type SSD.
--> **Note:** This parameter is optional for all nodes except `mongos`. This parameter is invalid for
+
+-> This parameter is optional for all nodes except `mongos`. This parameter is invalid for
   the `mongos` nodes.
 
-* `size` - (Optional) Specifies the disk size. The value must be a multiple of 10. The unit is GB.
-  * For a `cluster` instance, the storage space of a shard node can be 10 to 1000 GB, and the config
-  storage space is 20 GB. This parameter is invalid for `mongos` nodes. Therefore, you do not need
+* `size` - (Optional) Specifies the disk size. The value must be a multiple of `10`. The unit is GB.
+  * For a `cluster` instance, the storage space of a shard node can be `10` to `1000` GB, and the config
+  storage space is `20` GB. This parameter is invalid for `mongos` nodes. Therefore, you do not need
   to specify the storage space for `mongos` nodes.
-  * For a `replica set` instance, the value ranges from 10 to 2000.
--> **Note:** This parameter is mandatory for all nodes except `mongos`. This parameter is invalid
+  * For a `replica set` instance, the value ranges from `10` to `2000`.
+
+-> This parameter is mandatory for all nodes except `mongos`. This parameter is invalid
   for the `mongos` nodes.
 
 * `spec_code` - (Required) Specifies the resource specification code.
@@ -165,13 +167,13 @@ The `backup_strategy ` block supports:
 
 * `start_time` - (Required) Specifies the backup time window. Automated backups will be triggered
 	during the backup time window. The value cannot be empty. It must be a valid value in the
-	"hh:mm-HH:MM" format. The current time is in the UTC format.
+	`"hh:mm-HH:MM"` format. The current time is in the UTC format.
 	* The `HH` value must be 1 greater than the `hh` value.
-	* The values from `mm` and `MM` must be the same and must be set to any of the following 00, 15, 30, or 45.
+	* The values from `mm` and `MM` must be the same and must be set to any of the following `00`, `15`, `30`, or `45`.
 
 * `keep_days` - (Optional) Specifies the number of days to retain the generated backup files. The
 	value range is from `0` to `732`.
-	* If this parameter is set to 0, the automated backup policy is not set.
+	* If this parameter is set to `0`, the automated backup policy is not set.
 	* If this parameter is not transferred, the automated backup policy is enabled by default.
     Backup files are stored for seven days by default.
 
@@ -215,3 +217,11 @@ The `nodes` block contains:
 This resource provides the following timeouts configuration options:
   - `create` - Default is 30 minute.
   - `delete` - Default is 30 minute.
+
+## Import
+
+DDSv3 Instance can be imported using the `id`, e.g.
+
+```shell
+terraform import opentelekomcloud_dds_instance_v3.instance_1 c1851195-cdcb-4d23-96cb-032e6a3ee667
+```
