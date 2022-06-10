@@ -50,11 +50,34 @@ func TestAccDDSV3Instance_minConfig(t *testing.T) {
 	})
 }
 
+func TestAccDDSInstanceV3_importBasic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDDSV3InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: TestAccDDSInstanceV3ConfigBasic,
+			},
+			{
+				ResourceName:      resourceInstanceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"flavor",
+					"password",
+					"availability_zone",
+				},
+			},
+		},
+	})
+}
+
 func testAccCheckDDSV3InstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.DdsV3Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -95,7 +118,7 @@ func testAccCheckDDSV3InstanceExists(n string) resource.TestCheckFunc {
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.DdsV3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %s ", err)
+			return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
 		}
 
 		opts := instances.ListInstanceOpts{

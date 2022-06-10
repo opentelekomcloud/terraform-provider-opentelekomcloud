@@ -42,8 +42,9 @@ func ResourceDdsInstanceV3() *schema.Resource {
 				ForceNew: true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: common.ValidateName,
 			},
 			"datastore": {
 				Type:     schema.TypeList,
@@ -79,18 +80,21 @@ func ResourceDdsInstanceV3() *schema.Resource {
 				ForceNew: true,
 			},
 			"vpc_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"subnet_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"security_group_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"password": {
 				Type:      schema.TypeString,
@@ -139,9 +143,10 @@ func ResourceDdsInstanceV3() *schema.Resource {
 							}, true),
 						},
 						"size": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							ForceNew: true,
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.IntDivisibleBy(10),
 						},
 						"spec_code": {
 							Type:     schema.TypeString,
@@ -162,11 +167,13 @@ func ResourceDdsInstanceV3() *schema.Resource {
 						"start_time": {
 							Type:         schema.TypeString,
 							Required:     true,
+							ForceNew:     true,
 							ValidateFunc: common.ValidateDDSStartTime,
 						},
 						"keep_days": {
 							Type:         schema.TypeInt,
 							Required:     true,
+							ForceNew:     true,
 							ValidateFunc: validation.IntBetween(0, 732),
 						},
 					},
@@ -312,9 +319,11 @@ func instanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string
 
 func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.DdsV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.DdsV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
+		return fmterr.Errorf(errCreationV3Client, err)
 	}
 
 	createOpts := instances.CreateOpts{
@@ -360,14 +369,17 @@ func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", instance.Id, err)
 	}
 
-	return resourceDdsInstanceV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
+	return resourceDdsInstanceV3Read(clientCtx, d, meta)
 }
 
-func resourceDdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.DdsV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.DdsV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
+		return fmterr.Errorf(errCreationV3Client, err)
 	}
 
 	listOpts := instances.ListInstanceOpts{
@@ -414,6 +426,10 @@ func resourceDdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("ssl", sslEnable),
 	)
 
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("error setting DDSv3 multiple opts: %w", err)
+	}
+
 	datastoreList := make([]map[string]interface{}, 0, 1)
 	datastore := map[string]interface{}{
 		"type":           instance.DataStore.Type,
@@ -421,7 +437,7 @@ func resourceDdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 		"storage_engine": instance.Engine,
 	}
 	datastoreList = append(datastoreList, datastore)
-	if err = d.Set("datastore", datastoreList); err != nil {
+	if err := d.Set("datastore", datastoreList); err != nil {
 		return fmterr.Errorf("error setting DDSv3 datastore opts: %w", err)
 	}
 
@@ -431,7 +447,7 @@ func resourceDdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 		"keep_days":  instance.BackupStrategy.KeepDays,
 	}
 	backupStrategyList = append(backupStrategyList, backupStrategy)
-	if err = d.Set("backup_strategy", backupStrategyList); err != nil {
+	if err := d.Set("backup_strategy", backupStrategyList); err != nil {
 		return fmterr.Errorf("error setting DDSv3 backup_strategy opts: %w", err)
 	}
 
@@ -441,14 +457,16 @@ func resourceDdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf("error setting nodes of DDSv3 instance: %w", err)
 	}
 
-	return diag.FromErr(mErr.ErrorOrNil())
+	return nil
 }
 
 func resourceDdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.DdsV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.DdsV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
+		return fmterr.Errorf(errCreationV3Client, err)
 	}
 
 	var opts []instances.UpdateOpt
@@ -515,14 +533,17 @@ func resourceDdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", d.Id(), err)
 	}
 
-	return resourceDdsInstanceV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
+	return resourceDdsInstanceV3Read(clientCtx, d, meta)
 }
 
 func resourceDdsInstanceV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.DdsV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.DdsV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
+		return fmterr.Errorf(errCreationV3Client, err)
 	}
 
 	result := instances.Delete(client, d.Id())
@@ -547,7 +568,7 @@ func resourceDdsInstanceV3Delete(ctx context.Context, d *schema.ResourceData, me
 }
 
 func flattenDdsInstanceV3Nodes(dds instances.InstanceResponse) interface{} {
-	nodesList := make([]map[string]interface{}, 0)
+	var nodesList []map[string]interface{}
 	for _, group := range dds.Groups {
 		groupType := group.Type
 		for _, Node := range group.Nodes {
