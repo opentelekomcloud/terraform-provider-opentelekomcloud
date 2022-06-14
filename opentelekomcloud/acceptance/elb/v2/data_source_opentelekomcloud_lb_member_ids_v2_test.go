@@ -43,7 +43,7 @@ func testAccLbMemberIDsV3DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("can't find CCE Node data source: %s", n)
+			return fmt.Errorf("can't find ELBv2 Member IDs data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
