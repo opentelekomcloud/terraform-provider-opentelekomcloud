@@ -2,13 +2,13 @@ package v2
 
 import (
 	"context"
+	"log"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/pools"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -59,7 +59,7 @@ func dataSourceLBMemberIDsV2Read(_ context.Context, d *schema.ResourceData, meta
 	}
 
 	if len(refinedMembers) < 1 {
-		return common.DataSourceTooFewDiag
+		log.Println("[WARN] Your query returned no results. Please change your search criteria and try again.")
 	}
 
 	var memberList []string
