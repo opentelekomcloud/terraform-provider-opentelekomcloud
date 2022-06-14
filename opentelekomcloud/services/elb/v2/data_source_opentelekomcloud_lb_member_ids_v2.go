@@ -53,7 +53,7 @@ func dataSourceLBMemberIDsV2Read(_ context.Context, d *schema.ResourceData, meta
 
 	memberPages, err := members.List(client, listOpts).AllPages()
 	if err != nil {
-		return fmterr.Errorf("unable to retrieve member pages: %w", err)
+		return fmterr.Errorf("unable to retrieve ELBv2 member pages: %w", err)
 	}
 
 	refinedMembers, err := members.ExtractMembers(memberPages)
