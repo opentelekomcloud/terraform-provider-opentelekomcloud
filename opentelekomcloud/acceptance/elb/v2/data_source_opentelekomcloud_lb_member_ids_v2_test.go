@@ -30,7 +30,8 @@ func TestAccLbMemberIDsV2DataSource_basic(t *testing.T) {
 				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
 			},
 			{
-				Config: testAccLbMemberIDsV2DataSourceBasic,
+				Config:             testAccLbMemberIDsV2DataSourceBasic,
+				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
 				Check: resource.ComposeTestCheckFunc(
 					testAccLbMemberIDsV3DataSourceID(dataMemberIDsName),
 					resource.TestCheckResourceAttr(dataMemberIDsName, "ids.#", "1"),
