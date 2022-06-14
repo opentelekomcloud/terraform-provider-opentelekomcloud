@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas/members"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -47,16 +47,13 @@ func dataSourceLBMemberIDsV2Read(_ context.Context, d *schema.ResourceData, meta
 	}
 
 	poolID := d.Get("pool_id").(string)
-	listOpts := members.ListOpts{
-		PoolID: poolID,
-	}
 
-	memberPages, err := members.List(client, listOpts).AllPages()
+	memberPages, err := pools.ListMembers(client, poolID, pools.ListMembersOpts{}).AllPages()
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve ELBv2 member pages: %w", err)
 	}
 
-	refinedMembers, err := members.ExtractMembers(memberPages)
+	refinedMembers, err := pools.ExtractMembers(memberPages)
 	if err != nil {
 		return fmterr.Errorf("error extracting ELBv2 members: %w", err)
 	}

@@ -26,7 +26,8 @@ func TestAccLbMemberIDsV2DataSource_basic(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLbMemberIDsV2DataSourceInit,
+				Config:             testAccLbMemberIDsV2DataSourceInit,
+				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
 			},
 			{
 				Config: testAccLbMemberIDsV2DataSourceBasic,
@@ -107,7 +108,7 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
   listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
 
-resource "opentelekomcloud_lb_member_v2" "member_2" {
+resource "opentelekomcloud_lb_member_v2" "member_1" {
   address       = "192.168.0.11"
   protocol_port = 8080
   pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id
