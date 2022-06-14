@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **[ELB]** New ``data_source/opentelekomcloud_lb_member_ids_v2`` (`#1766 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1766>`_)
+    **New Data Source:** ``opentelekomcloud_lb_member_ids_v2`` (`#1766 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1766>`_)
