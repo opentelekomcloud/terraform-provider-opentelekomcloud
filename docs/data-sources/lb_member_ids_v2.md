@@ -25,5 +25,5 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `ids` - A list of all the member IDs found. This data source will fail if none are found.
+* `ids` - A list of all the member IDs found.
 
