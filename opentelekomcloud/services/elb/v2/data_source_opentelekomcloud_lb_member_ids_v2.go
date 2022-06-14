@@ -41,7 +41,7 @@ func DataSourceLBMemberIDsV2() *schema.Resource {
 
 func dataSourceLBMemberIDsV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV3Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}

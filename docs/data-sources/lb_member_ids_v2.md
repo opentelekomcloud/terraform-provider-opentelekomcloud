@@ -11,7 +11,7 @@ This data source can be useful for getting back a list of member IDs for a ELBv2
 
 ```hcl
 data "opentelekomcloud_lb_member_ids_v2" "this" {
-  pool_id = var.cluster_id
+  pool_id = var.pool_id
 }
 ```
 
