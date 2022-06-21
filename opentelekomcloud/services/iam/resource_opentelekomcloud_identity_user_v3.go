@@ -206,6 +206,7 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if d.HasChange("description") {
+		hasChange = true
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
 	}
