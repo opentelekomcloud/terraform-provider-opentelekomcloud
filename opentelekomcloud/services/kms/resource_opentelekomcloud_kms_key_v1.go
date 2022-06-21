@@ -259,9 +259,9 @@ func resourceKmsKeyV1Read(_ context.Context, d *schema.ResourceData, meta interf
 	}
 	r, err := keys.GetKeyRotationStatus(client, rotationOpts).ExtractResult()
 	if err == nil {
-		d.Set("rotation_enabled", r.Enabled)
-		d.Set("rotation_interval", r.Interval)
-		d.Set("rotation_number", r.NumberOfRotations)
+		_ = d.Set("rotation_enabled", r.Enabled)
+		_ = d.Set("rotation_interval", r.Interval)
+		_ = d.Set("rotation_number", r.NumberOfRotations)
 	} else {
 		log.Printf("[WARN] error fetching details about KMS key rotation: %s", err)
 	}
