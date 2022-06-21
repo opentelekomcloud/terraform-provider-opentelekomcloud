@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IAM]** Fix issue with ``description`` update in ``resource/opentelekomcloud_identity_user_v3`` (`#1773 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1773>`_)
