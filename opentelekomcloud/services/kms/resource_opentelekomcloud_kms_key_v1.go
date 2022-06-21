@@ -181,11 +181,11 @@ func resourceKmsKeyV1Create(ctx context.Context, d *schema.ResourceData, meta in
 		}
 
 		if i, ok := d.GetOk("rotation_interval"); ok {
-			rotationIntervalOpts := &keys.RotationOpts{
+			rotationOpts := &keys.RotationOpts{
 				KeyID:    key.KeyID,
 				Interval: i.(int),
 			}
-			err := keys.UpdateKeyRotationInterval(client, rotationIntervalOpts).ExtractErr()
+			err := keys.UpdateKeyRotationInterval(client, rotationOpts).ExtractErr()
 			if err != nil {
 				return fmterr.Errorf("failed to change KMS key rotation interval: %s", err)
 			}
@@ -259,9 +259,9 @@ func resourceKmsKeyV1Read(_ context.Context, d *schema.ResourceData, meta interf
 	}
 	r, err := keys.GetKeyRotationStatus(client, rotationOpts).ExtractResult()
 	if err == nil {
-		_ = d.Set("rotation_enabled", r.Enabled)
-		_ = d.Set("rotation_interval", r.Interval)
-		_ = d.Set("rotation_number", r.NumberOfRotations)
+		d.Set("rotation_enabled", r.Enabled)
+		d.Set("rotation_interval", r.Interval)
+		d.Set("rotation_number", r.NumberOfRotations)
 	} else {
 		log.Printf("[WARN] error fetching details about KMS key rotation: %s", err)
 	}

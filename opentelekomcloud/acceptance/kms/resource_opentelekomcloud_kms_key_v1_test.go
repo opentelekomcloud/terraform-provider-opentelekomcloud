@@ -99,7 +99,7 @@ func testAccCheckKmsV1KeyExists(n string, key *keys.Key) resource.TestCheckFunc 
 }
 
 func TestAccKmsKey_isEnabled(t *testing.T) {
-	var key1, key2, key3, key4 keys.Key
+	var key1, key2, key3 keys.Key
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resourceName := "opentelekomcloud_kms_key_v1.bar"
 
@@ -132,15 +132,6 @@ func TestAccKmsKey_isEnabled(t *testing.T) {
 					testAccCheckKmsKeyIsEnabled(&key3, true),
 				),
 			},
-			{
-				Config: testAccKmsKey_rotation(rName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKmsV1KeyExists(resourceName, &key4),
-					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "rotation_enabled", "true"),
-					testAccCheckKmsKeyIsEnabled(&key4, true),
-				),
-			},
 		},
 	})
 }
@@ -154,6 +145,28 @@ func testAccCheckKmsKeyIsEnabled(key *keys.Key, isEnabled bool) resource.TestChe
 
 		return nil
 	}
+}
+
+func TestAccKmsKey_rotation(t *testing.T) {
+	var key keys.Key
+	createName := fmt.Sprintf("kms_%s", acctest.RandString(5))
+	resourceName := "opentelekomcloud_kms_key_v1.key_1"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckKmsV1KeyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKmsKey_rotation(createName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKmsV1KeyExists(resourceName, &key),
+					resource.TestCheckResourceAttr(resourceName, "key_alias", createName),
+					resource.TestCheckResourceAttr(resourceName, "rotation_enabled", "true"),
+				),
+			},
+		},
+	})
 }
 
 func testAccKmsV1Key_basic(rName string) string {
@@ -203,10 +216,10 @@ resource "opentelekomcloud_kms_key_v1" "bar" {
 
 func testAccKmsKey_rotation(prefix string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_kms_key_v1" "bar" {
-  key_alias         = "tf-acc-test-kms-key-%[1]s"
+resource "opentelekomcloud_kms_key_v1" "key_1" {
+  key_alias         = "%s"
   pending_days      = "7"
   rotation_enabled  = true
-  rotation_interval = 200
+  rotation_interval = 183
 }`, prefix)
 }
