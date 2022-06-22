@@ -41,6 +41,12 @@ The following arguments are supported:
 * `is_enabled` - (Optional) Specifies whether the key is enabled. Defaults to true.
   Changing this updates the state of existing key.
 
+* `rotation_interval` - (Optional) Rotation interval. The value is an integer ranging from 30 to 365.
+   Set the interval based on how often a CMK is used.
+   If it is frequently used, set a short interval; otherwise, set a long one.
+
+* `rotation_enabled` - (Optional) Specifies whether the key is enabled for rotation.
+
 * `tags` - (Optional) Tags key/value pairs to associate with the AutoScaling Group.
 
 
@@ -72,6 +78,8 @@ The following attributes are exported:
 * `is_enabled` - See Argument Reference above.
 
 * `tags` - See Argument Reference above.
+
+* `rotation_number` - Number of key rotations.
 
 ## Import
 

@@ -2,6 +2,7 @@ package kms
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/kms/v1/keys"
@@ -86,9 +88,34 @@ func ResourceKmsKeyV1() *schema.Resource {
 				Optional: true,
 				Default:  "7",
 			},
+			"rotation_interval": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				RequiredWith: []string{"rotation_enabled"},
+				ValidateFunc: validation.IntBetween(30, 365),
+			},
+			"rotation_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"rotation_number": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 			"tags": common.TagsSchema(),
 		},
 	}
+}
+
+func resourceKmsKeyValidation(d *schema.ResourceData) error {
+	_, rotationEnabled := d.GetOk("rotation_enabled")
+	_, hasInterval := d.GetOk("rotation_interval")
+
+	if !rotationEnabled && hasInterval {
+		return fmt.Errorf("invalid arguments: rotation_interval is only valid when rotation is enabled")
+	}
+	return nil
 }
 
 func resourceKmsKeyV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -96,6 +123,10 @@ func resourceKmsKeyV1Create(ctx context.Context, d *schema.ResourceData, meta in
 	client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
+	}
+
+	if err := resourceKmsKeyValidation(d); err != nil {
+		return fmterr.Errorf("error validating KMS key: %s", err)
 	}
 
 	createOpts := &keys.CreateOpts{
@@ -136,6 +167,28 @@ func resourceKmsKeyV1Create(ctx context.Context, d *schema.ResourceData, meta in
 
 		if disableKey.KeyState != DisabledState {
 			return fmterr.Errorf("error disabling key, the key state is: %s", disableKey.KeyState)
+		}
+	}
+
+	// enable rotation and change interval if necessary
+	if _, ok := d.GetOk("rotation_enabled"); ok {
+		rotationOpts := &keys.RotationOpts{
+			KeyID: key.KeyID,
+		}
+		err := keys.EnableKeyRotation(client, rotationOpts).ExtractErr()
+		if err != nil {
+			return fmterr.Errorf("failed to enable KMS key rotation: %s", err)
+		}
+
+		if i, ok := d.GetOk("rotation_interval"); ok {
+			rotationOpts := &keys.RotationOpts{
+				KeyID:    key.KeyID,
+				Interval: i.(int),
+			}
+			err := keys.UpdateKeyRotationInterval(client, rotationOpts).ExtractErr()
+			if err != nil {
+				return fmterr.Errorf("failed to change KMS key rotation interval: %s", err)
+			}
 		}
 	}
 
@@ -198,6 +251,19 @@ func resourceKmsKeyV1Read(_ context.Context, d *schema.ResourceData, meta interf
 	tagMap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagMap); err != nil {
 		return fmterr.Errorf("error saving tags for OpenTelekomCloud KMS: %s", err)
+	}
+
+	// save rotation status
+	rotationOpts := &keys.RotationOpts{
+		KeyID: key.KeyID,
+	}
+	r, err := keys.GetKeyRotationStatus(client, rotationOpts).ExtractResult()
+	if err == nil {
+		_ = d.Set("rotation_enabled", r.Enabled)
+		_ = d.Set("rotation_interval", r.Interval)
+		_ = d.Set("rotation_number", r.NumberOfRotations)
+	} else {
+		log.Printf("[WARN] error fetching details about KMS key rotation: %s", err)
 	}
 
 	return nil
@@ -263,6 +329,34 @@ func resourceKmsKeyV1Update(ctx context.Context, d *schema.ResourceData, meta in
 	if d.HasChange("tags") {
 		if err := common.UpdateResourceTags(client, d, "kms", d.Id()); err != nil {
 			return fmterr.Errorf("error updating tags of KMS %s: %s", d.Id(), err)
+		}
+	}
+
+	_, rotationEnabled := d.GetOk("rotation_enabled")
+	if d.HasChange("rotation_enabled") {
+		var rotationErr error
+		rotationOpts := &keys.RotationOpts{
+			KeyID: d.Id(),
+		}
+		if rotationEnabled {
+			rotationErr = keys.EnableKeyRotation(client, rotationOpts).ExtractErr()
+		} else {
+			rotationErr = keys.DisableKeyRotation(client, rotationOpts).ExtractErr()
+		}
+
+		if rotationErr != nil {
+			return fmterr.Errorf("failed to update key rotation status: %s", err)
+		}
+	}
+
+	if rotationEnabled && d.HasChange("rotation_interval") {
+		intervalOpts := &keys.RotationOpts{
+			KeyID:    d.Id(),
+			Interval: d.Get("rotation_interval").(int),
+		}
+		err := keys.UpdateKeyRotationInterval(client, intervalOpts).ExtractErr()
+		if err != nil {
+			return fmterr.Errorf("failed to change key rotation interval: %s", err)
 		}
 	}
 

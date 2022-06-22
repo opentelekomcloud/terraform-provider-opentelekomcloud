@@ -147,6 +147,29 @@ func testAccCheckKmsKeyIsEnabled(key *keys.Key, isEnabled bool) resource.TestChe
 	}
 }
 
+func TestAccKmsKey_rotation(t *testing.T) {
+	var key keys.Key
+	createName := fmt.Sprintf("kms_%s", acctest.RandString(5))
+	resourceName := "opentelekomcloud_kms_key_v1.key_1"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckKmsV1KeyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKmsKey_rotation(createName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKmsV1KeyExists(resourceName, &key),
+					resource.TestCheckResourceAttr(resourceName, "key_alias", createName),
+					resource.TestCheckResourceAttr(resourceName, "rotation_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "rotation_interval", "183"),
+				),
+			},
+		},
+	})
+}
+
 func testAccKmsV1Key_basic(rName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_kms_key_v1" "key_1" {
@@ -190,4 +213,14 @@ resource "opentelekomcloud_kms_key_v1" "bar" {
   is_enabled      = false
 }
 `, prefix)
+}
+
+func testAccKmsKey_rotation(prefix string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_kms_key_v1" "key_1" {
+  key_alias         = "%s"
+  pending_days      = "7"
+  rotation_enabled  = true
+  rotation_interval = 183
+}`, prefix)
 }

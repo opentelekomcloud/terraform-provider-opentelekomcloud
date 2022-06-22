@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[KMS]** Add key rotation support in ``resource/opentelekomcloud_kms_key_v1`` (`#1774 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1774>`_)
