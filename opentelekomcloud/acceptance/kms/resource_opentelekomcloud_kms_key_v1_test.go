@@ -163,6 +163,7 @@ func TestAccKmsKey_rotation(t *testing.T) {
 					testAccCheckKmsV1KeyExists(resourceName, &key),
 					resource.TestCheckResourceAttr(resourceName, "key_alias", createName),
 					resource.TestCheckResourceAttr(resourceName, "rotation_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "rotation_interval", "183"),
 				),
 			},
 		},
