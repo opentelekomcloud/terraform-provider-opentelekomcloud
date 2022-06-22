@@ -79,6 +79,8 @@ The following attributes are exported:
 
 * `tags` - See Argument Reference above.
 
+* `rotation_number` - Number of key rotations.
+
 ## Import
 
 KMS Keys can be imported using the `id`, e.g.
