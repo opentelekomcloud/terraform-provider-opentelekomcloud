@@ -176,12 +176,6 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 
 	log.Printf("[DEBUG] Setting networks: %+v", networks)
 
-	d.Set("network", networks)
-	d.Set("access_ip_v4", hostv4)
-	d.Set("access_ip_v6", hostv6)
-
-	d.Set("metadata", server.Metadata)
-
 	secGrpNames := []string{}
 	for _, sg := range server.SecurityGroups {
 		secGrpNames = append(secGrpNames, sg["name"].(string))
@@ -189,20 +183,14 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 
 	log.Printf("[DEBUG] Setting security groups: %+v", secGrpNames)
 
-	d.Set("security_groups", secGrpNames)
-
 	flavorID, ok := server.Flavor["id"].(string)
 	if !ok {
 		return diag.Errorf("Error setting server's flavor: %v", server.Flavor)
 	}
-	d.Set("flavor_id", flavorID)
-
-	d.Set("key_pair", server.KeyName)
 	flavor, err := flavors.Get(client, flavorID).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("flavor_name", flavor.Name)
 
 	// Set the instance's image information appropriately
 	if err := setImageInformation(client, server, d); err != nil {
@@ -220,19 +208,30 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return diag.FromErr(common.CheckDeleted(d, err, "server"))
 	}
-	// Set the availability zone
-	d.Set("availability_zone", serverWithAZ.AvailabilityZone)
-
-	// Set the region
-	d.Set("region", config.GetRegion(d))
 
 	// Set the current power_state
 	currentStatus := strings.ToLower(server.Status)
 	switch currentStatus {
 	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved":
-		d.Set("power_state", currentStatus)
+		_ = d.Set("power_state", currentStatus)
 	default:
 		return diag.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
+	}
+
+	mErr = multierror.Append(mErr,
+		d.Set("network", networks),
+		d.Set("access_ip_v4", hostv4),
+		d.Set("access_ip_v6", hostv6),
+		d.Set("metadata", server.Metadata),
+		d.Set("security_groups", secGrpNames),
+		d.Set("flavor_id", flavorID),
+		d.Set("key_pair", server.KeyName),
+		d.Set("flavor_name", flavor.Name),
+		d.Set("availability_zone", serverWithAZ.AvailabilityZone),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
 	}
 
 	// Populate tags
@@ -240,7 +239,7 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 	if err != nil {
 		log.Printf("[DEBUG] Unable to get tags for openstack_compute_instance_v2: %s", err)
 	} else {
-		d.Set("tags", instanceTags)
+		_ = d.Set("tags", instanceTags)
 	}
 
 	return nil

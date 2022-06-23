@@ -54,7 +54,7 @@ func testAccComputeV2InstanceDataSourceBasic() string {
 %s
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name              = "instance_1"
   availability_zone = "%s"
   metadata = {
     foo = "bar"
