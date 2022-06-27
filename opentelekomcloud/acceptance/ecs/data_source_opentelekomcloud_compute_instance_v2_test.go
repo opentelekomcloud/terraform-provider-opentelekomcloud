@@ -10,7 +10,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
-func TestAccComputeV2InstanceDataSource(t *testing.T) {
+func TestAccComputeV2InstanceDataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
@@ -26,7 +26,7 @@ func TestAccComputeV2InstanceDataSource(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceV2DataSourceID("data.opentelekomcloud_compute_instance_v2.source_1"),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_compute_instance_v2.source_1", "name", "instance_1"),
-					resource.TestCheckResourceAttrPair("data.opentelekomcloud_compute_instance_v2.source_1", "metadata", "openstack_compute_instance_v2.instance_1", "metadata"),
+					resource.TestCheckResourceAttrPair("data.opentelekomcloud_compute_instance_v2.source_1", "metadata", "opentelekomcloud_compute_instance_v2.instance_1", "metadata"),
 					resource.TestCheckResourceAttrSet("data.opentelekomcloud_compute_instance_v2.source_1", "network.0.name"),
 				),
 			},
@@ -56,6 +56,7 @@ func testAccComputeV2InstanceDataSourceBasic() string {
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   availability_zone = "%s"
+  image_name        = "Standard_Debian_10_latest"
   metadata = {
     foo = "bar"
   }
