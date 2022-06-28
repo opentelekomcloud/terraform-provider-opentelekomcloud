@@ -2,6 +2,7 @@ package dns
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -157,7 +158,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	n, err := zones.Create(dnsClient, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud DNS zone: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DNS zone: %s", logHttpError(err))
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS Zone (%s) to become available", n.ID)
@@ -305,7 +306,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 
 	_, err = zones.Update(dnsClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error updating OpenTelekomCloud DNS Zone: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud DNS Zone: %s", logHttpError(err))
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS Zone (%s) to update", d.Id())
@@ -552,4 +553,11 @@ func resourceGetDNSRouters(dnsClient *golangsdk.ServiceClient, d *schema.Resourc
 	}
 
 	return associateList, disassociateList, nil
+}
+
+func logHttpError(err error) error {
+	if httpErr, ok := err.(golangsdk.ErrDefault500); ok {
+		return fmt.Errorf("%s\n %s", httpErr.Error(), httpErr.Body)
+	}
+	return err
 }
