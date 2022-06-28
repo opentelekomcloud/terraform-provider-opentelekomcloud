@@ -135,7 +135,7 @@ func TestAccDNSV2Zone_timeout(t *testing.T) {
 	})
 }
 
-func TestAccCheckDNSV2ZoneRouterValidation(t *testing.T) {
+func TestAccCheckDNSV2Zone_routerValidation(t *testing.T) {
 	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
