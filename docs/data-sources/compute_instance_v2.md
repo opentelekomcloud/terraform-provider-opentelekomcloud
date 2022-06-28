@@ -2,14 +2,14 @@
 subcategory: "Elastic Cloud Server (ECS)"
 ---
 
-# opentelekomcloud_ecs_instance_v1
+# opentelekomcloud_compute_instance_v2
 
 Get information on an ECS instance.
 
 ## Example Usage
 
 ```hcl
-data "opentelekomcloud_ecs_instance_v1" "instance" {
+data "opentelekomcloud_compute_instance_v2" "instance" {
   # Randomly generated UUID, for demonstration purposes
   id = "2ba26dc6-a12d-4889-8f25-794ea5bf4453"
 }

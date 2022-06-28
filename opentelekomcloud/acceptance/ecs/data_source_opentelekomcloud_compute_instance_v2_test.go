@@ -12,10 +12,7 @@ import (
 
 func TestAccComputeV2InstanceDataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			common.TestAccPreCheck(t)
-			common.TestAccPreCheckAdminOnly(t)
-		},
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

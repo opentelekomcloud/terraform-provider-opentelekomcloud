@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/availabilityzones"
@@ -119,11 +120,7 @@ func DataSourceComputeInstanceV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"tags": {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
+			"tags": common.TagsSchema(),
 		},
 	}
 }
@@ -133,7 +130,7 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 	log.Print("[DEBUG] Creating compute client")
 	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating compute client: %s", err)
+		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
 	id := d.Get("id").(string)
@@ -151,9 +148,6 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 		d.Set("name", server.Name),
 		d.Set("image_id", server.Image["ID"]),
 	)
-	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.FromErr(err)
-	}
 
 	// Get the instance network and address information
 	networks, err := FlattenInstanceNetworks(d, meta)
@@ -213,9 +207,9 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 	currentStatus := strings.ToLower(server.Status)
 	switch currentStatus {
 	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved":
-		_ = d.Set("power_state", currentStatus)
+		mErr = multierror.Append(mErr, d.Set("power_state", currentStatus))
 	default:
-		return diag.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
+		return fmterr.Errorf("invalid power_state for instance %s: %s", d.Id(), server.Status)
 	}
 
 	mErr = multierror.Append(mErr,
@@ -234,12 +228,20 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	// Populate tags
-	instanceTags, err := tags.List(client, server.ID).Extract()
+	computeClient, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		log.Printf("[DEBUG] Unable to get tags for openstack_compute_instance_v2: %s", err)
-	} else {
-		_ = d.Set("tags", instanceTags)
+		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV1 client: %w", err)
+	}
+	// save tags
+	resourceTags, err := tags.Get(computeClient, "cloudservers", d.Id()).Extract()
+	if err != nil {
+		return fmterr.Errorf("error fetching OpenTelekomCloud CloudServers tags: %w", err)
+	}
+	tagMap := common.TagsToMap(resourceTags)
+	mErr = multierror.Append(mErr, d.Set("tags", tagMap))
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("error setting opentelekomcloud_compute_instance_v2 values: %w", err)
 	}
 
 	return nil
