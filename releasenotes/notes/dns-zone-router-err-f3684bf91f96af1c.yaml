@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DNS]** Add proper error logging for ``resource/opentelekomcloud_dns_zone_v2`` router (`#1783 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1783>`_)

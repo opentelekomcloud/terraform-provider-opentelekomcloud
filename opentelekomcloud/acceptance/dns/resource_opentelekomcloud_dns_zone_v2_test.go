@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dns/v2/zones"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -131,6 +130,20 @@ func TestAccDNSV2Zone_timeout(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2ZoneExists(resourceZoneName, &zone),
 				),
+			},
+		},
+	})
+}
+
+func TestAccCheckDNSV2Zone_routerValidation(t *testing.T) {
+	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccDNSV2ZoneWrongRouterSetting(zoneName),
+				ExpectError: regexp.MustCompile(`region is invalid.+`),
 			},
 		},
 	})
@@ -269,4 +282,27 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
   }
 }
 `, zoneName)
+}
+
+func testAccDNSV2ZoneWrongRouterSetting(zoneName string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name        = "%s"
+  email       = "email1@example.com"
+  description = "a private zone"
+  ttl         = 3000
+  type        = "private"
+
+  router {
+    router_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+    router_region = "BAD"
+  }
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+`, common.DataSourceSubnet, zoneName)
 }
