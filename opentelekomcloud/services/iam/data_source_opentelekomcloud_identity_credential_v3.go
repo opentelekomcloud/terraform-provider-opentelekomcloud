@@ -31,12 +31,14 @@ func DataSourceIdentityCredentialV3() *schema.Resource {
 							Computed: true,
 						},
 						"description": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:      schema.TypeString,
+							Computed:  true,
+							Sensitive: true,
 						},
 						"access": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:      schema.TypeString,
+							Computed:  true,
+							Sensitive: true,
 						},
 						"create_time": {
 							Type:     schema.TypeString,
