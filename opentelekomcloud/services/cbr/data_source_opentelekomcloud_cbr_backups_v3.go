@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cbr/v3/backups"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -114,69 +113,61 @@ func DataSourceCBRBackupsV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"extend_info": {
-				Type:     schema.TypeMap,
+			"auto_trigger": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"bootable": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"incremental": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"snapshot_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"support_lld": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"supported_restore_mode": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"contain_system_disk": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"encrypted": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"system_disk": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"os_images_data": {
+				Type:     schema.TypeSet,
+				Optional: true,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"auto_trigger": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Computed: true,
-						},
-						"bootable": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Computed: true,
-						},
-						"incremental": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Computed: true,
-						},
-						"snapshot_id": {
+						"image_id": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
-						},
-						"support_lld": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Computed: true,
-						},
-						"supported_restore_mode": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"contain_system_disk": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Computed: true,
-						},
-						"encrypted": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Computed: true,
-						},
-						"system_disk": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Computed: true,
-						},
-						"os_images_data": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"image_id": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-								},
-							},
 						},
 					},
 				},
@@ -193,21 +184,16 @@ func dataSourceCBRBackupsV3Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	listOpts := backups.ListOpts{
-		CheckpointID:   d.Get("id").(string),
-		DedicatedCloud: d.Get("dec").(bool),
-		ImageType:      d.Get("image_type").(string),
-		MemberStatus:   d.Get("member_status").(string),
-		Name:           d.Get("name").(string),
-		OwnType:        d.Get("own_type").(string),
-		ParentID:       d.Get("parent_id").(string),
-		ResourceAZ:     d.Get("resource_az").(string),
-		ResourceID:     d.Get("resource_id").(string),
-		ResourceName:   d.Get("resource_name").(string),
-		ResourceType:   d.Get("resource_type").(string),
-		StartTime:      d.Get("start_time").(string),
-		Status:         d.Get("status").(string),
-		UsedPercent:    d.Get("used_percent").(string),
-		VaultID:        d.Get("vault_id").(string),
+		CheckpointID: d.Get("checkpoint_id").(string),
+		ImageType:    d.Get("image_type").(string),
+		Name:         d.Get("name").(string),
+		ParentID:     d.Get("parent_id").(string),
+		ResourceAZ:   d.Get("resource_az").(string),
+		ResourceID:   d.Get("resource_id").(string),
+		ResourceName: d.Get("resource_name").(string),
+		ResourceType: d.Get("resource_type").(string),
+		Status:       d.Get("status").(string),
+		VaultID:      d.Get("vault_id").(string),
 	}
 
 	pages, err := backups.List(backupClient, listOpts).AllPages()
@@ -220,21 +206,13 @@ func dataSourceCBRBackupsV3Read(_ context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf("unable to retrieve backups: %s", err)
 	}
 
-	if len(extractedBackups) < 1 {
-		return common.DataSourceTooFewDiag
-	}
-
-	if len(extractedBackups) > 1 {
-		return common.DataSourceTooManyDiag
-	}
-
 	backup := extractedBackups[0]
 
 	log.Printf("[INFO] Retrieved backup policy %s using given filter", backup.ID)
 
 	d.SetId(backup.ID)
 	mErr := multierror.Append(
-		d.Set("checkpoint", backup.CheckpointID),
+		d.Set("checkpoint_id", backup.CheckpointID),
 		d.Set("created_at", backup.CreatedAt),
 		d.Set("description", backup.Description),
 		d.Set("expired_at", backup.ExpiredAt),
