@@ -1,0 +1,6 @@
+---
+security:
+  - |
+    **[IAM]** Mark ``access`` and ``secret`` fields ``Sensitive`` in ``resource/opentelekomcloud_identity_credential_v3`` (`#1787 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1787>`_)
+  - |
+    **[IAM]** Mark ``access`` and ``secret`` fields ``Sensitive`` in ``data_source/opentelekomcloud_identity_credential_v3`` (`#1787 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1787>`_)
