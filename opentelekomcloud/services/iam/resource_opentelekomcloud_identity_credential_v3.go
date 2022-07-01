@@ -38,12 +38,14 @@ func ResourceIdentityCredentialV3() *schema.Resource {
 				Computed: true,
 			},
 			"access": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"secret": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"create_time": {
 				Type:     schema.TypeString,
