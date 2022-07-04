@@ -27,6 +27,10 @@ func DataSourceCBRBackupsIdsV3() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"vault_id": {
+				Required: true,
+				Type:     schema.TypeString,
+			},
 		},
 	}
 }
@@ -38,7 +42,10 @@ func dataSourceCBRBackupsIdsV3Read(_ context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("unable to create opentelekomcloud CBR client : %s", err)
 	}
 
-	pages, err := backups.List(cbrClient, backups.ListOpts{}).AllPages()
+	listOpts := backups.ListOpts{
+		VaultID: d.Get("vault_id").(string),
+	}
+	pages, err := backups.List(cbrClient, listOpts).AllPages()
 
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve Backups: %s", err)
@@ -57,8 +64,8 @@ func dataSourceCBRBackupsIdsV3Read(_ context.Context, d *schema.ResourceData, me
 	for _, singleBackup := range extractedBackups {
 		allBackups = append(allBackups, singleBackup.ID)
 	}
-
-	// d.SetId(d.Get("id").(string))
+	vaultID := d.Get("vault_id").(string)
+	d.SetId(vaultID)
 	mErr := multierror.Append(
 		d.Set("ids", allBackups),
 		d.Set("region", config.GetRegion(d)),
