@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cbr/v3/backups"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -57,7 +58,6 @@ func DataSourceCBRBackupsV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-
 			"project_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -158,20 +158,6 @@ func DataSourceCBRBackupsV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"os_images_data": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"image_id": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-					},
-				},
-			},
 		},
 	}
 }
@@ -184,6 +170,12 @@ func dataSourceCBRBackupsV3Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	listOpts := backups.ListOpts{
+		// DedicatedCloud: d.Get("dec").(bool),
+		// EndTime:      d.Get("end_time").(string),
+		// MemberStatus: d.Get("member_status").(string),
+		// OwnType:      d.Get("own_type").(string),
+		// StartTime:      d.Get("start_time").(string),
+		// UsedPercent:    d.Get("used_percent").(string),
 		CheckpointID: d.Get("checkpoint_id").(string),
 		ImageType:    d.Get("image_type").(string),
 		Name:         d.Get("name").(string),
@@ -204,6 +196,10 @@ func dataSourceCBRBackupsV3Read(_ context.Context, d *schema.ResourceData, meta 
 	extractedBackups, err := backups.ExtractBackups(pages)
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve backups: %s", err)
+	}
+
+	if len(extractedBackups) < 1 {
+		return common.DataSourceTooFewDiag
 	}
 
 	backup := extractedBackups[0]
@@ -239,7 +235,6 @@ func dataSourceCBRBackupsV3Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("contain_system_disk", backup.ExtendInfo.ContainSystemDisk),
 		d.Set("encrypted", backup.ExtendInfo.Encrypted),
 		d.Set("system_disk", backup.ExtendInfo.SystemDisk),
-		d.Set("os_images_data", backup.ExtendInfo.OsImagesData),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {

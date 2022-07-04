@@ -21,14 +21,14 @@ func TestAccCBRBackupV1DataSource_basic(t *testing.T) {
 			{
 				Config: testAccCBRBackupV3DataSourceBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCBRBackupV1DataSourceID(dataBackupName),
+					testAccCheckCBRBackupV3DataSourceID(dataBackupName),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckCBRBackupV1DataSourceID(n string) resource.TestCheckFunc {
+func testAccCheckCBRBackupV3DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -45,6 +45,8 @@ func testAccCheckCBRBackupV1DataSourceID(n string) resource.TestCheckFunc {
 
 func testAccCBRBackupV3DataSourceBasic() string {
 	return fmt.Sprintf(`
-data "opentelekomcloud_cbr_backup_v3" "cbr" {}
+data "opentelekomcloud_cbr_backup_v3" "cbr" {
+	checkpoint_id = "29b011d9-e0fa-4869-b727-e6184575081e"
+}
 `)
 }
