@@ -10,6 +10,11 @@ Get information on an ECS instance.
 
 ```hcl
 data "opentelekomcloud_compute_instance_v2" "instance" {
+  # Search ecs by name
+  name = "server_1"
+}
+
+data "opentelekomcloud_compute_instance_v2" "instance" {
   # Randomly generated UUID, for demonstration purposes
   id = "2ba26dc6-a12d-4889-8f25-794ea5bf4453"
 }
