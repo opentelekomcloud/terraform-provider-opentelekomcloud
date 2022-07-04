@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -29,10 +30,12 @@ func DataSourceComputeInstanceV2() *schema.Resource {
 			},
 			"id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 			"image_id": {
@@ -133,14 +136,44 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
-	id := d.Get("id").(string)
-	log.Printf("[DEBUG] Attempting to retrieve server %s", id)
-	server, err := servers.Get(client, id).Extract()
+	var allServers []servers.Server
+	if serverId := d.Get("id").(string); serverId != "" {
+		server, err := servers.Get(client, serverId).Extract()
+		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
+				return fmterr.Errorf("no server found")
+			}
+			return fmterr.Errorf("unable to retrieve OpenTelekomCloud %s server: %w", serverId, err)
+		}
+
+		allServers = append(allServers, *server)
+	} else {
+		serverName := d.Get("name").(string)
+
+		log.Printf("[DEBUG] Attempting to retrieve server %s", serverName)
+		allPages, err := servers.List(client, servers.ListOpts{Name: serverName}).AllPages()
+		if err != nil {
+			return fmterr.Errorf("unable to retrieve OpenTelekomCloud servers: %w", err)
+		}
+		allServers, err = servers.ExtractServers(allPages)
+		if err != nil {
+			return fmterr.Errorf("unable to retrieve OpenTelekomCloud servers: %w", err)
+		}
+	}
+
+	if len(allServers) < 1 {
+		return fmterr.Errorf("Your query returned no results. " +
+			"Please change your search criteria and try again.")
+	}
+
+	server := allServers[0]
+	log.Printf("[DEBUG] Retrieved server %s: %+v", server.Name, server)
+
 	if err != nil {
 		return diag.FromErr(common.CheckDeleted(d, err, "server"))
 	}
 
-	log.Printf("[DEBUG] Retrieved Server %s: %+v", id, server)
+	log.Printf("[DEBUG] Retrieved Server %s: %+v", server.ID, server)
 
 	d.SetId(server.ID)
 
@@ -187,7 +220,7 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 	}
 
 	// Set the instance's image information appropriately
-	if err := setImageInformation(client, server, d); err != nil {
+	if err := setImageInformation(client, &server, d); err != nil {
 		return diag.FromErr(err)
 	}
 
