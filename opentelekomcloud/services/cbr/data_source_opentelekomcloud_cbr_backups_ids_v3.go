@@ -16,20 +16,65 @@ func DataSourceCBRBackupsIdsV3() *schema.Resource {
 		ReadContext: dataSourceCBRBackupsIdsV3Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
 			"ids": {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"vault_id": {
-				Required: true,
+			"checkpoint_id": {
 				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"image_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"vault_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"parent_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"resource_az": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"resource_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"resource_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"resource_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 			},
 		},
 	}
@@ -43,17 +88,22 @@ func dataSourceCBRBackupsIdsV3Read(_ context.Context, d *schema.ResourceData, me
 	}
 
 	listOpts := backups.ListOpts{
-		VaultID: d.Get("vault_id").(string),
+		ID:           d.Get("id").(string),
+		CheckpointID: d.Get("checkpoint_id").(string),
+		ImageType:    d.Get("image_type").(string),
+		Name:         d.Get("name").(string),
+		VaultID:      d.Get("vault_id").(string),
+		ParentID:     d.Get("parent_id").(string),
+		ResourceAZ:   d.Get("resource_az").(string),
+		ResourceID:   d.Get("resource_id").(string),
+		ResourceName: d.Get("resource_name").(string),
+		ResourceType: d.Get("resource_type").(string),
+		Status:       d.Get("status").(string),
 	}
-	pages, err := backups.List(cbrClient, listOpts).AllPages()
+	extractedBackups, err := backups.List(cbrClient, listOpts)
 
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve Backups: %s", err)
-	}
-
-	extractedBackups, err := backups.ExtractBackups(pages)
-	if err != nil {
-		return fmterr.Errorf("unable to retrieve backups: %s", err)
 	}
 
 	if len(extractedBackups) < 1 {
@@ -64,11 +114,9 @@ func dataSourceCBRBackupsIdsV3Read(_ context.Context, d *schema.ResourceData, me
 	for _, singleBackup := range extractedBackups {
 		allBackups = append(allBackups, singleBackup.ID)
 	}
-	vaultID := d.Get("vault_id").(string)
-	d.SetId(vaultID)
+	d.SetId("Filter")
 	mErr := multierror.Append(
 		d.Set("ids", allBackups),
-		d.Set("region", config.GetRegion(d)),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {

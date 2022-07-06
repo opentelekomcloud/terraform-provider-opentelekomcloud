@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -12,6 +13,10 @@ import (
 const dataBackupName = "data.opentelekomcloud_cbr_backup_v3.cbr"
 
 func TestAccCBRBackupV3DataSource_basic(t *testing.T) {
+	if os.Getenv("CBR_DATA") == "" {
+		t.Skip("this test is not a stable one")
+	}
+	vaultId := "insert_vaultId_here"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
@@ -19,7 +24,7 @@ func TestAccCBRBackupV3DataSource_basic(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCBRBackupV3DataSourceBasic(),
+				Config: testAccCBRBackupV3DataSourceBasic(vaultId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCBRBackupV3DataSourceID(dataBackupName),
 				),
@@ -43,10 +48,10 @@ func testAccCheckCBRBackupV3DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCBRBackupV3DataSourceBasic() string {
+func testAccCBRBackupV3DataSourceBasic(vaultId string) string {
 	return fmt.Sprintf(`
 data "opentelekomcloud_cbr_backup_v3" "cbr" {
-	checkpoint_id = "29b011d9-e0fa-4869-b727-e6184575081e"
+	checkpoint_id = "%s"
 }
-`)
+`, vaultId)
 }

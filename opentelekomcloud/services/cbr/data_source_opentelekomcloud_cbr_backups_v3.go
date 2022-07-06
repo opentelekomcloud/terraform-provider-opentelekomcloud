@@ -63,11 +63,6 @@ func DataSourceCBRBackupsV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"protected_at": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 			"resource_az": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -170,36 +165,30 @@ func dataSourceCBRBackupsV3Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	listOpts := backups.ListOpts{
-		// DedicatedCloud: d.Get("dec").(bool),
-		// EndTime:      d.Get("end_time").(string),
-		// MemberStatus: d.Get("member_status").(string),
-		// OwnType:      d.Get("own_type").(string),
-		// StartTime:      d.Get("start_time").(string),
-		// UsedPercent:    d.Get("used_percent").(string),
+		ID:           d.Get("id").(string),
 		CheckpointID: d.Get("checkpoint_id").(string),
+		Status:       d.Get("status").(string),
+		ResourceName: d.Get("resource_name").(string),
 		ImageType:    d.Get("image_type").(string),
+		ResourceType: d.Get("resource_type").(string),
+		ResourceID:   d.Get("resource_id").(string),
 		Name:         d.Get("name").(string),
 		ParentID:     d.Get("parent_id").(string),
 		ResourceAZ:   d.Get("resource_az").(string),
-		ResourceID:   d.Get("resource_id").(string),
-		ResourceName: d.Get("resource_name").(string),
-		ResourceType: d.Get("resource_type").(string),
-		Status:       d.Get("status").(string),
 		VaultID:      d.Get("vault_id").(string),
 	}
 
-	pages, err := backups.List(backupClient, listOpts).AllPages()
+	extractedBackups, err := backups.List(backupClient, listOpts)
 	if err != nil {
-		return fmterr.Errorf("unable to all backups pages: %s", err)
-	}
-
-	extractedBackups, err := backups.ExtractBackups(pages)
-	if err != nil {
-		return fmterr.Errorf("unable to retrieve backups: %s", err)
+		return fmterr.Errorf("unable to list all backups pages: %s", err)
 	}
 
 	if len(extractedBackups) < 1 {
 		return common.DataSourceTooFewDiag
+	}
+
+	if len(extractedBackups) > 1 {
+		return common.DataSourceTooManyDiag
 	}
 
 	backup := extractedBackups[0]
@@ -216,7 +205,6 @@ func dataSourceCBRBackupsV3Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("name", backup.Name),
 		d.Set("parent_id", backup.ParentID),
 		d.Set("project_id", backup.ProjectID),
-		d.Set("protected_at", backup.ProtectedAt),
 		d.Set("provider_id", backup.ProviderID),
 		d.Set("resource_az", backup.ResourceAZ),
 		d.Set("resource_id", backup.ResourceID),
@@ -242,5 +230,4 @@ func dataSourceCBRBackupsV3Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	return nil
-
 }
