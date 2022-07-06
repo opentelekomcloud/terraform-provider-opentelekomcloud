@@ -51,7 +51,7 @@ func testAccCheckCBRBackupV3DataSourceID(n string) resource.TestCheckFunc {
 func testAccCBRBackupV3DataSourceBasic(vaultId string) string {
 	return fmt.Sprintf(`
 data "opentelekomcloud_cbr_backup_v3" "cbr" {
-	checkpoint_id = "%s"
+  checkpoint_id = "%s"
 }
 `, vaultId)
 }

@@ -51,7 +51,7 @@ func testAccCheckCBRBackupV3DataSourceIDs(n string) resource.TestCheckFunc {
 func testAccCBRBackupV3DataSourceIDsBasic(vaultId string) string {
 	return fmt.Sprintf(`
 data "opentelekomcloud_cbr_backup_ids_v3" "backup_ids" {
-	vault_id = "%s"
+  vault_id = "%s"
 }
 `, vaultId)
 }
