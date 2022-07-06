@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **New Data Source:** ``opentelekomcloud_cbr_backup_v3`` (`#1779 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1779>`_)
+  - |
+    **New Data Source:** ``opentelekomcloud_cbr_backup_ids_v3`` (`#1779 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1779>`_)
