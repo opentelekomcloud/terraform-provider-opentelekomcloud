@@ -2,3 +2,5 @@
 fixes:
   - |
     **[IAM]** Fix credential dependency (ForceNew field) in ``resource/opentelekomcloud_identity_credential_v3`` (`#1785 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1785>`_)
+  - |
+    **[IAM]** Fix membership dependency (ForceNew field) in ``resource/opentelekomcloud_identity_group_membership_v3`` (`#1785 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1785>`_)
