@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CBR]** Add support of ``exclude_volumes`` and ``include_volumes`` for ``resource`` in ``resource/opentelekomcloud_cbr_vault_v3`` (`#1802 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1802>`_)
