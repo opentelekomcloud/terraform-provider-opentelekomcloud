@@ -27,6 +27,7 @@ func ResourceIdentityCredentialV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -98,11 +99,7 @@ func resourceIdentityCredentialV3Read(_ context.Context, d *schema.ResourceData,
 	}
 	credential, err := credentials.Get(client, d.Id()).Extract()
 	if err != nil {
-		if common.IsResourceNotFound(err) {
-			d.SetId("")
-			return nil
-		}
-		return fmterr.Errorf("error retrieving AK/SK information: %s", err)
+		return common.CheckDeletedDiag(d, err, "IAM credentials")
 	}
 	mErr := multierror.Append(nil,
 		d.Set("user_id", credential.UserID),
