@@ -45,8 +45,8 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
     type = "OS::Nova::Server"
 
     exclude_volumes = [
-		opentelekomcloud_ecs_instance_v1.instance_1.data_disks.1.id
-      ]
+      opentelekomcloud_ecs_instance_v1.instance_1.data_disks.1.id
+    ]
   }
 }
 ```
