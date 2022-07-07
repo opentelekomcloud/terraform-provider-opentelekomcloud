@@ -287,11 +287,15 @@ The `data_disks` block supports:
 
 In addition to all arguments above, the following attributes are exported:
 
+* `system_disk_id` - The ID of the system disk.
+
 * `nics/mac_address` - The MAC address of the NIC on that network.
 
 * `nics/type` - The type of the address of the NIC on that network.
 
 * `nics/port_id` - The port ID of the NIC on that network.
+
+* `data_disks/id` - The ID of the data disk.
 
 ## Import
 
