@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[ECS]** Return ``IDs`` of ``data_disks`` and ``system_disk`` in ``resource/opentelekomcloud_ecs_instance_v1`` (`#1801 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1801>`_)

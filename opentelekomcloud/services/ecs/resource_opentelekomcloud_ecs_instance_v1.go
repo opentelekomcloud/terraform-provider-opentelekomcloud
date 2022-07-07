@@ -122,6 +122,10 @@ func ResourceEcsInstanceV1() *schema.Resource {
 					},
 				},
 			},
+			"system_disk_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"system_disk_type": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -147,6 +151,10 @@ func ResourceEcsInstanceV1() *schema.Resource {
 				MaxItems: 23,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"type": {
 							Type:     schema.TypeString,
 							Required: true,
@@ -303,6 +311,7 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 		}
 		if disk.Bootable == "true" {
 			mErr = multierror.Append(mErr,
+				d.Set("system_disk_id", disk.ID),
 				d.Set("system_disk_size", disk.Size),
 				d.Set("system_disk_type", disk.VolumeType),
 				d.Set("system_disk_kms_id", disk.Metadata["__system__cmkid"]),
@@ -310,6 +319,7 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 			continue
 		}
 		dataVolume := map[string]interface{}{
+			"id":          disk.ID,
 			"type":        disk.VolumeType,
 			"size":        disk.Size,
 			"kms_id":      disk.Metadata["__system__cmkid"],

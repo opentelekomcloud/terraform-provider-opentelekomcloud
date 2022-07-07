@@ -230,6 +230,8 @@ func Provider() *schema.Provider {
 
 		DataSourcesMap: map[string]*schema.Resource{
 			"opentelekomcloud_antiddos_v1":                     antiddos.DataSourceAntiDdosV1(),
+			"opentelekomcloud_cbr_backup_v3":                   cbr.DataSourceCBRBackupsV3(),
+			"opentelekomcloud_cbr_backup_ids_v3":               cbr.DataSourceCBRBackupsIdsV3(),
 			"opentelekomcloud_cce_cluster_v3":                  cce.DataSourceCCEClusterV3(),
 			"opentelekomcloud_cce_cluster_kubeconfig_v3":       cce.DataSourceCCEClusterKubeConfigV3(),
 			"opentelekomcloud_cce_node_ids_v3":                 cce.DataSourceCceNodeIdsV3(),
