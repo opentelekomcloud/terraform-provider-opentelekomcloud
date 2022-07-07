@@ -25,7 +25,7 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 }
 ```
 
-### Vault with associated resource (volume)
+### Vault with associated resource (server)
 
 ```hcl
 resource "opentelekomcloud_cbr_vault_v3" "vault" {
@@ -50,7 +50,7 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   }
 }
 ```
-### Vault with associated resource (server)
+### Vault with associated resource (volume)
 
 ```hcl
 resource "opentelekomcloud_blockstorage_volume_v2" "volume" {
@@ -75,10 +75,6 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   resource {
     id   = opentelekomcloud_blockstorage_volume_v2.volume.id
     type = "OS::Cinder::Volume"
-
-    exclude_volumes = [
-      opentelekomcloud_ecs_instance_v1.instance.data_disks.0.id
-    ]
   }
 }
 ```
