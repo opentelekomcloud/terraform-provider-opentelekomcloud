@@ -46,6 +46,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `user` - See Argument Reference above. Changing this parameter will recreate the resource.
+* `user` - See Argument Reference above.
 
-* `groups` - See Argument Reference above. Changing this parameter will recreate the resource.
+* `groups` - See Argument Reference above.
