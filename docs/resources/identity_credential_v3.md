@@ -41,7 +41,7 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `user_id` - IAM user ID.
+* `user_id` - IAM user ID. Changing this parameter will recreate the resource.
 
 * `description` - Description of the access key.
 
