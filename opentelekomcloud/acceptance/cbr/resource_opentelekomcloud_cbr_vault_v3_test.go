@@ -407,8 +407,8 @@ resource "opentelekomcloud_cbr_policy_v3" "default_policy" {
     "FREQ=DAILY;INTERVAL=1;BYHOUR=23;BYMINUTE=00"
   ]
   operation_definition {
-    max_backups   = 5
-    timezone      = "UTC+01:00"
+    max_backups = 5
+    timezone    = "UTC+01:00"
   }
 
   enabled = "true"
@@ -421,14 +421,14 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 
   backup_policy_id = opentelekomcloud_cbr_policy_v3.default_policy.id
 
-  auto_bind = true
+  auto_bind   = true
   auto_expand = true
 
   billing {
-	  size          = 10000
-	  object_type   = "server"
-	  protect_type  = "backup"
-	  charging_mode = "post_paid"
+    size          = 10000
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
   }
 
 }
@@ -473,8 +473,8 @@ resource "opentelekomcloud_cbr_policy_v3" "default_policy" {
     "FREQ=DAILY;INTERVAL=1;BYHOUR=23;BYMINUTE=00"
   ]
   operation_definition {
-    max_backups   = 5
-    timezone      = "UTC+01:00"
+    max_backups = 5
+    timezone    = "UTC+01:00"
   }
 
   enabled = "true"
@@ -486,19 +486,19 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   description = "CBR vault for default backup policy"
 
   billing {
-	  size          = 10000
-	  object_type   = "server"
-	  protect_type  = "backup"
-	  charging_mode = "post_paid"
+    size          = 10000
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
   }
 
   resource {
-      id = opentelekomcloud_ecs_instance_v1.instance_1.id
-      type = "OS::Nova::Server"
+    id   = opentelekomcloud_ecs_instance_v1.instance_1.id
+    type = "OS::Nova::Server"
 
-	  exclude_volumes = [
-		opentelekomcloud_ecs_instance_v1.instance_1.data_disks.1.id
-      ]
+    exclude_volumes = [
+      opentelekomcloud_ecs_instance_v1.instance_1.data_disks.1.id
+    ]
 
   }
 }
