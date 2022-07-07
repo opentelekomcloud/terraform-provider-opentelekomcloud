@@ -442,7 +442,7 @@ data "opentelekomcloud_vpc_subnet_v1" "shared_subnet" {
 
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
-  image_id = "%s"
+  image_id = "c0b36460-7aa6-44d2-990d-cc300f3a7e43"
   flavor   = "s2.medium.1"
   vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
@@ -452,11 +452,11 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
 
   data_disks {
     type = "SATA"
-    size = "5"
+    size = "10"
   }
   data_disks {
     type = "SAS"
-    size = "5"
+    size = "10"
   }
 
   password                    = "Password@123"
@@ -502,4 +502,4 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 
   }
 }
-`, env.OsSubnetName, env.OsImageName, env.OS_AVAILABILITY_ZONE)
+`, env.OsSubnetName, env.OS_AVAILABILITY_ZONE)
