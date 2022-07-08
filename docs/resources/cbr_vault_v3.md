@@ -25,7 +25,32 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 }
 ```
 
-### Vault with associated resource
+### Vault with associated resource (server)
+
+```hcl
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test"
+
+  description = "CBR vault for terraform provider test"
+
+  billing {
+    size          = 100
+    object_type   = "disk"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+  }
+
+  resource {
+    id   = opentelekomcloud_ecs_instance_v1.instance.id
+    type = "OS::Nova::Server"
+
+    exclude_volumes = [
+      opentelekomcloud_ecs_instance_v1.instance_1.data_disks.1.id
+    ]
+  }
+}
+```
+### Vault with associated resource (volume)
 
 ```hcl
 resource "opentelekomcloud_blockstorage_volume_v2" "volume" {
@@ -50,8 +75,6 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   resource {
     id   = opentelekomcloud_blockstorage_volume_v2.volume.id
     type = "OS::Cinder::Volume"
-
-    extra_info = {}
   }
 }
 ```
@@ -139,7 +162,9 @@ The following arguments are supported:
 
     * `name` - (Optional) Resource name.
 
-    * `extra_info` - (Optional) Map of extra info.
+    * `exclude_volumes` - (Optional) List of excluded volumes.
+
+    * `include_volumes` - (Optional) List of included volumes.
 
 * `backup_policy_id` - (Optional) Backup policy ID. If the value of this parameter is empty, automatic backup is not
   performed.

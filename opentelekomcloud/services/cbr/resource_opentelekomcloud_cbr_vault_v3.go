@@ -2,7 +2,6 @@ package cbr
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/go-multierror"
@@ -64,10 +63,17 @@ func ResourceCBRVaultV3() *schema.Resource {
 								"OS::Nova::Server", "OS::Cinder::Volume",
 							}, false),
 						},
-						"extra_info": {
-							Type:     schema.TypeMap,
+						"exclude_volumes": {
+							Type:     schema.TypeSet,
 							Optional: true,
-							Computed: true,
+							Set:      schema.HashString,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"include_volumes": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Set:      schema.HashString,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"protect_status": {
 							Type:     schema.TypeString,
@@ -279,16 +285,18 @@ func resourceCBRVaultV3Read(_ context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf("error getting vault details: %s", err)
 	}
 
-	resourceList := make([]interface{}, len(vault.Resources))
-	for i, resource := range vault.Resources {
-		data, _ := json.Marshal(resource)
-		resMap := make(map[string]interface{})
-		err = json.Unmarshal(data, &resMap)
-		if err != nil {
-			return fmterr.Errorf("error converting resource list: %s", err)
+	var resourceInfo []map[string]interface{}
+	for _, resource := range vault.Resources {
+		resourceMap := map[string]interface{}{
+			"id":              resource.ID,
+			"name":            resource.Name,
+			"type":            resource.Type,
+			"exclude_volumes": resource.ExtraInfo.ExcludeVolumes,
+			"include_volumes": resource.ExtraInfo.IncludeVolumes,
 		}
-		resourceList[i] = resMap
+		resourceInfo = append(resourceInfo, resourceMap)
 	}
+
 	tagsMap := make(map[string]string)
 	for _, tag := range vault.Tags {
 		tagsMap[tag.Key] = tag.Value
@@ -307,7 +315,7 @@ func resourceCBRVaultV3Read(_ context.Context, d *schema.ResourceData, meta inte
 		d.Set("name", vault.Name),
 		d.Set("project_id", vault.ProjectID),
 		d.Set("provider_id", vault.ProviderID),
-		d.Set("resource", resourceList),
+		d.Set("resource", resourceInfo),
 		d.Set("tags", tagsMap),
 		d.Set("enterprise_project_id", vault.EnterpriseProjectID),
 		d.Set("auto_bind", vault.AutoBind),
@@ -367,19 +375,31 @@ func resourceCBRVaultV3Create(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceExtraMapToExtra(src map[string]interface{}) (*vaults.ResourceExtraInfo, error) {
+	var resExtra *vaults.ResourceExtraInfo
 	if src == nil {
 		return nil, nil
 	}
-	data, err := json.Marshal(src)
-	if err != nil {
-		return nil, err
+
+	rawExclude := src["exclude_volumes"].(*schema.Set).List()
+	exclude := make([]string, len(rawExclude))
+	for i, raw := range rawExclude {
+		exclude[i] = raw.(string)
 	}
-	extra := new(vaults.ResourceExtraInfo)
-	err = json.Unmarshal(data, extra)
-	if err != nil {
-		return nil, err
+
+	rawInclude := src["include_volumes"].(*schema.Set).List()
+	include := make([]vaults.ResourceExtraInfoIncludeVolumes, len(rawInclude))
+	for i, raw := range rawInclude {
+		include[i] = vaults.ResourceExtraInfoIncludeVolumes{
+			ID: raw.(string),
+		}
 	}
-	return extra, nil
+	if len(exclude) != 0 || len(include) != 0 {
+		resExtra = &vaults.ResourceExtraInfo{
+			ExcludeVolumes: exclude,
+			IncludeVolumes: include,
+		}
+	}
+	return resExtra, nil
 }
 
 func cbrVaultResourcesCreate(d *schema.ResourceData) (res []vaults.ResourceCreate, err error) {
@@ -387,17 +407,16 @@ func cbrVaultResourcesCreate(d *schema.ResourceData) (res []vaults.ResourceCreat
 	res = make([]vaults.ResourceCreate, resources.Len())
 	for i, v := range resources.List() {
 		resource := v.(map[string]interface{})
-		rawExtra := resource["extra_info"].(map[string]interface{})
 		resourceID := resource["id"].(string)
-		extra, err := resourceExtraMapToExtra(rawExtra)
+		resExtra, err := resourceExtraMapToExtra(resource)
 		if err != nil {
-			return nil, fmt.Errorf("error converting \"%s\" resource extra: %v", resourceID, rawExtra)
+			return nil, err
 		}
 		res[i] = vaults.ResourceCreate{
 			ID:        resourceID,
 			Type:      resource["type"].(string),
 			Name:      resource["name"].(string),
-			ExtraInfo: extra,
+			ExtraInfo: resExtra,
 		}
 	}
 	return
@@ -480,7 +499,6 @@ func cbrVaultTags(d *schema.ResourceData) []vaults.Tag {
 func vaultAddedResources(d *schema.ResourceData) ([]vaults.ResourceCreate, error) {
 	oldR, newR := d.GetChange("resource")
 	addedSet := newR.(*schema.Set).Difference(oldR.(*schema.Set))
-
 	res := make([]vaults.ResourceCreate, addedSet.Len())
 	for i, v := range addedSet.List() {
 		newMap := v.(map[string]interface{})
@@ -489,14 +507,13 @@ func vaultAddedResources(d *schema.ResourceData) ([]vaults.ResourceCreate, error
 			Type: newMap["type"].(string),
 			Name: newMap["name"].(string),
 		}
-		extraMap, ok := newMap["extra"].(map[string]interface{})
-		if ok {
-			extra, err := resourceExtraMapToExtra(extraMap)
-			if err != nil {
-				return nil, err
-			}
-			newResource.ExtraInfo = extra
+
+		extra, err := resourceExtraMapToExtra(newMap)
+		if err != nil {
+			return nil, err
 		}
+
+		newResource.ExtraInfo = extra
 		res[i] = newResource
 	}
 	return res, nil
