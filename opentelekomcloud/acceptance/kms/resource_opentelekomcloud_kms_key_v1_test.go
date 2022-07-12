@@ -250,8 +250,8 @@ resource "opentelekomcloud_kms_key_v1" "key_1" {
 func testAccKmsV1Key_desiredState(rName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_kms_key_v1" "key_1" {
-  key_alias = "%s"
-  desired_state = "ENABLED"
+  key_alias       = "%s"
+  desired_state   = "ENABLED"
   key_description = "some description"
   tags = {
     muh = "value-create"
