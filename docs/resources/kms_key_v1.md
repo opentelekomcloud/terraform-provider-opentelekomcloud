@@ -26,6 +26,9 @@ resource "opentelekomcloud_kms_key_v1" "key_1" {
 
 The following arguments are supported:
 
+* `desired_state` - (Optional) Specifies whether the key is enabled from Pending Deletion state. The value `ENABLED` indicates
+  that the key state Pending Deletion will be cancelled.
+
 * `key_alias` - (Required) The alias in which to create the key. It is required when
   we create a new key. Changing this updates the alias of key.
 
