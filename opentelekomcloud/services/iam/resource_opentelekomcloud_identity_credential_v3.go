@@ -7,10 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/encryption"
 )
 
 func ResourceIdentityCredentialV3() *schema.Resource {
@@ -47,6 +47,15 @@ func ResourceIdentityCredentialV3() *schema.Resource {
 				Type:      schema.TypeString,
 				Computed:  true,
 				Sensitive: true,
+			},
+			"pgp_key": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+			},
+			"key_fingerprint": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"create_time": {
 				Type:     schema.TypeString,
@@ -86,7 +95,28 @@ func resourceIdentityCredentialV3Create(ctx context.Context, d *schema.ResourceD
 	}
 
 	d.SetId(credential.AccessKey)
-	_ = d.Set("secret", credential.SecretKey) // secret key returned only once
+	// encodedKey := base64.StdEncoding.EncodeToString([]byte(credential.SecretKey))
+	// _ = d.Set("secret", encodedKey) // secret key returned only once
+
+	if v, ok := d.GetOk("pgp_key"); ok {
+		pgpKey := v.(string)
+		encryptionKey, err := encryption.RetrieveGPGKey(pgpKey)
+		if err != nil {
+			return fmterr.Errorf("Error retrieving PGP key: %s", err)
+		}
+		fingerprint, encrypted, err := encryption.EncryptValue(encryptionKey, credential.SecretKey, "IAM Access Key Secret")
+		if err != nil {
+			return fmterr.Errorf("Error encrypting access key: %s", err)
+		}
+
+		mErr := multierror.Append(nil,
+			d.Set("key_fingerprint", fingerprint),
+			d.Set("secret", encrypted),
+		)
+		if err = mErr.ErrorOrNil(); err != nil {
+			return fmterr.Errorf("error setting identity access key fields: %s", err)
+		}
+	}
 
 	return resourceIdentityCredentialV3Read(ctx, d, meta)
 }
