@@ -250,9 +250,9 @@ resource "opentelekomcloud_kms_key_v1" "key_1" {
 func testAccKmsV1Key_cancelDeletion(rName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_kms_key_v1" "key_1" {
-  key_alias               = "%s"
-  allow_cancel_deletion   = true
-  key_description         = "some description"
+  key_alias             = "%s"
+  allow_cancel_deletion = true
+  key_description       = "some description"
   tags = {
     muh = "value-create"
     kuh = "value-create"
