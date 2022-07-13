@@ -170,7 +170,7 @@ func TestAccKmsKey_rotation(t *testing.T) {
 	})
 }
 
-func TestAccKmsKey_desiredState(t *testing.T) {
+func TestAccKmsKey_cancelDeletion(t *testing.T) {
 	var key keys.Key
 	createName := "test_key_gopher"
 	resourceName := "opentelekomcloud_kms_key_v1.key_1"
@@ -181,7 +181,7 @@ func TestAccKmsKey_desiredState(t *testing.T) {
 		CheckDestroy:      testAccCheckKmsV1KeyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKmsV1Key_desiredState(createName),
+				Config: testAccKmsV1Key_cancelDeletion(createName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKmsV1KeyExists(resourceName, &key),
 					resource.TestCheckResourceAttr(resourceName, "key_alias", createName),
@@ -247,12 +247,12 @@ resource "opentelekomcloud_kms_key_v1" "key_1" {
 }`, prefix)
 }
 
-func testAccKmsV1Key_desiredState(rName string) string {
+func testAccKmsV1Key_cancelDeletion(rName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_kms_key_v1" "key_1" {
-  key_alias       = "%s"
-  desired_state   = "ENABLED"
-  key_description = "some description"
+  key_alias               = "%s"
+  allow_cancel_deletion   = true
+  key_description         = "some description"
   tags = {
     muh = "value-create"
     kuh = "value-create"

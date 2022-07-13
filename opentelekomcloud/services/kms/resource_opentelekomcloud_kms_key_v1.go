@@ -61,12 +61,9 @@ func ResourceKmsKeyV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"desired_state": {
-				Type:     schema.TypeString,
+			"allow_cancel_deletion": {
+				Type:     schema.TypeBool,
 				Optional: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"ENABLED",
-				}, false),
 			},
 			"scheduled_deletion_date": {
 				Type:     schema.TypeString,
@@ -148,7 +145,7 @@ func resourceKmsKeyV1Create(ctx context.Context, d *schema.ResourceData, meta in
 	}
 	log.Printf("[INFO] Key ID: %s", key.KeyID)
 
-	if d.Get("desired_state").(string) == "ENABLED" {
+	if d.Get("allow_cancel_deletion").(bool) {
 		keyGet, err := keys.Get(client, key.KeyID).ExtractKeyInfo()
 		if err != nil {
 			return diag.FromErr(err)
