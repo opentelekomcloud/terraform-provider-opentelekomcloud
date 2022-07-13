@@ -44,9 +44,8 @@ func ResourceIdentityCredentialV3() *schema.Resource {
 				Sensitive: true,
 			},
 			"secret": {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"pgp_key": {
 				Type:     schema.TypeString,
