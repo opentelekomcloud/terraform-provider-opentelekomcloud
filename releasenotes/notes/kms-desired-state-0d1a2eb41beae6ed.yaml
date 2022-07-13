@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[KMS]** Add cancelling deletion via ``allow_cancel_deletion`` in ``resource/opentelekomcloud_kms_key_v1`` (`#1806 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1806>`_)
