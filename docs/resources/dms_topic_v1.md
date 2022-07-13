@@ -45,12 +45,12 @@ resource "opentelekomcloud_dms_instance_v1" "instance_1" {
 }
 
 resource "opentelekomcloud_dms_topic_v1" "topic_1" {
-  instance_id = resource.opentelekomcloud_dms_instance_v1.instance_1.id
-  name = "topic-test"
-  partition = 10
-  replication = 2
+  instance_id      = resource.opentelekomcloud_dms_instance_v1.instance_1.id
+  name             = "topic-test"
+  partition        = 10
+  replication      = 2
   sync_replication = true
-  retention_time = 80
+  retention_time   = 80
 }
 ```
 
