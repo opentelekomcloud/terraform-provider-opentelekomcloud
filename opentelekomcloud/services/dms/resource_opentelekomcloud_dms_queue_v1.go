@@ -23,6 +23,8 @@ func ResourceDmsQueuesV1() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
+		DeprecationMessage: "please use `opentelekomcloud_dms_instance_v1` resource instead",
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,

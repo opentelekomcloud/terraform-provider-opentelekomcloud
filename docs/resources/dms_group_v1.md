@@ -2,6 +2,7 @@
 subcategory: "Distributed Message Service (DMS)"
 ---
 
+**DEPRECATED**
 # opentelekomcloud_dms_group_v2
 
 Manages a DMS group in the OpenTelekomCloud DMS Service.

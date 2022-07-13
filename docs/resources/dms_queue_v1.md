@@ -2,6 +2,7 @@
 subcategory: "Distributed Message Service (DMS)"
 ---
 
+**DEPRECATED**
 # opentelekomcloud_dms_queue_v1
 
 Manages a DMS queue in the OpenTelekomCloud DMS Service.
