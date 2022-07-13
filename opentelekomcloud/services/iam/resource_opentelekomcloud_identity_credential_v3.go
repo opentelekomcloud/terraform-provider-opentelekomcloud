@@ -95,8 +95,6 @@ func resourceIdentityCredentialV3Create(ctx context.Context, d *schema.ResourceD
 	}
 
 	d.SetId(credential.AccessKey)
-	// encodedKey := base64.StdEncoding.EncodeToString([]byte(credential.SecretKey))
-	// _ = d.Set("secret", encodedKey) // secret key returned only once
 
 	if v, ok := d.GetOk("pgp_key"); ok {
 		pgpKey := v.(string)

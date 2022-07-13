@@ -87,15 +87,15 @@ resource opentelekomcloud_identity_credential_v3 aksk {
 }
 `
 	testAccIdentityV3CredentialUpdateStatus = `
-		resource opentelekomcloud_identity_credential_v3 aksk {
-		  description = "This is one and unique test AK/SK"
-		  status  = "inactive"
-		}
-		`
+resource opentelekomcloud_identity_credential_v3 aksk {
+  description = "This is one and unique test AK/SK"
+  status  = "inactive"
+}
+`
 	testAccIdentityV3CredentialUpdateDescription = `
-	resource opentelekomcloud_identity_credential_v3 aksk {
-	  description = "This is one and unique test AK/SK 2"
-	  status  = "inactive"
-	}
-	`
+resource opentelekomcloud_identity_credential_v3 aksk {
+  description = "This is one and unique test AK/SK 2"
+  status  = "inactive"
+}
+`
 )
