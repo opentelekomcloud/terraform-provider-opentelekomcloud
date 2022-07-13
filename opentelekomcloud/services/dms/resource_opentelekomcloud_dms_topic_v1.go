@@ -93,10 +93,10 @@ func resourceDmsTopicsV1Create(ctx context.Context, d *schema.ResourceData, meta
 	createOpts := &topics.CreateOpts{
 		Name:             d.Get("name").(string),
 		Partition:        d.Get("partition").(int),
-		Replication:      d.Get("description").(int),
+		Replication:      d.Get("replication").(int),
 		SyncReplication:  d.Get("sync_replication").(bool),
 		RetentionTime:    d.Get("retention_time").(int),
-		SyncMessageFlush: d.Get("SyncMessageFlush").(bool),
+		SyncMessageFlush: d.Get("sync_message_flush").(bool),
 	}
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	v, err := topics.Create(DmsV1Client, createOpts, d.Get("instance_id").(string)).Extract()
@@ -137,6 +137,7 @@ func resourceDmsTopicsV1Read(_ context.Context, d *schema.ResourceData, meta int
 		return fmterr.Errorf("Provided topic doesn't exist")
 	}
 
+	// conversion is done because API values are returned as strings
 	syncReplication, _ := strconv.ParseBool(fTopic.SyncReplication)
 	syncMessageFlush, _ := strconv.ParseBool(fTopic.SyncMessageFlush)
 
