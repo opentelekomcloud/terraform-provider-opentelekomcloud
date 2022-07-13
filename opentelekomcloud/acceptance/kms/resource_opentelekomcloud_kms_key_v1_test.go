@@ -170,6 +170,28 @@ func TestAccKmsKey_rotation(t *testing.T) {
 	})
 }
 
+func TestAccKmsKey_cancelDeletion(t *testing.T) {
+	var key keys.Key
+	createName := "test_key_gopher"
+	resourceName := "opentelekomcloud_kms_key_v1.key_1"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckKmsV1KeyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKmsV1Key_cancelDeletion(createName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKmsV1KeyExists(resourceName, &key),
+					resource.TestCheckResourceAttr(resourceName, "key_alias", createName),
+					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
+				),
+			},
+		},
+	})
+}
+
 func testAccKmsV1Key_basic(rName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_kms_key_v1" "key_1" {
@@ -223,4 +245,18 @@ resource "opentelekomcloud_kms_key_v1" "key_1" {
   rotation_enabled  = true
   rotation_interval = 183
 }`, prefix)
+}
+
+func testAccKmsV1Key_cancelDeletion(rName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_kms_key_v1" "key_1" {
+  key_alias             = "%s"
+  allow_cancel_deletion = true
+  key_description       = "some description"
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+`, rName)
 }

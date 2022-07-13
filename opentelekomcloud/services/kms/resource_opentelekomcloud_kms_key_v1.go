@@ -14,7 +14,6 @@ import (
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/kms/v1/keys"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -61,6 +60,10 @@ func ResourceKmsKeyV1() *schema.Resource {
 			"creation_date": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"allow_cancel_deletion": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			"scheduled_deletion_date": {
 				Type:     schema.TypeString,
@@ -141,6 +144,30 @@ func resourceKmsKeyV1Create(ctx context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("error creating OpenTelekomCloud key: %s", err)
 	}
 	log.Printf("[INFO] Key ID: %s", key.KeyID)
+
+	if d.Get("allow_cancel_deletion").(bool) {
+		keyGet, err := keys.Get(client, key.KeyID).ExtractKeyInfo()
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if keyGet.KeyState == PendingDeletionState {
+			cancelDeleteOpts := keys.CancelDeleteOpts{
+				KeyID: key.KeyID,
+			}
+			_, err = keys.CancelDelete(client, cancelDeleteOpts).Extract()
+			if err != nil {
+				return fmterr.Errorf("error disabling deletion of key: %s", err)
+			}
+
+			key, err := keys.EnableKey(client, key.KeyID).ExtractKeyInfo()
+			if err != nil {
+				return fmterr.Errorf("error enabling key: %s", err)
+			}
+			if key.KeyState != EnabledState {
+				return fmterr.Errorf("error enabling key, the key state is: %s", key.KeyState)
+			}
+		}
+	}
 
 	// Wait for the key to become enabled.
 	log.Printf("[DEBUG] Waiting for key (%s) to become enabled", key.KeyID)
