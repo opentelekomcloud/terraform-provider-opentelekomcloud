@@ -37,6 +37,9 @@ The following arguments are supported:
 
 * `status` - (Optional) Status of the access key to be changed to. The value can be `active` or `inactive`.
 
+* `pgp_key` - (Optional, String, ForceNew) Either a base-64 encoded PGP public key, or a keybase username in the form
+  `keybase:some_person_that_exists`. Changing this creates a new resource.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -49,7 +52,8 @@ The following attributes are exported:
 
 * `access` - Access key ID.
 
-* `secret` - Access key secret.
+* `secret` - The encrypted secret, base64 encoded. The encrypted secret may be decrypted using the command
+  line, for example: `terraform output encrypted_secret | base64 --decode | keybase pgp decrypt`.
 
 * `create_time` - Time of the access key creation.
 
