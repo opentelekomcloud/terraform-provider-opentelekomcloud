@@ -51,6 +51,7 @@ checksum:
 signs:
   - artifacts: checksum
     args:
+      - "--batch"
       - "--output"
       - "${signature}"
       - "--detach-sign"
