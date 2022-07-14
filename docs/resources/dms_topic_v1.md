@@ -4,7 +4,7 @@ subcategory: "Distributed Message Service (DMS)"
 
 # opentelekomcloud_dms_topic_v1
 
-Manages a DMS topic in the OpenTelekomCloud DMS Service.
+Manages a DMS topic in the OpenTelekomCloud DMS Service (Kafka Premium/Platinum).
 
 ## Example Usage: creating dms instance with topic
 
