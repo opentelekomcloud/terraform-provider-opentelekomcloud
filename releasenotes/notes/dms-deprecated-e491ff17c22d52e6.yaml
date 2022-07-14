@@ -1,0 +1,8 @@
+---
+deprecations:
+  - |
+    **[DMS]** ``resource/opentelekomcloud_dms_group_v1`` support will be discontinued in favor of DMS Kafka Premium
+    (`<https://open-telekom-cloud.com/en/support/release-notes/discontinue-dms-queue-end-of-june-2022>`_)
+  - |
+    **[DMS]** ``resource/opentelekomcloud_dms_queue_v1`` support will be discontinued in favor of DMS Kafka Premium
+    (`<https://open-telekom-cloud.com/en/support/release-notes/discontinue-dms-queue-end-of-june-2022>`_)
