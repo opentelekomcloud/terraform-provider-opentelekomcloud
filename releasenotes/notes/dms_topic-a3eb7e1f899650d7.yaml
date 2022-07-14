@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[DMS]** Add new resource ``resource/opentelekomcloud_dms_topic_v1`` (`#1788 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1788>`_)

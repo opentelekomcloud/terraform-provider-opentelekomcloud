@@ -1,0 +1,4 @@
+---
+security:
+  - |
+    **[IAM]** Add AK/SK gpg encryption for ``resource/opentelekomcloud_identity_credential_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
