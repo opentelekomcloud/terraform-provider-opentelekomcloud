@@ -196,6 +196,8 @@ func resourceCCEAddonV3Delete(ctx context.Context, d *schema.ResourceData, meta 
 		Target:  []string{"deleted"},
 		Refresh: waitForCCEAddonDelete(client, d.Id(), clusterID),
 		Timeout: d.Timeout(schema.TimeoutDelete),
+		Delay:        10 * time.Second,
+		PollInterval: 10 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
