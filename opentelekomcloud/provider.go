@@ -346,6 +346,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_dms_group_v1":                       dms.ResourceDmsGroupsV1(),
 			"opentelekomcloud_dms_instance_v1":                    dms.ResourceDmsInstancesV1(),
 			"opentelekomcloud_dms_queue_v1":                       dms.ResourceDmsQueuesV1(),
+			"opentelekomcloud_dms_topic_v1":                       dms.ResourceDmsTopicsV1(),
 			"opentelekomcloud_ecs_instance_v1":                    ecs.ResourceEcsInstanceV1(),
 			"opentelekomcloud_evs_volume_v3":                      evs.ResourceEvsStorageVolumeV3(),
 			"opentelekomcloud_fw_firewall_group_v2":               fw.ResourceFWFirewallGroupV2(),
