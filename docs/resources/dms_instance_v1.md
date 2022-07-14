@@ -4,7 +4,7 @@ subcategory: "Distributed Message Service (DMS)"
 
 # opentelekomcloud_dms_instance_v1
 
-Manages a DMS instance in the OpenTelekomCloud DMS Service.
+Manages a DMS instance in the OpenTelekomCloud DMS Service (Kafka Premium/Platinum).
 
 ## Example Usage
 
