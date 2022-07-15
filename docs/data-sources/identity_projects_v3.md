@@ -9,7 +9,7 @@ Use this data source to get the list of all OpenTelekomCloud projects.
 ## Example Usage
 
 ```hcl
-data "opentelekomcloud_identity_project_sv3" "project_1" {}
+data "opentelekomcloud_identity_projects_v3" "project_1" {}
 ```
 
 
