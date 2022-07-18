@@ -140,6 +140,12 @@ func ResourceCCENodeV3() *schema.Resource {
 							Required: true,
 							ForceNew: true,
 						},
+						"kms_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							DefaultFunc: schema.EnvDefaultFunc("OS_KMS_ID", nil),
+						},
 						"extend_param": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -430,6 +436,13 @@ func resourceCCERootVolume(d *schema.ResourceData) nodes.VolumeSpec {
 		nics.Size = nicsRaw[0].(map[string]interface{})["size"].(int)
 		nics.VolumeType = nicsRaw[0].(map[string]interface{})["volumetype"].(string)
 		nics.ExtendParam = nicsRaw[0].(map[string]interface{})["extend_param"].(string)
+		rawMap := nicsRaw[0].(map[string]interface{})
+		if kmsID := rawMap["kms_id"]; kmsID != "" {
+			nics.Metadata = map[string]interface{}{
+				"__system__cmkid":     kmsID,
+				"__system__encrypted": "1",
+			}
+		}
 	}
 	return nics
 }
@@ -686,6 +699,9 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 			"volumetype":   node.Spec.RootVolume.VolumeType,
 			"extend_param": node.Spec.RootVolume.ExtendParam,
 		},
+	}
+	if node.Spec.RootVolume.Metadata != nil {
+		rootVolume[0]["kms_id"] = node.Spec.RootVolume.Metadata["__system__cmkid"]
 	}
 
 	if err := d.Set("root_volume", rootVolume); err != nil {

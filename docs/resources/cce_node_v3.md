@@ -134,6 +134,7 @@ The following arguments are supported:
   * `size` - (Required) Disk size in GB.
   * `volumetype` - (Required) Disk type.
   * `extend_param` - (Optional) Disk expansion parameters.
+  * `kms_id` - (Optional) The Encryption KMS ID of the system volume. By default, it tries to get from env by `OS_KMS_ID`.
 
 * `data_volumes` - (Required) Represents the data disk to be created. Changing this parameter will create a new resource.
   * `size` - (Required) Disk size in GB.
