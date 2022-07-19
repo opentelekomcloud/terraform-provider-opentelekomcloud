@@ -138,6 +138,7 @@ func TestAccCCENodePoolsV3EncryptedVolume(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodePoolV3Exists(nodePoolResourceName, shared.DataSourceClusterName, &nodePool),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "data_volumes.0.kms_id", env.OS_KMS_ID),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "root_volume.0.kms_id", env.OS_KMS_ID),
 				),
 			},
 		},
@@ -344,13 +345,14 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   root_volume {
     size       = 40
     volumetype = "SSD"
+    kms_id     = "%s"
   }
   data_volumes {
     size       = 100
     volumetype = "SSD"
     kms_id     = "%s"
   }
-}`, shared.DataSourceCluster, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
+}`, shared.DataSourceCluster, env.OS_KEYPAIR_NAME, env.OS_KMS_ID, env.OS_KMS_ID)
 
 var testAccCCENodePoolV3ExtendParams = fmt.Sprintf(`
 %s

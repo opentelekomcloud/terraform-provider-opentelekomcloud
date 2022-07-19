@@ -314,7 +314,7 @@ func TestAccCCENodesV3EncryptedVolume(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 					resource.TestCheckResourceAttr(resourceNameNode, "data_volumes.0.kms_id", env.OS_KMS_ID),
-					resource.TestCheckResourceAttr(resourceNameNode, "root_volume.kms_id", env.OS_KMS_ID),
+					resource.TestCheckResourceAttr(resourceNameNode, "root_volume.0.kms_id", env.OS_KMS_ID),
 				),
 			},
 		},
