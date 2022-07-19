@@ -202,19 +202,26 @@ func resourceKmsKeyV1Create(ctx context.Context, d *schema.ResourceData, meta in
 		rotationOpts := &keys.RotationOpts{
 			KeyID: key.KeyID,
 		}
-		err := keys.EnableKeyRotation(client, rotationOpts).ExtractErr()
-		if err != nil {
-			return fmterr.Errorf("failed to enable KMS key rotation: %s", err)
-		}
 
-		if i, ok := d.GetOk("rotation_interval"); ok {
-			rotationOpts := &keys.RotationOpts{
-				KeyID:    key.KeyID,
-				Interval: i.(int),
-			}
-			err := keys.UpdateKeyRotationInterval(client, rotationOpts).ExtractErr()
+		keyRotation, err := keys.GetKeyRotationStatus(client, rotationOpts).ExtractResult()
+		if err != nil {
+			return fmterr.Errorf("failed to fetch KMS key rotation status: %s", err)
+		}
+		if keyRotation.Enabled == false {
+			err := keys.EnableKeyRotation(client, rotationOpts).ExtractErr()
 			if err != nil {
-				return fmterr.Errorf("failed to change KMS key rotation interval: %s", err)
+				return fmterr.Errorf("failed to enable KMS key rotation: %s", err)
+			}
+
+			if i, ok := d.GetOk("rotation_interval"); ok {
+				rotationOpts := &keys.RotationOpts{
+					KeyID:    key.KeyID,
+					Interval: i.(int),
+				}
+				err := keys.UpdateKeyRotationInterval(client, rotationOpts).ExtractErr()
+				if err != nil {
+					return fmterr.Errorf("failed to change KMS key rotation interval: %s", err)
+				}
 			}
 		}
 	}
@@ -413,6 +420,20 @@ func resourceKmsKeyV1Delete(_ context.Context, d *schema.ResourceData, meta inte
 	// in a pending deletion state from when the instance was terminated.
 	// If this is true, just move on. It'll eventually delete.
 	if key.KeyState != PendingDeletionState {
+		rotationOpts := &keys.RotationOpts{
+			KeyID: d.Id(),
+		}
+		keyRotation, err := keys.GetKeyRotationStatus(client, rotationOpts).ExtractResult()
+		if err != nil {
+			return fmterr.Errorf("failed to fetch KMS key rotation status: %s", err)
+		}
+		if keyRotation.Enabled == true {
+			err := keys.DisableKeyRotation(client, rotationOpts).ExtractErr()
+			if err != nil {
+				return fmterr.Errorf("failed to disable KMS key rotation: %s", err)
+			}
+		}
+
 		key, err = keys.Delete(client, deleteOpts).Extract()
 		if err != nil {
 			return diag.FromErr(err)
