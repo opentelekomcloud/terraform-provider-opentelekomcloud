@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    **[IAM]** New ``data/opentelekomcloud_identity_projects_v3`` data source
+    (`#1798 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1798>`_)
