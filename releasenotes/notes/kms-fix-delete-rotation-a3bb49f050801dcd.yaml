@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[KMS]** Fix key deletion with enabled ``rotation`` in ``resource/opentelekomcloud_kms_key_v1`` (`#1823 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1823>`_)
