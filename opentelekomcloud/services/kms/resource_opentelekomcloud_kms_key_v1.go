@@ -207,7 +207,7 @@ func resourceKmsKeyV1Create(ctx context.Context, d *schema.ResourceData, meta in
 		if err != nil {
 			return fmterr.Errorf("failed to fetch KMS key rotation status: %s", err)
 		}
-		if keyRotation.Enabled == false {
+		if !keyRotation.Enabled {
 			err := keys.EnableKeyRotation(client, rotationOpts).ExtractErr()
 			if err != nil {
 				return fmterr.Errorf("failed to enable KMS key rotation: %s", err)
@@ -427,7 +427,7 @@ func resourceKmsKeyV1Delete(_ context.Context, d *schema.ResourceData, meta inte
 		if err != nil {
 			return fmterr.Errorf("failed to fetch KMS key rotation status: %s", err)
 		}
-		if keyRotation.Enabled == true {
+		if keyRotation.Enabled {
 			err := keys.DisableKeyRotation(client, rotationOpts).ExtractErr()
 			if err != nil {
 				return fmterr.Errorf("failed to disable KMS key rotation: %s", err)
