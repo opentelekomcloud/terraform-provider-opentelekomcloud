@@ -104,6 +104,12 @@ func ResourceCCENodePoolV3() *schema.Resource {
 							Required: true,
 							ForceNew: true,
 						},
+						"kms_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							DefaultFunc: schema.EnvDefaultFunc("OS_KMS_ID", nil),
+						},
 						"extend_param": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -413,6 +419,9 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 			"volumetype":   s.Spec.NodeTemplate.RootVolume.VolumeType,
 			"extend_param": s.Spec.NodeTemplate.RootVolume.ExtendParam,
 		},
+	}
+	if s.Spec.NodeTemplate.RootVolume.Metadata != nil {
+		rootVolume[0]["kms_id"] = s.Spec.NodeTemplate.RootVolume.Metadata["__system__cmkid"]
 	}
 
 	mErr := multierror.Append(

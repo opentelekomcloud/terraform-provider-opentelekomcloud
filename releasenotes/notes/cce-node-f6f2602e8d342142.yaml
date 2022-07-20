@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CCE]** Add kms key id for system volume via ``kms_id`` in ``resource/opentelekomcloud_cce_node_pool_v3`` and ``resource/opentelekomcloud_cce_node_v3`` (`#1813 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1813>`_)
