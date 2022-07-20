@@ -191,6 +191,10 @@ func resourceCCEAddonV3Delete(ctx context.Context, d *schema.ResourceData, meta 
 
 	clusterID := d.Get("cluster_id").(string)
 
+	if err := addons.Delete(client, d.Id(), clusterID).ExtractErr(); err != nil {
+		return fmterr.Errorf("error deleting CCE addon : %w", err)
+	}
+
 	stateConf := &resource.StateChangeConf{
 		Pending:      []string{"available"},
 		Target:       []string{"deleted"},
@@ -248,13 +252,6 @@ func unStringMap(src map[string]interface{}) map[string]interface{} {
 
 func waitForCCEAddonDelete(client *golangsdk.ServiceClient, addonID, clusterID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		if err := addons.Delete(client, addonID, clusterID).ExtractErr(); err != nil {
-			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				return nil, "deleted", nil
-			}
-			return nil, "error", fmt.Errorf("error deleting CCE addon : %w", err)
-		}
-
 		addon, err := addons.Get(client, addonID, clusterID).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
