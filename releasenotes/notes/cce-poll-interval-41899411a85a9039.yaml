@@ -1,0 +1,5 @@
+---
+
+enhancements:
+  - |
+    **[CCE]** Add ``PollInterval`` in ``resourceCCEAddonV3Delete`` in ``resource/opentelekomcloud_cce_addon_v3`` (`#1810 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1810>`_)
