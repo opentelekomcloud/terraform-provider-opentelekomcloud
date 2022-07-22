@@ -188,12 +188,7 @@ func ResourceRdsInstance() *schema.Resource {
 						},
 					}},
 			},
-			"tag": {
-				Type:         schema.TypeMap,
-				Optional:     true,
-				ValidateFunc: common.ValidateTags,
-			},
-
+			"tag": common.TagsSchema(),
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
