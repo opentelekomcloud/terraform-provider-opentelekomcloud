@@ -10,11 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cbr/v3/vaults"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
-
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 )
 
 func ResourceCBRVaultV3() *schema.Resource {
@@ -471,15 +471,15 @@ func cbrVaultBillingCreate(d *schema.ResourceData) *vaults.BillingCreate {
 }
 
 func cbrVaultBindRules(d *schema.ResourceData) (rules *vaults.VaultBindRules) {
-	tags := d.Get("bind_rules").([]interface{})
-	if len(tags) == 0 {
+	bingTags := d.Get("bind_rules").([]interface{})
+	if len(bingTags) == 0 {
 		return
 	}
 	rules = new(vaults.VaultBindRules)
-	rules.Tags = make([]vaults.Tag, len(tags))
-	for i, tag := range tags {
+	rules.Tags = make([]tags.ResourceTag, len(bingTags))
+	for i, tag := range bingTags {
 		tagMap := tag.(map[string]interface{})
-		rules.Tags[i] = vaults.Tag{
+		rules.Tags[i] = tags.ResourceTag{
 			Key:   tagMap["key"].(string),
 			Value: tagMap["value"].(string),
 		}
@@ -487,11 +487,11 @@ func cbrVaultBindRules(d *schema.ResourceData) (rules *vaults.VaultBindRules) {
 	return rules
 }
 
-func cbrVaultTags(d *schema.ResourceData) []vaults.Tag {
-	tags := d.Get("tags").(map[string]interface{})
-	var tagSlice []vaults.Tag
-	for k, v := range tags {
-		tagSlice = append(tagSlice, vaults.Tag{Key: k, Value: v.(string)})
+func cbrVaultTags(d *schema.ResourceData) []tags.ResourceTag {
+	vaultTags := d.Get("tags").(map[string]interface{})
+	var tagSlice []tags.ResourceTag
+	for k, v := range vaultTags {
+		tagSlice = append(tagSlice, tags.ResourceTag{Key: k, Value: v.(string)})
 	}
 	return tagSlice
 }
