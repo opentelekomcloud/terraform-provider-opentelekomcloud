@@ -209,14 +209,12 @@ func ResourceRdsInstanceV3() *schema.Resource {
 			"tag": {
 				Type:          schema.TypeMap,
 				Optional:      true,
-				ValidateFunc:  common.ValidateTags,
 				Deprecated:    "Please use `tags` instead",
 				ConflictsWith: []string{"tags"},
 			},
 			"tags": {
 				Type:          schema.TypeMap,
 				Optional:      true,
-				ValidateFunc:  common.ValidateTags,
 				ConflictsWith: []string{"tag"},
 			},
 			"param_group_id": {

@@ -366,7 +366,7 @@ func resourceCBRVaultV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if err := common.UpdateResourceTags(client, d, "vault", d.Id()); err != nil {
-		return diag.Errorf("error setting tags of CBR vault: %s", err)
+		return fmterr.Errorf("error setting tags of CBR vault: %s", err)
 	}
 
 	return resourceCBRVaultV3Read(ctx, d, meta)

@@ -189,11 +189,7 @@ func ResourceComputeBMSInstanceV2() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
-			"tags": {
-				Type:         schema.TypeMap,
-				Optional:     true,
-				ValidateFunc: common.ValidateTags,
-			},
+			"tags": common.TagsSchema(),
 			"stop_before_destroy": {
 				Type:     schema.TypeBool,
 				Optional: true,

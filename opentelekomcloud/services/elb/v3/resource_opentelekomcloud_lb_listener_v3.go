@@ -144,12 +144,7 @@ func ResourceListenerV3() *schema.Resource {
 					},
 				},
 			},
-			"tags": {
-				Type:         schema.TypeMap,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: common.ValidateTags,
-			},
+			"tags": common.TagsSchema(),
 			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -225,6 +220,10 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId(lb.ID)
+
+	if err := common.UpdateResourceTags(client, d, "listeners", d.Id()); err != nil {
+		return fmterr.Errorf("error setting tags of elb listener: %s", err)
+	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)
 	return resourceListenerV3Read(clientCtx, d, meta)
@@ -360,6 +359,13 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	_, err = listeners.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("unable to update ListenerV3 %s: %s", d.Id(), err)
+	}
+
+	if d.HasChange("tags") {
+		tagErr := common.UpdateResourceTags(client, d, "listeners", d.Id())
+		if tagErr != nil {
+			return fmterr.Errorf("Error updating tags of elb listener:%s, err:%s", d.Id(), tagErr)
+		}
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)

@@ -125,11 +125,10 @@ func ResourceVPCEPServiceV1() *schema.Resource {
 				DiffSuppressFunc: common.SuppressCaseInsensitive,
 			},
 			"tags": {
-				Type:         schema.TypeMap,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: common.ValidateTags,
-				ForceNew:     true,
+				Type:     schema.TypeMap,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
 			},
 		},
 	}
