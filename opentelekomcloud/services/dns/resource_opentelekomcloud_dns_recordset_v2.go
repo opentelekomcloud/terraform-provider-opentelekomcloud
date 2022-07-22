@@ -96,10 +96,17 @@ func ResourceDNSRecordSetV2() *schema.Resource {
 }
 
 func getRecordSetCreateOpts(d cfg.SchemaOrDiff) RecordSetCreateOpts {
+	recordSetType := d.Get("type").(string)
 	recordsRaw := d.Get("records").(*schema.Set).List()
 	records := make([]string, len(recordsRaw))
-	for i, record := range recordsRaw {
-		records[i] = record.(string)
+	if recordSetType == "TXT" {
+		for i, record := range recordsRaw {
+			records[i] = fmt.Sprintf("\"%s\"", record.(string))
+		}
+	} else {
+		for i, record := range recordsRaw {
+			records[i] = record.(string)
+		}
 	}
 
 	return RecordSetCreateOpts{
@@ -108,10 +115,19 @@ func getRecordSetCreateOpts(d cfg.SchemaOrDiff) RecordSetCreateOpts {
 			Description: d.Get("description").(string),
 			Records:     records,
 			TTL:         d.Get("ttl").(int),
-			Type:        d.Get("type").(string),
+			Type:        recordSetType,
 		},
 		common.MapValueSpecs(d),
 	}
+}
+
+func trimQuotes(s string) string {
+	if len(s) >= 2 {
+		if s[0] == '"' && s[len(s)-1] == '"' {
+			return s[1 : len(s)-1]
+		}
+	}
+	return s
 }
 
 func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -195,6 +211,17 @@ func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta 
 		return common.CheckDeletedDiag(d, err, "record_set")
 	}
 
+	records := make([]string, len(n.Records))
+	if n.Type == "TXT" {
+		for i, record := range n.Records {
+			records[i] = trimQuotes(record)
+		}
+	} else {
+		for i, record := range n.Records {
+			records[i] = record
+		}
+	}
+
 	log.Printf("[DEBUG] Retrieved  record set %s: %#v", recordsetID, n)
 
 	mErr := multierror.Append(
@@ -202,7 +229,7 @@ func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("description", n.Description),
 		d.Set("ttl", n.TTL),
 		d.Set("type", n.Type),
-		d.Set("records", n.Records),
+		d.Set("records", records),
 		d.Set("region", config.GetRegion(d)),
 		d.Set("zone_id", zoneID),
 	)
@@ -244,8 +271,14 @@ func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, m
 	// `records` is required attribute for update request
 	recordsRaw := d.Get("records").(*schema.Set).List()
 	records := make([]string, len(recordsRaw))
-	for i, recordRaw := range recordsRaw {
-		records[i] = recordRaw.(string)
+	if d.Get("type").(string) == "TXT" {
+		for i, record := range recordsRaw {
+			records[i] = fmt.Sprintf("\"%s\"", record.(string))
+		}
+	} else {
+		for i, record := range recordsRaw {
+			records[i] = record.(string)
+		}
 	}
 	updateOpts.Records = records
 

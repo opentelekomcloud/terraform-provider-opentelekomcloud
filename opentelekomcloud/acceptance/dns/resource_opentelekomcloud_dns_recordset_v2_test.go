@@ -158,6 +158,38 @@ func TestAccDNSV2RecordSet_shared(t *testing.T) {
 	})
 }
 
+func TestAccDNSV2RecordSet_txt(t *testing.T) {
+	var recordset recordsets.RecordSet
+	zoneName := randomZoneName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDNSV2RecordSetTxt(zoneName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDNSV2RecordSetExists(resourceRecordSetName, &recordset),
+					resource.TestCheckResourceAttr(resourceRecordSetName, "name", zoneName),
+					resource.TestCheckResourceAttr(resourceRecordSetName, "description", "a record set"),
+					resource.TestCheckResourceAttr(resourceRecordSetName, "type", "TXT"),
+					resource.TestCheckResourceAttr(resourceRecordSetName, "ttl", "300"),
+					resource.TestCheckResourceAttr(resourceRecordSetName, "records.0", "v=spf1 include:my.example.try.com -all"),
+				),
+			},
+			{
+				Config: testAccDNSV2RecordSetTxtUpdate(zoneName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRecordSetName, "ttl", "3000"),
+					resource.TestCheckResourceAttr(resourceRecordSetName, "description", "an updated record set"),
+					resource.TestCheckResourceAttr(resourceRecordSetName, "records.0", "v=spf1 include:my.example.try.com -none"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.DnsV2Client(env.OS_REGION_NAME)
@@ -402,6 +434,48 @@ resource "opentelekomcloud_dns_recordset_v2" "recordset_sup" {
   description = "a parent record set"
   ttl         = 3000
   records     = ["10.1.0.0"]
+}
+`, zoneName)
+}
+
+func testAccDNSV2RecordSetTxt(zoneName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name        = "%[1]s"
+  email       = "email2@example.com"
+  description = "a zone"
+  ttl         = 6000
+}
+
+resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
+  zone_id     = opentelekomcloud_dns_zone_v2.zone_1.id
+  name        = "%[1]s"
+  type        = "TXT"
+  description = "a record set"
+  ttl         = 300
+  records     = ["v=spf1 include:my.example.try.com -all"]
+
+}
+`, zoneName)
+}
+
+func testAccDNSV2RecordSetTxtUpdate(zoneName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name        = "%[1]s"
+  email       = "email2@example.com"
+  description = "a zone"
+  ttl         = 6000
+}
+
+resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
+  zone_id     = opentelekomcloud_dns_zone_v2.zone_1.id
+  name        = "%[1]s"
+  type        = "TXT"
+  description = "an updated record set"
+  ttl         = 3000
+  records     = ["v=spf1 include:my.example.try.com -none"]
+
 }
 `, zoneName)
 }

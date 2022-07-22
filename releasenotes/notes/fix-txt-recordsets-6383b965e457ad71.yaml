@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DNS]** Fix ``TXT recordsed`` quoting in ``resource/opentelekomcloud_dns_recordset_v2`` (`#1829 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1829>`_)
