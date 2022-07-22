@@ -188,7 +188,9 @@ func ResourceRdsInstance() *schema.Resource {
 						},
 					}},
 			},
+
 			"tag": common.TagsSchema(),
+
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,

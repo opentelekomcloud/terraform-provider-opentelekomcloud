@@ -9,7 +9,6 @@ import (
 )
 
 var (
-	tagsPattern    = regexp.MustCompile(`^[0-9a-zA-Z-_@]+$`)
 	k8sTagsPattern = regexp.MustCompile(`^[./\-_A-Za-z0-9]+$`)
 )
 
