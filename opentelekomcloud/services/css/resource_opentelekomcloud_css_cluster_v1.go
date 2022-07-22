@@ -161,12 +161,7 @@ func ResourceCssClusterV1() *schema.Resource {
 					},
 				},
 			},
-			"tags": {
-				Type:         schema.TypeMap,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: common.ValidateTags,
-			},
+			"tags": common.TagsSchema(),
 			"endpoint": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -343,6 +338,13 @@ func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 			return fmterr.Errorf("error waiting cluster to extend: %s\nFail reason: %+v", err, state.FailedReasons)
 		}
 		return fmterr.Errorf("error waiting cluster to extend: %s", err)
+	}
+
+	if d.HasChange("tags") {
+		tagErr := common.UpdateResourceTags(client, d, "css-cluster", d.Id())
+		if tagErr != nil {
+			return fmterr.Errorf("Error updating tags of CSS cluster:%s, err:%s", d.Id(), tagErr)
+		}
 	}
 
 	return resourceCssClusterV1Read(ctx, d, meta)

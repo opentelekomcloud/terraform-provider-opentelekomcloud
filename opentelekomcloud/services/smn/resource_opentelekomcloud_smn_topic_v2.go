@@ -39,6 +39,7 @@ func ResourceTopic() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
+			"tags": common.TagsSchema(),
 			"topic_urn": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -80,6 +81,10 @@ func resourceTopicCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	if topic.TopicUrn != "" {
 		d.SetId(topic.TopicUrn)
 		return resourceTopicRead(ctx, d, meta)
+	}
+
+	if err := common.UpdateResourceTags(client, d, "smn_topic", d.Get("name").(string)); err != nil {
+		return diag.Errorf("error setting tags of SMN topic: %s", err)
 	}
 
 	return fmterr.Errorf("unexpected conversion error in resourceTopicCreate.")
@@ -152,6 +157,12 @@ func resourceTopicUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	topic, err := topics.Update(client, updateOpts, id).Extract()
 	if err != nil {
 		return fmterr.Errorf("error updating topic from result: %s", err)
+	}
+
+	if d.HasChange("tags") {
+		if err := common.UpdateResourceTags(client, d, "smn_topic", d.Get("name").(string)); err != nil {
+			return diag.Errorf("error setting tags of SMN topic: %s", err)
+		}
 	}
 
 	log.Printf("[DEBUG] Update : topic.TopicUrn: %s", topic.TopicUrn)

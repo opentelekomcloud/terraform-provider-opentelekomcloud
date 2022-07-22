@@ -216,12 +216,7 @@ func ResourceCBRVaultV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"tags": {
-				Type:         schema.TypeMap,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: common.ValidateTags,
-			},
+			"tags": common.TagsSchema(),
 			"enterprise_project_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -351,7 +346,6 @@ func resourceCBRVaultV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		Description:         d.Get("description").(string),
 		Name:                d.Get("name").(string),
 		Resources:           resources,
-		Tags:                cbrVaultTags(d),
 		EnterpriseProjectID: d.Get("enterprise_project_id").(string),
 		AutoBind:            d.Get("auto_bind").(bool),
 		BindRules:           cbrVaultBindRules(d),
@@ -369,6 +363,10 @@ func resourceCBRVaultV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		if err != nil {
 			return fmterr.Errorf("error binding policy to vault: %s", err)
 		}
+	}
+
+	if err := common.UpdateResourceTags(client, d, "vault", d.Id()); err != nil {
+		return diag.Errorf("error setting tags of CBR vault: %s", err)
 	}
 
 	return resourceCBRVaultV3Read(ctx, d, meta)
@@ -485,15 +483,6 @@ func cbrVaultBindRules(d *schema.ResourceData) (rules *vaults.VaultBindRules) {
 		}
 	}
 	return rules
-}
-
-func cbrVaultTags(d *schema.ResourceData) []tags.ResourceTag {
-	vaultTags := d.Get("tags").(map[string]interface{})
-	var tagSlice []tags.ResourceTag
-	for k, v := range vaultTags {
-		tagSlice = append(tagSlice, tags.ResourceTag{Key: k, Value: v.(string)})
-	}
-	return tagSlice
 }
 
 func vaultAddedResources(d *schema.ResourceData) ([]vaults.ResourceCreate, error) {
@@ -635,6 +624,12 @@ func resourceCBRVaultV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	if d.HasChange("backup_policy_id") {
 		if err := updatePolicy(d, client); err != nil {
 			return diag.FromErr(err)
+		}
+	}
+
+	if d.HasChange("tags") {
+		if err = common.UpdateResourceTags(client, d, "vault", d.Id()); err != nil {
+			return diag.Errorf("failed to update CBR tags: %s", err)
 		}
 	}
 

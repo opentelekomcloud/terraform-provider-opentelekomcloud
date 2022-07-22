@@ -260,35 +260,6 @@ func ValidateAntiDdosAppTypeID(v interface{}, k string) (ws []string, errors []e
 	return
 }
 
-func ValidateTags(v interface{}, k string) (ws []string, errors []error) {
-	tagMap := v.(map[string]interface{})
-
-	for key, value := range tagMap {
-		if !tagsPattern.MatchString(key) {
-			errors = append(errors, fmt.Errorf("key %q doesn't comply with restrictions (%q): %q", k, tagsPattern, key))
-		}
-		if len(key) < 1 {
-			errors = append(errors, fmt.Errorf("key %q cannot be shorter than 1 characters: %q", k, key))
-		}
-		if len(key) > 36 {
-			errors = append(errors, fmt.Errorf("key %q cannot be longer than 36 characters: %q", k, key))
-		}
-
-		valueString := value.(string)
-		if !tagsPattern.MatchString(valueString) {
-			errors = append(errors, fmt.Errorf("value %q doesn't comply with restrictions (%q): %q", k, tagsPattern, valueString))
-		}
-		if len(valueString) < 1 {
-			errors = append(errors, fmt.Errorf("value %q cannot be shorter than 1 characters: %q", k, value))
-		}
-		if len(valueString) > 43 {
-			errors = append(errors, fmt.Errorf("value %q cannot be longer than 43 characters: %q", k, value))
-		}
-	}
-
-	return
-}
-
 func ValidateK8sTagsMap(v interface{}, k string) (ws []string, errors []error) {
 	values := v.(map[string]interface{})
 
