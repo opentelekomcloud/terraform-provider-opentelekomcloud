@@ -1,0 +1,5 @@
+---
+
+fixes:
+  - |
+    **[CBR]** Fix tags schema in ``resource/opentelekomcloud_cbr_vault_v3`` after gopher refactoring (`#1830 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1830>`_)
