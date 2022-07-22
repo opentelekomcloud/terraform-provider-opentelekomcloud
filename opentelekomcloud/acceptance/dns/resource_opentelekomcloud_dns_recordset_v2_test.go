@@ -175,7 +175,7 @@ func TestAccDNSV2RecordSet_txt(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRecordSetName, "description", "a record set"),
 					resource.TestCheckResourceAttr(resourceRecordSetName, "type", "TXT"),
 					resource.TestCheckResourceAttr(resourceRecordSetName, "ttl", "300"),
-					resource.TestCheckResourceAttr(resourceRecordSetName, "records.0", "v=spf1 include:spf.protection.outlook.com -all"),
+					resource.TestCheckResourceAttr(resourceRecordSetName, "records.0", "v=spf1 include:my.example.try.com -all"),
 				),
 			},
 			{
@@ -183,7 +183,7 @@ func TestAccDNSV2RecordSet_txt(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRecordSetName, "ttl", "3000"),
 					resource.TestCheckResourceAttr(resourceRecordSetName, "description", "an updated record set"),
-					resource.TestCheckResourceAttr(resourceRecordSetName, "records.0", "v=spf1 include:spf.protection.outlook.com -none"),
+					resource.TestCheckResourceAttr(resourceRecordSetName, "records.0", "v=spf1 include:my.example.try.com -none"),
 				),
 			},
 		},
@@ -453,7 +453,7 @@ resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
   type        = "TXT"
   description = "a record set"
   ttl         = 300
-  records     = ["v=spf1 include:spf.protection.outlook.com -all"]
+  records     = ["v=spf1 include:my.example.try.com -all"]
 
 }
 `, zoneName)
@@ -474,7 +474,7 @@ resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
   type        = "TXT"
   description = "an updated record set"
   ttl         = 3000
-  records     = ["v=spf1 include:spf.protection.outlook.com -none"]
+  records     = ["v=spf1 include:my.example.try.com -none"]
 
 }
 `, zoneName)
