@@ -370,7 +370,7 @@ func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", instance.Id, err)
 	}
 
-	if err := common.UpdateResourceTags(client, d, "vault", d.Id()); err != nil {
+	if err := common.UpdateResourceTags(client, d, "instances", d.Id()); err != nil {
 		return diag.Errorf("error setting tags of DDS vault: %s", err)
 	}
 

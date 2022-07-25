@@ -252,6 +252,10 @@ func resourceCssClusterV1Create(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	d.SetId(created.ID)
+	tagErr := common.UpdateResourceTags(client, d, "clusters", d.Id())
+	if tagErr != nil {
+		return fmterr.Errorf("error setting tags of CSS cluster:%s, err:%s", d.Id(), tagErr)
+	}
 
 	return resourceCssClusterV1Read(ctx, d, meta)
 }
@@ -341,7 +345,7 @@ func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if d.HasChange("tags") {
-		tagErr := common.UpdateResourceTags(client, d, "css-cluster", d.Id())
+		tagErr := common.UpdateResourceTags(client, d, "clusters", d.Id())
 		if tagErr != nil {
 			return fmterr.Errorf("Error updating tags of CSS cluster:%s, err:%s", d.Id(), tagErr)
 		}

@@ -58,9 +58,10 @@ func ResourceVPCEPEndpointV1() *schema.Resource {
 				Computed: true,
 			},
 			"tags": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeMap,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: common.ValidateTags,
 			},
 			"route_tables": {
 				Type:     schema.TypeSet,
