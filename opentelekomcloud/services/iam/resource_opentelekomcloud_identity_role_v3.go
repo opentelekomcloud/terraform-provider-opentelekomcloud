@@ -180,7 +180,7 @@ func resourceIdentityRoleV3Read(ctx context.Context, d *schema.ResourceData, met
 		return config.IdentityV30Client()
 	})
 	if err != nil {
-		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf(clientV30CreationFail, err)
 	}
 
 	role, err := policies.Get(client, d.Id()).Extract()
@@ -226,7 +226,7 @@ func resourceIdentityRoleV3Update(ctx context.Context, d *schema.ResourceData, m
 		return config.IdentityV30Client()
 	})
 	if err != nil {
-		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf(clientV30CreationFail, err)
 	}
 
 	roleType, fmtErr := buildRoleType(d)
@@ -256,7 +256,7 @@ func resourceIdentityRoleV3Delete(ctx context.Context, d *schema.ResourceData, m
 		return config.IdentityV30Client()
 	})
 	if err != nil {
-		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf(clientV30CreationFail, err)
 	}
 
 	log.Printf("[DEBUG] Deleting Role %q", d.Id())
