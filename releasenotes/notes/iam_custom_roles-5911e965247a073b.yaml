@@ -1,0 +1,7 @@
+---
+enhancements:
+  - |
+    **[IAM]** New ``resource`` argument for ``resource/opentelekomcloud_identity_role_v3`` (`#1767 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1767>`_)
+other:
+  - |
+    **[IAM]** Refactoring of ``resource/opentelekomcloud_identity_role_v3`` (`#1767 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1767>`_)

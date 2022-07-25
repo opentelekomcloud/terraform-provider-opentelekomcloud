@@ -2,14 +2,14 @@ package iam
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"reflect"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/policies"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -33,7 +33,10 @@ func ResourceIdentityRoleV3() *schema.Resource {
 			},
 
 			"display_layer": {
-				Type:     schema.TypeString,
+				Type: schema.TypeString,
+				ValidateFunc: validation.StringInSlice([]string{
+					"domain", "project",
+				}, false),
 				Required: true,
 			},
 
@@ -55,8 +58,18 @@ func ResourceIdentityRoleV3() *schema.Resource {
 							},
 						},
 						"effect": {
-							Type:     schema.TypeString,
+							Type: schema.TypeString,
+							ValidateFunc: validation.StringInSlice([]string{
+								"Allow", "Deny",
+							}, false),
 							Required: true,
+						},
+						"resource": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
 					},
 				},
@@ -80,551 +93,178 @@ func ResourceIdentityRoleV3() *schema.Resource {
 	}
 }
 
-func resourceIdentityRoleV3UserInputParams(d *schema.ResourceData) map[string]interface{} {
-	return map[string]interface{}{
-		"description":   d.Get("description"),
-		"display_layer": d.Get("display_layer"),
-		"display_name":  d.Get("display_name"),
-		"statement":     d.Get("statement"),
+func buildRoleType(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	roleType := d.Get("display_layer")
+
+	if roleType == "domain" {
+		return "AX", nil
+	} else if roleType == "project" {
+		return "XA", nil
 	}
+	return nil, fmterr.Errorf("unknown display layer:%v", roleType)
+}
+
+func buildRolePolicy(d *schema.ResourceData) policies.CreatePolicy {
+	customPolicy := policies.CreatePolicy{
+		Version: "1.1",
+	}
+
+	statements := d.Get("statement").([]interface{})
+	res := make([]policies.CreateStatement, len(statements))
+
+	for i, v := range statements {
+		statement := v.(map[string]interface{})
+		effect := statement["effect"].(string)
+		action := statement["action"].([]interface{})
+		var refinedActions []string
+
+		for _, s := range action {
+			refinedActions = append(refinedActions, s.(string))
+		}
+
+		res[i] = policies.CreateStatement{
+			Effect: effect,
+			Action: refinedActions,
+		}
+
+		resourceCheck := statement["resource"].([]interface{})
+
+		if len(resourceCheck) > 0 {
+			var refinedResource []string
+			for _, s := range resourceCheck {
+				refinedResource = append(refinedResource, s.(string))
+			}
+			res[i].Resource = refinedResource
+		}
+	}
+
+	customPolicy.Statement = res
+	return customPolicy
 }
 
 func resourceIdentityRoleV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.IdentityV30Client()
+	client, err := common.ClientFromCtx(ctx, keyClientV30, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV30Client()
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
+		fmterr.Errorf(clientV30CreationFail, err)
 	}
 
-	opts := resourceIdentityRoleV3UserInputParams(d)
-
-	r, err := sendIdentityRoleV3CreateRequest(d, opts, nil, client)
-	if err != nil {
-		return fmterr.Errorf("error creating IdentityRoleV3: %s", err)
+	roleType, fmtErr := buildRoleType(d)
+	if fmtErr != nil {
+		return fmtErr
 	}
 
-	id, err := common.NavigateValue(r, []string{"role", "id"}, nil)
-	if err != nil {
-		return fmterr.Errorf("error constructing id: %s", err)
+	opts := policies.CreateOpts{
+		Description: d.Get("description").(string),
+		DisplayName: d.Get("display_name").(string),
+		Type:        roleType.(string),
+		Policy:      buildRolePolicy(d),
 	}
-	d.SetId(id.(string))
 
-	return resourceIdentityRoleV3Read(ctx, d, meta)
+	r, err := policies.Create(client, opts).Extract()
+	if err != nil {
+		return fmterr.Errorf("error creating custom role: %s", err)
+	}
+
+	d.SetId(r.ID)
+
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV30)
+	return resourceIdentityRoleV3Read(clientCtx, d, meta)
 }
 
 func resourceIdentityRoleV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.IdentityV30Client()
+	client, err := common.ClientFromCtx(ctx, keyClientV30, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV30Client()
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf(clientV30CreationFail, err)
 	}
 
-	res := make(map[string]interface{})
-
-	err = readIdentityRoleV3Read(ctx, d, client, res)
+	role, err := policies.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(err)
+		return common.CheckDeletedDiag(d, err, "custom IAM Role")
 	}
 
-	return diag.FromErr(setIdentityRoleV3Properties(d, res))
+	statements := make([]interface{}, len(role.Policy.Statement))
+	for i, statement := range role.Policy.Statement {
+		statements[i] = map[string]interface{}{
+			"effect":   statement.Effect,
+			"action":   statement.Action,
+			"resource": statement.Resource,
+		}
+	}
+
+	displayLayer := role.Type
+	if displayLayer == "AX" {
+		displayLayer = "domain"
+	} else {
+		displayLayer = "project"
+	}
+
+	mErr := multierror.Append(
+		d.Set("description", role.Description),
+		d.Set("display_name", role.DisplayName),
+		d.Set("name", role.Name),
+		d.Set("domain_id", role.DomainId),
+		d.Set("catalog", role.Catalog),
+		d.Set("statement", statements),
+		d.Set("display_layer", displayLayer),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("error setting role fields: %s", err)
+	}
+
+	return nil
 }
 
 func resourceIdentityRoleV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.IdentityV30Client()
+	client, err := common.ClientFromCtx(ctx, keyClientV30, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV30Client()
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf(clientV30CreationFail, err)
 	}
 
-	opts := resourceIdentityRoleV3UserInputParams(d)
+	roleType, fmtErr := buildRoleType(d)
+	if fmtErr != nil {
+		return fmtErr
+	}
 
-	_, err = sendIdentityRoleV3UpdateRequest(d, opts, nil, client)
+	opts := policies.CreateOpts{
+		Description: d.Get("description").(string),
+		DisplayName: d.Get("display_name").(string),
+		Type:        roleType.(string),
+		Policy:      buildRolePolicy(d),
+	}
+
+	_, err = policies.Update(client, d.Id(), opts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error updating (IdentityRoleV3: %v): %s", d.Id(), err)
 	}
 
-	return resourceIdentityRoleV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV30)
+	return resourceIdentityRoleV3Read(clientCtx, d, meta)
 }
 
-func resourceIdentityRoleV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityRoleV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.IdentityV30Client()
+	client, err := common.ClientFromCtx(ctx, keyClientV30, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV30Client()
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf(clientV30CreationFail, err)
 	}
-
-	url, err := common.ReplaceVars(d, "OS-ROLE/roles/{id}", nil)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	url = client.ServiceURL(url)
 
 	log.Printf("[DEBUG] Deleting Role %q", d.Id())
-	r := golangsdk.Result{}
-	_, r.Err = client.Delete(url, &golangsdk.RequestOpts{
-		OkCodes:      common.SuccessHTTPCodes,
-		JSONBody:     nil,
-		JSONResponse: &r.Body,
-		MoreHeaders:  map[string]string{"Content-Type": "application/json"},
-	})
-	if r.Err != nil {
-		return fmterr.Errorf("error deleting Role %q: %s", d.Id(), r.Err)
+
+	if err := policies.Delete(client, d.Id()).ExtractErr(); err != nil {
+		return fmterr.Errorf("error deleting OpenTelekomCloud IAMv3 role: %s", err)
 	}
 
+	d.SetId("")
 	return nil
-}
-
-func sendIdentityRoleV3CreateRequest(_ *schema.ResourceData, opts map[string]interface{},
-	arrayIndex map[string]int, client *golangsdk.ServiceClient) (interface{}, error) {
-	url := client.ServiceURL("OS-ROLE/roles")
-
-	params, err := buildIdentityRoleV3CreateParameters(opts, arrayIndex)
-	if err != nil {
-		return nil, fmt.Errorf("error building the request body of api(create)")
-	}
-
-	r := golangsdk.Result{}
-	_, r.Err = client.Post(url, params, &r.Body, &golangsdk.RequestOpts{
-		OkCodes: common.SuccessHTTPCodes,
-	})
-	if r.Err != nil {
-		return nil, fmt.Errorf("error run api(create): %s", r.Err)
-	}
-	return r.Body, nil
-}
-
-func buildIdentityRoleV3CreateParameters(opts map[string]interface{}, arrayIndex map[string]int) (interface{}, error) {
-	params := make(map[string]interface{})
-
-	descriptionProp, err := common.NavigateValue(opts, []string{"description"}, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	empty, err := common.IsEmptyValue(reflect.ValueOf(descriptionProp))
-	if err != nil {
-		return nil, err
-	}
-	if !empty {
-		params["description"] = descriptionProp
-	}
-
-	displayNameProp, err := common.NavigateValue(opts, []string{"display_name"}, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	empty, err = common.IsEmptyValue(reflect.ValueOf(displayNameProp))
-	if err != nil {
-		return nil, err
-	}
-	if !empty {
-		params["display_name"] = displayNameProp
-	}
-
-	policyProp, err := expandIdentityRoleV3CreatePolicy(opts, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	empty, err = common.IsEmptyValue(reflect.ValueOf(policyProp))
-	if err != nil {
-		return nil, err
-	}
-	if !empty {
-		params["policy"] = policyProp
-	}
-
-	typeProp, err := expandIdentityRoleV3CreateType(opts, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	empty, err = common.IsEmptyValue(reflect.ValueOf(typeProp))
-	if err != nil {
-		return nil, err
-	}
-	if !empty {
-		params["type"] = typeProp
-	}
-
-	params = map[string]interface{}{"role": params}
-
-	return params, nil
-}
-
-func expandIdentityRoleV3CreatePolicy(d interface{}, arrayIndex map[string]int) (interface{}, error) {
-	req := make(map[string]interface{})
-
-	statementProp, err := expandIdentityRoleV3CreatePolicyStatement(d, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	e, err := common.IsEmptyValue(reflect.ValueOf(statementProp))
-	if err != nil {
-		return nil, err
-	}
-	if !e {
-		req["Statement"] = statementProp
-	}
-
-	req["Version"] = "1.1"
-
-	return req, nil
-}
-
-func expandIdentityRoleV3CreatePolicyStatement(d interface{}, arrayIndex map[string]int) (interface{}, error) {
-	newArrayIndex := make(map[string]int)
-
-	for k, v := range arrayIndex {
-		newArrayIndex[k] = v
-	}
-
-	v, err := common.NavigateValue(d, []string{"statement"}, newArrayIndex)
-	if err != nil {
-		return nil, err
-	}
-
-	n := len(v.([]interface{}))
-	req := make([]interface{}, 0, n)
-	for i := 0; i < n; i++ {
-		newArrayIndex["statement"] = i
-		transformed := make(map[string]interface{})
-
-		actionProp, err := common.NavigateValue(d, []string{"statement", "action"}, newArrayIndex)
-		if err != nil {
-			return nil, err
-		}
-		e, err := common.IsEmptyValue(reflect.ValueOf(actionProp))
-		if err != nil {
-			return nil, err
-		}
-		if !e {
-			transformed["Action"] = actionProp
-		}
-
-		effectProp, err := common.NavigateValue(d, []string{"statement", "effect"}, newArrayIndex)
-		if err != nil {
-			return nil, err
-		}
-		e, err = common.IsEmptyValue(reflect.ValueOf(effectProp))
-		if err != nil {
-			return nil, err
-		}
-		if !e {
-			transformed["Effect"] = effectProp
-		}
-
-		req = append(req, transformed)
-	}
-
-	return req, nil
-}
-
-func expandIdentityRoleV3CreateType(d interface{}, arrayIndex map[string]int) (interface{}, error) {
-	v, err := common.NavigateValue(d, []string{"display_layer"}, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	if v == "domain" {
-		return "AX", nil
-	} else if v == "project" {
-		return "XA", nil
-	}
-	return nil, fmt.Errorf("unknown display layer:%v", v)
-}
-
-func sendIdentityRoleV3UpdateRequest(d *schema.ResourceData, opts map[string]interface{},
-	arrayIndex map[string]int, client *golangsdk.ServiceClient) (interface{}, error) {
-	url, err := common.ReplaceVars(d, "OS-ROLE/roles/{id}", nil)
-	if err != nil {
-		return nil, err
-	}
-	url = client.ServiceURL(url)
-
-	params, err := buildIdentityRoleV3UpdateParameters(opts, arrayIndex)
-	if err != nil {
-		return nil, fmt.Errorf("error building the request body of api(update)")
-	}
-
-	r := golangsdk.Result{}
-	_, r.Err = client.Patch(url, params, &r.Body, &golangsdk.RequestOpts{
-		OkCodes: common.SuccessHTTPCodes,
-	})
-	if r.Err != nil {
-		return nil, fmt.Errorf("error run api(update): %s", r.Err)
-	}
-	return r.Body, nil
-}
-
-func buildIdentityRoleV3UpdateParameters(opts map[string]interface{}, arrayIndex map[string]int) (interface{}, error) {
-	params := make(map[string]interface{})
-
-	descriptionProp, err := common.NavigateValue(opts, []string{"description"}, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	e, err := common.IsEmptyValue(reflect.ValueOf(descriptionProp))
-	if err != nil {
-		return nil, err
-	}
-	if !e {
-		params["description"] = descriptionProp
-	}
-
-	displayNameProp, err := common.NavigateValue(opts, []string{"display_name"}, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	e, err = common.IsEmptyValue(reflect.ValueOf(displayNameProp))
-	if err != nil {
-		return nil, err
-	}
-	if !e {
-		params["display_name"] = displayNameProp
-	}
-
-	policyProp, err := expandIdentityRoleV3UpdatePolicy(opts, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	e, err = common.IsEmptyValue(reflect.ValueOf(policyProp))
-	if err != nil {
-		return nil, err
-	}
-	if !e {
-		params["policy"] = policyProp
-	}
-
-	typeProp, err := expandIdentityRoleV3UpdateType(opts, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	e, err = common.IsEmptyValue(reflect.ValueOf(typeProp))
-	if err != nil {
-		return nil, err
-	}
-	if !e {
-		params["type"] = typeProp
-	}
-
-	params = map[string]interface{}{"role": params}
-
-	return params, nil
-}
-
-func expandIdentityRoleV3UpdatePolicy(d interface{}, arrayIndex map[string]int) (interface{}, error) {
-	req := make(map[string]interface{})
-
-	statementProp, err := expandIdentityRoleV3UpdatePolicyStatement(d, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	e, err := common.IsEmptyValue(reflect.ValueOf(statementProp))
-	if err != nil {
-		return nil, err
-	}
-	if !e {
-		req["Statement"] = statementProp
-	}
-
-	req["Version"] = "1.1"
-
-	return req, nil
-}
-
-func expandIdentityRoleV3UpdatePolicyStatement(d interface{}, arrayIndex map[string]int) (interface{}, error) {
-	newArrayIndex := make(map[string]int)
-	for k, v := range arrayIndex {
-		newArrayIndex[k] = v
-	}
-
-	v, err := common.NavigateValue(d, []string{"statement"}, newArrayIndex)
-	if err != nil {
-		return nil, err
-	}
-
-	n := len(v.([]interface{}))
-	req := make([]interface{}, 0, n)
-	for i := 0; i < n; i++ {
-		newArrayIndex["statement"] = i
-		transformed := make(map[string]interface{})
-
-		actionProp, err := common.NavigateValue(d, []string{"statement", "action"}, newArrayIndex)
-		if err != nil {
-			return nil, err
-		}
-		e, err := common.IsEmptyValue(reflect.ValueOf(actionProp))
-		if err != nil {
-			return nil, err
-		}
-		if !e {
-			transformed["Action"] = actionProp
-		}
-
-		effectProp, err := common.NavigateValue(d, []string{"statement", "effect"}, newArrayIndex)
-		if err != nil {
-			return nil, err
-		}
-		e, err = common.IsEmptyValue(reflect.ValueOf(effectProp))
-		if err != nil {
-			return nil, err
-		}
-		if !e {
-			transformed["Effect"] = effectProp
-		}
-
-		req = append(req, transformed)
-	}
-
-	return req, nil
-}
-
-func expandIdentityRoleV3UpdateType(d interface{}, arrayIndex map[string]int) (interface{}, error) {
-	v, err := common.NavigateValue(d, []string{"display_layer"}, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	if v == "domain" {
-		return "AX", nil
-	} else if v == "project" {
-		return "XA", nil
-	}
-	return nil, fmt.Errorf("unknown display layer:%v", v)
-}
-
-func readIdentityRoleV3Read(_ context.Context, d *schema.ResourceData, client *golangsdk.ServiceClient, result map[string]interface{}) error {
-	url, err := common.ReplaceVars(d, "OS-ROLE/roles/{id}", nil)
-	if err != nil {
-		return err
-	}
-	url = client.ServiceURL(url)
-
-	r := golangsdk.Result{}
-	_, r.Err = client.Get(
-		url, &r.Body,
-		&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
-	if r.Err != nil {
-		return fmt.Errorf("error running api(read) for resource(IdentityRoleV3: %v), error: %s", d.Id(), r.Err)
-	}
-
-	v, err := common.NavigateValue(r.Body, []string{"role"}, nil)
-	if err != nil {
-		return err
-	}
-	result["read"] = v
-
-	return nil
-}
-
-func setIdentityRoleV3Properties(d *schema.ResourceData, response map[string]interface{}) error {
-	opts := resourceIdentityRoleV3UserInputParams(d)
-
-	statementProp := opts["statement"]
-	statementProp, err := flattenIdentityRoleV3Statement(response, nil, statementProp)
-	if err != nil {
-		return fmt.Errorf("error reading Role:statement, err: %s", err)
-	}
-	if err = d.Set("statement", statementProp); err != nil {
-		return fmt.Errorf("error setting Role:statement, err: %s", err)
-	}
-
-	catalogProp, err := common.NavigateValue(response, []string{"read", "catalog"}, nil)
-	if err != nil {
-		return fmt.Errorf("error reading Role:catalog, err: %s", err)
-	}
-	if err = d.Set("catalog", catalogProp); err != nil {
-		return fmt.Errorf("error setting Role:catalog, err: %s", err)
-	}
-
-	descriptionProp, err := common.NavigateValue(response, []string{"read", "description"}, nil)
-	if err != nil {
-		return fmt.Errorf("error reading Role:description, err: %s", err)
-	}
-	if err = d.Set("description", descriptionProp); err != nil {
-		return fmt.Errorf("error setting Role:description, err: %s", err)
-	}
-
-	displayLayerProp := opts["display_layer"]
-	displayLayerProp, err = flattenIdentityRoleV3DisplayLayer(response, nil, displayLayerProp)
-	if err != nil {
-		return fmt.Errorf("error reading Role:display_layer, err: %s", err)
-	}
-	if err = d.Set("display_layer", displayLayerProp); err != nil {
-		return fmt.Errorf("error setting Role:display_layer, err: %s", err)
-	}
-
-	displayNameProp, err := common.NavigateValue(response, []string{"read", "display_name"}, nil)
-	if err != nil {
-		return fmt.Errorf("error reading Role:display_name, err: %s", err)
-	}
-	if err = d.Set("display_name", displayNameProp); err != nil {
-		return fmt.Errorf("error setting Role:display_name, err: %s", err)
-	}
-
-	domainIDProp, err := common.NavigateValue(response, []string{"read", "domain_id"}, nil)
-	if err != nil {
-		return fmt.Errorf("error reading Role:domain_id, err: %s", err)
-	}
-	if err = d.Set("domain_id", domainIDProp); err != nil {
-		return fmt.Errorf("error setting Role:domain_id, err: %s", err)
-	}
-
-	nameProp, err := common.NavigateValue(response, []string{"read", "name"}, nil)
-	if err != nil {
-		return fmt.Errorf("error reading Role:name, err: %s", err)
-	}
-	if err = d.Set("name", nameProp); err != nil {
-		return fmt.Errorf("error setting Role:name, err: %s", err)
-	}
-
-	return nil
-}
-
-func flattenIdentityRoleV3Statement(d interface{}, arrayIndex map[string]int, currentValue interface{}) (interface{}, error) {
-	result, ok := currentValue.([]interface{})
-	if !ok || len(result) == 0 {
-		v, err := common.NavigateValue(d, []string{"read", "policy", "Statement"}, arrayIndex)
-		if err != nil {
-			return nil, err
-		}
-		n := len(v.([]interface{}))
-		result = make([]interface{}, n)
-	}
-
-	newArrayIndex := make(map[string]int)
-	for k, v := range arrayIndex {
-		newArrayIndex[k] = v
-	}
-
-	for i := 0; i < len(result); i++ {
-		newArrayIndex["read.policy.Statement"] = i
-		if result[i] == nil {
-			result[i] = make(map[string]interface{})
-		}
-		r := result[i].(map[string]interface{})
-
-		actionProp, err := common.NavigateValue(d, []string{"read", "policy", "Statement", "Action"}, newArrayIndex)
-		if err != nil {
-			return nil, fmt.Errorf("error reading Role:action, err: %s", err)
-		}
-		r["action"] = actionProp
-
-		effectProp, err := common.NavigateValue(d, []string{"read", "policy", "Statement", "Effect"}, newArrayIndex)
-		if err != nil {
-			return nil, fmt.Errorf("error reading Role:effect, err: %s", err)
-		}
-		r["effect"] = effectProp
-	}
-
-	return result, nil
-}
-
-func flattenIdentityRoleV3DisplayLayer(d interface{}, arrayIndex map[string]int, _ interface{}) (interface{}, error) {
-	v, err := common.NavigateValue(d, []string{"read", "type"}, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	if v == "AX" {
-		return "domain", nil
-	} else if v == "XA" {
-		return "project", nil
-	}
-	return nil, fmt.Errorf("unknown display type:%v", v)
 }
