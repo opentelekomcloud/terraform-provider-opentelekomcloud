@@ -52,7 +52,8 @@ resource "opentelekomcloud_identity_role_v3" "role" {
   display_layer = "domain"
   statement {
     effect = "Allow"
-    action = ["ecs:*:list*"]
+    action = ["obs:bucket:GetBucketAcl"]
+	resource = ["obs:*:*:bucket:*"]
   }
 }
 	`, val)

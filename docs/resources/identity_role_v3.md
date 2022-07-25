@@ -53,6 +53,9 @@ The `statement` block supports:
 * `effect` - (Required) The value can be Allow and Deny. If both Allow and Deny are
   found in statements, the policy evaluation starts with Deny.
 
+* `resource` - (Optional) The value can be Allow and Deny. If both Allow and Deny are
+  found in statements, the policy evaluation starts with Deny.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
