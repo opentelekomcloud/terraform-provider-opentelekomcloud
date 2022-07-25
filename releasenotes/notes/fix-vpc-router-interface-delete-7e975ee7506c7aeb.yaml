@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix ``deleting OpenTelekomCloud Neutron Router Interface`` in ``resource/opentelekomcloud_networking_router_interface_v2`` (`#1836 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1836>`_)
