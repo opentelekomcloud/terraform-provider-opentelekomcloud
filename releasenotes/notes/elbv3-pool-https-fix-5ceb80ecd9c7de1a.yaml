@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[ELB]** Fix HTTPS for ``resource/opentelekomcloud_lb_pool_v3``
+       (`#1834 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1834>`_)
