@@ -182,6 +182,12 @@ func waitForRouterInterfaceDelete(networkingClient *golangsdk.ServiceClient, d *
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Router Interface %s.", routerInterfaceId)
 				return r, "DELETED", nil
 			}
+			if errCode, ok := err.(golangsdk.ErrDefault409); ok {
+				if errCode.Actual == 409 {
+					log.Printf("[DEBUG] Router Interface %s is still in use.", routerInterfaceId)
+					return r, "ACTIVE", nil
+				}
+			}
 			if errCode, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {
 				if errCode.Actual == 409 {
 					log.Printf("[DEBUG] Router Interface %s is still in use.", routerInterfaceId)
