@@ -192,6 +192,13 @@ func resourceIdentityRoleV3Read(_ context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
+	displayLayer := role.Type
+	if displayLayer == "AX" {
+		displayLayer = "domain"
+	} else {
+		displayLayer = "project"
+	}
+
 	mErr := multierror.Append(
 		d.Set("description", role.Description),
 		d.Set("display_name", role.DisplayName),
@@ -199,6 +206,7 @@ func resourceIdentityRoleV3Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("domain_id", role.DomainId),
 		d.Set("catalog", role.Catalog),
 		d.Set("statement", statements),
+		d.Set("display_layer", displayLayer),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting role fields: %s", err)
