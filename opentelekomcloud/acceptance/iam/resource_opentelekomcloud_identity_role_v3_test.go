@@ -126,7 +126,8 @@ resource "opentelekomcloud_identity_role_v3" "role" {
       "obs:bucket:GetBucketWebsite"
     ]
     resource = ["OBS:*:*:bucket:test-bucket",
-                "OBS:*:*:object:your_object"]
+      "OBS:*:*:object:your_object"
+    ]
   }
 }`, val)
 }
