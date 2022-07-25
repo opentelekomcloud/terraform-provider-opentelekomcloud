@@ -16,7 +16,7 @@ resource "opentelekomcloud_identity_role_v3" "role" {
   statement {
     effect   = "Allow"
     action   = ["obs:bucket:GetBucketAcl"]
-    resource = "obs:*:*:bucket:test-bucket"
+    resource = ["OBS:*:*:bucket:test-bucket"]
   }
   statement {
     effect = "Allow"
@@ -62,7 +62,7 @@ The `statement` block supports:
   found in statements, the policy evaluation starts with Deny.
 
 * `resource` - (Optional) The resources which will be granted/denied accesses.
-  Format: `service:*:*:resource:resource_path`.
+  Format: `Service:*:*:resource:resource_path`.
   Examples: `KMS:*:*:KeyId:your_key`, `OBS:*:*:bucket:your_bucket`, `OBS:*:*:object:your_object`.
 
 ## Attributes Reference
