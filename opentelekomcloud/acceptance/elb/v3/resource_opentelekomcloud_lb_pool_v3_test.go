@@ -46,6 +46,14 @@ func TestLBPoolV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourcePoolName, "name", "pool_1"),
 				),
 			},
+			{
+				Config: testLBPoolV3HTTPSBasic,
+				Check: resource.ComposeTestCheckFunc(
+					testLBPoolV3Exists(resourcePoolName, &pool),
+					resource.TestCheckResourceAttr(resourcePoolName, "name", ""),
+					resource.TestCheckResourceAttr(resourcePoolName, "protocol", "HTTPS"),
+				),
+			},
 		},
 	})
 }
@@ -171,6 +179,29 @@ resource "opentelekomcloud_lb_pool_v3" "pool" {
   session_persistence {
     type                = "SOURCE_IP"
     persistence_timeout = "30"
+  }
+}
+
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+	testLBPoolV3HTTPSBasic = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "lb" {
+  name        = "loadbalancer_1"
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+}
+
+resource "opentelekomcloud_lb_pool_v3" "pool" {
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.lb.id
+  lb_algorithm    = "ROUND_ROBIN"
+  protocol        = "HTTPS"
+
+  session_persistence {
+    type = "HTTP_COOKIE"
   }
 }
 

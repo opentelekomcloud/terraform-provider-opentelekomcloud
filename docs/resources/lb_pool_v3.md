@@ -40,11 +40,12 @@ The following arguments are supported:
 * `description` - (Optional) Provides supplementary information about the backend server group.
 
 * `protocol` - (Required) Specifies the protocol used by the backend server group to receive requests.
-  `TCP`, `UDP`, `HTTP`, and `QUIC` are supported.
+  `TCP`, `UDP`, `HTTP`, `HTTPS`, and `QUIC` are supported.
 
   * For `UDP` listeners, the protocol of the backend server group must be `UDP`.
   * For `TCP` listeners, the protocol of the backend server group must be `TCP`.
-  * For `HTTP` or `HTTPS` listeners, the protocol of the backend server group must be `HTTP`.
+  * For `HTTP` listeners, the protocol of the backend server group must be `HTTP`.
+  * For `HTTPS` listeners, the protocol of the backend server group must be `HTTPS`.
 
 * `lb_algorithm` - (Required) Specifies the load balancing algorithm used by the load balancer to route requests to backend servers.
 
