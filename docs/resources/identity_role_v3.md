@@ -11,7 +11,7 @@ Custom role management
 ```hcl
 resource "opentelekomcloud_identity_role_v3" "role" {
   description   = "role"
-  display_name  = "%s"
+  display_name  = "custom_role"
   display_layer = "domain"
   statement {
     effect   = "Allow"
