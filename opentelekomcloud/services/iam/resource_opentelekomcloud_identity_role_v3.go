@@ -31,7 +31,10 @@ func ResourceIdentityRoleV3() *schema.Resource {
 			},
 
 			"display_layer": {
-				Type:     schema.TypeString,
+				Type: schema.TypeString,
+				ValidateFunc: validation.StringInSlice([]string{
+					"domain", "project",
+				}, false),
 				Required: true,
 			},
 
@@ -146,7 +149,7 @@ func resourceIdentityRoleV3Create(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	roleType, fmtErr := buildRoleType(d)
-	if err != nil {
+	if fmtErr != nil {
 		return fmtErr
 	}
 
@@ -211,30 +214,26 @@ func resourceIdentityRoleV3Update(ctx context.Context, d *schema.ResourceData, m
 		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
 	}
 
-	opts := policies.CreateOpts{}
 	needsUpdate := false
 
-	if d.HasChange("description") {
-		opts.Description = d.Get("description").(string)
+	if d.HasChange("description") || d.HasChange("display_name") || d.HasChange("display_layer") ||
+		d.HasChange("statement") {
 		needsUpdate = true
-	}
-
-	if d.HasChange("display_layer") {
-		opts.Type = d.Get("display_layer").(string)
-		needsUpdate = true
-	}
-
-	if d.HasChange("display_name") {
-		opts.DisplayName = d.Get("display_name").(string)
-		needsUpdate = true
-	}
-
-	if d.HasChange("statement") {
-		opStatement := resourceIAMRoleV3OpStatement(d)
-		opts.Policy.Statement = opStatement
 	}
 
 	if needsUpdate {
+		roleType, fmtErr := buildRoleType(d)
+		if fmtErr != nil {
+			return fmtErr
+		}
+
+		opts := policies.CreateOpts{
+			Description: d.Get("description").(string),
+			DisplayName: d.Get("display_name").(string),
+			Type:        roleType.(string),
+			Policy:      buildRolePolicy(d),
+		}
+
 		_, err = policies.Update(client, d.Id(), opts).Extract()
 	}
 	if err != nil {
@@ -242,21 +241,6 @@ func resourceIdentityRoleV3Update(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	return resourceIdentityRoleV3Read(ctx, d, meta)
-}
-
-func resourceIAMRoleV3OpStatement(d *schema.ResourceData) []policies.CreateStatement {
-	opStatementsRaw := d.Get("statement").([]interface{})
-	var refinedStatements []policies.CreateStatement
-	for _, rawStatement := range opStatementsRaw {
-		rawStatement := rawStatement.(map[string]interface{})
-		refinedStatement := policies.CreateStatement{
-			Effect:   rawStatement["Effect"].(string),
-			Action:   rawStatement["Action"].([]string),
-			Resource: rawStatement["Resource"].([]string),
-		}
-		refinedStatements = append(refinedStatements, refinedStatement)
-	}
-	return refinedStatements
 }
 
 func resourceIdentityRoleV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

@@ -11,12 +11,20 @@ Custom role management
 ```hcl
 resource "opentelekomcloud_identity_role_v3" "role" {
   description   = "role"
-  display_name  = "custom_role"
+  display_name  = "%s"
   display_layer = "domain"
-
+  statement {
+    effect   = "Allow"
+    action   = ["obs:bucket:GetBucketAcl"]
+    resource = "obs:*:*:bucket:test-bucket"
+  }
   statement {
     effect = "Allow"
-    action = ["ecs:*:list*"]
+    action = [
+      "obs:bucket:HeadBucket",
+      "obs:bucket:ListBucketMultipartUploads",
+      "obs:bucket:ListBucket"
+    ]
   }
 }
 ```
@@ -53,8 +61,9 @@ The `statement` block supports:
 * `effect` - (Required) The value can be Allow and Deny. If both Allow and Deny are
   found in statements, the policy evaluation starts with Deny.
 
-* `resource` - (Optional) The value can be Allow and Deny. If both Allow and Deny are
-  found in statements, the policy evaluation starts with Deny.
+* `resource` - (Optional) The resources which will be granted/denied accesses.
+  Format: `service:*:*:resource:resource_path`.
+  Examples: `KMS:*:*:KeyId:your_key`, `OBS:*:*:bucket:your_bucket`, `OBS:*:*:object:your_object`.
 
 ## Attributes Reference
 
