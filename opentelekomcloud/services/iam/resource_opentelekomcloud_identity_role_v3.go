@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/policies"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -114,7 +116,7 @@ func buildRolePolicy(d *schema.ResourceData) policies.CreatePolicy {
 		statement := v.(map[string]interface{})
 		effect := statement["effect"].(string)
 		action := statement["action"].([]interface{})
-		refinedActions := make([]string, 0)
+		var refinedActions []string
 
 		for _, s := range action {
 			refinedActions = append(refinedActions, s.(string))
@@ -128,9 +130,8 @@ func buildRolePolicy(d *schema.ResourceData) policies.CreatePolicy {
 		resourceCheck := statement["resource"].([]interface{})
 
 		if len(resourceCheck) > 0 {
-			resource := statement["resource"].([]interface{})
-			refinedResource := make([]string, 0)
-			for _, s := range resource {
+			var refinedResource []string
+			for _, s := range resourceCheck {
 				refinedResource = append(refinedResource, s.(string))
 			}
 			res[i].Resource = refinedResource
@@ -143,9 +144,11 @@ func buildRolePolicy(d *schema.ResourceData) policies.CreatePolicy {
 
 func resourceIdentityRoleV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.IdentityV30Client()
+	client, err := common.ClientFromCtx(ctx, keyClientV30, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV30Client()
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
+		fmterr.Errorf(clientV30CreationFail, err)
 	}
 
 	roleType, fmtErr := buildRoleType(d)
@@ -161,26 +164,28 @@ func resourceIdentityRoleV3Create(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	r, err := policies.Create(client, opts).Extract()
-
 	if err != nil {
 		return fmterr.Errorf("error creating custom role: %s", err)
 	}
 
 	d.SetId(r.ID)
 
-	return resourceIdentityRoleV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV30)
+	return resourceIdentityRoleV3Read(clientCtx, d, meta)
 }
 
-func resourceIdentityRoleV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityRoleV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.IdentityV30Client()
+	client, err := common.ClientFromCtx(ctx, keyClientV30, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV30Client()
+	})
 	if err != nil {
 		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
 	}
 
 	role, err := policies.Get(client, d.Id()).Extract()
 	if err != nil {
-		return fmterr.Errorf("error getting role details: %s", err)
+		return common.CheckDeletedDiag(d, err, "custom IAM Role")
 	}
 
 	statements := make([]interface{}, len(role.Policy.Statement))
@@ -217,50 +222,46 @@ func resourceIdentityRoleV3Read(_ context.Context, d *schema.ResourceData, meta 
 
 func resourceIdentityRoleV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.IdentityV30Client()
+	client, err := common.ClientFromCtx(ctx, keyClientV30, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV30Client()
+	})
 	if err != nil {
 		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
 	}
 
-	needsUpdate := false
-
-	if d.HasChange("description") || d.HasChange("display_name") || d.HasChange("display_layer") ||
-		d.HasChange("statement") {
-		needsUpdate = true
+	roleType, fmtErr := buildRoleType(d)
+	if fmtErr != nil {
+		return fmtErr
 	}
 
-	if needsUpdate {
-		roleType, fmtErr := buildRoleType(d)
-		if fmtErr != nil {
-			return fmtErr
-		}
-
-		opts := policies.CreateOpts{
-			Description: d.Get("description").(string),
-			DisplayName: d.Get("display_name").(string),
-			Type:        roleType.(string),
-			Policy:      buildRolePolicy(d),
-		}
-
-		_, err = policies.Update(client, d.Id(), opts).Extract()
+	opts := policies.CreateOpts{
+		Description: d.Get("description").(string),
+		DisplayName: d.Get("display_name").(string),
+		Type:        roleType.(string),
+		Policy:      buildRolePolicy(d),
 	}
+
+	_, err = policies.Update(client, d.Id(), opts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error updating (IdentityRoleV3: %v): %s", d.Id(), err)
 	}
 
-	return resourceIdentityRoleV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV30)
+	return resourceIdentityRoleV3Read(clientCtx, d, meta)
 }
 
-func resourceIdentityRoleV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityRoleV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.IdentityV30Client()
+	client, err := common.ClientFromCtx(ctx, keyClientV30, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV30Client()
+	})
 	if err != nil {
 		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting Role %q", d.Id())
 
-	if err = policies.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := policies.Delete(client, d.Id()).ExtractErr(); err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud IAMv3 role: %s", err)
 	}
 
