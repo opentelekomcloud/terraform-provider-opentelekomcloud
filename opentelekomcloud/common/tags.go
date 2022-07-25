@@ -9,9 +9,10 @@ import (
 // TagsSchema returns the schema to use for tags.
 func TagsSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeMap,
-		Optional: true,
-		Elem:     &schema.Schema{Type: schema.TypeString},
+		Type:         schema.TypeMap,
+		Optional:     true,
+		ValidateFunc: ValidateTags,
+		Elem:         &schema.Schema{Type: schema.TypeString},
 	}
 }
 
