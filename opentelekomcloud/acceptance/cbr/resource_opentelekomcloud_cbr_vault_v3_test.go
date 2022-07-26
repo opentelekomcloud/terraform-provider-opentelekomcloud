@@ -263,6 +263,11 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
     period_num    = 2
   }
 
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+
   resource {
     id   = opentelekomcloud_blockstorage_volume_v2.volume.id
     type = "OS::Cinder::Volume"

@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CBR]** Add Tag to the CBR (`#1598 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1598>`_)

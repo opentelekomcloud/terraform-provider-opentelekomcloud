@@ -235,10 +235,6 @@ func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, m
 
 	d.SetId(lb.ID)
 
-	if err := common.UpdateResourceTags(client, d, "loadbalancers", d.Id()); err != nil {
-		return fmterr.Errorf("error setting tags of load balancer: %s", err)
-	}
-
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)
 	return resourceLoadBalancerV3Read(clientCtx, d, meta)
 }
@@ -302,13 +298,6 @@ func resourceLoadBalancerV3Update(ctx context.Context, d *schema.ResourceData, m
 	if d.HasChange("ip_target_enable") {
 		ipTargetEnable := d.Get("ip_target_enable").(bool)
 		updateOpts.IpTargetEnable = &ipTargetEnable
-	}
-
-	if d.HasChange("tags") {
-		tagErr := common.UpdateResourceTags(client, d, "loadbalancers", d.Id())
-		if tagErr != nil {
-			return fmterr.Errorf("Error updating tags of load balancer:%s, err:%s", d.Id(), tagErr)
-		}
 	}
 
 	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)

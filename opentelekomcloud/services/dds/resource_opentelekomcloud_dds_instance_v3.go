@@ -370,10 +370,6 @@ func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", instance.Id, err)
 	}
 
-	if err := common.UpdateResourceTags(client, d, "instances", d.Id()); err != nil {
-		return diag.Errorf("error setting tags of DDS vault: %s", err)
-	}
-
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
 	return resourceDdsInstanceV3Read(clientCtx, d, meta)
 }
@@ -536,13 +532,6 @@ func resourceDdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", d.Id(), err)
-	}
-
-	if d.HasChange("tags") {
-		tagErr := common.UpdateResourceTags(client, d, "instances", d.Id())
-		if tagErr != nil {
-			return fmterr.Errorf("Error updating tags of DDS instance:%s, err:%s", d.Id(), tagErr)
-		}
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
