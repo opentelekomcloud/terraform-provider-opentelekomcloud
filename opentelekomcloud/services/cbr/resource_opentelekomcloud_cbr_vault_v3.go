@@ -216,12 +216,7 @@ func ResourceCBRVaultV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"tags": {
-				Type:         schema.TypeMap,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: common.ValidateTags,
-			},
+			"tags": common.TagsSchema(),
 			"enterprise_project_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -635,6 +630,12 @@ func resourceCBRVaultV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	if d.HasChange("backup_policy_id") {
 		if err := updatePolicy(d, client); err != nil {
 			return diag.FromErr(err)
+		}
+	}
+
+	if d.HasChange("tags") {
+		if err = common.UpdateResourceTags(client, d, "vault", d.Id()); err != nil {
+			return diag.Errorf("failed to update CBR tags: %s", err)
 		}
 	}
 

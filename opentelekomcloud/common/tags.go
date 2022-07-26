@@ -12,6 +12,7 @@ func TagsSchema() *schema.Schema {
 		Type:         schema.TypeMap,
 		Optional:     true,
 		ValidateFunc: ValidateTags,
+		Elem:         &schema.Schema{Type: schema.TypeString},
 	}
 }
 
