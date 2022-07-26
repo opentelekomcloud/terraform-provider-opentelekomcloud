@@ -35,6 +35,14 @@ func TestAccCBRVaultV3_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceVaultName, "resource.#", "2"),
 					resource.TestCheckResourceAttrSet(resourceVaultName, "backup_policy_id"),
+					resource.TestCheckResourceAttr(resourceVaultName, "tags.foo", "bar"),
+				),
+			},
+			{
+				Config: testAccCBRVaultV3Tags,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceVaultName, "tags.new_test", "new_test2"),
+					resource.TestCheckResourceAttr(resourceVaultName, "tags.john", "doe"),
 				),
 			},
 			{
@@ -389,6 +397,28 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   }
 }
 `
+
+	testAccCBRVaultV3Tags = `
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test"
+
+  billing {
+    size          = 100
+    object_type   = "disk"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+    period_type   = "month"
+    period_num    = 2
+  }
+
+  tags = {
+    foo = "bar"
+    john = "doe"
+    new_test = "new_test2"
+  }
+}
+`
+
 	testAccCBRVaultV3NoResourceResize = `
 resource "opentelekomcloud_cbr_vault_v3" "vault" {
   name = "cbr-vault-test-2"
