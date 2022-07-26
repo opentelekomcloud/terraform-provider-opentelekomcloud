@@ -1,4 +1,5 @@
 ---
 fixes:
   - |
-    **[CBR]** Add Tag to the CBR (`#1598 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1598>`_)
+    **[CBR]** enhancement
+    Add possibility to ``Update`` ``tags`` in ``resource/opentelekomcloud_cbr_vault_v3`` (`#1833 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1833>`_)
