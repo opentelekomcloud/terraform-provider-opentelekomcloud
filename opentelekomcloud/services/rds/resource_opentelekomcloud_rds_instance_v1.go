@@ -188,7 +188,6 @@ func ResourceRdsInstance() *schema.Resource {
 						},
 					}},
 			},
-
 			"tag": {
 				Type:         schema.TypeMap,
 				Optional:     true,
