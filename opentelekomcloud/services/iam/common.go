@@ -16,6 +16,7 @@ const (
 	clientCreationFail    = "error creating OpenTelekomCloud identity v3 client: %w"
 	clientV30CreationFail = "error creating OpenTelekomCloud identity v3.0 client: %w"
 	keyClient             = ContextKey("client")
+	keyClientV3           = "iam-v3-client"
 	keyClientV30          = "iam-v30-client"
 )
 
