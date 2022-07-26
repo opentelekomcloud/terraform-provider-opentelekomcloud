@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CSBS]** Fix ``space_saving_ratio`` type in ``resource/resource_opentelekomcloud_csbs_backup_v1`` (`#1837 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1837>`_)
