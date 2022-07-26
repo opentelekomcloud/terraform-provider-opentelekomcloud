@@ -19,7 +19,7 @@ const resourceName = "opentelekomcloud_identity_user_v3.user_1"
 
 func TestAccIdentityV3User_basic(t *testing.T) {
 	var user users.User
-	var userName = fmt.Sprintf("tf-user-%s", acctest.RandString(5))
+	userName := acctest.RandomWithPrefix("tf-user")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -46,6 +46,33 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "email", "test2@acme.org"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccIdentityV3User_importBasic(t *testing.T) {
+	var userName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityV3UserDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIdentityV3UserImport(userName),
+			},
+
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"password",
+				},
 			},
 		},
 	})
@@ -102,6 +129,17 @@ func testAccCheckIdentityV3UserExists(n string, user *users.User) resource.TestC
 
 		return nil
 	}
+}
+
+func testAccIdentityV3UserImport(userName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  name     = "%s"
+  password = "password123@!"
+  enabled  = true
+  email    = "test3@acme.org"
+}
+  `, userName)
 }
 
 func testAccIdentityV3UserBasic(userName string) string {

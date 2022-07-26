@@ -1,0 +1,9 @@
+---
+fixes:
+  - |
+    **[IAM]** Fix ``resource/opentelekomcloud_identity_user_v3`` read and update logic
+    (`#1812 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1812>`_)
+other:
+  - |
+    **[IAM]** Test refactoring for ``resource/opentelekomcloud_identity_user_v3``
+    (`#1812 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1812>`_)

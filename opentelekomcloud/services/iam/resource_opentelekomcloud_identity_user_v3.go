@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/users"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -63,6 +64,7 @@ func ResourceIdentityUserV3() *schema.Resource {
 			"email": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				DiffSuppressFunc: common.SuppressCaseInsensitive,
 			},
 			"send_welcome_email": {
@@ -75,7 +77,9 @@ func ResourceIdentityUserV3() *schema.Resource {
 
 func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.IdentityV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(clientCreationFail, err)
 	}
@@ -87,6 +91,7 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 		DomainID:         d.Get("domain_id").(string),
 		Enabled:          &enabled,
 		Description:      d.Get("description").(string),
+		Email:            d.Get("email").(string),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -101,12 +106,21 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 
 	d.SetId(user.ID)
 
-	return setExtendedOpts(ctx, d, meta)
+	if d.Get("send_welcome_email").(bool) {
+		if err := users.SendWelcomeEmail(client, d.Id()).ExtractErr(); err != nil {
+			return fmterr.Errorf("error sending a welcome email: %w", err)
+		}
+	}
+
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
+	return resourceIdentityUserV3Read(clientCtx, d, meta)
 }
 
-func resourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.IdentityV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(clientCreationFail, err)
 	}
@@ -125,14 +139,6 @@ func resourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("name", user.Name),
 		d.Set("description", user.Description),
 		d.Set("region", config.GetRegion(d)),
-	)
-
-	// Read extended options
-	user, err = users.ExtendedUpdate(client, d.Id(), users.ExtendedUpdateOpts{}).Extract()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	mErr = multierror.Append(mErr,
 		d.Set("email", user.Email),
 	)
 
@@ -143,40 +149,11 @@ func resourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func setExtendedOpts(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*cfg.Config)
-	client, err := config.IdentityV3Client(config.GetRegion(d))
-	if err != nil {
-		return fmterr.Errorf(clientCreationFail, err)
-	}
-
-	var hasChange bool
-	var updateOpts users.ExtendedUpdateOpts
-
-	if d.HasChange("email") {
-		hasChange = true
-		updateOpts.Email = d.Get("email").(string)
-	}
-
-	if hasChange {
-		_, err := users.ExtendedUpdate(client, d.Id(), updateOpts).Extract()
-		if err != nil {
-			return fmterr.Errorf("error updating OpenTelekomCloud user: %w", err)
-		}
-
-		if d.Get("send_welcome_email").(bool) {
-			if err := users.SendWelcomeEmail(client, d.Id()).ExtractErr(); err != nil {
-				return fmterr.Errorf("error sending a welcome email: %w", err)
-			}
-		}
-	}
-
-	return resourceIdentityUserV3Read(ctx, d, meta)
-}
-
 func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.IdentityV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(clientCreationFail, err)
 	}
@@ -211,6 +188,11 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 		updateOpts.Description = &description
 	}
 
+	if d.HasChange("email") {
+		hasChange = true
+		updateOpts.Email = d.Get("email").(string)
+	}
+
 	if hasChange {
 		log.Printf("[DEBUG] Update Options: %#v", updateOpts)
 	}
@@ -227,12 +209,21 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	return setExtendedOpts(ctx, d, meta)
+	if d.HasChange("email") && d.Get("send_welcome_email").(bool) {
+		if err := users.SendWelcomeEmail(client, d.Id()).ExtractErr(); err != nil {
+			return fmterr.Errorf("error sending a welcome email: %w", err)
+		}
+	}
+
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
+	return resourceIdentityUserV3Read(clientCtx, d, meta)
 }
 
-func resourceIdentityUserV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityUserV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.IdentityV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(clientCreationFail, err)
 	}
