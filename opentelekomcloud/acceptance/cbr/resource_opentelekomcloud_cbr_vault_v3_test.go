@@ -412,8 +412,8 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   }
 
   tags = {
-    foo = "bar"
-    john = "doe"
+    foo      = "bar"
+    john     = "doe"
     new_test = "new_test2"
   }
 }
