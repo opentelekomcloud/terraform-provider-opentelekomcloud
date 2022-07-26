@@ -100,7 +100,7 @@ func ResourceCSBSBackupV1() *schema.Resource {
 							Computed: true,
 						},
 						"space_saving_ratio": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeFloat,
 							Computed: true,
 						},
 						"name": {
