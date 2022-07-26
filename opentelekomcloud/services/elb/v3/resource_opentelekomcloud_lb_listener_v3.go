@@ -144,7 +144,12 @@ func ResourceListenerV3() *schema.Resource {
 					},
 				},
 			},
-			"tags": common.TagsSchema(),
+			"tags": {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: common.ValidateTags,
+			},
 			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,

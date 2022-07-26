@@ -189,7 +189,11 @@ func ResourceRdsInstance() *schema.Resource {
 					}},
 			},
 
-			"tag": common.TagsSchema(),
+			"tag": {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ValidateFunc: common.ValidateTags,
+			},
 
 			"status": {
 				Type:     schema.TypeString,

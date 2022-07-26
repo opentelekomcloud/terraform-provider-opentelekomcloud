@@ -155,7 +155,12 @@ func ResourceLoadBalancerV3() *schema.Resource {
 					},
 				},
 			},
-			"tags": common.TagsSchema(),
+			"tags": {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: common.ValidateTags,
+			},
 			"vip_port_id": {
 				Type:     schema.TypeString,
 				Computed: true,

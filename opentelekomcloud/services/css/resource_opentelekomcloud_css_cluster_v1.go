@@ -161,7 +161,12 @@ func ResourceCssClusterV1() *schema.Resource {
 					},
 				},
 			},
-			"tags": common.TagsSchema(),
+			"tags": {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: common.ValidateTags,
+			},
 			"endpoint": {
 				Type:     schema.TypeString,
 				Computed: true,

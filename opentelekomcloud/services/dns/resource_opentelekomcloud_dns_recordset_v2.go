@@ -86,6 +86,7 @@ func ResourceDNSRecordSetV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"tags": common.TagsSchema(),
+
 			"shared": {
 				Type:     schema.TypeBool,
 				Computed: true,

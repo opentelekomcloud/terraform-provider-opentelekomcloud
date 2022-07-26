@@ -184,7 +184,6 @@ func ResourceDdsInstanceV3() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
-			"tags": common.TagsSchema(),
 			"db_username": {
 				Type:     schema.TypeString,
 				Computed: true,

@@ -39,7 +39,6 @@ func ResourceTopic() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
-			"tags": common.TagsSchema(),
 			"topic_urn": {
 				Type:     schema.TypeString,
 				Computed: true,
