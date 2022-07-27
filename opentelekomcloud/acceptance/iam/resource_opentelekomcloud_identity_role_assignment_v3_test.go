@@ -55,7 +55,7 @@ func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 			{
 				Config: testAccIdentityRoleAssignDomainV3_basic(domainId, groupName, roleName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3RoleAssignmentExists2("opentelekomcloud_identity_role_assignment_v3.role_assignment_1"),
+					testAccCheckIdentityV3RoleAssignmentExistsShort("opentelekomcloud_identity_role_assignment_v3.role_assignment_1"),
 					resource.TestCheckResourceAttrPtr(
 						"opentelekomcloud_identity_role_assignment_v3.role_assignment_1", "group_id", &group.ID),
 					resource.TestCheckResourceAttrPtr(
@@ -154,7 +154,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, grou
 	}
 }
 
-func testAccCheckIdentityV3RoleAssignmentExists2(n string) resource.TestCheckFunc {
+func testAccCheckIdentityV3RoleAssignmentExistsShort(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
