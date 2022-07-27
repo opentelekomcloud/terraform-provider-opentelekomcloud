@@ -1,0 +1,9 @@
+---
+fixes:
+  - |
+    **[IAM]** Unsupported argument ``user_id`` removed from  ``resource/opentelekomcloud_identity_role_assignment_v3``
+    (`#1828 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1828>`_)
+other:
+  - |
+    **[IAM]** Tests updated for ``resource/opentelekomcloud_identity_role_assignment_v3``
+    (`#1828 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1828>`_)
