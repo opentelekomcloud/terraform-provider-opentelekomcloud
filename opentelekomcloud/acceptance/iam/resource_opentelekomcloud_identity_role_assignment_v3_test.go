@@ -243,9 +243,9 @@ data "opentelekomcloud_identity_role_v3" "role_1" {
 }
 
 resource "opentelekomcloud_identity_role_assignment_v3" "role_assignment_1" {
-  group_id   = opentelekomcloud_identity_group_v3.group_1.id
-  domain_id  = "%s"
-  role_id    = data.opentelekomcloud_identity_role_v3.role_1.id
+  group_id  = opentelekomcloud_identity_group_v3.group_1.id
+  domain_id = "%s"
+  role_id   = data.opentelekomcloud_identity_role_v3.role_1.id
 }
 `, group_name, role_name, domain_id)
 }
