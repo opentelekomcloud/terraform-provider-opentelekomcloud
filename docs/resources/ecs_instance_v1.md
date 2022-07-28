@@ -295,7 +295,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `nics/port_id` - The port ID of the NIC on that network.
 
-* `data_disks/id` - The ID of the data disk.
+* `volumes_attached/id` - The ID of the data disk.
 
 ## Import
 
