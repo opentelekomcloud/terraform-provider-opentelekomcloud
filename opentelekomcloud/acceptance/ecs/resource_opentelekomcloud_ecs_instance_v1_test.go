@@ -140,6 +140,7 @@ func TestAccEcsV1Instance_import(t *testing.T) {
 				ImportStateVerifyIgnore: []string{
 					"password",
 					"delete_disks_on_termination",
+					"data_disks",
 				},
 			},
 		},
@@ -213,6 +214,39 @@ func TestAccEcsV1InstanceEncryption(t *testing.T) {
 					testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "data_disks.0.kms_id", env.OS_KMS_ID),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "system_disk_kms_id", env.OS_KMS_ID),
+				),
+			},
+		},
+	})
+}
+
+func TestAccEcsV1InstanceVolumeAttach(t *testing.T) {
+	var instance cloudservers.CloudServer
+	qts := serverQuotas(10+4, "s2.medium.1")
+	t.Parallel()
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEcsV1InstanceAttachVolume,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "auto_recovery", "true"),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "volumes_attached.#", "0"),
+				),
+			},
+			{
+				Config: testAccEcsV1InstanceAttachVolumeRepeat,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "auto_recovery", "true"),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "volumes_attached.#", "1"),
 				),
 			},
 		},
@@ -562,3 +596,65 @@ resource "opentelekomcloud_networking_floatingip_associate_v2" "this" {
   port_id     = opentelekomcloud_ecs_instance_v1.instance_1.nics.0.port_id
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccEcsV1InstanceAttachVolume = fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_blockstorage_volume_v2" "myvol" {
+  name              = "myvol"
+  availability_zone = "%s"
+  size              = 10
+}
+
+resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+  name     = "server_1"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
+  flavor   = "s2.medium.1"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  availability_zone = "%s"
+
+  nics {
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+    ip_address = "10.0.2.32"
+  }
+
+}
+
+resource "opentelekomcloud_compute_volume_attach_v2" "attached" {
+  instance_id = opentelekomcloud_ecs_instance_v1.instance_1.id
+  volume_id   = opentelekomcloud_blockstorage_volume_v2.myvol.id
+}
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_AVAILABILITY_ZONE)
+
+var testAccEcsV1InstanceAttachVolumeRepeat = fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_blockstorage_volume_v2" "myvol" {
+  name              = "myvol"
+  availability_zone = "%s"
+  size              = 10
+}
+
+resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+  name     = "server_1"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
+  flavor   = "s2.medium.1"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  availability_zone = "%s"
+
+  nics {
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+    ip_address = "10.0.2.32"
+  }
+
+}
+
+resource "opentelekomcloud_compute_volume_attach_v2" "attached" {
+  instance_id = opentelekomcloud_ecs_instance_v1.instance_1.id
+  volume_id   = opentelekomcloud_blockstorage_volume_v2.myvol.id
+}
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_AVAILABILITY_ZONE)

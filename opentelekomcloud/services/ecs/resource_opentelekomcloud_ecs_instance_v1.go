@@ -179,6 +179,35 @@ func ResourceEcsInstanceV1() *schema.Resource {
 					},
 				},
 			},
+			"volumes_attached": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"size": {
+							Type:     schema.TypeInt,
+							Required: true,
+						},
+						"kms_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							DefaultFunc: schema.EnvDefaultFunc("OS_KMS_ID", nil),
+						},
+						"snapshot_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
 			"security_groups": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -328,7 +357,7 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 		volumeList = append(volumeList, dataVolume)
 	}
 	mErr = multierror.Append(mErr,
-		d.Set("data_disks", volumeList),
+		d.Set("volumes_attached", volumeList),
 	)
 
 	// Get the instance network and address information
