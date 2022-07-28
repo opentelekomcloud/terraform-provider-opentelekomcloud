@@ -61,7 +61,7 @@ func TestAccDcsInstancesV1_basicSingleInstance(t *testing.T) {
 					testAccCheckDcsV1InstanceExists(resourceInstanceName, instance),
 					resource.TestCheckResourceAttr(resourceInstanceName, "name", instanceName),
 					resource.TestCheckResourceAttr(resourceInstanceName, "engine", "Redis"),
-					resource.TestCheckResourceAttr(resourceInstanceName, "resource_spec_code", "dcs.single_node"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "resource_spec_code", "redis.ha.xu1.tiny.r2.128"),
 				),
 			},
 		},
@@ -130,15 +130,15 @@ data "opentelekomcloud_dcs_az_v1" "az_1" {
 }
 
 data "opentelekomcloud_dcs_product_v1" "product_1" {
-  spec_code = "dcs.master_standby"
+  spec_code = "redis.ha.xu1.tiny.r2.128"
 }
 
 resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   name              = "%s"
-  engine_version    = "3.0"
+  engine_version    = "5.0"
   password          = "Hungarian_rapsody"
   engine            = "Redis"
-  capacity          = 2
+  capacity          = 0.125
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -172,15 +172,15 @@ data "opentelekomcloud_dcs_az_v1" "az_1" {
 }
 
 data "opentelekomcloud_dcs_product_v1" "product_1" {
-  spec_code = "dcs.master_standby"
+  spec_code = "redis.ha.xu1.tiny.r2.128"
 }
 
 resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   name              = "%s"
-  engine_version    = "3.0"
+  engine_version    = "5.0"
   password          = "Hungarian_rapsody"
   engine            = "Redis"
-  capacity          = 2
+  capacity          = 0.125
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -215,15 +215,15 @@ data "opentelekomcloud_dcs_az_v1" "az_1" {
 }
 
 data "opentelekomcloud_dcs_product_v1" "product_1" {
-  spec_code = "dcs.single_node"
+  spec_code = "redis.ha.xu1.tiny.r2.128"
 }
 
 resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   name              = "%s"
-  engine_version    = "3.0.7"
+  engine_version    = "5.0"
   password          = "Hungarian_rapsody"
   engine            = "Redis"
-  capacity          = 2
+  capacity          = 0.125
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
