@@ -332,7 +332,7 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 		Description:          d.Get("description").(string),
 		Engine:               d.Get("engine").(string),
 		EngineVersion:        d.Get("engine_version").(string),
-		Capacity:             d.Get("capacity").(float32),
+		Capacity:             float32(d.Get("capacity").(float64)),
 		NoPasswordAccess:     noPasswordAccess,
 		Password:             d.Get("password").(string),
 		AccessUser:           d.Get("access_user").(string),
