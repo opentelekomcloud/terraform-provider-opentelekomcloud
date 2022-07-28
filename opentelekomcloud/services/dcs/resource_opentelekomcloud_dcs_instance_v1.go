@@ -408,7 +408,7 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 	mErr := multierror.Append(
 		d.Set("name", v.Name),
 		d.Set("engine", v.Engine),
-		d.Set("capacity", v.Capacity),
+		d.Set("capacity", float64(v.Capacity)),
 		d.Set("used_memory", v.UsedMemory),
 		d.Set("max_memory", v.MaxMemory),
 		d.Set("port", v.Port),
