@@ -332,7 +332,7 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 		Description:          d.Get("description").(string),
 		Engine:               d.Get("engine").(string),
 		EngineVersion:        d.Get("engine_version").(string),
-		Capacity:             float32(d.Get("capacity").(float64)),
+		Capacity:             d.Get("capacity").(float64),
 		NoPasswordAccess:     noPasswordAccess,
 		Password:             d.Get("password").(string),
 		AccessUser:           d.Get("access_user").(string),
@@ -408,7 +408,7 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 	mErr := multierror.Append(
 		d.Set("name", v.Name),
 		d.Set("engine", v.Engine),
-		d.Set("capacity", float64(v.Capacity)),
+		d.Set("capacity", v.Capacity),
 		d.Set("used_memory", v.UsedMemory),
 		d.Set("max_memory", v.MaxMemory),
 		d.Set("port", v.Port),
