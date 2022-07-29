@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[VPC]** Reduce amount of init client requests in ``resource/opentelekomcloud_vpc_eip_v1`` (`#1849 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1849>`_)
