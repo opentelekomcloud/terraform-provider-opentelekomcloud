@@ -61,7 +61,7 @@ func TestAccDcsInstancesV1_basicSingleInstance(t *testing.T) {
 					testAccCheckDcsV1InstanceExists(resourceInstanceName, instance),
 					resource.TestCheckResourceAttr(resourceInstanceName, "name", instanceName),
 					resource.TestCheckResourceAttr(resourceInstanceName, "engine", "Redis"),
-					resource.TestCheckResourceAttr(resourceInstanceName, "resource_spec_code", "redis.ha.xu1.tiny.r2.128"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "resource_spec_code", "redis.single.xu1.tiny.128"),
 				),
 			},
 		},
@@ -215,7 +215,7 @@ data "opentelekomcloud_dcs_az_v1" "az_1" {
 }
 
 data "opentelekomcloud_dcs_product_v1" "product_1" {
-  spec_code = "redis.ha.xu1.tiny.r2.128"
+  spec_code = "redis.single.xu1.tiny.128"
 }
 
 resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
