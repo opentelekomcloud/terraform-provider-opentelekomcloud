@@ -35,10 +35,9 @@ func ResourceIdentityRoleAssignmentV3() *schema.Resource {
 			},
 
 			"group_id": {
-				Type:          schema.TypeString,
-				ConflictsWith: []string{"user_id"},
-				Optional:      true,
-				ForceNew:      true,
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 
 			"project_id": {
@@ -52,13 +51,6 @@ func ResourceIdentityRoleAssignmentV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-			},
-
-			"user_id": {
-				Type:          schema.TypeString,
-				ConflictsWith: []string{"group_id"},
-				Optional:      true,
-				ForceNew:      true,
 			},
 		},
 	}
@@ -75,12 +67,10 @@ func resourceIdentityRoleAssignmentV3Create(ctx context.Context, d *schema.Resou
 	groupID := d.Get("group_id").(string)
 	projectID := d.Get("project_id").(string)
 	roleID := d.Get("role_id").(string)
-	userID := d.Get("user_id").(string)
 	opts := roles.AssignOpts{
 		DomainID:  domainID,
 		GroupID:   groupID,
 		ProjectID: projectID,
-		UserID:    userID,
 	}
 
 	err = roles.Assign(identityClient, roleID, opts).ExtractErr()
@@ -88,7 +78,7 @@ func resourceIdentityRoleAssignmentV3Create(ctx context.Context, d *schema.Resou
 		return fmterr.Errorf("error assigning role: %s", err)
 	}
 
-	d.SetId(buildRoleAssignmentID(domainID, projectID, groupID, userID, roleID))
+	d.SetId(buildRoleAssignmentID(domainID, projectID, groupID, roleID))
 
 	return resourceIdentityRoleAssignmentV3Read(ctx, d, meta)
 }
@@ -104,14 +94,13 @@ func resourceIdentityRoleAssignmentV3Read(_ context.Context, d *schema.ResourceD
 	if err != nil {
 		return fmterr.Errorf("error getting role assignment: %s", err)
 	}
-	domainID, projectID, groupID, userID, _ := ExtractRoleAssignmentID(d.Id())
+	domainID, projectID, groupID, _ := ExtractRoleAssignmentID(d.Id())
 
 	log.Printf("[DEBUG] Retrieved OpenStack role assignment: %#v", roleAssignment)
 	mErr := multierror.Append(
 		d.Set("domain_id", domainID),
 		d.Set("project_id", projectID),
 		d.Set("group_id", groupID),
-		d.Set("user_id", userID),
 		d.Set("role_id", roleAssignment.ID),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -128,12 +117,11 @@ func resourceIdentityRoleAssignmentV3Delete(_ context.Context, d *schema.Resourc
 		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
-	domainID, projectID, groupID, userID, roleID := ExtractRoleAssignmentID(d.Id())
+	domainID, projectID, groupID, roleID := ExtractRoleAssignmentID(d.Id())
 	opts := roles.UnassignOpts{
 		DomainID:  domainID,
 		GroupID:   groupID,
 		ProjectID: projectID,
-		UserID:    userID,
 	}
 	err = roles.Unassign(identityClient, roleID, opts).ExtractErr()
 	if err != nil {
@@ -144,13 +132,12 @@ func resourceIdentityRoleAssignmentV3Delete(_ context.Context, d *schema.Resourc
 }
 
 func getRoleAssignment(identityClient *golangsdk.ServiceClient, d *schema.ResourceData) (roles.RoleAssignment, error) {
-	domainID, projectID, groupID, userID, roleID := ExtractRoleAssignmentID(d.Id())
+	domainID, projectID, groupID, roleID := ExtractRoleAssignmentID(d.Id())
 
 	opts := roles.ListAssignmentsOpts{
 		GroupID:        groupID,
 		ScopeDomainID:  domainID,
 		ScopeProjectID: projectID,
-		UserID:         userID,
 	}
 
 	pager := roles.ListAssignments(identityClient, opts)
@@ -176,11 +163,11 @@ func getRoleAssignment(identityClient *golangsdk.ServiceClient, d *schema.Resour
 }
 
 // Role assignments have no ID in OpenStack. Build an ID out of the IDs that make up the role assignment
-func buildRoleAssignmentID(domainID, projectID, groupID, userID, roleID string) string {
-	return fmt.Sprintf("%s/%s/%s/%s/%s", domainID, projectID, groupID, userID, roleID)
+func buildRoleAssignmentID(domainID, projectID, groupID, roleID string) string {
+	return fmt.Sprintf("%s/%s/%s/%s", domainID, projectID, groupID, roleID)
 }
 
-func ExtractRoleAssignmentID(roleAssignmentID string) (string, string, string, string, string) {
+func ExtractRoleAssignmentID(roleAssignmentID string) (string, string, string, string) {
 	split := strings.Split(roleAssignmentID, "/")
-	return split[0], split[1], split[2], split[3], split[4]
+	return split[0], split[1], split[2], split[3]
 }

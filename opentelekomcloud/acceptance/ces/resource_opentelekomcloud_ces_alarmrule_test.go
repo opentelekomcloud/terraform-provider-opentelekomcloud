@@ -105,7 +105,10 @@ var testCESAlarmRuleBasic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
-  name = "instance_1"
+  name        = "instance_1"
+  image_name  = "Standard_Debian_11_latest"
+  flavor_name = "s3.large.2"
+
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -150,7 +153,9 @@ var testCESAlarmRuleUpdate = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
-  name = "instance_1"
+  name        = "instance_1"
+  image_name  = "Standard_Debian_11_latest"
+  flavor_name = "s3.large.2"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
