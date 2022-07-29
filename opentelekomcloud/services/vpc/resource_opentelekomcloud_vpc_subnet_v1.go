@@ -93,6 +93,10 @@ func ResourceVpcSubnetV1() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"vpc_id": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -213,6 +217,7 @@ func resourceVpcSubnetV1Read(ctx context.Context, d *schema.ResourceData, meta i
 		d.Set("vpc_id", subnet.VpcID),
 		d.Set("subnet_id", subnet.SubnetID),
 		d.Set("network_id", subnet.NetworkID),
+		d.Set("status", subnet.Status),
 		d.Set("region", config.GetRegion(d)),
 	)
 

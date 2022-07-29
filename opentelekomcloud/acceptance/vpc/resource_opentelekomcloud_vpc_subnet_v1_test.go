@@ -40,6 +40,7 @@ func TestAccVpcSubnetV1Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceVPCSubnetName, "ntp_addresses", "10.100.0.33,10.100.0.34"),
 					resource.TestCheckResourceAttr(resourceVPCSubnetName, "tags.foo", "bar"),
 					resource.TestCheckResourceAttr(resourceVPCSubnetName, "tags.key", "value"),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "status", "ACTIVE"),
 				),
 			},
 			{
