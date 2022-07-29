@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
@@ -89,7 +90,9 @@ func ResourceLoadBalancerV2() *schema.Resource {
 
 func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -135,12 +138,15 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 	// If all has been successful, set the ID on the resource
 	d.SetId(lb.ID)
 
-	return resourceLoadBalancerV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceLoadBalancerV2Read(clientCtx, d, meta)
 }
 
-func resourceLoadBalancerV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadBalancerV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -183,7 +189,9 @@ func resourceLoadBalancerV2Read(_ context.Context, d *schema.ResourceData, meta 
 
 func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -202,8 +210,7 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 
 	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2LoadBalancer(ctx, client, d.Id(), "ACTIVE", nil, timeout)
-	if err != nil {
+	if err := waitForLBV2LoadBalancer(ctx, client, d.Id(), "ACTIVE", nil, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -220,8 +227,7 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	// Wait for LoadBalancer to become active before continuing
-	err = waitForLBV2LoadBalancer(ctx, client, d.Id(), "ACTIVE", nil, timeout)
-	if err != nil {
+	if err := waitForLBV2LoadBalancer(ctx, client, d.Id(), "ACTIVE", nil, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -232,12 +238,15 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	return resourceLoadBalancerV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceLoadBalancerV2Read(clientCtx, d, meta)
 }
 
 func resourceLoadBalancerV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -257,8 +266,7 @@ func resourceLoadBalancerV2Delete(ctx context.Context, d *schema.ResourceData, m
 
 	// Wait for LoadBalancer to become delete
 	pending := []string{"PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}
-	err = waitForLBV2LoadBalancer(ctx, client, d.Id(), "DELETED", pending, timeout)
-	if err != nil {
+	if err := waitForLBV2LoadBalancer(ctx, client, d.Id(), "DELETED", pending, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
