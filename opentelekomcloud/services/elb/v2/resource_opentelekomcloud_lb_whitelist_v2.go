@@ -3,11 +3,11 @@ package v2
 import (
 	"context"
 	"log"
-	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/whitelists"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -22,12 +22,6 @@ func ResourceWhitelistV2() *schema.Resource {
 		UpdateContext: resourceWhitelistV2Update,
 		DeleteContext: resourceWhitelistV2Delete,
 
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(10 * time.Minute),
-			Update: schema.DefaultTimeout(10 * time.Minute),
-			Delete: schema.DefaultTimeout(10 * time.Minute),
-		},
-
 		Schema: map[string]*schema.Schema{
 			"tenant_id": {
 				Type:     schema.TypeString,
@@ -35,18 +29,15 @@ func ResourceWhitelistV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-
 			"listener_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-
 			"enable_whitelist": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-
 			"whitelist": {
 				Type:             schema.TypeString,
 				Optional:         true,
@@ -58,7 +49,9 @@ func ResourceWhitelistV2() *schema.Resource {
 
 func resourceWhitelistV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -72,30 +65,33 @@ func resourceWhitelistV2Create(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	wl, err := whitelists.Create(networkingClient, createOpts).Extract()
+	wl, err := whitelists.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud Whitelist: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Whitelist: %w", err)
 	}
 
 	d.SetId(wl.ID)
-	return resourceWhitelistV2Read(ctx, d, meta)
+
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceWhitelistV2Read(clientCtx, d, meta)
 }
 
-func resourceWhitelistV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWhitelistV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
-	wl, err := whitelists.Get(networkingClient, d.Id()).Extract()
+	wl, err := whitelists.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "whitelist")
 	}
 
 	log.Printf("[DEBUG] Retrieved whitelist %s: %#v", d.Id(), wl)
 
-	d.SetId(wl.ID)
 	mErr := multierror.Append(
 		d.Set("tenant_id", wl.TenantId),
 		d.Set("listener_id", wl.ListenerId),
@@ -112,7 +108,9 @@ func resourceWhitelistV2Read(_ context.Context, d *schema.ResourceData, meta int
 
 func resourceWhitelistV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -127,26 +125,30 @@ func resourceWhitelistV2Update(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	log.Printf("[DEBUG] Updating whitelist %s with options: %#v", d.Id(), updateOpts)
-	_, err = whitelists.Update(networkingClient, d.Id(), updateOpts).Extract()
+	_, err = whitelists.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("unable to update whitelist %s: %s", d.Id(), err)
+		return fmterr.Errorf("unable to update whitelist %s: %w", d.Id(), err)
 	}
 
-	return resourceWhitelistV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceWhitelistV2Read(clientCtx, d, meta)
 }
 
-func resourceWhitelistV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWhitelistV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	log.Printf("[DEBUG] Attempting to delete whitelist %s", d.Id())
-	err = whitelists.Delete(networkingClient, d.Id()).ExtractErr()
-	if err != nil {
-		return fmterr.Errorf("error deleting OpenTelekomCloud whitelist: %s", err)
+
+	if err := whitelists.Delete(client, d.Id()).ExtractErr(); err != nil {
+		return fmterr.Errorf("error deleting OpenTelekomCloud whitelist: %w", err)
 	}
 	d.SetId("")
+
 	return nil
 }

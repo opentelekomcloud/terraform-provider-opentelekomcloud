@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -139,7 +140,9 @@ func resourcePoolV2Persistence(d *schema.ResourceData) (*pools.SessionPersistenc
 
 func resourceLBPoolV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -210,12 +213,15 @@ func resourceLBPoolV2Create(ctx context.Context, d *schema.ResourceData, meta in
 
 	d.SetId(pool.ID)
 
-	return resourceLBPoolV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceLBPoolV2Read(clientCtx, d, meta)
 }
 
-func resourceLBPoolV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLBPoolV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -250,7 +256,9 @@ func resourceLBPoolV2Read(_ context.Context, d *schema.ResourceData, meta interf
 
 func resourceLBPoolV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -290,7 +298,6 @@ func resourceLBPoolV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		}
 		return nil
 	})
-
 	if err != nil {
 		return fmterr.Errorf("unable to update pool %s: %w", d.Id(), err)
 	}
@@ -305,12 +312,15 @@ func resourceLBPoolV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(err)
 	}
 
-	return resourceLBPoolV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceLBPoolV2Read(clientCtx, d, meta)
 }
 
 func resourceLBPoolV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
