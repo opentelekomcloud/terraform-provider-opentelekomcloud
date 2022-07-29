@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 
@@ -109,7 +110,9 @@ func ResourceL7RuleV2() *schema.Resource {
 
 func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	lbClient, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -123,8 +126,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	adminStateUp := d.Get("admin_state_up").(bool)
 
 	// Ensure the right combination of options have been specified.
-	err = checkL7RuleType(ruleType, key)
-	if err != nil {
+	if err := checkL7RuleType(ruleType, key); err != nil {
 		return fmterr.Errorf("unable to create L7 Rule: %s", err)
 	}
 
@@ -142,7 +144,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	timeout := d.Timeout(schema.TimeoutCreate)
 
 	// Get a clean copy of the parent L7 Policy.
-	parentL7Policy, err := l7policies.Get(lbClient, l7policyID).Extract()
+	parentL7Policy, err := l7policies.Get(client, l7policyID).Extract()
 	if err != nil {
 		return fmterr.Errorf("unable to get parent L7 Policy: %s", err)
 	}
@@ -151,60 +153,60 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		listenerID = parentL7Policy.ListenerID
 	} else {
 		// Fallback for the Neutron LBaaSv2 extension
-		listenerID, err = getListenerIDForL7Policy(lbClient, l7policyID)
+		listenerID, err = getListenerIDForL7Policy(client, l7policyID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
 	// Get a clean copy of the parent listener.
-	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
+	parentListener, err := listeners.Get(client, listenerID).Extract()
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve listener %s: %s", listenerID, err)
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout)
-	if err != nil {
+	if err := waitForLBV2L7Policy(ctx, client, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to create L7 Rule")
 	var l7Rule *l7policies.Rule
 	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		l7Rule, err = l7policies.CreateRule(lbClient, l7policyID, createOpts).Extract()
+		l7Rule, err = l7policies.CreateRule(client, l7policyID, createOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
 		return nil
 	})
-
 	if err != nil {
 		return fmterr.Errorf("error creating L7 Rule: %s", err)
 	}
 
 	// Wait for L7 Rule to become active before continuing
-	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout)
-	if err != nil {
+	if err := waitForLBV2L7Rule(ctx, client, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(l7Rule.ID)
 	_ = d.Set("listener_id", listenerID)
 
-	return resourceL7RuleV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceL7RuleV2Read(clientCtx, d, meta)
 }
 
-func resourceL7RuleV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceL7RuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	lbClient, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	l7policyID := d.Get("l7policy_id").(string)
 
-	l7Rule, err := l7policies.GetRule(lbClient, l7policyID, d.Id()).Extract()
+	l7Rule, err := l7policies.GetRule(client, l7policyID, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "L7 Rule")
 	}
@@ -230,7 +232,9 @@ func resourceL7RuleV2Read(_ context.Context, d *schema.ResourceData, meta interf
 
 func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	lbClient, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -258,68 +262,66 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Ensure the right combination of options have been specified.
-	err = checkL7RuleType(ruleType, key)
-	if err != nil {
+	if err := checkL7RuleType(ruleType, key); err != nil {
 		return diag.FromErr(err)
 	}
 
 	timeout := d.Timeout(schema.TimeoutUpdate)
 
 	// Get a clean copy of the parent listener.
-	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
+	parentListener, err := listeners.Get(client, listenerID).Extract()
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve listener %s: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the parent L7 Policy.
-	parentL7Policy, err := l7policies.Get(lbClient, l7policyID).Extract()
+	parentL7Policy, err := l7policies.Get(client, l7policyID).Extract()
 	if err != nil {
 		return fmterr.Errorf("unable to get parent L7 Policy: %s", err)
 	}
 
 	// Get a clean copy of the L7 Rule.
-	l7Rule, err := l7policies.GetRule(lbClient, l7policyID, d.Id()).Extract()
+	l7Rule, err := l7policies.GetRule(client, l7policyID, d.Id()).Extract()
 	if err != nil {
 		return fmterr.Errorf("unable to get L7 Rule: %s", err)
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout)
-	if err != nil {
+	if err := waitForLBV2L7Policy(ctx, client, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for L7 Rule to become active before continuing
-	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout)
-	if err != nil {
+	if err := waitForLBV2L7Rule(ctx, client, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Updating L7 Rule %s with options: %#v", d.Id(), updateOpts)
 	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		_, err := l7policies.UpdateRule(lbClient, l7policyID, d.Id(), updateOpts).Extract()
+		_, err := l7policies.UpdateRule(client, l7policyID, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
 		return nil
 	})
-
 	if err != nil {
 		return fmterr.Errorf("unable to update L7 Rule %s: %s", d.Id(), err)
 	}
 
 	// Wait for L7 Rule to become active before continuing
-	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout)
-	if err != nil {
+	if err = waitForLBV2L7Rule(ctx, client, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
-	return resourceL7RuleV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceL7RuleV2Read(clientCtx, d, meta)
 }
 
 func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	lbClient, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -330,50 +332,48 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	listenerID := d.Get("listener_id").(string)
 
 	// Get a clean copy of the parent listener.
-	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
+	parentListener, err := listeners.Get(client, listenerID).Extract()
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve parent listener (%s) for the L7 Rule: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the parent L7 Policy.
-	parentL7Policy, err := l7policies.Get(lbClient, l7policyID).Extract()
+	parentL7Policy, err := l7policies.Get(client, l7policyID).Extract()
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve parent L7 Policy (%s) for the L7 Rule: %s", l7policyID, err)
 	}
 
 	// Get a clean copy of the L7 Rule.
-	l7Rule, err := l7policies.GetRule(lbClient, l7policyID, d.Id()).Extract()
+	l7Rule, err := l7policies.GetRule(client, l7policyID, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "Unable to retrieve L7 Rule")
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout)
-	if err != nil {
+	if err := waitForLBV2L7Policy(ctx, client, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to delete L7 Rule %s", d.Id())
 	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		err = l7policies.DeleteRule(lbClient, l7policyID, d.Id()).ExtractErr()
+		err = l7policies.DeleteRule(client, l7policyID, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
 		return nil
 	})
-
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "Error deleting L7 Rule")
 	}
 
-	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "DELETED", lbPendingDeleteStatuses, timeout)
-	if err != nil {
+	if err := waitForLBV2L7Rule(ctx, client, parentListener, parentL7Policy, l7Rule, "DELETED", lbPendingDeleteStatuses, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
+// TODO: DROP IT
 func resourceL7RuleV2Import(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
@@ -382,7 +382,7 @@ func resourceL7RuleV2Import(_ context.Context, d *schema.ResourceData, meta inte
 	}
 
 	config := meta.(*cfg.Config)
-	lbClient, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
 		return nil, fmt.Errorf(ErrCreationV2Client, err)
 	}
@@ -392,7 +392,7 @@ func resourceL7RuleV2Import(_ context.Context, d *schema.ResourceData, meta inte
 	l7ruleID := parts[1]
 
 	// Get a clean copy of the parent L7 Policy.
-	parentL7Policy, err := l7policies.Get(lbClient, l7policyID).Extract()
+	parentL7Policy, err := l7policies.Get(client, l7policyID).Extract()
 	if err != nil {
 		return nil, fmt.Errorf("unable to get parent L7 Policy: %s", err)
 	}
@@ -401,7 +401,7 @@ func resourceL7RuleV2Import(_ context.Context, d *schema.ResourceData, meta inte
 		listenerID = parentL7Policy.ListenerID
 	} else {
 		// Fallback for the Neutron LBaaSv2 extension
-		listenerID, err = getListenerIDForL7Policy(lbClient, l7policyID)
+		listenerID, err = getListenerIDForL7Policy(client, l7policyID)
 		if err != nil {
 			return nil, err
 		}
