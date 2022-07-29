@@ -101,7 +101,9 @@ func ResourceCertificateV2() *schema.Resource {
 
 func resourceCertificateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -116,7 +118,7 @@ func resourceCertificateV2Create(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	c, err := certificates.Create(networkingClient, createOpts).Extract()
+	c, err := certificates.Create(client, createOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating Certificate: %s", err)
 	}
@@ -124,17 +126,20 @@ func resourceCertificateV2Create(ctx context.Context, d *schema.ResourceData, me
 	// If all has been successful, set the ID on the resource
 	d.SetId(c.ID)
 
-	return resourceCertificateV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceCertificateV2Read(clientCtx, d, meta)
 }
 
-func resourceCertificateV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCertificateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
-	c, err := certificates.Get(networkingClient, d.Id()).Extract()
+	c, err := certificates.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "certificate")
 	}
@@ -162,7 +167,9 @@ func resourceCertificateV2Read(_ context.Context, d *schema.ResourceData, meta i
 
 func resourceCertificateV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -188,7 +195,7 @@ func resourceCertificateV2Update(ctx context.Context, d *schema.ResourceData, me
 
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		_, err := certificates.Update(networkingClient, d.Id(), updateOpts).Extract()
+		_, err := certificates.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
@@ -198,12 +205,15 @@ func resourceCertificateV2Update(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error updating certificate %s: %s", d.Id(), err)
 	}
 
-	return resourceCertificateV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceCertificateV2Read(clientCtx, d, meta)
 }
 
 func resourceCertificateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -256,7 +266,7 @@ func unassignCert(_ context.Context, client *golangsdk.ServiceClient, timeout ti
 		return fmt.Errorf("failed to get listener %s: %w", listenerID, err)
 	}
 
-	otherCerts := make([]string, 0)
+	var otherCerts []string
 	for _, cert := range listener.SniContainerRefs {
 		if cert != certID {
 			otherCerts = append(otherCerts, cert)
