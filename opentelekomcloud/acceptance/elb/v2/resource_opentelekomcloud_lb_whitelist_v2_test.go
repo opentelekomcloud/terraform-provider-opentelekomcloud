@@ -50,7 +50,7 @@ func TestAccLBV2Whitelist_basic(t *testing.T) {
 
 func testAccCheckLBV2WhitelistDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.ElbV2Client(env.OS_REGION_NAME)
+	client, err := config.ElbV2Client(env.OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf(elb.ErrCreationV2Client, err)
 	}
@@ -60,7 +60,7 @@ func testAccCheckLBV2WhitelistDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := whitelists.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err := whitelists.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("whitelist still exists: %s", rs.Primary.ID)
 		}
@@ -81,12 +81,12 @@ func testAccCheckLBV2WhitelistExists(n string, whitelist *whitelists.Whitelist) 
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.ElbV2Client(env.OS_REGION_NAME)
+		client, err := config.ElbV2Client(env.OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf(elb.ErrCreationV2Client, err)
 		}
 
-		found, err := whitelists.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := whitelists.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
