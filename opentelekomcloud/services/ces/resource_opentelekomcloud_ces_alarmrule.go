@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cloudeyeservice/alarmrule"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -318,7 +319,9 @@ func getAlarmAction(d *schema.ResourceData, name string) []alarmrule.ActionOpts 
 
 func resourceAlarmRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CesV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, cesClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.CesV1Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
@@ -355,12 +358,15 @@ func resourceAlarmRuleCreate(ctx context.Context, d *schema.ResourceData, meta i
 
 	d.SetId(r.AlarmID)
 
-	return resourceAlarmRuleRead(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, cesClientV1)
+	return resourceAlarmRuleRead(clientCtx, d, meta)
 }
 
-func resourceAlarmRuleRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAlarmRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CesV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, cesClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.CesV1Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
@@ -461,7 +467,9 @@ func resourceAlarmRuleRead(_ context.Context, d *schema.ResourceData, meta inter
 
 func resourceAlarmRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CesV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, cesClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.CesV1Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
@@ -487,12 +495,15 @@ func resourceAlarmRuleUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf("error updating alarm rule %s: %w", alarmRuleID, err)
 	}
 
-	return resourceAlarmRuleRead(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, cesClientV1)
+	return resourceAlarmRuleRead(clientCtx, d, meta)
 }
 
 func resourceAlarmRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CesV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, cesClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.CesV1Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
