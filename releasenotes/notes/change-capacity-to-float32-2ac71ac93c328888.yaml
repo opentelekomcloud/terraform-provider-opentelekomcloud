@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DCS]** Change Capacity from int to float32 (`#1842 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1842>`_)

@@ -55,7 +55,7 @@ func ResourceDcsInstanceV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"capacity": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeFloat,
 				Required: true,
 				ForceNew: true,
 			},
@@ -332,7 +332,7 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 		Description:          d.Get("description").(string),
 		Engine:               d.Get("engine").(string),
 		EngineVersion:        d.Get("engine_version").(string),
-		Capacity:             d.Get("capacity").(int),
+		Capacity:             d.Get("capacity").(float64),
 		NoPasswordAccess:     noPasswordAccess,
 		Password:             d.Get("password").(string),
 		AccessUser:           d.Get("access_user").(string),
