@@ -31,12 +31,13 @@ func waitForLBV2Listener(ctx context.Context, client *golangsdk.ServiceClient, i
 	log.Printf("[DEBUG] Waiting for listener %s to become %s.", id, target)
 
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{target},
-		Pending:    pending,
-		Refresh:    resourceLBV2ListenerRefreshFunc(client, id),
-		Timeout:    timeout,
-		Delay:      5 * time.Second,
-		MinTimeout: 1 * time.Second,
+		Target:       []string{target},
+		Pending:      pending,
+		Refresh:      resourceLBV2ListenerRefreshFunc(client, id),
+		Timeout:      timeout,
+		Delay:        5 * time.Second,
+		MinTimeout:   1 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err := stateConf.WaitForStateContext(ctx)
@@ -111,12 +112,13 @@ func waitForLBV2Pool(ctx context.Context, client *golangsdk.ServiceClient, id st
 	log.Printf("[DEBUG] Waiting for pool %s to become %s.", id, target)
 
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{target},
-		Pending:    pending,
-		Refresh:    resourceLBV2PoolRefreshFunc(client, id),
-		Timeout:    timeout,
-		Delay:      5 * time.Second,
-		MinTimeout: 1 * time.Second,
+		Target:       []string{target},
+		Pending:      pending,
+		Refresh:      resourceLBV2PoolRefreshFunc(client, id),
+		Timeout:      timeout,
+		Delay:        5 * time.Second,
+		MinTimeout:   1 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err := stateConf.WaitForStateContext(ctx)
@@ -298,12 +300,13 @@ func waitForLBV2L7Policy(ctx context.Context, client *golangsdk.ServiceClient, p
 	lbID := parentListener.Loadbalancers[0].ID
 
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{target},
-		Pending:    pending,
-		Refresh:    resourceLBV2L7PolicyRefreshFunc(client, lbID, l7policy),
-		Timeout:    timeout,
-		Delay:      1 * time.Second,
-		MinTimeout: 1 * time.Second,
+		Target:       []string{target},
+		Pending:      pending,
+		Refresh:      resourceLBV2L7PolicyRefreshFunc(client, lbID, l7policy),
+		Timeout:      timeout,
+		Delay:        1 * time.Second,
+		MinTimeout:   1 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err := stateConf.WaitForStateContext(ctx)
@@ -382,12 +385,13 @@ func waitForLBV2L7Rule(ctx context.Context, client *golangsdk.ServiceClient, par
 	lbID := parentListener.Loadbalancers[0].ID
 
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{target},
-		Pending:    pending,
-		Refresh:    resourceLBV2L7RuleRefreshFunc(client, lbID, parentL7policy.ID, l7rule),
-		Timeout:    timeout,
-		Delay:      1 * time.Second,
-		MinTimeout: 1 * time.Second,
+		Target:       []string{target},
+		Pending:      pending,
+		Refresh:      resourceLBV2L7RuleRefreshFunc(client, lbID, parentL7policy.ID, l7rule),
+		Timeout:      timeout,
+		Delay:        1 * time.Second,
+		MinTimeout:   1 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err := stateConf.WaitForStateContext(ctx)
