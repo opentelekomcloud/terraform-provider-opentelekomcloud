@@ -373,7 +373,6 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-// TODO: DROP IT
 func resourceL7RuleV2Import(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {

@@ -381,7 +381,6 @@ func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-// TODO: DROP IT
 // elbV3Client user as temporary stub for missing in service catalog for eu-de, but working endpoint
 func elbV3Client(config *cfg.Config, region string) (*golangsdk.ServiceClient, error) {
 	v3Client, err := config.ElbV3Client(region)
