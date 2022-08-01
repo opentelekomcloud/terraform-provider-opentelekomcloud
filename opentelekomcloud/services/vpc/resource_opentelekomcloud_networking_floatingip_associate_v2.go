@@ -51,15 +51,17 @@ func ResourceNetworkingFloatingIPAssociateV2() *schema.Resource {
 
 func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	floatingIP := d.Get("floating_ip").(string)
 	portID := d.Get("port_id").(string)
 
-	floatingIPID, err := resourceNetworkingFloatingIPAssociateV2IP2ID(networkingClient, floatingIP)
+	floatingIPID, err := resourceNetworkingFloatingIPAssociateV2IP2ID(client, floatingIP)
 	if err != nil {
 		return fmterr.Errorf("unable to get ID of floating IP: %s", err)
 	}
@@ -70,25 +72,27 @@ func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schem
 
 	log.Printf("[DEBUG] Floating IP Associate Create Options: %#v", updateOpts)
 
-	_, err = floatingips.Update(networkingClient, floatingIPID, updateOpts).Extract()
+	_, err = floatingips.Update(client, floatingIPID, updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error associating floating IP %s to port %s: %s",
-			floatingIPID, portID, err)
+		return fmterr.Errorf("error associating floating IP %s to port %s: %s", floatingIPID, portID, err)
 	}
 
 	d.SetId(floatingIPID)
 
-	return resourceNetworkingFloatingIPAssociateV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceNetworkingFloatingIPAssociateV2Read(clientCtx, d, meta)
 }
 
-func resourceNetworkingFloatingIPAssociateV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingFloatingIPAssociateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	floatingIP, err := floatingips.Get(networkingClient, d.Id()).Extract()
+	floatingIP, err := floatingips.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "floating IP")
 	}
@@ -105,11 +109,13 @@ func resourceNetworkingFloatingIPAssociateV2Read(_ context.Context, d *schema.Re
 	return nil
 }
 
-func resourceNetworkingFloatingIPAssociateV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingFloatingIPAssociateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	portID := d.Get("port_id").(string)
@@ -119,10 +125,9 @@ func resourceNetworkingFloatingIPAssociateV2Delete(_ context.Context, d *schema.
 
 	log.Printf("[DEBUG] Floating IP Delete Options: %#v", updateOpts)
 
-	_, err = floatingips.Update(networkingClient, d.Id(), updateOpts).Extract()
+	_, err = floatingips.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error disassociating floating IP %s from port %s: %s",
-			d.Id(), portID, err)
+		return fmterr.Errorf("error disassociating floating IP %s from port %s: %s", d.Id(), portID, err)
 	}
 
 	return nil

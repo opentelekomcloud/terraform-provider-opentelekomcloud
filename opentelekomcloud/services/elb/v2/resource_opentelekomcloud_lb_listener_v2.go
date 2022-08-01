@@ -125,7 +125,9 @@ func ResourceListenerV2() *schema.Resource {
 
 func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -138,6 +140,7 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 			sniContainerRefs = append(sniContainerRefs, v.(string))
 		}
 	}
+
 	createOpts := listeners.CreateOpts{
 		Protocol:               listeners.Protocol(d.Get("protocol").(string)),
 		ProtocolPort:           d.Get("protocol_port").(int),
@@ -197,12 +200,15 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf("error updating ELB v2 Listener `transparent_client_ip_enable`: %w", err)
 	}
 
-	return resourceListenerV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceListenerV2Read(clientCtx, d, meta)
 }
 
-func resourceListenerV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceListenerV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -252,7 +258,9 @@ func resourceListenerV2Read(_ context.Context, d *schema.ResourceData, meta inte
 
 func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -312,7 +320,6 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 		}
 		return nil
 	})
-
 	if err != nil {
 		return fmterr.Errorf("error updating listener %s: %s", d.Id(), err)
 	}
@@ -329,12 +336,15 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	return resourceListenerV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceListenerV2Read(clientCtx, d, meta)
 }
 
 func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
