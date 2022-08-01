@@ -3,6 +3,7 @@ package dcs
 import (
 	"context"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -405,10 +406,15 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 
 	log.Printf("[DEBUG] DCS instance %s: %+v", d.Id(), v)
 
+	minor, err := strconv.ParseFloat(v.CapacityMinor, 32)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	mErr := multierror.Append(
 		d.Set("name", v.Name),
 		d.Set("engine", v.Engine),
-		d.Set("capacity", v.Capacity),
+		d.Set("capacity", float64(v.Capacity)+minor),
 		d.Set("used_memory", v.UsedMemory),
 		d.Set("max_memory", v.MaxMemory),
 		d.Set("port", v.Port),
