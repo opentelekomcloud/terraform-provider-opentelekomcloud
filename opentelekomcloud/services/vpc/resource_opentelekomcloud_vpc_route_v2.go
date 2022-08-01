@@ -72,9 +72,11 @@ func ResourceVPCRouteV2() *schema.Resource {
 
 func resourceVpcRouteV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	createOpts := routes.CreateOpts{
@@ -93,24 +95,22 @@ func resourceVpcRouteV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	log.Printf("[INFO] Vpc Route ID: %s", route.RouteID)
 	d.SetId(route.RouteID)
 
-	return resourceVpcRouteV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceVpcRouteV2Read(clientCtx, d, meta)
 }
 
-func resourceVpcRouteV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpcRouteV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	route, err := routes.Get(client, d.Id()).Extract()
 	if err != nil {
-		if _, ok := err.(golangsdk.ErrDefault404); ok {
-			d.SetId("")
-			return nil
-		}
-
-		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc route: %s", err)
+		return common.CheckDeletedDiag(d, err, "route")
 	}
 
 	mErr := multierror.Append(nil,
@@ -131,22 +131,25 @@ func resourceVpcRouteV2Read(_ context.Context, d *schema.ResourceData, meta inte
 
 func resourceVpcRouteV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	if err = routes.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := routes.Delete(client, d.Id()).ExtractErr(); err != nil {
 		return fmterr.Errorf("error deleting VPC route: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"ACTIVE"},
-		Target:     []string{"DELETED"},
-		Refresh:    waitForVpcRouteDelete(client, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Pending:      []string{"ACTIVE"},
+		Target:       []string{"DELETED"},
+		Refresh:      waitForVpcRouteDelete(client, d.Id()),
+		Timeout:      d.Timeout(schema.TimeoutDelete),
+		Delay:        5 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
