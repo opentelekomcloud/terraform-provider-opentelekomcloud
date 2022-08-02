@@ -66,10 +66,12 @@ func ResourceIdentityUserV3() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: common.SuppressCaseInsensitive,
+				ValidateFunc:     common.ValidateEmail,
 			},
 			"send_welcome_email": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:         schema.TypeBool,
+				Optional:     true,
+				RequiredWith: []string{"email"},
 			},
 		},
 	}
@@ -209,7 +211,7 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	if d.HasChange("email") && d.Get("send_welcome_email").(bool) {
+	if updateOpts.Email != "" && d.Get("send_welcome_email").(bool) {
 		if err := users.SendWelcomeEmail(client, d.Id()).ExtractErr(); err != nil {
 			return fmterr.Errorf("error sending a welcome email: %w", err)
 		}
