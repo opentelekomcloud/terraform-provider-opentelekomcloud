@@ -347,9 +347,11 @@ func ResourceComputeInstanceV2() *schema.Resource {
 
 func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %w", err)
+		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
 	var createOpts servers.CreateOptsBuilder
@@ -449,12 +451,13 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	log.Printf("[DEBUG] Waiting for instance (%s) to become running", server.ID)
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"BUILD"},
-		Target:     []string{"ACTIVE"},
-		Refresh:    ServerV2StateRefreshFunc(client, server.ID),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      10 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Pending:      []string{"BUILD"},
+		Target:       []string{"ACTIVE"},
+		Refresh:      ServerV2StateRefreshFunc(client, server.ID),
+		Timeout:      d.Timeout(schema.TimeoutCreate),
+		Delay:        10 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 10 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -472,11 +475,12 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 			return fmterr.Errorf("error stopping server instance: %w", err)
 		}
 		stopStateConf := &resource.StateChangeConf{
-			Target:     []string{"SHUTOFF"},
-			Refresh:    ServerV2StateRefreshFunc(client, d.Id()),
-			Timeout:    d.Timeout(schema.TimeoutCreate),
-			Delay:      10 * time.Second,
-			MinTimeout: 3 * time.Second,
+			Target:       []string{"SHUTOFF"},
+			Refresh:      ServerV2StateRefreshFunc(client, d.Id()),
+			Timeout:      d.Timeout(schema.TimeoutCreate),
+			Delay:        10 * time.Second,
+			MinTimeout:   3 * time.Second,
+			PollInterval: 2 * time.Second,
 		}
 
 		log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
@@ -508,14 +512,17 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
-	return resourceComputeInstanceV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceComputeInstanceV2Read(clientCtx, d, meta)
 }
 
 func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %w", err)
+		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
 	server, err := servers.Get(client, d.Id()).Extract()
@@ -671,9 +678,11 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 
 func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %w", err)
+		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
 	var updateOpts servers.UpdateOpts
@@ -696,11 +705,12 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				return fmterr.Errorf("error stopping compute instance: %w", err)
 			}
 			stopStateConf := &resource.StateChangeConf{
-				Target:     []string{"SHUTOFF"},
-				Refresh:    ServerV2StateRefreshFunc(client, d.Id()),
-				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      10 * time.Second,
-				MinTimeout: 3 * time.Second,
+				Target:       []string{"SHUTOFF"},
+				Refresh:      ServerV2StateRefreshFunc(client, d.Id()),
+				Timeout:      d.Timeout(schema.TimeoutUpdate),
+				Delay:        10 * time.Second,
+				MinTimeout:   3 * time.Second,
+				PollInterval: 2 * time.Second,
 			}
 
 			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
@@ -715,11 +725,12 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 				return fmterr.Errorf("error starting compute instance: %w", err)
 			}
 			startStateConf := &resource.StateChangeConf{
-				Target:     []string{"ACTIVE"},
-				Refresh:    ServerV2StateRefreshFunc(client, d.Id()),
-				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      10 * time.Second,
-				MinTimeout: 3 * time.Second,
+				Target:       []string{"ACTIVE"},
+				Refresh:      ServerV2StateRefreshFunc(client, d.Id()),
+				Timeout:      d.Timeout(schema.TimeoutUpdate),
+				Delay:        10 * time.Second,
+				MinTimeout:   3 * time.Second,
+				PollInterval: 2 * time.Second,
 			}
 
 			log.Printf("[DEBUG] Waiting for instance (%s) to start/unshelve", d.Id())
@@ -836,12 +847,13 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 		log.Printf("[DEBUG] Waiting for instance (%s) to finish resizing", d.Id())
 
 		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"RESIZE"},
-			Target:     []string{"VERIFY_RESIZE"},
-			Refresh:    ServerV2StateRefreshFunc(client, d.Id()),
-			Timeout:    d.Timeout(schema.TimeoutUpdate),
-			Delay:      10 * time.Second,
-			MinTimeout: 3 * time.Second,
+			Pending:      []string{"RESIZE"},
+			Target:       []string{"VERIFY_RESIZE"},
+			Refresh:      ServerV2StateRefreshFunc(client, d.Id()),
+			Timeout:      d.Timeout(schema.TimeoutUpdate),
+			Delay:        10 * time.Second,
+			MinTimeout:   3 * time.Second,
+			PollInterval: 10 * time.Second,
 		}
 
 		_, err = stateConf.WaitForStateContext(ctx)
@@ -857,12 +869,13 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 		}
 
 		stateConf = &resource.StateChangeConf{
-			Pending:    []string{"VERIFY_RESIZE"},
-			Target:     []string{"ACTIVE"},
-			Refresh:    ServerV2StateRefreshFunc(client, d.Id()),
-			Timeout:    d.Timeout(schema.TimeoutUpdate),
-			Delay:      10 * time.Second,
-			MinTimeout: 3 * time.Second,
+			Pending:      []string{"VERIFY_RESIZE"},
+			Target:       []string{"ACTIVE"},
+			Refresh:      ServerV2StateRefreshFunc(client, d.Id()),
+			Timeout:      d.Timeout(schema.TimeoutUpdate),
+			Delay:        10 * time.Second,
+			MinTimeout:   3 * time.Second,
+			PollInterval: 5 * time.Second,
 		}
 
 		_, err = stateConf.WaitForStateContext(ctx)
@@ -891,14 +904,17 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
-	return resourceComputeInstanceV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceComputeInstanceV2Read(clientCtx, d, meta)
 }
 
 func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %w", err)
+		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
 	if d.Get("stop_before_destroy").(bool) {
@@ -916,12 +932,13 @@ func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData
 	log.Printf("[DEBUG] Waiting for instance (%s) to delete", d.Id())
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"ACTIVE", "SHUTOFF"},
-		Target:     []string{"DELETED", "SOFT_DELETED"},
-		Refresh:    ServerV2StateRefreshFunc(client, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      10 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Pending:      []string{"ACTIVE", "SHUTOFF"},
+		Target:       []string{"DELETED", "SOFT_DELETED"},
+		Refresh:      ServerV2StateRefreshFunc(client, d.Id()),
+		Timeout:      d.Timeout(schema.TimeoutDelete),
+		Delay:        10 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 5 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
