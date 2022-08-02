@@ -406,15 +406,15 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 
 	log.Printf("[DEBUG] DCS instance %s: %+v", d.Id(), v)
 
-	minor, err := strconv.ParseFloat(v.CapacityMinor, 32)
-	if err != nil {
-		return diag.FromErr(err)
+	capacity := float64(v.Capacity)
+	if v.Capacity == 0 {
+		capacity, _ = strconv.ParseFloat(v.CapacityMinor, 32)
 	}
 
 	mErr := multierror.Append(
 		d.Set("name", v.Name),
 		d.Set("engine", v.Engine),
-		d.Set("capacity", float64(v.Capacity)+minor),
+		d.Set("capacity", capacity),
 		d.Set("used_memory", v.UsedMemory),
 		d.Set("max_memory", v.MaxMemory),
 		d.Set("port", v.Port),
@@ -426,8 +426,8 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("vpc_name", v.VPCName),
 		d.Set("created_at", v.CreatedAt),
 		d.Set("product_id", v.ProductID),
-		d.Set("security_group_id", v.SecurityGroupID),
-		d.Set("security_group_name", v.SecurityGroupName),
+		// d.Set("security_group_id", v.SecurityGroupID),
+		// d.Set("security_group_name", v.SecurityGroupName),
 		d.Set("subnet_id", v.SubnetID),
 		d.Set("subnet_name", v.SubnetName),
 		d.Set("user_id", v.UserID),
