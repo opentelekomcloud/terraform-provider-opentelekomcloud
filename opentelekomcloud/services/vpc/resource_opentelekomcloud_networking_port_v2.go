@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
@@ -126,9 +127,10 @@ func ResourceNetworkingPortV2() *schema.Resource {
 							Required: true,
 						},
 						"mac_address": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.IsMACAddress,
 						},
 					},
 				},
@@ -154,9 +156,11 @@ func ResourceNetworkingPortV2() *schema.Resource {
 
 func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	asu, id := ExtractValFromNid(d.Get("network_id").(string))
@@ -224,11 +228,12 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 	log.Printf("[DEBUG] Waiting for OpenTelekomCloud Neutron Port (%s) to become available.", p.ID)
 
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{"ACTIVE"},
-		Refresh:    waitForNetworkPortActive(client, p.ID),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Target:       []string{"ACTIVE"},
+		Refresh:      waitForNetworkPortActive(client, p.ID),
+		Timeout:      d.Timeout(schema.TimeoutCreate),
+		Delay:        5 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -238,14 +243,17 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 
 	d.SetId(p.ID)
 
-	return resourceNetworkingPortV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceNetworkingPortV2Read(clientCtx, d, meta)
 }
 
-func resourceNetworkingPortV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	var port portWithPortSecurityExtensions
@@ -283,9 +291,10 @@ func resourceNetworkingPortV2Read(_ context.Context, d *schema.ResourceData, met
 	// Convert AllowedAddressPairs to list of map
 	var pairs []map[string]interface{}
 	for _, pairObject := range port.AllowedAddressPairs {
-		pair := make(map[string]interface{})
-		pair["ip_address"] = pairObject.IPAddress
-		pair["mac_address"] = pairObject.MACAddress
+		pair := map[string]interface{}{
+			"ip_address":  pairObject.IPAddress,
+			"mac_address": pairObject.MACAddress,
+		}
 		pairs = append(pairs, pair)
 	}
 
@@ -303,9 +312,11 @@ func resourceNetworkingPortV2Read(_ context.Context, d *schema.ResourceData, met
 
 func resourceNetworkingPortV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	noSecurityGroups := d.Get("no_security_groups").(bool)
@@ -387,23 +398,28 @@ func resourceNetworkingPortV2Update(ctx context.Context, d *schema.ResourceData,
 			return fmterr.Errorf("error updating OpenTelekomCloud Neutron port: %w", err)
 		}
 	}
-	return resourceNetworkingPortV2Read(ctx, d, meta)
+
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceNetworkingPortV2Read(clientCtx, d, meta)
 }
 
 func resourceNetworkingPortV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"ACTIVE"},
-		Target:     []string{"DELETED"},
-		Refresh:    waitForNetworkPortDelete(client, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Pending:      []string{"ACTIVE"},
+		Target:       []string{"DELETED"},
+		Refresh:      waitForNetworkPortDelete(client, d.Id()),
+		Timeout:      d.Timeout(schema.TimeoutDelete),
+		Delay:        5 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)

@@ -86,9 +86,11 @@ func ResourceNetworkingFloatingIPV2() *schema.Resource {
 
 func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	createOpts := FloatingIPCreateOpts{
@@ -102,7 +104,7 @@ func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceDa
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	floatingIP, err := floatingips.Create(networkingClient, createOpts).Extract()
+	floatingIP, err := floatingips.Create(client, createOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error allocating floating IP: %s", err)
 	}
@@ -110,11 +112,12 @@ func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceDa
 	log.Printf("[DEBUG] Waiting for OpenTelekomCloud Neutron Floating IP (%s) to become available.", floatingIP.ID)
 
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{"ACTIVE"},
-		Refresh:    waitForFloatingIPActive(networkingClient, floatingIP.ID),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Target:       []string{"ACTIVE"},
+		Refresh:      waitForFloatingIPActive(client, floatingIP.ID),
+		Timeout:      d.Timeout(schema.TimeoutCreate),
+		Delay:        5 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -124,17 +127,20 @@ func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceDa
 
 	d.SetId(floatingIP.ID)
 
-	return resourceNetworkFloatingIPV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceNetworkFloatingIPV2Read(clientCtx, d, meta)
 }
 
-func resourceNetworkFloatingIPV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkFloatingIPV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	floatingIP, err := floatingips.Get(networkingClient, d.Id()).Extract()
+	floatingIP, err := floatingips.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "floating IP")
 	}
@@ -157,9 +163,11 @@ func resourceNetworkFloatingIPV2Read(_ context.Context, d *schema.ResourceData, 
 
 func resourceNetworkFloatingIPV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	var updateOpts floatingips.UpdateOpts
@@ -171,28 +179,32 @@ func resourceNetworkFloatingIPV2Update(ctx context.Context, d *schema.ResourceDa
 
 	log.Printf("[DEBUG] Update Options: %#v", updateOpts)
 
-	_, err = floatingips.Update(networkingClient, d.Id(), updateOpts).Extract()
+	_, err = floatingips.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error updating floating IP: %s", err)
 	}
 
-	return resourceNetworkFloatingIPV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceNetworkFloatingIPV2Read(clientCtx, d, meta)
 }
 
 func resourceNetworkFloatingIPV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"ACTIVE"},
-		Target:     []string{"DELETED"},
-		Refresh:    waitForFloatingIPDelete(networkingClient, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Pending:      []string{"ACTIVE"},
+		Target:       []string{"DELETED"},
+		Refresh:      waitForFloatingIPDelete(client, d.Id()),
+		Timeout:      d.Timeout(schema.TimeoutDelete),
+		Delay:        5 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -204,9 +216,9 @@ func resourceNetworkFloatingIPV2Delete(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func waitForFloatingIPActive(networkingClient *golangsdk.ServiceClient, fId string) resource.StateRefreshFunc {
+func waitForFloatingIPActive(client *golangsdk.ServiceClient, fId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		f, err := floatingips.Get(networkingClient, fId).Extract()
+		f, err := floatingips.Get(client, fId).Extract()
 		if err != nil {
 			return nil, "", err
 		}
@@ -220,11 +232,11 @@ func waitForFloatingIPActive(networkingClient *golangsdk.ServiceClient, fId stri
 	}
 }
 
-func waitForFloatingIPDelete(networkingClient *golangsdk.ServiceClient, fId string) resource.StateRefreshFunc {
+func waitForFloatingIPDelete(client *golangsdk.ServiceClient, fId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete OpenTelekomCloud Floating IP %s.\n", fId)
 
-		f, err := floatingips.Get(networkingClient, fId).Extract()
+		f, err := floatingips.Get(client, fId).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Floating IP %s", fId)
@@ -233,7 +245,7 @@ func waitForFloatingIPDelete(networkingClient *golangsdk.ServiceClient, fId stri
 			return f, "ACTIVE", err
 		}
 
-		err = floatingips.Delete(networkingClient, fId).ExtractErr()
+		err = floatingips.Delete(client, fId).ExtractErr()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Floating IP %s", fId)

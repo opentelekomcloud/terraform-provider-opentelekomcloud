@@ -1,0 +1,20 @@
+---
+enhancements:
+  - |
+    **[ELB]** Reduce amount of init client requests in ``resource/opentelekomcloud_lb_member_v2`` (`#1852 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1852>`_)
+  - |
+    **[ELB]** Reduce amount of init client requests in ``resource/opentelekomcloud_lb_monitor_v2`` (`#1852 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1852>`_)
+  - |
+    **[ELB]** Reduce amount of init client requests in ``resource/opentelekomcloud_lb_pool_v2`` (`#1852 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1852>`_)
+  - |
+    **[ELB]** Reduce amount of init client requests in ``resource/opentelekomcloud_lb_whitelist_v2`` (`#1852 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1852>`_)
+  - |
+    **[ELB]** Reduce amount of init client requests in ``resource/opentelekomcloud_lb_loadbalancer_v2`` (`#1852 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1852>`_)
+  - |
+    **[ELB]** Reduce amount of init client requests in ``resource/opentelekomcloud_lb_listener_v2`` (`#1852 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1852>`_)
+  - |
+    **[ELB]** Reduce amount of init client requests in ``resource/opentelekomcloud_lb_l7rule_v2`` (`#1852 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1852>`_)
+  - |
+    **[ELB]** Reduce amount of init client requests in ``resource/opentelekomcloud_lb_l7policy_v2`` (`#1852 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1852>`_)
+  - |
+    **[ELB]** Reduce amount of init client requests in ``resource/opentelekomcloud_lb_certificate_v2`` (`#1852 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1852>`_)

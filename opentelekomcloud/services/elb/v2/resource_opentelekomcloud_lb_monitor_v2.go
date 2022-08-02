@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -112,7 +113,9 @@ func ResourceMonitorV2() *schema.Resource {
 
 func resourceMonitorV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -161,12 +164,15 @@ func resourceMonitorV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	d.SetId(monitor.ID)
 
-	return resourceMonitorV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceMonitorV2Read(clientCtx, d, meta)
 }
 
-func resourceMonitorV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceMonitorV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -202,7 +208,9 @@ func resourceMonitorV2Read(_ context.Context, d *schema.ResourceData, meta inter
 
 func resourceMonitorV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -254,7 +262,6 @@ func resourceMonitorV2Update(ctx context.Context, d *schema.ResourceData, meta i
 		}
 		return nil
 	})
-
 	if err != nil {
 		return fmterr.Errorf("unable to update monitor %s: %s", d.Id(), err)
 	}
@@ -264,12 +271,15 @@ func resourceMonitorV2Update(ctx context.Context, d *schema.ResourceData, meta i
 		return diag.FromErr(err)
 	}
 
-	return resourceMonitorV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceMonitorV2Read(clientCtx, d, meta)
 }
 
 func resourceMonitorV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.ElbV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
@@ -277,25 +287,23 @@ func resourceMonitorV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 	log.Printf("[DEBUG] Deleting monitor %s", d.Id())
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	poolID := d.Get("pool_id").(string)
-	err = waitForLBV2viaPool(ctx, networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
+
+	if err := waitForLBV2viaPool(ctx, client, poolID, "ACTIVE", timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
 	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		err = monitors.Delete(networkingClient, d.Id()).ExtractErr()
+		err = monitors.Delete(client, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
 		return nil
 	})
-
 	if err != nil {
 		return fmterr.Errorf("unable to delete monitor %s: %s", d.Id(), err)
 	}
 
-	err = waitForLBV2viaPool(ctx, networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
+	if err := waitForLBV2viaPool(ctx, client, poolID, "ACTIVE", timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
