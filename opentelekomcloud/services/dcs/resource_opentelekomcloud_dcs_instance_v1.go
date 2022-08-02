@@ -3,6 +3,7 @@ package dcs
 import (
 	"context"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -55,7 +56,7 @@ func ResourceDcsInstanceV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"capacity": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeFloat,
 				Required: true,
 				ForceNew: true,
 			},
@@ -332,7 +333,7 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 		Description:          d.Get("description").(string),
 		Engine:               d.Get("engine").(string),
 		EngineVersion:        d.Get("engine_version").(string),
-		Capacity:             d.Get("capacity").(int),
+		Capacity:             d.Get("capacity").(float64),
 		NoPasswordAccess:     noPasswordAccess,
 		Password:             d.Get("password").(string),
 		AccessUser:           d.Get("access_user").(string),
@@ -405,10 +406,15 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 
 	log.Printf("[DEBUG] DCS instance %s: %+v", d.Id(), v)
 
+	capacity := float64(v.Capacity)
+	if v.Capacity == 0 {
+		capacity, _ = strconv.ParseFloat(v.CapacityMinor, 32)
+	}
+
 	mErr := multierror.Append(
 		d.Set("name", v.Name),
 		d.Set("engine", v.Engine),
-		d.Set("capacity", v.Capacity),
+		d.Set("capacity", capacity),
 		d.Set("used_memory", v.UsedMemory),
 		d.Set("max_memory", v.MaxMemory),
 		d.Set("port", v.Port),
@@ -420,8 +426,8 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("vpc_name", v.VPCName),
 		d.Set("created_at", v.CreatedAt),
 		d.Set("product_id", v.ProductID),
-		d.Set("security_group_id", v.SecurityGroupID),
-		d.Set("security_group_name", v.SecurityGroupName),
+		// d.Set("security_group_id", v.SecurityGroupID),
+		// d.Set("security_group_name", v.SecurityGroupName),
 		d.Set("subnet_id", v.SubnetID),
 		d.Set("subnet_name", v.SubnetName),
 		d.Set("user_id", v.UserID),
