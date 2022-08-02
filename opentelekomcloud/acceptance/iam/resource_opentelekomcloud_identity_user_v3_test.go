@@ -207,9 +207,9 @@ resource "opentelekomcloud_identity_user_v3" "user_1" {
 func testAccIdentityV3UserWrongSendEmail(userName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_identity_user_v3" "user_1" {
-  name     = "%s"
-  enabled  = false
-  password = "password123@!"
+  name               = "%s"
+  enabled            = false
+  password           = "password123@!"
   send_welcome_email = true
 }
   `, userName)
