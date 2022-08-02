@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DCS]** Change Capacity from int to float64 (`#1851 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1851>`_)
