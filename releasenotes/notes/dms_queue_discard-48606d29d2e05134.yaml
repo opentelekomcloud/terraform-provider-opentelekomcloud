@@ -1,0 +1,8 @@
+---
+deprecations:
+  - |
+    **[DMS]** Discard ``resource/opentelekomcloud_dms_group_v1`` due to DMS Queue Manager discontinuation
+    (`#1782 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1782>`_)
+  - |
+    **[DMS]** Discard ``resource/opentelekomcloud_dms_queue_v1`` due to DMS Queue Manager discontinuation
+    (`#1782 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1782>`_)
