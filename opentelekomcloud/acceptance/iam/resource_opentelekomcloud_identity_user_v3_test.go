@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -73,6 +74,34 @@ func TestAccIdentityV3User_importBasic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{
 					"password",
 				},
+			},
+		},
+	})
+}
+
+func TestAccCheckIAMV3EmailValidation(t *testing.T) {
+	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccIdentityV3UserWrongEmail(zoneName),
+				ExpectError: regexp.MustCompile(`Error: "email" doesn't comply with email standards+`),
+			},
+		},
+	})
+}
+
+func TestAccCheckIAMV3SendEmailValidation(t *testing.T) {
+	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccIdentityV3UserWrongSendEmail(zoneName),
+				ExpectError: regexp.MustCompile(`"send_welcome_email":+`),
 			},
 		},
 	})
@@ -160,6 +189,28 @@ resource "opentelekomcloud_identity_user_v3" "user_1" {
   enabled  = false
   password = "password123@!"
   email    = "tEst2@acme.org"
+}
+  `, userName)
+}
+
+func testAccIdentityV3UserWrongEmail(userName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  name     = "%s"
+  enabled  = false
+  password = "password123@!"
+  email    = "tEst2@.org"
+}
+  `, userName)
+}
+
+func testAccIdentityV3UserWrongSendEmail(userName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  name     = "%s"
+  enabled  = false
+  password = "password123@!"
+  send_welcome_email = true
 }
   `, userName)
 }
