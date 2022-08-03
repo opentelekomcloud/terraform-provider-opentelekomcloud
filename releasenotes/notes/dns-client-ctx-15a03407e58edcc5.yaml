@@ -1,0 +1,6 @@
+---
+enhancements:
+  - |
+    **[DNS]** Reduce amount of init client requests in ``resource/opentelekomcloud_dns_zone_v2`` (`#1865 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1865>`_)
+  - |
+    **[DNS]** Reduce amount of init client requests in ``resource/opentelekomcloud_dns_recordset_v2`` (`#1865 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1865>`_)

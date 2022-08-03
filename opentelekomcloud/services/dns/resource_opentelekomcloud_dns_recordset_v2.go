@@ -132,9 +132,11 @@ func trimQuotes(s string) string {
 
 func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.DnsV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	zoneID := d.Get("zone_id").(string)
@@ -144,25 +146,27 @@ func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, m
 		log.Printf("[DEBUG] Using non-managed DNS record set, skipping creation")
 		id, _ := getExistingRecordSetID(d, meta)
 		d.SetId(fmt.Sprintf("%s/%s", zoneID, id))
-		return resourceDNSRecordSetV2Read(ctx, d, meta)
+		clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+		return resourceDNSRecordSetV2Read(clientCtx, d, meta)
 	}
 
 	createOpts := getRecordSetCreateOpts(d)
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	recordSet, err := recordsets.Create(dnsClient, zoneID, createOpts).Extract()
+	recordSet, err := recordsets.Create(client, zoneID, createOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud DNS record set: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS record set (%s) to become available", recordSet.ID)
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{"ACTIVE"},
-		Pending:    []string{"PENDING"},
-		Refresh:    waitForDNSRecordSet(dnsClient, zoneID, recordSet.ID),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Target:       []string{"ACTIVE"},
+		Pending:      []string{"PENDING"},
+		Refresh:      waitForDNSRecordSet(client, zoneID, recordSet.ID),
+		Timeout:      d.Timeout(schema.TimeoutCreate),
+		Delay:        5 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -178,26 +182,29 @@ func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, m
 	// set tags
 	tagRaw := d.Get("tags").(map[string]interface{})
 	if len(tagRaw) > 0 {
-		resourceType, err := getDNSRecordSetResourceType(dnsClient, zoneID)
+		resourceType, err := getDNSRecordSetResourceType(client, zoneID)
 		if err != nil {
 			return fmterr.Errorf("error getting resource type of DNS record set %s: %s", recordSet.ID, err)
 		}
 
 		tagList := common.ExpandResourceTags(tagRaw)
-		if tagErr := tags.Create(dnsClient, resourceType, recordSet.ID, tagList).ExtractErr(); tagErr != nil {
+		if tagErr := tags.Create(client, resourceType, recordSet.ID, tagList).ExtractErr(); tagErr != nil {
 			return fmterr.Errorf("error setting tags of DNS record set %s: %s", recordSet.ID, tagErr)
 		}
 	}
 
 	log.Printf("[DEBUG] Created OpenTelekomCloud DNS record set %s: %#v", recordSet.ID, recordSet)
-	return resourceDNSRecordSetV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceDNSRecordSetV2Read(clientCtx, d, meta)
 }
 
-func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSRecordSetV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.DnsV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	// Obtain relevant info from parsing the ID
@@ -206,7 +213,7 @@ func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 
-	n, err := recordsets.Get(dnsClient, zoneID, recordsetID).Extract()
+	n, err := recordsets.Get(client, zoneID, recordsetID).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "record_set")
 	}
@@ -239,11 +246,11 @@ func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	// save tags
-	resourceType, err := getDNSRecordSetResourceType(dnsClient, zoneID)
+	resourceType, err := getDNSRecordSetResourceType(client, zoneID)
 	if err != nil {
 		return fmterr.Errorf("error getting resource type of DNS record set %s: %s", recordsetID, err)
 	}
-	resourceTags, err := tags.Get(dnsClient, resourceType, recordsetID).Extract()
+	resourceTags, err := tags.Get(client, resourceType, recordsetID).Extract()
 	if err != nil {
 		return fmterr.Errorf("error fetching OpenTelekomCloud DNS record set tags: %s", err)
 	}
@@ -258,9 +265,11 @@ func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta 
 
 func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.DnsV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	var updateOpts recordsets.UpdateOpts
@@ -294,19 +303,20 @@ func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, m
 
 	log.Printf("[DEBUG] Updating  record set %s with options: %#v", recordsetID, updateOpts)
 
-	_, err = recordsets.Update(dnsClient, zoneID, recordsetID, updateOpts).Extract()
+	_, err = recordsets.Update(client, zoneID, recordsetID, updateOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud DNS  record set: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS record set (%s) to update", recordsetID)
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{"ACTIVE"},
-		Pending:    []string{"PENDING"},
-		Refresh:    waitForDNSRecordSet(dnsClient, zoneID, recordsetID),
-		Timeout:    d.Timeout(schema.TimeoutUpdate),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Target:       []string{"ACTIVE"},
+		Pending:      []string{"PENDING"},
+		Refresh:      waitForDNSRecordSet(client, zoneID, recordsetID),
+		Timeout:      d.Timeout(schema.TimeoutUpdate),
+		Delay:        5 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -317,24 +327,27 @@ func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	// update tags
-	resourceType, err := getDNSRecordSetResourceType(dnsClient, zoneID)
+	resourceType, err := getDNSRecordSetResourceType(client, zoneID)
 	if err != nil {
 		return fmterr.Errorf("error getting resource type of DNS record set %s: %s", d.Id(), err)
 	}
 
-	tagErr := common.UpdateResourceTags(dnsClient, d, resourceType, recordsetID)
+	tagErr := common.UpdateResourceTags(client, d, resourceType, recordsetID)
 	if tagErr != nil {
 		return fmterr.Errorf("error updating tags of DNS record set %s: %s", d.Id(), tagErr)
 	}
 
-	return resourceDNSRecordSetV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceDNSRecordSetV2Read(clientCtx, d, meta)
 }
 
 func resourceDNSRecordSetV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.DnsV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	shared := d.Get("shared").(bool)
@@ -350,19 +363,20 @@ func resourceDNSRecordSetV2Delete(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	err = recordsets.Delete(dnsClient, zoneID, recordsetID).ExtractErr()
+	err = recordsets.Delete(client, zoneID, recordsetID).ExtractErr()
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud DNS record set: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS record set (%s) to be deleted", recordsetID)
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{"DELETED"},
-		Pending:    []string{"ACTIVE", "PENDING", "ERROR"},
-		Refresh:    waitForDNSRecordSet(dnsClient, zoneID, recordsetID),
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Target:       []string{"DELETED"},
+		Pending:      []string{"ACTIVE", "PENDING", "ERROR"},
+		Refresh:      waitForDNSRecordSet(client, zoneID, recordsetID),
+		Timeout:      d.Timeout(schema.TimeoutDelete),
+		Delay:        5 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -376,9 +390,9 @@ func resourceDNSRecordSetV2Delete(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func waitForDNSRecordSet(dnsClient *golangsdk.ServiceClient, zoneID, recordsetId string) resource.StateRefreshFunc {
+func waitForDNSRecordSet(client *golangsdk.ServiceClient, zoneID, recordsetId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		recordset, err := recordsets.Get(dnsClient, zoneID, recordsetId).Extract()
+		recordset, err := recordsets.Get(client, zoneID, recordsetId).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return recordset, "DELETED", nil
