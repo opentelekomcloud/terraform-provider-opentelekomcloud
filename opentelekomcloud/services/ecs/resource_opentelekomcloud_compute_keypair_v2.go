@@ -64,9 +64,11 @@ func ResourceComputeKeypairV2() *schema.Resource {
 
 func resourceComputeKeypairV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
 	opts := KeyPairCreateOpts{
@@ -94,14 +96,17 @@ func resourceComputeKeypairV2Create(ctx context.Context, d *schema.ResourceData,
 	}
 	d.SetId(opts.Name)
 
-	return resourceComputeKeypairV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceComputeKeypairV2Read(clientCtx, d, meta)
 }
 
-func resourceComputeKeypairV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeKeypairV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
 	kp, err := keypairs.Get(client, d.Id()).Extract()
@@ -121,11 +126,13 @@ func resourceComputeKeypairV2Read(_ context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceComputeKeypairV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeKeypairV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
 	shared := d.Get("shared").(bool)
@@ -141,7 +148,7 @@ func resourceComputeKeypairV2Delete(_ context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func useSharedKeypair(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+func useSharedKeypair(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if d.Id() != "" { // skip if not new resource
 		return nil
 	}
@@ -151,10 +158,13 @@ func useSharedKeypair(_ context.Context, d *schema.ResourceDiff, meta interface{
 	}
 
 	config := meta.(*cfg.Config)
-	client, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		return fmt.Errorf(errCreateV2Client, err)
 	}
+
 	name := d.Get("name").(string)
 	publicKey := d.Get("public_key").(string)
 	exists, err := keyPairExist(client, name, publicKey)

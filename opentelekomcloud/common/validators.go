@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"net"
+	"net/mail"
 	"regexp"
 	"strconv"
 	"strings"
@@ -373,5 +374,14 @@ func ValidateASGroupListenerID(v interface{}, k string) (ws []string, errors []e
 		return
 	}
 	errors = append(errors, fmt.Errorf("%q supports binding up to 3 ELB listeners which are separated by a comma", k))
+	return
+}
+
+func ValidateEmail(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	_, err := mail.ParseAddress(value)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q doesn't comply with email standards: %s", k, value))
+	}
 	return
 }

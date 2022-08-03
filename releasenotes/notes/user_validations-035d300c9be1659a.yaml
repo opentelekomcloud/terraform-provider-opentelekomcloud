@@ -1,0 +1,9 @@
+---
+enhancements:
+  - |
+    **[IAM]** Add email validation for ``resource/opentelekomcloud_identity_user_v3`` (`#1855 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1855>`_)
+fixes:
+  - |
+    **[IAM]** Fix for ``resource/opentelekomcloud_identity_user_v3`` updateResource if `email` was deleted and
+    `welcome_message` was forced to be sent  (`#1855 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1855>`_)
+

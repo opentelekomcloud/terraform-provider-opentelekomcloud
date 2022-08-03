@@ -1,0 +1,6 @@
+---
+enhancements:
+  - |
+    **[ECS]** Reduce amount of init client requests in ``resource/opentelekomcloud_compute_instance_v2`` (`#1857 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1857>`_)
+  - |
+    **[ECS]** Reduce amount of init client requests in ``resource/opentelekomcloud_compute_keypair_v2`` (`#1857 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1857>`_)
