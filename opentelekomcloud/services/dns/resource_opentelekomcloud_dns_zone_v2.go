@@ -126,9 +126,11 @@ func resourceDNSRouter(d *schema.ResourceData) map[string]string {
 
 func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.DnsV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	zone_type := d.Get("type").(string)
@@ -156,19 +158,20 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	n, err := zones.Create(dnsClient, createOpts).Extract()
+	n, err := zones.Create(client, createOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud DNS zone: %s", logHttpError(err))
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS Zone (%s) to become available", n.ID)
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{"ACTIVE"},
-		Pending:    []string{"PENDING"},
-		Refresh:    waitForDNSZone(dnsClient, n.ID),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Target:       []string{"ACTIVE"},
+		Pending:      []string{"PENDING"},
+		Refresh:      waitForDNSZone(client, n.ID),
+		Timeout:      d.Timeout(schema.TimeoutCreate),
+		Delay:        5 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -187,7 +190,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 				// Skip the first router
 				if i > 0 {
 					log.Printf("[DEBUG] Creating AssociateZone Options: %#v", routerList[i])
-					_, err := zones.AssociateZone(dnsClient, n.ID, routerList[i]).Extract()
+					_, err := zones.AssociateZone(client, n.ID, routerList[i]).Extract()
 					if err != nil {
 						return fmterr.Errorf("error AssociateZone: %s", err)
 					}
@@ -195,12 +198,13 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 					log.Printf("[DEBUG] Waiting for AssociateZone (%s) to Router (%s) become ACTIVE",
 						n.ID, routerList[i].RouterID)
 					stateRouterConf := &resource.StateChangeConf{
-						Target:     []string{"ACTIVE"},
-						Pending:    []string{"PENDING"},
-						Refresh:    waitForDNSZoneRouter(dnsClient, n.ID, routerList[i].RouterID),
-						Timeout:    d.Timeout(schema.TimeoutCreate),
-						Delay:      5 * time.Second,
-						MinTimeout: 3 * time.Second,
+						Target:       []string{"ACTIVE"},
+						Pending:      []string{"PENDING"},
+						Refresh:      waitForDNSZoneRouter(client, n.ID, routerList[i].RouterID),
+						Timeout:      d.Timeout(schema.TimeoutCreate),
+						Delay:        5 * time.Second,
+						MinTimeout:   3 * time.Second,
+						PollInterval: 2,
 					}
 
 					_, err = stateRouterConf.WaitForStateContext(ctx)
@@ -221,23 +225,26 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	tagRaw := d.Get("tags").(map[string]interface{})
 	if len(tagRaw) > 0 {
 		taglist := common.ExpandResourceTags(tagRaw)
-		if tagErr := tags.Create(dnsClient, serviceMap[zone_type], n.ID, taglist).ExtractErr(); tagErr != nil {
+		if tagErr := tags.Create(client, serviceMap[zone_type], n.ID, taglist).ExtractErr(); tagErr != nil {
 			return fmterr.Errorf("error setting tags of DNS zone %s: %s", n.ID, tagErr)
 		}
 	}
 
 	log.Printf("[DEBUG] Created OpenTelekomCloud DNS Zone %s: %#v", n.ID, n)
-	return resourceDNSZoneV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceDNSZoneV2Read(clientCtx, d, meta)
 }
 
-func resourceDNSZoneV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.DnsV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	n, err := zones.Get(dnsClient, d.Id()).Extract()
+	n, err := zones.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "zone")
 	}
@@ -261,7 +268,7 @@ func resourceDNSZoneV2Read(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	// save tags
-	resourceTags, err := tags.Get(dnsClient, serviceMap[n.ZoneType], d.Id()).Extract()
+	resourceTags, err := tags.Get(client, serviceMap[n.ZoneType], d.Id()).Extract()
 	if err != nil {
 		return fmterr.Errorf("error fetching OpenTelekomCloud DNS zone tags: %s", err)
 	}
@@ -276,9 +283,11 @@ func resourceDNSZoneV2Read(_ context.Context, d *schema.ResourceData, meta inter
 
 func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.DnsV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	zone_type := d.Get("type").(string)
@@ -304,19 +313,20 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Updating Zone %s with options: %#v", d.Id(), updateOpts)
 
-	_, err = zones.Update(dnsClient, d.Id(), updateOpts).Extract()
+	_, err = zones.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud DNS Zone: %s", logHttpError(err))
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS Zone (%s) to update", d.Id())
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{"ACTIVE"},
-		Pending:    []string{"PENDING"},
-		Refresh:    waitForDNSZone(dnsClient, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutUpdate),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Target:       []string{"ACTIVE"},
+		Pending:      []string{"PENDING"},
+		Refresh:      waitForDNSZone(client, d.Id()),
+		Timeout:      d.Timeout(schema.TimeoutUpdate),
+		Delay:        5 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -327,7 +337,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	if d.HasChange("router") {
 		// when updating private zone
 		if zone_type == "private" {
-			associateList, disassociateList, err := resourceGetDNSRouters(dnsClient, d)
+			associateList, disassociateList, err := resourceGetDNSRouters(client, d)
 			if err != nil {
 				return fmterr.Errorf("error getting OpenTelekomCloud DNS Zone Router: %s", err)
 			}
@@ -335,7 +345,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 				// AssociateZone
 				for i := range associateList {
 					log.Printf("[DEBUG] Updating AssociateZone Options: %#v", associateList[i])
-					_, err := zones.AssociateZone(dnsClient, d.Id(), associateList[i]).Extract()
+					_, err := zones.AssociateZone(client, d.Id(), associateList[i]).Extract()
 					if err != nil {
 						return fmterr.Errorf("error AssociateZone: %s", err)
 					}
@@ -343,12 +353,13 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 					log.Printf("[DEBUG] Waiting for AssociateZone (%s) to Router (%s) become ACTIVE",
 						d.Id(), associateList[i].RouterID)
 					stateRouterConf := &resource.StateChangeConf{
-						Target:     []string{"ACTIVE"},
-						Pending:    []string{"PENDING"},
-						Refresh:    waitForDNSZoneRouter(dnsClient, d.Id(), associateList[i].RouterID),
-						Timeout:    d.Timeout(schema.TimeoutUpdate),
-						Delay:      5 * time.Second,
-						MinTimeout: 3 * time.Second,
+						Target:       []string{"ACTIVE"},
+						Pending:      []string{"PENDING"},
+						Refresh:      waitForDNSZoneRouter(client, d.Id(), associateList[i].RouterID),
+						Timeout:      d.Timeout(schema.TimeoutUpdate),
+						Delay:        5 * time.Second,
+						MinTimeout:   3 * time.Second,
+						PollInterval: 2,
 					}
 
 					_, err = stateRouterConf.WaitForStateContext(ctx)
@@ -362,7 +373,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 				// DisassociateZone
 				for j := range disassociateList {
 					log.Printf("[DEBUG] Updating DisassociateZone Options: %#v", disassociateList[j])
-					_, err := zones.DisassociateZone(dnsClient, d.Id(), disassociateList[j]).Extract()
+					_, err := zones.DisassociateZone(client, d.Id(), disassociateList[j]).Extract()
 					if err != nil {
 						return fmterr.Errorf("error DisassociateZone: %s", err)
 					}
@@ -370,12 +381,13 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 					log.Printf("[DEBUG] Waiting for DisassociateZone (%s) to Router (%s) become DELETED",
 						d.Id(), disassociateList[j].RouterID)
 					stateRouterConf := &resource.StateChangeConf{
-						Target:     []string{"DELETED"},
-						Pending:    []string{"ACTIVE", "PENDING", "ERROR"},
-						Refresh:    waitForDNSZoneRouter(dnsClient, d.Id(), disassociateList[j].RouterID),
-						Timeout:    d.Timeout(schema.TimeoutUpdate),
-						Delay:      5 * time.Second,
-						MinTimeout: 3 * time.Second,
+						Target:       []string{"DELETED"},
+						Pending:      []string{"ACTIVE", "PENDING", "ERROR"},
+						Refresh:      waitForDNSZoneRouter(client, d.Id(), disassociateList[j].RouterID),
+						Timeout:      d.Timeout(schema.TimeoutUpdate),
+						Delay:        5 * time.Second,
+						MinTimeout:   3 * time.Second,
+						PollInterval: 2,
 					}
 
 					_, err = stateRouterConf.WaitForStateContext(ctx)
@@ -389,22 +401,25 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	// update tags
-	tagErr := common.UpdateResourceTags(dnsClient, d, serviceMap[zone_type], d.Id())
+	tagErr := common.UpdateResourceTags(client, d, serviceMap[zone_type], d.Id())
 	if tagErr != nil {
 		return fmterr.Errorf("error updating tags of DNS zone %s: %s", d.Id(), tagErr)
 	}
 
-	return resourceDNSZoneV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceDNSZoneV2Read(clientCtx, d, meta)
 }
 
 func resourceDNSZoneV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.DnsV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	_, err = zones.Delete(dnsClient, d.Id()).Extract()
+	_, err = zones.Delete(client, d.Id()).Extract()
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud DNS Zone: %s", err)
 	}
@@ -413,11 +428,12 @@ func resourceDNSZoneV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 	stateConf := &resource.StateChangeConf{
 		Target: []string{"DELETED"},
 		// we allow to try to delete ERROR zone
-		Pending:    []string{"ACTIVE", "PENDING", "ERROR"},
-		Refresh:    waitForDNSZone(dnsClient, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Pending:      []string{"ACTIVE", "PENDING", "ERROR"},
+		Refresh:      waitForDNSZone(client, d.Id()),
+		Timeout:      d.Timeout(schema.TimeoutDelete),
+		Delay:        5 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -437,9 +453,9 @@ func parseStatus(rawStatus string) string {
 	return splits[0]
 }
 
-func waitForDNSZone(dnsClient *golangsdk.ServiceClient, zoneId string) resource.StateRefreshFunc {
+func waitForDNSZone(client *golangsdk.ServiceClient, zoneId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		zone, err := zones.Get(dnsClient, zoneId).Extract()
+		zone, err := zones.Get(client, zoneId).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return zone, "DELETED", nil
@@ -473,9 +489,9 @@ func getDNSRouters(d *schema.ResourceData) []zones.RouterOpts {
 	return nil
 }
 
-func waitForDNSZoneRouter(dnsClient *golangsdk.ServiceClient, zoneId string, routerId string) resource.StateRefreshFunc {
+func waitForDNSZoneRouter(client *golangsdk.ServiceClient, zoneId string, routerId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		zone, err := zones.Get(dnsClient, zoneId).Extract()
+		zone, err := zones.Get(client, zoneId).Extract()
 		if err != nil {
 			return nil, "", err
 		}
@@ -490,9 +506,9 @@ func waitForDNSZoneRouter(dnsClient *golangsdk.ServiceClient, zoneId string, rou
 	}
 }
 
-func resourceGetDNSRouters(dnsClient *golangsdk.ServiceClient, d *schema.ResourceData) ([]zones.RouterOpts, []zones.RouterOpts, error) {
+func resourceGetDNSRouters(client *golangsdk.ServiceClient, d *schema.ResourceData) ([]zones.RouterOpts, []zones.RouterOpts, error) {
 	// get zone info from api
-	n, err := zones.Get(dnsClient, d.Id()).Extract()
+	n, err := zones.Get(client, d.Id()).Extract()
 	if err != nil {
 		return nil, nil, common.CheckDeleted(d, err, "zone")
 	}
