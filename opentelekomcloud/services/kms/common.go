@@ -7,6 +7,7 @@ import (
 
 const (
 	errCreationClient = "error creating OpenTelekomCloud KMSv1 client: %w"
+	keyClientV1       = "kms-v1-client"
 )
 
 func ResourceKMSGrantV1ParseID(componentID string) (string, string, error) {
