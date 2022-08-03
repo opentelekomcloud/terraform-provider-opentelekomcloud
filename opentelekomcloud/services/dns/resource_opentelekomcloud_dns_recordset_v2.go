@@ -195,7 +195,7 @@ func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, m
 
 	log.Printf("[DEBUG] Created OpenTelekomCloud DNS record set %s: %#v", recordSet.ID, recordSet)
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
-	return resourceDNSZoneV2Read(clientCtx, d, meta)
+	return resourceDNSRecordSetV2Read(clientCtx, d, meta)
 }
 
 func resourceDNSRecordSetV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -338,7 +338,7 @@ func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
-	return resourceDNSZoneV2Read(clientCtx, d, meta)
+	return resourceDNSRecordSetV2Read(clientCtx, d, meta)
 }
 
 func resourceDNSRecordSetV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
