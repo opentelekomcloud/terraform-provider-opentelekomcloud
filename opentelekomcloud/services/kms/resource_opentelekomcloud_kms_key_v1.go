@@ -123,9 +123,11 @@ func resourceKmsKeyValidation(d *schema.ResourceData) error {
 
 func resourceKmsKeyV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.KmsKeyV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.KmsKeyV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	if err := resourceKmsKeyValidation(d); err != nil {
@@ -173,12 +175,13 @@ func resourceKmsKeyV1Create(ctx context.Context, d *schema.ResourceData, meta in
 	log.Printf("[DEBUG] Waiting for key (%s) to become enabled", key.KeyID)
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{WaitingForEnableState, DisabledState},
-		Target:     []string{EnabledState},
-		Refresh:    keyV1StateRefreshFunc(client, key.KeyID),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      10 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Pending:      []string{WaitingForEnableState, DisabledState},
+		Target:       []string{EnabledState},
+		Refresh:      keyV1StateRefreshFunc(client, key.KeyID),
+		Timeout:      d.Timeout(schema.TimeoutCreate),
+		Delay:        10 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -237,15 +240,17 @@ func resourceKmsKeyV1Create(ctx context.Context, d *schema.ResourceData, meta in
 
 	// Store the key ID now
 	d.SetId(key.KeyID)
-
-	return resourceKmsKeyV1Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
+	return resourceKmsKeyV1Read(clientCtx, d, meta)
 }
 
-func resourceKmsKeyV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKmsKeyV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.KmsKeyV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.KmsKeyV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	key, err := keys.Get(client, d.Id()).ExtractKeyInfo()
@@ -305,9 +310,11 @@ func resourceKmsKeyV1Read(_ context.Context, d *schema.ResourceData, meta interf
 
 func resourceKmsKeyV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.KmsKeyV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.KmsKeyV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	if d.HasChange("key_alias") {
@@ -394,14 +401,17 @@ func resourceKmsKeyV1Update(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	return resourceKmsKeyV1Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
+	return resourceKmsKeyV1Read(clientCtx, d, meta)
 }
 
-func resourceKmsKeyV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKmsKeyV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.KmsKeyV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.KmsKeyV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	key, err := keys.Get(client, d.Id()).ExtractKeyInfo()
