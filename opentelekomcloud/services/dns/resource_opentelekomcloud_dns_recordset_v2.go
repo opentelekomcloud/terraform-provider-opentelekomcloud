@@ -146,7 +146,8 @@ func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, m
 		log.Printf("[DEBUG] Using non-managed DNS record set, skipping creation")
 		id, _ := getExistingRecordSetID(d, meta)
 		d.SetId(fmt.Sprintf("%s/%s", zoneID, id))
-		return resourceDNSRecordSetV2Read(ctx, d, meta)
+		clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+		return resourceDNSRecordSetV2Read(clientCtx, d, meta)
 	}
 
 	createOpts := getRecordSetCreateOpts(d)
@@ -165,7 +166,7 @@ func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, m
 		Timeout:      d.Timeout(schema.TimeoutCreate),
 		Delay:        5 * time.Second,
 		MinTimeout:   3 * time.Second,
-		PollInterval: 2,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -315,7 +316,7 @@ func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, m
 		Timeout:      d.Timeout(schema.TimeoutUpdate),
 		Delay:        5 * time.Second,
 		MinTimeout:   3 * time.Second,
-		PollInterval: 2,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -375,7 +376,7 @@ func resourceDNSRecordSetV2Delete(ctx context.Context, d *schema.ResourceData, m
 		Timeout:      d.Timeout(schema.TimeoutDelete),
 		Delay:        5 * time.Second,
 		MinTimeout:   3 * time.Second,
-		PollInterval: 2,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)

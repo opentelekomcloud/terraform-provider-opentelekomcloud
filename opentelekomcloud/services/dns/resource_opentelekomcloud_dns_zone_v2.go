@@ -171,7 +171,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 		Timeout:      d.Timeout(schema.TimeoutCreate),
 		Delay:        5 * time.Second,
 		MinTimeout:   3 * time.Second,
-		PollInterval: 2,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -204,7 +204,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 						Timeout:      d.Timeout(schema.TimeoutCreate),
 						Delay:        5 * time.Second,
 						MinTimeout:   3 * time.Second,
-						PollInterval: 2,
+						PollInterval: 2 * time.Second,
 					}
 
 					_, err = stateRouterConf.WaitForStateContext(ctx)
@@ -326,7 +326,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 		Timeout:      d.Timeout(schema.TimeoutUpdate),
 		Delay:        5 * time.Second,
 		MinTimeout:   3 * time.Second,
-		PollInterval: 2,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -359,7 +359,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 						Timeout:      d.Timeout(schema.TimeoutUpdate),
 						Delay:        5 * time.Second,
 						MinTimeout:   3 * time.Second,
-						PollInterval: 2,
+						PollInterval: 2 * time.Second,
 					}
 
 					_, err = stateRouterConf.WaitForStateContext(ctx)
@@ -387,7 +387,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 						Timeout:      d.Timeout(schema.TimeoutUpdate),
 						Delay:        5 * time.Second,
 						MinTimeout:   3 * time.Second,
-						PollInterval: 2,
+						PollInterval: 2 * time.Second,
 					}
 
 					_, err = stateRouterConf.WaitForStateContext(ctx)
@@ -433,7 +433,7 @@ func resourceDNSZoneV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 		Timeout:      d.Timeout(schema.TimeoutDelete),
 		Delay:        5 * time.Second,
 		MinTimeout:   3 * time.Second,
-		PollInterval: 2,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
