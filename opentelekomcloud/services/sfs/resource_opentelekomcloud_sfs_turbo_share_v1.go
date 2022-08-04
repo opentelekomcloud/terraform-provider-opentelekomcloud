@@ -109,9 +109,11 @@ func ResourceSFSTurboShareV1() *schema.Resource {
 
 func resourceSFSTurboShareV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SfsTurboV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.SfsTurboV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	createOpts := shares.CreateOpts{
@@ -135,12 +137,13 @@ func resourceSFSTurboShareV1Create(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"100"},
-		Target:     []string{"200"},
-		Refresh:    waitForSFSTurboStatus(client, share.ID),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      20 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Pending:      []string{"100"},
+		Target:       []string{"200"},
+		Refresh:      waitForSFSTurboStatus(client, share.ID),
+		Timeout:      d.Timeout(schema.TimeoutCreate),
+		Delay:        20 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
@@ -149,14 +152,17 @@ func resourceSFSTurboShareV1Create(ctx context.Context, d *schema.ResourceData, 
 
 	d.SetId(share.ID)
 
-	return resourceSFSTurboShareV1Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
+	return resourceSFSTurboShareV1Read(clientCtx, d, meta)
 }
 
-func resourceSFSTurboShareV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSFSTurboShareV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SfsTurboV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.SfsTurboV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	share, err := shares.Get(client, d.Id()).Extract()
@@ -195,9 +201,11 @@ func resourceSFSTurboShareV1Read(_ context.Context, d *schema.ResourceData, meta
 
 func resourceSFSTurboShareV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SfsTurboV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.SfsTurboV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	if d.HasChange("size") {
@@ -215,12 +223,13 @@ func resourceSFSTurboShareV1Update(ctx context.Context, d *schema.ResourceData, 
 		}
 
 		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"121"},
-			Target:     []string{"221", "232"},
-			Refresh:    waitForSFSTurboSubStatus(client, d.Id()),
-			Timeout:    d.Timeout(schema.TimeoutDelete),
-			Delay:      10 * time.Second,
-			MinTimeout: 5 * time.Second,
+			Pending:      []string{"121"},
+			Target:       []string{"221", "232"},
+			Refresh:      waitForSFSTurboSubStatus(client, d.Id()),
+			Timeout:      d.Timeout(schema.TimeoutDelete),
+			Delay:        10 * time.Second,
+			MinTimeout:   5 * time.Second,
+			PollInterval: 2 * time.Second,
 		}
 
 		_, err = stateConf.WaitForStateContext(ctx)
@@ -242,12 +251,13 @@ func resourceSFSTurboShareV1Update(ctx context.Context, d *schema.ResourceData, 
 		}
 
 		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"121"},
-			Target:     []string{"221", "232"},
-			Refresh:    waitForSFSTurboSubStatus(client, d.Id()),
-			Timeout:    d.Timeout(schema.TimeoutDelete),
-			Delay:      10 * time.Second,
-			MinTimeout: 5 * time.Second,
+			Pending:      []string{"121"},
+			Target:       []string{"221", "232"},
+			Refresh:      waitForSFSTurboSubStatus(client, d.Id()),
+			Timeout:      d.Timeout(schema.TimeoutDelete),
+			Delay:        10 * time.Second,
+			MinTimeout:   5 * time.Second,
+			PollInterval: 2 * time.Second,
 		}
 
 		_, err = stateConf.WaitForStateContext(ctx)
@@ -256,14 +266,17 @@ func resourceSFSTurboShareV1Update(ctx context.Context, d *schema.ResourceData, 
 		}
 	}
 
-	return resourceSFSTurboShareV1Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
+	return resourceSFSTurboShareV1Read(clientCtx, d, meta)
 }
 
 func resourceSFSTurboShareV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SfsTurboV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.SfsTurboV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	if err := shares.Delete(client, d.Id()).ExtractErr(); err != nil {
@@ -271,12 +284,13 @@ func resourceSFSTurboShareV1Delete(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"100", "200"},
-		Target:     []string{"deleted"},
-		Refresh:    waitForSFSTurboStatus(client, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Pending:      []string{"100", "200"},
+		Target:       []string{"deleted"},
+		Refresh:      waitForSFSTurboStatus(client, d.Id()),
+		Timeout:      d.Timeout(schema.TimeoutDelete),
+		Delay:        5 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
