@@ -113,6 +113,13 @@ func resourceIdentityCredentialV3Create(ctx context.Context, d *schema.ResourceD
 		if err = mErr.ErrorOrNil(); err != nil {
 			return fmterr.Errorf("error setting identity access key fields: %s", err)
 		}
+	} else {
+		mErr := multierror.Append(nil,
+			d.Set("secret", credential.SecretKey),
+		)
+		if err = mErr.ErrorOrNil(); err != nil {
+			return fmterr.Errorf("error setting identity access key fields: %s", err)
+		}
 	}
 
 	return resourceIdentityCredentialV3Read(ctx, d, meta)

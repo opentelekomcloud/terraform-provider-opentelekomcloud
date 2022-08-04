@@ -1,0 +1,4 @@
+---
+security:
+  - |
+    **[IAM]** Make AKSK encryption optional for ``resource/opentelekomcloud_identity_credential_v3`` (`#1869 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1869>`_)
