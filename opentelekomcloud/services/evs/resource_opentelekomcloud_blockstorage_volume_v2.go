@@ -171,11 +171,11 @@ func resourceContainerTags(d *schema.ResourceData) map[string]string {
 
 func resourceBlockStorageVolumeV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
 		return config.BlockStorageV2Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
+		return fmterr.Errorf(errCreationClientV2, err)
 	}
 
 	metadata := resourceContainerMetadataV2(d)
@@ -233,17 +233,17 @@ func resourceBlockStorageVolumeV2Create(ctx context.Context, d *schema.ResourceD
 	// Store the ID now
 	d.SetId(v.ID)
 
-	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
 	return resourceBlockStorageVolumeV2Read(clientCtx, d, meta)
 }
 
 func resourceBlockStorageVolumeV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
 		return config.BlockStorageV2Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
+		return fmterr.Errorf(errCreationClientV2, err)
 	}
 
 	v, err := volumes.Get(client, d.Id()).Extract()
@@ -330,11 +330,11 @@ OUTER:
 
 func resourceBlockStorageVolumeV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
 		return config.BlockStorageV2Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
+		return fmterr.Errorf(errCreationClientV2, err)
 	}
 
 	updateOpts := volumes.UpdateOpts{
@@ -378,7 +378,7 @@ func resourceBlockStorageVolumeV2Update(ctx context.Context, d *schema.ResourceD
 		}
 	}
 
-	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
 	return resourceBlockStorageVolumeV2Read(clientCtx, d, meta)
 }
 
@@ -397,11 +397,11 @@ func extendSize(d *schema.ResourceData, client *golangsdk.ServiceClient) error {
 
 func resourceBlockStorageVolumeV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
 		return config.BlockStorageV2Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
+		return fmterr.Errorf(errCreationClientV2, err)
 	}
 
 	v, err := volumes.Get(client, d.Id()).Extract()
