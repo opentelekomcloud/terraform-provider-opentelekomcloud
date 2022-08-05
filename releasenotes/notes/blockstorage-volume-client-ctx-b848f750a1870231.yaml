@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[EVS]** Reduce amount of init client requests in ``resource/opentelekomcloud_blockstorage_volume_v2`` (`#1871 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1871>`_)
