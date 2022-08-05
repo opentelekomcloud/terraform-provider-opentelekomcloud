@@ -171,10 +171,13 @@ func resourceContainerTags(d *schema.ResourceData) map[string]string {
 
 func resourceBlockStorageVolumeV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.BlockStorageV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
+		return fmterr.Errorf(errCreationClientV2, err)
 	}
+
 	metadata := resourceContainerMetadataV2(d)
 	if d.Get("device_type").(string) == "SCSI" {
 		metadata["hw:passthrough"] = "true"
@@ -195,7 +198,7 @@ func resourceBlockStorageVolumeV2Create(ctx context.Context, d *schema.ResourceD
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	v, err := volumes.Create(blockStorageClient, createOpts).Extract()
+	v, err := volumes.Create(client, createOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud volume: %s", err)
 	}
@@ -207,12 +210,13 @@ func resourceBlockStorageVolumeV2Create(ctx context.Context, d *schema.ResourceD
 		v.ID)
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"downloading", "creating"},
-		Target:     []string{"available"},
-		Refresh:    VolumeV2StateRefreshFunc(blockStorageClient, v.ID),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      10 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Pending:      []string{"downloading", "creating"},
+		Target:       []string{"available"},
+		Refresh:      VolumeV2StateRefreshFunc(client, v.ID),
+		Timeout:      d.Timeout(schema.TimeoutCreate),
+		Delay:        10 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
@@ -229,17 +233,20 @@ func resourceBlockStorageVolumeV2Create(ctx context.Context, d *schema.ResourceD
 	// Store the ID now
 	d.SetId(v.ID)
 
-	return resourceBlockStorageVolumeV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceBlockStorageVolumeV2Read(clientCtx, d, meta)
 }
 
-func resourceBlockStorageVolumeV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockStorageVolumeV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.BlockStorageV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
+		return fmterr.Errorf(errCreationClientV2, err)
 	}
 
-	v, err := volumes.Get(blockStorageClient, d.Id()).Extract()
+	v, err := volumes.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "volume")
 	}
@@ -323,9 +330,11 @@ OUTER:
 
 func resourceBlockStorageVolumeV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.BlockStorageV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
+		return fmterr.Errorf(errCreationClientV2, err)
 	}
 
 	updateOpts := volumes.UpdateOpts{
@@ -337,7 +346,7 @@ func resourceBlockStorageVolumeV2Update(ctx context.Context, d *schema.ResourceD
 		updateOpts.Metadata = resourceVolumeMetadataV2(d)
 	}
 
-	_, err = volumes.Update(blockStorageClient, d.Id(), updateOpts).Extract()
+	_, err = volumes.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud volume: %s", err)
 	}
@@ -349,17 +358,18 @@ func resourceBlockStorageVolumeV2Update(ctx context.Context, d *schema.ResourceD
 	}
 
 	if d.HasChange("size") {
-		if err := extendSize(d, blockStorageClient); err != nil {
+		if err := extendSize(d, client); err != nil {
 			return diag.FromErr(err)
 		}
 
 		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"extending"},
-			Target:     []string{"available", "in-use"},
-			Refresh:    VolumeV2StateRefreshFunc(blockStorageClient, d.Id()),
-			Timeout:    d.Timeout(schema.TimeoutDelete),
-			Delay:      10 * time.Second,
-			MinTimeout: 3 * time.Second,
+			Pending:      []string{"extending"},
+			Target:       []string{"available", "in-use"},
+			Refresh:      VolumeV2StateRefreshFunc(client, d.Id()),
+			Timeout:      d.Timeout(schema.TimeoutDelete),
+			Delay:        10 * time.Second,
+			MinTimeout:   3 * time.Second,
+			PollInterval: 2 * time.Second,
 		}
 
 		_, err = stateConf.WaitForStateContext(ctx)
@@ -368,7 +378,8 @@ func resourceBlockStorageVolumeV2Update(ctx context.Context, d *schema.ResourceD
 		}
 	}
 
-	return resourceBlockStorageVolumeV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceBlockStorageVolumeV2Read(clientCtx, d, meta)
 }
 
 func extendSize(d *schema.ResourceData, client *golangsdk.ServiceClient) error {
@@ -386,12 +397,14 @@ func extendSize(d *schema.ResourceData, client *golangsdk.ServiceClient) error {
 
 func resourceBlockStorageVolumeV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.BlockStorageV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
+		return fmterr.Errorf(errCreationClientV2, err)
 	}
 
-	v, err := volumes.Get(blockStorageClient, d.Id()).Extract()
+	v, err := volumes.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "volume")
 	}
@@ -410,12 +423,13 @@ func resourceBlockStorageVolumeV2Delete(ctx context.Context, d *schema.ResourceD
 			}
 
 			stateConf := &resource.StateChangeConf{
-				Pending:    []string{"in-use", "attaching", "detaching"},
-				Target:     []string{"available"},
-				Refresh:    VolumeV2StateRefreshFunc(blockStorageClient, d.Id()),
-				Timeout:    d.Timeout(schema.TimeoutDelete),
-				Delay:      10 * time.Second,
-				MinTimeout: 3 * time.Second,
+				Pending:      []string{"in-use", "attaching", "detaching"},
+				Target:       []string{"available"},
+				Refresh:      VolumeV2StateRefreshFunc(client, d.Id()),
+				Timeout:      d.Timeout(schema.TimeoutDelete),
+				Delay:        10 * time.Second,
+				MinTimeout:   3 * time.Second,
+				PollInterval: 2 * time.Second,
 			}
 
 			_, err = stateConf.WaitForStateContext(ctx)
@@ -435,7 +449,7 @@ func resourceBlockStorageVolumeV2Delete(ctx context.Context, d *schema.ResourceD
 	// in a "deleting" state from when the instance was terminated.
 	// If this is true, just move on. It'll eventually delete.
 	if v.Status != "deleting" {
-		if err := volumes.Delete(blockStorageClient, d.Id(), deleteOpts).ExtractErr(); err != nil {
+		if err := volumes.Delete(client, d.Id(), deleteOpts).ExtractErr(); err != nil {
 			return common.CheckDeletedDiag(d, err, "volume")
 		}
 	}
@@ -444,12 +458,13 @@ func resourceBlockStorageVolumeV2Delete(ctx context.Context, d *schema.ResourceD
 	log.Printf("[DEBUG] Waiting for volume (%s) to delete", d.Id())
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"deleting", "downloading", "available"},
-		Target:     []string{"deleted"},
-		Refresh:    VolumeV2StateRefreshFunc(blockStorageClient, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      10 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Pending:      []string{"deleting", "downloading", "available"},
+		Target:       []string{"deleted"},
+		Refresh:      VolumeV2StateRefreshFunc(client, d.Id()),
+		Timeout:      d.Timeout(schema.TimeoutDelete),
+		Delay:        10 * time.Second,
+		MinTimeout:   3 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
