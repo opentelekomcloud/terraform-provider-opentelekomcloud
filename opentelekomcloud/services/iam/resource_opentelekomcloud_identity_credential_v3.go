@@ -44,8 +44,9 @@ func ResourceIdentityCredentialV3() *schema.Resource {
 				Sensitive: true,
 			},
 			"secret": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"pgp_key": {
 				Type:     schema.TypeString,
@@ -115,6 +116,7 @@ func resourceIdentityCredentialV3Create(ctx context.Context, d *schema.ResourceD
 		}
 	} else {
 		mErr := multierror.Append(nil,
+			d.Set("access", credential.AccessKey),
 			d.Set("secret", credential.SecretKey),
 		)
 		if err = mErr.ErrorOrNil(); err != nil {

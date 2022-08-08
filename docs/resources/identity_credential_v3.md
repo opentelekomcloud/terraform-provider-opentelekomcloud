@@ -52,7 +52,8 @@ The following attributes are exported:
 
 * `access` - Access key ID.
 
-* `secret` - The encrypted secret, base64 encoded. The encrypted secret may be decrypted using the command
+* `secret` - Secret key ID. If `pgp_key` is not set, secret will be in plain text.
+  The encrypted secret, base64 encoded. The encrypted secret may be decrypted using the command
   line, for example: `terraform output encrypted_secret | base64 --decode | keybase pgp decrypt`.
 
 * `create_time` - Time of the access key creation.

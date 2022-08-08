@@ -35,7 +35,7 @@ func TestAccIdentityV3Credential_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIdentityV3CredentialKeybase,
+				Config: testAccIdentityV3CredentialNoPGP,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("opentelekomcloud_identity_credential_v3.aksk", "access"),
 					resource.TestCheckResourceAttrSet("opentelekomcloud_identity_credential_v3.aksk", "secret"),
@@ -94,10 +94,9 @@ resource opentelekomcloud_identity_credential_v3 aksk {
   pgp_key = "mDMEYs6CMxYJKwYBBAHaRw8BAQdAoF5tLs+wvwvF+A5+mAfdGLrwz3bKdKsUA3iuxQcDUZe0JFZsYWRpbWlyIFZzaGl2a292IDxlbnJyb3VAZ21haWwuY29tPoiZBBMWCgBBFiEEDdv9KvPC2UDkSDiCKWyGs27oaG0FAmLOgjMCGwMFCQPCZwAFCwkIBwICIgIGFQoJCAsCBBYCAwECHgcCF4AACgkQKWyGs27oaG1VKgD8CBsP+kSZsuVXsa+OV1l3bOu1Ql1Ep7iTljk6ih+AIUUBAMIt2Xbm4UjN1RW2Z6lOOJqiMTDKZQ3y37bXdC74UKYOuDgEYs6CMxIKKwYBBAGXVQEFAQEHQE8bDiDqHGlFvwadjLXQ/FSYCWt4Hk7uOAoAdRsR+L8pAwEIB4h+BBgWCgAmFiEEDdv9KvPC2UDkSDiCKWyGs27oaG0FAmLOgjMCGwwFCQPCZwAACgkQKWyGs27oaG0FpQEApm+XVsFSaWA/cfoJadrWQwZzG3+Ifnbw/+yWk9FTxZIA/1FTrsAp/5ajz5O+knRQp6gop1lToK1HzFVgQa12gCQL"
 }
 `
-	testAccIdentityV3CredentialKeybase = `
+	testAccIdentityV3CredentialNoPGP = `
 resource opentelekomcloud_identity_credential_v3 aksk {
   description = "This is one and unique test AK/SK"
-  pgp_key = "keybase:enrrou"
 }
 `
 	testAccIdentityV3CredentialUpdateStatus = `
