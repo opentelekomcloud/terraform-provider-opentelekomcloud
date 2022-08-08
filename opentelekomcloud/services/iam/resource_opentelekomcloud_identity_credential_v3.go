@@ -44,8 +44,9 @@ func ResourceIdentityCredentialV3() *schema.Resource {
 				Sensitive: true,
 			},
 			"secret": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"pgp_key": {
 				Type:     schema.TypeString,
@@ -112,6 +113,10 @@ func resourceIdentityCredentialV3Create(ctx context.Context, d *schema.ResourceD
 		)
 		if err = mErr.ErrorOrNil(); err != nil {
 			return fmterr.Errorf("error setting identity access key fields: %s", err)
+		}
+	} else {
+		if err := d.Set("secret", credential.SecretKey); err != nil {
+			return fmterr.Errorf("error setting identity secret key field: %w", err)
 		}
 	}
 
