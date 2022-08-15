@@ -12,6 +12,7 @@ import (
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/roles"
 	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -58,9 +59,11 @@ func ResourceIdentityRoleAssignmentV3() *schema.Resource {
 
 func resourceIdentityRoleAssignmentV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	identityClient, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	domainID := d.Get("domain_id").(string)
@@ -80,14 +83,17 @@ func resourceIdentityRoleAssignmentV3Create(ctx context.Context, d *schema.Resou
 
 	d.SetId(buildRoleAssignmentID(domainID, projectID, groupID, roleID))
 
-	return resourceIdentityRoleAssignmentV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, identityClient, keyClientV3)
+	return resourceIdentityRoleAssignmentV3Read(clientCtx, d, meta)
 }
 
-func resourceIdentityRoleAssignmentV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityRoleAssignmentV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	identityClient, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	roleAssignment, err := getRoleAssignment(identityClient, d)
@@ -110,11 +116,13 @@ func resourceIdentityRoleAssignmentV3Read(_ context.Context, d *schema.ResourceD
 	return nil
 }
 
-func resourceIdentityRoleAssignmentV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityRoleAssignmentV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	identityClient, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	domainID, projectID, groupID, roleID := ExtractRoleAssignmentID(d.Id())

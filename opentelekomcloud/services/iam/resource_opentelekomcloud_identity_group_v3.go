@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/groups"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -53,9 +54,11 @@ func ResourceIdentityGroupV3() *schema.Resource {
 
 func resourceIdentityGroupV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	identityClient, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud identity client: %s", err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	createOpts := groups.CreateOpts{
@@ -73,14 +76,17 @@ func resourceIdentityGroupV3Create(ctx context.Context, d *schema.ResourceData, 
 
 	d.SetId(group.ID)
 
-	return resourceIdentityGroupV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, identityClient, keyClientV3)
+	return resourceIdentityGroupV3Read(clientCtx, d, meta)
 }
 
-func resourceIdentityGroupV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityGroupV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	identityClient, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud identity client: %s", err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	group, err := groups.Get(identityClient, d.Id()).Extract()
@@ -105,9 +111,11 @@ func resourceIdentityGroupV3Read(_ context.Context, d *schema.ResourceData, meta
 
 func resourceIdentityGroupV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	identityClient, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud identity client: %s", err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	var hasChange bool
@@ -139,14 +147,17 @@ func resourceIdentityGroupV3Update(ctx context.Context, d *schema.ResourceData, 
 		}
 	}
 
-	return resourceIdentityGroupV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, identityClient, keyClientV3)
+	return resourceIdentityGroupV3Read(clientCtx, d, meta)
 }
 
-func resourceIdentityGroupV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityGroupV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	identityClient, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud identity client: %s", err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	err = groups.Delete(identityClient, d.Id()).ExtractErr()
