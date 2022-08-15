@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[RDS]** Reduce amount of init client requests in ``resource/opentelekomcloud_rds_instance_v3`` (`#1873 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1873>`_)

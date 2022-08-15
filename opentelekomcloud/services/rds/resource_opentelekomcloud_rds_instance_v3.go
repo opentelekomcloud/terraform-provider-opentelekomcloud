@@ -349,7 +349,9 @@ func resourceRDSAvailabilityZones(d *schema.ResourceData) string {
 
 func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.RdsV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.RdsV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreateClient, err)
 	}
@@ -596,11 +598,11 @@ func applyTemplate(d *schema.ResourceData, client *golangsdk.ServiceClient) (boo
 	return restartRequired, nil
 }
 
-func GetRdsInstance(rdsClient *golangsdk.ServiceClient, rdsId string) (*instances.RdsInstanceResponse, error) {
+func GetRdsInstance(client *golangsdk.ServiceClient, rdsId string) (*instances.RdsInstanceResponse, error) {
 	listOpts := instances.ListRdsInstanceOpts{
 		Id: rdsId,
 	}
-	allPages, err := instances.List(rdsClient, listOpts).AllPages()
+	allPages, err := instances.List(client, listOpts).AllPages()
 	if err != nil {
 		return nil, err
 	}
@@ -713,7 +715,9 @@ func unAssignEipFromInstance(client *golangsdk.ServiceClient, oldPublicIP string
 
 func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.RdsV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.RdsV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreateClient, err)
 	}
@@ -1086,9 +1090,11 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func resourceRdsInstanceV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceRdsInstanceV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.RdsV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.RdsV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreateClient, err)
 	}

@@ -44,7 +44,7 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 			{
 				Config: testAccRdsInstanceV3Update(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.large"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.medium"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.size", "100"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.muh", "value-update"),
 				),
@@ -371,7 +371,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 100
   }
-  flavor = "rds.pg.c2.large"
+  flavor = "rds.pg.c2.medium"
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
