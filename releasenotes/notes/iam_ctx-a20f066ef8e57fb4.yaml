@@ -1,8 +1,8 @@
 ---
 enhancements:
   - |
-    **[IAM]** Reduce amount of init client requests in ``resource/opentelekomcloud_identity_group_membership_v3`` (`# <>`_)
+    **[IAM]** Reduce amount of init client requests in ``resource/opentelekomcloud_identity_group_membership_v3`` (`#1880 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1880>`_)
   - |
-    **[IAM]** Reduce amount of init client requests in ``resource/opentelekomcloud_identity_role_assignment_v3`` (`# <>`_)
+    **[IAM]** Reduce amount of init client requests in ``resource/opentelekomcloud_identity_role_assignment_v3`` (`#1880 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1880>`_)
   - |
-    **[IAM]** Reduce amount of init client requests in ``resource/opentelekomcloud_identity_group_v3`` (`# <>`_)
+    **[IAM]** Reduce amount of init client requests in ``resource/opentelekomcloud_identity_group_v3`` (`#1880 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1880>`_)
