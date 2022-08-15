@@ -43,9 +43,11 @@ func ResourceIdentityGroupMembershipV3() *schema.Resource {
 
 func resourceIdentityGroupMembershipV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	identityClient, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomcloud identity client: %s", err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	group := d.Get("group").(string)
@@ -60,11 +62,13 @@ func resourceIdentityGroupMembershipV3Create(ctx context.Context, d *schema.Reso
 	return resourceIdentityGroupMembershipV3Read(ctx, d, meta)
 }
 
-func resourceIdentityGroupMembershipV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityGroupMembershipV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	identityClient, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomcloud identity client: %s", err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 	group := d.Get("group").(string)
 	userList := d.Get("users").(*schema.Set)
@@ -99,9 +103,11 @@ func resourceIdentityGroupMembershipV3Read(_ context.Context, d *schema.Resource
 
 func resourceIdentityGroupMembershipV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	identityClient, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud identity client: %s", err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	if d.HasChange("users") {
@@ -120,7 +126,7 @@ func resourceIdentityGroupMembershipV3Update(ctx context.Context, d *schema.Reso
 		remove := common.ExpandToStringSlice(os.Difference(ns).List())
 		add := common.ExpandToStringSlice(ns.Difference(os).List())
 
-		if err := removeUsersFromGroup(identityClient, group, remove); err != nil {
+		if err := removeUsersFromGroup(identityClient, group, remove); err != nil && common.IsResourceNotFound(err) {
 			return fmterr.Errorf("error update user-group-membership: %s", err)
 		}
 
@@ -132,11 +138,13 @@ func resourceIdentityGroupMembershipV3Update(ctx context.Context, d *schema.Reso
 	return resourceIdentityGroupMembershipV3Read(ctx, d, meta)
 }
 
-func resourceIdentityGroupMembershipV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityGroupMembershipV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	identityClient, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	group := d.Get("group").(string)
