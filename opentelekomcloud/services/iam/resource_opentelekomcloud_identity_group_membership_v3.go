@@ -59,7 +59,8 @@ func resourceIdentityGroupMembershipV3Create(ctx context.Context, d *schema.Reso
 
 	d.SetId(resource.UniqueId())
 
-	return resourceIdentityGroupMembershipV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, identityClient, keyClientV3)
+	return resourceIdentityGroupMembershipV3Read(clientCtx, d, meta)
 }
 
 func resourceIdentityGroupMembershipV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -126,7 +127,7 @@ func resourceIdentityGroupMembershipV3Update(ctx context.Context, d *schema.Reso
 		remove := common.ExpandToStringSlice(os.Difference(ns).List())
 		add := common.ExpandToStringSlice(ns.Difference(os).List())
 
-		if err := removeUsersFromGroup(identityClient, group, remove); err != nil && common.IsResourceNotFound(err) {
+		if err := removeUsersFromGroup(identityClient, group, remove); err != nil && !common.IsResourceNotFound(err) {
 			return fmterr.Errorf("error update user-group-membership: %s", err)
 		}
 
@@ -135,7 +136,8 @@ func resourceIdentityGroupMembershipV3Update(ctx context.Context, d *schema.Reso
 		}
 	}
 
-	return resourceIdentityGroupMembershipV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, identityClient, keyClientV3)
+	return resourceIdentityGroupMembershipV3Read(clientCtx, d, meta)
 }
 
 func resourceIdentityGroupMembershipV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -150,7 +152,7 @@ func resourceIdentityGroupMembershipV3Delete(ctx context.Context, d *schema.Reso
 	group := d.Get("group").(string)
 	userSlice := common.ExpandToStringSlice(d.Get("users").(*schema.Set).List())
 
-	if err := removeUsersFromGroup(identityClient, group, userSlice); err != nil {
+	if err := removeUsersFromGroup(identityClient, group, userSlice); err != nil && !common.IsResourceNotFound(err) {
 		return fmterr.Errorf("error delete user-group-membership: %s", err)
 	}
 
@@ -169,8 +171,8 @@ func addUsersToGroup(identityClient *golangsdk.ServiceClient, group string, user
 
 func removeUsersFromGroup(identityClient *golangsdk.ServiceClient, group string, userList []string) error {
 	for _, u := range userList {
-		if r := users.RemoveFromGroup(identityClient, group, u).ExtractErr(); r != nil {
-			return fmt.Errorf("error remove user %s from group %s: %s", u, group, r)
+		if err := users.RemoveFromGroup(identityClient, group, u).ExtractErr(); err != nil {
+			return err
 		}
 	}
 	return nil

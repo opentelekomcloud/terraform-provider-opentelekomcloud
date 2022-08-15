@@ -83,7 +83,8 @@ func resourceIdentityRoleAssignmentV3Create(ctx context.Context, d *schema.Resou
 
 	d.SetId(buildRoleAssignmentID(domainID, projectID, groupID, roleID))
 
-	return resourceIdentityRoleAssignmentV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, identityClient, keyClientV3)
+	return resourceIdentityRoleAssignmentV3Read(clientCtx, d, meta)
 }
 
 func resourceIdentityRoleAssignmentV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

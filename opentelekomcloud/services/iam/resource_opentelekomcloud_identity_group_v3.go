@@ -76,7 +76,8 @@ func resourceIdentityGroupV3Create(ctx context.Context, d *schema.ResourceData, 
 
 	d.SetId(group.ID)
 
-	return resourceIdentityGroupV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, identityClient, keyClientV3)
+	return resourceIdentityGroupV3Read(clientCtx, d, meta)
 }
 
 func resourceIdentityGroupV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -146,7 +147,8 @@ func resourceIdentityGroupV3Update(ctx context.Context, d *schema.ResourceData, 
 		}
 	}
 
-	return resourceIdentityGroupV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, identityClient, keyClientV3)
+	return resourceIdentityGroupV3Read(clientCtx, d, meta)
 }
 
 func resourceIdentityGroupV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
