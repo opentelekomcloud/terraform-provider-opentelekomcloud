@@ -52,6 +52,14 @@ In addition to all arguments above, the following attributes are exported:
 
 * `service_metadata` - The metadata of the vbs backup.
 
+## Timeouts
+
+This resource provides the following timeouts configuration options:
+
+- `create` - Default is 10 minutes.
+
+- `delete` - Default is 3 minutes.
+
 ## Import
 
 VBS Backup can be imported using the `backup id`, e.g.
