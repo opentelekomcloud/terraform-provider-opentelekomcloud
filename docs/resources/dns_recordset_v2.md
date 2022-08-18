@@ -27,6 +27,15 @@ resource "opentelekomcloud_dns_recordset_v2" "rs_example_com" {
   type        = "A"
   records     = ["10.0.0.1"]
 }
+
+resource "opentelekomcloud_dns_recordset_v2" "rs_txt_example" {
+  zone_id     = opentelekomcloud_dns_zone_v2.zone_1.id
+  name        = "%[1]s"
+  type        = "TXT"
+  description = "a record set"
+  ttl         = 300
+  records     = ["v=spf1 include:my.example.try.com -all"]
+}
 ```
 
 ## Argument Reference
@@ -58,6 +67,8 @@ The following arguments are supported:
 If all `zone_id`, `type`, `name` and `ttl` duplicate the existing DNS record set value,
 the new record set won't be managed by the Terraform.
 DNS `recordset` resource will be marked as `shared.`
+
+If `type="TXT"` records should pass as plain text without quotation, look at `rs_txt_example`.
 
 ## Attributes Reference
 
