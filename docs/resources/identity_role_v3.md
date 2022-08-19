@@ -14,10 +14,22 @@ resource "opentelekomcloud_identity_role_v3" "role" {
   display_name  = "custom_role"
   display_layer = "domain"
   statement {
-    effect   = "Allow"
-    action   = ["obs:bucket:GetBucketAcl"]
-    resource = ["OBS:*:*:bucket:test-bucket"]
-  }
+    effect    = "Allow"
+    action    = ["obs:bucket:GetBucketAcl"]
+    resource  = ["OBS:*:*:bucket:test-bucket"]
+    condition = <<EOF
+    {
+      "StringStartWith": {
+          "g:ProjectName": [
+              "eu-de"
+          ]
+      },
+      "StringNotEqualsIgnoreCase": {
+          "g:ServiceName": [
+              "iam"
+          ]
+    }
+    EOF
   statement {
     effect = "Allow"
     action = [

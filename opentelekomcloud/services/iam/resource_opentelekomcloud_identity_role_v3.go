@@ -2,6 +2,7 @@ package iam
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 
 	"github.com/hashicorp/go-multierror"
@@ -71,6 +72,15 @@ func ResourceIdentityRoleV3() *schema.Resource {
 								Type: schema.TypeString,
 							},
 						},
+						"condition": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: common.ValidateJsonString,
+							StateFunc: func(v interface{}) string {
+								jsonString, _ := common.NormalizeJsonString(v)
+								return jsonString
+							},
+						},
 					},
 				},
 			},
@@ -104,7 +114,7 @@ func buildRoleType(d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	return nil, fmterr.Errorf("unknown display layer:%v", roleType)
 }
 
-func buildRolePolicy(d *schema.ResourceData) policies.CreatePolicy {
+func buildRolePolicy(d *schema.ResourceData) (policies.CreatePolicy, error) {
 	customPolicy := policies.CreatePolicy{
 		Version: "1.1",
 	}
@@ -136,10 +146,22 @@ func buildRolePolicy(d *schema.ResourceData) policies.CreatePolicy {
 			}
 			res[i].Resource = refinedResource
 		}
+
+		conditionCheck := statement["condition"].(string)
+
+		if len(conditionCheck) > 0 {
+			var refinedCondition policies.Condition
+			conditionBytes := []byte(conditionCheck)
+			if err := json.Unmarshal(conditionBytes, &refinedCondition); err != nil {
+				return customPolicy, err
+			}
+			res[i].Condition = refinedCondition
+		}
+
 	}
 
 	customPolicy.Statement = res
-	return customPolicy
+	return customPolicy, nil
 }
 
 func resourceIdentityRoleV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -156,11 +178,16 @@ func resourceIdentityRoleV3Create(ctx context.Context, d *schema.ResourceData, m
 		return fmtErr
 	}
 
+	rolePolicy, err := buildRolePolicy(d)
+	if err != nil {
+		return fmterr.Errorf("error building policy statements: %s", err)
+	}
+
 	opts := policies.CreateOpts{
 		Description: d.Get("description").(string),
 		DisplayName: d.Get("display_name").(string),
 		Type:        roleType.(string),
-		Policy:      buildRolePolicy(d),
+		Policy:      rolePolicy,
 	}
 
 	r, err := policies.Create(client, opts).Extract()
@@ -234,11 +261,15 @@ func resourceIdentityRoleV3Update(ctx context.Context, d *schema.ResourceData, m
 		return fmtErr
 	}
 
+	rolePolicy, err := buildRolePolicy(d)
+	if err != nil {
+		return fmterr.Errorf("error building policy statements: %s", err)
+	}
 	opts := policies.CreateOpts{
 		Description: d.Get("description").(string),
 		DisplayName: d.Get("display_name").(string),
 		Type:        roleType.(string),
-		Policy:      buildRolePolicy(d),
+		Policy:      rolePolicy,
 	}
 
 	_, err = policies.Update(client, d.Id(), opts).Extract()
