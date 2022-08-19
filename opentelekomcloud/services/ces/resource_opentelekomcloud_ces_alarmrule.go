@@ -232,11 +232,10 @@ func ResourceAlarmRule() *schema.Resource {
 				Default:  true,
 			},
 			"alarm_action_enabled": {
-				Type:         schema.TypeBool,
-				Optional:     true,
-				Default:      false,
-				ForceNew:     true,
-				AtLeastOneOf: []string{"alarm_actions", "ok_actions"},
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
 			},
 			"update_time": {
 				Type:     schema.TypeInt,
@@ -308,6 +307,10 @@ func resourceAlarmRuleCreate(ctx context.Context, d *schema.ResourceData, meta i
 
 	metric := getMetricOpts(d)
 	conditionListRaw := d.Get("condition").([]interface{})
+	if len(conditionListRaw) == 0 {
+		return fmterr.Errorf("invalid `condition` field provided in configuration")
+	}
+
 	conditionElement := conditionListRaw[0].(map[string]interface{})
 	createOpts := alarms.CreateAlarmOpts{
 		AlarmName:          d.Get("alarm_name").(string),
@@ -350,11 +353,11 @@ func resourceAlarmRuleRead(ctx context.Context, d *schema.ResourceData, meta int
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	r, err := alarms.ShowAlarm(client, d.Id())
+	respAlarm, err := alarms.ShowAlarm(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "alarmrule")
 	}
-	alarm := r[0]
+	alarm := respAlarm[0]
 
 	log.Printf("[DEBUG] Retrieved alarm rule %s: %#v", d.Id(), alarm)
 
