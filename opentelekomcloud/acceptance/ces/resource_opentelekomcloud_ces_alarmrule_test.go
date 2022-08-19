@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cloudeyeservice/alarmrule"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ces/v1/alarms"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	ecs "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/ecs"
 
@@ -18,7 +18,7 @@ import (
 const resourceAlarmRuleName = "opentelekomcloud_ces_alarmrule.alarmrule_1"
 
 func TestCESAlarmRule_basic(t *testing.T) {
-	var ar alarmrule.AlarmRule
+	var ar alarms.MetricAlarms
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -63,7 +63,7 @@ func testCESAlarmRuleDestroy(s *terraform.State) error {
 		}
 
 		id := rs.Primary.ID
-		_, err := alarmrule.Get(client, id).Extract()
+		_, err := alarms.ShowAlarm(client, id)
 		if err == nil {
 			return fmt.Errorf("alarm rule still exists")
 		}
@@ -72,7 +72,7 @@ func testCESAlarmRuleDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testCESAlarmRuleExists(n string, ar *alarmrule.AlarmRule) resource.TestCheckFunc {
+func testCESAlarmRuleExists(n string, ar *alarms.MetricAlarms) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -90,12 +90,12 @@ func testCESAlarmRuleExists(n string, ar *alarmrule.AlarmRule) resource.TestChec
 		}
 
 		id := rs.Primary.ID
-		found, err := alarmrule.Get(client, id).Extract()
+		found, err := alarms.ShowAlarm(client, id)
 		if err != nil {
 			return err
 		}
 
-		*ar = *found
+		*ar = found[0]
 
 		return nil
 	}
