@@ -2,6 +2,7 @@ package ces
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"regexp"
 	"time"
@@ -24,6 +25,8 @@ func ResourceAlarmRule() *schema.Resource {
 		ReadContext:   resourceAlarmRuleRead,
 		UpdateContext: resourceAlarmRuleUpdate,
 		DeleteContext: resourceAlarmRuleDelete,
+
+		CustomizeDiff: checkCesAlarmRestrictions,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -493,5 +496,19 @@ func resourceAlarmRuleDelete(ctx context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf("error deleting alarm rule %s: %s", alarmRuleID, err)
 	}
 
+	return nil
+}
+
+func checkCesAlarmRestrictions(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if v, ok := d.GetOk("alarm_action_enabled"); ok {
+		alarmActionEnabled := v.(bool)
+		if alarmActionEnabled {
+			_, alarmCheck := d.GetOk("alarm_actions")
+			_, okCheck := d.GetOk("ok_actions")
+			if !(alarmCheck || okCheck) {
+				return fmt.Errorf("either `alarm_actions` or `ok_actions` should be specified when `alarm_action_enabled` set to `true`")
+			}
+		}
+	}
 	return nil
 }
