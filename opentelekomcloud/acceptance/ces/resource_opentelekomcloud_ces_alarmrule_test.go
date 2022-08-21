@@ -58,7 +58,7 @@ func TestAccCheckCESV1AlarmValidation(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testCESAlarmRuleValidation,
-				ExpectError: regexp.MustCompile("Error: either `alarm_actions` or `ok_actions` should be specified+"),
+				ExpectError: regexp.MustCompile("Error: either `alarm_actions` or `ok_actions` should be specified.+"),
 			},
 		},
 	})
