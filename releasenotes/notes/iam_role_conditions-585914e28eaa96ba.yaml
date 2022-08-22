@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[IAM]** Add `conditions` parameter for  ``resource/opentelekomcloud_identity_role_v3`` (`# <>`_)

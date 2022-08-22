@@ -110,10 +110,10 @@ resource "opentelekomcloud_identity_role_v3" "role" {
   display_name  = "%s"
   display_layer = "domain"
   statement {
-    effect   = "Allow"
-    action   = ["obs:bucket:GetBucketAcl"]
-    resource = ["obs:*:*:bucket:*"]
-	condition = <<EOF
+    effect    = "Allow"
+    action    = ["obs:bucket:GetBucketAcl"]
+    resource  = ["obs:*:*:bucket:*"]
+    condition = <<EOF
 	    {
 	      "StringStartWith": {
 	          "g:ProjectName": [
@@ -172,6 +172,15 @@ resource "opentelekomcloud_identity_role_v3" "role" {
     resource = ["OBS:*:*:bucket:test-bucket",
       "OBS:*:*:object:your_object"
     ]
+    condition = <<EOF
+	    {
+	      "StringStartWith": {
+	          "g:ProjectName": [
+	              "eu-de"
+	          ]
+	      }
+  }
+EOF
   }
 }`, val)
 }
