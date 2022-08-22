@@ -224,9 +224,7 @@ func resourceDNSRecordSetV2Read(ctx context.Context, d *schema.ResourceData, met
 			records[i] = trimQuotes(record)
 		}
 	} else {
-		for i, record := range n.Records {
-			records[i] = record
-		}
+		copy(records, n.Records)
 	}
 
 	log.Printf("[DEBUG] Retrieved  record set %s: %#v", recordsetID, n)

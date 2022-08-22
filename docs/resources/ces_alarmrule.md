@@ -60,9 +60,6 @@ The following arguments are supported:
 * `alarm_actions` - (Optional) Specifies the actions list triggered by an alarm. The
   structure is described below.
 
-* `insufficientdata_actions` - (Optional) Specifies the actions list triggered by
-  data insufficiency. The structure is described below.
-
 * `ok_actions` - (Optional) Specifies the actions list triggered by the clearing of
   an alarm. The structure is described below.
 
@@ -73,9 +70,8 @@ The following arguments are supported:
   to be triggered by an alarm. The default value is `true`.
 
 -> If `alarm_action_enabled` is set to `true`, at least one of the following
-  parameters `alarm_actions`, `insufficientdata_actions` (deprecated, no need to configure),
-  and `ok_actions` cannot be empty. If `alarm_actions`, `insufficientdata_actions`
-  (deprecated, no need to configure), and `ok_actions` coexist, their corresponding
+  parameters `alarm_actions` or `ok_actions` cannot be empty.
+  If `alarm_actions` and `ok_actions` coexist, their corresponding
   `notification_list` must be of the same value.
 
 The `metric` block supports:
@@ -142,15 +138,6 @@ the `alarm_actions` block supports:
 -> To enable the AS alarm rules take effect, you must bind scaling
   policies. For details, see the [AutoScaling API Reference](https://docs.otc.t-systems.com/en-us/api/as/en-us_topic_0045219159.html).
 
-The `insufficientdata_actions` block supports:
-
-* `type` - (Optional) Specifies the type of action triggered by an alarm.
-  * `notification`: indicates that a notification will be sent to the user.
-  * `autoscaling`: indicates that a scaling action will be triggered.
-
-* `notification_list` - (Optional) Indicates the list of objects to be notified
-  if the alarm status changes. The maximum length is `5`.
-
 The `ok_actions` block supports:
 
 * `type` - (Optional) specifies the type of action triggered by an alarm. the
@@ -176,8 +163,6 @@ The following attributes are exported:
 * `condition` - See Argument Reference above.
 
 * `alarm_actions` - See Argument Reference above.
-
-* `insufficientdata_actions` - See Argument Reference above.
 
 * `ok_actions` - See Argument Reference above.
 
