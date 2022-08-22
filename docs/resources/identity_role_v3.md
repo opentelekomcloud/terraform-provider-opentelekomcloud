@@ -14,9 +14,22 @@ resource "opentelekomcloud_identity_role_v3" "role" {
   display_name  = "custom_role"
   display_layer = "domain"
   statement {
-    effect   = "Allow"
-    action   = ["obs:bucket:GetBucketAcl"]
-    resource = ["OBS:*:*:bucket:test-bucket"]
+    effect    = "Allow"
+    action    = ["obs:bucket:GetBucketAcl"]
+    resource  = ["OBS:*:*:bucket:test-bucket"]
+    condition = <<EOF
+    {
+      "StringStartWith": {
+          "g:ProjectName": [
+              "eu-de"
+          ]
+      },
+      "StringNotEqualsIgnoreCase": {
+          "g:ServiceName": [
+              "iam"
+          ]
+    }
+    EOF
   }
   statement {
     effect = "Allow"
@@ -64,6 +77,11 @@ The `statement` block supports:
 * `resource` - (Optional) The resources which will be granted/denied accesses.
   Format: `Service:*:*:resource:resource_path`.
   Examples: `KMS:*:*:KeyId:your_key`, `OBS:*:*:bucket:your_bucket`, `OBS:*:*:object:your_object`.
+
+* `condition` - (Optional) The conditions for the permission to take effect. A maximum of 10 conditions are allowed.
+  Conditions should be provided as string as in example above.
+
+-> For the full reference checkout [Policy Syntax](https://docs.otc.t-systems.com/en-us/usermanual/iam/iam_01_0017.html).
 
 ## Attributes Reference
 
