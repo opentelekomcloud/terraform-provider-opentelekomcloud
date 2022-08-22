@@ -157,7 +157,6 @@ func buildRolePolicy(d *schema.ResourceData) (policies.CreatePolicy, error) {
 			}
 			res[i].Condition = refinedCondition
 		}
-
 	}
 
 	customPolicy.Statement = res
