@@ -177,13 +177,14 @@ func ResourceASGroup() *schema.Resource {
 			},
 			"delete_publicip": {
 				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Required: true,
 			},
 			"delete_instances": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "no",
+				Type:     schema.TypeString,
+				Required: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"yes", "no",
+				}, true),
 				Description: "Whether to delete instances when they are removed from the AS group.",
 			},
 			"instances": {

@@ -171,10 +171,10 @@ The following arguments are supported:
 * `notifications` - (Optional) The notification mode. The system only supports `EMAIL`
   mode which refers to notification by email.
 
-* `delete_publicip` - (Optional) Whether to delete the elastic IP address bound to the
+* `delete_publicip` - (Required) Whether to delete the elastic IP address bound to the
   instances of AS group when deleting the instances. The options are `true` and `false`.
 
-* `delete_instances` - (Optional) Whether to delete the instances in the AS group
+* `delete_instances` - (Required) Whether to delete the instances in the AS group
   when deleting the AS group. The options are `yes` and `no`.
 
 The `networks` block supports:
