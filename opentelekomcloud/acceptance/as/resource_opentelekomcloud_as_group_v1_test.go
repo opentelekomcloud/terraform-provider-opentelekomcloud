@@ -40,6 +40,8 @@ func TestAccASV1Group_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "lbaas_listeners.0.protocol_port", "8080"),
 					resource.TestCheckResourceAttr(resourceName, "health_periodic_audit_grace_period", "700"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
+					resource.TestCheckResourceAttr(resourceName, "delete_publicip", "false"),
+					resource.TestCheckResourceAttr(resourceName, "delete_instances", "no"),
 				),
 			},
 			{
@@ -48,6 +50,8 @@ func TestAccASV1Group_basic(t *testing.T) {
 					testAccCheckASV1GroupExists(resourceName, &asGroup),
 					resource.TestCheckResourceAttr(resourceName, "health_periodic_audit_grace_period", "500"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
+					resource.TestCheckResourceAttr(resourceName, "delete_publicip", "true"),
+					resource.TestCheckResourceAttr(resourceName, "delete_instances", "yes"),
 				),
 			},
 		},
@@ -208,6 +212,9 @@ resource "opentelekomcloud_as_configuration_v1" "as_config" {
 resource "opentelekomcloud_as_group_v1" "as_group" {
   scaling_group_name       = "as_group"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
+  delete_publicip          = false
+  delete_instances         = "no"
+
   networks {
     id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -274,6 +281,9 @@ resource "opentelekomcloud_as_configuration_v1" "as_config" {
 resource "opentelekomcloud_as_group_v1" "as_group" {
   scaling_group_name       = "as_group"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
+  delete_publicip          = true
+  delete_instances         = "yes"
+
   networks {
     id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
