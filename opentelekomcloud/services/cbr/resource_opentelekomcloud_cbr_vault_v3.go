@@ -282,12 +282,16 @@ func resourceCBRVaultV3Read(_ context.Context, d *schema.ResourceData, meta inte
 
 	var resourceInfo []map[string]interface{}
 	for _, resource := range vault.Resources {
+		include := make([]string, len(resource.ExtraInfo.IncludeVolumes))
+		for i, raw := range resource.ExtraInfo.IncludeVolumes {
+			include[i] = raw.ID
+		}
 		resourceMap := map[string]interface{}{
 			"id":              resource.ID,
 			"name":            resource.Name,
 			"type":            resource.Type,
 			"exclude_volumes": resource.ExtraInfo.ExcludeVolumes,
-			"include_volumes": resource.ExtraInfo.IncludeVolumes,
+			"include_volumes": include,
 		}
 		resourceInfo = append(resourceInfo, resourceMap)
 	}
