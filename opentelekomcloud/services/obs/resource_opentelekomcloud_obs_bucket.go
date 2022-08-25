@@ -40,7 +40,6 @@ func ResourceObsBucket() *schema.Resource {
 			"storage_class": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "STANDARD",
 				ValidateFunc: validation.StringInSlice([]string{
 					"STANDARD", "WARM", "COLD",
 				}, true),
@@ -455,7 +454,9 @@ func resourceObsBucketRead(_ context.Context, d *schema.ResourceData, meta inter
 
 	// Read storage class
 	if err := setObsBucketStorageClass(client, d); err != nil {
-		return diag.FromErr(err)
+		if region != "eu-ch2" {
+			return diag.FromErr(err)
+		}
 	}
 
 	// Read the versioning
