@@ -21,7 +21,7 @@ data "opentelekomcloud_images_image_v2" "ubuntu" {
 ```hcl
 data "opentelekomcloud_images_image_v2" "latest-debian" {
   name        = "^Standard_Debian.?"
-  most_resent = true
+  most_recent = true
 }
 ```
 
