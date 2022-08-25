@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[AS]** make ``delete_publicip`` and ``delete_instances`` required in ``resource/opentelekomcloud_as_group_v1`` (`#1891 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1891>`_)

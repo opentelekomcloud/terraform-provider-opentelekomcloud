@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    **[CES]** Remove deprecated ``insufficientdata_actions`` block from logic&documentation for ``resource/opentelekomcloud_ces_alarmrule`` (`#1890 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1890>`_)
+other:
+  - |
+    **[CES]** API link changes for ``resource/opentelekomcloud_ces_alarmrule`` after gophercloud refactoring (`#1890 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1890>`_)

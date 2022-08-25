@@ -2,6 +2,7 @@ package ces
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"regexp"
 	"time"
@@ -12,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cloudeyeservice/alarmrule"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ces/v1/alarms"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -24,6 +25,8 @@ func ResourceAlarmRule() *schema.Resource {
 		ReadContext:   resourceAlarmRuleRead,
 		UpdateContext: resourceAlarmRuleUpdate,
 		DeleteContext: resourceAlarmRuleDelete,
+
+		CustomizeDiff: checkCesAlarmRestrictions,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -158,10 +161,10 @@ func ResourceAlarmRule() *schema.Resource {
 							}, false),
 						},
 						"value": {
-							Type:         schema.TypeInt,
+							Type:         schema.TypeFloat,
 							Required:     true,
 							ForceNew:     true,
-							ValidateFunc: validation.IntAtLeast(0),
+							ValidateFunc: validation.FloatAtLeast(0),
 						},
 						"unit": {
 							Type:         schema.TypeString,
@@ -179,30 +182,6 @@ func ResourceAlarmRule() *schema.Resource {
 				},
 			},
 			"alarm_actions": {
-				Type:     schema.TypeList,
-				Optional: true,
-				ForceNew: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"type": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"notification", "autoscaling",
-							}, false),
-						},
-						"notification_list": {
-							Type:     schema.TypeList,
-							Required: true,
-							ForceNew: true,
-							MaxItems: 5,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-					},
-				},
-			},
-			"insufficientdata_actions": {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
@@ -258,7 +237,7 @@ func ResourceAlarmRule() *schema.Resource {
 			"alarm_action_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				Default:  false,
 				ForceNew: true,
 			},
 			"update_time": {
@@ -273,33 +252,33 @@ func ResourceAlarmRule() *schema.Resource {
 	}
 }
 
-func getMetricOpts(d *schema.ResourceData) alarmrule.MetricOpts {
+func getMetricOpts(d *schema.ResourceData) alarms.MetricForAlarm {
 	metricListRaw := d.Get("metric").([]interface{})
 	metricElement := metricListRaw[0].(map[string]interface{})
 
 	metricDimensions := metricElement["dimensions"].([]interface{})
-	dimensionOpts := make([]alarmrule.DimensionOpts, len(metricDimensions))
+	dimensionOpts := make([]alarms.MetricsDimension, len(metricDimensions))
 	for i, dimensionElement := range metricDimensions {
 		dimension := dimensionElement.(map[string]interface{})
-		dimensionOpts[i] = alarmrule.DimensionOpts{
+		dimensionOpts[i] = alarms.MetricsDimension{
 			Name:  dimension["name"].(string),
 			Value: dimension["value"].(string),
 		}
 	}
 
-	return alarmrule.MetricOpts{
+	return alarms.MetricForAlarm{
 		Namespace:  metricElement["namespace"].(string),
 		MetricName: metricElement["metric_name"].(string),
 		Dimensions: dimensionOpts,
 	}
 }
 
-func getAlarmAction(d *schema.ResourceData, name string) []alarmrule.ActionOpts {
+func getAlarmAction(d *schema.ResourceData, name string) []alarms.AlarmActions {
 	alarmListRaw := d.Get(name).([]interface{})
 	if len(alarmListRaw) == 0 {
 		return nil
 	}
-	actionOpts := make([]alarmrule.ActionOpts, len(alarmListRaw))
+	actionOpts := make([]alarms.AlarmActions, len(alarmListRaw))
 	for i, alarmElement := range alarmListRaw {
 		alarm := alarmElement.(map[string]interface{})
 
@@ -309,7 +288,7 @@ func getAlarmAction(d *schema.ResourceData, name string) []alarmrule.ActionOpts 
 			notifyList[j] = notifiedObject.(string)
 		}
 
-		actionOpts[i] = alarmrule.ActionOpts{
+		actionOpts[i] = alarms.AlarmActions{
 			Type:             alarm["type"].(string),
 			NotificationList: notifyList,
 		}
@@ -326,37 +305,43 @@ func resourceAlarmRuleCreate(ctx context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
+	alarmEnabled := d.Get("alarm_enabled").(bool)
+	alarmActionEnabled := d.Get("alarm_action_enabled").(bool)
+
 	metric := getMetricOpts(d)
 	conditionListRaw := d.Get("condition").([]interface{})
+	if len(conditionListRaw) == 0 {
+		return fmterr.Errorf("invalid `condition` field provided in configuration")
+	}
+
 	conditionElement := conditionListRaw[0].(map[string]interface{})
-	createOpts := alarmrule.CreateOpts{
-		AlarmName:        d.Get("alarm_name").(string),
-		AlarmDescription: d.Get("alarm_description").(string),
-		AlarmLevel:       d.Get("alarm_level").(int),
-		Metric:           metric,
-		Condition: alarmrule.ConditionOpts{
+	createOpts := alarms.CreateAlarmOpts{
+		AlarmName:          d.Get("alarm_name").(string),
+		AlarmDescription:   d.Get("alarm_description").(string),
+		AlarmLevel:         d.Get("alarm_level").(int),
+		AlarmActions:       getAlarmAction(d, "alarm_actions"),
+		AlarmEnabled:       &alarmEnabled,
+		AlarmActionEnabled: &alarmActionEnabled,
+		OkActions:          getAlarmAction(d, "ok_actions"),
+		Metric:             metric,
+		Condition: alarms.Condition{
 			Period:             conditionElement["period"].(int),
 			Filter:             conditionElement["filter"].(string),
 			ComparisonOperator: conditionElement["comparison_operator"].(string),
-			Value:              conditionElement["value"].(int),
+			Value:              conditionElement["value"].(float64),
 			Unit:               conditionElement["unit"].(string),
 			Count:              conditionElement["count"].(int),
 		},
-		AlarmActions:            getAlarmAction(d, "alarm_actions"),
-		InsufficientdataActions: getAlarmAction(d, "insufficientdata_actions"),
-		OkActions:               getAlarmAction(d, "ok_actions"),
-		AlarmEnabled:            d.Get("alarm_enabled").(bool),
-		AlarmActionEnabled:      d.Get("alarm_action_enabled").(bool),
 	}
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	r, err := alarmrule.Create(client, createOpts).Extract()
+	alarmId, err := alarms.CreateAlarm(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating alarm rule: %w", err)
 	}
-	log.Printf("[DEBUG] Created alarm rule: %#v", *r)
+	log.Printf("[DEBUG] Created alarm rule, ID: %#v", alarmId)
 
-	d.SetId(r.AlarmID)
+	d.SetId(alarmId)
 
 	clientCtx := common.CtxWithClient(ctx, client, cesClientV1)
 	return resourceAlarmRuleRead(clientCtx, d, meta)
@@ -371,14 +356,16 @@ func resourceAlarmRuleRead(ctx context.Context, d *schema.ResourceData, meta int
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	r, err := alarmrule.Get(client, d.Id()).Extract()
+	respAlarm, err := alarms.ShowAlarm(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "alarmrule")
 	}
-	log.Printf("[DEBUG] Retrieved alarm rule %s: %#v", d.Id(), r)
+	alarm := respAlarm[0]
 
-	dimensionInfoList := make([]map[string]interface{}, len(r.Metric.Dimensions))
-	for i, v := range r.Metric.Dimensions {
+	log.Printf("[DEBUG] Retrieved alarm rule %s: %#v", d.Id(), alarm)
+
+	dimensionInfoList := make([]map[string]interface{}, len(alarm.Metric.Dimensions))
+	for i, v := range alarm.Metric.Dimensions {
 		dimensionInfoItem := map[string]interface{}{
 			"name":  v.Name,
 			"value": v.Value,
@@ -387,29 +374,27 @@ func resourceAlarmRuleRead(ctx context.Context, d *schema.ResourceData, meta int
 	}
 	metricInfo := []map[string]interface{}{
 		{
-			"namespace":   r.Metric.Namespace,
-			"metric_name": r.Metric.MetricName,
+			"namespace":   alarm.Metric.Namespace,
+			"metric_name": alarm.Metric.MetricName,
 			"dimensions":  dimensionInfoList,
 		},
 	}
 
 	conditionInfo := []map[string]interface{}{
 		{
-			"period":              r.Condition.Period,
-			"filter":              r.Condition.Filter,
-			"comparison_operator": r.Condition.ComparisonOperator,
-			"value":               r.Condition.Value,
-			"unit":                r.Condition.Unit,
-			"count":               r.Condition.Count,
+			"period":              alarm.Condition.Period,
+			"filter":              alarm.Condition.Filter,
+			"comparison_operator": alarm.Condition.ComparisonOperator,
+			"value":               alarm.Condition.Value,
+			"unit":                alarm.Condition.Unit,
+			"count":               alarm.Condition.Count,
 		},
 	}
 
-	alarmActionsInfo := make([]map[string]interface{}, len(r.AlarmActions))
-	for i, alarmActionItem := range r.AlarmActions {
+	alarmActionsInfo := make([]map[string]interface{}, len(alarm.AlarmActions))
+	for i, alarmActionItem := range alarm.AlarmActions {
 		notificationList := make([]string, len(alarmActionItem.NotificationList))
-		for j, notification := range alarmActionItem.NotificationList {
-			notificationList[j] = notification
-		}
+		copy(notificationList, alarmActionItem.NotificationList)
 		alarmAction := map[string]interface{}{
 			"type":              alarmActionItem.Type,
 			"notification_list": notificationList,
@@ -417,25 +402,10 @@ func resourceAlarmRuleRead(ctx context.Context, d *schema.ResourceData, meta int
 		alarmActionsInfo[i] = alarmAction
 	}
 
-	insufficientActionsInfo := make([]map[string]interface{}, len(r.InsufficientdataActions))
-	for i, insufficientActionItem := range r.InsufficientdataActions {
-		notificationList := make([]string, len(insufficientActionItem.NotificationList))
-		for j, notification := range insufficientActionItem.NotificationList {
-			notificationList[j] = notification
-		}
-		insufficientAction := map[string]interface{}{
-			"type":              insufficientActionItem.Type,
-			"notification_list": notificationList,
-		}
-		insufficientActionsInfo[i] = insufficientAction
-	}
-
-	okActionsInfo := make([]map[string]interface{}, len(r.OkActions))
-	for i, okActionItem := range r.OkActions {
+	okActionsInfo := make([]map[string]interface{}, len(alarm.OkActions))
+	for i, okActionItem := range alarm.OkActions {
 		notificationList := make([]string, len(okActionItem.NotificationList))
-		for j, notification := range okActionItem.NotificationList {
-			notificationList[j] = notification
-		}
+		copy(notificationList, okActionItem.NotificationList)
 		insufficientAction := map[string]interface{}{
 			"type":              okActionItem.Type,
 			"notification_list": notificationList,
@@ -444,18 +414,17 @@ func resourceAlarmRuleRead(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	mErr := multierror.Append(
-		d.Set("alarm_name", r.AlarmName),
-		d.Set("alarm_description", r.AlarmDescription),
-		d.Set("alarm_level", r.AlarmLevel),
+		d.Set("alarm_name", alarm.AlarmName),
+		d.Set("alarm_description", alarm.AlarmDescription),
+		d.Set("alarm_level", alarm.AlarmLevel),
 		d.Set("metric", metricInfo),
 		d.Set("condition", conditionInfo),
 		d.Set("alarm_actions", alarmActionsInfo),
-		d.Set("insufficientdata_actions", insufficientActionsInfo),
 		d.Set("ok_actions", okActionsInfo),
-		d.Set("alarm_enabled", r.AlarmEnabled),
-		d.Set("alarm_action_enabled", r.AlarmActionEnabled),
-		d.Set("update_time", r.UpdateTime),
-		d.Set("alarm_state", r.AlarmState),
+		d.Set("alarm_enabled", &alarm.AlarmEnabled),
+		d.Set("alarm_action_enabled", &alarm.AlarmActionEnabled),
+		d.Set("update_time", alarm.UpdateTime),
+		d.Set("alarm_state", alarm.AlarmState),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -480,12 +449,12 @@ func resourceAlarmRuleUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		log.Printf("[WARN] Nothing will be updated")
 		return nil
 	}
-	updateOpts := alarmrule.UpdateOpts{AlarmEnabled: d.Get("alarm_enabled").(bool)}
+	updateOpts := alarms.ModifyAlarmActionRequest{AlarmEnabled: d.Get("alarm_enabled").(bool)}
 	log.Printf("[DEBUG] Updating %s with options: %#v", alarmRuleID, updateOpts)
 
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		err := alarmrule.Update(client, alarmRuleID, updateOpts).ExtractErr()
+		err := alarms.UpdateAlarmAction(client, alarmRuleID, updateOpts)
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
@@ -513,7 +482,7 @@ func resourceAlarmRuleDelete(ctx context.Context, d *schema.ResourceData, meta i
 
 	timeout := d.Timeout(schema.TimeoutDelete)
 	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		err := alarmrule.Delete(client, alarmRuleID).ExtractErr()
+		err := alarms.DeleteAlarm(client, alarmRuleID)
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
@@ -527,5 +496,19 @@ func resourceAlarmRuleDelete(ctx context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf("error deleting alarm rule %s: %s", alarmRuleID, err)
 	}
 
+	return nil
+}
+
+func checkCesAlarmRestrictions(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if v, ok := d.GetOk("alarm_action_enabled"); ok {
+		alarmActionEnabled := v.(bool)
+		if alarmActionEnabled {
+			_, alarmCheck := d.GetOk("alarm_actions")
+			_, okCheck := d.GetOk("ok_actions")
+			if !(alarmCheck || okCheck) {
+				return fmt.Errorf("either `alarm_actions` or `ok_actions` should be specified when `alarm_action_enabled` set to `true`")
+			}
+		}
+	}
 	return nil
 }

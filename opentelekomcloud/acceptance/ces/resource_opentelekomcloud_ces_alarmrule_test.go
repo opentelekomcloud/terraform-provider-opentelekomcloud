@@ -2,11 +2,12 @@ package acceptance
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cloudeyeservice/alarmrule"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ces/v1/alarms"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	ecs "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/ecs"
 
@@ -18,7 +19,7 @@ import (
 const resourceAlarmRuleName = "opentelekomcloud_ces_alarmrule.alarmrule_1"
 
 func TestCESAlarmRule_basic(t *testing.T) {
-	var ar alarmrule.AlarmRule
+	var ar alarms.MetricAlarms
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -50,6 +51,19 @@ func TestCESAlarmRule_basic(t *testing.T) {
 	})
 }
 
+func TestAccCheckCESV1AlarmValidation(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      testCESAlarmRuleValidation,
+				ExpectError: regexp.MustCompile("Error: either `alarm_actions` or `ok_actions` should be specified.+"),
+			},
+		},
+	})
+}
+
 func testCESAlarmRuleDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.CesV1Client(env.OS_REGION_NAME)
@@ -63,7 +77,7 @@ func testCESAlarmRuleDestroy(s *terraform.State) error {
 		}
 
 		id := rs.Primary.ID
-		_, err := alarmrule.Get(client, id).Extract()
+		_, err := alarms.ShowAlarm(client, id)
 		if err == nil {
 			return fmt.Errorf("alarm rule still exists")
 		}
@@ -72,7 +86,7 @@ func testCESAlarmRuleDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testCESAlarmRuleExists(n string, ar *alarmrule.AlarmRule) resource.TestCheckFunc {
+func testCESAlarmRuleExists(n string, ar *alarms.MetricAlarms) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -90,12 +104,12 @@ func testCESAlarmRuleExists(n string, ar *alarmrule.AlarmRule) resource.TestChec
 		}
 
 		id := rs.Primary.ID
-		found, err := alarmrule.Get(client, id).Extract()
+		found, err := alarms.ShowAlarm(client, id)
 		if err != nil {
 			return err
 		}
 
-		*ar = *found
+		*ar = found[0]
 
 		return nil
 	}
@@ -194,5 +208,46 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
       opentelekomcloud_smn_topic_v2.topic_1.topic_urn
     ]
   }
+}
+`, common.DataSourceSubnet)
+
+var testCESAlarmRuleValidation = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_compute_instance_v2" "vm_1" {
+  name        = "instance_1"
+  image_name  = "Standard_Debian_11_latest"
+  flavor_name = "s3.large.2"
+
+  network {
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+}
+
+resource "opentelekomcloud_smn_topic_v2" "topic_1" {
+  name         = "topic_1"
+  display_name = "The display name of topic_1"
+}
+
+resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
+  alarm_name = "alarm_rule1"
+
+  metric {
+    namespace   = "SYS.ECS"
+    metric_name = "network_outgoing_bytes_rate_inband"
+    dimensions {
+      name  = "instance_id"
+      value = opentelekomcloud_compute_instance_v2.vm_1.id
+    }
+  }
+  condition {
+    period              = 300
+    filter              = "average"
+    comparison_operator = ">"
+    value               = 6
+    unit                = "B/s"
+    count               = 1
+  }
+  alarm_action_enabled = true
 }
 `, common.DataSourceSubnet)
