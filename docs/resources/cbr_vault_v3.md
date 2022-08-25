@@ -50,6 +50,30 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   }
 }
 ```
+Include volumes works currently only on SwissCloud:
+```hcl
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test"
+
+  description = "CBR vault for terraform provider test"
+
+  billing {
+    size          = 100
+    object_type   = "disk"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+  }
+
+  resource {
+    id   = opentelekomcloud_ecs_instance_v1.instance.id
+    type = "OS::Nova::Server"
+
+    include_volumes = [
+      opentelekomcloud_ecs_instance_v1.instance_1.data_disks.1.id
+    ]
+  }
+}
+```
 ### Vault with associated resource (volume)
 
 ```hcl

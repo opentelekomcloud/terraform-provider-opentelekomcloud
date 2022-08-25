@@ -71,7 +71,7 @@ The following arguments are supported:
   Either this field or `week_frequency` must be specified.
 
 * `week_frequency` - (Optional) Specifies on which days of each week backup jobs are executed.
-  The value can be one or more of the following: SUN, MON, TUE, WED, THU, FRI, SAT.
+  The value can be one or more of the following: "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT".
   Either this field or `frequency` must be specified.
 
 * `resources` - (Optional) Specifies one or more volumes associated with the backup policy.
@@ -89,7 +89,7 @@ The following arguments are supported:
 All of the argument attributes are also exported as result attributes:
 
 * `id` - Specifies a backup policy ID.
- 
+
 * `policy_resource_count` - Specifies the number of volumes associated with the backup policy.
 
 ## Import

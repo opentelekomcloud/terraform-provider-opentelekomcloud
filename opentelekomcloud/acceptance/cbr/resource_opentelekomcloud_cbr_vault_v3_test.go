@@ -170,7 +170,7 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 `, common.DataSourceImage, common.DataSourceSubnet, env.OsFlavorID)
 )
 
-func TestAccCBRVaultV3_extraInfo(t *testing.T) {
+func TestAccCBRVaultV3_extraInfoExclude(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
@@ -192,6 +192,36 @@ func TestAccCBRVaultV3_extraInfo(t *testing.T) {
 			},
 			{
 				Config: testAccCBRVaultV3BasicExtraInfoUpdate,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceVaultName, "resource.#", "1"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCBRVaultV3_extraInfoInclude_OnlySwissCloud(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.Volume, Count: 2},
+				{Q: quotas.VolumeSize, Count: 20},
+				{Q: quotas.CBRPolicy, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCBRVaultV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCBRVaultV3BasicIncludeVolumes,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceVaultName, "resource.#", "1"),
+				),
+			},
+			{
+				Config: testAccCBRVaultV3BasicIncludeVolumesUpdate,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceVaultName, "resource.#", "1"),
 				),
@@ -532,7 +562,144 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
     type = "OS::Nova::Server"
 
     exclude_volumes = [
-      opentelekomcloud_ecs_instance_v1.instance_1.data_disks.1.id
+      opentelekomcloud_ecs_instance_v1.instance_1.volumes_attached.1.id
+    ]
+
+  }
+}
+`, env.OsSubnetName, env.OS_AVAILABILITY_ZONE)
+
+var testAccCBRVaultV3BasicIncludeVolumes = fmt.Sprintf(`
+data "opentelekomcloud_vpc_subnet_v1" "shared_subnet" {
+  name = "%s"
+}
+
+resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+  name     = "server_1"
+  image_id = "fc11b59c-46e3-4b3f-84be-dd6bf9aef1b8"
+  flavor   = "s3.xlarge.1"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+
+  nics {
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+  system_disk_type = "SSD"
+  data_disks {
+    type = "SSD"
+    size = "10"
+  }
+  data_disks {
+    type = "SSD"
+    size = "10"
+  }
+
+  password                    = "Password@123"
+  availability_zone           = "%s"
+  auto_recovery               = true
+  delete_disks_on_termination = true
+}
+
+resource "opentelekomcloud_cbr_policy_v3" "default_policy" {
+  name           = "cbr-policy"
+  operation_type = "backup"
+
+  trigger_pattern = [
+    "FREQ=DAILY;INTERVAL=1;BYHOUR=23;BYMINUTE=00"
+  ]
+  operation_definition {
+    max_backups = 5
+    timezone    = "UTC+01:00"
+  }
+
+  enabled = "true"
+}
+
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test"
+
+  description = "CBR vault for default backup policy"
+
+  billing {
+    size          = 10000
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+  }
+
+  resource {
+    id   = opentelekomcloud_ecs_instance_v1.instance_1.id
+    type = "OS::Nova::Server"
+
+    include_volumes = [
+      opentelekomcloud_ecs_instance_v1.instance_1.volumes_attached.0.id
+    ]
+  }
+}
+`, env.OsSubnetName, env.OS_AVAILABILITY_ZONE)
+
+var testAccCBRVaultV3BasicIncludeVolumesUpdate = fmt.Sprintf(`
+data "opentelekomcloud_vpc_subnet_v1" "shared_subnet" {
+  name = "%s"
+}
+
+resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+  name     = "server_1"
+  image_id = "fc11b59c-46e3-4b3f-84be-dd6bf9aef1b8"
+  flavor   = "s3.xlarge.1"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+
+  nics {
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+  system_disk_type = "SSD"
+  data_disks {
+    type = "SSD"
+    size = "10"
+  }
+  data_disks {
+    type = "SSD"
+    size = "10"
+  }
+
+  password                    = "Password@123"
+  availability_zone           = "%s"
+  auto_recovery               = true
+  delete_disks_on_termination = true
+}
+
+resource "opentelekomcloud_cbr_policy_v3" "default_policy" {
+  name           = "cbr-policy"
+  operation_type = "backup"
+
+  trigger_pattern = [
+    "FREQ=DAILY;INTERVAL=1;BYHOUR=23;BYMINUTE=00"
+  ]
+  operation_definition {
+    max_backups = 5
+    timezone    = "UTC+01:00"
+  }
+
+  enabled = "true"
+}
+
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test"
+
+  description = "CBR vault for default backup policy"
+
+  billing {
+    size          = 10000
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+  }
+
+  resource {
+    id   = opentelekomcloud_ecs_instance_v1.instance_1.id
+    type = "OS::Nova::Server"
+
+    exclude_volumes = [
+      opentelekomcloud_ecs_instance_v1.instance_1.volumes_attached.0.id
     ]
 
   }
