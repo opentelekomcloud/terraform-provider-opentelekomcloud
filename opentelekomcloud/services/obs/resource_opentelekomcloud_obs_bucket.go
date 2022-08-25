@@ -40,6 +40,7 @@ func ResourceObsBucket() *schema.Resource {
 			"storage_class": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "STANDARD",
 				ValidateFunc: validation.StringInSlice([]string{
 					"STANDARD", "WARM", "COLD",
 				}, true),
@@ -323,7 +324,12 @@ func resourceObsBucketCreate(ctx context.Context, d *schema.ResourceData, meta i
 
 	bucket := d.Get("bucket").(string)
 	acl := d.Get("acl").(string)
-	class := d.Get("storage_class").(string)
+
+	var class string
+	if config.GetRegion(d) != "eu-ch2" {
+		class = d.Get("storage_class").(string)
+	}
+
 	opts := &obs.CreateBucketInput{
 		Bucket:       bucket,
 		ACL:          obs.AclType(acl),
@@ -356,7 +362,7 @@ func resourceObsBucketUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
-	if d.HasChange("storage_class") && !d.IsNewResource() {
+	if d.HasChange("storage_class") && !d.IsNewResource() && config.GetRegion(d) != "eu-ch2" {
 		if err := resourceObsBucketClassUpdate(client, d); err != nil {
 			return diag.FromErr(err)
 		}
@@ -453,8 +459,8 @@ func resourceObsBucketRead(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	// Read storage class
-	if err := setObsBucketStorageClass(client, d); err != nil {
-		if region != "eu-ch2" {
+	if region != "eu-ch2" {
+		if err := setObsBucketStorageClass(client, d); err != nil {
 			return diag.FromErr(err)
 		}
 	}
