@@ -5,4 +5,4 @@ fixes:
     (`#1900 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1900>`_)
 other:
   - |
-    **[IAM]** Clarify usage of `week_frequency` in ``docs/resources/vbs_backup_policy_v2.md`` (`#1900 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1900>`_)
+    **[VBS]** Clarify usage of `week_frequency` in ``docs/resources/vbs_backup_policy_v2.md`` (`#1900 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1900>`_)
