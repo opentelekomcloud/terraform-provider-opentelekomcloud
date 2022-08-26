@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[OBS]** Fix bucket creation on Swisscloud for ``resource/opentelekomcloud_obs_bucket`` (`# <>`_)
