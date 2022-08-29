@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[AS]** Add validation for action `percentage` and `size` in ``opentelekomcloud_as_policy_v2`` (`#1905 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1905>`_)
