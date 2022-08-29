@@ -43,6 +43,6 @@ func testAccCheckELBV3DataSourceFlavors(n string) resource.TestCheckFunc {
 	}
 }
 
-var testAccElbV3DataSourceFlavorsBasic = fmt.Sprintf(`
+var testAccElbV3DataSourceFlavorsBasic = `
 data "opentelekomcloud_lb_flavors_v3" "flavors_names" {}
-`)
+`
