@@ -7,7 +7,6 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v2/policies"
@@ -23,9 +22,7 @@ func ResourceASPolicyV2() *schema.Resource {
 		UpdateContext: resourceASPolicyV2Update,
 		DeleteContext: resourceASPolicyV2Delete,
 
-		CustomizeDiff: customdiff.All(
-			validateAction,
-		),
+		CustomizeDiff: validateAction,
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
