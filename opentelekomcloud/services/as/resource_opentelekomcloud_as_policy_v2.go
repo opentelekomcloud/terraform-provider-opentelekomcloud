@@ -2,6 +2,7 @@ package as
 
 import (
 	"context"
+	"fmt"
 	"regexp"
 
 	"github.com/hashicorp/go-multierror"
@@ -9,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v2/policies"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -22,6 +22,7 @@ func ResourceASPolicyV2() *schema.Resource {
 		UpdateContext: resourceASPolicyV2Update,
 		DeleteContext: resourceASPolicyV2Delete,
 
+		CustomizeDiff: validateAction,
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -318,5 +319,16 @@ func resourceASPolicyV2Delete(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("error deleting AS Policy: %w", err)
 	}
 
+	return nil
+}
+
+func validateAction(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	rawPolicyActionList := d.Get("scaling_policy_action").(*schema.Set).List()
+	if len(rawPolicyActionList) > 0 {
+		rawPolicyAction := rawPolicyActionList[0].(map[string]interface{})
+		if rawPolicyAction["percentage"].(int) > 0 && rawPolicyAction["size"].(int) > 0 {
+			return fmt.Errorf("select one from `percentage` or `size`")
+		}
+	}
 	return nil
 }
