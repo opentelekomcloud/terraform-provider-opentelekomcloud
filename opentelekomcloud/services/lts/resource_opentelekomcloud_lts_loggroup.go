@@ -29,9 +29,9 @@ func ResourceLTSGroupV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-
 			"ttl_in_days": {
 				Type:     schema.TypeInt,
+				Optional: true,
 				Computed: true,
 			},
 		},
@@ -47,6 +47,7 @@ func resourceGroupV2Create(ctx context.Context, d *schema.ResourceData, meta int
 
 	createOpts := &loggroups.CreateOpts{
 		LogGroupName: d.Get("group_name").(string),
+		TTL:          d.Get("ttl_in_days").(int),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
