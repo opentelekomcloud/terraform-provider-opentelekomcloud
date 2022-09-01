@@ -47,7 +47,7 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
 }
 ```
 
-### Engine version 5.0:
+### Engine version 5.0 (please pay attention to proper selection of the spec_code):
 
 ```hcl
 data "opentelekomcloud_dcs_az_v1" "az_1" {

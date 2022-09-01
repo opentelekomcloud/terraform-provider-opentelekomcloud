@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    [DCS] Clarify example for engine version 5.0 ``docs/resources/dcs_instance_v1``
+    (`#1912 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1912>`_)
