@@ -737,12 +737,27 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
+// cceV1Client for swiss
+func cceV1Client(config *cfg.Config, region string) (*golangsdk.ServiceClient, error) {
+	v1Client, err := config.CceV1Client(region)
+	if err == nil { // for eu-de
+		return v1Client, nil
+	}
+	client, err := config.CceV3Client(region)
+	if err != nil {
+		return nil, fmt.Errorf("both v1 and v3 clients are not available for %s region: %w", region, err)
+	}
+	client.ResourceBase = client.Endpoint + "api/v1/"
+
+	return client, nil
+}
+
 func setK8sNodeFields(d *schema.ResourceData, config *cfg.Config, clusterID, privateIP string) error {
-	v1Client, err := config.CceV1Client(config.GetRegion(d))
+	client, err := cceV1Client(config, config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud CCEv1 client: %w", err)
 	}
-	k8Node, err := nodesv1.Get(v1Client, clusterID, privateIP).Extract()
+	k8Node, err := nodesv1.Get(client, clusterID, privateIP).Extract()
 	if err != nil {
 		log.Printf("[WARN] error retrieving CCE node: %s", err.Error())
 		return nil
