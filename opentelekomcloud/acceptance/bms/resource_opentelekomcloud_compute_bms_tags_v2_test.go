@@ -17,7 +17,7 @@ import (
 const resourceTagsName = "opentelekomcloud_compute_bms_tags_v2.tags_1"
 
 func TestAccBMSTagsV2_basic(t *testing.T) {
-	var tagList tags.Tags
+	var tagList []string
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -27,7 +27,7 @@ func TestAccBMSTagsV2_basic(t *testing.T) {
 			{
 				Config: testAccBMSTagsV2Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBMSTagsV2Exists(resourceTagsName, &tagList),
+					testAccCheckBMSTagsV2Exists(resourceTagsName, tagList),
 					resource.TestCheckResourceAttr(resourceTagsName, "tags.#", "2"),
 				),
 			},
@@ -36,7 +36,7 @@ func TestAccBMSTagsV2_basic(t *testing.T) {
 }
 
 func TestAccBMSTagsV2_timeout(t *testing.T) {
-	var tagList tags.Tags
+	var tagList []string
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -46,7 +46,7 @@ func TestAccBMSTagsV2_timeout(t *testing.T) {
 			{
 				Config: testAccBMSTagsV2Timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBMSTagsV2Exists(resourceTagsName, &tagList),
+					testAccCheckBMSTagsV2Exists(resourceTagsName, tagList),
 				),
 			},
 		},
@@ -65,7 +65,7 @@ func testAccCheckBMSTagsV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := tags.Get(client, rs.Primary.ID).Extract()
+		_, err := tags.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("tags still exists")
 		}
@@ -74,7 +74,7 @@ func testAccCheckBMSTagsV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckBMSTagsV2Exists(n string, tag *tags.Tags) resource.TestCheckFunc {
+func testAccCheckBMSTagsV2Exists(n string, tag []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -91,13 +91,12 @@ func testAccCheckBMSTagsV2Exists(n string, tag *tags.Tags) resource.TestCheckFun
 			return fmt.Errorf("error creating OpenTelekomCloud CombuteV2 client: %s", err)
 		}
 
-		found, err := tags.Get(client, rs.Primary.ID).Extract()
+		found, err := tags.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		*tag = *found
-
+		tag = found
 		return nil
 	}
 }
