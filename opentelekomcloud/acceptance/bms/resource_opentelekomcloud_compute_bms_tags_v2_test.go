@@ -113,7 +113,10 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   availability_zone = "%s"
   flavor_id         = "physical.o2.medium"
   flavor_name       = "physical.o2.medium"
-  tags              = ["foo", "bar"]
+  tags              = {
+    foo = "bar"
+    john = "doe"
+  }
   metadata = {
     foo = "bar"
   }
