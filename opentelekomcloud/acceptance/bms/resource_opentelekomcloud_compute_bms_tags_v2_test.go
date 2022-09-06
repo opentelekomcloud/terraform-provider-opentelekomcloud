@@ -111,10 +111,10 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
   security_groups   = ["default"]
   availability_zone = "%s"
-  flavor_id         = "physical.o2.medium"
-  flavor_name       = "physical.o2.medium"
-  tags              = {
-    foo = "bar"
+  flavor_id         = "physical.h2.large"
+  flavor_name       = "physical.h2.medium"
+  tags = {
+    foo  = "bar"
     john = "doe"
   }
   metadata = {
@@ -139,8 +139,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
   security_groups   = ["default"]
   availability_zone = "%s"
-  flavor_id         = "physical.o2.medium"
-  flavor_name       = "physical.o2.medium"
+  flavor_id         = "physical.h2.medium"
+  flavor_name       = "physical.h2.medium"
   tags              = ["foo", "bar"]
   metadata = {
     foo = "bar"
