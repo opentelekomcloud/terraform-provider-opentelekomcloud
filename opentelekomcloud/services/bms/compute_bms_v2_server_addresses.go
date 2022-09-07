@@ -1,4 +1,4 @@
-// This set of code handles all functions required to configure addresses
+// Package bms This set of code handles all functions required to configure addresses
 // on an opentelekomcloud_compute_bms_server_v2 datasource.
 //
 // This is a complicated task because it's not possible to obtain all

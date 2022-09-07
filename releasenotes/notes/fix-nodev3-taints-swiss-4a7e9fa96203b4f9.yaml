@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Fix reading ``taints`` and ``labels`` for ``eu-ch2`` in ``resource/opentelekomcloud_cce_node_v3`` (`#1916 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1916>`_)

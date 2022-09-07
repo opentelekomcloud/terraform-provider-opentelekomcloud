@@ -90,7 +90,7 @@ func testAccCheckComputeV2BmsInstanceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		server, err := servers.Get(client, rs.Primary.ID).Extract()
+		server, err := servers.Get(client, rs.Primary.ID)
 		if err == nil {
 			if server.Status != "SOFT_DELETED" {
 				return fmt.Errorf("instance still exists")
@@ -118,7 +118,7 @@ func testAccCheckComputeV2BmsInstanceExists(n string, instance *servers.Server) 
 			return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 		}
 
-		found, err := servers.Get(client, rs.Primary.ID).Extract()
+		found, err := servers.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
