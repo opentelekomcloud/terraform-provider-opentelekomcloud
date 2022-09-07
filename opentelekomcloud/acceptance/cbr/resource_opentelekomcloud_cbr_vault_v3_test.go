@@ -131,45 +131,6 @@ func TestAccCBRVaultV3_instance(t *testing.T) {
 	})
 }
 
-var (
-	testAccCBRVaultV3BasicInstance = fmt.Sprintf(`
-%s
-
-%s
-
-resource "opentelekomcloud_compute_instance_v2" "instance" {
-  name = "tf-crb-test-instance"
-
-  image_id    = data.opentelekomcloud_images_image_v2.latest_image.id
-  flavor_name = "%s"
-
-  network {
-    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  }
-}
-
-resource "opentelekomcloud_cbr_vault_v3" "vault" {
-  name = "cbr-vault-test"
-
-  description = "CBR vault for terraform provider test"
-
-  billing {
-    size          = 100
-    object_type   = "server"
-    protect_type  = "backup"
-    charging_mode = "post_paid"
-    period_type   = "month"
-    period_num    = 2
-  }
-
-  resource {
-    id   = opentelekomcloud_compute_instance_v2.instance.id
-    type = "OS::Nova::Server"
-  }
-}
-`, common.DataSourceImage, common.DataSourceSubnet, env.OsFlavorID)
-)
-
 func TestAccCBRVaultV3_extraInfoExclude(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -230,6 +191,31 @@ func TestAccCBRVaultV3_extraInfoInclude_OnlySwissCloud(t *testing.T) {
 	})
 }
 
+func TestAccCBRVaultV3_bind_rules(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.Volume, Count: 2},
+				{Q: quotas.VolumeSize, Count: 20},
+				{Q: quotas.CBRPolicy, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCBRVaultV3BindRules,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceVaultName, "auto_bind", "true"),
+					resource.TestCheckResourceAttr(resourceVaultName, "bind_rules.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckCBRVaultV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.CbrV3Client(env.OS_REGION_NAME)
@@ -250,6 +236,45 @@ func testAccCheckCBRVaultV3Destroy(s *terraform.State) error {
 
 	return nil
 }
+
+var (
+	testAccCBRVaultV3BasicInstance = fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_compute_instance_v2" "instance" {
+  name = "tf-crb-test-instance"
+
+  image_id    = data.opentelekomcloud_images_image_v2.latest_image.id
+  flavor_name = "%s"
+
+  network {
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+}
+
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test"
+
+  description = "CBR vault for terraform provider test"
+
+  billing {
+    size          = 100
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+    period_type   = "month"
+    period_num    = 2
+  }
+
+  resource {
+    id   = opentelekomcloud_compute_instance_v2.instance.id
+    type = "OS::Nova::Server"
+  }
+}
+`, common.DataSourceImage, common.DataSourceSubnet, env.OsFlavorID)
+)
 
 const (
 	testAccCBRVaultV3BasicVolumes = `
@@ -705,3 +730,39 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   }
 }
 `, env.OsSubnetName, env.OS_AVAILABILITY_ZONE)
+
+const testAccCBRVaultV3BindRules = `
+resource "opentelekomcloud_cbr_policy_v3" "default_policy" {
+  name           = "cbr-policy"
+  operation_type = "backup"
+
+  trigger_pattern = [
+    "FREQ=DAILY;INTERVAL=1;BYHOUR=23;BYMINUTE=00"
+  ]
+  operation_definition {
+    max_backups = 5
+    timezone    = "UTC+01:00"
+  }
+
+  enabled = "true"
+}
+
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test"
+
+  description = "CBR vault for default backup policy"
+
+  billing {
+    size          = 10
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+  }
+  auto_bind = true
+
+  bind_rules {
+    key   = "foo"
+    value = "bar"
+  }
+}
+`
