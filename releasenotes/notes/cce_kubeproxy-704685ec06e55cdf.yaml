@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[CCE]** Fix ``kube_proxy_mode`` after CCE update for ``resource/opentelekomcloud_cce_cluster_v3`` (`# <>`_)
+    **[CCE]** Fix ``kube_proxy_mode`` after CCE update for ``resource/opentelekomcloud_cce_cluster_v3`` (`#1920 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1920>`_)
