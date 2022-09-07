@@ -10,7 +10,7 @@ Manages a log group resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_logtank_group_v2" "log_group1" {
-  group_name = "log_group1"
+  group_name  = "log_group1"
   ttl_in_days = 7
 }
 ```
