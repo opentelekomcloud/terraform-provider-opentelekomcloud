@@ -157,8 +157,8 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   }
   auto_bind = true
   bind_rules {
-      key   = "foo"
-      value = "bar"
+    key   = "foo"
+    value = "bar"
   }
 }
 ```
