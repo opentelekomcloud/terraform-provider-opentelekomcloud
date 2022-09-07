@@ -141,6 +141,28 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 }
 ```
 
+### Vault with auto bind and bind rule
+
+```hcl
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test"
+
+  description = "CBR vault for default backup policy"
+
+  billing {
+    size          = 10
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+  }
+  auto_bind = true
+  bind_rules {
+      key   = "foo"
+      value = "bar"
+  }
+}
+```
+
 ## Argument reference
 
 The following arguments are supported:
@@ -201,7 +223,10 @@ The following arguments are supported:
 
 * `auto_bind` - (Optional) Whether automatic association is supported.
 
-* `bind_rules` - (Optional) Rules for automatic association.
+* `bind_rules` - (Optional)  Tag map, a rules for automatic association. You can only select tag keys and values from
+  the existing ones. If there are no tags available, go to the corresponding service to create one.
+  You can add a maximum of 5 tags for a search. If more than one tag is added, the backups containing one of the
+  specified tags will be returned.
 
 * `auto_expand` - (Optional) Whether to automatically expand the vault capacity. Only pay-per-use vaults support this
   function.
