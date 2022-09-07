@@ -73,7 +73,7 @@ func resourceBMSTagsV2Create(ctx context.Context, d *schema.ResourceData, meta i
 		Tag: resourceTagsV2(d),
 	}
 
-	_, err = tags.Create(bmsClient, d.Get("server_id").(string), createOpts).Extract()
+	_, err = tags.Create(bmsClient, d.Get("server_id").(string), createOpts)
 
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud Tags: %s", err)
@@ -92,7 +92,7 @@ func resourceBMSTagsV2Read(_ context.Context, d *schema.ResourceData, meta inter
 		return fmterr.Errorf("error creating OpenTelekomCloud bms client: %s", err)
 	}
 
-	n, err := tags.Get(bmsClient, d.Id()).Extract()
+	n, err := tags.Get(bmsClient, d.Id())
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			d.SetId("")
@@ -103,7 +103,7 @@ func resourceBMSTagsV2Read(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	mErr := multierror.Append(
-		d.Set("tags", n.Tags),
+		d.Set("tags", n),
 		d.Set("region", config.GetRegion(d)),
 		d.Set("server_id", d.Id()),
 	)
@@ -122,7 +122,7 @@ func resourceBMSTagsV2Delete(_ context.Context, d *schema.ResourceData, meta int
 		return fmterr.Errorf("error creating OpenTelekomCloud bms client: %s", err)
 	}
 
-	err = tags.Delete(bmsClient, d.Id()).ExtractErr()
+	err = tags.Delete(bmsClient, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud tags: %s", err)
 	}

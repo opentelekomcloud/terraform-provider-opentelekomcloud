@@ -282,7 +282,7 @@ func bmsTagsCreate(client *golangsdk.ServiceClient, server_id string) error {
 		Tag: []string{"__type_baremetal"},
 	}
 
-	_, err := tags.Create(client, server_id, createOpts).Extract()
+	_, err := tags.Create(client, server_id, createOpts)
 
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud Tags: %s", err)
@@ -420,7 +420,7 @@ func resourceComputeBMSInstanceV2Read(_ context.Context, d *schema.ResourceData,
 		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
-	server, err := bms.Get(computeClient, d.Id()).Extract()
+	server, err := bms.Get(computeClient, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "server")
 	}

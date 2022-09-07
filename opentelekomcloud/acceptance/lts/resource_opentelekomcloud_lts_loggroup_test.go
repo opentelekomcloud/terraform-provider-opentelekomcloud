@@ -28,6 +28,8 @@ func TestAccLogTankGroupV2_basic(t *testing.T) {
 						"opentelekomcloud_logtank_group_v2.testacc_group", &group),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_logtank_group_v2.testacc_group", "group_name", "testacc_group"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_logtank_group_v2.testacc_group", "ttl_in_days", "7"),
 				),
 			},
 		},
@@ -88,6 +90,7 @@ func testAccCheckLogTankGroupV2Exists(n string, group *loggroups.LogGroup) resou
 
 const testAccLogTankGroupV2_basic = `
 resource "opentelekomcloud_logtank_group_v2" "testacc_group" {
-  group_name = "testacc_group"
+  group_name  = "testacc_group"
+  ttl_in_days = 7
 }
 `
