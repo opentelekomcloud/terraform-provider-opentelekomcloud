@@ -33,6 +33,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   subnet_id              = var.subnet_id
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
+  kube_proxy_mode        = "ipvs"
 }
 ```
 
@@ -151,6 +152,15 @@ The following arguments are supported:
 
 * `ignore_addons` - (Optional) Skip all cluster addons operations.
 
+* `kube_proxy_mode` - Service forwarding mode. Two modes are available:
+  * `iptables`: Traditional kube-proxy uses iptables rules to implement service load balancing.
+    In this mode, too many iptables rules will be generated when many services are deployed.
+    In addition, non-incremental updates will cause a latency and even obvious performance issues
+    in the case of heavy service traffic.
+  * `ipvs`: Optimized kube-proxy mode with higher throughput and faster speed.
+    This mode supports incremental updates and can keep connections uninterrupted during service updates.
+    It is suitable for large-sized clusters.
+
 ## Attributes Reference
 
 All above argument parameters can be exported as attribute parameters along with attribute reference.
@@ -176,15 +186,6 @@ All above argument parameters can be exported as attribute parameters along with
 * `certificate_users/client_certificate_data` - The client certificate data.
 
 * `certificate_users/client_key_data` - The client key data.
-
-* `kube_proxy_mode` - Service forwarding mode. Two modes are available:
-  * `iptables`: Traditional kube-proxy uses iptables rules to implement service load balancing.
-  In this mode, too many iptables rules will be generated when many services are deployed.
-  In addition, non-incremental updates will cause a latency and even obvious performance issues
-  in the case of heavy service traffic.
-  * `ipvs`: Optimized kube-proxy mode with higher throughput and faster speed.
-  This mode supports incremental updates and can keep connections uninterrupted during service updates.
-  It is suitable for large-sized clusters.
 
 * `installed_addons` - List of installed addon IDs. Empty if `ignore_addons` is `true`.
 

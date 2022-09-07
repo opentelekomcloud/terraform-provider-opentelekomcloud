@@ -39,7 +39,7 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceClusterName, "flavor_id", "cce.s1.small"),
 					resource.TestCheckResourceAttr(resourceClusterName, "container_network_type", "overlay_l2"),
 					resource.TestCheckResourceAttr(resourceClusterName, "authentication_mode", "x509"),
-					resource.TestCheckResourceAttr(resourceClusterName, "kube_proxy_mode", "iptables"),
+					resource.TestCheckResourceAttr(resourceClusterName, "kube_proxy_mode", "ipvs"),
 					resource.TestCheckResourceAttr(resourceClusterName, "kubernetes_svc_ip_range", "10.247.0.0/16"),
 					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_control"),
 					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_node"),
@@ -49,6 +49,7 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 				Config: testAccCCEClusterV3Update(clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceClusterName, "description", "new description"),
+					resource.TestCheckResourceAttr(resourceClusterName, "kube_proxy_mode", "ipvs"),
 				),
 			},
 		},
@@ -76,7 +77,7 @@ func TestAccCCEClusterV3_turbo_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceClusterName, "flavor_id", "cce.s1.small"),
 					resource.TestCheckResourceAttr(resourceClusterName, "container_network_type", "eni"),
 					resource.TestCheckResourceAttr(resourceClusterName, "authentication_mode", "rbac"),
-					resource.TestCheckResourceAttr(resourceClusterName, "kube_proxy_mode", "ipvs"),
+					resource.TestCheckResourceAttr(resourceClusterName, "kube_proxy_mode", "iptables"),
 					resource.TestCheckResourceAttr(resourceClusterName, "kubernetes_svc_ip_range", "10.247.0.0/16"),
 					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_control"),
 					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_node"),
@@ -294,6 +295,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   ignore_addons           = true
+  kube_proxy_mode         = "ipvs"
 }
 `, common.DataSourceSubnet, clusterName)
 }
@@ -331,6 +333,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   description             = "new description"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   ignore_addons           = true
+  kube_proxy_mode         = "ipvs"
 }
 `, common.DataSourceSubnet, clusterName)
 }
