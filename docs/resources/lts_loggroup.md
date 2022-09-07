@@ -11,6 +11,7 @@ Manages a log group resource within OpenTelekomCloud.
 ```hcl
 resource "opentelekomcloud_logtank_group_v2" "log_group1" {
   group_name = "log_group1"
+  ttl_in_days = 7
 }
 ```
 
@@ -20,6 +21,8 @@ The following arguments are supported:
 
 * `group_name` - (Required) Specifies the log group name.
   Changing this parameter will create a new resource.
+* `ttl_in_days` - (Required) Specifies the log retention time in days.
+  The value is fixed to 7 days.
 
 ## Attributes Reference
 
