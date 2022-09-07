@@ -731,8 +731,7 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 }
 `, env.OsSubnetName, env.OS_AVAILABILITY_ZONE)
 
-const (
-	testAccCBRVaultV3BindRules = `
+const testAccCBRVaultV3BindRules = `
 resource "opentelekomcloud_cbr_policy_v3" "default_policy" {
   name           = "cbr-policy"
   operation_type = "backup"
@@ -760,10 +759,10 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
     charging_mode = "post_paid"
   }
   auto_bind = true
+
   bind_rules {
       key   = "foo"
       value = "bar"
   }
 }
 `
-)
