@@ -228,7 +228,7 @@ func testAccCheckCBRVaultV3Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := vaults.Get(client, rs.Primary.ID).Extract()
+		_, err := vaults.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("CBRv3 vault still exists")
 		}

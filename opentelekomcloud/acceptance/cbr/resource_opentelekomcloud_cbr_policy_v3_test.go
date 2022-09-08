@@ -90,7 +90,7 @@ func testAccCheckCBRPolicyV3Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := policies.Get(client, rs.Primary.ID).Extract()
+		_, err := policies.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("CBRv3 policy still exists")
 		}
@@ -116,7 +116,7 @@ func testAccCheckCBRPolicyV3Exists(n string, group *policies.Policy) resource.Te
 			return fmt.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 		}
 
-		found, err := policies.Get(client, rs.Primary.ID).Extract()
+		found, err := policies.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}

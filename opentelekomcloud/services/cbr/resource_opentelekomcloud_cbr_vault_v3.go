@@ -275,7 +275,7 @@ func resourceCBRVaultV3Read(_ context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
-	vault, err := vaults.Get(client, d.Id()).Extract()
+	vault, err := vaults.Get(client, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error getting vault details: %s", err)
 	}
@@ -357,14 +357,14 @@ func resourceCBRVaultV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		AutoExpand:          d.Get("auto_expand").(bool),
 	}
 
-	vault, err := vaults.Create(client, opts).Extract()
+	vault, err := vaults.Create(client, opts)
 	if err != nil {
 		return fmterr.Errorf("error creating vaults: %s", err)
 	}
 	d.SetId(vault.ID)
 
 	if policy := d.Get("backup_policy_id").(string); policy != "" {
-		_, err := vaults.BindPolicy(client, d.Id(), vaults.BindPolicyOpts{PolicyID: policy}).Extract()
+		_, err := vaults.BindPolicy(client, d.Id(), vaults.BindPolicyOpts{PolicyID: policy})
 		if err != nil {
 			return fmterr.Errorf("error binding policy to vault: %s", err)
 		}
@@ -535,7 +535,7 @@ func updateResources(d *schema.ResourceData, client *golangsdk.ServiceClient) er
 	if len(removedIDs) > 0 {
 		_, err := vaults.DissociateResources(client, d.Id(), vaults.DissociateResourcesOpts{
 			ResourceIDs: removedIDs,
-		}).Extract()
+		})
 		if err != nil {
 			return fmt.Errorf("error unbinding resources: %s", err)
 		}
@@ -548,7 +548,7 @@ func updateResources(d *schema.ResourceData, client *golangsdk.ServiceClient) er
 	if len(addedResources) > 0 {
 		_, err := vaults.AssociateResources(client, d.Id(), vaults.AssociateResourcesOpts{
 			Resources: addedResources,
-		}).Extract()
+		})
 		if err != nil {
 			return fmt.Errorf("error binding resources: %s", err)
 		}
@@ -562,7 +562,7 @@ func updatePolicy(d *schema.ResourceData, client *golangsdk.ServiceClient) error
 	if oldP != "" {
 		_, err := vaults.UnbindPolicy(client, d.Id(), vaults.BindPolicyOpts{
 			PolicyID: oldP.(string),
-		}).Extract()
+		})
 		if err != nil {
 			return fmt.Errorf("error unbinding policy from vault: %s", err)
 		}
@@ -570,7 +570,7 @@ func updatePolicy(d *schema.ResourceData, client *golangsdk.ServiceClient) error
 	if newP != "" {
 		_, err := vaults.BindPolicy(client, d.Id(), vaults.BindPolicyOpts{
 			PolicyID: newP.(string),
-		}).Extract()
+		})
 		if err != nil {
 			return fmt.Errorf("error binding policy to vault: %s", err)
 		}
@@ -619,7 +619,7 @@ func resourceCBRVaultV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if needsUpdate {
-		_, err := vaults.Update(client, d.Id(), opts).Extract()
+		_, err := vaults.Update(client, d.Id(), opts)
 		if err != nil {
 			return fmterr.Errorf("error updating the vault: %s", err)
 		}
@@ -653,7 +653,7 @@ func resourceCBRVaultV3Delete(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
-	if err := vaults.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := vaults.Delete(client, d.Id()); err != nil {
 		return fmterr.Errorf("error deleting CBRv3 vault: %s", err)
 	}
 
