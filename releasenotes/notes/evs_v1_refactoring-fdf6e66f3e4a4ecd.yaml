@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[EVS]** Get rid of inline Extracts for ``common/customize_diffs`` after gophertelekomcloud refactoring (`# <>`_)

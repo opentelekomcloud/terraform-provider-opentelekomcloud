@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v1/volumetypes"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v1/volumetypes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
 
@@ -65,13 +65,9 @@ func ValidateVolumeType(argName string) schema.CustomizeDiffFunc {
 			return fmt.Errorf("error creating blockstorage v3 client: %s", err)
 		}
 
-		pages, err := volumetypes.List(client).AllPages()
+		types, err := volumetypes.List(client)
 		if err != nil {
 			return fmt.Errorf("error retrieving volume types: %s", err)
-		}
-		types, err := volumetypes.ExtractVolumeTypes(pages)
-		if err != nil {
-			return err
 		}
 		typeAZs := make(map[string][]string) // map of type name (lower case) -> az list
 		for _, volumeType := range types {
