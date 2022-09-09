@@ -37,6 +37,32 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 }
 ```
 
+### Installing ICAgent on Cluster creation
+
+~>
+  When creating a cluster in the OTC UI, ICAgent is deployed automatically. This does not apply if a cluster is created via Terraform/API.
+  To make AOM work in conjunction with CCE, the ICAgent needs to be deployed on the cluster. You can do this automatically by adding the appropriate annotation to the cluster resource.
+
+```hcl
+variable "flavor_id" {}
+variable "vpc_id" {}
+variable "subnet_id" {}
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name        = "cluster"
+  description = "Create cluster"
+
+  cluster_type           = "VirtualMachine"
+  flavor_id              = var.flavor_id
+  vpc_id                 = var.vpc_id
+  subnet_id              = var.subnet_id
+  container_network_type = "overlay_l2"
+  authentication_mode    = "rbac"
+  kube_proxy_mode        = "ipvs"
+  annotations = { "cluster.install.addons.external/install" = "[{\"addonTemplateName\":\"icagent\"}]"  }
+}
+```
+
 ### Creating agency
 
 You can create agency for CCE authorization using `opentelekomcloud_identity_agency_v3` resource.
