@@ -1,4 +1,4 @@
 ---
 other:
   - |
-    **[EVS]** Get rid of inline Extracts for ``common/customize_diffs`` after gophertelekomcloud refactoring (`# <>`_)
+    **[EVS]** Get rid of inline Extracts for ``common/customize_diffs`` after gophertelekomcloud refactoring (`#1924 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1924>`_)
