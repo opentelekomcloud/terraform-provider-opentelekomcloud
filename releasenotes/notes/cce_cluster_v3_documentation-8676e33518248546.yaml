@@ -1,4 +1,4 @@
 ---
 other:
   - |
-    **[CCE]** Add ICAgent installation example for ``resource/opentelekomcloud_cce_cluster_v3`` documentation (`# <>`_)
+    **[CCE]** Add ICAgent installation example for ``resource/opentelekomcloud_cce_cluster_v3`` documentation (`#1926 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1926>`_)
