@@ -41,6 +41,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 
 ~>
   When creating a cluster in the OTC UI, ICAgent is deployed automatically. This does not apply if a cluster is created via Terraform/API.
+  
   To make AOM work in conjunction with CCE, the ICAgent needs to be deployed on the cluster. You can do this automatically by adding the appropriate annotation to the cluster resource.
 
 ```hcl
