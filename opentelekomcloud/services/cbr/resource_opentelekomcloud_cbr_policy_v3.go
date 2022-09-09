@@ -157,7 +157,7 @@ func resourceCBRPolicyV3Create(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	cbrPolicy, err := policies.Create(client, createOpts).Extract()
+	cbrPolicy, err := policies.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 policy: %s", err)
 	}
@@ -175,7 +175,7 @@ func resourceCBRPolicyV3Read(_ context.Context, d *schema.ResourceData, meta int
 		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
-	cbrPolicy, err := policies.Get(client, d.Id()).Extract()
+	cbrPolicy, err := policies.Get(client, d.Id())
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			log.Printf("[WARN] Removing CBR policy %s as it's already gone", d.Id())
@@ -248,7 +248,7 @@ func resourceCBRPolicyV3Update(ctx context.Context, d *schema.ResourceData, meta
 		updateOpts.OperationDefinition = opDefinition
 	}
 
-	_, err = policies.Update(client, d.Id(), updateOpts).Extract()
+	_, err = policies.Update(client, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud CBRv3 policy: %s", err)
 	}
@@ -265,7 +265,7 @@ func resourceCBRPolicyV3Delete(_ context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Deleting CBRv3 policy %s", d.Id())
 
-	if err = policies.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err = policies.Delete(client, d.Id()); err != nil {
 		return fmterr.Errorf("eror deleting OpenTelekomCloud CBRv3 policy: %s", err)
 	}
 
