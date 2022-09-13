@@ -98,12 +98,14 @@ func testAccCheckSdrsProtectionGroupV1Exists(n string, group *protectiongroups.G
 var testAccSdrsProtectionGroupV1Basic = fmt.Sprintf(`
 %s
 
+data "opentelekomcloud_sdrs_domain_v1" "domain_1" {}
+
 resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   name                     = "group_1"
   description              = "test description"
   source_availability_zone = "eu-de-02"
   target_availability_zone = "eu-de-01"
-  domain_id                = "cdba26b2-cc35-4988-a904-82b7abf20094"
+  domain_id                = data.opentelekomcloud_sdrs_domain_v1.domain_1.id
   source_vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   dr_type                  = "migration"
 }
@@ -112,12 +114,14 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
 var testAccSdrsProtectionGroupV1Update = fmt.Sprintf(`
 %s
 
+data "opentelekomcloud_sdrs_domain_v1" "domain_1" {}
+
 resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   name                     = "group_updated"
   description              = "test description"
   source_availability_zone = "eu-de-02"
   target_availability_zone = "eu-de-01"
-  domain_id                = "cdba26b2-cc35-4988-a904-82b7abf20094"
+  domain_id                = data.opentelekomcloud_sdrs_domain_v1.domain_1.id
   source_vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   dr_type                  = "migration"
 }

@@ -9,6 +9,8 @@ Manages a SDRS protection group resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
+data "opentelekomcloud_sdrs_domain_v1" "dom_1" {}
+
 resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   name        = "group_1"
   description = "test description"
@@ -16,7 +18,7 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   source_availability_zone = "eu-de-01"
   target_availability_zone = "eu-de-02"
 
-  domain_id     = var.domain_id
+  domain_id     = data.opentelekomcloud_sdrs_domain_v1.dom_1.id
   source_vpc_id = var.vpc_id
   dr_type       = "migration"
 }
@@ -34,7 +36,9 @@ The following arguments are supported:
 
 * `target_availability_zone` - (Required) Specifies the target AZ of a protection group. Changing this creates a new group.
 
-* `domain_id` - (Required) Specifies the ID of an active-active domain. Changing this creates a new group.
+* `domain_id` - (Required) Specifies the ID of an ``active-active domain``. Changing this creates a new group.
+  An ``active-active domain`` id can be extracted from ``data/opentelekomcloud_sdrs_domain_v1`` and shouldn't be confused
+  with tenant ``domain``.
 
 * `source_vpc_id` - (Required) Specifies the ID of the source VPC. Changing this creates a new group.
 
