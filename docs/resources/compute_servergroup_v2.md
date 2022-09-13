@@ -31,9 +31,6 @@ The following arguments are supported:
 
 ## Policies
 
-* `affinity` - All instances/servers launched in this group will be hosted on
-  the same compute node.
-
 * `anti-affinity` - All instances/servers launched in this group will be
   hosted on different compute nodes.
 

@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -80,6 +81,23 @@ func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2ServerGroup_policyValidation(t *testing.T) {
+	qts := serverQuotas(4, env.OsFlavorID)
+	t.Parallel()
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeV2ServerGroupPolicyCheck,
+				ExpectError: regexp.MustCompile(`Error: only 'anti-affinity' policies are supported`),
+			},
+		},
+	})
+}
+
 func testAccCheckComputeV2ServerGroupDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.ComputeV2Client(env.OS_REGION_NAME)
@@ -150,7 +168,7 @@ func testAccCheckComputeV2InstanceInServerGroup(instance *servers.Server, sg *se
 const testAccComputeV2ServerGroupBasic = `
 resource "opentelekomcloud_compute_servergroup_v2" "sg_1" {
   name     = "sg_1"
-  policies = ["affinity"]
+  policies = ["anti-affinity"]
 }
 `
 
@@ -159,7 +177,7 @@ var testAccComputeV2ServerGroupAffinity = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_servergroup_v2" "sg_1" {
   name     = "sg_1"
-  policies = ["affinity"]
+  policies = ["anti-affinity"]
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -173,3 +191,10 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
 }
 `, common.DataSourceSubnet)
+
+const testAccComputeV2ServerGroupPolicyCheck = `
+resource "opentelekomcloud_compute_servergroup_v2" "sg_1" {
+  name     = "sg_1"
+  policies = ["affinity"]
+}
+`
