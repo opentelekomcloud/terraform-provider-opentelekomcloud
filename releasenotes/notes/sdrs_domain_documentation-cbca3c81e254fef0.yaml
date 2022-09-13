@@ -1,6 +1,6 @@
 ---
 other:
   - |
-    **[SDRS]** Documentation and tests update for  ``data_source/opentelekomcloud_sdrs_domain_v1` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[SDRS]** Documentation and tests update for  ``data_source/opentelekomcloud_sdrs_domain_v1` (`#1932 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1932>`_)
   - |
-    **[SDRS]** Documentation and tests update for  ``resource/opentelekomcloud_sdrs_protectiongroup_v1` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[SDRS]** Documentation and tests update for  ``resource/opentelekomcloud_sdrs_protectiongroup_v1` (`#1932 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1932>`_)
