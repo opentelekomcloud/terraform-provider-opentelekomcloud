@@ -207,9 +207,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 
     availability_zone = "%s"
   }
-  datastore {
-    version = "7.6.2"
-  }
+
   enable_https     = true
   enable_authority = true
   admin_pass       = "QwertyUI!"

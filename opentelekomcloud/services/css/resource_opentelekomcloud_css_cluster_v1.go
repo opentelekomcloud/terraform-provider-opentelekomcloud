@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/flavors"
@@ -155,8 +156,11 @@ func ResourceCssClusterV1() *schema.Resource {
 						"version": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Computed: true,
 							ForceNew: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"7.6.2", "7.9.3",
+							}, false),
+							Default: "7.6.2",
 						},
 					},
 				},
@@ -243,6 +247,8 @@ func resourceCssClusterV1Create(ctx context.Context, d *schema.ResourceData, met
 			Version: d.Get("datastore.0.version").(string),
 			Type:    d.Get("datastore.0.type").(string),
 		}
+	} else {
+		opts.Datastore = &defaultDatastore
 	}
 
 	created, err := clusters.Create(client, opts).Extract()

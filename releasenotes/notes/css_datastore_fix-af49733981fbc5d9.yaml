@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CSS]** Schema ``version`` fix for ``resource/opentelekomcloud_ccss_cluster_v1`` documentation (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
