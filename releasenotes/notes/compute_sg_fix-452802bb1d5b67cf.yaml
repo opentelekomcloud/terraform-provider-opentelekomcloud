@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    **[ECS]** Documentation fixed for ``policy`` parameter in ``resource/opentelekomcloud_compute_servergroup_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+other:
+  - |
+    **[ECS]** Validation/tests added for ``policy`` parameter ``resource/opentelekomcloud_compute_servergroup_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)

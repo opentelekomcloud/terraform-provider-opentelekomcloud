@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/go-multierror"
@@ -24,6 +25,8 @@ func ResourceComputeServerGroupV2() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
+		CustomizeDiff: validatePolicy,
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -39,7 +42,7 @@ func ResourceComputeServerGroupV2() *schema.Resource {
 			},
 			"policies": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
@@ -133,4 +136,12 @@ func resourceServerGroupPoliciesV2(d *schema.ResourceData) []string {
 		policies[i] = raw.(string)
 	}
 	return policies
+}
+
+func validatePolicy(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	policyData := d.Get("policies").([]interface{})
+	if policyData[0] != "anti-affinity" {
+		return fmt.Errorf("only 'anti-affinity' policies are supported")
+	}
+	return nil
 }
