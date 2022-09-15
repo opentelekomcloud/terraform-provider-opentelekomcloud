@@ -93,7 +93,6 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 		DomainID:         d.Get("domain_id").(string),
 		Enabled:          &enabled,
 		Description:      d.Get("description").(string),
-		Email:            d.Get("email").(string),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -108,14 +107,8 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 
 	d.SetId(user.ID)
 
-	if d.Get("send_welcome_email").(bool) {
-		if err := users.SendWelcomeEmail(client, d.Id()).ExtractErr(); err != nil {
-			return fmterr.Errorf("error sending a welcome email: %w", err)
-		}
-	}
-
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
-	return resourceIdentityUserV3Read(clientCtx, d, meta)
+	return setExtendedOpts(clientCtx, d, meta)
 }
 
 func resourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -149,6 +142,40 @@ func resourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	return nil
+}
+
+func setExtendedOpts(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.IdentityV3Client(config.GetRegion(d))
+	})
+	if err != nil {
+		return fmterr.Errorf(clientCreationFail, err)
+	}
+
+	var hasChange bool
+	var updateOpts users.ExtendedUpdateOpts
+
+	if d.HasChange("email") {
+		hasChange = true
+		updateOpts.Email = d.Get("email").(string)
+	}
+
+	if hasChange {
+		_, err := users.ExtendedUpdate(client, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmterr.Errorf("error updating OpenTelekomCloud user: %w", err)
+		}
+
+		if d.Get("send_welcome_email").(bool) {
+			if err := users.SendWelcomeEmail(client, d.Id()).ExtractErr(); err != nil {
+				return fmterr.Errorf("error sending a welcome email: %w", err)
+			}
+		}
+	}
+
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
+	return resourceIdentityUserV3Read(clientCtx, d, meta)
 }
 
 func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -190,11 +217,6 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 		updateOpts.Description = &description
 	}
 
-	if d.HasChange("email") {
-		hasChange = true
-		updateOpts.Email = d.Get("email").(string)
-	}
-
 	if hasChange {
 		log.Printf("[DEBUG] Update Options: %#v", updateOpts)
 	}
@@ -211,14 +233,8 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	if updateOpts.Email != "" && d.Get("send_welcome_email").(bool) {
-		if err := users.SendWelcomeEmail(client, d.Id()).ExtractErr(); err != nil {
-			return fmterr.Errorf("error sending a welcome email: %w", err)
-		}
-	}
-
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
-	return resourceIdentityUserV3Read(clientCtx, d, meta)
+	return setExtendedOpts(clientCtx, d, meta)
 }
 
 func resourceIdentityUserV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

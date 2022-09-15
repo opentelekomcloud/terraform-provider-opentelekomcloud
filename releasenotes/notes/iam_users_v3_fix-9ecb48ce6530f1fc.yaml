@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IAM]** User creation fix for ``resource/opentelekomcloud_identity_user_v3`` after API update (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
