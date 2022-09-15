@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[EVS]** Changes for ``resource/opentelekomcloud_blockstorage_volume_v2`` after gophertelekomcloud refactoring (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
