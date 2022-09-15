@@ -14,9 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/extensions/volumeactions"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v2/volumes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/volumeattach"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/extensions/volumeactions"
 	volumes_v3 "github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v3/volumes"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 
@@ -389,7 +389,7 @@ func extendSize(d *schema.ResourceData, client *golangsdk.ServiceClient) error {
 		return fmt.Errorf("can't decrease volume size. This is internal provider error, this point should never be reached")
 	}
 	opts := volumeactions.ExtendSizeOpts{NewSize: newSizeInt}
-	if err := volumeactions.ExtendSize(client, d.Id(), opts).ExtractErr(); err != nil {
+	if err := volumeactions.ExtendSize(client, d.Id(), opts); err != nil {
 		return fmt.Errorf("failed to extend disk size: %s", err)
 	}
 	return nil
