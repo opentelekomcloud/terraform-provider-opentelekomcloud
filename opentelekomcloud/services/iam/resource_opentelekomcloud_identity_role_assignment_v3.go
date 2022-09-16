@@ -177,5 +177,9 @@ func buildRoleAssignmentID(domainID, projectID, groupID, roleID string) string {
 
 func ExtractRoleAssignmentID(roleAssignmentID string) (string, string, string, string) {
 	split := strings.Split(roleAssignmentID, "/")
+	if len(split) != 4 {
+		// Otherwise previous role assignments in tfstate file won't be backwards compatible
+		return split[0], split[1], split[2], split[4]
+	}
 	return split[0], split[1], split[2], split[3]
 }

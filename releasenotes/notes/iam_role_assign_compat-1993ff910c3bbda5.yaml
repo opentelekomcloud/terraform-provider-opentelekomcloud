@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IAM]** Backwards compatibility for ``resource/opentelekomcloud_identity_role_assignment_v3`` (`#1938 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1938>`_)
