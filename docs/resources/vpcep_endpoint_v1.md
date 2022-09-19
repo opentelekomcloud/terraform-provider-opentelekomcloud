@@ -39,6 +39,9 @@ resource "opentelekomcloud_vpcep_endpoint_v1" "endpoint" {
   subnet_id  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   port_ip    = "192.168.0.12"
   enable_dns = true
+  whitelist = [
+    "127.0.0.1"
+  ]
 
   tags = {
     "fizz" : "buzz"
@@ -69,8 +72,11 @@ the VPC route table cannot overlap with the CIDR block `198.19.128.0/20`.
 * `port_ip` - (Optional) Specifies the IP address for accessing the associated VPC endpoint service.
 
 * `whitelist` - (Optional) Specifies the whitelist for controlling access to the VPC endpoint.
+  ``IPv4 addresses`` or ``CIDR blocks`` can be specified to control access when you create a VPC endpoint.
+  This parameter is mandatory only when you create a ``VPC endpoint`` for connecting to an interface VPC endpoint service.
 
 * `enable_whitelist` - (Optional) Specifies whether to enable access control.
+  This parameter is available only if you create a ``VPC endpoint`` for connecting to an interface VPC endpoint service.
 
 * `tags` - (Optional) Lists the resource tags.
 

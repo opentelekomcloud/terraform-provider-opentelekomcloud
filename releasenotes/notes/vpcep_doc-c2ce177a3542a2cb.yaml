@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[VPCEP]** Documentation update for ``resource/opentelekomcloud_vpcep_endpoint_v1`` (`#1941 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1941>`_)
