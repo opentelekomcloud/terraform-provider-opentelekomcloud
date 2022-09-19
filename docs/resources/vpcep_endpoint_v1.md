@@ -71,7 +71,7 @@ the VPC route table cannot overlap with the CIDR block `198.19.128.0/20`.
 
 * `port_ip` - (Optional) Specifies the IP address for accessing the associated VPC endpoint service.
 
-* `whitelist` - (Optional) Specifies the whitelist for controlling access to the VPC endpoint.
+* `whitelist` - (Optional) Specifies a whitelist IPs array for controlling access to the VPC endpoint.
   ``IPv4 addresses`` or ``CIDR blocks`` can be specified to control access when you create a VPC endpoint.
   This parameter is mandatory only when you create a ``VPC endpoint`` for connecting to an interface VPC endpoint service.
 
