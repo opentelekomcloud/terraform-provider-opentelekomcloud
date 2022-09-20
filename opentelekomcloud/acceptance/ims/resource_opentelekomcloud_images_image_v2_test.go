@@ -157,6 +157,25 @@ func TestAccImagesImageV2_timeout(t *testing.T) {
 	})
 }
 
+func TestAccImagesImageV2_big_image(t *testing.T) {
+	t.Skip("this test have a very long run over than 1128.64s")
+	var image images.Image
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccImagesImageV2_upload_large,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImagesImageV2Exists("opentelekomcloud_images_image_v2.image_1", &image),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckImagesImageV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
@@ -359,4 +378,12 @@ resource "opentelekomcloud_images_image_v2" "image_1" {
   timeouts {
     create = "10m"
   }
+}`
+
+var testAccImagesImageV2_upload_large = `
+resource "opentelekomcloud_images_image_v2" "image_1" {
+  name             = "Ubuntu Desktop TerraformAccTest"
+  image_source_url = "https://releases.ubuntu.com/22.04.1/ubuntu-22.04.1-desktop-amd64.iso?_ga=2.80151063.1266130091.1663673826-1722972329.1663673826"
+  container_format = "bare"
+  disk_format      = "iso"
 }`
