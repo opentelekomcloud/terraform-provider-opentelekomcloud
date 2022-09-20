@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
@@ -158,7 +159,9 @@ func TestAccImagesImageV2_timeout(t *testing.T) {
 }
 
 func TestAccImagesImageV2_big_image(t *testing.T) {
-	t.Skip("this test have a very long run over than 1128.64s")
+	if os.Getenv("IMS_LARGE") == "" {
+		t.Skip("this test have a very long run over than 1128.64s")
+	}
 	var image images.Image
 
 	resource.Test(t, resource.TestCase{
