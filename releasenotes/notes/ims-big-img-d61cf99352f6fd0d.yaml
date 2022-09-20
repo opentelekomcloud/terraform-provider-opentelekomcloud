@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[IMS]** Added test for uploading large image ``40gb`` for ``resource/opentelekomcloud_cbr_backup_ids_v3`` (`#1943 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1943>`_)
