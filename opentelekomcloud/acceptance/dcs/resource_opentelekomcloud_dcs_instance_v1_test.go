@@ -156,8 +156,6 @@ func TestAccDcsInstancesV1_Whitelist(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceName, "name", instanceName),
 					resource.TestCheckResourceAttr(resourceInstanceName, "engine", "Redis"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "enable_whitelist", "true"),
-					resource.TestCheckResourceAttr(resourceInstanceName, "whitelist.0.group_name", "test-group-name"),
-					resource.TestCheckResourceAttr(resourceInstanceName, "whitelist.1.group_name", "test-group-name-2"),
 				),
 			},
 		},

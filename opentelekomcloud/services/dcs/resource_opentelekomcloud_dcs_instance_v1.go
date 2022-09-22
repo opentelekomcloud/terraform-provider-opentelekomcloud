@@ -259,7 +259,7 @@ func ResourceDcsInstanceV1() *schema.Resource {
 				RequiredWith: []string{"whitelist"},
 			},
 			"whitelist": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -348,7 +348,7 @@ func getInstanceRedisConfiguration(d *schema.ResourceData) []configs.RedisConfig
 func getInstanceWhitelistOpts(d *schema.ResourceData) whitelists.WhitelistOpts {
 	var whitelistOpts whitelists.WhitelistOpts
 	enabled := d.Get("enable_whitelist").(bool)
-	whitelist := d.Get("whitelist").([]interface{})
+	whitelist := d.Get("whitelist").(*schema.Set).List()
 	whitelistOpts.Enable = &enabled
 	if len(whitelist) == 0 {
 		whitelistOpts.Enable = &enabled
@@ -454,7 +454,6 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 		if err := whitelists.Put(client, d.Id(), whitelistOpts).ExtractErr(); err != nil {
 			return fmterr.Errorf("error updating redis whitelist of DCS instance: %w", err)
 		}
-		time.Sleep(5 * time.Second)
 	}
 
 	return resourceDcsInstancesV1Read(ctx, d, meta)
@@ -515,14 +514,14 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 			return diag.FromErr(err)
 		}
 
-		if w.InstanceID != "" && len(w.Groups) == 0 {
+		if w.InstanceID != "" {
 			var whitelistGroups []map[string]interface{}
 			for _, group := range w.Groups {
-				iplist := make([]string, len(group.IPList))
-				copy(iplist, group.IPList)
+				ipList := make([]string, len(group.IPList))
+				copy(ipList, group.IPList)
 				resourceMap := map[string]interface{}{
 					"group_name": group.GroupName,
-					"ip_list":    iplist,
+					"ip_list":    ipList,
 				}
 				whitelistGroups = append(whitelistGroups, resourceMap)
 			}
@@ -599,7 +598,6 @@ func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 		if err := whitelists.Put(client, d.Id(), whitelistOpts).ExtractErr(); err != nil {
 			return fmterr.Errorf("error updating redis whitelist of DCS instance: %w", err)
 		}
-		time.Sleep(5 * time.Second)
 	}
 
 	return resourceDcsInstancesV1Read(ctx, d, meta)
