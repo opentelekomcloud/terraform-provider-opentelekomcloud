@@ -1,0 +1,7 @@
+---
+enhancements:
+  - |
+    **[DCS]** `Whitelist` feature implemented for ``resource/opentelekomcloud_dcs_instance_v1`` (`#1944 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1944>`_)
+fixes:
+  - |
+    **[DCS]** Fixed `security_group_id` dependencies for ``resource/opentelekomcloud_dcs_instance_v1`` (`#1944 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1944>`_)

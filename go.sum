@@ -210,6 +210,8 @@ github.com/opentelekomcloud/gophertelekomcloud v0.5.23-0.20220915113255-792b017e
 github.com/opentelekomcloud/gophertelekomcloud v0.5.23-0.20220915113255-792b017ebb56/go.mod h1:pzEP1kduNwv+hrI9R6/DFU/NiX7Kr9NiFjpQ7kJQTsM=
 github.com/opentelekomcloud/gophertelekomcloud v0.5.23-0.20220919120036-62ee4b4b59d7 h1:x2zcEjwLar9dmizOizxuDv2qbxSsCa0efsjXy2QmcNQ=
 github.com/opentelekomcloud/gophertelekomcloud v0.5.23-0.20220919120036-62ee4b4b59d7/go.mod h1:pzEP1kduNwv+hrI9R6/DFU/NiX7Kr9NiFjpQ7kJQTsM=
+github.com/opentelekomcloud/gophertelekomcloud v0.5.23-0.20220921110146-fa37d7f29866 h1:TgZRIYIHHtGjDprCGXtviW4hecQWhSzj1bPe0hFWPW0=
+github.com/opentelekomcloud/gophertelekomcloud v0.5.23-0.20220921110146-fa37d7f29866/go.mod h1:pzEP1kduNwv+hrI9R6/DFU/NiX7Kr9NiFjpQ7kJQTsM=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
