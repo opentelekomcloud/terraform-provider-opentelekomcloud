@@ -62,15 +62,15 @@ data "opentelekomcloud_dcs_product_v1" "product_1" {
 }
 
 resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
-  name              = "test_dcs_instance_5.0"
-  engine_version    = "5.0"
-  password          = "0TCTestP@ssw0rd"
-  engine            = "Redis"
-  capacity          = 0.125
-  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  available_zones   = [data.opentelekomcloud_dcs_az_v1.az_1.id]
-  product_id        = data.opentelekomcloud_dcs_product_v1.product_1.id
+  name            = "test_dcs_instance_5.0"
+  engine_version  = "5.0"
+  password        = "0TCTestP@ssw0rd"
+  engine          = "Redis"
+  capacity        = 0.125
+  vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  available_zones = [data.opentelekomcloud_dcs_az_v1.az_1.id]
+  product_id      = data.opentelekomcloud_dcs_product_v1.product_1.id
 
   enable_whitelist = true
   whitelist {
