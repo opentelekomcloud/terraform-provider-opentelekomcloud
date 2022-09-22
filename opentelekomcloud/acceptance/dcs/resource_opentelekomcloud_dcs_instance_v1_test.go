@@ -68,7 +68,7 @@ func TestAccDcsInstancesV1_basicSingleInstance(t *testing.T) {
 	})
 }
 
-func TestAccDcsInstancesV1_basicEngineV3Instace(t *testing.T) {
+func TestAccDcsInstancesV1_basicEngineV3Instance(t *testing.T) {
 	var instance instances.Instance
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
 
