@@ -454,6 +454,18 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 		if err := whitelists.Put(client, d.Id(), whitelistOpts).ExtractErr(); err != nil {
 			return fmterr.Errorf("error updating redis whitelist of DCS instance: %w", err)
 		}
+		stateConf := &resource.StateChangeConf{
+			Pending: []string{"UPDATING"},
+			Target:  []string{"SUCCESS"},
+			Refresh: dcsInstanceV1WhitelistRefreshFunc(client, d.Id(), nil),
+			Timeout: d.Timeout(schema.TimeoutCreate),
+			Delay:   4 * time.Second,
+		}
+
+		_, err = stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return fmterr.Errorf("error waiting for instance (%s) to update whitelist: %w", d.Id(), err)
+		}
 	}
 
 	return resourceDcsInstancesV1Read(ctx, d, meta)
@@ -594,9 +606,25 @@ func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if d.HasChange("enable_whitelist") || d.HasChange("whitelist") {
+		getResp, err := whitelists.Get(client, d.Id()).Extract()
+		if err != nil {
+			return diag.FromErr(err)
+		}
 		whitelistOpts := getInstanceWhitelistOpts(d)
 		if err := whitelists.Put(client, d.Id(), whitelistOpts).ExtractErr(); err != nil {
 			return fmterr.Errorf("error updating redis whitelist of DCS instance: %w", err)
+		}
+		stateConf := &resource.StateChangeConf{
+			Pending: []string{"UPDATING"},
+			Target:  []string{"SUCCESS"},
+			Refresh: dcsInstanceV1WhitelistRefreshFunc(client, d.Id(), getResp),
+			Timeout: d.Timeout(schema.TimeoutCreate),
+			Delay:   4 * time.Second,
+		}
+
+		_, err = stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return fmterr.Errorf("error waiting for instance (%s) to update whitelist: %w", d.Id(), err)
 		}
 	}
 
@@ -663,6 +691,20 @@ func dcsInstanceV1ConfigStateRefreshFunc(client *golangsdk.ServiceClient, instan
 			return nil, "", err
 		}
 		return v, v.ConfigStatus, nil
+	}
+}
+
+func dcsInstanceV1WhitelistRefreshFunc(client *golangsdk.ServiceClient, instanceID string, getResp *whitelists.Whitelist) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		v, err := whitelists.Get(client, instanceID).Extract()
+		if err != nil {
+			return nil, "", err
+		}
+		// first logical condition - on resource creation, second - on update
+		if getResp == nil && len(v.Groups) == 0 || v == getResp {
+			return v, "UPDATING", nil
+		}
+		return v, "SUCCESS", nil
 	}
 }
 

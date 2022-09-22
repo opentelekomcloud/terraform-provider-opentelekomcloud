@@ -158,6 +158,15 @@ func TestAccDcsInstancesV1_Whitelist(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceName, "enable_whitelist", "true"),
 				),
 			},
+			{
+				Config: testAccDcsV1InstanceWhitelistThirdUpdate(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDcsV1InstanceExists(resourceInstanceName, instance),
+					resource.TestCheckResourceAttr(resourceInstanceName, "name", instanceName),
+					resource.TestCheckResourceAttr(resourceInstanceName, "engine", "Redis"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "enable_whitelist", "false"),
+				),
+			},
 		},
 	})
 }
@@ -546,6 +555,54 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
     group_name = "test-group-name"
     ip_list    = ["10.10.10.1", "10.10.10.2"]
   }
+  whitelist {
+    group_name = "test-group-name-2"
+    ip_list    = ["10.10.10.11", "10.10.10.3", "10.10.10.4"]
+  }
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)
+}
+
+func testAccDcsV1InstanceWhitelistThirdUpdate(instanceName string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+data "opentelekomcloud_dcs_az_v1" "az_1" {
+  port = "8002"
+  code = "%s"
+}
+
+data "opentelekomcloud_dcs_product_v1" "product_1" {
+  spec_code = "redis.ha.xu1.tiny.r2.128"
+}
+
+resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
+  name            = "%s"
+  engine_version  = "5.0"
+  password        = "Hungarian_rapsody"
+  engine          = "Redis"
+  capacity        = 0.125
+  vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  available_zones = [data.opentelekomcloud_dcs_az_v1.az_1.id]
+  product_id      = data.opentelekomcloud_dcs_product_v1.product_1.id
+  backup_policy {
+    backup_type = "manual"
+    begin_at    = "00:00-01:00"
+    period_type = "weekly"
+    backup_at   = [4]
+    save_days   = 1
+  }
+
+  configuration {
+    parameter_id    = "1"
+    parameter_name  = "timeout"
+    parameter_value = "100"
+  }
+
+  enable_whitelist = false
   whitelist {
     group_name = "test-group-name-2"
     ip_list    = ["10.10.10.11", "10.10.10.3", "10.10.10.4"]
