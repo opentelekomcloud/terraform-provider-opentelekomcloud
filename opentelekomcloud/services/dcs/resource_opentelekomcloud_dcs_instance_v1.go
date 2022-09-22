@@ -2,6 +2,7 @@ package dcs
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -13,7 +14,7 @@ import (
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/configs"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/instances"
-
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v2/whitelists"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -25,6 +26,9 @@ func ResourceDcsInstanceV1() *schema.Resource {
 		ReadContext:   resourceDcsInstancesV1Read,
 		UpdateContext: resourceDcsInstancesV1Update,
 		DeleteContext: resourceDcsInstancesV1Delete,
+
+		CustomizeDiff: validateEngine,
+
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -79,7 +83,7 @@ func ResourceDcsInstanceV1() *schema.Resource {
 			},
 			"security_group_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"subnet_id": {
 				Type:     schema.TypeString,
@@ -248,6 +252,30 @@ func ResourceDcsInstanceV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"enable_whitelist": {
+				Type:         schema.TypeBool,
+				Computed:     true,
+				Optional:     true,
+				RequiredWith: []string{"whitelist"},
+			},
+			"whitelist": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"group_name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"ip_list": {
+							Type:     schema.TypeList,
+							Required: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+				RequiredWith: []string{"enable_whitelist"},
+			},
 		},
 	}
 }
@@ -315,6 +343,37 @@ func getInstanceRedisConfiguration(d *schema.ResourceData) []configs.RedisConfig
 	}
 
 	return redisConfigList
+}
+
+func getInstanceWhitelistOpts(d *schema.ResourceData) whitelists.WhitelistOpts {
+	var whitelistOpts whitelists.WhitelistOpts
+	enabled := d.Get("enable_whitelist").(bool)
+	whitelist := d.Get("whitelist").(*schema.Set).List()
+	whitelistOpts.Enable = &enabled
+	if len(whitelist) == 0 {
+		whitelistOpts.Enable = &enabled
+		whitelistOpts.Groups = []whitelists.WhitelistGroupOpts{}
+		return whitelistOpts
+	}
+
+	for _, v := range whitelist {
+		group := v.(map[string]interface{})
+		groupOpts := whitelists.WhitelistGroupOpts{
+			GroupName: group["group_name"].(string),
+		}
+
+		ipList := group["ip_list"].([]interface{})
+		var refinedIpList []string
+
+		for _, s := range ipList {
+			refinedIpList = append(refinedIpList, s.(string))
+		}
+		groupOpts.IPList = refinedIpList
+
+		whitelistOpts.Groups = append(whitelistOpts.Groups, groupOpts)
+	}
+
+	return whitelistOpts
 }
 
 func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -390,6 +449,25 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
+	if _, ok := d.GetOk("whitelist"); ok {
+		whitelistOpts := getInstanceWhitelistOpts(d)
+		if err := whitelists.Put(client, d.Id(), whitelistOpts).ExtractErr(); err != nil {
+			return fmterr.Errorf("error updating redis whitelist of DCS instance: %w", err)
+		}
+		stateConf := &resource.StateChangeConf{
+			Pending: []string{"UPDATING"},
+			Target:  []string{"SUCCESS"},
+			Refresh: dcsInstanceV1WhitelistRefreshFunc(client, d.Id(), nil),
+			Timeout: d.Timeout(schema.TimeoutCreate),
+			Delay:   4 * time.Second,
+		}
+
+		_, err = stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return fmterr.Errorf("error waiting for instance (%s) to update whitelist: %w", d.Id(), err)
+		}
+	}
+
 	return resourceDcsInstancesV1Read(ctx, d, meta)
 }
 
@@ -426,8 +504,6 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("vpc_name", v.VPCName),
 		d.Set("created_at", v.CreatedAt),
 		d.Set("product_id", v.ProductID),
-		// d.Set("security_group_id", v.SecurityGroupID),
-		// d.Set("security_group_name", v.SecurityGroupName),
 		d.Set("subnet_id", v.SubnetID),
 		d.Set("subnet_name", v.SubnetName),
 		d.Set("user_id", v.UserID),
@@ -438,6 +514,36 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("access_user", v.AccessUser),
 		d.Set("ip", v.IP),
 	)
+
+	if v.EngineVersion == "3.0" {
+		mErr = multierror.Append(
+			d.Set("security_group_id", v.SecurityGroupID),
+			d.Set("security_group_name", v.SecurityGroupName),
+		)
+	} else {
+		w, err := whitelists.Get(client, d.Id()).Extract()
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if w.InstanceID != "" {
+			var whitelistGroups []map[string]interface{}
+			for _, group := range w.Groups {
+				ipList := make([]string, len(group.IPList))
+				copy(ipList, group.IPList)
+				resourceMap := map[string]interface{}{
+					"group_name": group.GroupName,
+					"ip_list":    ipList,
+				}
+				whitelistGroups = append(whitelistGroups, resourceMap)
+			}
+
+			mErr = multierror.Append(
+				d.Set("enable_whitelist", w.Enable),
+				d.Set("whitelist", whitelistGroups),
+			)
+		}
+	}
 
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
@@ -496,6 +602,29 @@ func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf("error waiting for instance (%s) to delete: %w", d.Id(), err)
+		}
+	}
+
+	if d.HasChange("enable_whitelist") || d.HasChange("whitelist") {
+		getResp, err := whitelists.Get(client, d.Id()).Extract()
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		whitelistOpts := getInstanceWhitelistOpts(d)
+		if err := whitelists.Put(client, d.Id(), whitelistOpts).ExtractErr(); err != nil {
+			return fmterr.Errorf("error updating redis whitelist of DCS instance: %w", err)
+		}
+		stateConf := &resource.StateChangeConf{
+			Pending: []string{"UPDATING"},
+			Target:  []string{"SUCCESS"},
+			Refresh: dcsInstanceV1WhitelistRefreshFunc(client, d.Id(), getResp),
+			Timeout: d.Timeout(schema.TimeoutCreate),
+			Delay:   4 * time.Second,
+		}
+
+		_, err = stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return fmterr.Errorf("error waiting for instance (%s) to update whitelist: %w", d.Id(), err)
 		}
 	}
 
@@ -563,4 +692,35 @@ func dcsInstanceV1ConfigStateRefreshFunc(client *golangsdk.ServiceClient, instan
 		}
 		return v, v.ConfigStatus, nil
 	}
+}
+
+func dcsInstanceV1WhitelistRefreshFunc(client *golangsdk.ServiceClient, instanceID string, getResp *whitelists.Whitelist) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		v, err := whitelists.Get(client, instanceID).Extract()
+		if err != nil {
+			return nil, "", err
+		}
+		// first logical condition - on resource creation, second - on update
+		if getResp == nil && len(v.Groups) == 0 || v == getResp {
+			return v, "UPDATING", nil
+		}
+		return v, "SUCCESS", nil
+	}
+}
+
+func validateEngine(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	mErr := &multierror.Error{}
+	engineVersion := d.Get("engine_version").(string)
+
+	if _, ok := d.GetOk("security_group_id"); !ok && engineVersion == "3.0" {
+		mErr = multierror.Append(mErr, fmt.Errorf("'security_group_id' should be set with engine_version==3.0"))
+	} else if ok && engineVersion != "3.0" {
+		mErr = multierror.Append(mErr, fmt.Errorf("DCS Redis 4.0 and 5.0 instances do not support security groups"))
+	}
+
+	if _, ok := d.GetOk("whitelist"); ok && engineVersion == "3.0" {
+		mErr = multierror.Append(mErr, fmt.Errorf("DCS Redis 3.0 instance does not support whitelisting"))
+	}
+
+	return mErr.ErrorOrNil()
 }

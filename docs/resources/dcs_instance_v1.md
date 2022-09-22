@@ -8,6 +8,8 @@ Manages a DCSv1 instance in the OpenTelekomCloud DCS Service.
 
 ## Example Usage
 
+### Engine version 3.0 (`security_group_id` is required):
+
 ```hcl
 variable "network_id" {}
 variable "vpc_id" {}
@@ -27,7 +29,7 @@ data "opentelekomcloud_dcs_product_v1" "product_1" {
 
 resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   name           = "test_dcs_instance"
-  engine_version = "3.0.7"
+  engine_version = "3.0"
   password       = "0TCTestP@ssw0rd"
   engine         = "Redis"
   capacity       = 2
@@ -60,16 +62,25 @@ data "opentelekomcloud_dcs_product_v1" "product_1" {
 }
 
 resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
-  name              = "test_dcs_instance_5.0"
-  engine_version    = "5.0"
-  password          = "0TCTestP@ssw0rd"
-  engine            = "Redis"
-  capacity          = 0.125
-  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  available_zones   = [data.opentelekomcloud_dcs_az_v1.az_1.id]
-  product_id        = data.opentelekomcloud_dcs_product_v1.product_1.id
+  name            = "test_dcs_instance_5.0"
+  engine_version  = "5.0"
+  password        = "0TCTestP@ssw0rd"
+  engine          = "Redis"
+  capacity        = 0.125
+  vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  available_zones = [data.opentelekomcloud_dcs_az_v1.az_1.id]
+  product_id      = data.opentelekomcloud_dcs_product_v1.product_1.id
+
+  enable_whitelist = true
+  whitelist {
+    group_name = "test-group-name"
+    ip_list    = ["10.10.10.1", "10.10.10.2"]
+  }
+  whitelist {
+    group_name = "test-group-name-2"
+    ip_list    = ["10.10.10.11", "10.10.10.3", "10.10.10.4"]
+  }
 }
 ```
 
@@ -107,7 +118,7 @@ The following arguments are supported:
 
 * `vpc_id` - (Required) Specifies the VPC ID. Changing this creates a new instance.
 
-* `security_group_id` - (Required) Security group ID.
+* `security_group_id` - (Optional) Security group ID. This parameter is mandatory when `engine_version` is `3.0`.
 
 * `subnet_id` - (Required) Specifies the subnet Network ID. Changing this creates a new instance.
 
@@ -151,6 +162,17 @@ the default start time `02:00` and the default end time `06:00`.
   * `parameter_id` - (Required) Configuration item ID.
   * `parameter_name` - (Required) Configuration item name.
   * `parameter_value` - (Required) Value of the configuration item.
+
+* `enable_whitelist` - (Optional) Specifies whether to enable or disable `whitelist`. Only available when
+  `engine_version` is set to `4.0`/`5.0`. Parameter have to be used together with `whitelist`.
+
+* `whitelist` - (Optional) Describes the `whitelist` groups to be used with the instance. Only available when
+  `engine_version` is set to `4.0`/`5.0`. Parameter have to be used together with `enable_whitelist`.
+  Resource fields:
+  * `group_name` - (Optional) Whitelist group name. A maximum of four groups can be created for each instance.
+  * `ip_list` - (Optional) List of IP addresses in the whitelist group. A maximum of 20 IP addresses or IP address
+  ranges can be added to an instance. Separate multiple IP addresses or IP address ranges with commas (,).
+  IP address 0.0.0.0 and IP address range 0.0.0/0 are not supported.
 
 ## Attributes Reference
 
