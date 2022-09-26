@@ -45,6 +45,7 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 		},
 	})
 }
+
 func TestAccLBV2LoadBalancer_import(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {

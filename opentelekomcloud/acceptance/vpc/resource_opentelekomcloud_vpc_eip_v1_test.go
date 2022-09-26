@@ -46,6 +46,34 @@ func TestAccVpcV1EIP_basic(t *testing.T) {
 	})
 }
 
+func TestAccVpcV1EIP_UnAssing(t *testing.T) {
+	var eip eips.PublicIp
+	t.Parallel()
+	quotas.BookOne(t, quotas.FloatingIP)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckVpcV1EIPDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVpcV1EIP,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckVpcV1EIPExists(resourceVPCEIPName, &eip),
+					resource.TestCheckResourceAttr(resourceVPCEIPName, "publicip.#", "1"),
+				),
+			},
+			{
+				Config: testAccVpcV1EIPUnassign,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckVpcV1EIPExists(resourceVPCEIPName, &eip),
+					resource.TestCheckResourceAttr(resourceVPCEIPName, "publicip.0.port_id", ""),
+				),
+			},
+		},
+	})
+}
+
 func TestAccVpcV1EIP_timeout(t *testing.T) {
 	var eip eips.PublicIp
 	t.Parallel()
@@ -172,3 +200,59 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
   }
 }
 `
+
+var testAccVpcV1EIP = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
+  name          = "loadbalancer_1"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+
+resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
+  publicip {
+    type    = "5_bgp"
+    port_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.vip_port_id
+  }
+
+  bandwidth {
+    name       = "test-bandwidth-acc"
+    size       = 100
+    share_type = "PER"
+  }
+
+}
+`, common.DataSourceSubnet)
+
+var testAccVpcV1EIPUnassign = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
+  name          = "loadbalancer_1"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+
+resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
+  publicip {
+    type    = "5_bgp"
+    port_id = ""
+  }
+
+  bandwidth {
+    name       = "test-bandwidth-acc"
+    size       = 1000
+    share_type = "PER"
+  }
+
+}
+`, common.DataSourceSubnet)
