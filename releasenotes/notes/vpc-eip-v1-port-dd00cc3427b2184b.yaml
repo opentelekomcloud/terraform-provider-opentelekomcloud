@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Remove compute from ``port_id`` for possibility to un assign port in ``resource/opentelekomcloud_vpc_eip_v1`` (`#1946 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1946>`_)
