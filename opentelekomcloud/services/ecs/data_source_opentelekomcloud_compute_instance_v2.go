@@ -115,6 +115,11 @@ func DataSourceComputeInstanceV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"admin_pass": {
+				Type:     schema.TypeString,
+				Computed: true,
+				// Sensitive: true,
+			},
 			"metadata": {
 				Type:     schema.TypeMap,
 				Computed: true,
@@ -243,6 +248,12 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 		mErr = multierror.Append(mErr, d.Set("power_state", currentStatus))
 	default:
 		return fmterr.Errorf("invalid power_state for instance %s: %s", d.Id(), server.Status)
+	}
+
+	// Set instance password
+	pass, err := servers.GetPassword(client, d.Id()).Extract()
+	if err != nil {
+		mErr = multierror.Append(mErr, d.Set("admin_pass", pass))
 	}
 
 	mErr = multierror.Append(mErr,

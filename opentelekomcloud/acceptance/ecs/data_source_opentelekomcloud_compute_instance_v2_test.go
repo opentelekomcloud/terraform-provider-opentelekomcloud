@@ -25,6 +25,7 @@ func TestAccComputeV2InstanceDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("data.opentelekomcloud_compute_instance_v2.source_1", "name", "instance_1"),
 					resource.TestCheckResourceAttrPair("data.opentelekomcloud_compute_instance_v2.source_1", "metadata", "opentelekomcloud_compute_instance_v2.instance_1", "metadata"),
 					resource.TestCheckResourceAttrSet("data.opentelekomcloud_compute_instance_v2.source_1", "network.0.name"),
+					resource.TestCheckResourceAttrSet("data.opentelekomcloud_compute_instance_v2.source_1", "admin_pass"),
 				),
 			},
 			{

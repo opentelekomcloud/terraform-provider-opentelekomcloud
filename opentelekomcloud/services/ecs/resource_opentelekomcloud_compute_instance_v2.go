@@ -177,9 +177,10 @@ func ResourceComputeInstanceV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"admin_pass": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: false,
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  false,
+				Sensitive: true,
 			},
 			"access_ip_v4": {
 				Type:     schema.TypeString,
@@ -668,6 +669,12 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 	}
 	tagMap := common.TagsToMap(resourceTags)
 	mErr = multierror.Append(mErr, d.Set("tags", tagMap))
+
+	// Set instance password
+	pass, err := servers.GetPassword(client, d.Id()).Extract()
+	if err != nil {
+		mErr = multierror.Append(mErr, d.Set("admin_pass", pass))
+	}
 
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting opentelekomcloud_compute_instance_v2 values: %w", err)
