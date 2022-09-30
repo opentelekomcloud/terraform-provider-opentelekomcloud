@@ -19,6 +19,7 @@ import (
 const (
 	resourceNameNode  = "opentelekomcloud_cce_node_v3.node_1"
 	resourceNameNode2 = "opentelekomcloud_cce_node_v3.node_2"
+	resourceNameNode3 = "opentelekomcloud_cce_node_v3.node_3"
 )
 
 func TestAccCCENodesV3Basic(t *testing.T) {
@@ -97,6 +98,7 @@ func TestAccCCENodesV3Timeout(t *testing.T) {
 func TestAccCCENodesV3OS(t *testing.T) {
 	var node nodes.Nodes
 	var node2 nodes.Nodes
+	var node3 nodes.Nodes
 
 	t.Parallel()
 	shared.BookCluster(t)
@@ -114,8 +116,8 @@ func TestAccCCENodesV3OS(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameNode, "os", "EulerOS 2.5"),
 					testAccCheckCCENodeV3Exists(resourceNameNode2, shared.DataSourceClusterName, &node2),
 					resource.TestCheckResourceAttr(resourceNameNode2, "os", "CentOS 7.7"),
-					testAccCheckCCENodeV3Exists(resourceNameNode2, shared.DataSourceClusterName, &node2),
-					resource.TestCheckResourceAttr(resourceNameNode2, "os", "EulerOS 2.9"),
+					testAccCheckCCENodeV3Exists(resourceNameNode3, shared.DataSourceClusterName, &node3),
+					resource.TestCheckResourceAttr(resourceNameNode3, "os", "EulerOS 2.9"),
 				),
 			},
 		},
