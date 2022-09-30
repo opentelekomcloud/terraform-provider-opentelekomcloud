@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    [CCE] Support ``EulerOS 2.9`` in ``resource/opentelekomcloud_cce_node_v3`` (`#1950 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1950>`_)
