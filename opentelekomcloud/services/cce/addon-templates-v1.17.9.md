@@ -17,6 +17,9 @@ Following addon templates exist in the addon template list:
 
 All addons accept `basic` and some can accept `custom` input values.
 
+In some regions can be impossible to create addon without `tenant_id` which equal to `project_id` of the region you're deploying into,
+also be aware of that `swr_addr` can be also different in regions.
+
 ## Addon Inputs
 
 ### `autoscaler`
