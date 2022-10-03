@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"context"
+	"crypto/rsa"
 	"log"
 	"strings"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
+	"golang.org/x/crypto/ssh"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/availabilityzones"
@@ -250,10 +252,16 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 		return fmterr.Errorf("invalid power_state for instance %s: %s", d.Id(), server.Status)
 	}
 
-	// Set instance password
-	pass, err := servers.GetPassword(client, d.Id()).Extract()
-	if err != nil {
-		mErr = multierror.Append(mErr, d.Set("admin_pass", pass))
+	// Set win instance password
+	if v, ok := d.GetOk("ssh_private_key"); ok {
+		privateKey, err := ssh.ParseRawPrivateKey([]byte(v.(string)))
+		if err != nil {
+			return fmterr.Errorf("error parsing private key: %w", err)
+		}
+		pass, err := servers.GetPassword(client, d.Id()).ExtractPassword(privateKey.(*rsa.PrivateKey))
+		if err != nil {
+			mErr = multierror.Append(mErr, d.Set("admin_pass", pass))
+		}
 	}
 
 	mErr = multierror.Append(mErr,

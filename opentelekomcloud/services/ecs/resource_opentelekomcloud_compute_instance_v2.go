@@ -3,6 +3,7 @@ package ecs
 import (
 	"bytes"
 	"context"
+	"crypto/rsa"
 	"errors"
 	"fmt"
 	"log"
@@ -29,6 +30,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ims"
+	"golang.org/x/crypto/ssh"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -103,6 +105,12 @@ func ResourceComputeInstanceV2() *schema.Resource {
 						return ""
 					}
 				},
+			},
+			"ssh_private_key": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  false,
+				Sensitive: true,
 			},
 			"security_groups": {
 				Type:     schema.TypeSet,
@@ -670,10 +678,16 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 	tagMap := common.TagsToMap(resourceTags)
 	mErr = multierror.Append(mErr, d.Set("tags", tagMap))
 
-	// Set instance password
-	pass, err := servers.GetPassword(client, d.Id()).Extract()
-	if err != nil {
-		mErr = multierror.Append(mErr, d.Set("admin_pass", pass))
+	// Set win instance password
+	if v, ok := d.GetOk("ssh_private_key"); ok {
+		privateKey, err := ssh.ParseRawPrivateKey([]byte(v.(string)))
+		if err != nil {
+			return fmterr.Errorf("error parsing private key: %w", err)
+		}
+		pass, err := servers.GetPassword(client, d.Id()).ExtractPassword(privateKey.(*rsa.PrivateKey))
+		if err != nil {
+			mErr = multierror.Append(mErr, d.Set("admin_pass", pass))
+		}
 	}
 
 	if err := mErr.ErrorOrNil(); err != nil {
