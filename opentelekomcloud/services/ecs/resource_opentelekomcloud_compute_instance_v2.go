@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -183,6 +184,11 @@ func ResourceComputeInstanceV2() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
+			},
+			"password": {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"admin_pass": {
 				Type:      schema.TypeString,
@@ -680,14 +686,19 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 
 	// Set win instance password
 	if v, ok := d.GetOk("ssh_private_key"); ok {
-		privateKey, err := ssh.ParseRawPrivateKey([]byte(v.(string)))
+		readFile, err := os.ReadFile(v.(string))
+		if err != nil {
+			return fmterr.Errorf("error reading private key file: %w", err, v)
+		}
+		privateKey, err := ssh.ParseRawPrivateKey(readFile)
 		if err != nil {
 			return fmterr.Errorf("error parsing private key: %w", err)
 		}
 		pass, err := servers.GetPassword(client, d.Id()).ExtractPassword(privateKey.(*rsa.PrivateKey))
 		if err != nil {
-			mErr = multierror.Append(mErr, d.Set("admin_pass", pass))
+			return fmterr.Errorf("error getting password: %w", err)
 		}
+		mErr = multierror.Append(mErr, d.Set("password", pass))
 	}
 
 	if err := mErr.ErrorOrNil(); err != nil {
