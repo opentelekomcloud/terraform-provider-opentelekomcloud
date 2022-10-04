@@ -57,6 +57,9 @@ In addition to the above, the following attributes are exported:
 
 * `metadata` - A set of key/value pairs made available to the server.
 
+* `ssh_private_key_path` - (Optional) The path to the private key to use for SSH access. Required only if you want to
+  get the password from the windows instance.
+
 
 The `network` block is defined as:
 

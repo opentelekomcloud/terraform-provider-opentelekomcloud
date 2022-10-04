@@ -57,7 +57,7 @@ func DataSourceComputeInstanceV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"ssh_private_key": {
+			"ssh_private_key_path": {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
@@ -264,10 +264,10 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 	}
 
 	// Set win instance password
-	if v, ok := d.GetOk("ssh_private_key"); ok {
+	if v, ok := d.GetOk("ssh_private_key_path"); ok {
 		readFile, err := os.ReadFile(v.(string))
 		if err != nil {
-			return fmterr.Errorf("error reading private key file: %w", err, v)
+			return fmterr.Errorf("error reading private key file: %w", err)
 		}
 		privateKey, err := ssh.ParseRawPrivateKey(readFile)
 		if err != nil {

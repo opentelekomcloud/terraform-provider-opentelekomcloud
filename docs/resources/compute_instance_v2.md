@@ -300,6 +300,9 @@ The following arguments are supported:
 
 * `user_data` - (Optional) The user data to provide when launching the instance. Changing this creates a new server.
 
+* `ssh_private_key_path` - (Optional) The path to the private key to use for SSH access. Required only if you want to
+  get the password from the windows instance.
+
 * `security_groups` - (Optional) An array of one or more security group names to associate with the server. Changing
   this results in adding/removing security groups from the existing server.
 
