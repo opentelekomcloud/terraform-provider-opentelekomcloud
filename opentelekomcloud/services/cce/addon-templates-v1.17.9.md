@@ -20,6 +20,9 @@ All addons accept `basic` and some can accept `custom` input values.
 In some regions can be impossible to create addon without `tenant_id` which equal to `project_id` of the region you're deploying into,
 also be aware of that `swr_addr` can be also different in regions.
 
+#### For example
+`swr_addr` in swiss region is `swr.eu-ch2.sc.otc.t-systems.com`
+
 ## Addon Inputs
 
 ### `autoscaler`
