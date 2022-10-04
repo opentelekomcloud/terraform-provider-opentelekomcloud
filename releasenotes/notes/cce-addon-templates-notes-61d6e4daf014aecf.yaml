@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[CCE]** Add notes about different regions in ``addon-templates-v1.17.9.md`` and ``addon-templates-v1.19.8.md`` documentation (`#1953 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1953>`_)
