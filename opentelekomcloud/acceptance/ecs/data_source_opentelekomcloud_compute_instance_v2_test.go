@@ -25,7 +25,16 @@ func TestAccComputeV2InstanceDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("data.opentelekomcloud_compute_instance_v2.source_1", "name", "instance_1"),
 					resource.TestCheckResourceAttrPair("data.opentelekomcloud_compute_instance_v2.source_1", "metadata", "opentelekomcloud_compute_instance_v2.instance_1", "metadata"),
 					resource.TestCheckResourceAttrSet("data.opentelekomcloud_compute_instance_v2.source_1", "network.0.name"),
-					resource.TestCheckResourceAttrSet("data.opentelekomcloud_compute_instance_v2.source_1", "admin_pass"),
+				),
+			},
+			{
+				Config: testAccComputeV2InstanceDataSourceWindowsPassword(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceV2DataSourceID("data.opentelekomcloud_compute_instance_v2.source_1"),
+					resource.TestCheckResourceAttr("data.opentelekomcloud_compute_instance_v2.source_1", "name", "instance_1"),
+					resource.TestCheckResourceAttrPair("data.opentelekomcloud_compute_instance_v2.source_1", "metadata", "opentelekomcloud_compute_instance_v2.instance_1", "metadata"),
+					resource.TestCheckResourceAttrSet("data.opentelekomcloud_compute_instance_v2.source_1", "network.0.name"),
+					resource.TestCheckResourceAttrSet("data.opentelekomcloud_compute_instance_v2.source_1", "encrypted_password"),
 				),
 			},
 			{
@@ -89,6 +98,24 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 }
 
+func testAccComputeV2InstanceDataSourceWindows() string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name              = "instance_1"
+  availability_zone = "%s"
+  image_name        = "Enterprise_Windows_STD_2019_CORE_KVM"
+  metadata = {
+    foo = "bar"
+  }
+  network {
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+}
+
 func testAccComputeV2InstanceDataSourceID() string {
 	return fmt.Sprintf(`
 %s
@@ -107,4 +134,14 @@ data "opentelekomcloud_compute_instance_v2" "source_1" {
   name = "${opentelekomcloud_compute_instance_v2.instance_1.name}"
 }
 `, testAccComputeV2InstanceDataSourceBasic())
+}
+
+func testAccComputeV2InstanceDataSourceWindowsPassword() string {
+	return fmt.Sprintf(`
+%s
+
+data "opentelekomcloud_compute_instance_v2" "source_1" {
+  name = "${opentelekomcloud_compute_instance_v2.instance_1.name}"
+}
+`, testAccComputeV2InstanceDataSourceWindows())
 }

@@ -190,6 +190,11 @@ func ResourceComputeInstanceV2() *schema.Resource {
 				Computed:  true,
 				Sensitive: true,
 			},
+			"encrypted_password": {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
 			"admin_pass": {
 				Type:      schema.TypeString,
 				Optional:  true,
@@ -699,6 +704,12 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 			return fmterr.Errorf("error getting password: %w", err)
 		}
 		mErr = multierror.Append(mErr, d.Set("password", pass))
+	} else {
+		pass, err := servers.GetPassword(client, d.Id()).ExtractPassword(nil)
+		if err != nil {
+			return fmterr.Errorf("error getting password: %w", err)
+		}
+		mErr = multierror.Append(mErr, d.Set("encrypted_password", pass))
 	}
 
 	if err := mErr.ErrorOrNil(); err != nil {
