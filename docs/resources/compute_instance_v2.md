@@ -454,6 +454,13 @@ The following attributes are exported:
 
 * `auto_recovery` - See Argument Reference above.
 
+* `password` - The password of the server. This is only available if the server is a Windows server.
+  If privateKey != nil the password is decrypted with the private key.
+
+* `encrypted_password` - The encrypted password of the server. This is only available if the server is a Windows server.
+  If privateKey == nil the encrypted password is returned and can be decrypted with:
+  echo '<pwd>' | base64 -D | openssl rsautl -decrypt -inkey <private_key>
+
 ## Notes
 
 ### Multiple Ephemeral Disks
