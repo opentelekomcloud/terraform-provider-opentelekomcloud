@@ -134,9 +134,9 @@ func DataSourceComputeInstanceV2() *schema.Resource {
 				Computed: true,
 			},
 			"admin_pass": {
-				Type:     schema.TypeString,
-				Computed: true,
-				// Sensitive: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"metadata": {
 				Type:     schema.TypeMap,
