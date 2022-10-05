@@ -300,6 +300,9 @@ The following arguments are supported:
 
 * `user_data` - (Optional) The user data to provide when launching the instance. Changing this creates a new server.
 
+* `ssh_private_key_path` - (Optional) The path to the private key to use for SSH access. Required only if you want to
+  get the password from the windows instance.
+
 * `security_groups` - (Optional) An array of one or more security group names to associate with the server. Changing
   this results in adding/removing security groups from the existing server.
 
@@ -450,6 +453,13 @@ The following attributes are exported:
 * `all_metadata` - Contains all instance metadata, even metadata not set by Terraform.
 
 * `auto_recovery` - See Argument Reference above.
+
+* `password` - The password of the server. This is only available if the server is a Windows server.
+  If privateKey != nil the password is decrypted with the private key.
+
+* `encrypted_password` - The encrypted password of the server. This is only available if the server is a Windows server.
+  If privateKey == nil the encrypted password is returned and can be decrypted with:
+  echo '<pwd>' | base64 -D | openssl rsautl -decrypt -inkey <private_key>
 
 ## Notes
 

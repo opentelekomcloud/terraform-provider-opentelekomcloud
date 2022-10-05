@@ -24,6 +24,9 @@ data "opentelekomcloud_compute_instance_v2" "instance" {
 
 * `id` - (Required) The UUID of the instance
 
+* `ssh_private_key_path` - (Optional) The path to the private key to use for SSH access. Required only if you want to
+  get the password from the windows instance.
+
 
 ## Attributes Reference
 
@@ -57,6 +60,12 @@ In addition to the above, the following attributes are exported:
 
 * `metadata` - A set of key/value pairs made available to the server.
 
+* `password` - The password of the server. This is only available if the server is a Windows server.
+   If privateKey != nil the password is decrypted with the private key.
+
+* `encrypted_password` - The encrypted password of the server. This is only available if the server is a Windows server.
+  If privateKey == nil the encrypted password is returned and can be decrypted with:
+    echo '<pwd>' | base64 -D | openssl rsautl -decrypt -inkey <private_key>
 
 The `network` block is defined as:
 
