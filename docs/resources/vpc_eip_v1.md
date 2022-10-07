@@ -61,6 +61,9 @@ The `bandwidth` block supports:
 
 * `tags` - (Optional) Tags key/value pairs to associate with the eip.
 
+* `unbind_port` - (Optional) The value `true` indicates that port will be unassigned from EIP.
+  This parameter work only with already allocated resource.
+
 ## Attributes Reference
 
 The following attributes are exported:

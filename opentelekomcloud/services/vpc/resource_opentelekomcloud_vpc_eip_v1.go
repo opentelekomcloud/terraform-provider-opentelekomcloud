@@ -34,7 +34,6 @@ func ResourceVpcEIPV1() *schema.Resource {
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
-
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -63,6 +62,7 @@ func ResourceVpcEIPV1() *schema.Resource {
 						"port_id": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
@@ -101,6 +101,10 @@ func ResourceVpcEIPV1() *schema.Resource {
 				Optional: true,
 			},
 			"tags": common.TagsSchema(),
+			"unbind_port": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -233,9 +237,15 @@ func resourceVpcEIPV1Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Update publicip change
+	if d.Get("unbind_port").(bool) {
+		timeout := d.Timeout(schema.TimeoutUpdate)
+		if err := unbindToPort(ctx, d, d.Id(), client, timeout); err != nil {
+			return fmterr.Errorf("error unbinding eip: %s to port: %w", d.Id(), err)
+		}
+	}
+
 	if d.HasChange("publicip") {
 		var updateOpts eips.UpdateOpts
-
 		newIPList := d.Get("publicip").([]interface{})
 		newMap := newIPList[0].(map[string]interface{})
 		updateOpts.PortID = newMap["port_id"].(string)
