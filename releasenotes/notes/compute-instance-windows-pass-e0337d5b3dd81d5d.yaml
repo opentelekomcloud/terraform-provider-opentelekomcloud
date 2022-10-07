@@ -1,0 +1,7 @@
+---
+enhancements:
+  - |
+    **[ECS]** Added ``password`` attribute to ``opentelekomcloud_compute_instance_v2`` resource
+    for Windows instances
+    (`#1947 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1947>`_)
+

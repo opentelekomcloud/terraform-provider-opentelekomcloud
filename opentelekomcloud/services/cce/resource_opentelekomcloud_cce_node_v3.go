@@ -120,7 +120,7 @@ func ResourceCCENodeV3() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"EulerOS 2.5", "CentOS 7.7",
+					"EulerOS 2.5", "CentOS 7.7", "EulerOS 2.9",
 				}, false),
 			},
 			"root_volume": {

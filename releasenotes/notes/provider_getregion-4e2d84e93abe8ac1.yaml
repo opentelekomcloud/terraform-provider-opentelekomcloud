@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[Provider]** Fix ``GetRegion`` method for ``provider`` in case AK/SK is used with region (`#1955 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1955>`_)

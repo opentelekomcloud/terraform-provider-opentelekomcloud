@@ -1009,7 +1009,11 @@ func (c *Config) GetRegion(d SchemaOrDiff) string {
 		return v
 	}
 	tenantName := string(c.GetProjectName(d))
-	return strings.Split(tenantName, "_")[0]
+	if region := strings.Split(tenantName, "_")[0]; region != "" {
+		return region
+	}
+
+	return strings.Split(c.IdentityEndpoint, ".")[1]
 }
 
 type ProjectName string
