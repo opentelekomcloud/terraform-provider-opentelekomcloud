@@ -3,9 +3,11 @@ package ecs
 import (
 	"bytes"
 	"context"
+	"crypto/rsa"
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -29,6 +31,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ims"
+	"golang.org/x/crypto/ssh"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -104,6 +107,12 @@ func ResourceComputeInstanceV2() *schema.Resource {
 					}
 				},
 			},
+			"ssh_private_key_path": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  false,
+				Sensitive: true,
+			},
 			"security_groups": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -176,10 +185,21 @@ func ResourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"password": {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
+			"encrypted_password": {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
 			"admin_pass": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: false,
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  false,
+				Sensitive: true,
 			},
 			"access_ip_v4": {
 				Type:     schema.TypeString,
@@ -668,6 +688,29 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 	}
 	tagMap := common.TagsToMap(resourceTags)
 	mErr = multierror.Append(mErr, d.Set("tags", tagMap))
+
+	// Set win instance password
+	if v, ok := d.GetOk("ssh_private_key_path"); ok {
+		readFile, err := os.ReadFile(v.(string))
+		if err != nil {
+			return fmterr.Errorf("error reading private key file: %w", err)
+		}
+		privateKey, err := ssh.ParseRawPrivateKey(readFile)
+		if err != nil {
+			return fmterr.Errorf("error parsing private key: %w", err)
+		}
+		pass, err := servers.GetPassword(client, d.Id()).ExtractPassword(privateKey.(*rsa.PrivateKey))
+		if err != nil {
+			return fmterr.Errorf("error getting password: %w", err)
+		}
+		mErr = multierror.Append(mErr, d.Set("password", pass))
+	} else {
+		pass, err := servers.GetPassword(client, d.Id()).ExtractPassword(nil)
+		if err != nil {
+			return fmterr.Errorf("error getting password: %w", err)
+		}
+		mErr = multierror.Append(mErr, d.Set("encrypted_password", pass))
+	}
 
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting opentelekomcloud_compute_instance_v2 values: %w", err)

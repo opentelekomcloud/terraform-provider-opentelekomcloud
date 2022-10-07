@@ -2,7 +2,9 @@ package ecs
 
 import (
 	"context"
+	"crypto/rsa"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
@@ -12,6 +14,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
+	"golang.org/x/crypto/ssh"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/availabilityzones"
@@ -53,6 +56,21 @@ func DataSourceComputeInstanceV2() *schema.Resource {
 			"flavor_name": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"ssh_private_key_path": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			"password": {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
+			"encrypted_password": {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"user_data": {
 				Type:     schema.TypeString,
@@ -114,6 +132,11 @@ func DataSourceComputeInstanceV2() *schema.Resource {
 			"key_pair": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"admin_pass": {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"metadata": {
 				Type:     schema.TypeMap,
@@ -243,6 +266,29 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 		mErr = multierror.Append(mErr, d.Set("power_state", currentStatus))
 	default:
 		return fmterr.Errorf("invalid power_state for instance %s: %s", d.Id(), server.Status)
+	}
+
+	// Set win instance password
+	if v, ok := d.GetOk("ssh_private_key_path"); ok {
+		readFile, err := os.ReadFile(v.(string))
+		if err != nil {
+			return fmterr.Errorf("error reading private key file: %w", err)
+		}
+		privateKey, err := ssh.ParseRawPrivateKey(readFile)
+		if err != nil {
+			return fmterr.Errorf("error parsing private key: %w", err)
+		}
+		pass, err := servers.GetPassword(client, d.Id()).ExtractPassword(privateKey.(*rsa.PrivateKey))
+		if err != nil {
+			return fmterr.Errorf("error getting password: %w", err)
+		}
+		mErr = multierror.Append(mErr, d.Set("password", pass))
+	} else {
+		pass, err := servers.GetPassword(client, d.Id()).ExtractPassword(nil)
+		if err != nil {
+			return fmterr.Errorf("error getting password: %w", err)
+		}
+		mErr = multierror.Append(mErr, d.Set("encrypted_password", pass))
 	}
 
 	mErr = multierror.Append(mErr,

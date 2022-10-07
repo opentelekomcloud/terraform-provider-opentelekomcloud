@@ -52,6 +52,7 @@ The following arguments are supported:
   Supported OS depends on kubernetes version of the cluster.
   * Clusters of Kubernetes `v1.13` or later support `EulerOS 2.5`.
   * Clusters of Kubernetes `v1.17` or later support `EulerOS 2.5` and `CentOS 7.7`.
+  * Clusters of Kubernetes `v1.21` or later support `EulerOS 2.5`, `EulerOS 2.9` and `CentOS 7.7`.
 
 * `billing_mode` - (Optional) Node's billing mode: The value is `0` (on demand). Changing this parameter will create a new resource.
 

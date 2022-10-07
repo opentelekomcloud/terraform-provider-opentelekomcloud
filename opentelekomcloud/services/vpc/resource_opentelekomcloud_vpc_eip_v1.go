@@ -62,7 +62,6 @@ func ResourceVpcEIPV1() *schema.Resource {
 						"port_id": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Computed: true,
 						},
 					},
 				},
