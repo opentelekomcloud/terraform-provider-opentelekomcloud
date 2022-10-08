@@ -245,8 +245,10 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
 resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
   publicip {
     type    = "5_bgp"
-    port_id = ""
+    port_id = null
   }
+
+  unbind_port = true
 
   bandwidth {
     name       = "test-bandwidth-acc"
