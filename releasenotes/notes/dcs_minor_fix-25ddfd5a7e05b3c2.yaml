@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[DCS]** Fixed schema validation and documentation for ``resource/opentelekomcloud_dcs_instance_v1`` (`#1960 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1960>`_)
+

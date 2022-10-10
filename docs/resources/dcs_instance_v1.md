@@ -97,7 +97,7 @@ The following arguments are supported:
 * `engine` - (Required) Indicates a cache engine. Only `Redis` is supported. Changing this
   creates a new instance.
 
-* `engine_version` - (Required) Indicates the version of a cache engine, which is `3.0.7`.
+* `engine_version` - (Required) Indicates the version of a cache engine, which can be `3.0`/`4.0`/`5.0`.
   Changing this creates a new instance.
 
 * `capacity` - (Required) Indicates the Cache capacity. Unit: GB.
