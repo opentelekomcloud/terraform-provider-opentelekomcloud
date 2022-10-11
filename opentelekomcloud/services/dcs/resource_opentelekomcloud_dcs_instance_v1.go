@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/configs"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/instances"
@@ -58,6 +59,9 @@ func ResourceDcsInstanceV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"3.0", "4.0", "5.0",
+				}, false),
 			},
 			"capacity": {
 				Type:     schema.TypeFloat,
@@ -492,6 +496,7 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 	mErr := multierror.Append(
 		d.Set("name", v.Name),
 		d.Set("engine", v.Engine),
+		d.Set("engine_version", v.EngineVersion),
 		d.Set("capacity", capacity),
 		d.Set("used_memory", v.UsedMemory),
 		d.Set("max_memory", v.MaxMemory),
@@ -715,7 +720,7 @@ func validateEngine(_ context.Context, d *schema.ResourceDiff, _ interface{}) er
 	if _, ok := d.GetOk("security_group_id"); !ok && engineVersion == "3.0" {
 		mErr = multierror.Append(mErr, fmt.Errorf("'security_group_id' should be set with engine_version==3.0"))
 	} else if ok && engineVersion != "3.0" {
-		mErr = multierror.Append(mErr, fmt.Errorf("DCS Redis 4.0 and 5.0 instances do not support security groups"))
+		mErr = multierror.Append(mErr, fmt.Errorf("only DCS Redis 3.0 supports security groups"))
 	}
 
 	if _, ok := d.GetOk("whitelist"); ok && engineVersion == "3.0" {
