@@ -203,7 +203,7 @@ func resourceASPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	createOpts := policies.CreateOpts{
+	createOpts := policies.PolicyOpts{
 		PolicyName:     d.Get("scaling_policy_name").(string),
 		PolicyType:     d.Get("scaling_policy_type").(string),
 		ResourceID:     d.Get("scaling_resource_id").(string),
@@ -213,7 +213,7 @@ func resourceASPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		PolicyAction:   resourceASPolicyScalingAction(d),
 		CoolDownTime:   d.Get("cool_down_time").(int),
 	}
-	asPolicyID, err := policies.Create(client, createOpts).Extract()
+	asPolicyID, err := policies.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating AS Policy: %w", err)
 	}
@@ -229,7 +229,7 @@ func resourceASPolicyV2Read(_ context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	asPolicy, err := policies.Get(client, d.Id()).Extract()
+	asPolicy, err := policies.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "AS Policy")
 	}
@@ -289,18 +289,18 @@ func resourceASPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	updateOpts := policies.UpdateOpts{
+	updateOpts := policies.PolicyOpts{
 		PolicyName:     d.Get("scaling_policy_name").(string),
 		PolicyType:     d.Get("scaling_policy_type").(string),
 		ResourceID:     d.Get("scaling_resource_id").(string),
 		ResourceType:   d.Get("scaling_resource_type").(string),
 		AlarmID:        d.Get("alarm_id").(string),
 		SchedulePolicy: resourceASPolicyScheduledPolicy(d),
-		Action:         resourceASPolicyScalingAction(d),
+		PolicyAction:   resourceASPolicyScalingAction(d),
 		CoolDownTime:   d.Get("cool_down_time").(int),
 	}
 
-	asPolicyID, err := policies.Update(client, d.Id(), updateOpts).Extract()
+	asPolicyID, err := policies.Update(client, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating ASPolicy %q: %w", asPolicyID, err)
 	}
@@ -315,7 +315,7 @@ func resourceASPolicyV2Delete(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
-	if err := policies.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := policies.Delete(client, d.Id()); err != nil {
 		return fmterr.Errorf("error deleting AS Policy: %w", err)
 	}
 

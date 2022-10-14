@@ -217,13 +217,13 @@ func getAllNotifications(d *schema.ResourceData) []string {
 	return notifications
 }
 
-func getAllNetworks(d *schema.ResourceData) []groups.NetworkOpts {
-	var networkOptsList []groups.NetworkOpts
+func getAllNetworks(d *schema.ResourceData) []groups.ID {
+	var networkOptsList []groups.ID
 	networks := d.Get("networks").([]interface{})
 	for _, v := range networks {
 		network := v.(map[string]interface{})
 		networkID := network["id"].(string)
-		val := groups.NetworkOpts{
+		val := groups.ID{
 			ID: networkID,
 		}
 		networkOptsList = append(networkOptsList, val)
@@ -233,14 +233,14 @@ func getAllNetworks(d *schema.ResourceData) []groups.NetworkOpts {
 	return networkOptsList
 }
 
-func getAllSecurityGroups(d *schema.ResourceData) []groups.SecurityGroupOpts {
-	var Groups []groups.SecurityGroupOpts
+func getAllSecurityGroups(d *schema.ResourceData) []groups.ID {
+	var Groups []groups.ID
 
 	asGroups := d.Get("security_groups").([]interface{})
 	for _, v := range asGroups {
 		group := v.(map[string]interface{})
 		groupID := group["id"].(string)
-		v := groups.SecurityGroupOpts{
+		v := groups.ID{
 			ID: groupID,
 		}
 		Groups = append(Groups, v)
@@ -250,13 +250,13 @@ func getAllSecurityGroups(d *schema.ResourceData) []groups.SecurityGroupOpts {
 	return Groups
 }
 
-func getAllLBaaSListeners(d *schema.ResourceData) []groups.LBaaSListenerOpts {
-	var asListeners []groups.LBaaSListenerOpts
+func getAllLBaaSListeners(d *schema.ResourceData) []groups.LBaaSListener {
+	var asListeners []groups.LBaaSListener
 
 	listeners := d.Get("lbaas_listeners").([]interface{})
 	for _, v := range listeners {
 		listener := v.(map[string]interface{})
-		s := groups.LBaaSListenerOpts{
+		s := groups.LBaaSListener{
 			PoolID:       listener["pool_id"].(string),
 			ProtocolPort: listener["protocol_port"].(int),
 			Weight:       listener["weight"].(int),
@@ -268,13 +268,12 @@ func getAllLBaaSListeners(d *schema.ResourceData) []groups.LBaaSListenerOpts {
 	return asListeners
 }
 
-func getInstancesInGroup(client *golangsdk.ServiceClient, groupID string, opts instances.ListOptsBuilder) ([]instances.Instance, error) {
+func getInstancesInGroup(client *golangsdk.ServiceClient, groupID string, opts instances.ListOpts) ([]instances.Instance, error) {
 	var instanceList []instances.Instance
-	page, err := instances.List(client, groupID, opts).AllPages()
+	instanceList, err := instances.List(client, groupID, opts)
 	if err != nil {
 		return instanceList, fmt.Errorf("error getting instances in ASGroup %q: %s", groupID, err)
 	}
-	instanceList, err = page.(instances.InstancePage).Extract()
 	return instanceList, err
 }
 
@@ -303,7 +302,7 @@ func getInstancesLifeStates(allIns []instances.Instance) []string {
 
 func refreshInstancesLifeStates(client *golangsdk.ServiceClient, groupID string, instanceNumber int, checkInService bool) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		var opts instances.ListOptsBuilder
+		var opts instances.ListOpts
 		instanceList, err := getInstancesInGroup(client, groupID, opts)
 		if err != nil {
 			return nil, "ERROR", err
@@ -388,7 +387,7 @@ func resourceASGroupCreate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	asGroupID, err := groups.Create(client, createOpts).Extract()
+	asGroupID, err := groups.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating ASGroup: %s", err)
 	}
@@ -397,8 +396,8 @@ func resourceASGroupCreate(ctx context.Context, d *schema.ResourceData, meta int
 
 	// enable AutoScaling Group
 	enableResult := groups.Enable(client, asGroupID)
-	if enableResult.Err != nil {
-		return fmterr.Errorf("error enabling ASGroup %q: %s", asGroupID, enableResult.Err)
+	if enableResult != nil {
+		return fmterr.Errorf("error enabling ASGroup %q: %s", asGroupID, enableResult)
 	}
 	log.Printf("[DEBUG] Enable ASGroup %q success!", asGroupID)
 	// check all instances are inService
@@ -438,7 +437,7 @@ func resourceASGroupRead(_ context.Context, d *schema.ResourceData, meta interfa
 		return fmterr.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
 	}
 
-	asGroup, err := groups.Get(client, d.Id()).Extract()
+	asGroup, err := groups.Get(client, d.Id())
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			d.SetId("")
@@ -484,7 +483,7 @@ func resourceASGroupRead(_ context.Context, d *schema.ResourceData, meta interfa
 		}
 	}
 
-	var opts instances.ListOptsBuilder
+	var opts instances.ListOpts
 	instancesList, err := getInstancesInGroup(client, d.Id(), opts)
 	if err != nil {
 		return fmterr.Errorf("can not get the instances in ASGroup %q: %s", d.Id(), err)
@@ -555,7 +554,7 @@ func resourceASGroupUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		Notifications:             getAllNotifications(d),
 		IsDeletePublicip:          &isDeletePublicIp,
 	}
-	asGroupID, err := groups.Update(client, d.Id(), updateOpts).Extract()
+	asGroupID, err := groups.Update(client, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating ASGroup %q: %s", asGroupID, err)
 	}
@@ -579,7 +578,7 @@ func resourceASGroupDelete(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	log.Printf("[DEBUG] Begin to get instances of AutoScaling Group %q", d.Id())
-	var listOpts instances.ListOptsBuilder
+	var listOpts instances.ListOpts
 	instanceList, err := getInstancesInGroup(client, d.Id(), listOpts)
 	if err != nil {
 		return fmterr.Errorf("error listing instances of AutoScaling Group: %s", err)
@@ -601,7 +600,7 @@ func resourceASGroupDelete(ctx context.Context, d *schema.ResourceData, meta int
 			updateOpts := groups.UpdateOpts{
 				MinInstanceNumber: 0,
 			}
-			_, err := groups.Update(client, d.Id(), updateOpts).Extract()
+			_, err := groups.Update(client, d.Id(), updateOpts)
 			if err != nil {
 				return fmterr.Errorf("error updating min_instance_number to 0: %s", err)
 			}
@@ -609,7 +608,7 @@ func resourceASGroupDelete(ctx context.Context, d *schema.ResourceData, meta int
 		deleteInstances := d.Get("delete_instances").(string)
 		log.Printf("[DEBUG] The flag delete_instances in AutoScaling Group is %s", deleteInstances)
 
-		if err := instances.BatchDelete(client, d.Id(), instanceIDs, deleteInstances).ExtractErr(); err != nil {
+		if err := instances.BatchDelete(client, d.Id(), instanceIDs, deleteInstances); err != nil {
 			return fmterr.Errorf("error removing instancess of AutoScaling Group: %s", err)
 		}
 		log.Printf("[DEBUG] Begin to remove instances of ASGroup %q", d.Id())
@@ -630,7 +629,7 @@ func resourceASGroupDelete(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	log.Printf("[DEBUG] Begin to delete ASGroup %q", d.Id())
-	if err := groups.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := groups.Delete(client, d.Id()); err != nil {
 		return fmterr.Errorf("error deleting AutoScaling Group: %s", err)
 	}
 

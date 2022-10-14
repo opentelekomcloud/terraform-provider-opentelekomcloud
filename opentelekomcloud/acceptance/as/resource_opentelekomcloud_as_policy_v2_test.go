@@ -110,7 +110,7 @@ func testAccCheckASV2PolicyDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := policies.Get(client, rs.Primary.ID).Extract()
+		_, err := policies.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("AS policyV2 still exists")
 		}
@@ -136,12 +136,12 @@ func testAccCheckASV2PolicyExists(n string, policy *policies.Policy) resource.Te
 			return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV2 client: %w", err)
 		}
 
-		found, err := policies.Get(asClient, rs.Primary.ID).Extract()
+		found, err := policies.Get(asClient, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		policy = &found
+		policy = found
 
 		return nil
 	}

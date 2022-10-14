@@ -218,7 +218,7 @@ func resourceASPolicyCreate(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	log.Printf("[DEBUG] Create AS policy Options: %#v", createOpts)
-	asPolicyId, err := policies.Create(asClient, createOpts).Extract()
+	asPolicyId, err := policies.Create(asClient, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating ASPolicy: %s", err)
 	}
@@ -234,7 +234,7 @@ func resourceASPolicyRead(_ context.Context, d *schema.ResourceData, meta interf
 		return fmterr.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
 	}
 
-	asPolicy, err := policies.Get(asClient, d.Id()).Extract()
+	asPolicy, err := policies.Get(asClient, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "AS Policy")
 	}
@@ -302,7 +302,7 @@ func resourceASPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		updateOpts.Action = policyAction
 	}
 	log.Printf("[DEBUG] Update AS policy Options: %#v", updateOpts)
-	asPolicyID, err := policies.Update(asClient, d.Id(), updateOpts).Extract()
+	asPolicyID, err := policies.Update(asClient, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating ASPolicy %q: %s", asPolicyID, err)
 	}
@@ -317,7 +317,7 @@ func resourceASPolicyDelete(_ context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
 	}
 	log.Printf("[DEBUG] Begin to delete AS policy %q", d.Id())
-	if delErr := policies.Delete(asClient, d.Id()).ExtractErr(); delErr != nil {
+	if delErr := policies.Delete(asClient, d.Id()); delErr != nil {
 		return fmterr.Errorf("error deleting AS policy: %s", delErr)
 	}
 
