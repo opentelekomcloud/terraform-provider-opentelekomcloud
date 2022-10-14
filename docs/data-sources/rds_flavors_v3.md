@@ -21,8 +21,8 @@ data "opentelekomcloud_rds_flavors_v3" "flavor" {
 * `db_type` - (Required) Specifies the DB engine. Possible values are: `MySQL`, `PostgreSQL`, `SQLServer`.
 
 * `db_version` - (Required) Specifies the database version. `MySQL` databases support `5.6`,
-  `5.7` and `8.0`. `PostgreSQL` databases support `9.5`, `9.6`, `10`, `11` and `12`.
-  `SQLServer` databases support `2014_SE`, `2016_SE`, `2016_EE` and `2017_SE`.
+  `5.7` and `8.0`. `PostgreSQL` databases support `9.5`, `9.6`, `10`, `11`, `12`  and `13`.
+  `SQLServer` databases support `2014_SE`, `2016_SE`, `2016_EE`, `2017_SE` and `2017_EE`.
 
 * `instance_mode` - (Required) The mode of instance. Possible values are:
   `ha` indicates primary/standby instance, `single` indicates single instance
