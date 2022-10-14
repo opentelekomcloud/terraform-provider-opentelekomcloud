@@ -267,7 +267,7 @@ The following arguments are supported:
 
 * `db` - (Required) Specifies the database information. Structure is documented below. Changing this parameter will create a new resource.
 
-* `flavor` - (Required) Specifies the specification code.
+* `flavor` - (Required) Specifies the specification code. Use data source [opentelekomcloud_rds_flavors_v3](../data-sources/rds_flavors_v3.md) to get a list of available flavor names. Examples could be `rds.pg.c2.medium` or `rds.pg.c2.medium.ha` for HA clusters.
 
 * `name` - (Required) Specifies the DB instance name. The DB instance name of the same type
   must be unique for the same tenant. The value must be 4 to 64
