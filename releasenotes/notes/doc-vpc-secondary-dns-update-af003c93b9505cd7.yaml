@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[VPC]** Change VPC subnet default secondary DNS to OTC DNS in ``services/vpc/utils.go`` and docs ``docs/resources/networking_subnet_v2.md`` ``docs/resources/vpc_subnet_v1.md`` (`#1964 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1964>`_)

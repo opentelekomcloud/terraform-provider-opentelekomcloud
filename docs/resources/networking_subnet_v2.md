@@ -57,7 +57,7 @@ The following arguments are supported:
 
 * `dns_nameservers` - (Optional) An array of DNS name server names used by hosts
   in this subnet. Changing this updates the DNS name servers for the existing
-  subnet. Default value is `["100.125.4.25", "1.1.1.1"]`
+  subnet. Default value is `["100.125.4.25", "100.125.129.199"]`
 
 * `host_routes` - (Optional) An array of routes that should be used by devices
   with IPs from this subnet (not including local subnet route). The host_route
