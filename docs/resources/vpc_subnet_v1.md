@@ -69,7 +69,7 @@ The following arguments are supported:
   valid IP address. Default is `100.125.4.25`, OpenTelekomCloud internal DNS server.
 
 * `secondary_dns` - (Optional) Specifies the IP address of DNS server 2 on the subnet. The value must be a
-  valid IP address. Default is `1.1.1.1`, `Cloudflare`/`APNIC` public DNS server.
+  valid IP address. Default is `100.125.129.199`, OpenTelekomCloud secondary internal DNS server.
 
 * `dns_list` - (Optional) Specifies the DNS server address list of a subnet. This field is required if you
   need to use more than two DNS servers. This parameter value is the superset of both DNS server address

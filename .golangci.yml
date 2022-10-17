@@ -34,3 +34,7 @@ linters-settings:
   misspell:
     ignore-words:
       - unknwon
+  staticcheck:
+    checks:
+      - all
+      - '-SA1019' # disable the rule SA1019

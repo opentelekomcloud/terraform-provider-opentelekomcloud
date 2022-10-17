@@ -119,7 +119,7 @@ func testAccCheckASV1ConfigurationDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := configurations.Get(client, rs.Primary.ID).Extract()
+		_, err := configurations.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("AS configuration still exists")
 		}
@@ -145,7 +145,7 @@ func testAccCheckASV1ConfigurationExists(n string, configuration *configurations
 			return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV1 client: %w", err)
 		}
 
-		found, err := configurations.Get(client, rs.Primary.ID).Extract()
+		found, err := configurations.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -153,7 +153,7 @@ func testAccCheckASV1ConfigurationExists(n string, configuration *configurations
 		if found.ID != rs.Primary.ID {
 			return fmt.Errorf("autoscaling Configuration not found")
 		}
-		configuration = &found
+		configuration = found
 
 		return nil
 	}
@@ -190,17 +190,17 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
-      size        = 32768
+      size        = 1000
       volume_type = "uh-l1"
       disk_type   = "SYS"
     }
     disk {
-      size        = 32768
+      size        = 1000
       volume_type = "co-p1"
       disk_type   = "DATA"
     }
     disk {
-      size        = 32768
+      size        = 1000
       volume_type = "uh-l1"
       disk_type   = "DATA"
     }

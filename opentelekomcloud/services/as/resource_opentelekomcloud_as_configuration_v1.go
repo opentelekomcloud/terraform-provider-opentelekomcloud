@@ -217,22 +217,22 @@ func ResourceASConfiguration() *schema.Resource {
 	}
 }
 
-func getDisk(diskMeta []interface{}) []configurations.DiskOpts {
-	var diskOptsList []configurations.DiskOpts
+func getDisk(diskMeta []interface{}) []configurations.Disk {
+	var diskOptsList []configurations.Disk
 
 	for _, v := range diskMeta {
 		disk := v.(map[string]interface{})
 		size := disk["size"].(int)
 		volumeType := disk["volume_type"].(string)
 		diskType := disk["disk_type"].(string)
-		diskOpts := configurations.DiskOpts{
+		diskOpts := configurations.Disk{
 			Size:       size,
 			VolumeType: volumeType,
 			DiskType:   diskType,
 		}
 		kmsID := disk["kms_id"].(string)
 		if kmsID != "" {
-			meta := make(map[string]string)
+			meta := make(map[string]interface{})
 			meta["__system__cmkid"] = kmsID
 			meta["__system__encrypted"] = "1"
 			diskOpts.Metadata = meta
@@ -243,12 +243,12 @@ func getDisk(diskMeta []interface{}) []configurations.DiskOpts {
 	return diskOptsList
 }
 
-func getPersonality(personalityMeta []interface{}) []configurations.PersonalityOpts {
-	var personalityOptsList []configurations.PersonalityOpts
+func getPersonality(personalityMeta []interface{}) []configurations.Personality {
+	var personalityOptsList []configurations.Personality
 
 	for _, v := range personalityMeta {
 		personality := v.(map[string]interface{})
-		personalityOpts := configurations.PersonalityOpts{
+		personalityOpts := configurations.Personality{
 			Path:    personality["path"].(string),
 			Content: personality["content"].(string),
 		}
@@ -258,14 +258,14 @@ func getPersonality(personalityMeta []interface{}) []configurations.PersonalityO
 	return personalityOptsList
 }
 
-func getPublicIps(publicIpMeta map[string]interface{}) *configurations.PublicIpOpts {
+func getPublicIps(publicIpMeta map[string]interface{}) *configurations.PublicIp {
 	eipMap := publicIpMeta["eip"].([]interface{})[0].(map[string]interface{})
 	bandWidthMap := eipMap["bandwidth"].([]interface{})[0].(map[string]interface{})
 
-	publicIpOpts := &configurations.PublicIpOpts{
-		Eip: configurations.EipOpts{
-			IpType: eipMap["ip_type"].(string),
-			Bandwidth: configurations.BandwidthOpts{
+	publicIpOpts := &configurations.PublicIp{
+		Eip: configurations.Eip{
+			Type: eipMap["ip_type"].(string),
+			Bandwidth: configurations.Bandwidth{
 				Size:         bandWidthMap["size"].(int),
 				ShareType:    bandWidthMap["share_type"].(string),
 				ChargingMode: bandWidthMap["charging_mode"].(string),
@@ -276,11 +276,11 @@ func getPublicIps(publicIpMeta map[string]interface{}) *configurations.PublicIpO
 	return publicIpOpts
 }
 
-func getSecurityGroups(d *schema.ResourceData) []configurations.SecurityGroupOpts {
+func getSecurityGroups(d *schema.ResourceData) []configurations.SecurityGroup {
 	rawSecGroups := d.Get("instance_config.0.security_groups").(*schema.Set).List()
-	secGroups := make([]configurations.SecurityGroupOpts, len(rawSecGroups))
+	secGroups := make([]configurations.SecurityGroup, len(rawSecGroups))
 	for i, raw := range rawSecGroups {
-		secGroups[i] = configurations.SecurityGroupOpts{
+		secGroups[i] = configurations.SecurityGroup{
 			ID: raw.(string),
 		}
 	}
@@ -327,7 +327,7 @@ func resourceASConfigurationCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	log.Printf("[DEBUG] Create AS configuration Options: %#v", createOpts)
-	asConfigID, err := configurations.Create(client, createOpts).Extract()
+	asConfigID, err := configurations.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating ASConfiguration: %s", err)
 	}
@@ -343,7 +343,7 @@ func resourceASConfigurationRead(_ context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
 
-	asConfig, err := configurations.Get(client, d.Id()).Extract()
+	asConfig, err := configurations.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "AS Configuration")
 	}
@@ -405,7 +405,7 @@ func resourceASConfigurationDelete(_ context.Context, d *schema.ResourceData, me
 	}
 
 	log.Printf("[DEBUG] Begin to delete AS configuration %q", d.Id())
-	if err := configurations.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := configurations.Delete(client, d.Id()); err != nil {
 		return fmterr.Errorf("error deleting AS configuration: %s", err)
 	}
 
@@ -417,11 +417,10 @@ func getASGroupsByConfiguration(client *golangsdk.ServiceClient, configID string
 	listOpts := groups.ListOpts{
 		ConfigurationID: configID,
 	}
-	allPages, err := groups.List(client, listOpts).AllPages()
+	asGroups, err := groups.List(client, listOpts)
 	if err != nil {
 		return asGroups, fmt.Errorf("error getting ASGroups by configuration %q: %s", configID, err)
 	}
-	asGroups, err = groups.ExtractGroups(allPages)
 	return asGroups, err
 }
 
