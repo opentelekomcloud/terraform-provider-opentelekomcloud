@@ -126,7 +126,7 @@ func testAccCheckASV1GroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := groups.Get(client, rs.Primary.ID).Extract()
+		_, err := groups.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("AS group still exists")
 		}
@@ -152,7 +152,7 @@ func testAccCheckASV1GroupExists(n string, group *groups.Group) resource.TestChe
 			return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV1 client: %w", err)
 		}
 
-		found, err := groups.Get(client, rs.Primary.ID).Extract()
+		found, err := groups.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}

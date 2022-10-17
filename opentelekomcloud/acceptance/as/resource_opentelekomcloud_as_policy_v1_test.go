@@ -52,7 +52,7 @@ func testAccCheckASV1PolicyDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := policies.Get(client, rs.Primary.ID).Extract()
+		_, err := policies.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("AS policy still exists")
 		}
@@ -78,12 +78,12 @@ func testAccCheckASV1PolicyExists(n string, policy *policies.Policy) resource.Te
 			return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV1 client: %w", err)
 		}
 
-		found, err := policies.Get(client, rs.Primary.ID).Extract()
+		found, err := policies.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		policy = &found
+		policy = found
 
 		return nil
 	}
@@ -115,6 +115,8 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
 resource "opentelekomcloud_as_group_v1" "as_group"{
   scaling_group_name       = "as_group"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
+  delete_instances         = "yes"
+  delete_publicip          = true
   networks {
     id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
