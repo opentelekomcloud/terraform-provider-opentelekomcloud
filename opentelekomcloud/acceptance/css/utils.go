@@ -32,12 +32,7 @@ func findSharedFlavor(t *testing.T) {
 			t.Fatalf("error creating CSSv1 client: %s", err)
 		}
 
-		pages, err := flavors.List(client).AllPages()
-		if err != nil {
-			t.Fatalf("error reading cluster value: %s", err)
-		}
-
-		versions, err := flavors.ExtractVersions(pages)
+		versions, err := flavors.List(client)
 		if err != nil {
 			t.Fatalf("error extracting versions: %s", err)
 		}

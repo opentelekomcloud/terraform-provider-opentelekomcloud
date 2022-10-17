@@ -114,7 +114,7 @@ func readResourceCssSnapshotConfigurationV1(_ context.Context, d *schema.Resourc
 	}
 	clusterID := d.Id()
 
-	info, err := snapshots.PolicyGet(client, clusterID).Extract()
+	info, err := snapshots.PolicyGet(client, clusterID)
 	if err != nil {
 		return fmterr.Errorf("error retrieving CSS cluster automatic snapshot configuration")
 	}
@@ -157,7 +157,7 @@ func deleteResourceCssSnapshotConfigurationV1(_ context.Context, d *schema.Resou
 	}
 	clusterID := d.Id()
 
-	if err := snapshots.Disable(client, clusterID).ExtractErr(); err != nil {
+	if err := snapshots.Disable(client, clusterID); err != nil {
 		return fmterr.Errorf("error disabling automatic snapshots: %w", err)
 	}
 
@@ -174,7 +174,7 @@ func updateSnapshotPolicy(client *golangsdk.ServiceClient, d *schema.ResourceDat
 	}
 
 	clusterID := d.Get("cluster_id").(string)
-	err := snapshots.PolicyCreate(client, policyOpts, clusterID).ExtractErr()
+	err := snapshots.PolicyCreate(client, policyOpts, clusterID)
 	if err != nil {
 		return fmt.Errorf("error creating snapshot creating policy: %w", err)
 	}
@@ -187,7 +187,7 @@ func updateSnapshotConfiguration(client *golangsdk.ServiceClient, d *schema.Reso
 		Agency:        d.Get("configuration.0.agency").(string),
 		SnapshotCmkID: d.Get("configuration.0.kms_id").(string),
 	}
-	err := snapshots.UpdateConfiguration(client, d.Id(), opts).ExtractErr()
+	err := snapshots.UpdateConfiguration(client, d.Id(), opts)
 	if err != nil {
 		return fmt.Errorf("error updating cluster automatic snapshot configuration: %w", err)
 	}
@@ -202,7 +202,7 @@ func updateSnapshotConfigurationResource(_ context.Context, d *schema.ResourceDa
 	}
 
 	if d.Get("automatic").(bool) {
-		if err := snapshots.Enable(client, d.Id()).ExtractErr(); err != nil {
+		if err := snapshots.Enable(client, d.Id()); err != nil {
 			return fmt.Errorf("error using automatic config for snapshots: %w", err)
 		}
 		return nil
