@@ -2,11 +2,13 @@ package iam
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/policies"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
@@ -45,4 +47,26 @@ func identityExtClient(d *schema.ResourceData, meta interface{}) (*golangsdk.Ser
 	}
 	client.Endpoint = strings.Replace(client.Endpoint, "/v3/", "/v3-ext/", 1)
 	return client, nil
+}
+
+func buildStatementsSet(role *policies.Policy) ([]interface{}, error) {
+	statements := make([]interface{}, len(role.Policy.Statement))
+	for i, statement := range role.Policy.Statement {
+		var condition string
+		if len(statement.Condition) > 0 {
+			jsonOutput, err := json.Marshal(statement.Condition)
+			if err != nil {
+				return nil, err
+			}
+			condition = string(jsonOutput)
+		}
+		statements[i] = map[string]interface{}{
+			"effect":    statement.Effect,
+			"action":    statement.Action,
+			"resource":  statement.Resource,
+			"condition": condition,
+		}
+	}
+
+	return statements, nil
 }

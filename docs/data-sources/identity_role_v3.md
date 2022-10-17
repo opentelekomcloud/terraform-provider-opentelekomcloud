@@ -6,6 +6,8 @@ subcategory: "Identity and Access Management (IAM)"
 
 Use this data source to get the ID of an OpenTelekomCloud role.
 
+-> For custom user roles usage please refer to `opentelekomcloud_identity_role_custom_v3`
+
 The Role in Terraform is the same as Policy on the console. however,
 The policy name is the display name of Role, the Role name cannot
 be found on Console. please refer to the following table to configuration

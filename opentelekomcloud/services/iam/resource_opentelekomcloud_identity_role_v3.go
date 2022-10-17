@@ -214,22 +214,9 @@ func resourceIdentityRoleV3Read(ctx context.Context, d *schema.ResourceData, met
 		return common.CheckDeletedDiag(d, err, "custom IAM Role")
 	}
 
-	statements := make([]interface{}, len(role.Policy.Statement))
-	for i, statement := range role.Policy.Statement {
-		var condition string
-		if len(statement.Condition) > 0 {
-			jsonOutput, err := json.Marshal(statement.Condition)
-			if err != nil {
-				return diag.FromErr(err)
-			}
-			condition = string(jsonOutput)
-		}
-		statements[i] = map[string]interface{}{
-			"effect":    statement.Effect,
-			"action":    statement.Action,
-			"resource":  statement.Resource,
-			"condition": condition,
-		}
+	statements, err := buildStatementsSet(role)
+	if err != nil {
+		return fmterr.Errorf("error building policy statements(READ): %s", err)
 	}
 
 	displayLayer := role.Type
