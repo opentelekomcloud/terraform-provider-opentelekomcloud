@@ -266,6 +266,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_identity_project_v3":             iam.DataSourceIdentityProjectV3(),
 			"opentelekomcloud_identity_projects_v3":            iam.DataSourceIdentityProjectsV3(),
 			"opentelekomcloud_identity_role_v3":                iam.DataSourceIdentityRoleV3(),
+			"opentelekomcloud_identity_role_custom_v3":         iam.DataSourceIdentityRoleCustomV3(),
 			"opentelekomcloud_identity_user_v3":                iam.DataSourceIdentityUserV3(),
 			"opentelekomcloud_images_image_v2":                 ims.DataSourceImagesImageV2(),
 			"opentelekomcloud_kms_key_v1":                      kms.DataSourceKmsKeyV1(),
