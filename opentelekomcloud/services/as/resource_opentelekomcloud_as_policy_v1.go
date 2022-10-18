@@ -178,8 +178,8 @@ func getScheduledPolicy(rawScheduledPolicy map[string]interface{}) policies.Sche
 	return scheduledPolicy
 }
 
-func getPolicyAction(rawPolicyAction map[string]interface{}) policies.ActionOpts {
-	policyAction := policies.ActionOpts{
+func getPolicyAction(rawPolicyAction map[string]interface{}) policies.Action {
+	policyAction := policies.Action{
 		Operation:   rawPolicyAction["operation"].(string),
 		InstanceNum: rawPolicyAction["instance_number"].(int),
 	}

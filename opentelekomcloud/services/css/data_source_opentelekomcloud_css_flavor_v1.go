@@ -97,12 +97,7 @@ func dataSourceCSSFlavorV1Read(_ context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf("error creating CSS v1 client: %s", err)
 	}
 
-	pages, err := flavors.List(client).AllPages()
-	if err != nil {
-		return fmterr.Errorf("error reading cluster value: %s", err)
-	}
-
-	versions, err := flavors.ExtractVersions(pages)
+	versions, err := flavors.List(client)
 	if err != nil {
 		return fmterr.Errorf("error extracting versions")
 	}

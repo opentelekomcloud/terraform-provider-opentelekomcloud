@@ -251,7 +251,7 @@ func resourceCssClusterV1Create(ctx context.Context, d *schema.ResourceData, met
 		opts.Datastore = &defaultDatastore
 	}
 
-	created, err := clusters.Create(client, opts).Extract()
+	created, err := clusters.Create(client, opts)
 	if err != nil {
 		return fmterr.Errorf("error creating CSS cluster: %s", err)
 	}
@@ -274,7 +274,7 @@ func resourceCssClusterV1Read(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("error creating CSS v1 client: %s", err)
 	}
 
-	cluster, err := clusters.Get(client, d.Id()).Extract()
+	cluster, err := clusters.Get(client, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error reading cluster value: %s", err)
 	}
@@ -337,14 +337,14 @@ func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 
 	_, err = clusters.ExtendCluster(client, d.Id(), clusters.ClusterExtendCommonOpts{
 		ModifySize: diff,
-	}).Extract()
+	})
 	if err != nil {
 		return fmterr.Errorf("error extending cluster: %s", err)
 	}
 
 	secondsWait := int(math.Round(d.Timeout(schema.TimeoutUpdate).Seconds()))
 	if err := clusters.WaitForClusterToExtend(client, d.Id(), secondsWait); err != nil {
-		state, _ := clusters.Get(client, d.Id()).Extract()
+		state, _ := clusters.Get(client, d.Id())
 		if state != nil {
 			return fmterr.Errorf("error waiting cluster to extend: %s\nFail reason: %+v", err, state.FailedReasons)
 		}
@@ -361,7 +361,7 @@ func resourceCssClusterV1Delete(ctx context.Context, d *schema.ResourceData, met
 		return fmterr.Errorf("error creating CSS v1 client: %s", err)
 	}
 
-	if err := clusters.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := clusters.Delete(client, d.Id()); err != nil {
 		return fmterr.Errorf("error deleting cluster: %s", err)
 	}
 
@@ -386,7 +386,7 @@ const (
 
 func resourceCssClusterV1StateRefresh(client *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (result interface{}, state string, err error) {
-		cluster, err := clusters.Get(client, id).Extract()
+		cluster, err := clusters.Get(client, id)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return nil, "", nil
@@ -407,11 +407,7 @@ func checkCssClusterFlavorRestrictions(_ context.Context, d *schema.ResourceDiff
 	flavorName := d.Get("node_config.0.flavor").(string)
 	size := d.Get("node_config.0.volume.0.size").(int)
 
-	pages, err := flavors.List(client).AllPages()
-	if err != nil {
-		return fmt.Errorf("error retrieving flavor pages: %s", err)
-	}
-	versions, err := flavors.ExtractVersions(pages)
+	versions, err := flavors.List(client)
 	if err != nil {
 		return fmt.Errorf("error extracting flavor list: %s", err)
 	}

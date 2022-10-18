@@ -143,7 +143,7 @@ func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := clusters.Get(client, rs.Primary.ID).Extract()
+		_, err := clusters.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("cluster still exists")
 		}
@@ -169,7 +169,7 @@ func testAccCheckCssClusterV1Exists(n string, cluster *clusters.Cluster) resourc
 			return fmt.Errorf("error creating CSSv1 client: %w", err)
 		}
 
-		found, err := clusters.Get(client, rs.Primary.ID).Extract()
+		found, err := clusters.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
