@@ -108,6 +108,8 @@ func testAccCheckNatDnatExists(n string) resource.TestCheckFunc {
 var testAccNatDnatRuleWithPort = fmt.Sprintf(`
 %s
 
+%s
+
 resource "opentelekomcloud_networking_port_v2" "this" {
   name       = "dnat_rule_port"
   network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -129,6 +131,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   security_groups   = ["default"]
   availability_zone = "%s"
+  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
+
   network {
     port = opentelekomcloud_networking_port_v2.this.id
   }
@@ -143,9 +147,11 @@ resource "opentelekomcloud_nat_dnat_rule_v2" "dnat" {
   internal_service_port = 80
   depends_on            = [opentelekomcloud_compute_instance_v2.instance_1]
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
 var testAccNatDnatBasic = fmt.Sprintf(`
+%s
+
 %s
 
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
@@ -162,6 +168,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   security_groups   = ["default"]
   availability_zone = "%s"
+  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
+
   metadata = {
     foo = "bar"
   }
@@ -178,4 +186,4 @@ resource "opentelekomcloud_nat_dnat_rule_v2" "dnat" {
   protocol              = "tcp"
   external_service_port = 242
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
