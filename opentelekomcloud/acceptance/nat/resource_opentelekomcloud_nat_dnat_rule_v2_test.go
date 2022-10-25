@@ -54,6 +54,25 @@ func TestAccNatDnatRule_withPort(t *testing.T) {
 	})
 }
 
+func TestAccNatDnat_importBasic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNatDnatDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNatDnatBasic,
+			},
+
+			{
+				ResourceName:      resourceDnatRuleName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccCheckNatDnatDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.NatV2Client(env.OS_REGION_NAME)
