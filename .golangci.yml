@@ -9,16 +9,26 @@ issues:
 linters:
   disable-all: true
   enable:
+    - asciicheck
     - deadcode
-    - durationcheck
     - errcheck
+    - gocritic
     - gofmt
+    - goimports
     - gosimple
+    - govet
     - ineffassign
+    - nakedret
+    - misspell
     - staticcheck
+    - structcheck
+    - typecheck
+    - unused
     - unconvert
     - varcheck
     - vet
+    - vetshadow
+    - whitespace
 
 linters-settings:
   misspell:
@@ -28,3 +38,5 @@ linters-settings:
     checks:
       - all
       - '-SA1019' # disable the rule SA1019
+  errcheck:
+    ignore: github.com/hashicorp/terraform-plugin-sdk/helper/schema:ForceNew|Set,fmt:.*,io:Close
