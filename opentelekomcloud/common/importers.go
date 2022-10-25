@@ -15,9 +15,12 @@ func ImportAsManaged(_ context.Context, d *schema.ResourceData, _ interface{}) (
 }
 
 // SetComplexID setting ID from multiple attributes by names
-//   SetComplexID(d, "provider", "protocol")
+//
+//	SetComplexID(d, "provider", "protocol")
+//
 // will set ID from components:
-//   "<provider>/<protocol>"
+//
+//	"<provider>/<protocol>"
 func SetComplexID(d *schema.ResourceData, attributes ...string) error {
 	parts := make([]string, len(attributes))
 	for i, name := range attributes {
@@ -32,9 +35,12 @@ func SetComplexID(d *schema.ResourceData, attributes ...string) error {
 }
 
 // SetIDComponents setting attributes from complex ID, e.g.:
-//   SetIDComponents(d, "provider", "protocol")
+//
+//	SetIDComponents(d, "provider", "protocol")
+//
 // will set fields from ID formatted as
-//   <provider>/<protocol>
+//
+//	<provider>/<protocol>
 func SetIDComponents(d *schema.ResourceData, attributes ...string) error {
 	id := d.Id()
 	parts := strings.SplitN(id, "/", len(attributes))
@@ -60,7 +66,8 @@ func SetIDComponents(d *schema.ResourceData, attributes ...string) error {
 // (e.g. identity protocol by `<provider>/<identity>` or CCE addon by `<cluster_id>/<addon_id>`)
 //
 // Usage in schema:
-//   StateContext: common.ImportByPath("provider", "protocol"),
+//
+//	StateContext: common.ImportByPath("provider", "protocol"),
 func ImportByPath(attributes ...string) schema.StateContextFunc {
 	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 		err := SetIDComponents(d, attributes...)
