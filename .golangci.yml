@@ -9,26 +9,16 @@ issues:
 linters:
   disable-all: true
   enable:
-    - asciicheck
     - deadcode
+    - durationcheck
     - errcheck
-    - gocritic
     - gofmt
-    - goimports
     - gosimple
-    - govet
     - ineffassign
-    - nakedret
-    - misspell
     - staticcheck
-    - structcheck
-    - typecheck
-    - unused
     - unconvert
     - varcheck
     - vet
-    - vetshadow
-    - whitespace
 
 linters-settings:
   misspell:
