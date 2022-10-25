@@ -38,5 +38,3 @@ linters-settings:
     checks:
       - all
       - '-SA1019' # disable the rule SA1019
-  errcheck:
-    ignore: github.com/hashicorp/terraform-plugin-sdk/helper/schema:ForceNew|Set,fmt:.*,io:Close
