@@ -17,7 +17,6 @@
     merge-mode: squash-merge
     vars:
       functest_project_name: "eu-de_zuul_tf"
-      go_version: "1.18.1"
     default-branch: devel
     templates:
       - release-notes-jobs
