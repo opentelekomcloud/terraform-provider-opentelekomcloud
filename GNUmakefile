@@ -41,7 +41,7 @@ errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
 
 lint:
-	golangci-lint run ./...
+	GOGC=1 golangci-lint run ./...
 
 test-compile:
 	@if [ "$(TEST)" = "./..." ]; then \
