@@ -45,6 +45,24 @@ func TestAccNatGateway_basic(t *testing.T) {
 	})
 }
 
+func TestAccNatV2Gateway_importBasic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNatV2GatewayDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNatV2GatewayBasic,
+			},
+			{
+				ResourceName:      resourceGatewayName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccCheckNatV2GatewayDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.NatV2Client(env.OS_REGION_NAME)

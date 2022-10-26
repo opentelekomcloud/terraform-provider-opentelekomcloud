@@ -43,7 +43,7 @@ func TestAccCCENodesV3Basic(t *testing.T) {
 					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 					resource.TestCheckResourceAttr(resourceNameNode, "name", "test-node"),
 					resource.TestCheckResourceAttr(resourceNameNode, "flavor_id", "s3.medium.1"),
-					resource.TestCheckResourceAttr(resourceNameNode, "os", "EulerOS 2.5"),
+					resource.TestCheckResourceAttr(resourceNameNode, "os", "EulerOS 2.9"),
 					resource.TestCheckResourceAttr(resourceNameNode, "private_ip", privateIP),
 				),
 			},

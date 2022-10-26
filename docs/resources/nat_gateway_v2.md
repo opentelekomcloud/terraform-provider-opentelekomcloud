@@ -61,3 +61,9 @@ The following attributes are exported:
 * `router_id` - See Argument Reference above.
 
 * `internal_network_id` - See Argument Reference above.
+
+Gateway can be imported using the following format:
+
+```sh
+terraform import opentelekomcloud_nat_gateway_v2.gw_1 e4f783a7-b908-4215-b018-724960e5g34t
+```

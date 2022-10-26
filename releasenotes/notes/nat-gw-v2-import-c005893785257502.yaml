@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[NAT]** Add import in ``resource/opentelekomcloud_nat_gateway_v2`` (`#1973 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1973>`_)
