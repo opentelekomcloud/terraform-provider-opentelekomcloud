@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[OBS]** Fix ``versioning`` documentation in ``docs/resources/obs_bucket.md`` (`#1979 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1979>`_)
