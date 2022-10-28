@@ -32,6 +32,16 @@ resource "opentelekomcloud_obs_bucket" "b" {
 }
 ```
 
+### Suspend versioning
+
+```hcl
+resource "opentelekomcloud_obs_bucket" "b" {
+  bucket     = "my-tf-test-bucket"
+  acl        = "private"
+  versioning = false
+}
+```
+
 ### Enable Logging
 
 ```hcl
@@ -237,7 +247,7 @@ The following arguments are supported:
 
 * `tags` - (Optional) A mapping of tags to assign to the bucket. Each tag is represented by one key-value pair.
 
-* `enabled` - (Optional) Enable versioning. Once you version-enable a bucket, it can never return to an
+* `versioning` - (Optional) Set to `true` to enable versioning. Once you version-enable a bucket, it can never return to an
   unversioned state. You can, however, suspend versioning on that bucket. If omitted, during bucket
   creation it will be in `Disabled` state.
 
