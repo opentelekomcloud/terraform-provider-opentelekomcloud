@@ -67,10 +67,10 @@ func dataSourceCceAddonTemplatesV3Read(_ context.Context, d *schema.ResourceData
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve templates: %s", err)
 	}
-
+	aName := d.Get("addon_name")
 	var template addons.AddonTemplate
 	for _, addon := range addonTemplates.Items {
-		if addon.Metadata.Name == d.Get("addon_name") {
+		if addon.Metadata.Name == aName {
 			template = addon
 		}
 	}
@@ -79,9 +79,10 @@ func dataSourceCceAddonTemplatesV3Read(_ context.Context, d *schema.ResourceData
 			" Please change your search criteria and try again")
 	}
 
+	aVersion := d.Get("addon_version")
 	var result addons.Version
 	for _, version := range template.Spec.Versions {
-		if version.Version == d.Get("addon_version") {
+		if version.Version == aVersion {
 			result = version
 		}
 	}
