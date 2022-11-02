@@ -10,8 +10,8 @@ Use this data source to get from OpenTelekomCloud a CCE Addon template info.
 
 ```hcl
 data "opentelekomcloud_cce_addon_template_v3" "template" {
-	addon_version = "1.23.1"
-	addon_name    = "coredns"
+  addon_version = "1.23.1"
+  addon_name    = "coredns"
 }
 ```
 
