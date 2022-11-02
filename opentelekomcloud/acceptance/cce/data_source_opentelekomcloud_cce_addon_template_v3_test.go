@@ -47,7 +47,7 @@ func testAccCheckCCEAddonTemplatesV3DataSourceID(n string) resource.TestCheckFun
 
 const testAccCCEAddonTemplateMappingV3DataSourceBasic = `
 data "opentelekomcloud_cce_addon_template_v3" "template" {
-	addon_version = "1.2.9"
-	addon_name    = "gpu-beta"
+  addon_version = "1.2.9"
+  addon_name    = "gpu-beta"
 }
 `
