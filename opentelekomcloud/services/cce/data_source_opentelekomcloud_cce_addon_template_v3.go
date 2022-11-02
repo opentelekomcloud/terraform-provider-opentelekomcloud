@@ -72,6 +72,7 @@ func dataSourceCceAddonTemplatesV3Read(_ context.Context, d *schema.ResourceData
 	for _, addon := range addonTemplates.Items {
 		if addon.Metadata.Name == aName {
 			template = addon
+			break
 		}
 	}
 	if template.Metadata.Id == "" {
@@ -84,6 +85,7 @@ func dataSourceCceAddonTemplatesV3Read(_ context.Context, d *schema.ResourceData
 	for _, version := range template.Spec.Versions {
 		if version.Version == aVersion {
 			result = version
+			break
 		}
 	}
 	if result.Version == "" {
