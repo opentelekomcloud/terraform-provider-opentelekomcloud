@@ -1,4 +1,4 @@
 ---
 enhancements:
   - |
-    [ELB] Added latest ciphers listener options ``resource/opentelekomcloud_lb_listener_v2`` (`#1982 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1982>`_)
+    [ELB] Added latest ciphers listener options ``resource/opentelekomcloud_lb_listener_v3`` (`#1982 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1982>`_)
