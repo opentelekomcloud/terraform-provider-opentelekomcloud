@@ -90,6 +90,7 @@ func ResourceListenerV3() *schema.Resource {
 				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"tls-1-0", "tls-1-1", "tls-1-2", "tls-1-2-strict",
+					"tls-1-2-fs", "tls-1-0-with-1-3", "tls-1-2-fs-with-1-3",
 				}, false),
 			},
 			"member_retry_enable": {

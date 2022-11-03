@@ -38,6 +38,7 @@ func TestAccLBV3Listener_basic(t *testing.T) {
 					testAccCheckLBV3ListenerExists(resourceListenerName, &listener),
 					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1"),
 					resource.TestCheckResourceAttr(resourceListenerName, "description", "some interesting description"),
+					resource.TestCheckResourceAttr(resourceListenerName, "tls_ciphers_policy", "tls-1-2-fs"),
 				),
 			},
 			{
@@ -45,6 +46,7 @@ func TestAccLBV3Listener_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1_updated"),
 					resource.TestCheckResourceAttr(resourceListenerName, "description", ""),
+					resource.TestCheckResourceAttr(resourceListenerName, "tls_ciphers_policy", "tls-1-2-fs-with-1-3"),
 				),
 			},
 		},
@@ -228,6 +230,7 @@ resource "opentelekomcloud_lb_listener_v3" "listener_1" {
   protocol                  = "HTTPS"
   protocol_port             = 443
   default_tls_container_ref = opentelekomcloud_lb_certificate_v3.certificate_1.id
+  tls_ciphers_policy        = "tls-1-2-fs"
 
   insert_headers {
     forwarded_host = true
@@ -259,6 +262,7 @@ resource "opentelekomcloud_lb_listener_v3" "listener_1" {
   protocol                  = "HTTPS"
   protocol_port             = 443
   default_tls_container_ref = opentelekomcloud_lb_certificate_v3.certificate_1.id
+  tls_ciphers_policy        = "tls-1-2-fs-with-1-3"
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, privateKey, certificate)
 
