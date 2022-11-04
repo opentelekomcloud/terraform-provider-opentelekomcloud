@@ -11,6 +11,9 @@ import (
 )
 
 func TestAccComputeV2InstanceDataSource_basic(t *testing.T) {
+	resourceName := "data.opentelekomcloud_compute_instance_v2.source_1"
+	instanceName := "opentelekomcloud_compute_instance_v2.instance_1"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -21,29 +24,29 @@ func TestAccComputeV2InstanceDataSource_basic(t *testing.T) {
 			{
 				Config: testAccComputeV2InstanceDataSourceID(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceV2DataSourceID("data.opentelekomcloud_compute_instance_v2.source_1"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_compute_instance_v2.source_1", "name", "instance_1"),
-					resource.TestCheckResourceAttrPair("data.opentelekomcloud_compute_instance_v2.source_1", "metadata", "opentelekomcloud_compute_instance_v2.instance_1", "metadata"),
-					resource.TestCheckResourceAttrSet("data.opentelekomcloud_compute_instance_v2.source_1", "network.0.name"),
+					testAccCheckComputeInstanceV2DataSourceID(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "instance_1"),
+					resource.TestCheckResourceAttrPair(resourceName, "metadata", instanceName, "metadata"),
+					resource.TestCheckResourceAttrSet(resourceName, "network.0.name"),
 				),
 			},
 			{
 				Config: testAccComputeV2InstanceDataSourceWindowsPassword(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceV2DataSourceID("data.opentelekomcloud_compute_instance_v2.source_1"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_compute_instance_v2.source_1", "name", "instance_1"),
-					resource.TestCheckResourceAttrPair("data.opentelekomcloud_compute_instance_v2.source_1", "metadata", "opentelekomcloud_compute_instance_v2.instance_1", "metadata"),
-					resource.TestCheckResourceAttrSet("data.opentelekomcloud_compute_instance_v2.source_1", "network.0.name"),
-					resource.TestCheckResourceAttrSet("data.opentelekomcloud_compute_instance_v2.source_1", "encrypted_password"),
+					testAccCheckComputeInstanceV2DataSourceID(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "instance_1"),
+					resource.TestCheckResourceAttrPair(resourceName, "metadata", instanceName, "metadata"),
+					resource.TestCheckResourceAttrSet(resourceName, "network.0.name"),
+					resource.TestCheckResourceAttrSet(resourceName, "encrypted_password"),
 				),
 			},
 			{
 				Config: testAccComputeV2InstanceDataSourceName(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceV2DataSourceName("data.opentelekomcloud_compute_instance_v2.source_1"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_compute_instance_v2.source_1", "name", "instance_1"),
-					resource.TestCheckResourceAttrPair("data.opentelekomcloud_compute_instance_v2.source_1", "metadata", "opentelekomcloud_compute_instance_v2.instance_1", "metadata"),
-					resource.TestCheckResourceAttrSet("data.opentelekomcloud_compute_instance_v2.source_1", "network.0.name"),
+					testAccCheckComputeInstanceV2DataSourceName(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "instance_1"),
+					resource.TestCheckResourceAttrPair(resourceName, "metadata", instanceName, "metadata"),
+					resource.TestCheckResourceAttrSet(resourceName, "network.0.name"),
 				),
 			},
 		},
