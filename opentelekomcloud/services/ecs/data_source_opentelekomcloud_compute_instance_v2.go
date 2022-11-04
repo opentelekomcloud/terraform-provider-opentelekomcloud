@@ -285,10 +285,13 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 		mErr = multierror.Append(mErr, d.Set("password", pass))
 	} else {
 		pass, err := servers.GetPassword(client, d.Id()).ExtractPassword(nil)
-		if err != nil {
+		if _, ok := err.(golangsdk.ErrDefault403); ok {
+			mErr = multierror.Append(mErr, d.Set("encrypted_password", pass))
+		} else if err != nil {
 			return fmterr.Errorf("error getting password: %w", err)
+		} else {
+			mErr = multierror.Append(mErr, d.Set("encrypted_password", pass))
 		}
-		mErr = multierror.Append(mErr, d.Set("encrypted_password", pass))
 	}
 
 	mErr = multierror.Append(mErr,
