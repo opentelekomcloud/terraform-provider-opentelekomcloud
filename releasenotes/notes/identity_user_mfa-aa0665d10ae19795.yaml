@@ -1,0 +1,9 @@
+---
+enhancements:
+  - |
+    **[IAM]** Added MFA info for ``data_source/opentelekomcloud_identity_user_v3``
+    (`#1987 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1987>`_)
+deprecations:
+  - |
+    **[IAM]** Removed redundant `default_project_id` and `region` attributes for
+    ``data_source/opentelekomcloud_identity_user_v3`` (`#1987 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1987>`_)
