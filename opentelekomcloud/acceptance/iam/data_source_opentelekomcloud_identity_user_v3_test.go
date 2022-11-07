@@ -58,8 +58,8 @@ func testAccCheckIdentityUserV3DataSourceID(n string) resource.TestCheckFunc {
 func testAccOpenStackIdentityUserV3DataSource_user(name, password string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_identity_user_v3" "user_1" {
-  name               = "%s"
-  password           = "%s"
+  name     = "%s"
+  password = "%s"
 }
 `, name, password)
 }
