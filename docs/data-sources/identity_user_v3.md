@@ -25,12 +25,11 @@ The following arguments are supported:
 
 * `name` - (Optional) The name of the user.
 
-* `region` - (Optional) The region this user belongs to.
-
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `default_project_id` - The default project this user belongs to.
-
 * `password_expires_at` - Password expiration date of the user.
+
+* `mfa_device` - Serial number of user MFA device.
+  `Security administrator` permissions are needed to set this attribute.

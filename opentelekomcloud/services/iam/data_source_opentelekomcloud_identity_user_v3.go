@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/users"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -33,15 +34,11 @@ func DataSourceIdentityUserV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"default_project_id": {
+			"password_expires_at": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"password_expires_at": {
+			"mfa_device": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -92,12 +89,21 @@ func dataSourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, met
 
 	d.SetId(user.ID)
 	mErr := multierror.Append(
-		d.Set("default_project_id", user.DefaultProjectID),
 		d.Set("domain_id", user.DomainID),
 		d.Set("enabled", user.Enabled),
 		d.Set("name", user.Name),
 		d.Set("password_expires_at", user.PasswordExpiresAt.Format(time.RFC3339)),
 	)
+
+	mfa, err := users.ShowUserMfaDevice(client, user.ID)
+	switch err.(type) {
+	case golangsdk.ErrDefault403:
+		log.Printf("[DEBUG] Security administrator permissions needed to set MFA")
+	case nil, golangsdk.ErrDefault404:
+		mErr = multierror.Append(mErr, d.Set("mfa_device", mfa))
+	default:
+		log.Printf("[DEBUG] Error getting MFA info: %v", err.Error())
+	}
 
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting user fields: %s", err)
