@@ -232,9 +232,15 @@ func getDisk(diskMeta []interface{}) []configurations.Disk {
 		}
 		kmsID := disk["kms_id"].(string)
 		if kmsID != "" {
-			meta := make(map[string]interface{})
-			meta["__system__cmkid"] = kmsID
-			meta["__system__encrypted"] = "1"
+			meta := configurations.SystemMetadata{
+				SystemCmkId:     kmsID,
+				SystemEncrypted: "1",
+			}
+			diskOpts.Metadata = meta
+		} else {
+			meta := configurations.SystemMetadata{
+				SystemEncrypted: "0",
+			}
 			diskOpts.Metadata = meta
 		}
 		diskOptsList = append(diskOptsList, diskOpts)
@@ -291,7 +297,7 @@ func getInstanceConfig(d *schema.ResourceData) configurations.InstanceConfigOpts
 	configDataMap := d.Get("instance_config").([]interface{})[0].(map[string]interface{})
 	disksData := configDataMap["disk"].([]interface{})
 	personalityData := configDataMap["personality"].([]interface{})
-
+	meta := configDataMap["metadata"].(map[string]interface{})
 	instanceConfigOpts := configurations.InstanceConfigOpts{
 		ID:             configDataMap["instance_id"].(string),
 		FlavorRef:      configDataMap["flavor"].(string),
@@ -300,8 +306,12 @@ func getInstanceConfig(d *schema.ResourceData) configurations.InstanceConfigOpts
 		SSHKey:         configDataMap["key_name"].(string),
 		Personality:    getPersonality(personalityData),
 		UserData:       []byte(configDataMap["user_data"].(string)),
-		Metadata:       configDataMap["metadata"].(map[string]interface{}),
 		SecurityGroups: getSecurityGroups(d),
+	}
+	if _, ok := meta["admin_pass"]; ok {
+		instanceConfigOpts.Metadata = configurations.AdminPassMetadata{
+			AdminPass: meta["admin_pass"].(string),
+		}
 	}
 
 	pubicIpData := configDataMap["public_ip"].([]interface{})
@@ -413,15 +423,15 @@ func resourceASConfigurationDelete(_ context.Context, d *schema.ResourceData, me
 }
 
 func getASGroupsByConfiguration(client *golangsdk.ServiceClient, configID string) ([]groups.Group, error) {
-	var asGroups []groups.Group
+	var asGroups *groups.ListScalingGroupsResponse
 	listOpts := groups.ListOpts{
 		ConfigurationID: configID,
 	}
 	asGroups, err := groups.List(client, listOpts)
 	if err != nil {
-		return asGroups, fmt.Errorf("error getting ASGroups by configuration %q: %s", configID, err)
+		return asGroups.ScalingGroups, fmt.Errorf("error getting ASGroups by configuration %q: %s", configID, err)
 	}
-	return asGroups, err
+	return asGroups.ScalingGroups, err
 }
 
 func validateDiskSize(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {

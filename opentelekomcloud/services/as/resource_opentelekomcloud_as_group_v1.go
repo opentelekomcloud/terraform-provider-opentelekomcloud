@@ -269,12 +269,13 @@ func getAllLBaaSListeners(d *schema.ResourceData) []groups.LBaaSListener {
 }
 
 func getInstancesInGroup(client *golangsdk.ServiceClient, groupID string, opts instances.ListOpts) ([]instances.Instance, error) {
-	var instanceList []instances.Instance
-	instanceList, err := instances.List(client, groupID, opts)
+	var instanceList *instances.ListScalingInstancesResponse
+	opts.ScalingGroupId = groupID
+	instanceList, err := instances.List(client, opts)
 	if err != nil {
-		return instanceList, fmt.Errorf("error getting instances in ASGroup %q: %s", groupID, err)
+		return instanceList.ScalingGroupInstances, fmt.Errorf("error getting instances in ASGroup %q: %s", groupID, err)
 	}
-	return instanceList, err
+	return instanceList.ScalingGroupInstances, err
 }
 
 func getInstancesIDs(instanceList []instances.Instance) []string {
@@ -608,7 +609,12 @@ func resourceASGroupDelete(ctx context.Context, d *schema.ResourceData, meta int
 		deleteInstances := d.Get("delete_instances").(string)
 		log.Printf("[DEBUG] The flag delete_instances in AutoScaling Group is %s", deleteInstances)
 
-		if err := instances.BatchDelete(client, d.Id(), instanceIDs, deleteInstances); err != nil {
+		opts := instances.BatchOpts{
+			Instances:   instanceIDs,
+			IsDeleteEcs: deleteInstances,
+			Action:      "REMOVE",
+		}
+		if err := instances.BatchAction(client, d.Id(), opts); err != nil {
 			return fmterr.Errorf("error removing instancess of AutoScaling Group: %s", err)
 		}
 		log.Printf("[DEBUG] Begin to remove instances of ASGroup %q", d.Id())
@@ -629,7 +635,10 @@ func resourceASGroupDelete(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	log.Printf("[DEBUG] Begin to delete ASGroup %q", d.Id())
-	if err := groups.Delete(client, d.Id()); err != nil {
+	delOpts := groups.DeleteOpts{
+		ScalingGroupId: d.Id(),
+	}
+	if err := groups.Delete(client, delOpts); err != nil {
 		return fmterr.Errorf("error deleting AutoScaling Group: %s", err)
 	}
 
