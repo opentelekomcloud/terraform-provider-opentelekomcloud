@@ -393,8 +393,8 @@ resource "opentelekomcloud_as_group_v1" "as_group" {
   scaling_group_name       = "as_group"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   available_zones          = ["%s"]
-  desire_instance_number   = 3
-  min_instance_number      = 1
+  desire_instance_number   = 0
+  min_instance_number      = 0
   max_instance_number      = 10
   vpc_id                   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   delete_publicip          = true
