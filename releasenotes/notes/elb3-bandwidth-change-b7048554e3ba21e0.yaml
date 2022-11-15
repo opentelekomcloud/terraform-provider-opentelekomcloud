@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[ELB]** added suppress functions to size and type to have ability change eip bandwidth in ``opentelekomcloud_lb_loadbalancer_v3`` (`#1991 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1991>`_)
