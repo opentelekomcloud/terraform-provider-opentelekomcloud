@@ -132,10 +132,7 @@ func ResourceLoadBalancerV3() *schema.Resource {
 							ForceNew:              true,
 							DiffSuppressOnRefresh: true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								if old >= new {
-									return true
-								}
-								return false
+								return old >= new
 							},
 							RequiredWith: []string{"public_ip.0.ip_type"},
 							ValidateFunc: validation.IntBetween(0, 99999),
