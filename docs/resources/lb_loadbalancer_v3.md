@@ -87,6 +87,40 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
 }
 ```
 
+#### Assign new bandwidth to EIP without recreating
+
+```hcl
+resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name        = "loadbalancer_1"
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["eu-de-01"]
+
+  public_ip {
+    ip_type              = "5_gray"
+    bandwidth_name       = "lb_band"
+    bandwidth_size       = 10
+    bandwidth_share_type = "PER"
+  }
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+
+resource "opentelekomcloud_vpc_bandwidth_v2" "bw" {
+  name = "lb_band"
+  size = 20
+}
+
+resource "opentelekomcloud_vpc_bandwidth_associate_v2" "associate" {
+  bandwidth    = opentelekomcloud_vpc_bandwidth_v2.bw.id
+  floating_ips = [opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.public_ip.0.id]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:

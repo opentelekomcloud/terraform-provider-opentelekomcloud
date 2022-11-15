@@ -15,6 +15,7 @@ import (
 )
 
 const resourceLBName = "opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1"
+const resourceBWName = "opentelekomcloud_vpc_bandwidth_v2.bw"
 
 func TestAccLBV3LoadBalancer_basic(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
@@ -44,7 +45,7 @@ func TestAccLBV3LoadBalancer_basic(t *testing.T) {
 	})
 }
 
-func TestAccLBV3LoadBalancer_eipIDs(t *testing.T) {
+func TestAccLBV3LoadBalancer_bandwidth(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
 
 	qts := lbQuotas()
@@ -57,9 +58,12 @@ func TestAccLBV3LoadBalancer_eipIDs(t *testing.T) {
 		CheckDestroy:      testAccCheckLBV3LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV3LoadBalancerEIPs,
+				Config: testAccLBV3LoadBalancerConfigNewBandwidth,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV3LoadBalancerExists(resourceLBName, &lb),
+					resource.TestCheckResourceAttr(resourceLBName, "public_ip.0.bandwidth_share_type", "PER"),
+					resource.TestCheckResourceAttr(resourceLBName, "public_ip.0.bandwidth_size", "10"),
+					resource.TestCheckResourceAttr(resourceBWName, "size", "20"),
 				),
 			},
 		},
@@ -190,20 +194,8 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
-var testAccLBV3LoadBalancerEIPs = fmt.Sprintf(`
+var testAccLBV3LoadBalancerConfigNewBandwidth = fmt.Sprintf(`
 %s
-
-resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
-  publicip {
-    type = "5_gray"
-  }
-  bandwidth {
-    name        = "test"
-    size        = 8
-    share_type  = "PER"
-    charge_mode = "traffic"
-  }
-}
 
 resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   name        = "loadbalancer_1"
@@ -213,7 +205,25 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   availability_zones = ["%s"]
 
   public_ip {
-    id = opentelekomcloud_vpc_eip_v1.eip_1.id
+    ip_type              = "5_gray"
+    bandwidth_name       = "lb_band"
+    bandwidth_size       = 10
+    bandwidth_share_type = "PER"
   }
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+
+resource "opentelekomcloud_vpc_bandwidth_v2" "bw" {
+  name = "lb_band"
+  size = 20
+}
+
+resource "opentelekomcloud_vpc_bandwidth_associate_v2" "associate" {
+  bandwidth    = opentelekomcloud_vpc_bandwidth_v2.bw.id
+  floating_ips = [opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.public_ip.0.id]
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
