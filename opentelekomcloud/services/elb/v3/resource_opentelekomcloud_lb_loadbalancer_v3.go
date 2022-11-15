@@ -126,11 +126,18 @@ func ResourceLoadBalancerV3() *schema.Resource {
 							ForceNew:     true,
 						},
 						"bandwidth_size": {
-							Type:         schema.TypeInt,
-							Optional:     true,
-							Computed:     true,
+							Type:                  schema.TypeInt,
+							Optional:              true,
+							Computed:              true,
+							ForceNew:              true,
+							DiffSuppressOnRefresh: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								if old >= new {
+									return true
+								}
+								return false
+							},
 							RequiredWith: []string{"public_ip.0.ip_type"},
-							ForceNew:     true,
 							ValidateFunc: validation.IntBetween(0, 99999),
 						},
 						"bandwidth_charge_mode": {
@@ -143,11 +150,18 @@ func ResourceLoadBalancerV3() *schema.Resource {
 							}, false),
 						},
 						"bandwidth_share_type": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Computed:     true,
+							Type:                  schema.TypeString,
+							Optional:              true,
+							Computed:              true,
+							ForceNew:              true,
+							DiffSuppressOnRefresh: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								if old == "WHOLE" && new == "PER" {
+									return true
+								}
+								return false
+							},
 							RequiredWith: []string{"public_ip.0.ip_type"},
-							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"PER", "WHOLE",
 							}, false),
