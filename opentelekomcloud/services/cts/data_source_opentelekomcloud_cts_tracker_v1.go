@@ -85,14 +85,14 @@ func dataSourceCTSTrackerV1Read(_ context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf(clientError, err)
 	}
 
-	listOpts := tracker.ListOpts{
+	listOpts := tracker.Tracker{
 		TrackerName:    d.Get("tracker_name").(string),
 		BucketName:     d.Get("bucket_name").(string),
 		FilePrefixName: d.Get("file_prefix_name").(string),
 		Status:         d.Get("status").(string),
 	}
 
-	refinedTrackers, err := tracker.List(ctsClient, listOpts)
+	refinedTrackers, err := tracker.Get(ctsClient)
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve cts tracker: %s", err)
 	}
