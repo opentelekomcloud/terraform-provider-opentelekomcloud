@@ -31,6 +31,7 @@ func TestAccCTSTrackerV1_basic(t *testing.T) {
 					testAccCheckCTSTrackerV1Exists(trackerResource, &ctsTracker, env.OS_TENANT_NAME),
 					resource.TestCheckResourceAttr(trackerResource, "bucket_name", bucketName),
 					resource.TestCheckResourceAttr(trackerResource, "file_prefix_name", "yO8Q"),
+					resource.TestCheckResourceAttr(trackerResource, "is_lts_enabled", "false"),
 				),
 			},
 			{
@@ -38,6 +39,7 @@ func TestAccCTSTrackerV1_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCTSTrackerV1Exists(trackerResource, &ctsTracker, env.OS_TENANT_NAME),
 					resource.TestCheckResourceAttr(trackerResource, "file_prefix_name", "yO8Q1"),
+					resource.TestCheckResourceAttr(trackerResource, "is_lts_enabled", "true"),
 				),
 			},
 		},
@@ -147,7 +149,7 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
   bucket_name      = opentelekomcloud_obs_bucket.bucket.bucket
   file_prefix_name = "yO8Q1"
-  is_lts_enabled   = false
+  is_lts_enabled   = true
 }
 `, bucketName)
 }
