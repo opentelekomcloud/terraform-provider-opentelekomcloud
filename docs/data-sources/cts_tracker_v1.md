@@ -8,37 +8,26 @@ Use this data source to get details about OpenTelekomCloud Cloud Trace Service.
 
 ## Example Usage
 ```hcl
-variable "bucket_name" {}
-
-data "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
-  bucket_name = var.bucket_name
-}
+data "opentelekomcloud_cts_tracker_v1" "tracker_v1" {}
 
 ```
 
-## Argument Reference
+## Attributes Reference
 
 The following arguments are supported:
 
-* `tracker_name` - (Optional) The tracker name.
+* `bucket_name` - The OBS bucket name for a tracker to store trace info.
 
-* `bucket_name` - (Optional) The OBS bucket name for a tracker.
+* `file_prefix_name` - The prefix of a log that needs to be stored in an OBS bucket.
 
-* `file_prefix_name` - (Optional) The prefix of a log that needs to be stored in an OBS bucket.
+* `is_lts_enabled` - Specifies whether to enable trace analysis.
 
-* `status` - (Optional) Status of a tracker.
+* `tracker_name` - The tracker name. Currently, only tracker `system` is available.
 
+* `region` - Specifies the tracker region.
 
-## Attributes Reference
+* `status` - Specifies current status of the tracker.
 
-In addition to all arguments above, the following attributes are exported:
+* `log_group_name` - Specifies LTS log group name.
 
-* `is_support_smn` - Specifies SMN support.
-
-* `topic_id` - The theme of the SMN service.
-
-* `operations` - The trigger conditions for sending a notification
-
-* `is_send_all_key_operation` - Specifies Typical or All operations for Trigger Condition.
-
-* `need_notify_user_list` - The users using the login function.
+* `log_topic_name` - Specifies LTS log stream.

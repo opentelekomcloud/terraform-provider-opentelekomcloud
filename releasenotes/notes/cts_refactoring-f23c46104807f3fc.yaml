@@ -1,0 +1,8 @@
+---
+other:
+  - |
+    **[CTS]** Complete overhaul of ``resource/opentelekomcloud_cts_tracker_v1`` to be up to date with current
+    CTS version (`#1994 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1994>`_)
+  - |
+    **[CTS]** Complete overhaul of ``data_source/opentelekomcloud_cts_tracker_v1`` to be up to date with current
+    CTS version (`#1994 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1994>`_)

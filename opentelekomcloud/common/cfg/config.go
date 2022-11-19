@@ -880,7 +880,18 @@ func (c *Config) CtsV1Client(projectName ProjectName) (*golangsdk.ServiceClient,
 	if err != nil {
 		return nil, err
 	}
-	return openstack.NewCTSService(newConfig.HwClient, golangsdk.EndpointOpts{
+	return openstack.NewCTSV1(newConfig.HwClient, golangsdk.EndpointOpts{
+		Region:       c.GetRegion(nil),
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) CtsV2Client(projectName ProjectName) (*golangsdk.ServiceClient, error) {
+	newConfig, err := reconfigProjectName(*c, projectName)
+	if err != nil {
+		return nil, err
+	}
+	return openstack.NewCTSV2(newConfig.HwClient, golangsdk.EndpointOpts{
 		Region:       c.GetRegion(nil),
 		Availability: c.getEndpointType(),
 	})

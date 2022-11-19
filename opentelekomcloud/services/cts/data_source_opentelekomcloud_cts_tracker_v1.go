@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cts/v1/tracker"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -18,61 +19,41 @@ func DataSourceCTSTrackerV1() *schema.Resource {
 		ReadContext: dataSourceCTSTrackerV1Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": {
+			"tracker_name": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
-				ForceNew: true,
-			},
-			"project_name": {
-				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
-			"status": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"system",
+				}, false),
 			},
 			"bucket_name": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
+			},
+			"region": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"status": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"file_prefix_name": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
-			"tracker_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"is_support_smn": {
+			"is_lts_enabled": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"topic_id": {
+			"log_topic_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"operations": {
-				Type:     schema.TypeSet,
+			"log_group_name": {
+				Type:     schema.TypeString,
 				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
-			},
-			"is_send_all_key_operation": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"need_notify_user_list": {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 		},
 	}
@@ -85,44 +66,23 @@ func dataSourceCTSTrackerV1Read(_ context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf(clientError, err)
 	}
 
-	listOpts := tracker.ListOpts{
-		TrackerName:    d.Get("tracker_name").(string),
-		BucketName:     d.Get("bucket_name").(string),
-		FilePrefixName: d.Get("file_prefix_name").(string),
-		Status:         d.Get("status").(string),
-	}
-
-	refinedTrackers, err := tracker.List(ctsClient, listOpts)
+	ctsTracker, err := tracker.Get(ctsClient, trackerName)
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve cts tracker: %s", err)
 	}
 
-	if len(refinedTrackers) < 1 {
-		return fmterr.Errorf("your query returned no results. " +
-			"Please change your search criteria and try again.")
-	}
+	log.Printf("[INFO] Retrieved cts tracker %s", ctsTracker.TrackerName)
 
-	if len(refinedTrackers) > 1 {
-		return fmterr.Errorf("your query returned more than one result." +
-			" Please try a more specific search criteria")
-	}
-
-	trackers := refinedTrackers[0]
-
-	log.Printf("[INFO] Retrieved cts tracker %s using given filter", trackers.TrackerName)
-
-	d.SetId(trackers.TrackerName)
+	d.SetId(ctsTracker.TrackerName)
 
 	mErr := multierror.Append(
-		d.Set("tracker_name", trackers.TrackerName),
-		d.Set("bucket_name", trackers.BucketName),
-		d.Set("file_prefix_name", trackers.FilePrefixName),
-		d.Set("status", trackers.Status),
-		d.Set("is_support_smn", trackers.SimpleMessageNotification.IsSupportSMN),
-		d.Set("topic_id", trackers.SimpleMessageNotification.TopicID),
-		d.Set("is_send_all_key_operation", trackers.SimpleMessageNotification.IsSendAllKeyOperation),
-		d.Set("operations", trackers.SimpleMessageNotification.Operations),
-		d.Set("need_notify_user_list", trackers.SimpleMessageNotification.NeedNotifyUserList),
+		d.Set("tracker_name", ctsTracker.TrackerName),
+		d.Set("bucket_name", ctsTracker.BucketName),
+		d.Set("file_prefix_name", ctsTracker.FilePrefixName),
+		d.Set("status", ctsTracker.Status),
+		d.Set("is_lts_enabled", ctsTracker.Lts.IsLtsEnabled),
+		d.Set("log_topic_name", ctsTracker.Lts.LogTopicName),
+		d.Set("log_group_name", ctsTracker.Lts.LogGroupName),
 		d.Set("region", config.GetRegion(d)),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
