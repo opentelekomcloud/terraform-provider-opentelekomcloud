@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPN]** Minor example fixes in documentation for ``resource/opentelekomcloud_vpnaas_site_connection_v2`` (`#2003 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2003>`_)
