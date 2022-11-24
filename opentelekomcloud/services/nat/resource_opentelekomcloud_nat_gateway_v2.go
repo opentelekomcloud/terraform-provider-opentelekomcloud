@@ -118,7 +118,7 @@ func resourceNatGatewayV2Create(ctx context.Context, d *schema.ResourceData, met
 
 	// set tags
 	tagRaw := d.Get("tags").(map[string]interface{})
-	if len(tagRaw) > 0 {
+	if len(tagRaw) > 0 && config.GetRegion(d) != "eu-ch2" {
 		tagList := common.ExpandResourceTags(tagRaw)
 		if err := tags.Create(client, "nat_gateways", natGateway.ID, tagList).ExtractErr(); err != nil {
 			return fmterr.Errorf("error setting tags of NAT Gateway: %w", err)
@@ -157,13 +157,15 @@ func resourceNatGatewayV2Read(_ context.Context, d *schema.ResourceData, meta in
 	}
 
 	// save tags
-	resourceTags, err := tags.Get(client, "nat_gateways", d.Id()).Extract()
-	if err != nil {
-		return fmterr.Errorf("error fetching OpenTelekomCloud NAT Gateway tags: %w", err)
-	}
-	tagMap := common.TagsToMap(resourceTags)
-	if err := d.Set("tags", tagMap); err != nil {
-		return fmterr.Errorf("error saving tags for OpenTelekomCloud NAT Gateway: %w", err)
+	if config.GetRegion(d) != "eu-ch2" {
+		resourceTags, err := tags.Get(client, "nat_gateways", d.Id()).Extract()
+		if err != nil {
+			return fmterr.Errorf("error fetching OpenTelekomCloud NAT Gateway tags: %w", err)
+		}
+		tagMap := common.TagsToMap(resourceTags)
+		if err := d.Set("tags", tagMap); err != nil {
+			return fmterr.Errorf("error saving tags for OpenTelekomCloud NAT Gateway: %w", err)
+		}
 	}
 
 	return nil
@@ -196,9 +198,11 @@ func resourceNatGatewayV2Update(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	// update tags
-	if d.HasChange("tags") {
-		if err := common.UpdateResourceTags(client, d, "nat_gateways", d.Id()); err != nil {
-			return fmterr.Errorf("error updating tags of NAT Gateway %s: %w", d.Id(), err)
+	if config.GetRegion(d) != "eu-ch2" {
+		if d.HasChange("tags") {
+			if err := common.UpdateResourceTags(client, d, "nat_gateways", d.Id()); err != nil {
+				return fmterr.Errorf("error updating tags of NAT Gateway %s: %w", d.Id(), err)
+			}
 		}
 	}
 
