@@ -31,7 +31,7 @@ func ResourceDcsInstanceV1() *schema.Resource {
 		CustomizeDiff: validateEngine,
 
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceDcsInstanceV1ImportState,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -728,4 +728,47 @@ func validateEngine(_ context.Context, d *schema.ResourceDiff, _ interface{}) er
 	}
 
 	return mErr.ErrorOrNil()
+}
+
+func resourceDcsInstanceV1ImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*cfg.Config)
+	client, err := config.DcsV1Client(config.GetRegion(d))
+	if err != nil {
+		return nil, fmt.Errorf("error creating ComputeV2 client: %w", err)
+	}
+
+	results := make([]*schema.ResourceData, 1)
+	if diagRead := resourceDcsInstancesV1Read(ctx, d, meta); diagRead.HasError() {
+		return nil, fmt.Errorf("error reading opentelekomcloud_dcs_instance_v1 %s: %s", d.Id(), diagRead[0].Summary)
+	}
+	instance, err := instances.Get(client, d.Id()).Extract()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get instance %s: %s", d.Id(), err)
+	}
+	if err := d.Set("available_zones", instance.AvailableZones); err != nil {
+		return nil, fmt.Errorf("error setting available zones")
+	}
+	if err := d.Set("used_memory", instance.UsedMemory); err != nil {
+		return nil, fmt.Errorf("error setting used memory")
+	}
+	var backup []map[string]interface{}
+	backup_policy := make(map[string]interface{})
+	backup_policy["backup_type"] = instance.InstanceBackupPolicy.BackupType
+	backup_policy["save_days"] = instance.InstanceBackupPolicy.SaveDays
+	backup_policy["begin_at"] = instance.InstanceBackupPolicy.PeriodicalBackupPlan.BeginAt
+	backup_policy["period_type"] = instance.InstanceBackupPolicy.PeriodicalBackupPlan.PeriodType
+	var backupAts []int
+	for _, at := range instance.InstanceBackupPolicy.PeriodicalBackupPlan.BackupAt {
+		backupAts = append(backupAts, at)
+	}
+	backup_policy["backup_at"] = backupAts
+
+	backup = append(backup, backup_policy)
+	if err := d.Set("backup_policy", backup); err != nil {
+		return nil, fmt.Errorf("error setting backup policy")
+	}
+
+	results[0] = d
+
+	return results, nil
 }

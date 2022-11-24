@@ -186,6 +186,29 @@ func TestAccDcsInstancesV1_Whitelist(t *testing.T) {
 	})
 }
 
+func TestAccDCSInstanceV1_importBasic(t *testing.T) {
+	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDcsV1InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDcsV1InstanceBasic(instanceName),
+			},
+
+			{
+				ResourceName:      resourceInstanceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"password", "configuration",
+				},
+			},
+		},
+	})
+}
+
 func testAccCheckDcsV1InstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.DcsV1Client(env.OS_REGION_NAME)
