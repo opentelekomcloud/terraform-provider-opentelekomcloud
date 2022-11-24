@@ -76,6 +76,20 @@ func ValidateName(v interface{}, k string) (ws []string, errors []error) {
 	return
 }
 
+func ValidateCTSEventName(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	if len(value) > 64 || len(value) < 1 {
+		errors = append(errors, fmt.Errorf("%q must contain more than 1 and less than 64 characters", k))
+	}
+
+	pattern := `^[_A-Za-z0-9]+$`
+	if !regexp.MustCompile(pattern).MatchString(value) {
+		errors = append(errors, fmt.Errorf("only alphanumeric characters and underscores allowed in %q", k))
+	}
+
+	return
+}
+
 func ValidateStackTemplate(v interface{}, k string) (ws []string, errors []error) {
 	if LooksLikeJsonString(v) {
 		if _, err := NormalizeJsonString(v); err != nil {
