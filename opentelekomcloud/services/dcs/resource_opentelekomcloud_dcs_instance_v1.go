@@ -14,7 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/configs"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/instances"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/lifecycle"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/others"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v2/whitelists"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -73,12 +74,6 @@ func ResourceDcsInstanceV1() *schema.Resource {
 				Sensitive: true,
 				Required:  true,
 				ForceNew:  true,
-			},
-			"access_user": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
 			},
 			"vpc_id": {
 				Type:     schema.TypeString,
@@ -292,17 +287,17 @@ func formatAts(src []interface{}) []int {
 	return res
 }
 
-func getInstanceBackupPolicy(d *schema.ResourceData) *instances.InstanceBackupPolicy {
-	var instanceBackupPolicy *instances.InstanceBackupPolicy
+func getInstanceBackupPolicy(d *schema.ResourceData) *lifecycle.InstanceBackupPolicy {
+	var instanceBackupPolicy *lifecycle.InstanceBackupPolicy
 	if _, ok := d.GetOk("backup_policy"); !ok { // deprecated branch
 		backupAts := d.Get("backup_at").([]interface{})
 		if len(backupAts) == 0 {
 			return nil
 		}
-		instanceBackupPolicy = &instances.InstanceBackupPolicy{
+		instanceBackupPolicy = &lifecycle.InstanceBackupPolicy{
 			SaveDays:   d.Get("save_days").(int),
 			BackupType: d.Get("backup_type").(string),
-			PeriodicalBackupPlan: instances.PeriodicalBackupPlan{
+			PeriodicalBackupPlan: lifecycle.PeriodicalBackupPlan{
 				BeginAt:    d.Get("begin_at").(string),
 				PeriodType: d.Get("period_type").(string),
 				BackupAt:   formatAts(backupAts),
@@ -317,10 +312,10 @@ func getInstanceBackupPolicy(d *schema.ResourceData) *instances.InstanceBackupPo
 	}
 	backupPolicy := backupPolicyList[0].(map[string]interface{})
 	backupAts := backupPolicy["backup_at"].([]interface{})
-	instanceBackupPolicy = &instances.InstanceBackupPolicy{
+	instanceBackupPolicy = &lifecycle.InstanceBackupPolicy{
 		SaveDays:   backupPolicy["save_days"].(int),
 		BackupType: backupPolicy["backup_type"].(string),
-		PeriodicalBackupPlan: instances.PeriodicalBackupPlan{
+		PeriodicalBackupPlan: lifecycle.PeriodicalBackupPlan{
 			BeginAt:    backupPolicy["begin_at"].(string),
 			PeriodType: backupPolicy["period_type"].(string),
 			BackupAt:   formatAts(backupAts),
@@ -388,10 +383,22 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	noPasswordAccess := "true"
-	if d.Get("access_user").(string) != "" || d.Get("password").(string) != "" {
+	if d.Get("password").(string) != "" {
 		noPasswordAccess = "false"
 	}
-	createOpts := &instances.CreateOps{
+	productId := d.Get("product_id").(string)
+	var specCode string
+	products, err := others.GetProducts(client)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	log.Printf("[DEBUG] Dcs get products : %+v", products)
+	for _, pd := range products {
+		if productId != "" && pd.ProductID == productId {
+			specCode = pd.SpecCode
+		}
+	}
+	createOpts := lifecycle.CreateOps{
 		Name:                 d.Get("name").(string),
 		Description:          d.Get("description").(string),
 		Engine:               d.Get("engine").(string),
@@ -399,45 +406,44 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 		Capacity:             d.Get("capacity").(float64),
 		NoPasswordAccess:     noPasswordAccess,
 		Password:             d.Get("password").(string),
-		AccessUser:           d.Get("access_user").(string),
-		VPCID:                d.Get("vpc_id").(string),
+		VPCId:                d.Get("vpc_id").(string),
 		SecurityGroupID:      d.Get("security_group_id").(string),
 		SubnetID:             d.Get("subnet_id").(string),
 		AvailableZones:       common.GetAllAvailableZones(d),
-		ProductID:            d.Get("product_id").(string),
+		SpecCode:             specCode,
 		InstanceBackupPolicy: getInstanceBackupPolicy(d),
 		MaintainBegin:        d.Get("maintain_begin").(string),
 		MaintainEnd:          d.Get("maintain_end").(string),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	v, err := instances.Create(client, createOpts).Extract()
+	instanceID, err := lifecycle.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating DCS instance: %w", err)
 	}
-	log.Printf("[INFO] instance ID: %s", v.InstanceID)
+	log.Printf("[INFO] instance ID: %s", instanceID)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"CREATING"},
 		Target:     []string{"RUNNING"},
-		Refresh:    dcsInstancesV1StateRefreshFunc(client, v.InstanceID),
+		Refresh:    dcsInstancesV1StateRefreshFunc(client, instanceID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", v.InstanceID, err)
+		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", instanceID, err)
 	}
 
 	// Store the instance ID now
-	d.SetId(v.InstanceID)
+	d.SetId(instanceID)
 
 	updateOpts := configs.UpdateOpts{
 		RedisConfigs: getInstanceRedisConfiguration(d),
 	}
 	if len(updateOpts.RedisConfigs) > 0 {
-		if err := configs.Update(client, d.Id(), updateOpts).ExtractErr(); err != nil {
+		if err := configs.Update(client, d.Id(), updateOpts); err != nil {
 			return fmterr.Errorf("error updating redis configuration of DCS instance: %w", err)
 		}
 		stateConf := &resource.StateChangeConf{
@@ -455,7 +461,7 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 
 	if _, ok := d.GetOk("whitelist"); ok {
 		whitelistOpts := getInstanceWhitelistOpts(d)
-		if err := whitelists.Put(client, d.Id(), whitelistOpts).ExtractErr(); err != nil {
+		if err := whitelists.Put(client, d.Id(), whitelistOpts); err != nil {
 			return fmterr.Errorf("error updating redis whitelist of DCS instance: %w", err)
 		}
 		stateConf := &resource.StateChangeConf{
@@ -481,7 +487,7 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
-	v, err := instances.Get(client, d.Id()).Extract()
+	v, err := lifecycle.Get(client, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -491,6 +497,16 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 	capacity := float64(v.Capacity)
 	if v.Capacity == 0 {
 		capacity, _ = strconv.ParseFloat(v.CapacityMinor, 32)
+	}
+	var productId string
+	products, err := others.GetProducts(client)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	for _, pd := range products {
+		if pd.SpecCode == v.SpecCode {
+			productId = pd.ProductID
+		}
 	}
 
 	mErr := multierror.Append(
@@ -508,7 +524,7 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("vpc_id", v.VPCID),
 		d.Set("vpc_name", v.VPCName),
 		d.Set("created_at", v.CreatedAt),
-		d.Set("product_id", v.ProductID),
+		d.Set("product_id", productId),
 		d.Set("subnet_id", v.SubnetID),
 		d.Set("subnet_name", v.SubnetName),
 		d.Set("user_id", v.UserID),
@@ -516,7 +532,6 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("order_id", v.OrderID),
 		d.Set("maintain_begin", v.MaintainBegin),
 		d.Set("maintain_end", v.MaintainEnd),
-		d.Set("access_user", v.AccessUser),
 		d.Set("ip", v.IP),
 	)
 
@@ -526,7 +541,7 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 			d.Set("security_group_name", v.SecurityGroupName),
 		)
 	} else {
-		w, err := whitelists.Get(client, d.Id()).Extract()
+		w, err := whitelists.Get(client, d.Id())
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -563,13 +578,13 @@ func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
-	var updateOpts instances.UpdateOpts
+	var updateOpts lifecycle.UpdateOpts
 	if d.HasChange("name") {
 		updateOpts.Name = d.Get("name").(string)
 	}
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
-		updateOpts.Description = &description
+		updateOpts.Description = description
 	}
 	if d.HasChange("maintain_begin") {
 		updateOpts.MaintainBegin = d.Get("maintain_begin").(string)
@@ -584,7 +599,7 @@ func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 		updateOpts.InstanceBackupPolicy = getInstanceBackupPolicy(d)
 	}
 
-	err = instances.Update(client, d.Id(), updateOpts).Err
+	err = lifecycle.Update(client, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating DCS Instance: %w", err)
 	}
@@ -594,7 +609,7 @@ func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 		updateConfigOpts.RedisConfigs = getInstanceRedisConfiguration(d)
 	}
 	if len(updateConfigOpts.RedisConfigs) > 0 {
-		if err := configs.Update(client, d.Id(), updateConfigOpts).ExtractErr(); err != nil {
+		if err := configs.Update(client, d.Id(), updateConfigOpts); err != nil {
 			return fmterr.Errorf("error updating redis config of DCS instance: %w", err)
 		}
 		stateConf := &resource.StateChangeConf{
@@ -611,12 +626,12 @@ func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if d.HasChange("enable_whitelist") || d.HasChange("whitelist") {
-		getResp, err := whitelists.Get(client, d.Id()).Extract()
+		getResp, err := whitelists.Get(client, d.Id())
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		whitelistOpts := getInstanceWhitelistOpts(d)
-		if err := whitelists.Put(client, d.Id(), whitelistOpts).ExtractErr(); err != nil {
+		if err := whitelists.Put(client, d.Id(), whitelistOpts); err != nil {
 			return fmterr.Errorf("error updating redis whitelist of DCS instance: %w", err)
 		}
 		stateConf := &resource.StateChangeConf{
@@ -643,12 +658,12 @@ func resourceDcsInstancesV1Delete(ctx context.Context, d *schema.ResourceData, m
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	_, err = instances.Get(client, d.Id()).Extract()
+	_, err = lifecycle.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "DCS instance")
 	}
 
-	err = instances.Delete(client, d.Id()).ExtractErr()
+	err = lifecycle.Delete(client, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error deleting DCS instance: %w", err)
 	}
@@ -677,7 +692,7 @@ func resourceDcsInstancesV1Delete(ctx context.Context, d *schema.ResourceData, m
 
 func dcsInstancesV1StateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		v, err := instances.Get(client, instanceID).Extract()
+		v, err := lifecycle.Get(client, instanceID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return v, "DELETED", nil
@@ -691,7 +706,7 @@ func dcsInstancesV1StateRefreshFunc(client *golangsdk.ServiceClient, instanceID 
 
 func dcsInstanceV1ConfigStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		v, err := configs.List(client, instanceID).Extract()
+		v, err := configs.List(client, instanceID)
 		if err != nil {
 			return nil, "", err
 		}
@@ -701,7 +716,7 @@ func dcsInstanceV1ConfigStateRefreshFunc(client *golangsdk.ServiceClient, instan
 
 func dcsInstanceV1WhitelistRefreshFunc(client *golangsdk.ServiceClient, instanceID string, getResp *whitelists.Whitelist) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		v, err := whitelists.Get(client, instanceID).Extract()
+		v, err := whitelists.Get(client, instanceID)
 		if err != nil {
 			return nil, "", err
 		}
@@ -741,7 +756,7 @@ func resourceDcsInstanceV1ImportState(ctx context.Context, d *schema.ResourceDat
 	if diagRead := resourceDcsInstancesV1Read(ctx, d, meta); diagRead.HasError() {
 		return nil, fmt.Errorf("error reading opentelekomcloud_dcs_instance_v1 %s: %s", d.Id(), diagRead[0].Summary)
 	}
-	instance, err := instances.Get(client, d.Id()).Extract()
+	instance, err := lifecycle.Get(client, d.Id())
 	if err != nil {
 		return nil, fmt.Errorf("unable to get instance %s: %s", d.Id(), err)
 	}
@@ -752,18 +767,18 @@ func resourceDcsInstanceV1ImportState(ctx context.Context, d *schema.ResourceDat
 		return nil, fmt.Errorf("error setting used memory")
 	}
 	var backup []map[string]interface{}
-	backup_policy := make(map[string]interface{})
-	backup_policy["backup_type"] = instance.InstanceBackupPolicy.BackupType
-	backup_policy["save_days"] = instance.InstanceBackupPolicy.SaveDays
-	backup_policy["begin_at"] = instance.InstanceBackupPolicy.PeriodicalBackupPlan.BeginAt
-	backup_policy["period_type"] = instance.InstanceBackupPolicy.PeriodicalBackupPlan.PeriodType
+	backupPolicy := make(map[string]interface{})
+	backupPolicy["backup_type"] = instance.InstanceBackupPolicy.Policy.BackupType
+	backupPolicy["save_days"] = instance.InstanceBackupPolicy.Policy.SaveDays
+	backupPolicy["begin_at"] = instance.InstanceBackupPolicy.Policy.PeriodicalBackupPlan.BeginAt
+	backupPolicy["period_type"] = instance.InstanceBackupPolicy.Policy.PeriodicalBackupPlan.PeriodType
 	var backupAts []int
-	for _, at := range instance.InstanceBackupPolicy.PeriodicalBackupPlan.BackupAt {
+	for _, at := range instance.InstanceBackupPolicy.Policy.PeriodicalBackupPlan.BackupAt {
 		backupAts = append(backupAts, at)
 	}
-	backup_policy["backup_at"] = backupAts
+	backupPolicy["backup_at"] = backupAts
 
-	backup = append(backup, backup_policy)
+	backup = append(backup, backupPolicy)
 	if err := d.Set("backup_policy", backup); err != nil {
 		return nil, fmt.Errorf("error setting backup policy")
 	}

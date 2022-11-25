@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/instances"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/lifecycle"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -18,7 +18,7 @@ import (
 const resourceInstanceName = "opentelekomcloud_dcs_instance_v1.instance_1"
 
 func TestAccDcsInstancesV1_basic(t *testing.T) {
-	var instance instances.Instance
+	var instance lifecycle.Instance
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -47,7 +47,7 @@ func TestAccDcsInstancesV1_basic(t *testing.T) {
 }
 
 func TestAccDcsInstancesV1_basicSingleInstance(t *testing.T) {
-	var instance instances.Instance
+	var instance lifecycle.Instance
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -69,7 +69,7 @@ func TestAccDcsInstancesV1_basicSingleInstance(t *testing.T) {
 }
 
 func TestAccDcsInstancesV1_basicEngineV3Instance(t *testing.T) {
-	var instance instances.Instance
+	var instance lifecycle.Instance
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -138,7 +138,7 @@ func TestAccASV1Configuration_WhitelistValidation(t *testing.T) {
 }
 
 func TestAccDcsInstancesV1_Whitelist(t *testing.T) {
-	var instance instances.Instance
+	var instance lifecycle.Instance
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -221,7 +221,7 @@ func testAccCheckDcsV1InstanceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := instances.Get(client, rs.Primary.ID).Extract()
+		_, err := lifecycle.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("DCS instance still exists")
 		}
@@ -229,7 +229,7 @@ func testAccCheckDcsV1InstanceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckDcsV1InstanceExists(n string, instance instances.Instance) resource.TestCheckFunc {
+func testAccCheckDcsV1InstanceExists(n string, instance lifecycle.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -246,7 +246,7 @@ func testAccCheckDcsV1InstanceExists(n string, instance instances.Instance) reso
 			return fmt.Errorf("error creating DCSv1 client: %w", err)
 		}
 
-		v, err := instances.Get(dcsClient, rs.Primary.ID).Extract()
+		v, err := lifecycle.Get(dcsClient, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("error getting instance (%s): %w", rs.Primary.ID, err)
 		}

@@ -7,8 +7,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/availablezones"
-
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/others"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -44,13 +43,13 @@ func dataSourceDcsAZV1Read(_ context.Context, d *schema.ResourceData, meta inter
 		return fmterr.Errorf("error creating dcs key client: %s", err)
 	}
 
-	v, err := availablezones.Get(DcsV1Client).Extract()
+	v, err := others.ListAvailableZones(DcsV1Client)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Dcs az : %+v", v)
-	var filteredAZs []availablezones.AvailableZone
+	var filteredAZs []others.AvailableZone
 	if v.RegionID == config.GetRegion(d) {
 		AZs := v.AvailableZones
 		for _, newAZ := range AZs {

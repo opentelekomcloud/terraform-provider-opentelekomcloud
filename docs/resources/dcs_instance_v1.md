@@ -106,10 +106,6 @@ The following arguments are supported:
   For a DCS Redis instance in cluster mode, the cache capacity can be `64`, `128`, `256`, `512` GB.
   Changing this creates a new instance.
 
-* `access_user` - (Optional) Username used for accessing a DCS instance after password
-  authentication. A username starts with a letter, consists of `1` to `64` characters,
-  and supports only letters, digits, and hyphens (-). Changing this creates a new instance.
-
 * `password` - (Required) Indicates the password of an instance. An instance password
   must meet the following complexity requirements: Must be 8 to 32 characters long.
   Must contain at least 3 of the following character types: lowercase letters, uppercase
