@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/products"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/others"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -33,13 +33,13 @@ func dataSourceDcsProductV1Read(_ context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf("error get dcs product client: %s", err)
 	}
 
-	v, err := products.Get(DcsV1Client).Extract()
+	v, err := others.GetProducts(DcsV1Client)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	log.Printf("[DEBUG] Dcs get products : %+v", v)
-	var FilteredPd []products.Product
-	for _, pd := range v.Products {
+	var FilteredPd []others.Product
+	for _, pd := range v {
 		specCode := d.Get("spec_code").(string)
 		if specCode != "" && pd.SpecCode != specCode {
 			continue
