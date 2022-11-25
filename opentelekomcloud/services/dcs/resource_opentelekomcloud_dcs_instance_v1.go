@@ -773,9 +773,7 @@ func resourceDcsInstanceV1ImportState(ctx context.Context, d *schema.ResourceDat
 	backupPolicy["begin_at"] = instance.InstanceBackupPolicy.Policy.PeriodicalBackupPlan.BeginAt
 	backupPolicy["period_type"] = instance.InstanceBackupPolicy.Policy.PeriodicalBackupPlan.PeriodType
 	var backupAts []int
-	for _, at := range instance.InstanceBackupPolicy.Policy.PeriodicalBackupPlan.BackupAt {
-		backupAts = append(backupAts, at)
-	}
+	backupAts = append(backupAts, instance.InstanceBackupPolicy.Policy.PeriodicalBackupPlan.BackupAt...)
 	backupPolicy["backup_at"] = backupAts
 
 	backup = append(backup, backupPolicy)
