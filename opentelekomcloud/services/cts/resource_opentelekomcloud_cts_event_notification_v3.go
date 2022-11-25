@@ -363,10 +363,8 @@ func ExtractNotificationID(id string) (string, string) {
 func validateSchema(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
 	operationType := d.Get("operation_type").(string)
 
-	if _, ok := d.GetOk("operations"); ok {
-		if operationType == "complete" {
-			return fmt.Errorf("customized operations can't be used with `complete` operation_type")
-		}
+	if _, ok := d.GetOk("operations"); ok && operationType == "complete" {
+		return fmt.Errorf("customized operations can't be used with `complete` operation_type")
 	}
 
 	return nil

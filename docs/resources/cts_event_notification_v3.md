@@ -23,6 +23,19 @@ resource "opentelekomcloud_cts_event_notification_v3" "notification_v3" {
 }
 ```
 
+### Event notification with disabled SMN topic
+
+```hcl
+resource "opentelekomcloud_smn_topic_v2" "topic_1" {
+  name = "topic_1"
+}
+
+resource "opentelekomcloud_cts_event_notification_v3" "notification_v3" {
+  notification_name = "my_notification"
+  operation_type    = "complete"
+}
+```
+
 ### Event notification with selected operations and users
 
 ```hcl
