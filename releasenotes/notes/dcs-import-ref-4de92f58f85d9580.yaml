@@ -1,0 +1,7 @@
+---
+enhancements:
+  - |
+    **[DCS]** Refactoring in ``resource/opentelekomcloud_dcs*`` (`#2005 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2005>`_)
+fixes:
+  - |
+    **[DCS]** Fix import in ``resource/opentelekomcloud_dcs_instance_v1`` (`#2005 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2005>`_)
