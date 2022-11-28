@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[RDS]** Added example with changing timezone in ``resource/opentelekomcloud_rds_instance_v3`` documentation (`#2006 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2006>`_)
