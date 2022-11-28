@@ -259,6 +259,53 @@ resource "opentelekomcloud_rds_instance_v3" "from_backup" {
 }
 ```
 
+### Override timezone parameter (MySQL, for other DBs parameter can have different name)
+
+```hcl
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = opentelekomcloud_rds_instance_v3.instance.availability_zone
+  db {
+    password = "MySql!112822"
+    type     = "MySQL"
+    version  = "8.0"
+    port     = "8635"
+  }
+  param_group_id    = opentelekomcloud_rds_parametergroup_v3.pg_1.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+  flavor = "rds.mysql.c2.medium"
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = 1
+  }
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+
+
+resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
+  name        = "pg_tmz"
+  description = "time zone template"
+
+  values = {
+    time_zone = "Africa/Casablanca"
+  }
+
+  datastore {
+    type    = "mysql"
+    version = "8.0"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -267,8 +314,8 @@ The following arguments are supported:
 
 * `db` - (Required) Specifies the database information. Structure is documented below. Changing this parameter will create a new resource.
 
-* `flavor` - (Required) Specifies the specification code. 
-  Use data source [opentelekomcloud_rds_flavors_v3](../data-sources/rds_flavors_v3.md) to get a list of available flavor names. 
+* `flavor` - (Required) Specifies the specification code.
+  Use data source [opentelekomcloud_rds_flavors_v3](../data-sources/rds_flavors_v3.md) to get a list of available flavor names.
   Examples could be `rds.pg.c2.medium` or   `rds.pg.c2.medium.ha` for HA clusters.
 
 * `name` - (Required) Specifies the DB instance name. The DB instance name of the same type
