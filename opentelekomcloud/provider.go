@@ -338,6 +338,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_compute_volume_attach_v2":           ecs.ResourceComputeVolumeAttachV2(),
 			"opentelekomcloud_csbs_backup_v1":                     csbs.ResourceCSBSBackupV1(),
 			"opentelekomcloud_csbs_backup_policy_v1":              csbs.ResourceCSBSBackupPolicyV1(),
+			"opentelekomcloud_cts_event_notification_v3":          cts.ResourceCTSEventNotificationV3(),
 			"opentelekomcloud_cts_tracker_v1":                     cts.ResourceCTSTrackerV1(),
 			"opentelekomcloud_css_cluster_v1":                     css.ResourceCssClusterV1(),
 			"opentelekomcloud_css_snapshot_configuration_v1":      css.ResourceCssSnapshotConfigurationV1(),

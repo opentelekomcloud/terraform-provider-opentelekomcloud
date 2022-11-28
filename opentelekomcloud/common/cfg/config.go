@@ -897,6 +897,17 @@ func (c *Config) CtsV2Client(projectName ProjectName) (*golangsdk.ServiceClient,
 	})
 }
 
+func (c *Config) CtsV3Client(projectName ProjectName) (*golangsdk.ServiceClient, error) {
+	newConfig, err := reconfigProjectName(*c, projectName)
+	if err != nil {
+		return nil, err
+	}
+	return openstack.NewCTSV3(newConfig.HwClient, golangsdk.EndpointOpts{
+		Region:       c.GetRegion(nil),
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) CssV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewCSSService(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
