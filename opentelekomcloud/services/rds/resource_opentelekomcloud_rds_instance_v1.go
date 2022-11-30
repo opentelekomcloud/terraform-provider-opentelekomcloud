@@ -36,6 +36,9 @@ func ResourceRdsInstance() *schema.Resource {
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
+		DeprecationMessage: "Support will be discontinued in favor of RDS v3. " +
+			"Please use `opentelekomcloud_rds_instance_v3` resource instead",
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,

@@ -18,6 +18,9 @@ func DataSourceRdsFlavorV1() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourcedataSourceRdsFlavorV1Read,
 
+		DeprecationMessage: "Support will be discontinued in favor of RDS v3. " +
+			"Please use `opentelekomcloud_rds_flavors_v3` resource instead",
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,

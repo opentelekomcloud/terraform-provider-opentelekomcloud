@@ -1,0 +1,8 @@
+---
+deprecations:
+  - |
+    **[RDS]** ``data_source/opentelekomcloud_rds_flavors_v1`` support will be discontinued in favor of RDS v3
+    (`#2010 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2010>`_)
+  - |
+    **[RDS]** ``resource/opentelekomcloud_rds_instance_v1`` support will be discontinued in favor of RDS v3
+    (`#2010 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2010>`_)
