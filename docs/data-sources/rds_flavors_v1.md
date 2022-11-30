@@ -2,6 +2,7 @@
 subcategory: "Relational Database Service (RDS)"
 ---
 
+**DEPRECATED**
 # opentelekomcloud_rds_flavors_v1
 
 Use this data source to get the ID of an available OpenTelekomCloud RDS flavor.

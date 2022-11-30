@@ -2,6 +2,7 @@
 subcategory: "Relational Database Service (RDS)"
 ---
 
+**DEPRECATED**
 # opentelekomcloud_rds_instance_v1
 
 Manages RDS instance v1 resource within OpenTelekomCloud.
