@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    **[IMS]** Added list of systems roles in the documentation of ``resource/opentelekomcloud_identity_role_v3``
+    (`#2009 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2009>`_)
