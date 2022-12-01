@@ -109,9 +109,11 @@ func ResourceComputeSecGroupV2() *schema.Resource {
 
 func resourceComputeSecGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
 	// Before creating the security group, make sure all rules are valid.
@@ -126,7 +128,7 @@ func resourceComputeSecGroupV2Create(ctx context.Context, d *schema.ResourceData
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	sg, err := secgroups.Create(computeClient, createOpts).Extract()
+	sg, err := secgroups.Create(client, createOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud security group: %s", err)
 	}
@@ -136,23 +138,26 @@ func resourceComputeSecGroupV2Create(ctx context.Context, d *schema.ResourceData
 	// Now that the security group has been created, iterate through each rule and create it
 	createRuleOptsList := resourceSecGroupRulesV2(d)
 	for _, createRuleOpts := range createRuleOptsList {
-		_, err := secgroups.CreateRule(computeClient, createRuleOpts).Extract()
+		_, err := secgroups.CreateRule(client, createRuleOpts).Extract()
 		if err != nil {
 			return fmterr.Errorf("error creating OpenTelekomCloud security group rule: %s", err)
 		}
 	}
 
-	return resourceComputeSecGroupV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceComputeSecGroupV2Read(clientCtx, d, meta)
 }
 
-func resourceComputeSecGroupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeSecGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
-	sg, err := secgroups.Get(computeClient, d.Id()).Extract()
+	sg, err := secgroups.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "security group")
 	}
@@ -162,7 +167,7 @@ func resourceComputeSecGroupV2Read(_ context.Context, d *schema.ResourceData, me
 		d.Set("region", config.GetRegion(d)),
 	)
 
-	rulesMap, err := rulesToMap(computeClient, d, sg.Rules)
+	rulesMap, err := rulesToMap(client, d, sg.Rules)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -176,9 +181,11 @@ func resourceComputeSecGroupV2Read(_ context.Context, d *schema.ResourceData, me
 
 func resourceComputeSecGroupV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
 	updateOpts := secgroups.UpdateOpts{
@@ -188,7 +195,7 @@ func resourceComputeSecGroupV2Update(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[DEBUG] Updating Security Group (%s) with options: %+v", d.Id(), updateOpts)
 
-	_, err = secgroups.Update(computeClient, d.Id(), updateOpts).Extract()
+	_, err = secgroups.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud security group (%s): %s", d.Id(), err)
 	}
@@ -204,7 +211,7 @@ func resourceComputeSecGroupV2Update(ctx context.Context, d *schema.ResourceData
 
 		for _, rawRule := range secGroupRulesToAdd.List() {
 			createRuleOpts := resourceSecGroupRuleCreateOptsV2(d, rawRule)
-			rule, err := secgroups.CreateRule(computeClient, createRuleOpts).Extract()
+			rule, err := secgroups.CreateRule(client, createRuleOpts).Extract()
 			if err != nil {
 				return fmterr.Errorf("error adding rule to OpenTelekomCloud security group (%s): %s", d.Id(), err)
 			}
@@ -213,7 +220,7 @@ func resourceComputeSecGroupV2Update(ctx context.Context, d *schema.ResourceData
 
 		for _, r := range secGroupRulesToRemove.List() {
 			rule := resourceSecGroupRuleV2(d, r)
-			err := secgroups.DeleteRule(computeClient, rule.ID).ExtractErr()
+			err := secgroups.DeleteRule(client, rule.ID).ExtractErr()
 			if err != nil {
 				if _, ok := err.(golangsdk.ErrDefault404); ok {
 					continue
@@ -225,7 +232,8 @@ func resourceComputeSecGroupV2Update(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
-	return resourceComputeSecGroupV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceComputeSecGroupV2Read(clientCtx, d, meta)
 }
 
 func resourceComputeSecGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
