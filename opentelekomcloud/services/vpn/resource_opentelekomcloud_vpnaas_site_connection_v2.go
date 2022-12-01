@@ -24,7 +24,7 @@ import (
 var (
 	// A PSK can contain 6 to 128 characters.
 	// Spaces and the following special characters are not allowed: <>&?*'"
-	pskRegex = regexp.MustCompile("^[^<>&?*'\"]{6,128}$")
+	pskRegex = regexp.MustCompile("^[^ <>&?*'\"]{6,128}$")
 )
 
 func ResourceVpnSiteConnectionV2() *schema.Resource {
