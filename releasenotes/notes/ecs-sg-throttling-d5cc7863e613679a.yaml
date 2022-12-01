@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[ECS]** Reduce amount of init client requests in ``resource/opentelekomcloud_compute_secgroup_v2`` (`#2014 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2014>`_)
