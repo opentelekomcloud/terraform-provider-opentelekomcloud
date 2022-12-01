@@ -73,7 +73,7 @@ The following arguments are supported:
 
 * `peer_address` - (Required) The peer gateway public IPv4 or IPv6 address or FQDN.
 
-* `psk` - (Required) The pre-shared key. A valid value is any string.
+* `psk` - (Required) The pre-shared key. A PSK can contain 6 to 128 characters. Spaces and the following special characters are not allowed: `<>&?*'"`.
 
 * `initiator` - (Optional) A valid value is `response-only` or `bi-directional`.
 

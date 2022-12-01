@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[VPN]** Add validation and update documentation for ``psk`` in ``resource/opentelekomcloud_vpnaas_site_connection_v2`` (`#2011 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2011>`_)

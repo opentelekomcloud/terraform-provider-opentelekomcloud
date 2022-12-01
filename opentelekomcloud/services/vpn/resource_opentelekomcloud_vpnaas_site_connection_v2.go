@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/vpnaas/siteconnections"
@@ -17,6 +19,12 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
+)
+
+var (
+	// A PSK can contain 6 to 128 characters.
+	// Spaces and the following special characters are not allowed: <>&?*'"
+	pskRegex = regexp.MustCompile("^[^ <>&?*'\"]{6,128}$")
 )
 
 func ResourceVpnSiteConnectionV2() *schema.Resource {
@@ -93,6 +101,8 @@ func ResourceVpnSiteConnectionV2() *schema.Resource {
 			"psk": {
 				Type:     schema.TypeString,
 				Required: true,
+				ValidateFunc: validation.StringMatch(pskRegex, "Invalid pks value. "+
+					"A PSK can contain 6 to 128 characters. Spaces and the following special characters are not allowed: <>&?*'\"."),
 			},
 			"initiator": {
 				Type:     schema.TypeString,
