@@ -16,12 +16,14 @@ import (
 )
 
 func TestAccASV1Configuration_basic(t *testing.T) {
+	supportedRegions := []string{"eu-de", "eu-nl", "eu-ch2"}
 	var asConfig configurations.Configuration
 	resourceName := "opentelekomcloud_as_configuration_v1.as_config"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
 			quotas.BookOne(t, quotas.ASConfiguration)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
@@ -38,12 +40,14 @@ func TestAccASV1Configuration_basic(t *testing.T) {
 }
 
 func TestAccASV1Configuration_publicIP(t *testing.T) {
+	supportedRegions := []string{"eu-de", "eu-nl", "eu-ch2"}
 	var asConfig configurations.Configuration
 	resourceName := "opentelekomcloud_as_configuration_v1.as_config"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
 			quotas.BookOne(t, quotas.ASConfiguration)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
@@ -63,9 +67,11 @@ func TestAccASV1Configuration_publicIP(t *testing.T) {
 }
 
 func TestAccASV1Configuration_invalidDiskSize(t *testing.T) {
+	supportedRegions := []string{"eu-de", "eu-nl", "eu-ch2"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
 			quotas.BookOne(t, quotas.ASConfiguration)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
@@ -81,12 +87,14 @@ func TestAccASV1Configuration_invalidDiskSize(t *testing.T) {
 }
 
 func TestAccASV1Configuration_multipleSecurityGroups(t *testing.T) {
+	supportedRegions := []string{"eu-de", "eu-nl", "eu-ch2"}
 	var asConfig configurations.Configuration
 	resourceName := "opentelekomcloud_as_configuration_v1.as_config"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
 			qts := quotas.MultipleQuotas{
 				{Q: quotas.ASConfiguration, Count: 1},
 				{Q: quotas.SecurityGroup, Count: 3},
@@ -207,7 +215,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
     key_name = "%s"
     public_ip {
       eip {
-        ip_type = "5_mailbgp"
+        ip_type = "5_bgp"
         bandwidth {
           charging_mode = "traffic"
           share_type    = "PER"

@@ -15,12 +15,14 @@ import (
 )
 
 func TestAccASV1Group_basic(t *testing.T) {
+	supportedRegions := []string{"eu-de", "eu-nl", "eu-ch2"}
 	var asGroup groups.Group
 	resourceName := "opentelekomcloud_as_group_v1.as_group"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
 			qts := quotas.MultipleQuotas{
 				{Q: quotas.LoadBalancer, Count: 1},
 				{Q: quotas.LbListener, Count: 1},
@@ -59,12 +61,14 @@ func TestAccASV1Group_basic(t *testing.T) {
 }
 
 func TestAccASV1Group_RemoveWithSetMinNumber(t *testing.T) {
+	supportedRegions := []string{"eu-de", "eu-nl"}
 	var asGroup groups.Group
 	resourceName := "opentelekomcloud_as_group_v1.as_group"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
 			qts := quotas.MultipleQuotas{
 				{Q: quotas.ASGroup, Count: 1},
 				{Q: quotas.ASConfiguration, Count: 1},
@@ -79,7 +83,7 @@ func TestAccASV1Group_RemoveWithSetMinNumber(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1GroupExists(resourceName, &asGroup),
 					resource.TestCheckResourceAttr(resourceName, "delete_publicip", "true"),
-					resource.TestCheckResourceAttr(resourceName, "scaling_group_name", "as_group"),
+					resource.TestCheckResourceAttr(resourceName, "scaling_group_name", "as_group_min"),
 				),
 			},
 		},
@@ -87,6 +91,8 @@ func TestAccASV1Group_RemoveWithSetMinNumber(t *testing.T) {
 }
 
 func TestAccASV1Group_WithoutSecurityGroups(t *testing.T) {
+	// seems that new disk metadata not accepted in eu-ch2 (different versions?) need to investigate, scaling action fails
+	supportedRegions := []string{"eu-de", "eu-nl", "eu-ch2"}
 	var asGroup groups.Group
 
 	resourceName := "opentelekomcloud_as_group_v1.as_group"
@@ -94,6 +100,7 @@ func TestAccASV1Group_WithoutSecurityGroups(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
 			qts := quotas.MultipleQuotas{
 				{Q: quotas.ASGroup, Count: 1},
 				{Q: quotas.ASConfiguration, Count: 1},
@@ -315,7 +322,7 @@ var testAccASV1GroupRemoveWithSetMinNumber = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_as_configuration_v1" "as_config" {
-  scaling_configuration_name = "as_config"
+  scaling_configuration_name = "as_config_min"
   instance_config {
     image    = data.opentelekomcloud_images_image_v2.latest_image.id
     key_name = "%s"
@@ -336,7 +343,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config" {
 }
 
 resource "opentelekomcloud_as_group_v1" "as_group" {
-  scaling_group_name       = "as_group"
+  scaling_group_name       = "as_group_min"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   available_zones          = ["%s"]
   desire_instance_number   = 3
