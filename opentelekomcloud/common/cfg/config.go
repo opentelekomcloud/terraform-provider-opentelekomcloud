@@ -700,6 +700,13 @@ func (c *Config) IdentityV30Client() (*golangsdk.ServiceClient, error) {
 	return service, nil
 }
 
+func (c *Config) RegionIdentityV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewIdentityV3(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) ImageV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewImageServiceV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,

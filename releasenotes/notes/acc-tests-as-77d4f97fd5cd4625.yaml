@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[AS]** Refactoring of acceptance tests ``resource/opentelekomcloud_as*`` (`#2015 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2015>`_)

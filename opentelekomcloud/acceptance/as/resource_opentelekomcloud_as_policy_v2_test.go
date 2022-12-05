@@ -15,12 +15,14 @@ import (
 )
 
 func TestAccASPolicyV2_basic(t *testing.T) {
+	supportedRegions := []string{"eu-de", "eu-nl", "eu-ch2"}
 	var asPolicy policies.Policy
 	resourceName := "opentelekomcloud_as_policy_v2.as_policy"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
 			qts := quotas.MultipleQuotas{
 				{Q: quotas.ASGroup, Count: 1},
 				{Q: quotas.ASConfiguration, Count: 1},
@@ -54,12 +56,14 @@ func TestAccASPolicyV2_basic(t *testing.T) {
 }
 
 func TestAccASPolicyV2_withSize(t *testing.T) {
+	supportedRegions := []string{"eu-de", "eu-nl", "eu-ch2"}
 	var asPolicy policies.Policy
 	resourceName := "opentelekomcloud_as_policy_v2.as_policy"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
 			qts := quotas.MultipleQuotas{
 				{Q: quotas.ASGroup, Count: 1},
 				{Q: quotas.ASConfiguration, Count: 1},
@@ -85,8 +89,12 @@ func TestAccASPolicyV2_withSize(t *testing.T) {
 }
 
 func TestAccASPolicyV2_conflictsAction(t *testing.T) {
+	supportedRegions := []string{"eu-de", "eu-nl", "eu-ch2"}
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

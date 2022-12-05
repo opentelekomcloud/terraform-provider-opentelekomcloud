@@ -16,11 +16,13 @@ import (
 )
 
 func TestAccASV1Policy_basic(t *testing.T) {
+	supportedRegions := []string{"eu-de", "eu-nl", "eu-ch2"}
 	var asPolicy policies.Policy
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
 			qts := quotas.MultipleQuotas{
 				{Q: quotas.ASGroup, Count: 1},
 				{Q: quotas.ASConfiguration, Count: 1},
