@@ -60,6 +60,7 @@ func TestAccASV1Group_basic(t *testing.T) {
 	})
 }
 
+// not working in eu-ch2 Failed to create ECS as_config_min-X7OO2LFL of flavor s3.large.2 in eu-ch2-01.[(Ecs.0043)rootVolume type[SATA] is not exist.]
 func TestAccASV1Group_RemoveWithSetMinNumber(t *testing.T) {
 	supportedRegions := []string{"eu-de", "eu-nl"}
 	var asGroup groups.Group

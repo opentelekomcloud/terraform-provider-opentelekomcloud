@@ -122,7 +122,7 @@ func TestAccPreCheckServiceAvailability(t *testing.T, service string, regions []
 	config := TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.RegionIdentityV3Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmterr.Errorf("clientCreationFail", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud identity v3 client: %w", err)
 	}
 	allPages, err := catalog.List(client).AllPages()
 	if err != nil {
