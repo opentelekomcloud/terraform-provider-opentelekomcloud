@@ -144,5 +144,5 @@ func TestAccPreCheckServiceAvailability(t *testing.T, service string, regions []
 	}
 
 	t.Skipf("Service %s not available or configuration differs in %s", service, env.OS_REGION_NAME)
-	return fmterr.Errorf("test not valid in region")
+	return nil
 }
