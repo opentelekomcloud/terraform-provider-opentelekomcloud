@@ -232,15 +232,9 @@ func getDisk(diskMeta []interface{}) []configurations.Disk {
 		}
 		kmsID := disk["kms_id"].(string)
 		if kmsID != "" {
-			meta := configurations.SystemMetadata{
-				SystemCmkId:     kmsID,
-				SystemEncrypted: "1",
-			}
-			diskOpts.Metadata = meta
-		} else {
-			meta := configurations.SystemMetadata{
-				SystemEncrypted: "0",
-			}
+			meta := make(map[string]interface{})
+			meta["__system__cmkid"] = kmsID
+			meta["__system__encrypted"] = "1"
 			diskOpts.Metadata = meta
 		}
 		diskOptsList = append(diskOptsList, diskOpts)

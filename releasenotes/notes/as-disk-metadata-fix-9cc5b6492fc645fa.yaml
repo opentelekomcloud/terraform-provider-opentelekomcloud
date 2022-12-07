@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[AS]** Disk ``metadata`` fix for ``resource/opentelekomcloud_as_configuration_v1`` documentation (`#2017 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2017>`_)
