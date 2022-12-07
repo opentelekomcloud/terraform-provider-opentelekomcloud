@@ -60,9 +60,8 @@ func TestAccASV1Group_basic(t *testing.T) {
 	})
 }
 
-// not working in eu-ch2 Failed to create ECS as_config_min-X7OO2LFL of flavor s3.large.2 in eu-ch2-01.[(Ecs.0043)rootVolume type[SATA] is not exist.]
 func TestAccASV1Group_RemoveWithSetMinNumber(t *testing.T) {
-	supportedRegions := []string{"eu-de", "eu-nl"}
+	supportedRegions := []string{"eu-de", "eu-nl", "eu-ch2"}
 	var asGroup groups.Group
 	resourceName := "opentelekomcloud_as_group_v1.as_group"
 
@@ -329,7 +328,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config" {
     key_name = "%s"
     disk {
       size        = 40
-      volume_type = "SATA"
+      volume_type = "SSD"
       disk_type   = "SYS"
     }
 
