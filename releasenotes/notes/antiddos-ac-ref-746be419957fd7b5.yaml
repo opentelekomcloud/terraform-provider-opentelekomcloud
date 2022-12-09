@@ -1,0 +1,4 @@
+---
+deprecations:
+  - |
+    **[Anti-DDoS]** acceptance test refactoring ``acceptance/opentelekomcloud_antiddos_v1`` (`#2018 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2018>`_)

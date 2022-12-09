@@ -14,11 +14,18 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+var unstableMessage = "Unstable service, tests often fails"
+
 func TestAccAntiDdosV1_basic(t *testing.T) {
+	t.Log(unstableMessage)
+	supportedRegions := []string{"eu-de"}
 	var antiddosElement antiddos.GetResponse
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckAntiDdosV1Destroy,
 		Steps: []resource.TestStep{
@@ -56,10 +63,15 @@ func TestAccAntiDdosV1_basic(t *testing.T) {
 }
 
 func TestAccAntiDdosV1_timeout(t *testing.T) {
+	t.Log(unstableMessage)
+	supportedRegions := []string{"eu-de"}
 	var antiddosElement antiddos.GetResponse
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckAntiDdosV1Destroy,
 		Steps: []resource.TestStep{
@@ -68,6 +80,31 @@ func TestAccAntiDdosV1_timeout(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAntiDdosV1Exists("opentelekomcloud_antiddos_v1.antiddos_1", &antiddosElement),
 				),
+			},
+		},
+	})
+}
+
+func TestAccAntiDdosV1_importBasic(t *testing.T) {
+	t.Log(unstableMessage)
+	supportedRegions := []string{"eu-de"}
+	resourceName := "opentelekomcloud_antiddos_v1.antiddos_1"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAntiDdosV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAntiDdosV1_basic,
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -84,7 +121,6 @@ func testAccCheckAntiDdosV1Destroy(s *terraform.State) error {
 		if rs.Type != "opentelekomcloud_antiddos_v1" {
 			continue
 		}
-
 		_, err := antiddos.Get(antiddosClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("antiddos still exists")

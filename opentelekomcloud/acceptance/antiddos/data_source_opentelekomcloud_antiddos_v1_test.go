@@ -11,8 +11,12 @@ import (
 )
 
 func TestAccAntiDdosV1DataSource_basic(t *testing.T) {
+	supportedRegions := []string{"eu-de"}
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckServiceAvailability(t, testServiceV1, supportedRegions)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
