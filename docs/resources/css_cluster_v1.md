@@ -118,7 +118,7 @@ The `datastore` block contains:
 
 * `type` - Engine type. The default value is `elasticsearch`. Currently, the value can only be `elasticsearch`.
 
-* `version` - Engine version. The value can be `7.6.2` or `7.9.3`. The default value is `7.6.2`.
+* `version` - Engine version. The value can be `7.6.2` or `7.9.3` or `7.10.2`. The default value is `7.6.2`.
 
 ## Attributes Reference
 
