@@ -158,7 +158,7 @@ func ResourceCssClusterV1() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
-								"7.6.2", "7.9.3",
+								"7.6.2", "7.9.3", "7.10.2",
 							}, false),
 							Default: "7.6.2",
 						},
