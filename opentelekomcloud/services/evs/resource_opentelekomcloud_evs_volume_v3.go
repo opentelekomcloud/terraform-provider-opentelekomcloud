@@ -141,7 +141,9 @@ func ResourceEvsStorageVolumeV3() *schema.Resource {
 
 func resourceEvsVolumeV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.BlockStorageV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.BlockStorageV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
@@ -205,14 +207,17 @@ func resourceEvsVolumeV3Create(ctx context.Context, d *schema.ResourceData, meta
 				return fmterr.Errorf("error setting tags for EVSv3 Volume: %w", err)
 			}
 		}
-		return resourceEvsVolumeV3Read(ctx, d, meta)
+		clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+		return resourceEvsVolumeV3Read(clientCtx, d, meta)
 	}
 	return fmterr.Errorf("unexpected conversion error in resourceEvsVolumeV3Create")
 }
 
-func resourceEvsVolumeV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceEvsVolumeV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.BlockStorageV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.BlockStorageV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
@@ -266,7 +271,9 @@ func resourceEvsVolumeV3Read(_ context.Context, d *schema.ResourceData, meta int
 // using OpenStack Cinder API v2 to update volume resource
 func resourceEvsVolumeV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.BlockStorageV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.BlockStorageV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
@@ -308,7 +315,8 @@ func resourceEvsVolumeV3Update(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
-	return resourceEvsVolumeV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceEvsVolumeV3Read(clientCtx, d, meta)
 }
 
 func resourceVolumeAttachmentHash(v interface{}) int {

@@ -66,9 +66,11 @@ func ResourceComputeVolumeAttachV2() *schema.Resource {
 
 func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
 	instanceId := d.Get("instance_id").(string)
@@ -86,7 +88,7 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 
 	log.Printf("[DEBUG] Creating volume attachment: %#v", attachOpts)
 
-	attachment, err := volumeattach.Create(computeClient, instanceId, attachOpts).Extract()
+	attachment, err := volumeattach.Create(client, instanceId, attachOpts).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -94,7 +96,7 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ATTACHING"},
 		Target:     []string{"ATTACHED"},
-		Refresh:    resourceComputeVolumeAttachV2AttachFunc(computeClient, instanceId, attachment.ID),
+		Refresh:    resourceComputeVolumeAttachV2AttachFunc(client, instanceId, attachment.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      30 * time.Second,
 		MinTimeout: 15 * time.Second,
@@ -112,14 +114,17 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 
 	d.SetId(id)
 
-	return resourceComputeVolumeAttachV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceComputeVolumeAttachV2Read(clientCtx, d, meta)
 }
 
-func resourceComputeVolumeAttachV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeVolumeAttachV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
 	instanceId, attachmentId, err := ParseComputeVolumeAttachmentId(d.Id())
@@ -127,7 +132,7 @@ func resourceComputeVolumeAttachV2Read(_ context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	attachment, err := volumeattach.Get(computeClient, instanceId, attachmentId).Extract()
+	attachment, err := volumeattach.Get(client, instanceId, attachmentId).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "compute_volume_attach")
 	}
@@ -149,9 +154,11 @@ func resourceComputeVolumeAttachV2Read(_ context.Context, d *schema.ResourceData
 
 func resourceComputeVolumeAttachV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf(errCreateV2Client, err)
 	}
 
 	instanceId, attachmentId, err := ParseComputeVolumeAttachmentId(d.Id())
@@ -162,7 +169,7 @@ func resourceComputeVolumeAttachV2Delete(ctx context.Context, d *schema.Resource
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{""},
 		Target:     []string{"DETACHED"},
-		Refresh:    resourceComputeVolumeAttachV2DetachFunc(computeClient, instanceId, attachmentId),
+		Refresh:    resourceComputeVolumeAttachV2DetachFunc(client, instanceId, attachmentId),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      15 * time.Second,
 		MinTimeout: 15 * time.Second,
