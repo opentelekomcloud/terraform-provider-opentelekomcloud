@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CSS]** Enable volume size scaling without resource recreation ``resource/opentelekomcloud_ccss_cluster_v1`` (`#2026 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2026>`_)

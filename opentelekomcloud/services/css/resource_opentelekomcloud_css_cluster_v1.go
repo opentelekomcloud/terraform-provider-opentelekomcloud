@@ -87,7 +87,6 @@ func ResourceCssClusterV1() *schema.Resource {
 									"size": {
 										Type:     schema.TypeInt,
 										Required: true,
-										ForceNew: true,
 									},
 									"volume_type": {
 										Type:     schema.TypeString,
@@ -325,19 +324,35 @@ func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 		return fmterr.Errorf("error creating CSS v1 client: %s", err)
 	}
 
-	if !d.HasChange("expect_node_num") {
+	if !d.HasChange("expect_node_num") && !d.HasChange("node_config.0.volume.0.size") {
 		return nil
 	}
 
-	oldNum, newNum := d.GetChange("expect_node_num")
-	diff := newNum.(int) - oldNum.(int)
-	if diff < 0 {
-		return fmterr.Errorf("invalid number of new nodes: %d", diff)
+	oldNode, newNode := d.GetChange("expect_node_num")
+	nodeDiff := newNode.(int) - oldNode.(int)
+	if nodeDiff < 0 {
+		return fmterr.Errorf("invalid number of new nodes: %d", nodeDiff)
 	}
 
-	_, err = clusters.ExtendCluster(client, d.Id(), clusters.ClusterExtendCommonOpts{
-		ModifySize: diff,
-	})
+	oldSize, newSize := d.GetChange("node_config.0.volume.0.size")
+	sizeDiff := newSize.(int) - oldSize.(int)
+
+	if sizeDiff < 0 || (0 < sizeDiff && sizeDiff < 40) {
+		return fmterr.Errorf("invalid number of new volume size: %d", sizeDiff)
+	} else if sizeDiff == 0 {
+		_, err = clusters.ExtendCluster(client, d.Id(), clusters.ClusterExtendCommonOpts{
+			ModifySize: nodeDiff,
+		})
+	} else {
+		_, err = clusters.ExtendCluster(client, d.Id(), []clusters.ClusterExtendSpecialOpts{
+			{
+				Type:     "ess",
+				NodeSize: nodeDiff,
+				DiskSize: sizeDiff,
+			},
+		})
+	}
+
 	if err != nil {
 		return fmterr.Errorf("error extending cluster: %s", err)
 	}

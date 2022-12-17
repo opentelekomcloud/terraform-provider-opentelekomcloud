@@ -45,6 +45,15 @@ func TestAccCssClusterV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceClusterName, "nodes.#", "2"),
 				),
 			},
+			{
+				Config: testAccCssClusterV1Extend2(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCssClusterV1Exists(resourceClusterName, &cluster),
+					resource.TestCheckResourceAttr(resourceClusterName, "expect_node_num", "2"),
+					resource.TestCheckResourceAttr(resourceClusterName, "nodes.#", "2"),
+					resource.TestCheckResourceAttr(resourceClusterName, "node_config.0.volume.0.size", "200"),
+				),
+			},
 		},
 	})
 }
@@ -370,6 +379,39 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
     volume {
       volume_type = "COMMON"
       size        = 40
+    }
+
+    availability_zone = "%s"
+  }
+  datastore {
+    version = "7.6.2"
+  }
+  enable_https     = true
+  enable_authority = true
+  admin_pass       = "QwertyUI!"
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccCssClusterV1Extend2(name string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_css_cluster_v1" "cluster" {
+  expect_node_num = 2
+  name            = "%s"
+  node_config {
+    flavor = "css.medium.8"
+    network_info {
+      security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+      network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+      vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+    }
+    volume {
+      volume_type = "COMMON"
+      size        = 200
     }
 
     availability_zone = "%s"
