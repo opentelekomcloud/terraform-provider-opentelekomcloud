@@ -337,13 +337,14 @@ func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 	oldSize, newSize := d.GetChange("node_config.0.volume.0.size")
 	sizeDiff := newSize.(int) - oldSize.(int)
 
-	if sizeDiff < 0 || (0 < sizeDiff && sizeDiff < 40) {
+	switch {
+	case sizeDiff < 0 || (0 < sizeDiff && sizeDiff < 40):
 		return fmterr.Errorf("invalid number of new volume size: %d", sizeDiff)
-	} else if sizeDiff == 0 {
+	case sizeDiff == 0:
 		_, err = clusters.ExtendCluster(client, d.Id(), clusters.ClusterExtendCommonOpts{
 			ModifySize: nodeDiff,
 		})
-	} else {
+	default:
 		_, err = clusters.ExtendCluster(client, d.Id(), []clusters.ClusterExtendSpecialOpts{
 			{
 				Type:     "ess",
