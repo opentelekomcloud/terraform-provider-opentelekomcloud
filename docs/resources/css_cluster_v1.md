@@ -108,7 +108,6 @@ The `volume` block supports:
   Changing this parameter will create a new resource.
 
 * `size` - (Required) Volume size, which must be a multiple of `4` and `10`.
-  Changing this parameter will create a new resource.
 
 * `volume_type` - (Required) `COMMON`: Common I/O. The SATA disk is used. `HIGH`: High I/O.
   The SAS disk is used. `ULTRAHIGH`: Ultra-high I/O. The solid-state drive (SSD) is used.
