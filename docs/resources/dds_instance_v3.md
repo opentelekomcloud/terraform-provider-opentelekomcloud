@@ -85,6 +85,37 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
 }
 ```
 
+## Example Usage: Creating a Single node instance
+```hcl
+variable "availability_zone" {}
+variable "vpc_id" {}
+variable "subnet_id" {}
+variable "security_group_id" {}
+
+resource "opentelekomcloud_dds_instance_v3" "instance" {
+  name = "dds-instance"
+  datastore {
+    type           = "DDS-Community"
+    version        = "3.4"
+    storage_engine = "wiredTiger"
+  }
+
+  availability_zone = var.availability_zone
+  vpc_id            = var.vpc_id
+  subnet_id         = var.subnet_id
+  security_group_id = var.security_group_id
+  password          = "5ecuredPa55w0rd@"
+  mode              = "Single"
+  flavor {
+    type      = "single"
+    num       = 1
+    storage   = "ULTRAHIGH"
+    size      = 30
+    spec_code = "dds.mongodb.s2.medium.4.single"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
