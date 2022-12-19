@@ -111,7 +111,7 @@ func ResourceDdsInstanceV3() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"Sharding", "ReplicaSet",
+					"Sharding", "ReplicaSet", "Single",
 				}, true),
 			},
 			"flavor": {
@@ -125,7 +125,7 @@ func ResourceDdsInstanceV3() *schema.Resource {
 							Required: true,
 							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
-								"mongos", "shard", "config", "replica",
+								"mongos", "shard", "config", "replica", "single",
 							}, true),
 						},
 						"num": {

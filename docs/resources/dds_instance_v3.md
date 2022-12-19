@@ -140,12 +140,14 @@ The `flavor` block supports:
 * `type` - (Required) Specifies the node type. Valid value:
   * For a cluster instance, the value can be `mongos`, `shard`, or `config`.
   * For a replica set instance, the value is `replica`.
+  * For a single node instance, the value is `single`.
 
 * `num` - (Required) Specifies the node quantity. Valid value:
   * `mongos`: The value ranges from `2` to `16`.
   * `shard`: The value ranges from `2` to `16`.
   * `config`: The value is `1`.
   * `replica`: The value is `1`.
+  * `single`: The value is `1`.
 
 * `storage` - (Optional) Specifies the disk type. Valid value: `ULTRAHIGH` which indicates the type SSD.
 
