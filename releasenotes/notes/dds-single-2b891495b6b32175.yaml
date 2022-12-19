@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DDS]** Fix not creating single-node ``resource/opentelekomcloud_dds_instance_v3`` (`#2027 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2027>`_)

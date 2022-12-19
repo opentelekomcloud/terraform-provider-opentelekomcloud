@@ -85,6 +85,37 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
 }
 ```
 
+## Example Usage: Creating a Single node instance
+```hcl
+variable "availability_zone" {}
+variable "vpc_id" {}
+variable "subnet_id" {}
+variable "security_group_id" {}
+
+resource "opentelekomcloud_dds_instance_v3" "instance" {
+  name = "dds-instance"
+  datastore {
+    type           = "DDS-Community"
+    version        = "3.4"
+    storage_engine = "wiredTiger"
+  }
+
+  availability_zone = var.availability_zone
+  vpc_id            = var.vpc_id
+  subnet_id         = var.subnet_id
+  security_group_id = var.security_group_id
+  password          = "5ecuredPa55w0rd@"
+  mode              = "Single"
+  flavor {
+    type      = "single"
+    num       = 1
+    storage   = "ULTRAHIGH"
+    size      = 30
+    spec_code = "dds.mongodb.s2.medium.4.single"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -140,12 +171,14 @@ The `flavor` block supports:
 * `type` - (Required) Specifies the node type. Valid value:
   * For a cluster instance, the value can be `mongos`, `shard`, or `config`.
   * For a replica set instance, the value is `replica`.
+  * For a single node instance, the value is `single`.
 
 * `num` - (Required) Specifies the node quantity. Valid value:
   * `mongos`: The value ranges from `2` to `16`.
   * `shard`: The value ranges from `2` to `16`.
   * `config`: The value is `1`.
   * `replica`: The value is `1`.
+  * `single`: The value is `1`.
 
 * `storage` - (Optional) Specifies the disk type. Valid value: `ULTRAHIGH` which indicates the type SSD.
 
