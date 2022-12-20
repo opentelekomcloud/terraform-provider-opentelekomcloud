@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Enable ignore of default CCE tags for ``resource/opentelekomcloud_cce_nodes_v3`` (`#2028 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2028>`_)

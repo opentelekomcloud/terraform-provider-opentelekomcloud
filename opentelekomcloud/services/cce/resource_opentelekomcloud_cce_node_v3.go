@@ -726,6 +726,7 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 	tagMap := common.TagsToMap(resourceTags)
 	// ignore "CCE-Dynamic-Provisioning-Node"
 	delete(tagMap, "CCE-Dynamic-Provisioning-Node")
+	delete(tagMap, "CCE-Cluster-ID")
 	if err := d.Set("tags", tagMap); err != nil {
 		return fmterr.Errorf("error saving tags of CCE node: %w", err)
 	}
