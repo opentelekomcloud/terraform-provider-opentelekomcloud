@@ -42,7 +42,7 @@ func TestAccCCENodesV3Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 					resource.TestCheckResourceAttr(resourceNameNode, "name", "test-node"),
-					resource.TestCheckResourceAttr(resourceNameNode, "flavor_id", "s3.medium.1"),
+					resource.TestCheckResourceAttr(resourceNameNode, "flavor_id", "s2.large.2"),
 					resource.TestCheckResourceAttr(resourceNameNode, "os", "EulerOS 2.9"),
 					resource.TestCheckResourceAttr(resourceNameNode, "private_ip", privateIP),
 				),
@@ -446,7 +446,7 @@ var testAccCCENodeV3OS = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name       = "test-node"
-  flavor_id  = "s3.medium.1"
+  flavor_id  = "s2.large.2"
   os         = "EulerOS 2.5"
 
   availability_zone = "%[2]s"
@@ -466,7 +466,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 resource "opentelekomcloud_cce_node_v3" "node_2" {
   cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name       = "test-node"
-  flavor_id  = "s3.medium.1"
+  flavor_id  = "s2.large.2"
   os         = "CentOS 7.7"
 
   availability_zone = "%[2]s"
@@ -486,7 +486,7 @@ resource "opentelekomcloud_cce_node_v3" "node_2" {
 resource "opentelekomcloud_cce_node_v3" "node_3" {
   cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name       = "test-node"
-  flavor_id  = "s3.medium.1"
+  flavor_id  = "s2.large.2"
   os         = "EulerOS 2.9"
 
   availability_zone = "%[2]s"
@@ -511,7 +511,7 @@ func testAccCCENodeV3Basic(privateIP string) string {
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name       = "test-node"
-  flavor_id  = "s3.medium.1"
+  flavor_id  = "s2.large.2"
 
   availability_zone = "%s"
   key_pair          = "%s"
@@ -538,7 +538,7 @@ func testAccCCENodeV3Update(privateIP string) string {
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name       = "test-node2"
-  flavor_id  = "s3.medium.1"
+  flavor_id  = "s2.large.2"
 
   availability_zone = "%s"
   key_pair          = "%s"
@@ -563,7 +563,7 @@ var testAccCCENodeV3Multiple = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name       = "test-node"
-  flavor_id  = "s3.medium.1"
+  flavor_id  = "s2.large.2"
   count      = 2
 
   availability_zone = "%s"
@@ -587,7 +587,7 @@ var testAccCCENodeV3Timeout = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "test-node1"
-  flavor_id         = "s3.medium.1"
+  flavor_id         = "s2.large.2"
   availability_zone = "%s"
   key_pair          = "%s"
 
@@ -612,7 +612,7 @@ var testAccCCENodeV3Ip = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "cce-node-1"
-  flavor_id         = "s3.medium.1"
+  flavor_id         = "s2.large.2"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -635,7 +635,7 @@ var testAccCCENodeV3BandWidthResize = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "cce-node-1"
-  flavor_id         = "s3.medium.1"
+  flavor_id         = "s2.large.2"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -658,7 +658,7 @@ var testAccCCENodeV3IpUnset = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "cce-node-1"
-  flavor_id         = "s3.medium.1"
+  flavor_id         = "s2.large.2"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -679,7 +679,7 @@ var testAccCCENodeV3IpParams = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "cce-node-1"
-  flavor_id         = "s3.medium.1"
+  flavor_id         = "s2.large.2"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -704,7 +704,7 @@ var testAccCCENodeV3IpNull = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "cce-node-1"
-  flavor_id         = "s3.medium.1"
+  flavor_id         = "s2.large.2"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -732,7 +732,7 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_2" {}
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "cce-node-1"
-  flavor_id         = "s3.medium.1"
+  flavor_id         = "s2.large.2"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -757,7 +757,7 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_2" {}
 
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
-  flavor_id         = "s3.medium.1"
+  flavor_id         = "s2.large.2"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -779,7 +779,7 @@ var testAccCCENodeV3EncryptedVolume = fmt.Sprintf(`
 
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
-  flavor_id         = "s3.medium.1"
+  flavor_id         = "s2.large.2"
   availability_zone = "%s"
   key_pair          = "%s"
 
@@ -804,7 +804,7 @@ func testAccCCENodeV3TaintsK8sTags(privateIP string) string {
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "test-node"
-  flavor_id         = "s3.medium.1"
+  flavor_id         = "s2.large.2"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -835,7 +835,7 @@ var testAccCCENodeV3ExtendParams = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name       = "test-node"
-  flavor_id  = "s3.medium.1"
+  flavor_id  = "s2.large.2"
 
   availability_zone = "%s"
   key_pair          = "%s"
