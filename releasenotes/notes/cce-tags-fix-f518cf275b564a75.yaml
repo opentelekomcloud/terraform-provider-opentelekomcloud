@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Add new predefined tag in ``resource/opentelekomcloud_cce_nodes_v3`` (`#2024 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2024>`_)
