@@ -39,7 +39,7 @@ var (
 		"node.kubernetes.io/baremetal",
 		"node.kubernetes.io/subnetid",
 		"node.kubernetes.io/container-engine",
-                "node.kubernetes.io/instance-type",
+		"node.kubernetes.io/instance-type",
 		"os.architecture",
 		"os.name",
 		"os.version",
