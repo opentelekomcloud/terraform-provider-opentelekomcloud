@@ -147,7 +147,7 @@ func resourceRdsConfigurationV3Create(ctx context.Context, d *schema.ResourceDat
 	}
 	log.Printf("[DEBUG] CreateOpts: %#v", createOpts)
 
-	configuration, err := configurations.Create(rdsClient, createOpts).Extract()
+	configuration, err := configurations.Create(rdsClient, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud RDSv3 configuration: %s", err)
 	}
@@ -164,7 +164,7 @@ func resourceRdsConfigurationV3Read(_ context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
 	}
-	configuration, err := configurations.Get(client, d.Id()).Extract()
+	configuration, err := configurations.Get(client, d.Id())
 
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -219,6 +219,7 @@ func resourceRdsConfigurationV3Update(ctx context.Context, d *schema.ResourceDat
 		return fmterr.Errorf("error creating OpenTelekomCloud RDSv3 Client: %s", err)
 	}
 	var updateOpts configurations.UpdateOpts
+	updateOpts.ConfigId = d.Id()
 
 	if d.HasChange("name") {
 		updateOpts.Name = d.Get("name").(string)
@@ -231,7 +232,7 @@ func resourceRdsConfigurationV3Update(ctx context.Context, d *schema.ResourceDat
 	}
 	log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
 
-	err = configurations.Update(rdsClient, d.Id(), updateOpts).ExtractErr()
+	err = configurations.Update(rdsClient, updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud RDSv3 configuration: %s", err)
 	}
@@ -245,7 +246,7 @@ func resourceRdsConfigurationV3Delete(_ context.Context, d *schema.ResourceData,
 		return fmterr.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
 	}
 
-	err = configurations.Delete(rdsClient, d.Id()).ExtractErr()
+	err = configurations.Delete(rdsClient, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud RDSv3 configuration: %s", err)
 	}

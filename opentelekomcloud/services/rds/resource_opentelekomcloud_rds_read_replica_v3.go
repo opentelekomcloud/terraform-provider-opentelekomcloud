@@ -160,7 +160,7 @@ func resourceRdsReadReplicaV3Create(ctx context.Context, d *schema.ResourceData,
 		Region:           d.Get("region").(string),
 		AvailabilityZone: d.Get("availability_zone").(string),
 	}
-	job, err := instances.CreateReplica(client, opts).Extract()
+	job, err := instances.CreateReplica(client, *opts)
 	if err != nil {
 		return fmterr.Errorf("error creating read replica: %w", err)
 	}
@@ -308,13 +308,12 @@ func resourceRdsReadReplicaV3Update(ctx context.Context, d *schema.ResourceData,
 	}
 
 	if d.HasChange("flavor_ref") {
-		resizeOpts := instances.ResizeFlavorOpts{
-			ResizeFlavor: &instances.SpecCode{
-				Speccode: d.Get("flavor_ref").(string),
-			},
+		resizeOpts := instances.ResizeOpts{
+			InstanceId: d.Id(),
+			SpecCode:   d.Get("flavor_ref").(string),
 		}
 
-		_, err := instances.Resize(client, resizeOpts, d.Id()).Extract()
+		_, err := instances.Resize(client, resizeOpts)
 		if err != nil {
 			return fmterr.Errorf("error resizing read replica: %w", err)
 		}
@@ -363,7 +362,7 @@ func resourceRdsReadReplicaV3Delete(_ context.Context, d *schema.ResourceData, m
 
 	log.Printf("[DEBUG] Deleting Instance %s", d.Id())
 
-	_, err = instances.Delete(client, d.Id()).Extract()
+	_, err = instances.Delete(client, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error deleting read replica instance: %w", err)
 	}

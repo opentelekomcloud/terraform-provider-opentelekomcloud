@@ -13,11 +13,11 @@ import (
 
 func TestAccRdsReadReplicaV3Basic(t *testing.T) {
 	postfix := tools.RandomString("rr", 3)
-	var rdsInstance instances.RdsInstanceResponse
+	var rdsInstance instances.InstanceResponse
 
 	resName := "opentelekomcloud_rds_read_replica_v3.replica"
 
-	secondAZ := "eu-de-02"
+	secondAZ := "eu-de-03"
 
 	if env.OS_AVAILABILITY_ZONE == secondAZ {
 		t.Skip("OS_AVAILABILITY_ZONE should be set to value !=", secondAZ)
@@ -98,7 +98,7 @@ resource "opentelekomcloud_rds_read_replica_v3" "replica" {
   replica_of_id = opentelekomcloud_rds_instance_v3.instance.id
   flavor_ref    = "${opentelekomcloud_rds_instance_v3.instance.flavor}.rr"
 
-  availability_zone = "eu-de-02"
+  availability_zone = "eu-de-03"
 
   public_ips = [opentelekomcloud_compute_floatingip_v2.eip.address]
 
@@ -150,7 +150,7 @@ resource "opentelekomcloud_rds_read_replica_v3" "replica" {
   replica_of_id = opentelekomcloud_rds_instance_v3.instance.id
   flavor_ref    = "${opentelekomcloud_rds_instance_v3.instance.flavor}.rr"
 
-  availability_zone = "eu-de-02"
+  availability_zone = "eu-de-03"
 
   public_ips = []
 

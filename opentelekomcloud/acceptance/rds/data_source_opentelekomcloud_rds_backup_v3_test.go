@@ -20,7 +20,7 @@ const dataSourceBackupName = "data.opentelekomcloud_rds_backup_v3.backup"
 
 func TestAccDataSourceRDSV3Backup_basic(t *testing.T) {
 	postfix := acctest.RandString(3)
-	var rdsInstance instances.RdsInstanceResponse
+	var rdsInstance instances.InstanceResponse
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -41,7 +41,7 @@ func TestAccDataSourceRDSV3Backup_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
 					resource.TestCheckResourceAttr(dataSourceBackupName, "databases.#", "0"),
-					resource.TestCheckResourceAttr(dataSourceBackupName, "db_type", "PostgreSQL"),
+					resource.TestCheckResourceAttr(dataSourceBackupName, "db_type", "postgresql"),
 					resource.TestCheckResourceAttr(dataSourceBackupName, "db_version", "10"),
 				),
 			},
@@ -82,13 +82,9 @@ func forceRdsBackup(t *testing.T, instanceID *string) {
 	th.AssertNoErr(t, err)
 
 	err = golangsdk.WaitFor(600, func() (bool, error) {
-		pages, err := backups.List(client, backups.ListOpts{
+		bList, err := backups.List(client, backups.ListOpts{
 			InstanceID: *instanceID,
-		}).AllPages()
-		if err != nil {
-			return false, err
-		}
-		bList, err := backups.ExtractBackups(pages)
+		})
 		if err != nil {
 			return false, err
 		}

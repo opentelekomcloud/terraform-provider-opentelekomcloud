@@ -30,9 +30,6 @@ func DataSourceRdsFlavorV3() *schema.Resource {
 			"instance_mode": {
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"single", "ha", "replica",
-				}, false),
 			},
 			"flavors": {
 				Type:     schema.TypeList,
@@ -74,13 +71,11 @@ func dataSourceRdsFlavorV3Read(_ context.Context, d *schema.ResourceData, meta i
 	}
 
 	listOpts := flavors.ListOpts{
-		VersionName: d.Get("db_version").(string),
+		VersionName:  d.Get("db_version").(string),
+		SpecCode:     d.Get("instance_mode").(string),
+		DatabaseName: d.Get("db_type").(string),
 	}
-	flavorsPages, err := flavors.List(client, listOpts, d.Get("db_type").(string)).AllPages()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	allFlavorsList, err := flavors.ExtractDbFlavors(flavorsPages)
+	allFlavorsList, err := flavors.ListFlavors(client, listOpts)
 	if err != nil {
 		return diag.FromErr(err)
 	}

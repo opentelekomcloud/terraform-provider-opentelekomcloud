@@ -72,7 +72,7 @@ func testAccCheckRdsConfigV3Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := configurations.Get(rdsClient, rs.Primary.ID).Extract()
+		_, err := configurations.Get(rdsClient, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("RDSv3 configuration still exists")
 		}
@@ -98,7 +98,7 @@ func testAccCheckRdsConfigV3Exists(n string, configuration *configurations.Confi
 			return fmt.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
 		}
 
-		found, err := configurations.Get(client, rs.Primary.ID).Extract()
+		found, err := configurations.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}

@@ -205,12 +205,7 @@ func dataSourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta
 		listOpts.Id = v.(string)
 	}
 
-	allPages, err := instances.List(client, listOpts).AllPages()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	instancesList, err := instances.ExtractRdsInstances(allPages)
+	instancesList, err := instances.List(client, listOpts)
 	if err != nil {
 		return diag.FromErr(err)
 	}

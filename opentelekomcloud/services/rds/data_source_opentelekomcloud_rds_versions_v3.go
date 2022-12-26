@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/datastores"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/flavors"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -59,16 +59,13 @@ func dataSourceRdsVersionsV3Read(_ context.Context, d *schema.ResourceData, meta
 }
 
 func getRdsV3VersionList(client *golangsdk.ServiceClient, dbName string) ([]string, error) {
-	pages, err := datastores.List(client, dbName).AllPages()
+	stores, err := flavors.ListDatastores(client, dbName)
 	if err != nil {
 		return nil, fmt.Errorf("error listing RDSv3 versions: %s", err)
 	}
-	stores, err := datastores.ExtractDataStores(pages)
-	if err != nil {
-		return nil, fmt.Errorf("error extracting RDSv3 versions: %s", err)
-	}
-	result := make([]string, len(stores.DataStores))
-	for i, store := range stores.DataStores {
+
+	result := make([]string, len(stores))
+	for i, store := range stores {
 		result[i] = store.Name
 	}
 	resultSorted := common.SortVersions(result)

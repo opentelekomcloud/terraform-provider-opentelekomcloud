@@ -20,7 +20,7 @@ const instanceV3ResourceName = "opentelekomcloud_rds_instance_v3.instance"
 
 func TestAccRdsInstanceV3Basic(t *testing.T) {
 	postfix := acctest.RandString(3)
-	var rdsInstance instances.RdsInstanceResponse
+	var rdsInstance instances.InstanceResponse
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -31,7 +31,7 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 				Config: testAccRdsInstanceV3Basic(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.medium"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.large"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8635"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "PostgreSQL"),
@@ -44,7 +44,7 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 			{
 				Config: testAccRdsInstanceV3Update(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.medium"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.large"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.size", "100"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.muh", "value-update"),
 				),
@@ -55,8 +55,8 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 
 func TestAccRdsInstanceV3RestoreBackup(t *testing.T) {
 	postfix := acctest.RandString(3)
-	var rdsInstance instances.RdsInstanceResponse
-	var restoredInstance instances.RdsInstanceResponse
+	var rdsInstance instances.InstanceResponse
+	var restoredInstance instances.InstanceResponse
 
 	restoredResourceName := "opentelekomcloud_rds_instance_v3.from_backup"
 
@@ -79,7 +79,7 @@ func TestAccRdsInstanceV3RestoreBackup(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
 					testAccCheckRdsInstanceV3Exists(restoredResourceName, &restoredInstance),
-					resource.TestCheckResourceAttr(restoredResourceName, "flavor", "rds.pg.c2.medium"),
+					resource.TestCheckResourceAttr(restoredResourceName, "flavor", "rds.pg.c2.large"),
 					resource.TestCheckResourceAttr(restoredResourceName, "volume.0.size", "40"),
 					resource.TestCheckResourceAttr(restoredResourceName, "tags.muh", "value-create"),
 				),
@@ -90,7 +90,7 @@ func TestAccRdsInstanceV3RestoreBackup(t *testing.T) {
 
 func TestAccRdsInstanceV3ElasticIP(t *testing.T) {
 	postfix := acctest.RandString(3)
-	var rdsInstance instances.RdsInstanceResponse
+	var rdsInstance instances.InstanceResponse
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -119,7 +119,7 @@ func TestAccRdsInstanceV3ElasticIP(t *testing.T) {
 
 func TestAccRdsInstanceV3HA(t *testing.T) {
 	postfix := acctest.RandString(3)
-	var rdsInstance instances.RdsInstanceResponse
+	var rdsInstance instances.InstanceResponse
 
 	var availabilityZone2 = os.Getenv("OS_AVAILABILITY_ZONE_2")
 	if availabilityZone2 == "" {
@@ -147,7 +147,7 @@ func TestAccRdsInstanceV3HA(t *testing.T) {
 
 func TestAccRdsInstanceV3OptionalParams(t *testing.T) {
 	postfix := acctest.RandString(3)
-	var rdsInstance instances.RdsInstanceResponse
+	var rdsInstance instances.InstanceResponse
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -167,7 +167,7 @@ func TestAccRdsInstanceV3OptionalParams(t *testing.T) {
 
 func TestAccRdsInstanceV3Backup(t *testing.T) {
 	postfix := acctest.RandString(3)
-	var rdsInstance instances.RdsInstanceResponse
+	var rdsInstance instances.InstanceResponse
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -187,7 +187,7 @@ func TestAccRdsInstanceV3Backup(t *testing.T) {
 
 func TestAccRdsInstanceV3TemplateConfig(t *testing.T) {
 	postfix := acctest.RandString(3)
-	var rdsInstance instances.RdsInstanceResponse
+	var rdsInstance instances.InstanceResponse
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -248,7 +248,7 @@ func TestAccRdsInstanceV3InvalidFlavor(t *testing.T) {
 
 func TestAccRdsInstanceV3_configurationParameters(t *testing.T) {
 	postfix := acctest.RandString(3)
-	var rdsInstance instances.RdsInstanceResponse
+	var rdsInstance instances.InstanceResponse
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -268,7 +268,7 @@ func TestAccRdsInstanceV3_configurationParameters(t *testing.T) {
 
 func TestAccRdsInstanceV3TimeZone(t *testing.T) {
 	postfix := acctest.RandString(3)
-	var rdsInstance instances.RdsInstanceResponse
+	var rdsInstance instances.InstanceResponse
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -281,7 +281,7 @@ func TestAccRdsInstanceV3TimeZone(t *testing.T) {
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "MySQL"),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.mysql.c2.medium"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.mysql.m1.large"),
 				),
 			},
 		},
@@ -308,7 +308,7 @@ func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckRdsInstanceV3Exists(n string, rdsInstance *instances.RdsInstanceResponse) resource.TestCheckFunc {
+func testAccCheckRdsInstanceV3Exists(n string, rdsInstance *instances.InstanceResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -359,7 +359,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 40
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.c2.large"
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
@@ -393,7 +393,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 100
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.c2.large"
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
@@ -428,7 +428,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 40
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.c2.large"
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
@@ -490,7 +490,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 100
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.c2.large"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
@@ -515,7 +515,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 100
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.c2.large"
   backup_strategy {
     start_time = "10:00-11:00"
     keep_days  = 5
@@ -568,7 +568,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 40
   }
-  flavor         = "rds.pg.c2.medium"
+  flavor         = "rds.pg.c2.large"
   param_group_id = opentelekomcloud_rds_parametergroup_v3.pg.id
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
@@ -618,7 +618,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 40
   }
-  flavor         = "rds.pg.c2.medium"
+  flavor         = "rds.pg.c2.large"
   param_group_id = opentelekomcloud_rds_parametergroup_v3.pg2.id
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
@@ -645,7 +645,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 40
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.c2.large"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
@@ -680,7 +680,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  flavor            = "rds.pg.c2.medium"
+  flavor            = "rds.pg.c2.large"
   volume {
     type = "COMMON"
     size = 40
@@ -739,7 +739,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 40
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.c2.large"
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
@@ -777,7 +777,7 @@ resource "opentelekomcloud_rds_instance_v3" "from_backup" {
     type = "COMMON"
     size = 40
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.c2.large"
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
@@ -811,7 +811,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 40
   }
-  flavor = "rds.mysql.c2.medium"
+  flavor = "rds.mysql.m1.large"
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
