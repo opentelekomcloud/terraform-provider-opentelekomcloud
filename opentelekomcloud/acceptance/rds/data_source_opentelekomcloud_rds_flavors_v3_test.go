@@ -46,6 +46,6 @@ const testAccRdsFlavorV3DataSourceBasic = `
 data "opentelekomcloud_rds_flavors_v3" "flavor" {
   db_type       = "PostgreSQL"
   db_version    = "9.5"
-  instance_mode = "rds.pg.s1.medium.ha"
+  instance_mode = "ha"
 }
 `

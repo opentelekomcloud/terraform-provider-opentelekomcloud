@@ -30,6 +30,9 @@ func DataSourceRdsFlavorV3() *schema.Resource {
 			"instance_mode": {
 				Type:     schema.TypeString,
 				Required: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"single", "ha", "replica",
+				}, false),
 			},
 			"flavors": {
 				Type:     schema.TypeList,
@@ -72,7 +75,6 @@ func dataSourceRdsFlavorV3Read(_ context.Context, d *schema.ResourceData, meta i
 
 	listOpts := flavors.ListOpts{
 		VersionName:  d.Get("db_version").(string),
-		SpecCode:     d.Get("instance_mode").(string),
 		DatabaseName: d.Get("db_type").(string),
 	}
 	allFlavorsList, err := flavors.ListFlavors(client, listOpts)
