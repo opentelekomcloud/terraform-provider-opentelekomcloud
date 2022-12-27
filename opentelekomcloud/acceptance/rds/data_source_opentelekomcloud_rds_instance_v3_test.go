@@ -25,7 +25,7 @@ func TestAccRdsInstanceDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(dataSourceName, "name"),
 					resource.TestCheckResourceAttr(dataSourceName, "datastore_type", "PostgreSQL"),
 					resource.TestCheckResourceAttr(dataSourceName, "port", "8635"),
-					resource.TestCheckResourceAttr(dataSourceName, "flavor", "rds.pg.c2.medium"),
+					resource.TestCheckResourceAttr(dataSourceName, "flavor", "rds.pg.c2.large"),
 				),
 			},
 		},
@@ -53,7 +53,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 40
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.c2.large"
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
@@ -65,7 +65,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 }
 data "opentelekomcloud_rds_instance_v3" "test" {
   depends_on = [
-    opentelekomcloud_rds_instance.test,
+    opentelekomcloud_rds_instance_v3.instance,
   ]
   name = opentelekomcloud_rds_instance_v3.instance.name
 }

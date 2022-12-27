@@ -88,13 +88,9 @@ func dataSourceRDSv3BackupRead(_ context.Context, d *schema.ResourceData, meta i
 		BackupType: d.Get("type").(string),
 	}
 
-	pages, err := backups.List(client, opts).AllPages()
+	backupList, err := backups.List(client, opts)
 	if err != nil {
 		return fmterr.Errorf("error listing backups: %w", err)
-	}
-	backupList, err := backups.ExtractBackups(pages)
-	if err != nil {
-		return fmterr.Errorf("error extracting backups: %w", err)
 	}
 	if len(backupList) < 1 {
 		return common.DataSourceTooFewDiag

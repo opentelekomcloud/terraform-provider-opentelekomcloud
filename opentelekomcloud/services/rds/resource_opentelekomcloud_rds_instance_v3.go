@@ -384,7 +384,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			SecurityGroupId:  d.Get("security_group_id").(string),
 			RestorePoint:     resourceRestorePoint(d),
 		}
-		restored, err := backups.RestoreToNew(client, restoreOpts).Extract()
+		restored, err := backups.RestoreToNew(client, restoreOpts)
 		if err != nil {
 			return fmterr.Errorf("error creating new RDSv3 instance from backup: %w", err)
 		}
@@ -408,7 +408,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			SecurityGroupId:  d.Get("security_group_id").(string),
 			ChargeInfo:       resourceRDSChangeMode(),
 		}
-		created, err := instances.Create(client, createOpts).Extract()
+		created, err := instances.Create(client, createOpts)
 		if err != nil {
 			return fmterr.Errorf("error creating new RDSv3 instance: %w", err)
 		}
@@ -523,7 +523,7 @@ func assureTemplateApplied(d *schema.ResourceData, client *golangsdk.ServiceClie
 		return false, nil
 	}
 
-	applied, err := configurations.Get(client, templateID).Extract()
+	applied, err := configurations.Get(client, templateID)
 	if err != nil {
 		return false, fmt.Errorf("error getting parameter template %s: %w", templateID, err)
 	}
@@ -533,7 +533,7 @@ func assureTemplateApplied(d *schema.ResourceData, client *golangsdk.ServiceClie
 		appliedParams[param.Name] = param
 	}
 
-	current, err := configurations.GetForInstance(client, d.Id()).Extract()
+	current, err := configurations.GetForInstance(client, d.Id())
 	if err != nil {
 		return false, fmt.Errorf("error getting configuration of instance %s: %w", d.Id(), err)
 	}
@@ -557,12 +557,14 @@ func assureTemplateApplied(d *schema.ResourceData, client *golangsdk.ServiceClie
 }
 
 func restartInstance(d *schema.ResourceData, client *golangsdk.ServiceClient) error {
-	job, err := instances.Restart(client, instances.RestartRdsInstanceOpts{}, d.Id()).Extract()
+	job, err := instances.Restart(client, instances.RestartOpts{
+		InstanceId: d.Id(),
+	})
 	if err != nil {
 		return fmt.Errorf("error restarting RDS instance: %w", err)
 	}
 	timeout := d.Timeout(schema.TimeoutCreate)
-	if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), job.JobId); err != nil {
+	if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), *job); err != nil {
 		return fmt.Errorf("error waiting for instance to reboot: %w", err)
 	}
 	return nil
@@ -570,9 +572,10 @@ func restartInstance(d *schema.ResourceData, client *golangsdk.ServiceClient) er
 
 func applyTemplate(d *schema.ResourceData, client *golangsdk.ServiceClient) (bool, error) {
 	templateID := d.Get("param_group_id").(string)
-	applyResult, err := configurations.Apply(client, templateID, configurations.ApplyOpts{
+	applyResult, err := configurations.Apply(client, configurations.ApplyOpts{
 		InstanceIDs: []string{d.Id()},
-	}).Extract()
+		ConfigId:    templateID,
+	})
 	if err != nil {
 		return false, fmt.Errorf("error applying configuration %s to instance %s: %w", templateID, d.Id(), err)
 	}
@@ -598,19 +601,15 @@ func applyTemplate(d *schema.ResourceData, client *golangsdk.ServiceClient) (boo
 	return restartRequired, nil
 }
 
-func GetRdsInstance(client *golangsdk.ServiceClient, rdsId string) (*instances.RdsInstanceResponse, error) {
-	listOpts := instances.ListRdsInstanceOpts{
+func GetRdsInstance(client *golangsdk.ServiceClient, rdsId string) (*instances.InstanceResponse, error) {
+	listOpts := instances.ListOpts{
 		Id: rdsId,
 	}
-	allPages, err := instances.List(client, listOpts).AllPages()
+	n, err := instances.List(client, listOpts)
 	if err != nil {
 		return nil, err
 	}
 
-	n, err := instances.ExtractRdsInstances(allPages)
-	if err != nil {
-		return nil, err
-	}
 	if len(n.Instances) == 0 {
 		return nil, nil
 	}
@@ -725,12 +724,13 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 
 	if d.HasChange("backup_strategy") {
 		backupRaw := resourceRDSBackupStrategy(d)
-		updateBackupOpts.KeepDays = &backupRaw.KeepDays
+		updateBackupOpts.KeepDays = backupRaw.KeepDays
 		updateBackupOpts.StartTime = backupRaw.StartTime
 		updateBackupOpts.Period = "1,2,3,4,5,6,7"
+		updateBackupOpts.InstanceId = d.Id()
 		log.Printf("[DEBUG] updateOpts: %#v", updateBackupOpts)
 
-		if err = backups.Update(client, d.Id(), updateBackupOpts).ExtractErr(); err != nil {
+		if err = backups.Update(client, updateBackupOpts); err != nil {
 			return fmterr.Errorf("error updating OpenTelekomCloud RDSv3 Instance: %s", err)
 		}
 	}
@@ -783,10 +783,9 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 	if d.HasChange("flavor") {
 		_, newFlavor := d.GetChange("flavor")
 
-		updateFlavorOpts := instances.ResizeFlavorOpts{
-			ResizeFlavor: &instances.SpecCode{
-				Speccode: newFlavor.(string),
-			},
+		updateFlavorOpts := instances.ResizeOpts{
+			InstanceId: d.Id(),
+			SpecCode:   newFlavor.(string),
 		}
 
 		log.Printf("Update flavor could be done only in status `available`")
@@ -795,7 +794,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		}
 
 		log.Printf("[DEBUG] Update flavor: %s", newFlavor.(string))
-		_, err = instances.Resize(client, updateFlavorOpts, d.Id()).Extract()
+		_, err = instances.Resize(client, updateFlavorOpts)
 		if err != nil {
 			return fmterr.Errorf("error updating instance Flavor from result: %s", err)
 		}
@@ -820,9 +819,8 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		}
 		log.Printf("[DEBUG] volume: %+v", volume)
 		updateOpts := instances.EnlargeVolumeRdsOpts{
-			EnlargeVolume: &instances.EnlargeVolumeSize{
-				Size: volume["size"].(int),
-			},
+			InstanceId: d.Id(),
+			Size:       volume["size"].(int),
 		}
 
 		log.Printf("Update volume size could be done only in status `available`")
@@ -830,12 +828,12 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 			return diag.FromErr(err)
 		}
 
-		updateResult, err := instances.EnlargeVolume(client, updateOpts, d.Id()).ExtractJobResponse()
+		updateResult, err := instances.EnlargeVolume(client, updateOpts)
 		if err != nil {
 			return fmterr.Errorf("error updating instance volume from result: %s", err)
 		}
 		timeout := d.Timeout(schema.TimeoutUpdate)
-		if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), updateResult.JobID); err != nil {
+		if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), *updateResult); err != nil {
 			return diag.FromErr(err)
 		}
 
@@ -1101,7 +1099,7 @@ func resourceRdsInstanceV3Delete(ctx context.Context, d *schema.ResourceData, me
 
 	log.Printf("[DEBUG] Deleting Instance %s", d.Id())
 
-	_, err = instances.Delete(client, d.Id()).Extract()
+	_, err = instances.Delete(client, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud RDSv3 instance: %s", err)
 	}
@@ -1158,16 +1156,14 @@ func validateRDSv3Flavor(argName string) schema.CustomizeDiffFunc {
 		flavor := d.Get(argName).(string)
 
 		listOpts := flavors.ListOpts{
-			VersionName: dataStoreInfo["version"].(string),
+			VersionName:  dataStoreInfo["version"].(string),
+			DatabaseName: dataStoreInfo["type"].(string),
 		}
-		flavorPages, err := flavors.List(client, listOpts, dataStoreInfo["type"].(string)).AllPages()
+		flavorList, err := flavors.ListFlavors(client, listOpts)
 		if err != nil {
 			return fmt.Errorf("unable to get flavor pages: %w", err)
 		}
-		flavorList, err := flavors.ExtractDbFlavors(flavorPages)
-		if err != nil {
-			return fmt.Errorf("error extracting flavors: %w", err)
-		}
+
 		var matches = false
 		for _, flavorItem := range flavorList {
 			if flavorItem.SpecCode == flavor {
@@ -1189,10 +1185,11 @@ func updateInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceC
 		return false, nil
 	}
 
-	opts := instances.UpdateInstanceConfigurationOpts{
-		Values: d.Get("parameters").(map[string]interface{}),
+	opts := configurations.UpdateInstanceConfigurationOpts{
+		Values:     d.Get("parameters").(map[string]interface{}),
+		InstanceId: d.Id(),
 	}
-	status, err := instances.UpdateInstanceConfigurationParameters(client, d.Id(), opts).Extract()
+	status, err := configurations.UpdateInstanceConfiguration(client, opts)
 	if err != nil {
 		return false, fmt.Errorf("error applying configuration parameters: %w", err)
 	}
