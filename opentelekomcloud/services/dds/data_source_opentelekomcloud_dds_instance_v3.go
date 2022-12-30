@@ -164,13 +164,9 @@ func dataSourceDdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta
 		SubnetId:      d.Get("subnet_id").(string),
 	}
 
-	allPages, err := instances.List(ddsClient, listOpts).AllPages()
+	instancesList, err := instances.List(ddsClient, listOpts)
 	if err != nil {
 		return fmterr.Errorf("error fetching DDS instance: %s", err)
-	}
-	instancesList, err := instances.ExtractInstances(allPages)
-	if err != nil {
-		return fmterr.Errorf("error extracting DDS instance: %s", err)
 	}
 	if len(instancesList.Instances) < 1 {
 		return fmterr.Errorf("your query returned no results. Please change your search criteria and try again")

@@ -106,11 +106,7 @@ func testAccCheckDDSV3InstanceDestroy(s *terraform.State) error {
 		opts := instances.ListInstanceOpts{
 			Id: rs.Primary.ID,
 		}
-		allPages, err := instances.List(client, &opts).AllPages()
-		if err != nil {
-			return err
-		}
-		ddsInstances, err := instances.ExtractInstances(allPages)
+		ddsInstances, err := instances.List(client, opts)
 		if err != nil {
 			return err
 		}
@@ -142,11 +138,7 @@ func testAccCheckDDSV3InstanceExists(n string) resource.TestCheckFunc {
 		opts := instances.ListInstanceOpts{
 			Id: rs.Primary.ID,
 		}
-		allPages, err := instances.List(client, &opts).AllPages()
-		if err != nil {
-			return err
-		}
-		ddsInstances, err := instances.ExtractInstances(allPages)
+		ddsInstances, err := instances.List(client, opts)
 		if err != nil {
 			return err
 		}
