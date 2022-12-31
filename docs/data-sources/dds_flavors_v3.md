@@ -17,8 +17,6 @@ data "opentelekomcloud_dds_flavors_v3" "flavor" {
 
 ## Argument Reference
 
-* `region` - (Optional) Specifies the region in which to obtain the DDSv3 client.
-
 * `engine_name` - (Required) Specifies the engine name of the DDS, `DDS-Community` is supported.
 
 * `type` - (Optional) Specifies the type of the DDS flavor. `mongos`, `shard`, `config` and `replica` are supported.

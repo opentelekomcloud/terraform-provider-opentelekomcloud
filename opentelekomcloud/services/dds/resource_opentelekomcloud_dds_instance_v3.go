@@ -292,11 +292,7 @@ func instanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string
 		opts := instances.ListInstanceOpts{
 			Id: instanceID,
 		}
-		allPages, err := instances.List(client, &opts).AllPages()
-		if err != nil {
-			return nil, "", err
-		}
-		instancesList, err := instances.ExtractInstances(allPages)
+		instancesList, err := instances.List(client, opts)
 		if err != nil {
 			return nil, "", err
 		}
@@ -347,7 +343,7 @@ func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	}
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	instance, err := instances.Create(client, createOpts).Extract()
+	instance, err := instances.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error getting instance from result: %w", err)
 	}
@@ -385,13 +381,9 @@ func resourceDdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 	listOpts := instances.ListInstanceOpts{
 		Id: d.Id(),
 	}
-	allPages, err := instances.List(client, listOpts).AllPages()
+	instancesList, err := instances.List(client, listOpts)
 	if err != nil {
 		return fmterr.Errorf("error fetching DDS instance: %w", err)
-	}
-	instancesList, err := instances.ExtractInstances(allPages)
-	if err != nil {
-		return fmterr.Errorf("error extracting DDS instance: %w", err)
 	}
 	if instancesList.TotalCount == 0 {
 		log.Printf("[WARN] DDS instance (%s) was not found", d.Id())
@@ -469,54 +461,49 @@ func resourceDdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf(errCreationV3Client, err)
 	}
 
-	var opts []instances.UpdateOpt
 	if d.HasChange("name") {
-		opt := instances.UpdateOpt{
-			Param:  "new_instance_name",
-			Value:  d.Get("name").(string),
-			Action: "modify-name",
-			Method: "put",
+		err := instances.UpdateName(client, instances.UpdateNameOpt{
+			InstanceId:      d.Id(),
+			NewInstanceName: d.Get("name").(string),
+		})
+		if err != nil {
+			return fmterr.Errorf("error updating instance name: %w", err)
 		}
-		opts = append(opts, opt)
 	}
 
 	if d.HasChange("password") {
-		opt := instances.UpdateOpt{
-			Param:  "user_pwd",
-			Value:  d.Get("password").(string),
-			Action: "reset-password",
-			Method: "put",
+		err := instances.ChangePassword(client, instances.ChangePasswordOpt{
+			InstanceId: d.Id(),
+			UserPwd:    d.Get("password").(string),
+		})
+		if err != nil {
+			return fmterr.Errorf("error updating instance password: %w", err)
 		}
-		opts = append(opts, opt)
 	}
 
 	if d.HasChange("ssl") {
-		opt := instances.UpdateOpt{
-			Param:  "ssl_option",
-			Action: "switch-ssl",
-			Method: "post",
+		opt := instances.SSLOpt{
+			InstanceId: d.Id(),
 		}
 		if d.Get("ssl").(bool) {
-			opt.Value = "1"
+			opt.SSL = "1"
 		} else {
-			opt.Value = "0"
+			opt.SSL = "0"
 		}
-		opts = append(opts, opt)
+		_, err = instances.SwitchSSL(client, opt)
+		if err != nil {
+			return fmterr.Errorf("error updating ssl: %w", err)
+		}
 	}
 
 	if d.HasChange("security_group_id") {
-		opt := instances.UpdateOpt{
-			Param:  "security_group_id",
-			Value:  d.Get("security_group_id").(string),
-			Action: "modify-security-group",
-			Method: "post",
+		_, err = instances.ModifySG(client, instances.ModifySGOpt{
+			InstanceId:      d.Id(),
+			SecurityGroupId: d.Get("security_group_id").(string),
+		})
+		if err != nil {
+			return fmterr.Errorf("error updating security group: %w", err)
 		}
-		opts = append(opts, opt)
-	}
-
-	r := instances.Update(client, d.Id(), opts)
-	if r.Err != nil {
-		return fmterr.Errorf("error updating instance from result: %w", r.Err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -546,8 +533,8 @@ func resourceDdsInstanceV3Delete(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf(errCreationV3Client, err)
 	}
 
-	result := instances.Delete(client, d.Id())
-	if result.Err != nil {
+	_, err = instances.Delete(client, d.Id())
+	if err != nil {
 		return diag.FromErr(err)
 	}
 	stateConf := &resource.StateChangeConf{

@@ -18,11 +18,6 @@ func DataSourceDdsFlavorV3() *schema.Resource {
 		ReadContext: dataSourceDdsFlavorV3Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 			"engine_name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -70,6 +65,10 @@ func DataSourceDdsFlavorV3() *schema.Resource {
 					},
 				},
 			},
+			"region": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -81,19 +80,13 @@ func dataSourceDdsFlavorV3Read(_ context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf("error creating OpenTelekomCloud DDS client: %s", err)
 	}
 
-	listOpts := flavors.ListOpts{
-		Region:     config.GetRegion(d),
+	listOpts := flavors.ListFlavorOpts{
 		EngineName: d.Get("engine_name").(string),
 	}
 
-	pages, err := flavors.List(ddsClient, listOpts).AllPages()
+	extractedFlavors, err := flavors.List(ddsClient, listOpts)
 	if err != nil {
 		return fmterr.Errorf("unable to all flavor pages: %s", err)
-	}
-
-	extractedFlavors, err := flavors.ExtractFlavors(pages)
-	if err != nil {
-		return fmterr.Errorf("unable to extract flavors: %s", err)
 	}
 
 	matchFlavorList := make([]map[string]interface{}, 0)
@@ -101,7 +94,7 @@ func dataSourceDdsFlavorV3Read(_ context.Context, d *schema.ResourceData, meta i
 	expectedVcpus := d.Get("vcpus").(string)
 	expectedMemory := d.Get("memory").(string)
 
-	for _, item := range extractedFlavors {
+	for _, item := range extractedFlavors.Flavors {
 		if matchesFilters(item, expectedType, expectedVcpus, expectedMemory) {
 			continue
 		}
@@ -128,7 +121,7 @@ func dataSourceDdsFlavorV3Read(_ context.Context, d *schema.ResourceData, meta i
 	return diag.FromErr(mErr.ErrorOrNil())
 }
 
-func matchesFilters(item flavors.Flavor, flavorType, flavorVcpus, flavorMemory string) bool {
+func matchesFilters(item flavors.FlavorResponse, flavorType, flavorVcpus, flavorMemory string) bool {
 	if flavorType != "" && flavorType != item.Type {
 		return true
 	}
