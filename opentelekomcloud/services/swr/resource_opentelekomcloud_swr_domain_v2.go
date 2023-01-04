@@ -80,10 +80,6 @@ func ResourceSwrDomainV2() *schema.Resource {
 	}
 }
 
-func repository(d *schema.ResourceData) string {
-	return d.Get("repository").(string)
-}
-
 func resourceSwrDomainCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SwrV2Client(config.GetRegion(d))
@@ -92,13 +88,15 @@ func resourceSwrDomainCreate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	opts := domains.CreateOpts{
+		Namespace:    d.Get("organization").(string),
+		Repository:   d.Get("repository").(string),
 		AccessDomain: d.Get("access_domain").(string),
 		Permit:       d.Get("permission").(string),
 		Deadline:     d.Get("deadline").(string),
 		Description:  d.Get("description").(string),
 	}
 
-	err = domains.Create(client, organization(d), repository(d), opts).ExtractErr()
+	err = domains.Create(client, opts)
 	if err != nil {
 		return fmterr.Errorf("error creating domain: %w", err)
 	}
@@ -114,7 +112,12 @@ func resourceSwrDomainRead(_ context.Context, d *schema.ResourceData, meta inter
 		return fmterr.Errorf(ClientError, err)
 	}
 
-	domain, err := domains.Get(client, organization(d), repository(d), d.Id()).Extract()
+	opts := domains.GetOpts{
+		Namespace:    d.Get("organization").(string),
+		Repository:   d.Get("repository").(string),
+		AccessDomain: d.Get("access_domain").(string),
+	}
+	domain, err := domains.Get(client, opts)
 	if err != nil {
 		return fmterr.Errorf("error reading domain: %w", err)
 	}
@@ -122,7 +125,7 @@ func resourceSwrDomainRead(_ context.Context, d *schema.ResourceData, meta inter
 	mErr := multierror.Append(
 		d.Set("access_domain", strings.ToUpper(domain.AccessDomain)),
 		d.Set("repository", domain.Repository),
-		d.Set("organization", domain.Organization),
+		d.Set("organization", domain.Namespace),
 		d.Set("description", domain.Description),
 		d.Set("status", domain.Status),
 		d.Set("permission", domain.Permit),
@@ -146,12 +149,14 @@ func resourceSwrDomainUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	opts := domains.UpdateOpts{
+		Namespace:   d.Get("organization").(string),
+		Repository:  d.Get("repository").(string),
 		Permit:      d.Get("permission").(string),
 		Deadline:    d.Get("deadline").(string),
 		Description: d.Get("description").(string),
 	}
 
-	err = domains.Update(client, organization(d), repository(d), d.Id(), opts).ExtractErr()
+	err = domains.Update(client, opts)
 	if err != nil {
 		return fmterr.Errorf("error updating domain: %w", err)
 	}
@@ -166,7 +171,12 @@ func resourceSwrDomainDelete(_ context.Context, d *schema.ResourceData, meta int
 		return fmterr.Errorf(ClientError, err)
 	}
 
-	err = domains.Delete(client, organization(d), repository(d), d.Id()).ExtractErr()
+	opts := domains.GetOpts{
+		Namespace:    d.Get("organization").(string),
+		Repository:   d.Get("repository").(string),
+		AccessDomain: d.Get("access_domain").(string),
+	}
+	err = domains.Delete(client, opts)
 	if err != nil {
 		fmterr.Errorf("error deleting domain: %w", err)
 	}

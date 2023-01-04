@@ -53,8 +53,13 @@ func resourceSwrOrganizationPermissionsV2Create(ctx context.Context, d *schema.R
 	if err != nil {
 		return fmterr.Errorf(ClientError, err)
 	}
-	opts := organizations.CreatePermissionsOpts(getAuth(d))
-	err = organizations.CreatePermissions(client, organization(d), opts).ExtractErr()
+
+	opts := organizations.Auth{
+		UserID:   d.Get("user_id").(string),
+		Username: d.Get("username").(string),
+		Auth:     d.Get("auth").(int),
+	}
+	err = organizations.CreatePermissions(client, organization(d), []organizations.Auth{opts})
 	if err != nil {
 		return fmterr.Errorf("error creating organization permissions: %w", err)
 	}
@@ -69,7 +74,7 @@ func resourceSwrOrganizationPermissionsV2Read(_ context.Context, d *schema.Resou
 		return fmterr.Errorf(ClientError, err)
 	}
 
-	perms, err := organizations.GetPermissions(client, organization(d)).Extract()
+	perms, err := organizations.GetPermissions(client, organization(d))
 	if err != nil {
 		return fmterr.Errorf("error getting organization permissions: %w", err)
 	}
@@ -101,8 +106,12 @@ func resourceSwrOrganizationPermissionsV2Update(ctx context.Context, d *schema.R
 		return fmterr.Errorf(ClientError, err)
 	}
 
-	opts := organizations.UpdatePermissionsOpts(getAuth(d))
-	err = organizations.UpdatePermissions(client, organization(d), opts).ExtractErr()
+	opts := organizations.Auth{
+		UserID:   d.Get("user_id").(string),
+		Username: d.Get("username").(string),
+		Auth:     d.Get("auth").(int),
+	}
+	err = organizations.UpdatePermissions(client, organization(d), []organizations.Auth{opts})
 	if err != nil {
 		return fmterr.Errorf("error updating organization permissions: %w", err)
 	}
@@ -117,19 +126,11 @@ func resourceSwrOrganizationPermissionsV2Delete(_ context.Context, d *schema.Res
 		return fmterr.Errorf(ClientError, err)
 	}
 
-	err = organizations.DeletePermissions(client, organization(d), d.Id()).ExtractErr()
+	err = organizations.DeletePermissions(client, organization(d), d.Id())
 	if err != nil {
 		return fmterr.Errorf("error deleting organization permissions: %w", err)
 	}
 
 	d.SetId("")
 	return nil
-}
-
-func getAuth(d *schema.ResourceData) organizations.Auth {
-	return organizations.Auth{
-		UserID:   d.Get("user_id").(string),
-		Username: d.Get("username").(string),
-		Auth:     d.Get("auth").(int),
-	}
 }

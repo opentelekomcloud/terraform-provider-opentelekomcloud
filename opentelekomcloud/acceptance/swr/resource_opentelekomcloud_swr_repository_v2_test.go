@@ -41,7 +41,7 @@ func testSwrRepositoryV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := repositories.Get(client, rs.Primary.Attributes["organization"], rs.Primary.ID).Extract()
+		_, err := repositories.Get(client, rs.Primary.Attributes["organization"], rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("SWR repository still exists")
 		}

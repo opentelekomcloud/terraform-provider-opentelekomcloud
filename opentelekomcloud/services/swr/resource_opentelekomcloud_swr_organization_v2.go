@@ -72,7 +72,7 @@ func resourceOrganizationCreate(ctx context.Context, d *schema.ResourceData, met
 	opts := organizations.CreateOpts{
 		Namespace: name,
 	}
-	err = organizations.Create(client, opts).ExtractErr()
+	err = organizations.Create(client, opts)
 	if err != nil {
 		return fmterr.Errorf("error creating SWR organization: %w", err)
 	}
@@ -87,7 +87,7 @@ func resourceOrganizationRead(_ context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		return fmterr.Errorf(ClientError, err)
 	}
-	org, err := organizations.Get(client, d.Id()).Extract()
+	org, err := organizations.Get(client, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error reading SWR organization: %w", err)
 	}
@@ -109,7 +109,7 @@ func resourceOrganizationDelete(_ context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return fmterr.Errorf(ClientError, err)
 	}
-	err = organizations.Delete(client, d.Id()).ExtractErr()
+	err = organizations.Delete(client, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error deleting SWR organization: %w", err)
 	}

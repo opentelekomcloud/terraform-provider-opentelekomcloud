@@ -62,7 +62,7 @@ func testSwrOrganizationV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := organizations.Get(client, rs.Primary.ID).Extract()
+		_, err := organizations.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("SWR organization still exists")
 		}
