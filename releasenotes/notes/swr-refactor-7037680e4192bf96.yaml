@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[RDS]** Refactoring of ``resource/opentelekomcloud_swr_*`` after gophertelekomcloud update (`#2033 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2033>`_)
