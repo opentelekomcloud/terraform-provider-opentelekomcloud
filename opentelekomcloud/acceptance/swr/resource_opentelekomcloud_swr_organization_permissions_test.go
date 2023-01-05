@@ -51,7 +51,7 @@ func testSwrOrganizationPermissionsV2Destroy(s *terraform.State) error {
 		}
 
 		org := rs.Primary.Attributes["organization"]
-		perms, err := organizations.GetPermissions(client, org).Extract()
+		perms, err := organizations.GetPermissions(client, org)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return nil // no permissions at all exist for the organization

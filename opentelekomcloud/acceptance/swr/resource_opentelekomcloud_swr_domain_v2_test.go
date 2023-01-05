@@ -48,7 +48,11 @@ func testSwrDomainV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := domains.Get(client, rs.Primary.Attributes["organization"], rs.Primary.Attributes["repository"], rs.Primary.ID).Extract()
+		_, err := domains.Get(client, domains.GetOpts{
+			Namespace:    rs.Primary.Attributes["organization"],
+			Repository:   rs.Primary.Attributes["repository"],
+			AccessDomain: rs.Primary.ID,
+		})
 		if err == nil {
 			return fmt.Errorf("SWR domain still exists")
 		}

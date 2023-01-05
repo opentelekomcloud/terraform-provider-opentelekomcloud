@@ -100,13 +100,14 @@ func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	opts := repositories.CreateOpts{
+		Namespace:   d.Get("organization").(string),
 		Repository:  d.Get("name").(string),
 		Category:    d.Get("category").(string),
 		Description: d.Get("description").(string),
 		IsPublic:    d.Get("is_public").(bool),
 	}
 
-	err = repositories.Create(client, organization(d), opts).ExtractErr()
+	err = repositories.Create(client, opts)
 	if err != nil {
 		return fmterr.Errorf("error creating repository: %w", err)
 	}
@@ -122,7 +123,7 @@ func resourceRepositoryRead(_ context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf(ClientError, err)
 	}
 
-	repo, err := repositories.Get(client, organization(d), d.Id()).Extract()
+	repo, err := repositories.Get(client, organization(d), d.Id())
 	if err != nil {
 		return fmterr.Errorf("error reading repository: %w", err)
 	}
@@ -153,11 +154,13 @@ func resourceRepositoryUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	opts := repositories.UpdateOpts{
+		Namespace:   d.Get("organization").(string),
+		Repository:  d.Get("repository").(string),
 		Category:    d.Get("category").(string),
 		Description: d.Get("description").(string),
 		IsPublic:    d.Get("is_public").(bool),
 	}
-	err = repositories.Update(client, organization(d), d.Id(), opts).ExtractErr()
+	err = repositories.Update(client, opts)
 	if err != nil {
 		return fmterr.Errorf("error updating repository: %w", err)
 	}
@@ -172,7 +175,7 @@ func resourceRepositoryDelete(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf(ClientError, err)
 	}
 
-	err = repositories.Delete(client, organization(d), d.Id()).ExtractErr()
+	err = repositories.Delete(client, organization(d), d.Id())
 	if err != nil {
 		fmterr.Errorf("error deleting repository: %w", err)
 	}
