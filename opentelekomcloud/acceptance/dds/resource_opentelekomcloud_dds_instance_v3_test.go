@@ -325,7 +325,7 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
   availability_zone = "%s"
   datastore {
     type           = "DDS-Community"
-    version        = "3.4"
+    version        = "4.0"
     storage_engine = "wiredTiger"
   }
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
@@ -368,7 +368,7 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
   availability_zone = "%s"
   datastore {
     type           = "DDS-Community"
-    version        = "3.4"
+    version        = "4.0"
     storage_engine = "wiredTiger"
   }
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id

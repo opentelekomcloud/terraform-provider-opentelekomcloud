@@ -32,6 +32,7 @@ func ResourceDdsInstanceV3() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(60 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
@@ -349,8 +350,18 @@ func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 
 	d.SetId(instance.Id)
 
-	if err := resourceDdsInstanceWaitUpdate(ctx, client, d); err != nil {
-		return diag.FromErr(err)
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"creating", "updating"},
+		Target:     []string{"normal"},
+		Refresh:    instanceStateRefreshFunc(client, d.Id()),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      15 * time.Second,
+		MinTimeout: 10 * time.Second,
+	}
+
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", d.Id(), err)
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
@@ -817,7 +828,7 @@ func resourceDdsInstanceWaitUpdate(ctx context.Context, client *golangsdk.Servic
 		Pending:    []string{"creating", "updating"},
 		Target:     []string{"normal"},
 		Refresh:    instanceStateRefreshFunc(client, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Timeout:    d.Timeout(schema.TimeoutUpdate),
 		Delay:      15 * time.Second,
 		MinTimeout: 10 * time.Second,
 	}
