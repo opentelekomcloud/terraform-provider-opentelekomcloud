@@ -2,6 +2,7 @@ package dds
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -31,6 +32,7 @@ func ResourceDdsInstanceV3() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(60 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
@@ -131,7 +133,6 @@ func ResourceDdsInstanceV3() *schema.Resource {
 						"num": {
 							Type:         schema.TypeInt,
 							Required:     true,
-							ForceNew:     true,
 							ValidateFunc: validation.IntBetween(1, 16),
 						},
 						"storage": {
@@ -145,13 +146,11 @@ func ResourceDdsInstanceV3() *schema.Resource {
 						"size": {
 							Type:         schema.TypeInt,
 							Optional:     true,
-							ForceNew:     true,
 							ValidateFunc: validation.IntDivisibleBy(10),
 						},
 						"spec_code": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: true,
 						},
 					},
 				},
@@ -354,15 +353,15 @@ func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"creating", "updating"},
 		Target:     []string{"normal"},
-		Refresh:    instanceStateRefreshFunc(client, instance.Id),
+		Refresh:    instanceStateRefreshFunc(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      20 * time.Second,
+		Delay:      15 * time.Second,
 		MinTimeout: 10 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", instance.Id, err)
+		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", d.Id(), err)
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
@@ -506,18 +505,35 @@ func resourceDdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"updating"},
-		Target:     []string{"normal"},
-		Refresh:    instanceStateRefreshFunc(client, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      15 * time.Second,
-		MinTimeout: 10 * time.Second,
+	if err := resourceDdsInstanceWaitUpdate(ctx, client, d); err != nil {
+		return diag.FromErr(err)
 	}
 
-	_, err = stateConf.WaitForStateContext(ctx)
-	if err != nil {
-		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", d.Id(), err)
+	if d.HasChange("flavor") {
+		for i := range d.Get("flavor").([]interface{}) {
+			volumeSizeIndex := fmt.Sprintf("flavor.%d.size", i)
+			numIndex := fmt.Sprintf("flavor.%d.num", i)
+			specCodeIndex := fmt.Sprintf("flavor.%d.spec_code", i)
+
+			if d.HasChange(volumeSizeIndex) {
+				err := flavorSizeUpdate(ctx, client, d, i)
+				if err != nil {
+					return diag.FromErr(err)
+				}
+			}
+			if d.HasChange(specCodeIndex) {
+				err := flavorSpecCodeUpdate(ctx, client, d, i)
+				if err != nil {
+					return diag.FromErr(err)
+				}
+			}
+			if d.HasChange(numIndex) {
+				err := flavorNumUpdate(ctx, client, d, i)
+				if err != nil {
+					return diag.FromErr(err)
+				}
+			}
+		}
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
@@ -572,4 +588,254 @@ func flattenDdsInstanceV3Nodes(dds instances.InstanceResponse) interface{} {
 		}
 	}
 	return nodesList
+}
+
+func flavorSizeUpdate(ctx context.Context, client *golangsdk.ServiceClient, d *schema.ResourceData, i int) error {
+	volumeSizeIndex := fmt.Sprintf("flavor.%d.size", i)
+	oldSizeRaw, newSizeRaw := d.GetChange(volumeSizeIndex)
+	oldSize := oldSizeRaw.(int)
+	newSize := newSizeRaw.(int)
+	if newSize < oldSize {
+		return fmt.Errorf("error updating instance: the new size(%d) must be greater than the old size(%d)", newSize, oldSize)
+	}
+	groupTypeIndex := fmt.Sprintf("flavor.%d.type", i)
+	groupType := d.Get(groupTypeIndex).(string)
+	if groupType != "replica" && groupType != "single" && groupType != "shard" {
+		return fmt.Errorf("error updating instance: %s does not support scaling up storage space", groupType)
+	}
+
+	if groupType == "shard" {
+		groupIDs, err := getDdsInstanceV3ShardGroupID(client, d)
+		if err != nil {
+			return err
+		}
+
+		for _, groupID := range groupIDs {
+			updateVolumeOpts := instances.ScaleStorageOpt{
+				GroupId:    groupID,
+				Size:       fmt.Sprintf("%d", newSize),
+				InstanceId: d.Id(),
+			}
+
+			_, err := instances.ScaleStorage(client, updateVolumeOpts)
+			if err != nil {
+				return err
+			}
+
+			if err := resourceDdsInstanceWaitUpdate(ctx, client, d); err != nil {
+				return err
+			}
+		}
+	} else {
+		updateVolumeOpts := instances.ScaleStorageOpt{
+			Size:       fmt.Sprintf("%d", newSize),
+			InstanceId: d.Id(),
+		}
+
+		_, err := instances.ScaleStorage(client, updateVolumeOpts)
+		if err != nil {
+			return err
+		}
+
+		if err := resourceDdsInstanceWaitUpdate(ctx, client, d); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func flavorNumUpdate(ctx context.Context, client *golangsdk.ServiceClient, d *schema.ResourceData, i int) error {
+	groupTypeIndex := fmt.Sprintf("flavor.%d.type", i)
+	groupType := d.Get(groupTypeIndex).(string)
+	if groupType != "mongos" && groupType != "shard" {
+		return fmt.Errorf("error updating instance: %s does not support adding nodes", groupType)
+	}
+	specCodeIndex := fmt.Sprintf("flavor.%d.spec_code", i)
+	volumeSizeIndex := fmt.Sprintf("flavor.%d.size", i)
+	volumeSize := d.Get(volumeSizeIndex).(int)
+	numIndex := fmt.Sprintf("flavor.%d.num", i)
+	oldNumRaw, newNumRaw := d.GetChange(numIndex)
+	oldNum := oldNumRaw.(int)
+	newNum := newNumRaw.(int)
+	if newNum < oldNum {
+		return fmt.Errorf("error updating instance: the new num(%d) must be greater than the old num(%d)", newNum, oldNum)
+	}
+
+	var updateNodeNumOpts instances.AddNodeOpts
+	if groupType == "mongos" {
+		updateNodeNumOpts = instances.AddNodeOpts{
+			Type:       groupType,
+			SpecCode:   d.Get(specCodeIndex).(string),
+			Num:        newNum - oldNum,
+			InstanceId: d.Id(),
+		}
+	} else {
+		volume := instances.VolumeNode{
+			Size: volumeSize,
+		}
+		updateNodeNumOpts = instances.AddNodeOpts{
+			Type:       groupType,
+			SpecCode:   d.Get(specCodeIndex).(string),
+			Num:        newNum - oldNum,
+			Volume:     &volume,
+			InstanceId: d.Id(),
+		}
+	}
+
+	_, err := instances.AddNode(client, updateNodeNumOpts)
+	if err != nil {
+		return err
+	}
+
+	if err := resourceDdsInstanceWaitUpdate(ctx, client, d); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func flavorSpecCodeUpdate(ctx context.Context, client *golangsdk.ServiceClient, d *schema.ResourceData, i int) error {
+	specCodeIndex := fmt.Sprintf("flavor.%d.spec_code", i)
+	groupTypeIndex := fmt.Sprintf("flavor.%d.type", i)
+	groupType := d.Get(groupTypeIndex).(string)
+	if groupType == "config" {
+		return fmt.Errorf("error updating instance: %s does not support updating spec_code", groupType)
+	}
+	switch groupType {
+	case "mongos":
+		nodeIDs, err := getDdsInstanceV3MongosNodeID(client, d)
+		if err != nil {
+			return err
+		}
+		for _, ID := range nodeIDs {
+			updateSpecOpts := instances.ModifySpecOpt{
+				TargetType:     "mongos",
+				TargetId:       ID,
+				TargetSpecCode: d.Get(specCodeIndex).(string),
+				InstanceId:     d.Id(),
+			}
+
+			_, err = instances.ModifySpec(client, updateSpecOpts)
+			if err != nil {
+				return err
+			}
+
+			if err := resourceDdsInstanceWaitUpdate(ctx, client, d); err != nil {
+				return err
+			}
+		}
+	case "shard":
+		groupIDs, err := getDdsInstanceV3ShardGroupID(client, d)
+		if err != nil {
+			return err
+		}
+
+		for _, ID := range groupIDs {
+			updateSpecOpts := instances.ModifySpecOpt{
+				TargetType:     "shard",
+				TargetId:       ID,
+				TargetSpecCode: d.Get(specCodeIndex).(string),
+				InstanceId:     d.Id(),
+			}
+
+			_, err = instances.ModifySpec(client, updateSpecOpts)
+			if err != nil {
+				return err
+			}
+
+			if err := resourceDdsInstanceWaitUpdate(ctx, client, d); err != nil {
+				return err
+			}
+		}
+	default:
+		updateSpecOpts := instances.ModifySpecOpt{
+			TargetId:       d.Id(),
+			TargetSpecCode: d.Get(specCodeIndex).(string),
+			InstanceId:     d.Id(),
+		}
+
+		_, err := instances.ModifySpec(client, updateSpecOpts)
+		if err != nil {
+			return err
+		}
+
+		if err := resourceDdsInstanceWaitUpdate(ctx, client, d); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func getDdsInstanceV3ShardGroupID(client *golangsdk.ServiceClient, d *schema.ResourceData) ([]string, error) {
+	groupIDs := make([]string, 0)
+
+	instanceID := d.Id()
+	opts := instances.ListInstanceOpts{
+		Id: instanceID,
+	}
+	ddsInstances, err := instances.List(client, opts)
+	if err != nil {
+		return groupIDs, fmt.Errorf("error fetching DDS instance: %s", err)
+	}
+	if ddsInstances.TotalCount == 0 {
+		log.Printf("[WARN] DDS instance (%s) was not found", instanceID)
+		return groupIDs, nil
+	}
+
+	log.Printf("[DEBUG] Retrieved instance, id: %s", instanceID)
+
+	for _, group := range ddsInstances.Instances[0].Groups {
+		if group.Type == "shard" {
+			groupIDs = append(groupIDs, group.Id)
+		}
+	}
+
+	return groupIDs, nil
+}
+
+func getDdsInstanceV3MongosNodeID(client *golangsdk.ServiceClient, d *schema.ResourceData) ([]string, error) {
+	nodeIDs := make([]string, 0)
+
+	instanceID := d.Id()
+	opts := instances.ListInstanceOpts{
+		Id: instanceID,
+	}
+	ddsInstances, err := instances.List(client, opts)
+	if err != nil {
+		return nodeIDs, fmt.Errorf("error fetching DDS instance: %s", err)
+	}
+
+	if ddsInstances.TotalCount == 0 {
+		log.Printf("[WARN] DDS instance (%s) was not found", instanceID)
+		return nodeIDs, nil
+	}
+
+	log.Printf("[DEBUG] Retrieved instance, id: %s", instanceID)
+
+	for _, group := range ddsInstances.Instances[0].Groups {
+		if group.Type == "mongos" {
+			for _, node := range group.Nodes {
+				nodeIDs = append(nodeIDs, node.Id)
+			}
+		}
+	}
+
+	return nodeIDs, nil
+}
+
+func resourceDdsInstanceWaitUpdate(ctx context.Context, client *golangsdk.ServiceClient, d *schema.ResourceData) error {
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"creating", "updating"},
+		Target:     []string{"normal"},
+		Refresh:    instanceStateRefreshFunc(client, d.Id()),
+		Timeout:    d.Timeout(schema.TimeoutUpdate),
+		Delay:      15 * time.Second,
+		MinTimeout: 10 * time.Second,
+	}
+
+	_, err := stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmt.Errorf("error waiting for instance (%s) to become ready: %w", d.Id(), err)
+	}
+	return nil
 }
