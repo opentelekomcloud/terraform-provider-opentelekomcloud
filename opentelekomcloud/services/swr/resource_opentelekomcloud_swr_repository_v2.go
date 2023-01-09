@@ -43,8 +43,8 @@ func ResourceSwrRepositoryV2() *schema.Resource {
 				ValidateFunc: validation.All(
 					validation.StringLenBetween(1, 128),
 					validation.StringMatch(
-						regexp.MustCompile(`^[a-z0-9][a-z0-9._-]+[a-z0-9]+$`),
-						"Only lowercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed.",
+						regexp.MustCompile(`^[a-z0-9][a-z0-9\/._-]+[a-z0-9]+$`),
+						"Only lowercase letters, digits, periods (.), underscores (_), slashes (/), and hyphens (-) are allowed.",
 					),
 					validation.StringDoesNotMatch(
 						regexp.MustCompile(`_{3,}?|\.{2,}?|-{2,}?`),
@@ -123,7 +123,7 @@ func resourceRepositoryRead(_ context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf(ClientError, err)
 	}
 
-	repo, err := repositories.Get(client, organization(d), d.Id())
+	repo, err := repositories.Get(client, organization(d), repository(d))
 	if err != nil {
 		return fmterr.Errorf("error reading repository: %w", err)
 	}
@@ -175,7 +175,7 @@ func resourceRepositoryDelete(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf(ClientError, err)
 	}
 
-	err = repositories.Delete(client, organization(d), d.Id())
+	err = repositories.Delete(client, organization(d), repository(d))
 	if err != nil {
 		fmterr.Errorf("error deleting repository: %w", err)
 	}

@@ -22,7 +22,9 @@ func TestSwrRepositoryV2_basic(t *testing.T) {
 			{
 				Config: testSwrRepositoryV2Basic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceRepoName, "category", "linux"),
+					resource.TestCheckResourceAttr(resourceRepoName1, "category", "linux"),
+					resource.TestCheckResourceAttr(resourceRepoName2, "name", "one/two"),
+					resource.TestCheckResourceAttr(resourceRepoName3, "name", "one/two/three"),
 				),
 			},
 		},
@@ -51,7 +53,9 @@ func testSwrRepositoryV2Destroy(s *terraform.State) error {
 }
 
 const (
-	resourceRepoName = "opentelekomcloud_swr_repository_v2.repo_1"
+	resourceRepoName1 = "opentelekomcloud_swr_repository_v2.repo_1"
+	resourceRepoName2 = "opentelekomcloud_swr_repository_v2.repo_2"
+	resourceRepoName3 = "opentelekomcloud_swr_repository_v2.repo_3"
 
 	testSwRepositoryV2BasicTemplate = `
 resource opentelekomcloud_swr_organization_v2 org_1 {
@@ -61,6 +65,22 @@ resource opentelekomcloud_swr_organization_v2 org_1 {
 resource opentelekomcloud_swr_repository_v2 repo_1 {
   organization = opentelekomcloud_swr_organization_v2.org_1.name
   name         = "%[1]s"
+  description  = "Test repository"
+  category     = "linux"
+  is_public    = false
+}
+
+resource opentelekomcloud_swr_repository_v2 repo_2 {
+  organization = opentelekomcloud_swr_organization_v2.org_1.name
+  name         = "one/two"
+  description  = "Test repository"
+  category     = "linux"
+  is_public    = false
+}
+
+resource opentelekomcloud_swr_repository_v2 repo_3 {
+  organization = opentelekomcloud_swr_organization_v2.org_1.name
+  name         = "one/two/three"
   description  = "Test repository"
   category     = "linux"
   is_public    = false
