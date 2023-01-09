@@ -13,5 +13,5 @@ func organization(d *schema.ResourceData) string {
 }
 
 func repository(d *schema.ResourceData) string {
-	return strings.Replace(d.Id(), "/", "$", -1)
+	return strings.ReplaceAll(d.Id(), "/", "$")
 }
