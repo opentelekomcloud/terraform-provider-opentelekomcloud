@@ -19,6 +19,7 @@ func ResourceLTSGroupV2() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceGroupV2Create,
 		ReadContext:   resourceGroupV2Read,
+		UpdateContext: resourceGroupV2Update,
 		DeleteContext: resourceGroupV2Delete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -33,7 +34,6 @@ func ResourceLTSGroupV2() *schema.Resource {
 			"ttl_in_days": {
 				Type:     schema.TypeInt,
 				Required: true,
-				ForceNew: true,
 			},
 			"creation_time": {
 				Type:     schema.TypeInt,
@@ -101,6 +101,24 @@ func resourceGroupV2Read(_ context.Context, d *schema.ResourceData, meta interfa
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+func resourceGroupV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	client, err := config.LtsV2Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
+	}
+
+	_, err = groups.UpdateLogGroup(client, groups.UpdateLogGroupOpts{
+		TTLInDays:  int32(d.Get("ttl_in_days").(int)),
+		LogGroupId: d.Id(),
+	})
+	if err != nil {
+		return fmterr.Errorf("error updating OpenTelekomCloud LTS Log Group: %w", err)
+	}
+
+	return resourceGroupV2Read(ctx, d, meta)
 }
 
 func resourceGroupV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
