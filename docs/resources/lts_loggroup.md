@@ -34,6 +34,12 @@ The following attributes are exported:
 
 * `ttl_in_days` - Specifies the log expiration time. The value is fixed to 7 days.
 
+## Attributes Reference
+
+The following attributes are exported:
+
+* `creation_time` - Specifies the time when a log group was created.
+
 ## Import
 
 Log group can be imported using the `id`, e.g.

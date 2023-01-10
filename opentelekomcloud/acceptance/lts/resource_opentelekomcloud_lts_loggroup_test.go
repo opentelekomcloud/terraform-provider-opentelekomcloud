@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/lts/v2/loggroups"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/lts/v2/groups"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -15,7 +15,7 @@ import (
 )
 
 func TestAccLogTankGroupV2_basic(t *testing.T) {
-	var group loggroups.LogGroup
+	var group groups.LogGroup
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -30,6 +30,17 @@ func TestAccLogTankGroupV2_basic(t *testing.T) {
 						"opentelekomcloud_logtank_group_v2.testacc_group", "group_name", "testacc_group"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_logtank_group_v2.testacc_group", "ttl_in_days", "7"),
+				),
+			},
+			{
+				Config: testAccLogTankGroupV2_updated,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLogTankGroupV2Exists(
+						"opentelekomcloud_logtank_group_v2.testacc_group", &group),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_logtank_group_v2.testacc_group", "group_name", "testacc_group"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_logtank_group_v2.testacc_group", "ttl_in_days", "6"),
 				),
 			},
 		},
@@ -48,10 +59,17 @@ func testAccCheckLogTankGroupV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err = loggroups.Get(ltsclient, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("log group (%s) still exists.", rs.Primary.ID)
+		allGroups, err := groups.ListLogGroups(ltsclient)
+		if err != nil {
+			return fmt.Errorf("error listing lts groups: %s", err)
 		}
+
+		for _, group := range allGroups {
+			if group.LogGroupId == rs.Primary.ID {
+				return fmt.Errorf("log group (%s) still exists", rs.Primary.ID)
+			}
+		}
+
 		if _, ok := err.(golangsdk.ErrDefault404); !ok {
 			return err
 		}
@@ -59,7 +77,7 @@ func testAccCheckLogTankGroupV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckLogTankGroupV2Exists(n string, group *loggroups.LogGroup) resource.TestCheckFunc {
+func testAccCheckLogTankGroupV2Exists(n string, group *groups.LogGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -76,13 +94,17 @@ func testAccCheckLogTankGroupV2Exists(n string, group *loggroups.LogGroup) resou
 			return fmt.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
 		}
 
-		var found *loggroups.LogGroup
-
-		found, err = loggroups.Get(ltsclient, rs.Primary.ID).Extract()
+		allGroups, err := groups.ListLogGroups(ltsclient)
 		if err != nil {
 			return err
 		}
-		*group = *found
+
+		for _, ltsGroup := range allGroups {
+			if ltsGroup.LogGroupId == rs.Primary.ID {
+				*group = ltsGroup
+				break
+			}
+		}
 
 		return nil
 	}
@@ -92,5 +114,12 @@ const testAccLogTankGroupV2_basic = `
 resource "opentelekomcloud_logtank_group_v2" "testacc_group" {
   group_name  = "testacc_group"
   ttl_in_days = 7
+}
+`
+
+const testAccLogTankGroupV2_updated = `
+resource "opentelekomcloud_logtank_group_v2" "testacc_group" {
+  group_name  = "testacc_group"
+  ttl_in_days = 6
 }
 `
