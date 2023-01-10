@@ -39,7 +39,7 @@ The following attributes are exported:
 
 * `topic_name` - See Argument Reference above.
 
-* `index_enabled` - Specifies the search switch. When index is enabled, the topic allows you to search for logs by keyword.
+* `creation_time` - Specifies the time when a log group was created.
 
 ## Import
 

@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/lts/v2/loggroups"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/lts/v2/logtopics"
-
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/lts/v2/groups"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/lts/v2/streams"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -39,8 +39,8 @@ func ResourceLTSTopicV2() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"index_enabled": {
-				Type:     schema.TypeBool,
+			"creation_time": {
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 		},
@@ -55,18 +55,19 @@ func resourceTopicV2Create(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	groupId := d.Get("group_id").(string)
-	createOpts := &logtopics.CreateOpts{
-		LogTopicName: d.Get("topic_name").(string),
+	createOpts := streams.CreateOpts{
+		LogStreamName: d.Get("topic_name").(string),
+		GroupId:       groupId,
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	topicCreate, err := logtopics.Create(client, groupId, createOpts).Extract()
+	topicCreate, err := streams.CreateLogStream(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating log topic: %s", err)
 	}
 
-	d.SetId(topicCreate.ID)
+	d.SetId(topicCreate)
 	return resourceTopicV2Read(ctx, d, meta)
 }
 
@@ -78,18 +79,29 @@ func resourceTopicV2Read(_ context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	groupId := d.Get("group_id").(string)
-	topic, err := logtopics.Get(client, groupId, d.Id()).Extract()
+	allTopics, err := streams.ListLogStream(client, groupId)
 	if err != nil {
 		return fmterr.Errorf("error getting OpenTelekomCloud log topic %s: %s", d.Id(), err)
 	}
 
-	log.Printf("[DEBUG] Retrieved log topic %s: %#v", d.Id(), topic)
-	if topic.ID != "" {
-		d.SetId(topic.ID)
+	var stream streams.LogStream
+	for _, topic := range allTopics {
+		if topic.LogStreamId == d.Id() {
+			stream = topic
+			break
+		}
 	}
+
+	if stream.LogStreamId == "" {
+		return fmterr.Errorf("OpenTelekomCloud log stream %s was not found", d.Id())
+	}
+
+	log.Printf("[DEBUG] Retrieved log topic %s: %#v", d.Id(), stream)
+	d.SetId(stream.LogStreamId)
+
 	mErr := multierror.Append(
-		d.Set("topic_name", topic.Name),
-		d.Set("index_enabled", topic.IndexEnabled),
+		d.Set("topic_name", stream.LogStreamName),
+		d.Set("creation_time", stream.CreationTime),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -106,9 +118,17 @@ func resourceTopicV2Delete(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	groupId := d.Get("group_id").(string)
-	err = logtopics.Delete(client, groupId, d.Id()).ExtractErr()
+	err = streams.DeleteLogStream(client, streams.DeleteOpts{
+		GroupId:  groupId,
+		StreamId: d.Id(),
+	})
 	if err != nil {
-		return common.CheckDeletedDiag(d, err, "Error deleting log topic")
+		if _, ok := err.(golangsdk.ErrDefault400); ok {
+			d.SetId("")
+			return nil
+		} else {
+			return common.CheckDeletedDiag(d, err, "Error deleting log topic")
+		}
 	}
 
 	d.SetId("")
@@ -133,7 +153,7 @@ func resourceTopicV2Import(_ context.Context, d *schema.ResourceData, meta inter
 	log.Printf("[DEBUG] Import log topic %s / %s", groupId, topicId)
 
 	// check the parent logtank group whether exists.
-	_, err = loggroups.Get(client, groupId).Extract()
+	_, err = groups.ListLogGroups(client)
 	if err != nil {
 		return nil, fmt.Errorf("error importing OpenTelekomCloud log topic %s: %s", topicId, err)
 	}

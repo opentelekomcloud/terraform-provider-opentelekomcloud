@@ -1,0 +1,6 @@
+---
+other:
+  - |
+    **[LTS]** Refactoring of ``resource/opentelekomcloud_logtank_group_v2`` with new API (`#2041 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2041>`_)
+  - |
+    **[LTS]** Refactoring of ``resource/opentelekomcloud_logtank_topic_v2`` with new API (`#2041 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2041>`_)
