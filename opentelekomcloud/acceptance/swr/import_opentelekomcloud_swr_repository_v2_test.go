@@ -18,7 +18,7 @@ func TestSwrRepositoryV2_import(t *testing.T) {
 				Config: testSwrRepositoryV2Basic,
 			},
 			{
-				ResourceName:      resourceRepoName,
+				ResourceName:      resourceRepoName1,
 				ImportStateId:     fmt.Sprintf("%[1]s/%[1]s", name),
 				ImportState:       true,
 				ImportStateVerify: true,

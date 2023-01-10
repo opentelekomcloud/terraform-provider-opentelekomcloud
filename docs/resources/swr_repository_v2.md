@@ -29,7 +29,7 @@ The following arguments are supported:
 * `organization` - The name of the repository organization.
 
 * `name` - Enter 1 to 128 characters, starting and ending with a lowercase letter or digit.
-  Only lowercase letters, digits, periods (`.`), underscores (`_`), and hyphens (`-`) are allowed.
+  Only lowercase letters, digits, periods (`.`), slashes (`/`), underscores (`_`), and hyphens (`-`) are allowed.
   Periods, underscores, and hyphens cannot be placed next to each other.
   A maximum of two consecutive underscores are allowed.
 
