@@ -1154,9 +1154,16 @@ func validateRDSv3Flavor(argName string) schema.CustomizeDiffFunc {
 		}
 		dataStoreInfo := d.Get("db").([]interface{})[0].(map[string]interface{})
 		flavor := d.Get(argName).(string)
-
+		dversion := dataStoreInfo["version"].(string)
+		version, err := strconv.Atoi(dversion)
+		if err != nil {
+			return fmt.Errorf("error during version conversion: %s", dversion)
+		}
+		if version > 13 {
+			version = 13
+		}
 		listOpts := flavors.ListOpts{
-			VersionName:  dataStoreInfo["version"].(string),
+			VersionName:  strconv.Itoa(version),
 			DatabaseName: dataStoreInfo["type"].(string),
 		}
 		flavorList, err := flavors.ListFlavors(client, listOpts)
