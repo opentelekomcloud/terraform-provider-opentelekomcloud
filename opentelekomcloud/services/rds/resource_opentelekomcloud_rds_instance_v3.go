@@ -1155,6 +1155,7 @@ func validateRDSv3Flavor(argName string) schema.CustomizeDiffFunc {
 		dataStoreInfo := d.Get("db").([]interface{})[0].(map[string]interface{})
 		flavor := d.Get(argName).(string)
 		dversion := dataStoreInfo["version"].(string)
+		// TODO: need to be removed when https://jira.tsi-dev.otc-service.com/browse/BM-1169 done
 		version, err := strconv.Atoi(dversion)
 		if err != nil {
 			return fmt.Errorf("error during version conversion: %s", dversion)
@@ -1162,6 +1163,7 @@ func validateRDSv3Flavor(argName string) schema.CustomizeDiffFunc {
 		if version > 13 {
 			version = 13
 		}
+		// till here
 		listOpts := flavors.ListOpts{
 			VersionName:  strconv.Itoa(version),
 			DatabaseName: dataStoreInfo["type"].(string),
