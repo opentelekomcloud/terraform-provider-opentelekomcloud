@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[CCE]** Add pre-defined tag ignore for ``resource/opentelekomcloud_cce_node_v3`` (`#2042 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2042>`_)

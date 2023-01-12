@@ -30,6 +30,7 @@ import (
 var (
 	predefinedTags = []string{
 		"beta.kubernetes.io/arch",
+		"beta.kubernetes.io/instance-type",
 		"beta.kubernetes.io/os",
 		"failure-domain.beta.kubernetes.io/region",
 		"failure-domain.beta.kubernetes.io/zone",
