@@ -384,8 +384,8 @@ The `db` block supports:
 * `type` - (Required) Specifies the DB engine. Value: MySQL, PostgreSQL, SQLServer. Changing this parameter will create a new resource.
 
 * `version` - (Required) Specifies the database version. MySQL databases support MySQL 5.6
-  and 5.7. PostgreSQL databases support PostgreSQL 9.5 and above. Microsoft SQL Server
-  databases support 2014 SE, 2016 SE, and 2016 EE.
+  and above. PostgreSQL databases support PostgreSQL 9.5 and above. Microsoft SQL Server
+  databases support 2014 SE, 2016 SE, and above.
   Changing this parameter will create a new resource.
 
 The `volume` block supports:
