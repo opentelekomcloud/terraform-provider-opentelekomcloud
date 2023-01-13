@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -1154,18 +1155,23 @@ func validateRDSv3Flavor(argName string) schema.CustomizeDiffFunc {
 		}
 		dataStoreInfo := d.Get("db").([]interface{})[0].(map[string]interface{})
 		flavor := d.Get(argName).(string)
-		dversion := dataStoreInfo["version"].(string)
-		// TODO: need to be removed when https://jira.tsi-dev.otc-service.com/browse/BM-1169 done
-		version, err := strconv.Atoi(dversion)
+
+		dataStoreVersion := dataStoreInfo["version"].(string)
+		// TODO: need to be removed when https://jira.tsi-dev.otc-service.com/browse/OTCDB-2757 done
+		newVersion, err := version.NewVersion(dataStoreVersion)
 		if err != nil {
-			return fmt.Errorf("error during version conversion: %s", dversion)
+			return fmt.Errorf("error while version conversion: %w", err)
 		}
-		if version > 13 {
-			version = 13
+		versionConstraints, err := version.NewConstraint(">= 14, < 15")
+		if err != nil {
+			return fmt.Errorf("error while constraint creation: %w", err)
 		}
-		// till here
+		if versionConstraints.Check(newVersion) {
+			dataStoreVersion = "14.4"
+		}
+		// END
 		listOpts := flavors.ListOpts{
-			VersionName:  strconv.Itoa(version),
+			VersionName:  dataStoreVersion,
 			DatabaseName: dataStoreInfo["type"].(string),
 		}
 		flavorList, err := flavors.ListFlavors(client, listOpts)
