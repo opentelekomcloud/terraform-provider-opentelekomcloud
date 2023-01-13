@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    [DCS]: Fix pre-apply check with non-existent resource for DCS `v3.0` for ``resource/opentelekomcloud_dcs_instance_v1`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+

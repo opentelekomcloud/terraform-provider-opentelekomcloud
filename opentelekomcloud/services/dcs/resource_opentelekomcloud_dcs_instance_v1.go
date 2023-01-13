@@ -729,20 +729,13 @@ func dcsInstanceV1WhitelistRefreshFunc(client *golangsdk.ServiceClient, instance
 }
 
 func validateEngine(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	mErr := &multierror.Error{}
 	engineVersion := d.Get("engine_version").(string)
 
-	if _, ok := d.GetOk("security_group_id"); !ok && engineVersion == "3.0" {
-		mErr = multierror.Append(mErr, fmt.Errorf("'security_group_id' should be set with engine_version==3.0"))
-	} else if ok && engineVersion != "3.0" {
-		mErr = multierror.Append(mErr, fmt.Errorf("only DCS Redis 3.0 supports security groups"))
-	}
-
 	if _, ok := d.GetOk("whitelist"); ok && engineVersion == "3.0" {
-		mErr = multierror.Append(mErr, fmt.Errorf("DCS Redis 3.0 instance does not support whitelisting"))
+		return fmt.Errorf("DCS Redis 3.0 instance does not support whitelisting")
 	}
 
-	return mErr.ErrorOrNil()
+	return nil
 }
 
 func resourceDcsInstanceV1ImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -756,6 +749,7 @@ func resourceDcsInstanceV1ImportState(ctx context.Context, d *schema.ResourceDat
 	if diagRead := resourceDcsInstancesV1Read(ctx, d, meta); diagRead.HasError() {
 		return nil, fmt.Errorf("error reading opentelekomcloud_dcs_instance_v1 %s: %s", d.Id(), diagRead[0].Summary)
 	}
+
 	instance, err := lifecycle.Get(client, d.Id())
 	if err != nil {
 		return nil, fmt.Errorf("unable to get instance %s: %s", d.Id(), err)
