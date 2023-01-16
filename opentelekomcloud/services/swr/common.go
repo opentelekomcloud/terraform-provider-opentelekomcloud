@@ -12,6 +12,6 @@ func organization(d *schema.ResourceData) string {
 	return d.Get("organization").(string)
 }
 
-func repository(d *schema.ResourceData) string {
-	return strings.ReplaceAll(d.Id(), "/", "$")
+func repository(name string) string {
+	return strings.ReplaceAll(name, "/", "$")
 }

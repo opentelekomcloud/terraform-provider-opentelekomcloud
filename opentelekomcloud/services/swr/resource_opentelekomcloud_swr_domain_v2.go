@@ -89,7 +89,7 @@ func resourceSwrDomainCreate(ctx context.Context, d *schema.ResourceData, meta i
 
 	opts := domains.CreateOpts{
 		Namespace:    d.Get("organization").(string),
-		Repository:   d.Get("repository").(string),
+		Repository:   repository(d.Get("repository").(string)),
 		AccessDomain: d.Get("access_domain").(string),
 		Permit:       d.Get("permission").(string),
 		Deadline:     d.Get("deadline").(string),
@@ -114,7 +114,7 @@ func resourceSwrDomainRead(_ context.Context, d *schema.ResourceData, meta inter
 
 	opts := domains.GetOpts{
 		Namespace:    d.Get("organization").(string),
-		Repository:   d.Get("repository").(string),
+		Repository:   repository(d.Get("repository").(string)),
 		AccessDomain: d.Get("access_domain").(string),
 	}
 	domain, err := domains.Get(client, opts)
@@ -150,7 +150,7 @@ func resourceSwrDomainUpdate(ctx context.Context, d *schema.ResourceData, meta i
 
 	opts := domains.UpdateOpts{
 		Namespace:   d.Get("organization").(string),
-		Repository:  d.Get("repository").(string),
+		Repository:  repository(d.Get("repository").(string)),
 		Permit:      d.Get("permission").(string),
 		Deadline:    d.Get("deadline").(string),
 		Description: d.Get("description").(string),
@@ -173,7 +173,7 @@ func resourceSwrDomainDelete(_ context.Context, d *schema.ResourceData, meta int
 
 	opts := domains.GetOpts{
 		Namespace:    d.Get("organization").(string),
-		Repository:   d.Get("repository").(string),
+		Repository:   repository(d.Get("repository").(string)),
 		AccessDomain: d.Get("access_domain").(string),
 	}
 	err = domains.Delete(client, opts)

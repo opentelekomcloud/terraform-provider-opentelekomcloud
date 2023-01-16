@@ -123,7 +123,7 @@ func resourceRepositoryRead(_ context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf(ClientError, err)
 	}
 
-	repo, err := repositories.Get(client, organization(d), repository(d))
+	repo, err := repositories.Get(client, organization(d), repository(d.Id()))
 	if err != nil {
 		return fmterr.Errorf("error reading repository: %w", err)
 	}
@@ -175,7 +175,7 @@ func resourceRepositoryDelete(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf(ClientError, err)
 	}
 
-	err = repositories.Delete(client, organization(d), repository(d))
+	err = repositories.Delete(client, organization(d), repository(d.Id()))
 	if err != nil {
 		fmterr.Errorf("error deleting repository: %w", err)
 	}

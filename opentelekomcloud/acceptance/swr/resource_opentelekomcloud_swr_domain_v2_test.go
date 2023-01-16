@@ -36,6 +36,29 @@ func TestSwrDomainV2Basic(t *testing.T) {
 	})
 }
 
+func TestSwrDomainV2Slashes(t *testing.T) {
+	domainToShare := os.Getenv("OS_DOMAIN_NAME_2")
+	if domainToShare == "" {
+		t.Skip("OS_DOMAIN_NAME_2 is empty")
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testSwrDomainV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testSwrDomainV2Slashes(name, "grafana/grafana", domainToShare),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceDomainName, "permission", "read"),
+					resource.TestCheckResourceAttr(resourceDomainName, "access_domain", domainToShare),
+					resource.TestCheckResourceAttr(resourceDomainName, "repository", "grafana/grafana"),
+				),
+			},
+		},
+	})
+}
+
 func testSwrDomainV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.SwrV2Client(env.OS_REGION_NAME)
@@ -87,4 +110,28 @@ resource opentelekomcloud_swr_domain_v2 domain_1 {
   deadline      = "forever"
 }
 `, name, domainToShare)
+}
+
+func testSwrDomainV2Slashes(orgName string, repoName string, domainToShare string) string {
+	return fmt.Sprintf(`
+resource opentelekomcloud_swr_organization_v2 org_1 {
+  name = "%[1]s"
+}
+
+resource opentelekomcloud_swr_repository_v2 repo_1 {
+  organization = opentelekomcloud_swr_organization_v2.org_1.name
+  name         = "%[2]s"
+  description  = "Test repository"
+  category     = "linux"
+  is_public    = false
+}
+
+resource opentelekomcloud_swr_domain_v2 domain_1 {
+  organization  = opentelekomcloud_swr_organization_v2.org_1.name
+  repository    = opentelekomcloud_swr_repository_v2.repo_1.name
+  access_domain = "%[3]s"
+  permission    = "read"
+  deadline      = "forever"
+}
+`, orgName, repoName, domainToShare)
 }
