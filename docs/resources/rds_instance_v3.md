@@ -362,6 +362,8 @@ The following arguments are supported:
 
 * `restore_point` - (Optional) Specifies the restoration information.
 
+* `ssl_enable` - (Optional) Specifies whether SSL should be enabled for MySql instances.
+
 The `db` block supports:
 
 * `password` - (Required) Specifies the database password. The value cannot be

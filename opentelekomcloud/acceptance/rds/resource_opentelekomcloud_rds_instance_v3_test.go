@@ -35,6 +35,7 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8635"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "PostgreSQL"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8635"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.size", "40"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.keep_days", "1"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.muh", "value-create"),
@@ -47,6 +48,7 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.large"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.size", "100"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.muh", "value-update"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8636"),
 				),
 			},
 		},
@@ -267,6 +269,8 @@ func TestAccRdsInstanceV3_configurationParameters(t *testing.T) {
 }
 
 func TestAccRdsInstanceV3TimeZone(t *testing.T) {
+	// Test is failing on deletion because RDSv3 SSL switchover doesn't change instance `action` status / doesn't
+	// return job_id but still blocks the instance from performing other actions like port_change/instance_deletion
 	postfix := acctest.RandString(3)
 	var rdsInstance instances.InstanceResponse
 
@@ -282,6 +286,7 @@ func TestAccRdsInstanceV3TimeZone(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "MySQL"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.mysql.m1.large"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "ssl_enable", "true"),
 				),
 			},
 		},
@@ -375,7 +380,11 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 func testAccRdsInstanceV3Update(postfix string) string {
 	return fmt.Sprintf(`
 %s
-%s
+
+resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
+  name        = "terraform_test_security_group"
+  description = "terraform security group acceptance test"
+}
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%s"
@@ -384,9 +393,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     password = "Postgres!120521"
     type     = "PostgreSQL"
     version  = "10"
-    port     = "8635"
+    port     = "8636"
   }
-  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
@@ -402,7 +411,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     muh = "value-update"
   }
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3ElasticIP(postfix string) string {
@@ -811,7 +820,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 40
   }
-  flavor = "rds.mysql.m1.large"
+  flavor     = "rds.mysql.m1.large"
+  ssl_enable = true
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
@@ -836,6 +846,7 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
     version = "8.0"
   }
 }
+
 
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
