@@ -90,22 +90,6 @@ func TestAccDcsInstancesV1_basicEngineV3Instance(t *testing.T) {
 	})
 }
 
-func TestAccASV1Configuration_invalidSecurityGroup(t *testing.T) {
-	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckDcsV1InstanceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config:      testAccDcsV1InstanceValidation(instanceName),
-				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`'security_group_id' should be set.+`),
-			},
-		},
-	})
-}
-
 func TestAccASV1Configuration_invalidEngineVersion(t *testing.T) {
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
 	resource.ParallelTest(t, resource.TestCase{
@@ -202,7 +186,7 @@ func TestAccDCSInstanceV1_importBasic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
-					"password", "configuration",
+					"password", "configuration", "security_group_id",
 				},
 			},
 		},
@@ -275,15 +259,16 @@ data "opentelekomcloud_dcs_product_v1" "product_1" {
 }
 
 resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
-  name            = "%s"
-  engine_version  = "5.0"
-  password        = "Hungarian_rapsody"
-  engine          = "Redis"
-  capacity        = 0.125
-  vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  available_zones = [data.opentelekomcloud_dcs_az_v1.az_1.id]
-  product_id      = data.opentelekomcloud_dcs_product_v1.product_1.id
+  name              = "%s"
+  engine_version    = "5.0"
+  password          = "Hungarian_rapsody"
+  engine            = "Redis"
+  capacity          = 0.125
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  available_zones   = [data.opentelekomcloud_dcs_az_v1.az_1.id]
+  product_id        = data.opentelekomcloud_dcs_product_v1.product_1.id
+  security_group_id = "dummy-sg-id"
   backup_policy {
     backup_type = "manual"
     begin_at    = "00:00-01:00"
@@ -371,35 +356,6 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)
 }
 
-func testAccDcsV1InstanceValidation(instanceName string) string {
-	return fmt.Sprintf(`
-%s
-
-%s
-
-data "opentelekomcloud_dcs_az_v1" "az_1" {
-  port = "8002"
-  code = "%s"
-}
-
-data "opentelekomcloud_dcs_product_v1" "product_1" {
-  spec_code = "redis.single.xu1.tiny.128"
-}
-
-resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
-  name            = "%s"
-  engine_version  = "3.0"
-  password        = "Hungarian_rapsody"
-  engine          = "Redis"
-  capacity        = 0.125
-  vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  available_zones = [data.opentelekomcloud_dcs_az_v1.az_1.id]
-  product_id      = data.opentelekomcloud_dcs_product_v1.product_1.id
-}
-`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)
-}
-
 func testAccDcsV1InstanceEngineValidation(instanceName string) string {
 	return fmt.Sprintf(`
 %s
@@ -467,9 +423,15 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
 
 func testAccDcsV1InstanceEngineV3(instanceName string) string {
 	return fmt.Sprintf(`
-%s
 
 %s
+
+resource "opentelekomcloud_networking_secgroup_v2" "redis_sg" {
+  name                 = "test-redis-sg"
+  description          = "REDIS cache access protection"
+  delete_default_rules = true
+}
+
 
 data "opentelekomcloud_dcs_az_v1" "az_1" {
   port = "8002"
@@ -488,11 +450,11 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   capacity          = 2
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  security_group_id = opentelekomcloud_networking_secgroup_v2.redis_sg.id
   available_zones   = [data.opentelekomcloud_dcs_az_v1.az_1.id]
   product_id        = data.opentelekomcloud_dcs_product_v1.product_1.id
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)
 }
 
 func testAccDcsV1InstanceWhitelist(instanceName string) string {
