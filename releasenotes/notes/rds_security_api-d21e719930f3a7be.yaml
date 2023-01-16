@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **[RDS]** Add security features for ``resource/opentelekomcloud_rds_instance_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[RDS]** Add security features for ``resource/opentelekomcloud_rds_instance_v3`` (`#2049 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2049>`_)
