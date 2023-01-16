@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -24,6 +25,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/configurations"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/flavors"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/security"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -42,7 +44,7 @@ func ResourceRdsInstanceV3() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
-			Update: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(40 * time.Minute),
 		},
 
 		CustomizeDiff: customdiff.All(
@@ -120,7 +122,6 @@ func ResourceRdsInstanceV3() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 							Optional: true,
-							ForceNew: true,
 						},
 						"user_name": {
 							Type:     schema.TypeString,
@@ -141,7 +142,6 @@ func ResourceRdsInstanceV3() *schema.Resource {
 			"security_group_id": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"subnet_id": {
 				Type:     schema.TypeString,
@@ -278,6 +278,10 @@ func ResourceRdsInstanceV3() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			"ssl_enable": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 		},
 	}
@@ -501,6 +505,23 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
+	if sslEnable := d.Get("ssl_enable").(bool); sslEnable {
+		if dbType := d.Get("db.0.type").(string); strings.ToLower(dbType) == "mysql" {
+			updateOpts := security.SwitchSslOpts{
+				SslOption:  sslEnable,
+				InstanceId: d.Id(),
+			}
+			log.Printf("[DEBUG] Update opts of SSL configuration: %+v", updateOpts)
+			err := security.SwitchSsl(client, updateOpts)
+			if err != nil {
+				return fmterr.Errorf("error updating instance SSL configuration: %s ", err)
+			}
+			return nil
+		} else {
+			return diag.Errorf("only MySQL database support SSL enable and disable")
+		}
+	}
+
 	return resourceRdsInstanceV3Read(clientCtx, d, meta)
 }
 
@@ -721,6 +742,18 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 	if err != nil {
 		return fmterr.Errorf(errCreateClient, err)
 	}
+
+	if d.HasChange("security_group_id") {
+		updateOpts := security.SetSecurityGroupOpts{
+			InstanceId:      d.Id(),
+			SecurityGroupId: d.Get("security_group_id").(string),
+		}
+		_, err := security.SetSecurityGroup(client, updateOpts)
+		if err != nil {
+			return fmterr.Errorf("error updating instance security group: %s ", err)
+		}
+	}
+
 	var updateBackupOpts backups.UpdateOpts
 
 	if d.HasChange("backup_strategy") {
@@ -897,6 +930,31 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		restartRequired = restartRequired || paramRestart
 	}
 
+	if d.HasChange("db.0.port") {
+		udpateOpts := security.UpdatePortOpts{
+			Port:       int32(d.Get("db.0.port").(int)),
+			InstanceId: d.Id(),
+		}
+		log.Printf("[DEBUG] Update opts of Database port: %+v", udpateOpts)
+		_, err := security.UpdatePort(client, udpateOpts)
+		if err != nil {
+			return fmterr.Errorf("error updating instance database port: %s ", err)
+		}
+
+		stateConf := &resource.StateChangeConf{
+			Pending:      []string{"MODIFYING DATABASE PORT"},
+			Target:       []string{"ACTIVE"},
+			Refresh:      rdsInstanceStateRefreshFunc(client, d.Id()),
+			Timeout:      d.Timeout(schema.TimeoutUpdate),
+			Delay:        5 * time.Second,
+			PollInterval: 5 * time.Second,
+		}
+		if _, err = stateConf.WaitForStateContext(ctx); err != nil {
+			return fmterr.Errorf("error waiting for RDS instance (%s) creation completed: %s", d.Id(), err)
+		}
+		restartRequired = true
+	}
+
 	err = instances.WaitForStateAvailable(client, 1200, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error waiting for instance to become available: %w", err)
@@ -909,6 +967,23 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		waitSeconds := int(d.Timeout(schema.TimeoutUpdate).Seconds())
 		if err := instances.WaitForStateAvailable(client, waitSeconds, d.Id()); err != nil {
 			return fmterr.Errorf("error waiting for instance to become available: %w", err)
+		}
+	}
+
+	if d.HasChange("ssl_enable") {
+		if dbType := d.Get("db.0.type").(string); strings.ToLower(dbType) == "mysql" {
+			updateOpts := security.SwitchSslOpts{
+				SslOption:  d.Get("ssl_enable").(bool),
+				InstanceId: d.Id(),
+			}
+			log.Printf("[DEBUG] Update opts of SSL configuration: %+v", updateOpts)
+			err := security.SwitchSsl(client, updateOpts)
+			if err != nil {
+				return fmterr.Errorf("error updating instance SSL configuration: %s ", err)
+			}
+			return nil
+		} else {
+			return diag.Errorf("only MySQL database support SSL enable and disable")
 		}
 	}
 
@@ -1209,4 +1284,18 @@ func updateInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceC
 		return false, fmt.Errorf("error applying configuration parameters: %w", err)
 	}
 	return status.RestartRequired, err
+}
+
+func rdsInstanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		instance, err := GetRdsInstance(client, instanceID)
+		if err != nil {
+			return nil, "Error retrieving RDSv3 Instance", err
+		}
+		if instance.Id == "" {
+			return instance, "DELETED", nil
+		}
+
+		return instance, instance.Status, nil
+	}
 }
