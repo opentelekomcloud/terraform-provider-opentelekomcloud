@@ -268,7 +268,7 @@ func TestAccRdsInstanceV3_configurationParameters(t *testing.T) {
 	})
 }
 
-func TestAccRdsInstanceV3TimeZone(t *testing.T) {
+func TestAccRdsInstanceV3TimeZoneAndSSL(t *testing.T) {
 	// Test is failing on deletion because RDSv3 SSL switchover doesn't change instance `action` status / doesn't
 	// return job_id but still blocks the instance from performing other actions like port_change/instance_deletion
 	// https://jira.tsi-dev.otc-service.com/browse/OTCDB-3026
