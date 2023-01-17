@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[SWR]** forward slash ``/`` support for repository name in ``opentelekomcloud_swr_domain_v2`` (`#2052 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2052>`_)
