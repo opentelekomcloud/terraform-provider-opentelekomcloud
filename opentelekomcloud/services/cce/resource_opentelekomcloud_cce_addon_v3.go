@@ -231,6 +231,7 @@ func logHttpError(err error) error {
 // Make map values to be not a string, if possible
 func unStringMap(src map[string]interface{}) map[string]interface{} {
 	out := make(map[string]interface{}, len(src))
+	var jsonStr map[string]interface{}
 	for key, v := range src {
 		val := v.(string)
 		if intVal, err := strconv.Atoi(val); err == nil {
@@ -243,6 +244,11 @@ func unStringMap(src map[string]interface{}) map[string]interface{} {
 		}
 		if floatVal, err := strconv.ParseFloat(val, 64); err == nil {
 			out[key] = floatVal
+			continue
+		}
+		err := json.Unmarshal([]byte(val), &jsonStr)
+		if err == nil {
+			out[key] = jsonStr
 			continue
 		}
 		out[key] = val

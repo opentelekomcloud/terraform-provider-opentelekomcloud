@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Fixed conversion to map for ``stub_domains`` in ``coredns`` ``resource/opentelekomcloud_cce_addon_v3`` (`#2055 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2055>`_)
