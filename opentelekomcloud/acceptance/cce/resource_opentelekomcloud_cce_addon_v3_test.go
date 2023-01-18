@@ -379,13 +379,14 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
 }
 
 resource "opentelekomcloud_cce_addon_v3" "coredns" {
-  cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
   template_name    = "coredns"
   template_version = "1.23.3"
+  cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
+
   values {
     basic = {
-      "swr_addr": "100.125.7.25:20202",
-      "swr_user": "hwofficial"
+      "swr_addr" : "100.125.7.25:20202",
+      "swr_user" : "hwofficial"
     }
     custom = {
       "stub_domains" : "{\"test\":[\"10.10.40.10\"], \"test2\":[\"10.10.40.20\"]}"
