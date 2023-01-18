@@ -14,6 +14,7 @@ import (
 )
 
 const resourceAddonName = "opentelekomcloud_cce_addon_v3.autoscaler"
+const resourceAddonNameDns = "opentelekomcloud_cce_addon_v3.coredns"
 
 func TestAccCCEAddonV3Basic(t *testing.T) {
 	clusterName := randClusterName()
@@ -109,6 +110,26 @@ func TestAccCCEAddonV3ForceNewCCE(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					checkScaleDownForAutoscaler(resourceAddonName, true),
 					resource.TestCheckResourceAttr(resourceAddonName, "values.0.custom.scaleDownDelayAfterDelete", "11"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCCEAddonV3CoreDNS(t *testing.T) {
+	clusterName := randClusterName()
+	t.Parallel()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCEAddonV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCEAddonV3StubDomains(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceAddonNameDns, "template_name", "coredns"),
 				),
 			},
 		},
@@ -338,4 +359,38 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
   }
 }
 `, common.DataSourceSubnet, common.DataSourceProject, cName)
+}
+
+func testAccCCEAddonV3StubDomains(name string) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource opentelekomcloud_cce_cluster_v3 cluster_1 {
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.medium"
+  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  cluster_version         = "v1.23"
+  container_network_type  = "overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+  no_addons               = true
+}
+
+resource "opentelekomcloud_cce_addon_v3" "coredns" {
+  cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  template_name    = "coredns"
+  template_version = "1.23.3"
+  values {
+    basic = {
+      "swr_addr": "100.125.7.25:20202",
+      "swr_user": "hwofficial"
+    }
+    custom = {
+      "stub_domains" : "{\"test\":[\"10.10.40.10\"], \"test2\":[\"10.10.40.20\"]}"
+    }
+  }
+}
+`, common.DataSourceSubnet, common.DataSourceProject, name)
 }
