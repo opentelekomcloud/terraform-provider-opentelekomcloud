@@ -90,7 +90,7 @@ CoreDNS is a DNS server that chains plugins and provides Kubernetes DNS Services
 
 ```json
 {
-  "stub_domains": "",
+  "stub_domains": "{\"test\":[\"10.10.40.10\"], \"test2\":[\"10.10.40.20\"]}",
   "upstream_nameservers": ""
 }
 ```

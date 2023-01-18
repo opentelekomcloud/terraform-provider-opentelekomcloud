@@ -97,7 +97,7 @@ See the [OTC Cloud Container Engine Addon Documentation](https://docs.otc.t-syst
 
 ```json
 {
-  "stub_domains": "",
+  "stub_domains": "{\"test\":[\"10.10.40.10\"], \"test2\":[\"10.10.40.20\"]}",
   "upstream_nameservers": ""
 }
 ```
