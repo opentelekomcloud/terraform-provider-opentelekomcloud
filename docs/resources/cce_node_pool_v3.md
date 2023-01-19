@@ -36,6 +36,13 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool_1" {
     size       = 100
     volumetype = "SSD"
   }
+  data_volumes {
+    size       = 100
+    volumetype = "SSD"
+    extend_params = {
+      "useType" = "docker"
+    }
+  }
 }
 ```
 
@@ -114,13 +121,17 @@ the AZ based on the AZ sequence. For more details see
 * `root_volume` - (Required) It corresponds to the system disk related configuration. Changing this parameter will create a new resource.
   * `size` - (Required) Disk size in GB.
   * `volumetype` - (Required) Disk type.
-  * `extend_param` - (Optional) Disk expansion parameters.
+  * `extend_params` - (Optional) Disk expansion parameters. A list of strings which describes additional disk parameters.
+  * `extend_param` **DEPRECATED** - (Optional) Disk expansion parameters.
+  Please use alternative parameter `extend_params`.
   * `kms_id` - (Optional) The Encryption KMS ID of the system volume. By default, it tries to get from env by `OS_KMS_ID`.
 
 * `data_volumes` - (Required) Represents the data disk to be created. Changing this parameter will create a new resource.
   * `size` - (Required) Disk size in GB.
   * `volumetype` - (Required) Disk type.
-  * `extend_param` - (Optional) Disk expansion parameters.
+  * `extend_params` - (Optional) Disk expansion parameters. A list of strings which describes additional disk parameters.
+  * `extend_param` **DEPRECATED** - (Optional) Disk expansion parameters.
+    Please use alternative parameter `extend_params`.
   * `kms_id` - (Optional) The Encryption KMS ID of the data volume. By default, it tries to get from env by `OS_KMS_ID`.
 
 -> To enable encryption with the KMS. Firstly, you need to create the agency to grant KMS rights to EVS.

@@ -45,12 +45,14 @@ func TestAccCCENodesV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameNode, "flavor_id", "s2.large.2"),
 					resource.TestCheckResourceAttr(resourceNameNode, "os", "EulerOS 2.9"),
 					resource.TestCheckResourceAttr(resourceNameNode, "private_ip", privateIP),
+					resource.TestCheckResourceAttr(resourceNameNode, "data_volumes.0.extend_params.useType", "docker"),
 				),
 			},
 			{
 				Config: testAccCCENodeV3Update(privateIP),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceNameNode, "name", "test-node2"),
+					resource.TestCheckResourceAttr(resourceNameNode, "data_volumes.0.extend_params.useType", "docker"),
 				),
 			},
 		},
@@ -523,7 +525,10 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SSD"
+    extend_params = {
+      "useType" = "docker"
+    }
   }
 
   private_ip = "%s"
@@ -549,7 +554,10 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   }
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SSD"
+    extend_params = {
+      "useType" = "docker"
+    }
   }
 
   private_ip = "%s"
