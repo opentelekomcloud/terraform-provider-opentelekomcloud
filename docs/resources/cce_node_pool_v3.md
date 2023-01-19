@@ -36,7 +36,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool_1" {
     size       = 100
     volumetype = "SSD"
   }
-    data_volumes {
+  data_volumes {
     size       = 100
     volumetype = "SSD"
     extend_params = {
