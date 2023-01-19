@@ -1,0 +1,12 @@
+---
+deprecations:
+  - |
+    **[CCE]** Deprecate `extend_param` for `volumes` in ``resource/opentelekomcloud_cce_node_v3`` (`#2056 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2056>`_)
+  - |
+    **[CCE]** Deprecate `extend_param` for `volumes` in ``resource/opentelekomcloud_cce_node_pool_v3`` (`#2056 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2056>`_)
+
+fixes:
+  - |
+    **[CCE]** Added `extend_params` for `volumes` in ``resource/opentelekomcloud_cce_node_v3`` (`#2056 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2056>`_)
+  - |
+    **[CCE]** Added `extend_params` for `volumes` in ``resource/opentelekomcloud_cce_node_pool_v3`` (`#2056 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2056>`_)
