@@ -111,9 +111,16 @@ func ResourceCCENodePoolV3() *schema.Resource {
 							DefaultFunc: schema.EnvDefaultFunc("OS_KMS_ID", nil),
 						},
 						"extend_param": {
-							Type:     schema.TypeString,
+							Type:       schema.TypeString,
+							Optional:   true,
+							ForceNew:   true,
+							Deprecated: "use extend_params instead",
+						},
+						"extend_params": {
+							Type:     schema.TypeMap,
 							Optional: true,
 							ForceNew: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					}},
 			},
@@ -141,9 +148,16 @@ func ResourceCCENodePoolV3() *schema.Resource {
 							DefaultFunc: schema.EnvDefaultFunc("OS_KMS_ID", nil),
 						},
 						"extend_param": {
-							Type:     schema.TypeString,
+							Type:       schema.TypeString,
+							Optional:   true,
+							ForceNew:   true,
+							Deprecated: "use extend_params instead",
+						},
+						"extend_params": {
+							Type:     schema.TypeMap,
 							Optional: true,
 							ForceNew: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					}},
 			},
@@ -415,9 +429,10 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 
 	rootVolume := []map[string]interface{}{
 		{
-			"size":         s.Spec.NodeTemplate.RootVolume.Size,
-			"volumetype":   s.Spec.NodeTemplate.RootVolume.VolumeType,
-			"extend_param": s.Spec.NodeTemplate.RootVolume.ExtendParam,
+			"size":          s.Spec.NodeTemplate.RootVolume.Size,
+			"volumetype":    s.Spec.NodeTemplate.RootVolume.VolumeType,
+			"extend_params": s.Spec.NodeTemplate.RootVolume.ExtendParam,
+			"extend_param":  "",
 		},
 	}
 	if s.Spec.NodeTemplate.RootVolume.Metadata != nil {
@@ -462,9 +477,10 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 	var volumes []interface{}
 	for _, pairObject := range s.Spec.NodeTemplate.DataVolumes {
 		volume := map[string]interface{}{
-			"size":         pairObject.Size,
-			"volumetype":   pairObject.VolumeType,
-			"extend_param": pairObject.ExtendParam,
+			"size":          pairObject.Size,
+			"volumetype":    pairObject.VolumeType,
+			"extend_params": pairObject.ExtendParam,
+			"extend_param":  "",
 		}
 		if pairObject.Metadata != nil {
 			volume["kms_id"] = pairObject.Metadata["__system__cmkid"]
