@@ -1,0 +1,4 @@
+---
+deprecations:
+  - |
+    **[CSS]** Deprecate of `automatic` parameter for ``resource/opentelekomcloud_css_snapshot_configuration_v1`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)

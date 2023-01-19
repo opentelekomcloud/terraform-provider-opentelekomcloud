@@ -34,8 +34,9 @@ func ResourceCssSnapshotConfigurationV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"automatic": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:       schema.TypeBool,
+				Optional:   true,
+				Deprecated: "Please use `configuration` instead",
 			},
 			"configuration": {
 				Type:     schema.TypeList,
@@ -199,13 +200,6 @@ func updateSnapshotConfigurationResource(_ context.Context, d *schema.ResourceDa
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf(clientError, err)
-	}
-
-	if d.Get("automatic").(bool) {
-		if err := snapshots.Enable(client, d.Id()); err != nil {
-			return fmt.Errorf("error using automatic config for snapshots: %w", err)
-		}
-		return nil
 	}
 
 	if d.Get("configuration.#") != 0 {
