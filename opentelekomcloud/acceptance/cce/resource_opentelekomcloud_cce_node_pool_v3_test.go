@@ -44,6 +44,7 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(nodePoolResourceName, "flavor", "s2.large.2"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "os", "EulerOS 2.5"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "muh"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "data_volumes.0.extend_params.useType", "docker"),
 				),
 			},
 			{
@@ -51,6 +52,7 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(nodePoolResourceName, "initial_node_count", "2"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "kuh"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "data_volumes.0.extend_params.useType", "docker"),
 				),
 			},
 		},
@@ -257,6 +259,9 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   data_volumes {
     size       = 100
     volumetype = "SSD"
+    extend_params = {
+      "useType" = "docker"
+    }
   }
 
   k8s_tags = {
@@ -271,7 +276,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
   os                 = "EulerOS 2.5"
-  flavor             = "s3.medium.1"
+  flavor             = "s2.large.2"
   initial_node_count = 2
   availability_zone  = "%s"
   key_pair           = "%s"
@@ -289,6 +294,9 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   data_volumes {
     size       = 100
     volumetype = "SSD"
+    extend_params = {
+      "useType" = "docker"
+    }
   }
 
   k8s_tags = {

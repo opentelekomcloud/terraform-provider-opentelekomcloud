@@ -149,9 +149,17 @@ func ResourceCCENodeV3() *schema.Resource {
 							DefaultFunc: schema.EnvDefaultFunc("OS_KMS_ID", nil),
 						},
 						"extend_param": {
-							Type:     schema.TypeString,
+							Type:       schema.TypeString,
+							Optional:   true,
+							ForceNew:   true,
+							Deprecated: "use extend_params instead",
+						},
+						"extend_params": {
+							Type:     schema.TypeMap,
 							Optional: true,
 							ForceNew: true,
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					}},
 			},
@@ -178,9 +186,17 @@ func ResourceCCENodeV3() *schema.Resource {
 							DefaultFunc: schema.EnvDefaultFunc("OS_KMS_ID", nil),
 						},
 						"extend_param": {
-							Type:     schema.TypeString,
+							Type:       schema.TypeString,
+							Optional:   true,
+							ForceNew:   true,
+							Deprecated: "use extend_params instead",
+						},
+						"extend_params": {
+							Type:     schema.TypeMap,
 							Optional: true,
 							ForceNew: true,
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					}},
 			},
@@ -419,7 +435,7 @@ func resourceCCEDataVolume(d *schema.ResourceData) []nodes.VolumeSpec {
 		volumes[i] = nodes.VolumeSpec{
 			Size:        rawMap["size"].(int),
 			VolumeType:  rawMap["volumetype"].(string),
-			ExtendParam: rawMap["extend_param"].(string),
+			ExtendParam: rawMap["extend_params"].(map[string]interface{}),
 		}
 		if kmsID := rawMap["kms_id"]; kmsID != "" {
 			volumes[i].Metadata = map[string]interface{}{
@@ -435,10 +451,10 @@ func resourceCCERootVolume(d *schema.ResourceData) nodes.VolumeSpec {
 	var nics nodes.VolumeSpec
 	nicsRaw := d.Get("root_volume").([]interface{})
 	if len(nicsRaw) == 1 {
-		nics.Size = nicsRaw[0].(map[string]interface{})["size"].(int)
-		nics.VolumeType = nicsRaw[0].(map[string]interface{})["volumetype"].(string)
-		nics.ExtendParam = nicsRaw[0].(map[string]interface{})["extend_param"].(string)
 		rawMap := nicsRaw[0].(map[string]interface{})
+		nics.Size = rawMap["size"].(int)
+		nics.VolumeType = rawMap["volumetype"].(string)
+		nics.ExtendParam = rawMap["extend_params"].(map[string]interface{})
 		if kmsID := rawMap["kms_id"]; kmsID != "" {
 			nics.Metadata = map[string]interface{}{
 				"__system__cmkid":     kmsID,
@@ -685,7 +701,8 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 		volume := make(map[string]interface{})
 		volume["size"] = dataVolume.Size
 		volume["volumetype"] = dataVolume.VolumeType
-		volume["extend_param"] = dataVolume.ExtendParam
+		volume["extend_params"] = dataVolume.ExtendParam
+		volume["extend_param"] = ""
 		if dataVolume.Metadata != nil {
 			volume["kms_id"] = dataVolume.Metadata["__system__cmkid"]
 		}
@@ -697,9 +714,10 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 
 	rootVolume := []map[string]interface{}{
 		{
-			"size":         node.Spec.RootVolume.Size,
-			"volumetype":   node.Spec.RootVolume.VolumeType,
-			"extend_param": node.Spec.RootVolume.ExtendParam,
+			"size":          node.Spec.RootVolume.Size,
+			"volumetype":    node.Spec.RootVolume.VolumeType,
+			"extend_params": node.Spec.RootVolume.ExtendParam,
+			"extend_param":  "",
 		},
 	}
 	if node.Spec.RootVolume.Metadata != nil {
