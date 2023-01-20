@@ -60,7 +60,7 @@ The following arguments are supported:
 * `cluster_id` - (Required) ID of the CSS cluster.
 
 * `automatic` - (Optional) Use automatic configuration for CCS cluster screenshots.
-  Mutually exclusive with `configuration`.
+  Mutually exclusive with `configuration`/`creation_policy`.
 
 * `configuration` - (Optional) The basic configurations of a cluster snapshot. Structure is documented below.
   Mutually exclusive with `automatic`.
