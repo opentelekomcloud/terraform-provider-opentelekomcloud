@@ -1,0 +1,4 @@
+---
+deprecations:
+  - |
+    **[CSS]** Added `ConflictsWith` setting for `configuration` and `automatic` parameters in ``resource/opentelekomcloud_css_snapshot_configuration_v1`` (`#2057 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2057>`_)

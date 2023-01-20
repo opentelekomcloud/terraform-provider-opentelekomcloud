@@ -34,8 +34,9 @@ func ResourceCssSnapshotConfigurationV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"automatic": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:          schema.TypeBool,
+				Optional:      true,
+				ConflictsWith: []string{"configuration", "creation_policy"},
 			},
 			"configuration": {
 				Type:     schema.TypeList,
@@ -58,12 +59,14 @@ func ResourceCssSnapshotConfigurationV1() *schema.Resource {
 						},
 					},
 				},
+				ConflictsWith: []string{"automatic"},
 			},
 			"creation_policy": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				MaxItems: 1,
+				Type:          schema.TypeList,
+				Optional:      true,
+				Computed:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"automatic"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"prefix": {
