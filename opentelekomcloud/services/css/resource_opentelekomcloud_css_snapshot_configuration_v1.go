@@ -34,9 +34,9 @@ func ResourceCssSnapshotConfigurationV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"automatic": {
-				Type:       schema.TypeBool,
-				Optional:   true,
-				Deprecated: "Please use `configuration` instead",
+				Type:          schema.TypeBool,
+				Optional:      true,
+				ConflictsWith: []string{"configuration", "creation_policy"},
 			},
 			"configuration": {
 				Type:     schema.TypeList,
@@ -59,12 +59,14 @@ func ResourceCssSnapshotConfigurationV1() *schema.Resource {
 						},
 					},
 				},
+				ConflictsWith: []string{"automatic"},
 			},
 			"creation_policy": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				MaxItems: 1,
+				Type:          schema.TypeList,
+				Optional:      true,
+				Computed:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"automatic"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"prefix": {
@@ -200,6 +202,13 @@ func updateSnapshotConfigurationResource(_ context.Context, d *schema.ResourceDa
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf(clientError, err)
+	}
+
+	if d.Get("automatic").(bool) {
+		if err := snapshots.Enable(client, d.Id()); err != nil {
+			return fmt.Errorf("error using automatic config for snapshots: %w", err)
+		}
+		return nil
 	}
 
 	if d.Get("configuration.#") != 0 {

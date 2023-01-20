@@ -59,13 +59,14 @@ The following arguments are supported:
 
 * `cluster_id` - (Required) ID of the CSS cluster.
 
-* `automatic` **DEPRECATED** - (Optional) Use automatic configuration for CCS cluster screenshots.
-  Setting this parameter to `true` will make configuration and policy ignored.
-  Please fill `configuration` parameter instead.
+* `automatic` - (Optional) Use automatic configuration for CCS cluster screenshots.
+  Mutually exclusive with `configuration`.
 
 * `configuration` - (Optional) The basic configurations of a cluster snapshot. Structure is documented below.
+  Mutually exclusive with `automatic`.
 
 * `creation_policy` - (Optional) Parameters related to automatic snapshot creation. Structure is documented below.
+  Mutually exclusive with `automatic`.
 
 The `configuration` block supports:
 

@@ -3,6 +3,7 @@ package acceptance
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -37,6 +38,20 @@ func TestResourceCSSSnapshotConfigurationV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "creation_policy.0.prefix", "snapshot"),
 					resource.TestCheckResourceAttr(resourceName, "creation_policy.0.keepday", "2"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccCheckCSSV1Validation(t *testing.T) {
+	name := fmt.Sprintf("css-%s", acctest.RandString(10))
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      testResourceCSSSnapshotConfigurationV1Validation(name),
+				ExpectError: regexp.MustCompile(`Conflicting configuration.+`),
 			},
 		},
 	})
@@ -154,6 +169,54 @@ resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
     keepday     = 2
     enable      = true
     delete_auto = true
+  }
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE, osAgency)
+}
+
+func testResourceCSSSnapshotConfigurationV1Validation(name string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_css_cluster_v1" "cluster" {
+  expect_node_num = 1
+  name            = "%s"
+  node_config {
+    flavor = "css.medium.8"
+    network_info {
+      security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+      network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+      vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+    }
+    volume {
+      volume_type = "COMMON"
+      size        = 100
+    }
+
+    availability_zone = "%s"
+  }
+  datastore {
+    version = "7.6.2"
+  }
+
+  enable_https     = true
+  enable_authority = true
+  admin_pass       = "QwertyUI!"
+}
+
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket        = "tf-snap-testing"
+  force_destroy = true
+}
+
+resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
+  cluster_id = opentelekomcloud_css_cluster_v1.cluster.id
+  automatic  = true
+  configuration {
+    bucket = opentelekomcloud_obs_bucket.bucket.bucket
+    agency = "%s"
   }
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE, osAgency)
