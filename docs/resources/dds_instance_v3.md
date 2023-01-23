@@ -35,7 +35,7 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
     spec_code = "dds.mongodb.s2.medium.4.repset"
   }
   tags = {
-    foo     = "bar"
+    foo      = "bar"
     new_test = "new_test2"
   }
 }
