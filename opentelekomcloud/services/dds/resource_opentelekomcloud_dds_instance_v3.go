@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dds/v3/instances"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -32,7 +33,7 @@ func ResourceDdsInstanceV3() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
-			Update: schema.DefaultTimeout(60 * time.Minute),
+			Update: schema.DefaultTimeout(90 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
@@ -235,6 +236,7 @@ func ResourceDdsInstanceV3() *schema.Resource {
 					},
 				},
 			},
+			"tags": common.TagsSchema(),
 		},
 	}
 }
@@ -334,6 +336,7 @@ func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		Mode:             d.Get("mode").(string),
 		Flavor:           resourceDdsFlavors(d),
 		BackupStrategy:   resourceDdsBackupStrategy(d),
+		Tags:             ddsTags(d),
 	}
 	if d.Get("ssl").(bool) {
 		createOpts.Ssl = "1"
@@ -368,6 +371,15 @@ func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	return resourceDdsInstanceV3Read(clientCtx, d, meta)
 }
 
+func ddsTags(d *schema.ResourceData) []tags.ResourceTag {
+	vaultTags := d.Get("tags").(map[string]interface{})
+	var tagSlice []tags.ResourceTag
+	for k, v := range vaultTags {
+		tagSlice = append(tagSlice, tags.ResourceTag{Key: k, Value: v.(string)})
+	}
+	return tagSlice
+}
+
 func resourceDdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
@@ -394,6 +406,11 @@ func resourceDdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 
 	log.Printf("[DEBUG] Retrieved instance %s: %#v", d.Id(), instance)
 
+	tagsMap := make(map[string]string)
+	for _, tag := range instance.Tags {
+		tagsMap[tag.Key] = tag.Value
+	}
+
 	mErr := multierror.Append(nil,
 		d.Set("region", instance.Region),
 		d.Set("name", instance.Name),
@@ -406,6 +423,7 @@ func resourceDdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("status", instance.Status),
 		d.Set("port", instance.Port),
 		d.Set("pay_mode", instance.PayMode),
+		d.Set("tags", tagsMap),
 	)
 
 	sslEnable := true
@@ -507,6 +525,13 @@ func resourceDdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 
 	if err := resourceDdsInstanceWaitUpdate(ctx, client, d); err != nil {
 		return diag.FromErr(err)
+	}
+
+	if d.HasChange("tags") {
+		tagErr := common.UpdateResourceTags(client, d, "instances", d.Id())
+		if tagErr != nil {
+			return fmterr.Errorf("error updating tags of DDS instance:%s, err:%s", d.Id(), tagErr)
+		}
 	}
 
 	if d.HasChange("flavor") {

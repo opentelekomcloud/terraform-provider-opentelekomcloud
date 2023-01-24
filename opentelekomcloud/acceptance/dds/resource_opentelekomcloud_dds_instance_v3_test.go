@@ -43,6 +43,8 @@ func TestAccDDSV3Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.0.size", "60"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.0.num", "1"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.0.spec_code", "dds.mongodb.s2.xlarge.4.repset"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "tags.new_test", "new_test2"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "tags.john", "doe"),
 				),
 			},
 		},
@@ -66,6 +68,8 @@ func TestAccDDSV3Instance_Cluster(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.1.num", "2"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.1.spec_code", "dds.mongodb.s2.medium.4.shard"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.1.size", "20"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "tags.new_test", "new_test2"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "tags.john", "doe"),
 				),
 			},
 			{
@@ -261,6 +265,10 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
     start_time = "08:00-09:00"
     keep_days  = "1"
   }
+  tags = {
+    john     = "doe"
+    new_test = "new_test2"
+  }
 }`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
 var TestAccDDSInstanceV3ConfigMinConfig = fmt.Sprintf(`
@@ -355,6 +363,10 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = "8"
+  }
+  tags = {
+    john     = "doe"
+    new_test = "new_test2"
   }
 }`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 

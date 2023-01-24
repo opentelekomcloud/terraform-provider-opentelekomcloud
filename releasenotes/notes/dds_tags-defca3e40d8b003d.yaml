@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DDS]** Fixed tags management for ``resource/opentelekomcloud_dds_instance_v3`` (`#2060 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2060>`_)

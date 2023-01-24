@@ -34,11 +34,14 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
     size      = 30
     spec_code = "dds.mongodb.s2.medium.4.repset"
   }
+  tags = {
+    foo      = "bar"
+    new_test = "new_test2"
+  }
 }
 ```
 
 ## Example Usage: Creating a Cluster Community Edition
-
 ```hcl
 variable "availability_zone" {}
 variable "vpc_id" {}
@@ -153,8 +156,10 @@ The following arguments are supported:
   described below. Changing this creates a new instance.
 
 * `ssl` - (Optional) Specifies whether to enable or disable SSL. Defaults to true.
-
 -> The instance will be restarted in the background when switching SSL. Please operate with caution.
+
+* `tags` - (Optional) Tags key/value pairs to associate with the volume.
+  Changing this updates the existing volume tags.
 
 The `datastore` block supports:
 
