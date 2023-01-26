@@ -424,8 +424,7 @@ func resourceDwsClusterV1Delete(ctx context.Context, d *schema.ResourceData, met
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "DWS instance")
 	}
-	var keepSnapshots *int
-	keepSnapshots = new(int)
+	var keepSnapshots = new(int)
 	*keepSnapshots = d.Get("keep_last_manual_snapshot").(int)
 	err = cluster.DeleteCluster(client, cluster.DeleteClusterOpts{
 		ClusterId:              d.Id(),
