@@ -63,10 +63,6 @@ The following arguments are supported:
   Lowercase letters Uppercase letters Digits Special characters
   ~!@#%^&*()-_=+|[{}];:,<.>/?
 
-* `enterprise_project_id` - (Optional, String, ForceNew) Specifies the enterprise project id of the dws cluster,
-  Value 0 indicates the default enterprise project.
-  Changing this parameter will create a new resource.
-
 * `availability_zone` - (Optional, String, ForceNew) AZ in a cluster.
 
 * `port` - (Optional, Int) Service port of a cluster (8000 to 10000). The default value is 8000.

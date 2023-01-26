@@ -105,12 +105,6 @@ func ResourceDcsInstanceV1() *schema.Resource {
 				Default:      3,
 				ForceNew:     true,
 			},
-			"enterprise_project_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
-			},
 			"keep_last_manual_snapshot": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -224,18 +218,17 @@ func resourceDwsClusterV1Create(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	createOpts := cluster.CreateClusterOpts{
-		NodeType:            d.Get("node_type").(string),
-		Name:                d.Get("name").(string),
-		NumberOfNode:        d.Get("number_of_node").(int),
-		SubnetId:            d.Get("network_id").(string),
-		SecurityGroupId:     d.Get("security_group_id").(string),
-		VpcId:               d.Get("vpc_id").(string),
-		AvailabilityZone:    d.Get("availability_zone").(string),
-		Port:                d.Get("port").(int),
-		UserName:            d.Get("user_name").(string),
-		UserPwd:             d.Get("user_pwd").(string),
-		NumberOfCn:          d.Get("number_of_cn").(int),
-		EnterpriseProjectId: d.Get("enterprise_project_id").(string),
+		NodeType:         d.Get("node_type").(string),
+		Name:             d.Get("name").(string),
+		NumberOfNode:     d.Get("number_of_node").(int),
+		SubnetId:         d.Get("network_id").(string),
+		SecurityGroupId:  d.Get("security_group_id").(string),
+		VpcId:            d.Get("vpc_id").(string),
+		AvailabilityZone: d.Get("availability_zone").(string),
+		Port:             d.Get("port").(int),
+		UserName:         d.Get("user_name").(string),
+		UserPwd:          d.Get("user_pwd").(string),
+		NumberOfCn:       d.Get("number_of_cn").(int),
 	}
 
 	if _, ok := d.GetOk("public_ip.0"); ok {
@@ -294,7 +287,6 @@ func resourceDwsClusterV1Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("vpc_id", v.VpcId),
 		d.Set("availability_zone", v.AvailabilityZone),
 		d.Set("port", v.Port),
-		d.Set("enterprise_project_id", v.EnterpriseProjectId),
 		d.Set("created", v.Created),
 		d.Set("recent_event", v.RecentEvent),
 		d.Set("status", v.Status),
