@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Resource:** ``opentelekomcloud_dws_cluster_v1`` (`#2061 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2061>`_)
