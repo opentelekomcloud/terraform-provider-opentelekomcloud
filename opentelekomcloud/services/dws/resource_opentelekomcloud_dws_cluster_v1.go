@@ -150,6 +150,7 @@ func ResourceDcsInstanceV1() *schema.Resource {
 			"endpoints": {
 				Type:     schema.TypeList,
 				Computed: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"connect_info": {
@@ -166,6 +167,7 @@ func ResourceDcsInstanceV1() *schema.Resource {
 			"public_endpoints": {
 				Type:     schema.TypeList,
 				Computed: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"public_connect_info": {
@@ -364,7 +366,7 @@ func resourceDwsClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 			Count:     num,
 		})
 		if err != nil {
-			return fmterr.Errorf("Extend DWS cluster failed.cluster_id=%s,error=%s", d.Id(), err)
+			return fmterr.Errorf("Extend DWS cluster failed, cluster_id: %s, error: %s", d.Id(), err)
 		}
 		stateConf := &resource.StateChangeConf{
 			Pending:      []string{"PENDING"},
@@ -390,7 +392,7 @@ func resourceDwsClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 			NewPassword: newValue.(string),
 		})
 		if err != nil {
-			return fmterr.Errorf("reset password of DWS cluster failed. cluster_id=%s,error:%s", d.Id(), err)
+			return fmterr.Errorf("reset password of DWS cluster failed. cluster_id: %s, error: %s", d.Id(), err)
 		}
 
 		stateConf := &resource.StateChangeConf{
