@@ -33,13 +33,13 @@ func TestAccDwsClusterV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceName, "number_of_node", "3"),
 				),
 			},
-			// {
-			// 	Config: testAccDwsV1ClusterUpdated(clusterName),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		resource.TestCheckResourceAttr(resourceInstanceName, "name", clusterName),
-			// 		resource.TestCheckResourceAttr(resourceInstanceName, "number_of_node", "6"),
-			// 	),
-			// },
+			{
+				Config: testAccDwsV1ClusterUpdated(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceInstanceName, "name", clusterName),
+					resource.TestCheckResourceAttr(resourceInstanceName, "number_of_node", "6"),
+				),
+			},
 			{
 				ResourceName:      resourceInstanceName,
 				ImportState:       true,
