@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    **New Data Source:** ``opentelekomcloud_dws_flavors_v2``
+    (`#2064 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2064>`_)
