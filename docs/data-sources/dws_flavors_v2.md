@@ -35,7 +35,7 @@ In addition to all arguments above, the following attributes are exported:
 
 The `flavors` block contains:
 
-* `flavor_id` - The name of the dws node flavor. It is referenced by `node_type` in `opentelekomcloud_dws_flavors`.
+* `flavor_id` - The name of the dws node flavor. It is referenced by `node_type` in `opentelekomcloud_dws_flavors_v2`.
 * `vcpus` - Indicates the vcpus of the dws node flavor.
 * `memory` - Indicates the ram of the dws node flavor in GB.
 * `volumetype` - Indicates Disk type.
