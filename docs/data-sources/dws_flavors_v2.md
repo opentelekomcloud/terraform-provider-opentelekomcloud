@@ -9,7 +9,7 @@ Use this data source to get details about flavors from OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-data "opentelekomcloud_dws_flavors" "flavor" {
+data "opentelekomcloud_dws_flavors_v2" "flavor" {
   vcpus = 32
 }
 ```
