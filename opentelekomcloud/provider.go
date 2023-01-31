@@ -261,6 +261,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_dms_maintainwindow_v1":           dms.DataSourceDmsMaintainWindowV1(),
 			"opentelekomcloud_dns_nameservers_v2":              dns.DataSourceDNSNameserversV2(),
 			"opentelekomcloud_dns_zone_v2":                     dns.DataSourceDNSZoneV2(),
+			"opentelekomcloud_dws_flavors_v2":                  dws.DataSourceDwsFlavorsV2(),
 			"opentelekomcloud_identity_agency_v3":              iam.DataSourceIdentityAgencyV3(),
 			"opentelekomcloud_identity_auth_scope_v3":          iam.DataSourceIdentityAuthScopeV3(),
 			"opentelekomcloud_identity_credential_v3":          iam.DataSourceIdentityCredentialV3(),

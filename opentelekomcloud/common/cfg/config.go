@@ -1015,6 +1015,18 @@ func (c *Config) DwsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) DwsV2Client(region string) (*golangsdk.ServiceClient, error) {
+	service, err := openstack.NewDWSV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	service.ResourceBase = strings.Replace(service.ResourceBase, "v1.0/", "v2/", 1)
+	return service, nil
+}
+
 func reconfigProjectName(src Config, projectName ProjectName) (*Config, error) {
 	config := &Config{}
 	if err := copier.Copy(config, &src); err != nil {
