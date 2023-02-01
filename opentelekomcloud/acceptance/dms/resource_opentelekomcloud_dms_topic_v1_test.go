@@ -111,6 +111,6 @@ resource "opentelekomcloud_dms_topic_v1" "topic_1" {
   partition        = 10
   replication      = 2
   sync_replication = true
-  retention_time   = 80
+  retention_time   = 720
 }`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, instanceName, topicName)
 }
