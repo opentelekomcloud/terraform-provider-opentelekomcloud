@@ -402,8 +402,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     kuh = "value-create"
   }
   parameters = {
-      max_prepared_transactions = "200"
-      max_connections = "250"
+      max_files_per_process = "100"
+      max_parallel_workers = "10"
    }
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)

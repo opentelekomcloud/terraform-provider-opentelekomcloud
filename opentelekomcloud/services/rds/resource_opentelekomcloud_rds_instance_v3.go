@@ -958,7 +958,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 			Refresh:      rdsInstanceStateRefreshFunc(client, d.Id()),
 			Timeout:      d.Timeout(schema.TimeoutUpdate),
 			Delay:        5 * time.Second,
-			PollInterval: 5 * time.Second,
+			PollInterval: 10 * time.Second,
 		}
 		if _, err = stateConf.WaitForStateContext(ctx); err != nil {
 			return fmterr.Errorf("error waiting for RDS instance (%s) creation completed: %s", d.Id(), err)
@@ -1286,11 +1286,11 @@ func updateInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceC
 		Values:     d.Get("parameters").(map[string]interface{}),
 		InstanceId: d.Id(),
 	}
-	status, err := configurations.UpdateInstanceConfiguration(client, opts)
+	_, err := configurations.UpdateInstanceConfiguration(client, opts)
 	if err != nil {
 		return false, err
 	}
-	return status.RestartRequired, err
+	return true, err
 }
 
 func rdsInstanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
@@ -1318,6 +1318,6 @@ func waitForParameterApply(d *schema.ResourceData, client *golangsdk.ServiceClie
 			return nil, "", fmt.Errorf("error applying configuration parameters: %w", err)
 		}
 
-		return nil, "SUCCESS", nil
+		return r, "SUCCESS", nil
 	}
 }
