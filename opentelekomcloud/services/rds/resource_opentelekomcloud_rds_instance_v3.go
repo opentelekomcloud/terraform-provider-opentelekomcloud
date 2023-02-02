@@ -427,6 +427,11 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 
 	d.SetId(r.Instance.Id)
 
+	err = instances.WaitForStateAvailable(client, 1200, d.Id())
+	if err != nil {
+		return fmterr.Errorf("error waiting for instance to become available: %w", err)
+	}
+
 	if common.HasFilledOpt(d, "tag") {
 		rdsInstance, err := GetRdsInstance(client, r.Instance.Id)
 		if err != nil {
