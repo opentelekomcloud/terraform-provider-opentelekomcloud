@@ -1,5 +1,5 @@
 ---
 other:
   - |
-    **[RDS]** PostgreSQL 13/14 `parameters` workaround for ``resource/opentelekomcloud_rds_instance_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[RDS]** PostgreSQL 13/14 `parameters` workaround for ``resource/opentelekomcloud_rds_instance_v3`` (`#2068 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2068>`_)
 
