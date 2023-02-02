@@ -61,7 +61,7 @@ func ResourceDmsTopicsV1() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.IntBetween(1, 168),
+				ValidateFunc: validation.IntBetween(1, 720),
 			},
 			"sync_message_flush": {
 				Type:     schema.TypeBool,

@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DMS]** Fix `retention_time` validation for ``resource/opentelekomcloud_dms_topic_v1`` (`#2066 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2066>`_)

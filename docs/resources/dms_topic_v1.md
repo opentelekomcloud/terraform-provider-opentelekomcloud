@@ -75,7 +75,7 @@ The following arguments are supported:
   Otherwise, this parameter does not take effect.
 
 * `retention_time` - (Required) Indicates the retention period of a message. Its default value is `72`.
-  Value range: `1–168`. Default value: `72`. Unit: `hour`.
+  Value range: `1–720`. Default value: `72`. Unit: `hour`.
 
 * `sync_message_flush` - (Optional) Indicates whether to enable synchronous flushing.
   Default value: `false`. Synchronous flushing compromises performance.
