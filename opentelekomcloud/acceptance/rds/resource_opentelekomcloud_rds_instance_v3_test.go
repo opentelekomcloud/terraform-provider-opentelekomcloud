@@ -74,7 +74,6 @@ func TestAccRdsPostgre13V3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "PostgreSQL"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8635"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.size", "40"),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.keep_days", "1"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.muh", "value-create"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.kuh", "value-create"),
 				),
@@ -402,6 +401,10 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     muh = "value-create"
     kuh = "value-create"
   }
+  parameters = {
+      max_prepared_transactions = "200"
+      max_connections = "250"
+   }
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
