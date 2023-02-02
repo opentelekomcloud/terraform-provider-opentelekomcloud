@@ -492,7 +492,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	paramRestart := false
-	if _, paramRestart = d.GetOk("parameters"); paramRestart {
+	if _, ok := d.GetOk("parameters"); ok {
 		stateConf := &resource.StateChangeConf{
 			Pending:      []string{"PENDING"},
 			Target:       []string{"SUCCESS"},
@@ -501,10 +501,11 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			PollInterval: 10 * time.Second,
 		}
 
-		_, err = stateConf.WaitForStateContext(ctx)
+		result, err := stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return diag.FromErr(err)
 		}
+		paramRestart = result.(bool)
 	}
 
 	if templateRestart || paramRestart {
