@@ -211,7 +211,7 @@ func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	listOpts := backup.ListOpts{
-		ID:           d.Get("id").(string),
+		// ID:           d.Get("id").(string),
 		Name:         d.Get("backup_name").(string),
 		Status:       d.Get("status").(string),
 		ResourceName: d.Get("resource_name").(string),
@@ -219,7 +219,7 @@ func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta 
 		ResourceType: d.Get("resource_type").(string),
 		ResourceId:   d.Get("resource_id").(string),
 		PolicyId:     d.Get("policy_id").(string),
-		VmIp:         d.Get("vm_ip").(string),
+		// VmIp:         d.Get("vm_ip").(string),
 	}
 
 	refinedBackups, err := backup.List(backupClient, listOpts)
@@ -240,6 +240,11 @@ func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta 
 
 	d.SetId(backupObject.Id)
 
+	tagsMap := make(map[string]string)
+	for _, tag := range backupObject.Tags {
+		tagsMap[tag.Key] = tag.Value
+	}
+
 	mErr := multierror.Append(
 		d.Set("backup_record_id", backupObject.CheckpointId),
 		d.Set("backup_name", backupObject.Name),
@@ -254,7 +259,7 @@ func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("volume_backups", flattenCSBSVolumeBackups(&backupObject)),
 		d.Set("vm_metadata", flattenCSBSVMMetadata(&backupObject)),
 		d.Set("region", config.GetRegion(d)),
-		d.Set("tags", flattenCSBSTags(&backupObject)),
+		d.Set("tags", tagsMap),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {

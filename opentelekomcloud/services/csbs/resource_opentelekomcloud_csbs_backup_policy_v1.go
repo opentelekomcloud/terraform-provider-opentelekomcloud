@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -170,21 +171,11 @@ func ResourceCSBSBackupPolicyV1() *schema.Resource {
 				},
 			},
 			"tags": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				ForceNew: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"key": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"value": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ValidateFunc: common.ValidateTags,
+				ForceNew:     true,
+				Elem:         &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
@@ -208,10 +199,10 @@ func resourceCSBSBackupPolicyCreate(ctx context.Context, d *schema.ResourceData,
 		ScheduledOperations: resourceCSBSScheduleV1(d),
 
 		Resources: resourceCSBSResourceV1(d),
-		Tags:      resourceCSBSPolicyTagsV1(d),
+		Tags:      resourceCSBSTagsV1(d),
 	}
 
-	backupPolicy, err := policies.Create(policyClient, createOpts).Extract()
+	backupPolicy, err := policies.Create(policyClient, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating Backup Policy : %s", err)
 	}
@@ -241,7 +232,7 @@ func resourceCSBSBackupPolicyRead(_ context.Context, d *schema.ResourceData, met
 		return fmterr.Errorf("error creating CSBSv1 client: %s", err)
 	}
 
-	backupPolicy, err := policies.Get(policyClient, d.Id()).Extract()
+	backupPolicy, err := policies.Get(policyClient, d.Id())
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			log.Printf("[WARN] Removing backup policy %s as it's already gone", d.Id())
@@ -271,8 +262,9 @@ func resourceCSBSBackupPolicyRead(_ context.Context, d *schema.ResourceData, met
 		return fmterr.Errorf(errorSaveMsg, "scheduler_operation", d.Id(), err)
 	}
 
-	if err := d.Set("tags", flattenCSBSPolicyTags(*backupPolicy)); err != nil {
-		return fmterr.Errorf(errorSaveMsg, "policy tags", d.Id(), err)
+	tagsMap := make(map[string]string)
+	for _, tag := range backupPolicy.Tags {
+		tagsMap[tag.Key] = tag.Value
 	}
 
 	me := multierror.Append(nil,
@@ -283,6 +275,7 @@ func resourceCSBSBackupPolicyRead(_ context.Context, d *schema.ResourceData, met
 		d.Set("provider_id", backupPolicy.ProviderId),
 		d.Set("created_at", backupPolicy.CreatedAt.Format(time.RFC3339)),
 		d.Set("region", config.GetRegion(d)),
+		d.Set("tags", tagsMap),
 	)
 
 	return diag.FromErr(me.ErrorOrNil())
@@ -302,8 +295,6 @@ func resourceCSBSBackupPolicyUpdate(ctx context.Context, d *schema.ResourceData,
 		updateOpts.Description = d.Get("description").(string)
 	}
 
-	updateOpts.Parameters.Common = resourceCSBSCommonParamsV1(d)
-
 	if d.HasChange("resource") {
 		updateOpts.Resources = resourceCSBSResourceV1(d)
 	}
@@ -311,7 +302,7 @@ func resourceCSBSBackupPolicyUpdate(ctx context.Context, d *schema.ResourceData,
 		updateOpts.ScheduledOperations = resourceCSBSScheduleUpdateV1(d)
 	}
 
-	_, err = policies.Update(policyClient, d.Id(), updateOpts).Extract()
+	_, err = policies.Update(policyClient, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating Backup Policy: %s", err)
 	}
@@ -326,7 +317,7 @@ func resourceCSBSBackupPolicyDelete(ctx context.Context, d *schema.ResourceData,
 		return fmterr.Errorf("error creating CSBS client: %s", err)
 	}
 
-	err = policies.Delete(policyClient, d.Id()).Err
+	err = policies.Delete(policyClient, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error delete CSBSv1 policy; %s", err)
 	}
@@ -351,7 +342,7 @@ func resourceCSBSBackupPolicyDelete(ctx context.Context, d *schema.ResourceData,
 
 func waitForCSBSBackupPolicyActive(policyClient *golangsdk.ServiceClient, policyID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		policy, err := policies.Get(policyClient, policyID).Extract()
+		policy, err := policies.Get(policyClient, policyID)
 		if err != nil {
 			return nil, "", err
 		}
@@ -365,7 +356,7 @@ func waitForCSBSBackupPolicyActive(policyClient *golangsdk.ServiceClient, policy
 
 func waitForCSBSPolicyDelete(policyClient *golangsdk.ServiceClient, policyID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		policy, err := policies.Get(policyClient, policyID).Extract()
+		policy, err := policies.Get(policyClient, policyID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[INFO] Successfully deleted Backup Policy %s", policyID)
@@ -422,19 +413,6 @@ func resourceCSBSResourceV1(d *schema.ResourceData) []policies.Resource {
 		}
 	}
 	return res
-}
-
-func resourceCSBSPolicyTagsV1(d *schema.ResourceData) []policies.ResourceTag {
-	rawTags := d.Get("tags").(*schema.Set).List()
-	tags := make([]policies.ResourceTag, len(rawTags))
-	for i, raw := range rawTags {
-		rawMap := raw.(map[string]interface{})
-		tags[i] = policies.ResourceTag{
-			Key:   rawMap["key"].(string),
-			Value: rawMap["value"].(string),
-		}
-	}
-	return tags
 }
 
 func resourceCSBSScheduleUpdateV1(d *schema.ResourceData) []policies.ScheduledOperationToUpdate {
@@ -502,19 +480,6 @@ func flattenCSBSScheduledOperations(backupPolicy policies.BackupPolicy) []map[st
 	}
 
 	return scheduledOperationList
-}
-
-func flattenCSBSPolicyTags(backupPolicy policies.BackupPolicy) []map[string]interface{} {
-	var tagsList []map[string]interface{}
-	for _, tag := range backupPolicy.Tags {
-		mapping := map[string]interface{}{
-			"key":   tag.Key,
-			"value": tag.Value,
-		}
-		tagsList = append(tagsList, mapping)
-	}
-
-	return tagsList
 }
 
 func flattenCSBSPolicyResources(backupPolicy policies.BackupPolicy) []map[string]interface{} {

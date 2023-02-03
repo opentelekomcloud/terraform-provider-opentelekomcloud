@@ -125,7 +125,7 @@ func testAccCheckCSBSBackupPolicyV1Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := policies.Get(client, rs.Primary.ID).Extract()
+		_, err := policies.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("backup policy still exists")
 		}
@@ -151,7 +151,7 @@ func testAccCheckCSBSBackupPolicyV1Exists(n string, policy *policies.BackupPolic
 			return fmt.Errorf("error creating CSBSv1 client: %w", err)
 		}
 
-		found, err := policies.Get(client, rs.Primary.ID).Extract()
+		found, err := policies.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -319,6 +319,9 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
     week_backups    = "4"
     month_backups   = "2"
     timezone        = "UTC+03:00"
+  }
+  tags = {
+    muh = "kuh"
   }
 }
 `, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsFlavorID)

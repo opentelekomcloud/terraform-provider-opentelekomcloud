@@ -156,9 +156,9 @@ func dataSourceCSBSBackupPolicyV1Read(_ context.Context, d *schema.ResourceData,
 	}
 
 	listOpts := policies.ListOpts{
-		ID:     d.Get("id").(string),
-		Name:   d.Get("name").(string),
-		Status: d.Get("status").(string),
+		// ID:     d.Get("id").(string),
+		Name: d.Get("name").(string),
+		// Status: d.Get("status").(string),
 	}
 
 	refinedPolicies, err := policies.List(policyClient, listOpts)
@@ -179,6 +179,12 @@ func dataSourceCSBSBackupPolicyV1Read(_ context.Context, d *schema.ResourceData,
 	log.Printf("[INFO] Retrieved backup policy %s using given filter", backupPolicy.ID)
 
 	d.SetId(backupPolicy.ID)
+
+	tagsMap := make(map[string]string)
+	for _, tag := range backupPolicy.Tags {
+		tagsMap[tag.Key] = tag.Value
+	}
+
 	mErr := multierror.Append(
 		d.Set("name", backupPolicy.Name),
 		d.Set("id", backupPolicy.ID),
@@ -189,7 +195,7 @@ func dataSourceCSBSBackupPolicyV1Read(_ context.Context, d *schema.ResourceData,
 		d.Set("region", config.GetRegion(d)),
 		d.Set("resource", flattenCSBSPolicyResources(backupPolicy)),
 		d.Set("scheduled_operation", flattenCSBSScheduledOperations(backupPolicy)),
-		d.Set("tags", flattenCSBSPolicyTags(backupPolicy)),
+		d.Set("tags", tagsMap),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
