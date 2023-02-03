@@ -887,7 +887,7 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 resource "opentelekomcloud_networking_subnet_v2" "subnet_101" {
   name        = "subnet_101"
   network_id  = opentelekomcloud_networking_network_v2.network_1.id
-  cidr        = "172.16.1.0/24"
+  cidr        = "192.168.1.0/24"
   ip_version  = 4
   enable_dhcp = true
   no_gateway  = true
@@ -903,7 +903,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
   network {
     uuid        = opentelekomcloud_networking_network_v2.network_1.id
-    fixed_ip_v4 = "172.16.1.100"
+    fixed_ip_v4 = "192.168.1.100"
   }
 }
 `, common.DataSourceSubnet, getFlavorName())
