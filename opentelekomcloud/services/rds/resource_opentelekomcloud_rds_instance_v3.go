@@ -491,9 +491,21 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error making sure configuration template is applied: %w", err)
 	}
 
-	paramRestart, err := updateInstanceParameters(d, client)
-	if err != nil {
-		return fmterr.Errorf("error applying parameters to the instance: %w", err)
+	paramRestart := false
+	if _, ok := d.GetOk("parameters"); ok {
+		stateConf := &resource.StateChangeConf{
+			Pending:      []string{"PENDING"},
+			Target:       []string{"SUCCESS"},
+			Refresh:      waitForParameterApply(d, client),
+			Timeout:      d.Timeout(schema.TimeoutUpdate),
+			PollInterval: 10 * time.Second,
+		}
+
+		result, err := stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		paramRestart = result.(bool)
 	}
 
 	if templateRestart || paramRestart {
@@ -947,7 +959,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 			Refresh:      rdsInstanceStateRefreshFunc(client, d.Id()),
 			Timeout:      d.Timeout(schema.TimeoutUpdate),
 			Delay:        5 * time.Second,
-			PollInterval: 5 * time.Second,
+			PollInterval: 10 * time.Second,
 		}
 		if _, err = stateConf.WaitForStateContext(ctx); err != nil {
 			return fmterr.Errorf("error waiting for RDS instance (%s) creation completed: %s", d.Id(), err)
@@ -1271,19 +1283,15 @@ func validateRDSv3Flavor(argName string) schema.CustomizeDiffFunc {
 }
 
 func updateInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceClient) (bool, error) {
-	if _, ok := d.GetOk("parameters"); !ok {
-		return false, nil
-	}
-
 	opts := configurations.UpdateInstanceConfigurationOpts{
 		Values:     d.Get("parameters").(map[string]interface{}),
 		InstanceId: d.Id(),
 	}
-	status, err := configurations.UpdateInstanceConfiguration(client, opts)
+	_, err := configurations.UpdateInstanceConfiguration(client, opts)
 	if err != nil {
-		return false, fmt.Errorf("error applying configuration parameters: %w", err)
+		return false, err
 	}
-	return status.RestartRequired, err
+	return true, err
 }
 
 func rdsInstanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
@@ -1297,5 +1305,20 @@ func rdsInstanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceID str
 		}
 
 		return instance, instance.Status, nil
+	}
+}
+
+func waitForParameterApply(d *schema.ResourceData, client *golangsdk.ServiceClient) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		r, err := updateInstanceParameters(d, client)
+
+		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault403); ok {
+				return r, "PENDING", nil
+			}
+			return nil, "", fmt.Errorf("error applying configuration parameters: %w", err)
+		}
+
+		return r, "SUCCESS", nil
 	}
 }
