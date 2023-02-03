@@ -235,6 +235,8 @@ var testAccComputeV2FloatingIPAssociateBasic = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
+  image_name      = "Standard_Debian_10_latest"
+  flavor_name	  = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -246,7 +248,7 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
   floating_ip = opentelekomcloud_networking_floatingip_v2.fip_1.address
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
-`, common.DataSourceSubnet)
+`, common.DataSourceSubnet, getFlavorName())
 
 var testAccComputeV2FloatingIPAssociateFixedIP = fmt.Sprintf(`
 %s
@@ -254,6 +256,8 @@ var testAccComputeV2FloatingIPAssociateFixedIP = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
+  image_name      = "Standard_Debian_10_latest"
+  flavor_name	  = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -266,7 +270,7 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
   fixed_ip    = opentelekomcloud_compute_instance_v2.instance_1.access_ip_v4
 }
-`, common.DataSourceSubnet)
+`, common.DataSourceSubnet, getFlavorName())
 
 var testAccComputeV2FloatingIPAssociateAttachToFirstNetwork = fmt.Sprintf(`
 %s
@@ -274,7 +278,8 @@ var testAccComputeV2FloatingIPAssociateAttachToFirstNetwork = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
-
+  image_name      = "Standard_Debian_10_latest"
+  flavor_name	  = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -287,7 +292,7 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
   fixed_ip    = opentelekomcloud_compute_instance_v2.instance_1.network.0.fixed_ip_v4
 }
-`, common.DataSourceSubnet)
+`, common.DataSourceSubnet, getFlavorName())
 
 var testAccComputeV2FloatingIPAssociateAttachNew1 = fmt.Sprintf(`
 %s
@@ -295,6 +300,8 @@ var testAccComputeV2FloatingIPAssociateAttachNew1 = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
+  image_name      = "Standard_Debian_10_latest"
+  flavor_name	  = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -308,7 +315,7 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
   floating_ip = opentelekomcloud_networking_floatingip_v2.fip_1.address
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
-`, common.DataSourceSubnet)
+`, common.DataSourceSubnet, getFlavorName())
 
 var testAccComputeV2FloatingIPAssociateAttachNew2 = fmt.Sprintf(`
 %s
@@ -316,6 +323,8 @@ var testAccComputeV2FloatingIPAssociateAttachNew2 = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
+  image_name      = "Standard_Debian_10_latest"
+  flavor_name	  = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -329,4 +338,4 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
   floating_ip = opentelekomcloud_networking_floatingip_v2.fip_2.address
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
-`, common.DataSourceSubnet)
+`, common.DataSourceSubnet, getFlavorName())

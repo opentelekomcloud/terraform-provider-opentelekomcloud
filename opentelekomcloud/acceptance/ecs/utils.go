@@ -68,6 +68,36 @@ func getFlavors() (map[string][]*quotas.ExpectedQuota, error) {
 	return resultsQ, nil
 }
 
+func getFlavorName() string {
+
+	resultsQ, err := getFlavors()
+	if err != nil {
+		panic("failed to get server flavors")
+	}
+	flavorsList := []string{}
+	for key := range resultsQ {
+		flavorsList = append(flavorsList, key)
+	}
+
+	// Check entry an element of flavors in flavorsList, use flavors pattern
+
+	flavorsPattern := []string{"s3.large.2", "s2.large.2", "s3.large.1", "s2.large.1"}
+	found := false
+	var flavorName string
+	for !found {
+		for _, flavorPatternName := range flavorsPattern {
+			for _, flavorComputeName := range flavorsList {
+				if flavorComputeName == flavorPatternName {
+					flavorName = flavorComputeName
+					found = true
+					break
+				}
+			}
+		}
+	}
+	return flavorName
+}
+
 var flavorsQuota map[string][]*quotas.ExpectedQuota
 
 func init() {
@@ -77,6 +107,7 @@ func init() {
 			panic("failed to get server flavors")
 		}
 		flavorsQuota = qs
+
 	}
 }
 
