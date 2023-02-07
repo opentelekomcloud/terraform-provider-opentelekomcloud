@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -386,7 +387,7 @@ func resourceCSBSScheduleV1(d *schema.ResourceData) []policies.ScheduledOperatio
 			},
 
 			OperationDefinition: policies.OperationDefinition{
-				MaxBackups:            rawMap["max_backups"].(int),
+				MaxBackups:            pointerto.Int(rawMap["max_backups"].(int)),
 				RetentionDurationDays: rawMap["retention_duration_days"].(int),
 				Permanent:             rawMap["permanent"].(bool),
 				DayBackups:            rawMap["day_backups"].(int),
@@ -436,7 +437,7 @@ func resourceCSBSScheduleUpdateV1(d *schema.ResourceData) []policies.ScheduledOp
 				},
 			},
 			OperationDefinition: policies.OperationDefinition{
-				MaxBackups:            rawNewMap["max_backups"].(int),
+				MaxBackups:            pointerto.Int(rawNewMap["max_backups"].(int)),
 				RetentionDurationDays: rawNewMap["retention_duration_days"].(int),
 				Permanent:             rawNewMap["permanent"].(bool),
 				DayBackups:            rawNewMap["day_backups"].(int),

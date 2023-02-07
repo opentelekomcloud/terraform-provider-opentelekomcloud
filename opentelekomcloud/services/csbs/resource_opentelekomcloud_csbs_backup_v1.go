@@ -192,16 +192,12 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 	resourceID := d.Get("resource_id").(string)
 	resourceType := d.Get("resource_type").(string)
 
-	queryOpts := res.ResourceBackupCapOpts{
-		CheckProtectable: []res.ResourceCapQueryParams{
-			{
-				ResourceId:   resourceID,
-				ResourceType: resourceType,
-			},
+	query, err := res.GetResBackupCapabilities(client, []res.ResourceBackupCapOpts{
+		{
+			ResourceId:   resourceID,
+			ResourceType: resourceType,
 		},
-	}
-
-	query, err := res.GetResBackupCapabilities(client, queryOpts)
+	})
 	if err != nil {
 		return fmterr.Errorf("error querying resource backup capability: %s", err)
 	}

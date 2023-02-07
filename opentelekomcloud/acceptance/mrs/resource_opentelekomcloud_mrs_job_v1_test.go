@@ -16,7 +16,7 @@ import (
 )
 
 func TestAccMRSV1Job_basic(t *testing.T) {
-	var jobGet job.Job
+	var jobGet job.JobExecution
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
@@ -47,7 +47,7 @@ func testAccCheckMRSV1JobDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := job.Get(mrsClient, rs.Primary.ID).Extract()
+		_, err := job.Get(mrsClient, rs.Primary.ID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault400); ok {
 				return nil
@@ -62,7 +62,7 @@ func testAccCheckMRSV1JobDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckMRSV1JobExists(n string, jobGet *job.Job) resource.TestCheckFunc {
+func testAccCheckMRSV1JobExists(n string, jobGet *job.JobExecution) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -79,12 +79,12 @@ func testAccCheckMRSV1JobExists(n string, jobGet *job.Job) resource.TestCheckFun
 			return fmt.Errorf("error creating opentelekomcloud mrs client: %s ", err)
 		}
 
-		found, err := job.Get(mrsClient, rs.Primary.ID).Extract()
+		found, err := job.Get(mrsClient, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		if found.ID != rs.Primary.ID {
+		if found.Id != rs.Primary.ID {
 			return fmt.Errorf("job not found. ")
 		}
 
@@ -118,7 +118,7 @@ resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
   safe_mode                = 0
   cluster_type             = 0
   node_public_cert_name    = "%s"
-  cluster_admin_secret     = "Qwert!123"
+  cluster_admin_secret     = "SuperQwert!123"
   component_list {
     component_name = "Hadoop"
   }
@@ -133,7 +133,7 @@ resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
 resource "opentelekomcloud_mrs_job_v1" "job1" {
   job_type   = 1
   job_name   = "test_mapreduce_job1"
-  cluster_id = opentelekomcloud_mrs_cluster_v1.cluster1.id
+  cluster_id = "9e9dfe0f-2b8a-4b40-bd49-2323b8268a47"
   jar_path   = "s3a://tf-mrs-test/program/hadoop-mapreduce-examples-2.7.5.jar"
   input      = "s3a://tf-mrs-test/input/"
   output     = "s3a://tf-mrs-test/output/"

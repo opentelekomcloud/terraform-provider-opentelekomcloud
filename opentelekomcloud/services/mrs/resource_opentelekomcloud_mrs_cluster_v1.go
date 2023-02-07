@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/mrs/v1/cluster"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
@@ -183,7 +184,7 @@ func ResourceMRSClusterV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"component_list": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: true,
 				ForceNew: true,
 				Elem: &schema.Resource{
@@ -400,10 +401,6 @@ func ResourceMRSClusterV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"duration": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"vnc": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -448,14 +445,14 @@ func ResourceMRSClusterV1() *schema.Resource {
 	}
 }
 
-func getAllClusterComponents(d *schema.ResourceData) []cluster.ComponentOpts {
-	var componentOpts []cluster.ComponentOpts
+func getAllClusterComponents(d *schema.ResourceData) []cluster.ComponentList {
+	var componentOpts []cluster.ComponentList
 
-	components := d.Get("component_list").([]interface{})
-	for _, v := range components {
+	components := d.Get("component_list").(*schema.Set)
+	for _, v := range components.List() {
 		component := v.(map[string]interface{})
 
-		componentOpts = append(componentOpts, cluster.ComponentOpts{
+		componentOpts = append(componentOpts, cluster.ComponentList{
 			ComponentName: component["component_name"].(string),
 		})
 	}
@@ -463,8 +460,8 @@ func getAllClusterComponents(d *schema.ResourceData) []cluster.ComponentOpts {
 	return componentOpts
 }
 
-func getAllClusterJobs(d *schema.ResourceData) []cluster.JobOpts {
-	var jobOpts []cluster.JobOpts
+func getAllClusterJobs(d *schema.ResourceData) []cluster.AddJobs {
+	var jobOpts []cluster.AddJobs
 
 	jobs := d.Get("add_jobs").([]interface{})
 	for _, v := range jobs {
@@ -472,7 +469,7 @@ func getAllClusterJobs(d *schema.ResourceData) []cluster.JobOpts {
 
 		shutDown := job["shutdown_cluster"].(bool)
 		submitJob := job["submit_job_once_cluster_run"].(bool)
-		jobOpts = append(jobOpts, cluster.JobOpts{
+		jobOpts = append(jobOpts, cluster.AddJobs{
 			JobType:                 job["job_type"].(int),
 			JobName:                 job["job_name"].(string),
 			JarPath:                 job["jar_path"].(string),
@@ -491,8 +488,8 @@ func getAllClusterJobs(d *schema.ResourceData) []cluster.JobOpts {
 	return jobOpts
 }
 
-func getAllClusterScripts(d *schema.ResourceData) []cluster.ScriptOpts {
-	var scriptOpts []cluster.ScriptOpts
+func getAllClusterScripts(d *schema.ResourceData) []cluster.BootstrapScript {
+	var scriptOpts []cluster.BootstrapScript
 
 	scripts := d.Get("bootstrap_scripts").([]interface{})
 	for _, v := range scripts {
@@ -508,7 +505,7 @@ func getAllClusterScripts(d *schema.ResourceData) []cluster.ScriptOpts {
 
 		activeMaster := script["active_master"].(bool)
 		beforeComponent := script["before_component_start"].(bool)
-		scriptOpts = append(scriptOpts, cluster.ScriptOpts{
+		scriptOpts = append(scriptOpts, cluster.BootstrapScript{
 			Name:                 script["name"].(string),
 			Uri:                  script["uri"].(string),
 			Parameters:           script["parameters"].(string),
@@ -551,14 +548,14 @@ func resourceClusterV1Create(ctx context.Context, d *schema.ResourceData, meta i
 		MasterNodeSize:        d.Get("master_node_size").(string),
 		CoreNodeNum:           d.Get("core_node_num").(int),
 		CoreNodeSize:          d.Get("core_node_size").(string),
-		AvailableZoneID:       d.Get("available_zone_id").(string),
+		AvailableZoneId:       d.Get("available_zone_id").(string),
 		ClusterName:           d.Get("cluster_name").(string),
 		Vpc:                   vpc.Name,
-		VpcID:                 d.Get("vpc_id").(string),
-		SubnetID:              d.Get("subnet_id").(string),
+		VpcId:                 d.Get("vpc_id").(string),
+		SubnetId:              d.Get("subnet_id").(string),
 		SubnetName:            subnet.Name,
 		ClusterVersion:        d.Get("cluster_version").(string),
-		ClusterType:           d.Get("cluster_type").(int),
+		ClusterType:           pointerto.Int(d.Get("cluster_type").(int)),
 		VolumeType:            d.Get("volume_type").(string),
 		VolumeSize:            d.Get("volume_size").(int),
 		MasterDataVolumeType:  d.Get("master_data_volume_type").(string),
@@ -570,25 +567,25 @@ func resourceClusterV1Create(ctx context.Context, d *schema.ResourceData, meta i
 		NodePublicCertName:    d.Get("node_public_cert_name").(string),
 		SafeMode:              d.Get("safe_mode").(int),
 		ClusterAdminSecret:    d.Get("cluster_admin_secret").(string),
-		LogCollection:         d.Get("log_collection").(int),
+		LogCollection:         pointerto.Int(d.Get("log_collection").(int)),
 		ComponentList:         getAllClusterComponents(d),
 		AddJobs:               getAllClusterJobs(d),
 		BootstrapScripts:      getAllClusterScripts(d),
-		LoginMode:             1,
+		LoginMode:             pointerto.Int(1),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	mrsCluster, err := cluster.Create(client, createOpts).Extract()
+	mrsCluster, err := cluster.Create(client, *createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating Cluster: %s", err)
 	}
-	d.SetId(mrsCluster.ClusterID)
+	d.SetId(mrsCluster.ClusterId)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"starting"},
 		Target:     []string{"running"},
-		Refresh:    clusterStateRefreshFunc(client, mrsCluster.ClusterID),
+		Refresh:    clusterStateRefreshFunc(client, mrsCluster.ClusterId),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -596,15 +593,15 @@ func resourceClusterV1Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("error waiting for cluster (%s) to become ready: %s ", mrsCluster.ClusterID, err)
+		return fmterr.Errorf("error waiting for cluster (%s) to become ready: %s ", mrsCluster.ClusterId, err)
 	}
 
 	// set tags
 	tagRaw := d.Get("tags").(map[string]interface{})
 	if len(tagRaw) > 0 {
 		tagList := common.ExpandResourceTags(tagRaw)
-		if err := tags.Create(client, "clusters", mrsCluster.ClusterID, tagList).ExtractErr(); err != nil {
-			return fmterr.Errorf("error setting tags of MRS cluster %s: %s", mrsCluster.ClusterID, err)
+		if err := tags.Create(client, "clusters", mrsCluster.ClusterId, tagList).ExtractErr(); err != nil {
+			return fmterr.Errorf("error setting tags of MRS cluster %s: %s", mrsCluster.ClusterId, err)
 		}
 	}
 
@@ -618,7 +615,7 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 		return fmterr.Errorf(ErrCreationClient, err)
 	}
 
-	mrsCluster, err := cluster.Get(client, d.Id()).Extract()
+	mrsCluster, err := cluster.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "Cluster")
 	}
@@ -635,10 +632,10 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 
 	mErr := multierror.Append(
 		d.Set("region", config.GetRegion(d)),
-		d.Set("order_id", mrsCluster.OrderID),
-		d.Set("cluster_id", mrsCluster.ClusterID),
+		d.Set("order_id", mrsCluster.OrderId),
+		d.Set("cluster_id", mrsCluster.ClusterId),
 		d.Set("available_zone_name", mrsCluster.AzName),
-		d.Set("available_zone_id", mrsCluster.AzID),
+		d.Set("available_zone_id", mrsCluster.AzId),
 		d.Set("cluster_version", mrsCluster.ClusterVersion),
 		d.Set("master_node_num", masterNodeNum),
 		d.Set("core_node_num", coreNodeNum),
@@ -653,28 +650,26 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 		d.Set("node_public_cert_name", mrsCluster.NodePublicCertName),
 		d.Set("safe_mode", mrsCluster.SafeMode),
 		d.Set("master_node_size", mrsCluster.MasterNodeSize),
-		d.Set("instance_id", mrsCluster.InstanceID),
+		d.Set("instance_id", mrsCluster.InstanceId),
 		d.Set("hadoop_version", mrsCluster.HadoopVersion),
 		d.Set("master_node_ip", mrsCluster.MasterNodeIp),
 		d.Set("external_ip", mrsCluster.ExternalIp),
 		d.Set("private_ip_first", mrsCluster.PrivateIpFirst),
 		d.Set("internal_ip", mrsCluster.InternalIp),
-		d.Set("slave_security_groups_id", mrsCluster.SlaveSecurityGroupsID),
-		d.Set("security_groups_id", mrsCluster.SecurityGroupsID),
+		d.Set("slave_security_groups_id", mrsCluster.SlaveSecurityGroupsId),
+		d.Set("security_groups_id", mrsCluster.SecurityGroupsId),
 		d.Set("external_alternate_ip", mrsCluster.ExternalAlternateIp),
-		d.Set("master_node_spec_id", mrsCluster.MasterNodeSpecID),
-		d.Set("core_node_spec_id", mrsCluster.CoreNodeSpecID),
-		d.Set("master_node_product_id", mrsCluster.MasterNodeProductID),
-		d.Set("core_node_product_id", mrsCluster.CoreNodeProductID),
-		d.Set("duration", mrsCluster.Duration),
+		d.Set("master_node_spec_id", mrsCluster.MasterNodeSpecId),
+		d.Set("core_node_spec_id", mrsCluster.CoreNodeSpecId),
+		d.Set("master_node_product_id", mrsCluster.MasterNodeProductId),
+		d.Set("core_node_product_id", mrsCluster.CoreNodeProductId),
 		d.Set("vnc", mrsCluster.Vnc),
 		d.Set("fee", mrsCluster.Fee),
-		d.Set("deployment_id", mrsCluster.DeploymentID),
+		d.Set("deployment_id", mrsCluster.DeploymentId),
 		d.Set("cluster_state", mrsCluster.ClusterState),
 		d.Set("error_info", mrsCluster.ErrorInfo),
 		d.Set("remark", mrsCluster.Remark),
-		d.Set("tenant_id", mrsCluster.TenantID),
-		d.Set("duration", mrsCluster.Duration),
+		d.Set("tenant_id", mrsCluster.TenantId),
 	)
 
 	updateAt, err := strconv.ParseInt(mrsCluster.UpdateAt, 10, 64)
@@ -701,7 +696,7 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 	components := make([]map[string]interface{}, len(mrsCluster.ComponentList))
 	for i, attachment := range mrsCluster.ComponentList {
 		components[i] = make(map[string]interface{})
-		components[i]["component_id"] = attachment.ComponentID
+		components[i]["component_id"] = attachment.ComponentId
 		components[i]["component_name"] = attachment.ComponentName
 		components[i]["component_version"] = attachment.ComponentVersion
 		components[i]["component_desc"] = attachment.ComponentDesc
@@ -765,7 +760,7 @@ func resourceClusterV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf(ErrCreationClient, err)
 	}
 
-	if err := cluster.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := cluster.Delete(client, d.Id()); err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud Cluster: %s", err)
 	}
 
@@ -791,7 +786,7 @@ func resourceClusterV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 
 func clusterStateRefreshFunc(client *golangsdk.ServiceClient, clusterID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := cluster.Get(client, clusterID).Extract()
+		n, err := cluster.Get(client, clusterID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return n, "DELETED", nil

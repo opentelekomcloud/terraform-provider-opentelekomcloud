@@ -129,20 +129,9 @@ func DataSourceCSBSBackupPolicyV1() *schema.Resource {
 				},
 			},
 			"tags": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeMap,
 				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"key": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"value": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
@@ -155,15 +144,22 @@ func dataSourceCSBSBackupPolicyV1Read(_ context.Context, d *schema.ResourceData,
 		return fmterr.Errorf("error creating CSBSv1 client: %w", err)
 	}
 
-	listOpts := policies.ListOpts{
-		// ID:     d.Get("id").(string),
-		Name: d.Get("name").(string),
-		// Status: d.Get("status").(string),
-	}
-
-	refinedPolicies, err := policies.List(policyClient, listOpts)
-	if err != nil {
-		return fmterr.Errorf("unable to retrieve backup policies: %s", err)
+	var refinedPolicies []policies.BackupPolicy
+	if v, ok := d.GetOk("id"); ok {
+		pl, err := policies.Get(policyClient, v.(string))
+		if err != nil {
+			return fmterr.Errorf("unable to retrieve policy: %s", err)
+		}
+		refinedPolicies = append(refinedPolicies, *pl)
+	} else {
+		listOpts := policies.ListOpts{
+			Name: d.Get("name").(string),
+		}
+		pols, err := policies.List(policyClient, listOpts)
+		if err != nil {
+			return fmterr.Errorf("unable to retrieve backup policies: %s", err)
+		}
+		refinedPolicies = pols
 	}
 
 	if len(refinedPolicies) < 1 {
