@@ -133,7 +133,7 @@ resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
 resource "opentelekomcloud_mrs_job_v1" "job1" {
   job_type   = 1
   job_name   = "test_mapreduce_job1"
-  cluster_id = "9e9dfe0f-2b8a-4b40-bd49-2323b8268a47"
+  cluster_id = opentelekomcloud_mrs_cluster_v1.cluster1.id
   jar_path   = "s3a://tf-mrs-test/program/hadoop-mapreduce-examples-2.7.5.jar"
   input      = "s3a://tf-mrs-test/input/"
   output     = "s3a://tf-mrs-test/output/"
