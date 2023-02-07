@@ -32,7 +32,7 @@ func TestAccCCENodesV3DataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodeV3DataSourceID(dataSourceNodesName),
 					resource.TestCheckResourceAttr(dataSourceNodesName, "name", cceNodeName),
-					resource.TestCheckResourceAttr(dataSourceNodesName, "flavor_id", "s3.medium.1"),
+					resource.TestCheckResourceAttr(dataSourceNodesName, "flavor_id", "s2.large.2"),
 				),
 			},
 		},
@@ -61,7 +61,7 @@ func testAccCCENodeV3DataSourceInit(cceNodeName string) string {
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "%s"
-  flavor_id         = "s3.medium.1"
+  flavor_id         = "s2.large.2"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -83,7 +83,7 @@ func testAccCCENodeV3DataSourceBasic(cceNodeName string) string {
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "%s"
-  flavor_id         = "s3.medium.1"
+  flavor_id         = "s2.large.2"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {

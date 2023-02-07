@@ -85,9 +85,10 @@ func DataSourceCceNodesV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"extend_param": {
-							Type:     schema.TypeString,
+						"extend_params": {
+							Type:     schema.TypeMap,
 							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"kms_id": {
 							Type:     schema.TypeString,
@@ -175,10 +176,10 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 	var dataVolumes []map[string]interface{}
 	for _, volume := range Node.Spec.DataVolumes {
 		mapping := map[string]interface{}{
-			"disk_size":    volume.Size,
-			"volume_type":  volume.VolumeType,
-			"extend_param": volume.ExtendParam,
-			"kms_id":       volume.Metadata["__system__cmkid"],
+			"disk_size":     volume.Size,
+			"volume_type":   volume.VolumeType,
+			"extend_params": volume.ExtendParam,
+			"kms_id":        volume.Metadata["__system__cmkid"],
 		}
 		dataVolumes = append(dataVolumes, mapping)
 	}
