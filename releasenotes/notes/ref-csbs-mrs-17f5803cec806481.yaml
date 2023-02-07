@@ -1,0 +1,10 @@
+---
+other:
+  - |
+    **[CSBS]** Refaсtoring of ``resource/opentelekomcloud_csbs_*`` (`#2079 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2079>`_)
+  - |
+    **[CSBS]** Refaсtoring of ``data/opentelekomcloud_csbs_*`` (`#2079 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2079>`_)
+  - |
+    **[MRS]** Refaсtoring of ``resource/opentelekomcloud_mrs_*`` (`#2079 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2079>`_)
+  - |
+    **[MRS]** Refaсtoring of ``data/opentelekomcloud_mrs_*`` (`#2079 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2079>`_)
