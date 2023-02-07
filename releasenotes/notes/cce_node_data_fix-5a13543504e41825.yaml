@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Fix `extend_params` for ``data_source/opentelekomcloud_cce_node_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
