@@ -15,6 +15,21 @@ resource "opentelekomcloud_networking_router_v2" "router_1" {
 }
 ```
 
+## Enable SNAT
+```hcl
+data "opentelekomcloud_networking_network_v2" "admin_external_net" {
+  name = "admin_external_net"
+}
+
+resource "opentelekomcloud_networking_router_v2" "router_1" {
+  name             = "my_router"
+  admin_state_up   = true
+  distributed      = false
+  external_gateway = data.opentelekomcloud_networking_network_v2.admin_external_net.id
+  enable_snat      = true
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
