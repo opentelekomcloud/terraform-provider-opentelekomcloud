@@ -47,6 +47,8 @@ The following arguments are supported:
 
 * `project_id` - (Optional, String) Specifies the project where instance hosted.
 
+* `limit` - (Optional, Integer) Specifies the number of instances to be queried. The value is an integer and is 100 by default.
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
