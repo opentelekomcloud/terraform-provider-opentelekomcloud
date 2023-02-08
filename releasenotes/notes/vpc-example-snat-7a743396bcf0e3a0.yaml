@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[VPC]** Clarify usage of SNAT in ``resource/opentelekomcloud_networking_router_v2`` (`#2081 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2081>`_)
