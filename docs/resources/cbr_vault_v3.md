@@ -74,6 +74,7 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   }
 }
 ```
+
 ### Vault with associated resource (volume)
 
 ```hcl
@@ -99,6 +100,43 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   resource {
     id   = opentelekomcloud_blockstorage_volume_v2.volume.id
     type = "OS::Cinder::Volume"
+  }
+}
+```
+
+### Vault with associated resource (sfs-turbo)
+
+```hcl
+variable "vpc_id" {}
+variable "subnet_id" {}
+variable "sg_id" {}
+variable "az" {}
+
+resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
+  name              = "sfs-turbo-share"
+  size              = 500
+  share_proto       = "NFS"
+  vpc_id            = var.vpc_id
+  subnet_id         = var.subnet_id
+  security_group_id = var.sg_id
+  availability_zone = var.az
+}
+
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test"
+
+  description = "CBR vault for terraform provider test"
+
+  billing {
+    size          = 1000
+    object_type   = "turbo"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+  }
+
+  resource {
+    id   = opentelekomcloud_sfs_turbo_share_v1.sfs-turbo.id
+    type = "OS::Sfs::Turbo"
   }
 }
 ```
@@ -175,7 +213,7 @@ The following arguments are supported:
 
     * `consistent_level` - (Optional) Backup specifications. The default value is `crash_consistent`
 
-    * `object_type` - Object type. One of `server`, `disk`.
+    * `object_type` - Object type. One of `server`, `disk`, `turbo`.
 
     * `protect_type` - Operation type. One of `backup`, `replication`
 
@@ -204,7 +242,7 @@ The following arguments are supported:
 
     * `id` - ID of the resource to be backed up.
 
-    * `type` - Type of the resource to be backed up. Possible values are `OS::Nova::Server` and `OS::Cinder::Volume`.
+    * `type` - Type of the resource to be backed up. Possible values are `OS::Nova::Server`, `OS::Cinder::Volume` and `OS::Sfs::Turbo`.
 
     * `name` - (Optional) Resource name.
 

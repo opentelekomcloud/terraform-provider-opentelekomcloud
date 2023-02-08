@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cbr/v3/vaults"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -123,6 +124,39 @@ func TestAccCBRVaultV3_instance(t *testing.T) {
 			},
 			{
 				Config: testAccCBRVaultV3NoResource,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceVaultName, "resource.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCBRVaultV3_SfsTurbo(t *testing.T) {
+	shareName := tools.RandomString("sfs-turbo-", 3)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.Volume, Count: 2},
+				{Q: quotas.VolumeSize, Count: 20},
+				{Q: quotas.CBRPolicy, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCBRVaultv3SFSTurboShare(shareName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceVaultName, "resource.#", "1"),
+					resource.TestCheckResourceAttr(resourceVaultName, "resource.0.name", shareName),
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.size", "1000"),
+				),
+			},
+			{
+				Config: testAccCBRVaultV3TurboNoResource,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceVaultName, "resource.#", "0"),
 				),
@@ -763,6 +797,58 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   bind_rules {
     key   = "foo"
     value = "bar"
+  }
+}
+`
+
+func testAccCBRVaultv3SFSTurboShare(shareName string) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
+  name        = "%s"
+  size        = 500
+  share_proto = "NFS"
+  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  availability_zone = "%s"
+}
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test"
+
+  description = "CBR vault for terraform provider test"
+
+  billing {
+    size          = 1000
+    object_type   = "turbo"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+    period_type   = "month"
+    period_num    = 2
+  }
+
+  resource {
+    id   = opentelekomcloud_sfs_turbo_share_v1.sfs-turbo.id
+    type = "OS::Sfs::Turbo"
+  }
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, shareName, env.OS_AVAILABILITY_ZONE)
+}
+
+var testAccCBRVaultV3TurboNoResource = `
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test"
+
+  description = "CBR vault for terraform provider test"
+
+  billing {
+    size          = 1000
+    object_type   = "turbo"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
   }
 }
 `
