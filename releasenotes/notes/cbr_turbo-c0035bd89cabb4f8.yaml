@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **[CBR]** Implement sfs-turbo support for ``resource/opentelekomcloud_cbr_vault_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/>`_)
+    **[CBR]** Implement sfs-turbo support for ``resource/opentelekomcloud_cbr_vault_v3`` (`#2080 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/2080>`_)
