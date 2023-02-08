@@ -60,7 +60,7 @@ func ResourceCBRVaultV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 							ValidateFunc: validation.StringInSlice([]string{
-								"OS::Nova::Server", "OS::Cinder::Volume",
+								"OS::Nova::Server", "OS::Cinder::Volume", "OS::Sfs::Turbo",
 							}, false),
 						},
 						"exclude_volumes": {
