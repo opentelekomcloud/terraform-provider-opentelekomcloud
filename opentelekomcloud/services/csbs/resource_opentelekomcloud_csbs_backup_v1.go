@@ -11,8 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/backup"
+	res "github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/resource"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -67,24 +68,11 @@ func ResourceCSBSBackupV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"tags": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"key": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"value": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-					},
-				},
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ValidateFunc: common.ValidateTags,
+				ForceNew:     true,
+				Elem:         &schema.Schema{Type: schema.TypeString},
 			},
 			"status": {
 				Type:     schema.TypeString,
@@ -204,16 +192,12 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 	resourceID := d.Get("resource_id").(string)
 	resourceType := d.Get("resource_type").(string)
 
-	queryOpts := backup.ResourceBackupCapOpts{
-		CheckProtectable: []backup.ResourceCapQueryParams{
-			{
-				ResourceId:   resourceID,
-				ResourceType: resourceType,
-			},
+	query, err := res.GetResBackupCapabilities(client, []res.ResourceBackupCapOpts{
+		{
+			ResourceId:   resourceID,
+			ResourceType: resourceType,
 		},
-	}
-
-	query, err := backup.QueryResourceBackupCapability(client, queryOpts).ExtractQueryResponse()
+	})
 	if err != nil {
 		return fmterr.Errorf("error querying resource backup capability: %s", err)
 	}
@@ -226,7 +210,7 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 			Tags:         resourceCSBSTagsV1(d),
 		}
 
-		checkpoint, err := backup.Create(client, resourceID, createOpts).Extract()
+		checkpoint, err := backup.Create(client, resourceID, createOpts)
 		if err != nil {
 			return fmterr.Errorf("error creating backup: %s", err)
 		}
@@ -275,7 +259,7 @@ func resourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("error creating csbs client: %s", err)
 	}
 
-	backupObject, err := backup.Get(client, d.Id()).Extract()
+	backupObject, err := backup.Get(client, d.Id())
 
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -283,9 +267,14 @@ func resourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-
 		return fmterr.Errorf("error retrieving backup: %s", err)
 	}
+
+	tagsMap := make(map[string]string)
+	for _, tag := range backupObject.Tags {
+		tagsMap[tag.Key] = tag.Value
+	}
+
 	mErr := multierror.Append(
 		d.Set("resource_id", backupObject.ResourceId),
 		d.Set("backup_name", backupObject.Name),
@@ -296,13 +285,10 @@ func resourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("vm_metadata", flattenCSBSVMMetadata(backupObject)),
 		d.Set("backup_record_id", backupObject.CheckpointId),
 		d.Set("region", config.GetRegion(d)),
+		d.Set("tags", tagsMap),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := d.Set("tags", flattenCSBSTags(backupObject)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -336,7 +322,7 @@ func resourceCSBSBackupV1Delete(ctx context.Context, d *schema.ResourceData, met
 
 func waitForCSBSBackupActive(client *golangsdk.ServiceClient, backupId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := backup.Get(client, backupId).Extract()
+		n, err := backup.Get(client, backupId)
 		if err != nil {
 			return nil, "", err
 		}
@@ -351,7 +337,7 @@ func waitForCSBSBackupActive(client *golangsdk.ServiceClient, backupId string) r
 
 func waitForCSBSBackupDelete(client *golangsdk.ServiceClient, backupId string, backupRecordID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		r, err := backup.Get(client, backupId).Extract()
+		r, err := backup.Get(client, backupId)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[INFO] Successfully deleted csbs backup %s", backupId)
@@ -360,7 +346,7 @@ func waitForCSBSBackupDelete(client *golangsdk.ServiceClient, backupId string, b
 			return r, "deleting", err
 		}
 
-		err = backup.Delete(client, backupRecordID).Err
+		err = backup.Delete(client, backupRecordID)
 
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -381,19 +367,6 @@ func waitForCSBSBackupDelete(client *golangsdk.ServiceClient, backupId string, b
 
 		return r, r.Status, nil
 	}
-}
-
-func resourceCSBSTagsV1(d *schema.ResourceData) []tags.ResourceTag {
-	rawTags := d.Get("tags").(*schema.Set).List()
-	tagList := make([]tags.ResourceTag, len(rawTags))
-	for i, raw := range rawTags {
-		rawMap := raw.(map[string]interface{})
-		tagList[i] = tags.ResourceTag{
-			Key:   rawMap["key"].(string),
-			Value: rawMap["value"].(string),
-		}
-	}
-	return tagList
 }
 
 func flattenCSBSVolumeBackups(backupObject *backup.Backup) []map[string]interface{} {
@@ -438,17 +411,4 @@ func flattenCSBSVMMetadata(backupObject *backup.Backup) []map[string]interface{}
 	vmMetadata = append(vmMetadata, mapping)
 
 	return vmMetadata
-}
-
-func flattenCSBSTags(backupObject *backup.Backup) []map[string]interface{} {
-	var t []map[string]interface{}
-	for _, tag := range backupObject.Tags {
-		mapping := map[string]interface{}{
-			"key":   tag.Key,
-			"value": tag.Value,
-		}
-		t = append(t, mapping)
-	}
-
-	return t
 }

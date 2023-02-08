@@ -95,7 +95,7 @@ func testAccCSBSBackupV1Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := backup.Get(client, rs.Primary.ID).Extract()
+		_, err := backup.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("backup still exists")
 		}
@@ -121,7 +121,7 @@ func testAccCSBSBackupV1Exists(n string, backups *backup.Backup) resource.TestCh
 			return fmt.Errorf("error creating CSBSv1 client: %s", err)
 		}
 
-		found, err := backup.Get(client, rs.Primary.ID).Extract()
+		found, err := backup.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -159,6 +159,10 @@ resource "opentelekomcloud_csbs_backup_v1" "csbs" {
   description   = "test-code"
   resource_id   = opentelekomcloud_compute_instance_v2.instance_1.id
   resource_type = "OS::Nova::Server"
+
+  tags = {
+    muh = "kuh"
+  }
 }
 `, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsFlavorID)
 

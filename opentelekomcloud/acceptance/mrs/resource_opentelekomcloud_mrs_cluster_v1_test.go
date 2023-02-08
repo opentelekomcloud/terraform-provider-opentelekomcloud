@@ -48,7 +48,7 @@ func testAccCheckMRSV1ClusterDestroy(s *terraform.State) error {
 			continue
 		}
 
-		clusterGet, err := cluster.Get(client, rs.Primary.ID).Extract()
+		clusterGet, err := cluster.Get(client, rs.Primary.ID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return nil
@@ -80,12 +80,12 @@ func testAccCheckMRSV1ClusterExists(n string, clusterGet *cluster.Cluster) resou
 			return fmt.Errorf(mrs.ErrCreationClient, err)
 		}
 
-		found, err := cluster.Get(client, rs.Primary.ID).Extract()
+		found, err := cluster.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		if found.ClusterID != rs.Primary.ID {
+		if found.ClusterId != rs.Primary.ID {
 			return fmt.Errorf("cluster not found")
 		}
 
@@ -114,7 +114,7 @@ resource "opentelekomcloud_mrs_cluster_v1" "this" {
   cluster_type          = 0
   safe_mode             = 1
   node_public_cert_name = "%s"
-  cluster_admin_secret  = "Qwerty!123"
+  cluster_admin_secret  = "SuperQwerty!123"
   component_list {
     component_name = "Presto"
   }

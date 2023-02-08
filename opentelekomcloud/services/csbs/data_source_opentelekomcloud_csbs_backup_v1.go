@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/backup"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -184,20 +183,9 @@ func DataSourceCSBSBackupV1() *schema.Resource {
 				},
 			},
 			"tags": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeMap,
 				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"key": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"value": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
@@ -210,21 +198,29 @@ func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf("error creating CSBSv1 client: %w", err)
 	}
 
-	listOpts := backup.ListOpts{
-		ID:           d.Get("id").(string),
-		Name:         d.Get("backup_name").(string),
-		Status:       d.Get("status").(string),
-		ResourceName: d.Get("resource_name").(string),
-		CheckpointId: d.Get("backup_record_id").(string),
-		ResourceType: d.Get("resource_type").(string),
-		ResourceId:   d.Get("resource_id").(string),
-		PolicyId:     d.Get("policy_id").(string),
-		VmIp:         d.Get("vm_ip").(string),
-	}
-
-	refinedBackups, err := backup.List(backupClient, listOpts)
-	if err != nil {
-		return fmterr.Errorf("unable to retrieve backup: %s", err)
+	var refinedBackups []backup.Backup
+	if v, ok := d.GetOk("id"); ok {
+		bk, err := backup.Get(backupClient, v.(string))
+		if err != nil {
+			return fmterr.Errorf("unable to retrieve backup: %s", err)
+		}
+		refinedBackups = append(refinedBackups, *bk)
+	} else {
+		listOpts := backup.ListOpts{
+			Name:         d.Get("backup_name").(string),
+			Status:       d.Get("status").(string),
+			ResourceName: d.Get("resource_name").(string),
+			CheckpointId: d.Get("backup_record_id").(string),
+			ResourceType: d.Get("resource_type").(string),
+			ResourceId:   d.Get("resource_id").(string),
+			PolicyId:     d.Get("policy_id").(string),
+			VmIp:         d.Get("vm_ip").(string),
+		}
+		backUps, err := backup.List(backupClient, listOpts)
+		if err != nil {
+			return fmterr.Errorf("unable to retrieve backup: %s", err)
+		}
+		refinedBackups = backUps
 	}
 
 	if len(refinedBackups) < 1 {
@@ -240,6 +236,11 @@ func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta 
 
 	d.SetId(backupObject.Id)
 
+	tagsMap := make(map[string]string)
+	for _, tag := range backupObject.Tags {
+		tagsMap[tag.Key] = tag.Value
+	}
+
 	mErr := multierror.Append(
 		d.Set("backup_record_id", backupObject.CheckpointId),
 		d.Set("backup_name", backupObject.Name),
@@ -254,7 +255,7 @@ func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("volume_backups", flattenCSBSVolumeBackups(&backupObject)),
 		d.Set("vm_metadata", flattenCSBSVMMetadata(&backupObject)),
 		d.Set("region", config.GetRegion(d)),
-		d.Set("tags", flattenCSBSTags(&backupObject)),
+		d.Set("tags", tagsMap),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {

@@ -64,38 +64,12 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
 }
 
-resource "opentelekomcloud_compute_instance_v2" "instance_2" {
-  name              = "instance_2"
-  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
-  security_groups   = ["default"]
-  availability_zone = "%[3]s"
-  network {
-    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  }
-}
-
 resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
   name = "backup-policy"
   resource {
     id   = opentelekomcloud_compute_instance_v2.instance_1.id
     type = "OS::Nova::Server"
     name = "resource4"
-  }
-  scheduled_operation {
-    name            = "mybackup"
-    enabled         = true
-    operation_type  = "backup"
-    max_backups     = "2"
-    trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
-  }
-}
-
-resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1_2" {
-  name = "backup-policy2"
-  resource {
-    id   = opentelekomcloud_compute_instance_v2.instance_2.id
-    type = "OS::Nova::Server"
-    name = "resource5"
   }
   scheduled_operation {
     name            = "mybackup"

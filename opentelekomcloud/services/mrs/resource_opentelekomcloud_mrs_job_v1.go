@@ -103,7 +103,7 @@ func ResourceMRSJobV1() *schema.Resource {
 
 func JobStateRefreshFunc(client *golangsdk.ServiceClient, jobID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		jobGet, err := job.Get(client, jobID).Extract()
+		jobGet, err := job.Get(client, jobID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return jobGet, "DELETED", nil
@@ -125,7 +125,7 @@ func resourceMRSJobV1Create(ctx context.Context, d *schema.ResourceData, meta in
 	createOpts := &job.CreateOpts{
 		JobType:        d.Get("job_type").(int),
 		JobName:        d.Get("job_name").(string),
-		ClusterID:      d.Get("cluster_id").(string),
+		ClusterId:      d.Get("cluster_id").(string),
 		JarPath:        d.Get("jar_path").(string),
 		Arguments:      d.Get("arguments").(string),
 		Input:          d.Get("input").(string),
@@ -138,16 +138,16 @@ func resourceMRSJobV1Create(ctx context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	jobCreate, err := job.Create(client, createOpts).Extract()
+	jobCreate, err := job.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating Job: %s", err)
 	}
 
-	d.SetId(jobCreate.ID)
+	d.SetId(jobCreate.Id)
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"Starting", "Running"},
 		Target:     []string{"Completed"},
-		Refresh:    JobStateRefreshFunc(client, jobCreate.ID),
+		Refresh:    JobStateRefreshFunc(client, jobCreate.Id),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -157,7 +157,7 @@ func resourceMRSJobV1Create(ctx context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		return fmterr.Errorf(
 			"error waiting for job (%s) to become ready: %s ",
-			jobCreate.ID, err)
+			jobCreate.Id, err)
 	}
 
 	return resourceMRSJobV1Read(ctx, d, meta)
@@ -170,18 +170,18 @@ func resourceMRSJobV1Read(_ context.Context, d *schema.ResourceData, meta interf
 		return fmterr.Errorf("error creating OpenTelekomCloud  MRS client: %s", err)
 	}
 
-	jobGet, err := job.Get(client, d.Id()).Extract()
+	jobGet, err := job.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "MRS Job")
 	}
 	log.Printf("[DEBUG] Retrieved MRS Job %s: %#v", d.Id(), jobGet)
 
-	d.SetId(jobGet.ID)
+	d.SetId(jobGet.Id)
 	mErr := multierror.Append(
 		d.Set("region", config.GetRegion(d)),
 		d.Set("job_type", jobGet.JobType),
 		d.Set("job_name", jobGet.JobName),
-		d.Set("cluster_id", jobGet.ClusterID),
+		d.Set("cluster_id", jobGet.ClusterId),
 		d.Set("jar_path", jobGet.JarPath),
 		d.Set("arguments", jobGet.Arguments),
 		d.Set("input", jobGet.Input),
@@ -228,7 +228,7 @@ func resourceMRSJobV1Delete(ctx context.Context, d *schema.ResourceData, meta in
 
 	timeout := d.Timeout(schema.TimeoutDelete)
 	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		err := job.Delete(client, rId).ExtractErr()
+		err := job.Delete(client, rId)
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}

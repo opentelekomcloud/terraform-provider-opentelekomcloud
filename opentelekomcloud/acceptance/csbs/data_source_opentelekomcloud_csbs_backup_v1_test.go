@@ -67,31 +67,15 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
 }
 
-resource "opentelekomcloud_compute_instance_v2" "instance_2" {
-  name              = "instance_2"
-  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
-  security_groups   = ["default"]
-  availability_zone = "%[3]s"
-  metadata = {
-    foo = "bar"
-  }
-  network {
-    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  }
-}
-
 resource "opentelekomcloud_csbs_backup_v1" "csbs" {
   backup_name   = "csbs-test"
   description   = "test-code"
   resource_id   = opentelekomcloud_compute_instance_v2.instance_1.id
   resource_type = "OS::Nova::Server"
-}
 
-resource "opentelekomcloud_csbs_backup_v1" "csbs_2" {
-  backup_name   = "csbs-test2"
-  description   = "test-code"
-  resource_id   = opentelekomcloud_compute_instance_v2.instance_2.id
-  resource_type = "OS::Nova::Server"
+  tags = {
+    muh = "kuh"
+  }
 }
 
 data "opentelekomcloud_csbs_backup_v1" "csbs" {
