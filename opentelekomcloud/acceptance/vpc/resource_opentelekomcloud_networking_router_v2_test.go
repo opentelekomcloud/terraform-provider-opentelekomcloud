@@ -89,6 +89,27 @@ func TestAccNetworkingV2Router_timeout(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2RouterSnat(t *testing.T) {
+	var router routers.Router
+	t.Parallel()
+	quotas.BookOne(t, quotas.Router)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2RouterEnableSnat,
+				Check: resource.ComposeTestCheckFunc(
+					TestAccCheckNetworkingV2RouterExists(resourceRouterName, &router),
+					resource.TestCheckResourceAttr(resourceRouterName, "enable_snat", "true"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingV2RouterDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
@@ -157,3 +178,15 @@ resource "opentelekomcloud_networking_router_v2" "router_1" {
   }
 }
 `
+
+var testAccNetworkingV2RouterEnableSnat = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_networking_router_v2" "router_1" {
+  name             = "router_1_snat"
+  admin_state_up   = true
+  distributed      = false
+  external_gateway = data.opentelekomcloud_networking_network_v2.ext_network.id
+  enable_snat      = true
+}
+`, common.DataSourceExtNetwork)
