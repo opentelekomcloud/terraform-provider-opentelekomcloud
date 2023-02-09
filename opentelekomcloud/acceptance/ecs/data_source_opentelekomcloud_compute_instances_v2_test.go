@@ -51,11 +51,11 @@ func testAccCheckComputeInstancesV2DataSourceName(n string) resource.TestCheckFu
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("can't find compute instance data source: %s", n)
+			return fmt.Errorf("can't find compute instances data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("compute instance data source name not set")
+			return fmt.Errorf("compute instances data source name not set")
 		}
 
 		return nil

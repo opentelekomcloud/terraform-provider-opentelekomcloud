@@ -4,7 +4,7 @@ subcategory: "Elastic Cloud Server (ECS)"
 
 # opentelekomcloud_compute_instances_v2
 
-Get information on an ECS instance.
+Get information on an ECS instances.
 
 ## Example Usage
 
