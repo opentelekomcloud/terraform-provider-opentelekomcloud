@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Data Source:** ``opentelekomcloud_compute_instances_v2`` (`#2082 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2082>`_)
