@@ -19,7 +19,7 @@ data "opentelekomcloud_compute_instances_v2" "test" {
 ```hcl
 
 data "opentelekomcloud_compute_instances_v2" "test" {
-  status = 'ACTIVE'
+  status =  "ACTIVE"
 }
 ```
 
