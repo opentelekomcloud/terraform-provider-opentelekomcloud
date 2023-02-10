@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -79,11 +80,8 @@ func ResourceAlarmRule() *schema.Resource {
 							ValidateFunc: validation.All(
 								validation.StringLenBetween(1, 64),
 								validation.StringMatch(
-									regexp.MustCompile(`^[a-zA-Z].+`),
-									"Must start with a letter."),
-								validation.StringMatch(
-									regexp.MustCompile(`^\w+$`),
-									"Only lowercase/uppercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed.",
+									regexp.MustCompile(`^[a-zA-Z\][a-z0-9\/_]+[a-z0-9]+$`),
+									"Only lowercase/uppercase letters, digits, underscores (_) and slashes (/) are allowed.",
 								),
 							),
 						},
@@ -265,10 +263,11 @@ func getMetricOpts(d *schema.ResourceData) alarms.MetricForAlarm {
 			Value: dimension["value"].(string),
 		}
 	}
-
+	metricName := metricElement["metric_name"].(string)
+	metricName = strings.ReplaceAll(metricName, "/", "SlAsH")
 	return alarms.MetricForAlarm{
 		Namespace:  metricElement["namespace"].(string),
-		MetricName: metricElement["metric_name"].(string),
+		MetricName: metricName,
 		Dimensions: dimensionOpts,
 	}
 }
@@ -372,10 +371,12 @@ func resourceAlarmRuleRead(ctx context.Context, d *schema.ResourceData, meta int
 		}
 		dimensionInfoList[i] = dimensionInfoItem
 	}
+	metricName := alarm.Metric.MetricName
+	metricName = strings.ReplaceAll(metricName, "SlAsH", "/")
 	metricInfo := []map[string]interface{}{
 		{
 			"namespace":   alarm.Metric.Namespace,
-			"metric_name": alarm.Metric.MetricName,
+			"metric_name": metricName,
 			"dimensions":  dimensionInfoList,
 		},
 	}

@@ -64,6 +64,33 @@ func TestAccCheckCESV1AlarmValidation(t *testing.T) {
 	})
 }
 
+func TestCESAlarmRule_slashes(t *testing.T) {
+	var ar alarms.MetricAlarms
+	resourceName := "opentelekomcloud_ces_alarmrule.alarmrule_s"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := ecs.QuotasForFlavor(env.OsFlavorID)
+			qts = append(qts,
+				&quotas.ExpectedQuota{Q: quotas.Server, Count: 1},
+				&quotas.ExpectedQuota{Q: quotas.Volume, Count: 1},
+				&quotas.ExpectedQuota{Q: quotas.VolumeSize, Count: 4},
+			)
+			quotas.BookMany(t, qts)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testCESAlarmRuleDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testCESAlarmRuleSlashes,
+				Check: resource.ComposeTestCheckFunc(
+					testCESAlarmRuleExists(resourceName, &ar),
+				),
+			},
+		},
+	})
+}
+
 func testCESAlarmRuleDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.CesV1Client(env.OS_REGION_NAME)
@@ -249,5 +276,41 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
     count               = 1
   }
   alarm_action_enabled = true
+}
+`, common.DataSourceSubnet)
+
+var testCESAlarmRuleSlashes = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_compute_instance_v2" "vm_1" {
+  name        = "instance_1"
+  image_name  = "Standard_Debian_11_latest"
+  flavor_name = "s3.large.2"
+
+  network {
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+}
+
+resource "opentelekomcloud_ces_alarmrule" "alarmrule_s" {
+  alarm_name = "alarm_rule_s"
+
+  metric {
+    namespace   = "SYS.ECS"
+    metric_name = "/mnt/share_disk_usedPercent"
+    dimensions {
+      name  = "instance_id"
+      value = opentelekomcloud_compute_instance_v2.vm_1.id
+    }
+  }
+  condition {
+    period              = 1
+    filter              = "sum"
+    comparison_operator = ">="
+    value               = 90
+    unit                = "%%"
+    count               = 3
+  }
+  alarm_action_enabled = false
 }
 `, common.DataSourceSubnet)

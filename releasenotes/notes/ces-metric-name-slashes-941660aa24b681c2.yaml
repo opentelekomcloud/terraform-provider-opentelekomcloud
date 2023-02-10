@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CES]** Add slashes support for metric name in ``resource/opentelekomcloud_ces_alarmrule`` (`#2084 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2084>`_)

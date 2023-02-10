@@ -82,7 +82,7 @@ The `metric` block supports:
 
 * `metric_name` - (Required) Specifies the metric name. The value can be a string
   of `1` to `64` characters that must start with a letter and can consists of uppercase
-  letters, lowercase letters, numbers, or underscores (_).
+  letters, lowercase letters, numbers, underscores (_) or slashes (/).
 
 * `dimensions` - (Required) Specifies the list of metric dimensions. Currently,
   the maximum length of the dimension list that are supported is `3`. The structure
