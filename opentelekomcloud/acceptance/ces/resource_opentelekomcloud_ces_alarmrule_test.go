@@ -66,7 +66,7 @@ func TestAccCheckCESV1AlarmValidation(t *testing.T) {
 
 func TestCESAlarmRule_slashes(t *testing.T) {
 	var ar alarms.MetricAlarms
-
+	resourceName := "opentelekomcloud_ces_alarmrule.alarmrule_s"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
@@ -84,7 +84,7 @@ func TestCESAlarmRule_slashes(t *testing.T) {
 			{
 				Config: testCESAlarmRuleSlashes,
 				Check: resource.ComposeTestCheckFunc(
-					testCESAlarmRuleExists(resourceAlarmRuleName, &ar),
+					testCESAlarmRuleExists(resourceName, &ar),
 				),
 			},
 		},
@@ -292,13 +292,8 @@ resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   }
 }
 
-resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name         = "topic_1"
-  display_name = "The display name of topic_1"
-}
-
-resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
-  alarm_name = "alarm_rule1"
+resource "opentelekomcloud_ces_alarmrule" "alarmrule_s" {
+  alarm_name = "alarm_rule_s"
 
   metric {
     namespace   = "SYS.ECS"

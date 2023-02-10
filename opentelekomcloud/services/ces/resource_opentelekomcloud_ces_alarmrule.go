@@ -264,7 +264,7 @@ func getMetricOpts(d *schema.ResourceData) alarms.MetricForAlarm {
 		}
 	}
 	metricName := metricElement["metric_name"].(string)
-	metricName = strings.Replace(metricName, "/", "SlAsH", -1)
+	metricName = strings.ReplaceAll(metricName, "/", "SlAsH")
 	return alarms.MetricForAlarm{
 		Namespace:  metricElement["namespace"].(string),
 		MetricName: metricName,
@@ -372,7 +372,7 @@ func resourceAlarmRuleRead(ctx context.Context, d *schema.ResourceData, meta int
 		dimensionInfoList[i] = dimensionInfoItem
 	}
 	metricName := alarm.Metric.MetricName
-	metricName = strings.Replace(metricName, "SlAsH", "/", -1)
+	metricName = strings.ReplaceAll(metricName, "SlAsH", "/")
 	metricInfo := []map[string]interface{}{
 		{
 			"namespace":   alarm.Metric.Namespace,
