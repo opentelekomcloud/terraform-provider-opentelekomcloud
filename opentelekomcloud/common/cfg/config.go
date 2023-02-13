@@ -708,14 +708,14 @@ func (c *Config) RegionIdentityV3Client(region string) (*golangsdk.ServiceClient
 }
 
 func (c *Config) ImageV1Client(region string) (*golangsdk.ServiceClient, error) {
-	return openstack.NewImageServiceV1(c.HwClient, golangsdk.EndpointOpts{
+	return openstack.NewIMSV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
 		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) ImageV2Client(region string) (*golangsdk.ServiceClient, error) {
-	return openstack.NewImageServiceV2(c.HwClient, golangsdk.EndpointOpts{
+	return openstack.NewIMSV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
 		Availability: c.getEndpointType(),
 	})
