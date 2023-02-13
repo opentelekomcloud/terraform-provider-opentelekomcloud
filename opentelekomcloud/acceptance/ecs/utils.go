@@ -69,7 +69,6 @@ func getFlavors() (map[string][]*quotas.ExpectedQuota, error) {
 }
 
 func getFlavorName() string {
-
 	resultsQ, err := getFlavors()
 	if err != nil {
 		panic("failed to get server flavors")
@@ -107,7 +106,6 @@ func init() {
 			panic("failed to get server flavors")
 		}
 		flavorsQuota = qs
-
 	}
 }
 
