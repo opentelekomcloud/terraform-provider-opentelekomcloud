@@ -90,7 +90,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   availability_zone = "%s"
   image_name        = "Standard_Debian_10_latest"
-  flavor_name		= "%s"
+  flavor_name       = "%s"
   metadata = {
     foo = "bar"
   }
@@ -109,7 +109,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   availability_zone = "%s"
   image_name        = "Enterprise_Windows_STD_2019_CORE_KVM"
-  flavor_name		= "%s"
+  flavor_name       = "%s"
   metadata = {
     foo = "bar"
   }

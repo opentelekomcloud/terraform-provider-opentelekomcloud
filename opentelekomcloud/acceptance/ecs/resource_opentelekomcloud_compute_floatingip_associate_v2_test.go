@@ -236,7 +236,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
   image_name      = "Standard_Debian_10_latest"
-  flavor_name	  = "%s"
+  flavor_name     = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -257,7 +257,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
   image_name      = "Standard_Debian_10_latest"
-  flavor_name	  = "%s"
+  flavor_name     = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -279,7 +279,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
   image_name      = "Standard_Debian_10_latest"
-  flavor_name	  = "%s"
+  flavor_name     = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -301,7 +301,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
   image_name      = "Standard_Debian_10_latest"
-  flavor_name	  = "%s"
+  flavor_name     = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -324,7 +324,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
   image_name      = "Standard_Debian_10_latest"
-  flavor_name	  = "%s"
+  flavor_name     = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
