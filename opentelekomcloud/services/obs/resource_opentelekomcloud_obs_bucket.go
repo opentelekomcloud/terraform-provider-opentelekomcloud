@@ -1192,30 +1192,42 @@ func setObsBucketTags(client *obs.ObsClient, d *schema.ResourceData) error {
 }
 
 func deleteAllBucketObjects(client *obs.ObsClient, bucket string) error {
-	listOpts := &obs.ListObjectsInput{
-		Bucket: bucket,
-	}
-	// list all objects
-	resp, err := client.ListObjects(listOpts)
-	if err != nil {
-		return GetObsError("error listing objects of OBS bucket", bucket, err)
-	}
+	// Query and delete objects in cycle because ListVersions returns
+	// max of 1000 objects.
+	for {
+		listOpts := &obs.ListVersionsInput{
+			Bucket: bucket,
+		}
+		// list all objects
+		resp, err := client.ListVersions(listOpts)
+		if err != nil {
+			return GetObsError("error listing objects of OBS bucket", bucket, err)
+		}
+		objLength := len(resp.DeleteMarkers) + len(resp.Versions)
+		objects := make([]obs.ObjectToDelete, objLength)
+		for i, content := range resp.Versions {
+			objects[i].Key = content.Key
+			objects[i].VersionId = content.VersionId
+		}
+		for i, content := range resp.DeleteMarkers {
+			objects[len(resp.Versions)+i].Key = content.Key
+			objects[len(resp.Versions)+i].VersionId = content.VersionId
+		}
 
-	objects := make([]obs.ObjectToDelete, len(resp.Contents))
-	for i, content := range resp.Contents {
-		objects[i].Key = content.Key
-	}
-
-	deleteOpts := &obs.DeleteObjectsInput{
-		Bucket:  bucket,
-		Objects: objects,
-	}
-	log.Printf("[DEBUG] objects of %s will be deleted: %v", bucket, objects)
-	output, err := client.DeleteObjects(deleteOpts)
-	if err != nil {
-		return GetObsError("error deleting all objects of OBS bucket", bucket, err)
-	} else if len(output.Errors) > 0 {
-		return fmt.Errorf("error some objects still exist in %s: %#v", bucket, output.Errors)
+		deleteOpts := &obs.DeleteObjectsInput{
+			Bucket:  bucket,
+			Objects: objects,
+		}
+		log.Printf("[DEBUG] objects of %s will be deleted: %v", bucket, objects)
+		output, err := client.DeleteObjects(deleteOpts)
+		if err != nil {
+			return GetObsError("error deleting all objects of OBS bucket", bucket, err)
+		} else if len(output.Errors) > 0 {
+			return fmt.Errorf("error some objects still exist in %s: %#v", bucket, output.Errors)
+		}
+		if objLength < 1000 {
+			break
+		}
 	}
 	return nil
 }
