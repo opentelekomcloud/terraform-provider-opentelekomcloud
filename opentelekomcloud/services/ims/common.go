@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/members"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v1/members"
+	image2 "github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
@@ -22,21 +22,18 @@ func GetImageByName(d *schema.ResourceData, cfg *cfg.Config, name string) (strin
 		return "", fmt.Errorf("error creating IMSv2 client: %w", err)
 	}
 
-	opts := images.ListOpts{
-		Name: d.Get("image_name").(string),
-	}
-	pages, err := images.List(client, opts).AllPages()
-	if err != nil {
-		return "", fmt.Errorf("error listing images: %w", err)
-	}
-	imgs, err := images.ExtractImages(pages)
+	img, err := image2.ListImages(client, image2.ListImagesOpts{
+		Name:  d.Get("image_name").(string),
+		Limit: 1,
+	})
 	if err != nil {
 		return "", fmt.Errorf("error extracting images: %w", err)
 	}
-	if len(imgs) < 1 {
+	if len(img) < 1 {
 		return "", fmt.Errorf("no image matching name: %s", name)
 	}
-	return imgs[0].ID, nil
+
+	return img[0].Id, nil
 }
 
 func ResourceImagesImageAccessV2ParseID(id string) (string, string, error) {
