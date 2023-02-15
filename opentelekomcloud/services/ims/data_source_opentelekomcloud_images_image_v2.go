@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -21,83 +22,59 @@ func DataSourceImagesImageV2() *schema.Resource {
 		ReadContext: dataSourceImagesImageV2Read,
 
 		Schema: map[string]*schema.Schema{
-			"__imagetype": {
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-			"__isregistered": {
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsValidRegExp,
+			},
+			"visibility": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-			"__whole_image": {
+			"owner": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"sort_key": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"sort_direction": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "asc",
+				ValidateFunc: validation.StringInSlice([]string{
+					"asc", "desc",
+				}, false),
+			},
+			"tag": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"most_recent": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  false,
 				ForceNew: true,
 			},
-			"__system__cmkid": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"__os_bit": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"__os_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"__platform": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"__support_diskintensive": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"__support_highperformance": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"__support_kvm": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"__support_kvm_gpu_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"__support_kvm_infiniband": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"__support_largememory": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"__support_xen": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"__support_xen_gpu_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"__support_xen_hana": {
-				Type:     schema.TypeString,
+			"properties": {
+				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
 			},
@@ -107,6 +84,135 @@ func DataSourceImagesImageV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"disk_format": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"min_disk_gb": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"min_ram_mb": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"protected": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
+			"checksum": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"size_bytes": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"metadata": {
+				Type:     schema.TypeMap,
+				Computed: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"file": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"schema": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
+			"image_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"is_registered": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"whole_image": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
+			"system_cmk_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"os_bit": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"os_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"platform": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"support_disk_intensive": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"support_high_performance": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"support_kvm": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"support_kvm_gpu_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"support_kvm_infiniband": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"support_large_memory": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"support_xen": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"support_xen_gpu_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"support_xen_hana": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -150,33 +256,7 @@ func DataSourceImagesImageV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
-			"owner": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"protected": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-			},
 			"sort_dir": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"sort_key": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -186,29 +266,9 @@ func DataSourceImagesImageV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"tag": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"virtual_env_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
-			},
-			"visibility": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"created_at": {
-				Type:     schema.TypeString,
-				Computed: true,
-				ForceNew: true,
-			},
-			"updated_at": {
-				Type:     schema.TypeString,
-				Computed: true,
 				ForceNew: true,
 			},
 		},
