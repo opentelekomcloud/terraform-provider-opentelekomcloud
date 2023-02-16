@@ -9,9 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	v2 "github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/cloudimages"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v1/others"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/tags"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -118,25 +117,21 @@ func resourceImsDataImageV2Create(ctx context.Context, d *schema.ResourceData, m
 			"Either 'volume_id' or 'image_url' must be specified")
 	}
 
-	var v *cloudimages.JobResponse
+	var v *string
 	if common.HasFilledOpt(d, "volume_id") {
-		var dataImages []cloudimages.DataImage
-		dataImageOpts := cloudimages.DataImage{
+		var dataImages []images.ECSDataImage
+		dataImageOpts := images.ECSDataImage{
 			Name:        d.Get("name").(string),
 			Description: d.Get("description").(string),
 			VolumeId:    d.Get("volume_id").(string),
 		}
 
 		dataImages = append(dataImages, dataImageOpts)
-		createOpts := &cloudimages.CreateDataImageByServerOpts{
+		createOpts := images.CreateImageFromECSOpts{
 			DataImages: dataImages,
 		}
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
-
-		v, err = cloudimages.CreateImageByServer(client, createOpts).ExtractJobResponse()
-		if err != nil {
-			return fmterr.Errorf("error creating OpenTelekomCloud IMS: %s", err)
-		}
+		v, err = images.CreateImageFromECS(client, createOpts)
 	} else {
 		if !common.HasFilledOpt(d, "min_disk") {
 			return fmterr.Errorf("error creating OpenTelekomCloud IMS: 'min_disk' must be specified")
@@ -147,7 +142,7 @@ func resourceImsDataImageV2Create(ctx context.Context, d *schema.ResourceData, m
 			return fmterr.Errorf("error creating OpenTelekomCloud image client: %s", err)
 		}
 
-		createOpts := &cloudimages.CreateDataImageByOBSOpts{
+		createOpts := images.CreateImageFromOBSOpts{
 			Name:        d.Get("name").(string),
 			Description: d.Get("description").(string),
 			ImageUrl:    d.Get("image_url").(string),
@@ -156,36 +151,35 @@ func resourceImsDataImageV2Create(ctx context.Context, d *schema.ResourceData, m
 			CmkId:       d.Get("cmk_id").(string),
 		}
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
-		v, err = cloudimages.CreateDataImageByOBS(v1Client, createOpts).ExtractJobResponse()
-		if err != nil {
-			return fmterr.Errorf("error creating OpenTelekomCloud IMS: %s", err)
-		}
+		v, err = images.CreateImageFromOBS(v1Client, createOpts)
 	}
-
-	log.Printf("[INFO] IMS Job ID: %s", v.JobID)
+	if err != nil {
+		return fmterr.Errorf("error creating OpenTelekomCloud IMS: %s", err)
+	}
+	log.Printf("[INFO] IMS Job ID: %s", *v)
 
 	// Wait for the ims to become available.
 	log.Printf("[DEBUG] Waiting for IMS to become available")
-	err = cloudimages.WaitForJobSuccess(client, int(d.Timeout(schema.TimeoutCreate)/time.Second), v.JobID)
+	err = others.WaitForJob(client, *v, int(d.Timeout(schema.TimeoutCreate)/time.Second))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	entity, err := cloudimages.GetJobEntity(client, v.JobID, "__data_images")
+	entity, err := others.ShowJob(client, *v)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if id, ok := entity.(string); ok {
-		log.Printf("[INFO] IMS ID: %s", id)
+	if entity.JobId != "" {
+		log.Printf("[INFO] IMS ID: %s", entity.JobId)
 		// Store the ID now
-		d.SetId(id)
+		d.SetId(entity.JobId)
 
 		if common.HasFilledOpt(d, "tags") {
 			tagmap := d.Get("tags").(map[string]interface{})
 			if len(tagmap) > 0 {
 				log.Printf("[DEBUG] Setting tags: %v", tagmap)
-				err = setTagForImage(d, meta, id, tagmap)
+				err = setTagForImage(d, meta, entity.JobId, tagmap)
 				if err != nil {
 					return fmterr.Errorf("error setting OpenTelekomCloud tags of image:%s", err)
 				}
@@ -222,13 +216,13 @@ func resourceImsDataImageV2Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Set image tags
-	taglist, err := tags.Get(client, d.Id()).Extract()
+	taglist, err := tags.ListImageTags(client, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error fetching OpenTelekomCloud image tags: %s", err)
 	}
 
 	tagMap := make(map[string]string)
-	for _, val := range taglist.Tags {
+	for _, val := range taglist {
 		tagMap[val.Key] = val.Value
 	}
 	if err := d.Set("tags", tagMap); err != nil {
@@ -244,30 +238,34 @@ func resourceImsDataImageV2Update(ctx context.Context, d *schema.ResourceData, m
 		return fmterr.Errorf("error creating OpenTelekomCloud image client: %s", err)
 	}
 
-	updateOpts := make(v2.UpdateOpts, 0)
-
+	var updateOpts []images.UpdateImageOpts
 	if d.HasChange("name") {
-		v := v2.ReplaceImageName{NewName: d.Get("name").(string)}
+		v := images.UpdateImageOpts{
+			Op:    "replace",
+			Path:  "/name",
+			Value: d.Get("name").(string),
+		}
 		updateOpts = append(updateOpts, v)
-
-		log.Printf("[DEBUG] Update Options: %#v", updateOpts)
-
-		_, err = v2.Update(client, d.Id(), updateOpts).Extract()
+		_, err = images.UpdateImage(client, d.Id(), updateOpts)
 		if err != nil {
 			return fmterr.Errorf("error updating image: %s", err)
 		}
 	}
 
 	if d.HasChange("tags") {
-		oldTags, err := tags.Get(client, d.Id()).Extract()
+		oldTags, err := tags.ListImageTags(client, d.Id())
 		if err != nil {
 			return fmterr.Errorf("error fetching OpenTelekomCloud image tags: %s", err)
 		}
-		if len(oldTags.Tags) > 0 {
-			deleteOpts := tags.BatchOpts{Action: tags.ActionDelete, Tags: oldTags.Tags}
-			deleteTags := tags.BatchAction(client, d.Id(), deleteOpts)
-			if deleteTags.Err != nil {
-				return fmterr.Errorf("error deleting OpenTelekomCloud image tags: %s", deleteTags.Err)
+		if len(oldTags) > 0 {
+			deleteOpts := tags.BatchAddOrDeleteTagsOpts{
+				ImageId: d.Id(),
+				Action:  "delete",
+				Tags:    oldTags,
+			}
+			err = tags.BatchAddOrDeleteTags(client, deleteOpts)
+			if err != nil {
+				return fmterr.Errorf("error deleting OpenTelekomCloud image tags: %s", err)
 			}
 		}
 
