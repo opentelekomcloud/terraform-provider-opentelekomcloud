@@ -840,6 +840,13 @@ func (c *Config) DmsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) DmsV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewDMSServiceV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) MrsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewMapReduceV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
