@@ -130,6 +130,7 @@ func ResourceDmsInstancesV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			// Not supported on current version
 			// "enable_publicip": {
 			// 	Type:     schema.TypeBool,
 			// 	Optional: true,
@@ -391,7 +392,7 @@ func resourceDmsInstancesV2Read(_ context.Context, d *schema.ResourceData, meta 
 		// d.Set("disk_encrypted_key", v.DiskEncryptedKey),
 		d.Set("subnet_cidr", v.SubnetCIDR),
 		d.Set("total_storage_space", v.TotalStorageSpace),
-		d.Set("public_connect_address", v.PublicConnectionAddress),
+		// d.Set("public_connect_address", v.PublicConnectionAddress),
 		d.Set("storage_resource_id", v.StorageResourceID),
 		d.Set("public_access_enabled", v.PublicAccessEnabled),
 		d.Set("node_num", v.NodeNum),

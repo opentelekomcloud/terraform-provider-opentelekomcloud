@@ -269,18 +269,18 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 }
 
 resource "opentelekomcloud_dms_instance_v2" "instance_1" {
-  name                  = "%s"
-  engine                = "kafka"
-  storage_space         = data.opentelekomcloud_dms_product_v1.product_1.storage
-  vpc_id                = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  security_group_id     = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-  subnet_id             = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  available_zones       = [data.opentelekomcloud_dms_az_v1.az_1.id]
-  product_id            = data.opentelekomcloud_dms_product_v1.product_1.id
-  engine_version        = data.opentelekomcloud_dms_product_v1.product_1.version
-  storage_spec_code     = data.opentelekomcloud_dms_product_v1.product_1.storage_spec_code
-  enable_publicip       = true
-  publicip_id           = opentelekomcloud_networking_floatingip_v2.fip_1.id
+  name              = "%s"
+  engine            = "kafka"
+  storage_space     = data.opentelekomcloud_dms_product_v1.product_1.storage
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  available_zones   = [data.opentelekomcloud_dms_az_v1.az_1.id]
+  product_id        = data.opentelekomcloud_dms_product_v1.product_1.id
+  engine_version    = data.opentelekomcloud_dms_product_v1.product_1.version
+  storage_spec_code = data.opentelekomcloud_dms_product_v1.product_1.storage_spec_code
+  enable_publicip   = true
+  publicip_id       = opentelekomcloud_networking_floatingip_v2.fip_1.id
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, instanceName)
 }
