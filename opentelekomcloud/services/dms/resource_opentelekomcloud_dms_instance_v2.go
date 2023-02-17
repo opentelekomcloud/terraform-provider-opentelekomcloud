@@ -385,7 +385,7 @@ func resourceDmsInstancesV2Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("maintain_begin", v.MaintainBegin),
 		d.Set("maintain_end", v.MaintainEnd),
 		d.Set("retention_policy", v.RetentionPolicy),
-		d.Set("enable_publicip", v.EnablePublicIP),
+		// d.Set("enable_publicip", v.EnablePublicIP),
 		d.Set("public_bandwidth", v.PublicBandWidth),
 		d.Set("ssl_enable", v.SslEnable),
 		// d.Set("disk_encrypted_enable", v.DiskEncrypted),
