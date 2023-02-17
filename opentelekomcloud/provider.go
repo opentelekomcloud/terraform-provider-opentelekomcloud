@@ -352,6 +352,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_dns_recordset_v2":                   dns.ResourceDNSRecordSetV2(),
 			"opentelekomcloud_dns_zone_v2":                        dns.ResourceDNSZoneV2(),
 			"opentelekomcloud_dms_instance_v1":                    dms.ResourceDmsInstancesV1(),
+			"opentelekomcloud_dms_instance_v2":                    dms.ResourceDmsInstancesV2(),
 			"opentelekomcloud_dms_topic_v1":                       dms.ResourceDmsTopicsV1(),
 			"opentelekomcloud_dws_cluster_v1":                     dws.ResourceDcsInstanceV1(),
 			"opentelekomcloud_ecs_instance_v1":                    ecs.ResourceEcsInstanceV1(),
