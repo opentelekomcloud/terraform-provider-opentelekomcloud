@@ -6,6 +6,7 @@ import (
 	"log"
 	"regexp"
 	"sort"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -284,107 +285,102 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 
 	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
 
-	listOpts := images.ListOpts{
+	listOpts := images.ListImagesOpts{
 		Name:       d.Get("name").(string),
 		Visibility: visibility,
 		Owner:      d.Get("owner").(string),
-		Status:     images.ImageStatusActive,
-		SizeMin:    int64(d.Get("size_min").(int)),
-		SizeMax:    int64(d.Get("size_max").(int)),
-		SortKey:    d.Get("sort_key").(string),
-		SortDir:    d.Get("sort_direction").(string),
-		Tag:        d.Get("tag").(string),
+		Status:     "active",
+		// SizeMin:    int64(d.Get("size_min").(int)),
+		// SizeMax:    int64(d.Get("size_max").(int)),
+		SortKey: d.Get("sort_key").(string),
+		SortDir: d.Get("sort_direction").(string),
+		Tag:     d.Get("tag").(string),
 	}
 
 	log.Printf("[DEBUG] List Options: %#v", listOpts)
 
-	var image images.Image
-	allPages, err := images.List(client, listOpts).AllPages()
+	var img images.ImageInfo
+	ims, err := images.ListImages(client, listOpts)
 	if err != nil {
 		return fmterr.Errorf("unable to query images: %s", err)
 	}
 
-	allImages, err := images.ExtractImages(allPages)
-	if err != nil {
-		return fmterr.Errorf("unable to retrieve images: %s", err)
-	}
-
-	var filteredImages []images.Image
+	var filteredImages []images.ImageInfo
 	if nameRegex, ok := d.GetOk("name_regex"); ok {
 		r := regexp.MustCompile(nameRegex.(string))
-		for _, image := range allImages {
-			if r.MatchString(image.Name) {
+		for _, image := range ims {
+			if r.MatchString(img.Name) {
 				filteredImages = append(filteredImages, image)
 			}
 		}
-		allImages = filteredImages
+		ims = filteredImages
 	}
 
-	properties := d.Get("properties").(map[string]interface{})
-	imageProperties := resourceImagesImageV2ExpandProperties(properties)
-	if len(filteredImages) > 1 && len(imageProperties) > 0 {
-		for _, image := range filteredImages {
-			if len(image.Properties) > 0 {
-				match := true
-				for searchKey, searchValue := range imageProperties {
-					imageValue, ok := image.Properties[searchKey]
-					if !ok {
-						match = false
-						break
-					}
+	// properties := d.Get("properties").(map[string]interface{})
+	// imageProperties := resourceImagesImageV2ExpandProperties(properties)
+	// if len(filteredImages) > 1 && len(imageProperties) > 0 {
+	// 	for _, image := range filteredImages {
+	// 		if len(image.) > 0 {
+	// 			match := true
+	// 			for searchKey, searchValue := range imageProperties {
+	// 				imageValue, ok := image.Properties[searchKey]
+	// 				if !ok {
+	// 					match = false
+	// 					break
+	// 				}
+	//
+	// 				if searchValue != imageValue {
+	// 					match = false
+	// 					break
+	// 				}
+	// 			}
+	//
+	// 			if match {
+	// 				filteredImages = append(filteredImages, image)
+	// 			}
+	// 		}
+	// 	}
+	// 	allImages = filteredImages
+	// }
 
-					if searchValue != imageValue {
-						match = false
-						break
-					}
-				}
-
-				if match {
-					filteredImages = append(filteredImages, image)
-				}
-			}
-		}
-		allImages = filteredImages
-	}
-
-	if len(allImages) < 1 {
+	if len(ims) < 1 {
 		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again")
 	}
 
-	if len(allImages) > 1 {
+	if len(ims) > 1 {
 		recent := d.Get("most_recent").(bool)
 		log.Printf("[DEBUG] Multiple results found and `most_recent` is set to: %t", recent)
 		if recent {
-			image = mostRecentImage(allImages)
+			img = mostRecentImage(ims)
 		} else {
 			return fmterr.Errorf("your query returned more than one result. Please try a more " +
 				"specific search criteria, or set `most_recent` attribute to true")
 		}
 	} else {
-		image = allImages[0]
+		img.Id = ims[0].Id
 	}
 
-	log.Printf("[DEBUG] Single Image found: %s", image.ID)
-	d.SetId(image.ID)
+	log.Printf("[DEBUG] Single Image found: %s", img.Id)
+	d.SetId(img.Id)
 
 	mErr := multierror.Append(nil,
-		d.Set("name", image.Name),
-		d.Set("tags", image.Tags),
-		d.Set("container_format", image.ContainerFormat),
-		d.Set("disk_format", image.DiskFormat),
-		d.Set("min_disk_gb", image.MinDiskGigabytes),
-		d.Set("min_ram_mb", image.MinRAMMegabytes),
-		d.Set("owner", image.Owner),
-		d.Set("protected", image.Protected),
-		d.Set("visibility", image.Visibility),
-		d.Set("checksum", image.Checksum),
-		d.Set("size_bytes", image.SizeBytes),
-		d.Set("created_at", image.CreatedAt.String()),
-		d.Set("updated_at", image.UpdatedAt.String()),
-		d.Set("file", image.File),
-		d.Set("schema", image.Schema),
-		d.Set("metadata", image.Metadata),
+		d.Set("name", img.Name),
+		d.Set("tags", img.Tags),
+		d.Set("container_format", img.ContainerFormat),
+		d.Set("disk_format", img.DiskFormat),
+		// d.Set("min_disk_gb", img.MinDiskGigabytes),
+		// d.Set("min_ram_mb", img.MinRAMMegabytes),
+		d.Set("owner", img.Owner),
+		d.Set("protected", img.Protected),
+		d.Set("visibility", img.Visibility),
+		d.Set("checksum", img.Checksum),
+		d.Set("size_bytes", img.Size),
+		d.Set("created_at", img.CreatedAt),
+		d.Set("updated_at", img.UpdatedAt),
+		d.Set("file", img.File),
+		d.Set("schema", img.Schema),
+		// d.Set("metadata", img.Metadata),
 	)
 
 	if mErr.ErrorOrNil() != nil {
@@ -394,7 +390,7 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-type imageSort []images.Image
+type imageSort []images.ImageInfo
 
 func (a imageSort) Len() int {
 	return len(a)
@@ -405,13 +401,13 @@ func (a imageSort) Swap(i, j int) {
 }
 
 func (a imageSort) Less(i, j int) bool {
-	itime := a[i].CreatedAt
-	jtime := a[j].CreatedAt
+	itime, _ := time.Parse(time.UnixDate, a[i].CreatedAt)
+	jtime, _ := time.Parse(time.UnixDate, a[j].CreatedAt)
 	return itime.Unix() < jtime.Unix()
 }
 
 // Returns the most recent Image out of a slice of images.
-func mostRecentImage(images []images.Image) images.Image {
+func mostRecentImage(images []images.ImageInfo) images.ImageInfo {
 	sortedImages := images
 	sort.Sort(imageSort(sortedImages))
 	return sortedImages[len(sortedImages)-1]

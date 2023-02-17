@@ -15,8 +15,8 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/imagedata"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/imagedata"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -186,7 +186,7 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 
 	protected := d.Get("protected").(bool)
 	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
-	createOpts := &images.CreateOpts{
+	createOpts := images.C{
 		Name:            d.Get("name").(string),
 		ContainerFormat: d.Get("container_format").(string),
 		DiskFormat:      d.Get("disk_format").(string),
@@ -485,7 +485,7 @@ func resourceImagesImageV2File(d *schema.ResourceData) (string, error) {
 
 func resourceImagesImageV2RefreshFunc(client *golangsdk.ServiceClient, id string, _ int64, _ string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		img, err := images.Get(client, id).Extract()
+		img, err := images.List(client, id).Extract()
 		if err != nil {
 			return nil, "", err
 		}
