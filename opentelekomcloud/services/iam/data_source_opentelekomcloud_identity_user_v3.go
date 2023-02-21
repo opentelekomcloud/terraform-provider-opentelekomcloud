@@ -100,7 +100,11 @@ func dataSourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, met
 	case golangsdk.ErrDefault403:
 		log.Printf("[DEBUG] Security administrator permissions needed to set MFA")
 	case nil, golangsdk.ErrDefault404:
-		mErr = multierror.Append(mErr, d.Set("mfa_device", mfa))
+		if mfa == nil {
+			mErr = multierror.Append(mErr, d.Set("mfa_device", ""))
+		} else {
+			mErr = multierror.Append(mErr, d.Set("mfa_device", mfa.SerialNumber))
+		}
 	default:
 		log.Printf("[DEBUG] Error getting MFA info: %v", err.Error())
 	}
