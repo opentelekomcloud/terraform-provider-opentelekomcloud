@@ -39,6 +39,22 @@ resource "opentelekomcloud_ims_image_v2" "ims_test_file" {
 }
 ```
 
+###  Creating an image using an Volume
+
+```hcl
+resource "opentelekomcloud_ims_image_v2" "image_volume" {
+  name        = "image_volume"
+  volume_id   = "54a6c3a4-8511-4d01-818f-3fe5177cbb07"
+  os_version  = "Debian GNU/Linux 10.0.0 64bit"
+  description = "created by Terraform"
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -57,7 +73,11 @@ The following arguments are supported:
 * `tags` - (Optional) The tags of the image.
 
 * `instance_id` - (Optional) The ID of the ECS that needs to be converted into an image.
-  This parameter is mandatory when you create a privete image from an ECS.
+  This parameter is mandatory when you create a private image from an ECS.
+  Changing this creates a new image.
+
+* `volume_id` - (Optional) Specifies the data disk ID.
+  This parameter is mandatory when you create a private image from a volume.
   Changing this creates a new image.
 
 * `image_url` - (Optional) The URL of the external image file in the OBS bucket.
@@ -71,7 +91,8 @@ The following arguments are supported:
   Changing this creates a new image.
 
 * `os_version` - (Optional) The OS version.
-  This parameter is valid when you create a private image from an external file
+  This parameter is valid when you create a private image from an external file.
+  This parameter is mandatory when you create a private image from a volume.
   uploaded to an OBS bucket. Changing this creates a new image.
 
 * `is_config` - (Optional) If automatic configuration is required, set the value to true.
