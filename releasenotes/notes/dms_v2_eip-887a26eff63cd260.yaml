@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **[DMS]** Added EIP feature for ``resource/opentelekomcloud_dms_instance_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[DMS]** Added EIP feature for ``resource/opentelekomcloud_dms_instance_v2`` (`#2095 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2095>`_)
