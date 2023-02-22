@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[IMS]** Added possibility to create image from an data volume in ``resource/opentelekomcloud_ims_image_v2`` (`#2096 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2096>`_)

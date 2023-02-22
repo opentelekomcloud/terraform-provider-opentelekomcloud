@@ -67,14 +67,20 @@ func ResourceImsImageV2() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
-				ConflictsWith: []string{"image_url"},
+				ConflictsWith: []string{"image_url", "volume_id"},
+			},
+			"volume_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"instance_id", "image_url"},
 			},
 			// image_url and min_disk are required for creating an image from an OBS
 			"image_url": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
-				ConflictsWith: []string{"instance_id"},
+				ConflictsWith: []string{"instance_id", "volume_id"},
 			},
 			"min_disk": {
 				Type:          schema.TypeInt,
@@ -153,14 +159,15 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf("error creating OpenTelekomCloud image client: %s", err)
 	}
 
-	if !common.HasFilledOpt(d, "instance_id") && !common.HasFilledOpt(d, "image_url") {
+	if !common.HasFilledOpt(d, "instance_id") && !common.HasFilledOpt(d, "image_url") && !common.HasFilledOpt(d, "volume_id") {
 		return fmterr.Errorf("error creating OpenTelekomCloud IMS: " +
-			"Either 'instance_id' or 'image_url' must be specified")
+			"Either 'instance_id', 'volume_id' or 'image_url' must be specified")
 	}
 
 	var v *cloudimages.JobResponse
 	imageTags := resourceContainerImageTags(d)
-	if common.HasFilledOpt(d, "instance_id") {
+	switch {
+	case common.HasFilledOpt(d, "instance_id"):
 		createOpts := &cloudimages.CreateByServerOpts{
 			Name:        d.Get("name").(string),
 			Description: d.Get("description").(string),
@@ -171,7 +178,20 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		}
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
 		v, err = cloudimages.CreateImageByServer(client, createOpts).ExtractJobResponse()
-	} else {
+	case common.HasFilledOpt(d, "volume_id"):
+		createOpts := &cloudimages.CreateByVolumeOpts{
+			Name:        d.Get("name").(string),
+			Description: d.Get("description").(string),
+			VolumeId:    d.Get("volume_id").(string),
+			OsVersion:   d.Get("os_version").(string),
+			Type:        d.Get("type").(string),
+			MaxRam:      d.Get("max_ram").(int),
+			MinRam:      d.Get("min_ram").(int),
+			ImageTags:   imageTags,
+		}
+		log.Printf("[DEBUG] Create Options: %#v", createOpts)
+		v, err = cloudimages.CreateImageByVolume(client, createOpts).ExtractJobResponse()
+	case common.HasFilledOpt(d, "image_url"):
 		if !common.HasFilledOpt(d, "min_disk") {
 			return fmterr.Errorf("error creating OpenTelekomCloud IMS: 'min_disk' must be specified")
 		}
