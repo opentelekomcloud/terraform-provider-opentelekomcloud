@@ -69,6 +69,12 @@ func ResourceImsImageV2() *schema.Resource {
 				ForceNew:      true,
 				ConflictsWith: []string{"image_url"},
 			},
+			"volume_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"instance_id"},
+			},
 			// image_url and min_disk are required for creating an image from an OBS
 			"image_url": {
 				Type:          schema.TypeString,
@@ -155,7 +161,7 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	if !common.HasFilledOpt(d, "instance_id") && !common.HasFilledOpt(d, "image_url") {
 		return fmterr.Errorf("error creating OpenTelekomCloud IMS: " +
-			"Either 'instance_id' or 'image_url' must be specified")
+			"Either 'instance_id', 'volume_id'  or 'image_url' must be specified")
 	}
 
 	var v *string
@@ -170,7 +176,19 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 			ImageTags:   imageTags,
 		}
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
-		v, err = images.C(client, createOpts)
+		v, err = images.CreateImageFromECS(client, createOpts)
+	} else if common.HasFilledOpt(d, "volume_id") {
+		createOpts := images.CreateImageFromDiskOpts{
+			Name:        d.Get("name").(string),
+			Description: d.Get("description").(string),
+			VolumeId:    d.Get("volume_id").(string),
+			OsVersion:   d.Get("os_version").(string),
+			MaxRam:      d.Get("max_ram").(int),
+			MinRam:      d.Get("min_ram").(int),
+			ImageTags:   imageTags,
+		}
+		log.Printf("[DEBUG] Create Options: %#v", createOpts)
+		v, err = images.CreateImageFromDisk(client, createOpts)
 	} else {
 		if !common.HasFilledOpt(d, "min_disk") {
 			return fmterr.Errorf("error creating OpenTelekomCloud IMS: 'min_disk' must be specified")
@@ -224,16 +242,16 @@ func GetCloudImage(client *golangsdk.ServiceClient, id string) (*images.ImageInf
 		Id:    id,
 		Limit: 1,
 	}
-	images, err := images.ListImages(client, listOpts)
+	ims, err := images.ListImages(client, listOpts)
 	if err != nil {
 		return nil, fmt.Errorf("unable to query images: %s", err)
 	}
 
-	if len(images) < 1 {
+	if len(ims) < 1 {
 		return nil, fmt.Errorf("unable to find images %s: Maybe not existed", id)
 	}
 
-	img := images[0]
+	img := ims[0]
 	if img.Id != id {
 		return nil, fmt.Errorf("unexpected images ID")
 	}
@@ -291,11 +309,11 @@ func setTagForImage(d *schema.ResourceData, meta interface{}, imageID string, ta
 
 	taglist := make([]tag.ResourceTag, 0)
 	for k, v := range tagMap {
-		tag := tag.ResourceTag{
+		tg := tag.ResourceTag{
 			Key:   k,
 			Value: v.(string),
 		}
-		taglist = append(taglist, tag)
+		taglist = append(taglist, tg)
 	}
 	createOpts := tags.BatchAddOrDeleteTagsOpts{
 		ImageId: imageID,
