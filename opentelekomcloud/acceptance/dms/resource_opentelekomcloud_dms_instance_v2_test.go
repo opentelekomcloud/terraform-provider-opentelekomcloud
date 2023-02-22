@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -52,6 +53,9 @@ func TestAccDmsInstancesV2_basic(t *testing.T) {
 
 // Not supported on current version
 func TestAccDmsInstancesV2_Encrypted(t *testing.T) {
+	if os.Getenv("TF_ACC") == "" {
+		t.Skip("Disk encryption is not supported in current version")
+	}
 	var instance instances.Instance
 	var instanceName = fmt.Sprintf("dms_instance_%s", acctest.RandString(5))
 
@@ -73,7 +77,6 @@ func TestAccDmsInstancesV2_Encrypted(t *testing.T) {
 	})
 }
 
-// Not supported on current version
 func TestAccDmsInstancesV2_EIP(t *testing.T) {
 	var instance instances.Instance
 	var instanceName = fmt.Sprintf("dms_instance_%s", acctest.RandString(5))
@@ -268,6 +271,12 @@ data "opentelekomcloud_dms_product_v1" "product_1" {
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 }
 
+resource "opentelekomcloud_networking_floatingip_v2" "fip_2" {
+}
+
+resource "opentelekomcloud_networking_floatingip_v2" "fip_3" {
+}
+
 resource "opentelekomcloud_dms_instance_v2" "instance_1" {
   name              = "%s"
   engine            = "kafka"
@@ -280,7 +289,9 @@ resource "opentelekomcloud_dms_instance_v2" "instance_1" {
   engine_version    = data.opentelekomcloud_dms_product_v1.product_1.version
   storage_spec_code = data.opentelekomcloud_dms_product_v1.product_1.storage_spec_code
   enable_publicip   = true
-  publicip_id       = opentelekomcloud_networking_floatingip_v2.fip_1.id
+  publicip_id = [opentelekomcloud_networking_floatingip_v2.fip_1.id,
+    opentelekomcloud_networking_floatingip_v2.fip_2.id,
+  opentelekomcloud_networking_floatingip_v2.fip_3.id]
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, instanceName)
 }
