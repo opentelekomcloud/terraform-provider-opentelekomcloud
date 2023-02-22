@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -130,19 +131,19 @@ func ResourceDmsInstancesV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			// Not supported on current version
-			// "enable_publicip": {
-			// 	Type:     schema.TypeBool,
-			// 	Optional: true,
-			// 	Computed: true,
-			// 	ForceNew: true,
-			// },
-			// "publicip_id": {
-			// 	Type:         schema.TypeString,
-			// 	Optional:     true,
-			// 	ForceNew:     true,
-			// 	RequiredWith: []string{"enable_publicip"},
-			// },
+			"enable_publicip": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"publicip_id": {
+				Type:         schema.TypeList,
+				Optional:     true,
+				ForceNew:     true,
+				Elem:         &schema.Schema{Type: schema.TypeString},
+				RequiredWith: []string{"enable_publicip"},
+			},
 			"public_bandwidth": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -240,7 +241,8 @@ func ResourceDmsInstancesV2() *schema.Resource {
 				Computed: true,
 			},
 			"public_connect_address": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
 			"storage_resource_id": {
@@ -298,10 +300,15 @@ func resourceDmsInstancesV2Create(ctx context.Context, d *schema.ResourceData, m
 		SslEnable:       &sslEnable,
 	}
 
-	// if d.Get("enable_publicip").(bool) {
-	// 	createOpts.EnablePublicIP = true
-	// 	createOpts.PublicIpID = d.Get("publicip_id").(string)
-	// }
+	if d.Get("enable_publicip").(bool) {
+		createOpts.EnablePublicIP = true
+		rawIpList := d.Get("publicip_id").([]interface{})
+		var ipList []string
+		for _, ip := range rawIpList {
+			ipList = append(ipList, ip.(string))
+		}
+		createOpts.PublicIpID = strings.Join(ipList, ",")
+	}
 
 	// if d.Get("disk_encrypted_enable").(bool) {
 	// 	diskEncryptedEnable := true
@@ -385,14 +392,14 @@ func resourceDmsInstancesV2Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("maintain_begin", v.MaintainBegin),
 		d.Set("maintain_end", v.MaintainEnd),
 		d.Set("retention_policy", v.RetentionPolicy),
-		// d.Set("enable_publicip", v.EnablePublicIP),
+		d.Set("enable_publicip", v.EnablePublicIP),
+		d.Set("public_connect_address", flattenPublicIps(v.PublicConnectionAddress)),
 		d.Set("public_bandwidth", v.PublicBandWidth),
 		d.Set("ssl_enable", v.SslEnable),
 		// d.Set("disk_encrypted_enable", v.DiskEncrypted),
 		// d.Set("disk_encrypted_key", v.DiskEncryptedKey),
 		d.Set("subnet_cidr", v.SubnetCIDR),
 		d.Set("total_storage_space", v.TotalStorageSpace),
-		// d.Set("public_connect_address", v.PublicConnectionAddress),
 		d.Set("storage_resource_id", v.StorageResourceID),
 		d.Set("public_access_enabled", v.PublicAccessEnabled),
 		d.Set("node_num", v.NodeNum),
@@ -510,4 +517,8 @@ func instancesV2StateRefreshFunc(client *golangsdk.ServiceClient, instanceID str
 
 		return v, v.Status, nil
 	}
+}
+
+func flattenPublicIps(ips string) []string {
+	return strings.Split(ips, ",")
 }

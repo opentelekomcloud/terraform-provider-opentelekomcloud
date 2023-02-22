@@ -11,6 +11,11 @@ Manages a DMS instance in the OpenTelekomCloud DMS Service (Kafka Premium/Platin
 ### Automatically detect the correct network
 
 ```hcl
+variable "vpc_id" {}
+variable "subnet_id" {}
+variable "access_user" {}
+variable "password" {}
+
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name        = "secgroup_1"
   description = "secgroup_1"
@@ -44,6 +49,54 @@ resource "opentelekomcloud_dms_instance_v2" "instance_1" {
   subnet_id         = var.subnet_id
   access_user       = var.access_user
   password          = var.password
+}
+```
+
+### DMS instance with assigned EIPs
+
+```hcl
+variable "vpc_id" {}
+variable "subnet_id" {}
+
+resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
+  name        = "secgroup_1"
+  description = "secgroup_1"
+}
+
+data "opentelekomcloud_dms_az_v1" "az_1" {
+  name = "eu-de-01"
+}
+
+data "opentelekomcloud_dms_product_v1" "product_1" {
+  engine        = "kafka"
+  instance_type = "cluster"
+  version       = "1.1.0"
+}
+
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
+}
+
+resource "opentelekomcloud_networking_floatingip_v2" "fip_2" {
+}
+
+resource "opentelekomcloud_networking_floatingip_v2" "fip_3" {
+}
+
+resource "opentelekomcloud_dms_instance_v2" "instance_1" {
+  name              = "%s"
+  engine            = "kafka"
+  storage_space     = data.opentelekomcloud_dms_product_v1.product_1.storage
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  available_zones   = [data.opentelekomcloud_dms_az_v1.az_1.id]
+  product_id        = data.opentelekomcloud_dms_product_v1.product_1.id
+  engine_version    = data.opentelekomcloud_dms_product_v1.product_1.version
+  storage_spec_code = data.opentelekomcloud_dms_product_v1.product_1.storage_spec_code
+  enable_publicip   = true
+  publicip_id = [opentelekomcloud_networking_floatingip_v2.fip_1.id,
+    opentelekomcloud_networking_floatingip_v2.fip_2.id,
+  opentelekomcloud_networking_floatingip_v2.fip_3.id]
 }
 ```
 
@@ -130,6 +183,14 @@ The following arguments are supported:
   * `produce_reject`: New messages cannot be created
   * `time_base`: The earliest messages are deleted.
 
+* `enable_publicip` - (Optional) - Whether to enable public access. By default, public access is disabled.
+  * Possible values: `true`, `false`.
+  * Default: `false`.
+
+* `publicip_id` - (Optional) - List of `public ip` IDs to be bound to DMS instance nodes.
+  * Provided ip amount should be same as amount of DMS cluster nodes.
+  * Example: `["0f2a51dc-93ce-42af","d967d49b-6659-4052","002872f4-82a4-4f6e-9a4e"]`.
+
 * `tags` - (Optional) Tags key/value pairs to associate with the instance.
 
 ## Attributes Reference
@@ -212,3 +273,5 @@ The following attributes are exported:
 
 * `ssl_enable` - Indicates whether security authentication is enabled.
   Possible values: `true`, `false`.
+
+* `public_connect_address` - List of Public IPs bound to DMS instance with specified port.
