@@ -28,6 +28,15 @@ func TestLoadBalancerV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(dataLBName, "name", "loadbalancer_1"),
 				),
 			},
+			{
+				Config: testLoadBalancerV3ByName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(dataLBName, "id"),
+					resource.TestCheckResourceAttrSet(dataLBName, "router_id"),
+					resource.TestCheckResourceAttr(dataLBName, "availability_zones.#", "1"),
+					resource.TestCheckResourceAttr(dataLBName, "name", "loadbalancer_1"),
+				),
+			},
 		},
 	})
 }
@@ -57,5 +66,21 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
 
 data "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   id = opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.id
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testLoadBalancerV3ByName = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name        = "loadbalancer_1"
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+}
+
+data "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name = opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.name
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

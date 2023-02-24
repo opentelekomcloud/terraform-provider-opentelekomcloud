@@ -150,8 +150,8 @@ func dataSourceLoadBalancerV3Read(_ context.Context, d *schema.ResourceData, met
 		Name:            common.StrSlice(d.Get("name")),
 		VpcID:           common.StrSlice(d.Get("router_id")),
 		VipSubnetCidrID: common.StrSlice(d.Get("subnet_id")),
-		L7FlavorID:      common.StrSlice(d.Get("l7_flavor_id")),
-		L4FlavorID:      common.StrSlice(d.Get("l4_flavor_id")),
+		L7FlavorID:      common.StrSlice(d.Get("l7_flavor")),
+		L4FlavorID:      common.StrSlice(d.Get("l4_flavor")),
 		VipAddress:      common.StrSlice(d.Get("vip_address")),
 		VipPortID:       common.StrSlice(d.Get("vip_port_id")),
 	}
