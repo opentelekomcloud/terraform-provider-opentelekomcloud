@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ELB]** Fix query fields `l7_flavor` and `l4_flavor` in ``data/opentelekomcloud_lb_loadbalancer_v3`` (`#2099 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2099>`_)
