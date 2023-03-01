@@ -37,6 +37,27 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 }
 ```
 
+### Turbo cluster
+
+```hcl
+data "opentelekomcloud_vpc_subnet_v1" "shared_subnet"  {
+  name = "shared_test"
+}
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name                    = "turbo"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  container_network_type  = "eni"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+  ignore_addons           = true
+  eni_subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+  eni_subnet_cidr         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.cidr
+}
+```
+
 ### Installing ICAgent on Cluster creation
 
 ~>
