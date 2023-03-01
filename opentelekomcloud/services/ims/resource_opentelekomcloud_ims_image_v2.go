@@ -158,10 +158,12 @@ func resourceContainerImageTags(d *schema.ResourceData) []tagCommon.ResourceTag 
 func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ImageV2Client(config.GetRegion(d))
-	client1, err := config.ImageV1Client(config.GetRegion(d))
-
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud image client: %s", err)
+	}
+	client1, err := config.ImageV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating OpenTelekomCloud image client v1: %s", err)
 	}
 
 	if !common.HasFilledOpt(d, "instance_id") && !common.HasFilledOpt(d, "image_url") && !common.HasFilledOpt(d, "volume_id") {
@@ -182,7 +184,7 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 			MinRam:      d.Get("min_ram").(int),
 			ImageTags:   imageTags,
 		}
-		log.Printf("[DEBUG] Create Options: %#jobId", createOpts)
+		log.Printf("[DEBUG] Create Options: %#v", createOpts)
 		jobId, err = ims.CreateImageFromECS(client, createOpts)
 	case common.HasFilledOpt(d, "volume_id"):
 		createOpts := ims.CreateImageFromDiskOpts{
@@ -195,7 +197,7 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 			MinRam:      d.Get("min_ram").(int),
 			ImageTags:   imageTags,
 		}
-		log.Printf("[DEBUG] Create Options: %#jobId", createOpts)
+		log.Printf("[DEBUG] Create Options: %#v", createOpts)
 		jobId, err = ims.CreateImageFromDisk(client, createOpts)
 	case common.HasFilledOpt(d, "image_url"):
 		if !common.HasFilledOpt(d, "min_disk") {
@@ -215,14 +217,14 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 			Type:        d.Get("type").(string),
 			ImageTags:   imageTags,
 		}
-		log.Printf("[DEBUG] Create Options: %#jobId", createOpts)
+		log.Printf("[DEBUG] Create Options: %#v", createOpts)
 		jobId, err = ims.CreateImageFromOBS(client, createOpts)
 	}
 
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud IMS: %s", err)
 	}
-	log.Printf("[INFO] IMS Job ID: %s", jobId)
+	log.Printf("[INFO] IMS Job ID: %s", *jobId)
 
 	// Wait for the ims to become available.
 	log.Printf("[DEBUG] Waiting for IMS to become available")

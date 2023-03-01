@@ -108,10 +108,12 @@ func ResourceImsDataImageV2() *schema.Resource {
 func resourceImsDataImageV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ImageV2Client(config.GetRegion(d))
-	client1, err := config.ImageV1Client(config.GetRegion(d))
-
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud image client: %s", err)
+	}
+	client1, err := config.ImageV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating OpenTelekomCloud image client v1: %s", err)
 	}
 
 	if !common.HasFilledOpt(d, "volume_id") && !common.HasFilledOpt(d, "image_url") {

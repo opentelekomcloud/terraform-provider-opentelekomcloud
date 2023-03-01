@@ -263,7 +263,7 @@ func resourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Retrieved Image %s: %#v", d.Id(), img)
 
-	size, err := strconv.Atoi(img.ImageSize)
+	size, _ := strconv.Atoi(img.ImageSize)
 	mErr := multierror.Append(
 		d.Set("owner", img.Owner),
 		d.Set("status", img.Status),
@@ -495,15 +495,4 @@ func resourceImagesImageV2BuildTags(v []interface{}) []string {
 	}
 
 	return tags
-}
-
-func resourceImagesImageV2ExpandProperties(v map[string]interface{}) map[string]string {
-	properties := map[string]string{}
-	for key, value := range v {
-		if v, ok := value.(string); ok {
-			properties[key] = v
-		}
-	}
-
-	return properties
 }
