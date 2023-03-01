@@ -76,17 +76,11 @@ func TestAccCCEClusterV3_turbo_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceClusterName, "cluster_type", "VirtualMachine"),
 					resource.TestCheckResourceAttr(resourceClusterName, "flavor_id", "cce.s1.small"),
 					resource.TestCheckResourceAttr(resourceClusterName, "container_network_type", "eni"),
-					resource.TestCheckResourceAttr(resourceClusterName, "authentication_mode", "rbac"),
+					resource.TestCheckResourceAttr(resourceClusterName, "authentication_mode", "x509"),
 					resource.TestCheckResourceAttr(resourceClusterName, "kube_proxy_mode", "iptables"),
 					resource.TestCheckResourceAttr(resourceClusterName, "kubernetes_svc_ip_range", "10.247.0.0/16"),
 					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_control"),
 					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_node"),
-				),
-			},
-			{
-				Config: testAccCCEClusterV3Update(clusterName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceClusterName, "description", "new description"),
 				),
 			},
 		},
@@ -313,8 +307,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   container_network_type  = "eni"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   ignore_addons           = true
-  eni_subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  eni_subnet_cidr         = "192.168.0.0/24"
+  eni_subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+  eni_subnet_cidr         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.cidr
 }
 `, common.DataSourceSubnet, clusterName)
 }

@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IAM]** Fix documentation for ``data/opentelekomcloud_identity_projects_v3`` (`#2092 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2092>`_)

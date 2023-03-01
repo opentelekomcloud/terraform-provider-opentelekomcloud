@@ -49,6 +49,27 @@ func TestAccImsImageV2_basic(t *testing.T) {
 	})
 }
 
+func TestAccImsImageV2_volume(t *testing.T) {
+	var image cloudimages.Image
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckImsImageV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccImsImageV2Volume,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImsImageV2Exists(resourceImageName, &image),
+					testAccCheckImsImageV2Tags(resourceImageName, "foo", "bar"),
+					testAccCheckImsImageV2Tags(resourceImageName, "key", "value"),
+					resource.TestCheckResourceAttr(resourceImageName, "name", "TFTest_image_volume_test"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckImsImageV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
@@ -144,6 +165,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   security_groups   = ["default"]
   availability_zone = "%s"
+  image_name        = "Standard_Debian_10_latest"
   metadata = {
     foo = "bar"
   }
@@ -170,6 +192,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   security_groups   = ["default"]
   availability_zone = "%s"
+  image_name        = "Standard_Debian_10_latest"
   metadata = {
     foo = "bar"
   }
@@ -186,6 +209,34 @@ resource "opentelekomcloud_ims_image_v2" "image_1" {
     foo  = "bar"
     key  = "value1"
     key2 = "value2"
+  }
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccImsImageV2Volume = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name              = "instance_1"
+  security_groups   = ["default"]
+  image_name        = "Standard_Debian_10_latest"
+  availability_zone = "%s"
+  metadata = {
+    foo = "bar"
+  }
+  network {
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+}
+
+resource "opentelekomcloud_ims_image_v2" "image_1" {
+  name        = "TFTest_image_volume_test"
+  volume_id   = opentelekomcloud_compute_instance_v2.instance_1.volume_attached.0.id
+  os_version  = "Debian GNU/Linux 10.0.0 64bit"
+  description = "created by TerraformAccTest"
+  tags = {
+    foo = "bar"
+    key = "value"
   }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

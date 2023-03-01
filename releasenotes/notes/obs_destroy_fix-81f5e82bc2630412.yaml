@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[OBS]** Fix object deletion if versioning is enabled for ``resource/opentelekomcloud_obs_bucket`` (`#2086 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2086>`_)
