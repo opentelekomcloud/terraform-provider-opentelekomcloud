@@ -156,9 +156,9 @@ func resourceImsDataImageV2Create(ctx context.Context, d *schema.ResourceData, m
 		}
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
 		v, err = images.CreateImageFromOBS(v1Client, createOpts)
-	}
-	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud IMS: %s", err)
+		if err != nil {
+			return fmterr.Errorf("error creating OpenTelekomCloud IMS: %s", err)
+		}
 	}
 	log.Printf("[INFO] IMS Job ID: %s", *v)
 
