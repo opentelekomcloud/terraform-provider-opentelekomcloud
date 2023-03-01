@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[CCE]** Add Turbo cluster example for ``resource/opentelekomcloud_cce_cluster_v3`` documentation (`#2100 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2100>`_)

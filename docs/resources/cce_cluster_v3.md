@@ -40,7 +40,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 ### Turbo cluster
 
 ```hcl
-data "opentelekomcloud_vpc_subnet_v1" "shared_subnet"  {
+data "opentelekomcloud_vpc_subnet_v1" "shared_subnet" {
   name = "shared_test"
 }
 
