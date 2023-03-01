@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/members"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/image/v2/members"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -87,7 +87,7 @@ func resourceImagesImageAccessAcceptV2Create(ctx context.Context, d *schema.Reso
 	opts := members.UpdateOpts{
 		Status: status,
 	}
-	_, err = members.Update(client, imageID, memberID, opts).Extract()
+	_, err = members.Update(client, imageID, memberID, opts)
 	if err != nil {
 		return fmterr.Errorf("error setting a member status to the image share: %w", err)
 	}
