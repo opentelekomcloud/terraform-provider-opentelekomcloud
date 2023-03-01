@@ -6,7 +6,6 @@ import (
 	"log"
 	"regexp"
 	"sort"
-	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -283,11 +282,9 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf("error creating OpenTelekomCloud IMSv2 client: %w", err)
 	}
 
-	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
-
 	listOpts := images.ListImagesOpts{
 		Name:       d.Get("name").(string),
-		Visibility: visibility,
+		Visibility: d.Get("visibility").(string),
 		Owner:      d.Get("owner").(string),
 		Status:     "active",
 		// SizeMin:    int64(d.Get("size_min").(int)),
@@ -401,8 +398,8 @@ func (a imageSort) Swap(i, j int) {
 }
 
 func (a imageSort) Less(i, j int) bool {
-	itime, _ := time.Parse(time.UnixDate, a[i].CreatedAt)
-	jtime, _ := time.Parse(time.UnixDate, a[j].CreatedAt)
+	itime := a[i].CreatedAt
+	jtime := a[j].CreatedAt
 	return itime.Unix() < jtime.Unix()
 }
 

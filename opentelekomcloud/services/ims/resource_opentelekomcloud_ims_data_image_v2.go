@@ -108,6 +108,8 @@ func ResourceImsDataImageV2() *schema.Resource {
 func resourceImsDataImageV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ImageV2Client(config.GetRegion(d))
+	client1, err := config.ImageV1Client(config.GetRegion(d))
+
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud image client: %s", err)
 	}
@@ -160,26 +162,26 @@ func resourceImsDataImageV2Create(ctx context.Context, d *schema.ResourceData, m
 
 	// Wait for the ims to become available.
 	log.Printf("[DEBUG] Waiting for IMS to become available")
-	err = others.WaitForJob(client, *v, int(d.Timeout(schema.TimeoutCreate)/time.Second))
+	err = others.WaitForJob(client1, *v, int(d.Timeout(schema.TimeoutCreate)/time.Second))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	entity, err := others.ShowJob(client, *v)
+	entity, err := others.ShowJob(client1, *v)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	if entity.JobId != "" {
-		log.Printf("[INFO] IMS ID: %s", entity.JobId)
+		log.Printf("[INFO] IMS ID: %s", entity.Entities.ImageId)
 		// Store the ID now
-		d.SetId(entity.JobId)
+		d.SetId(entity.Entities.ImageId)
 
 		if common.HasFilledOpt(d, "tags") {
 			tagmap := d.Get("tags").(map[string]interface{})
 			if len(tagmap) > 0 {
 				log.Printf("[DEBUG] Setting tags: %v", tagmap)
-				err = setTagForImage(d, meta, entity.JobId, tagmap)
+				err = setTagForImage(d, meta, entity.Entities.ImageId, tagmap)
 				if err != nil {
 					return fmterr.Errorf("error setting OpenTelekomCloud tags of image:%s", err)
 				}
