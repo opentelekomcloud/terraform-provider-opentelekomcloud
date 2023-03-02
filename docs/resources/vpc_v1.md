@@ -53,7 +53,7 @@ The following arguments are supported:
 * `description` - (Optional) A description of the VPC.
 
 * `shared` - (Optional) Specifies whether the shared SNAT should be used or not. Is also
-  required for cross-tenant sharing.
+  required for cross-tenant sharing. Shared SNAT only avadilable in eu-de region.
 
 * `tags` - (Optional) The key/value pairs to associate with the VPC.
 
