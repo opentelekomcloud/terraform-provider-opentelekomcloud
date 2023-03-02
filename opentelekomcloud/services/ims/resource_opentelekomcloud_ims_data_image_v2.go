@@ -136,6 +136,9 @@ func resourceImsDataImageV2Create(ctx context.Context, d *schema.ResourceData, m
 		}
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
 		v, err = images.CreateImageFromECS(client, createOpts)
+		if err != nil {
+			return fmterr.Errorf("error creating OpenTelekomCloud IMS: %s", err)
+		}
 	} else {
 		if !common.HasFilledOpt(d, "min_disk") {
 			return fmterr.Errorf("error creating OpenTelekomCloud IMS: 'min_disk' must be specified")
