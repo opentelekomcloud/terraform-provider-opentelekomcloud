@@ -7,7 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/members"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/image/v2/members"
+	ims2 "github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/members"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -15,7 +16,7 @@ import (
 )
 
 func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
-	var member members.Member
+	var member ims2.Member
 	acceptResourceName := "opentelekomcloud_images_image_access_accept_v2.accept_1"
 	privateImageID := os.Getenv("OS_PRIVATE_IMAGE_ID")
 	shareProjectID := os.Getenv("OS_PROJECT_ID_2")
@@ -65,7 +66,10 @@ func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 			return err
 		}
 
-		_, err = members.Get(client, imageID, memberID).Extract()
+		_, err = members.Get(client, members.MemberOpts{
+			ImageId:  imageID,
+			MemberId: memberID,
+		})
 		if err == nil {
 			return fmt.Errorf("image membership still exists")
 		}
