@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/cloudimages"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -18,7 +18,7 @@ import (
 const resourceDataImageName = "opentelekomcloud_ims_data_image_v2.image_1"
 
 func TestAccImsDataImageV2_basic(t *testing.T) {
-	var image cloudimages.Image
+	var image images.ImageInfo
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -69,7 +69,7 @@ func testAccCheckImsDataImageV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckImsDataImageV2Exists(n string, image *cloudimages.Image) resource.TestCheckFunc {
+func testAccCheckImsDataImageV2Exists(n string, image *images.ImageInfo) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {

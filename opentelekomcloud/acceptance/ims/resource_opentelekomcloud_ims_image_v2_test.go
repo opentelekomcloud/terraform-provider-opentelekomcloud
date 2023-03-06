@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/cloudimages"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/tags"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -19,7 +19,7 @@ import (
 const resourceImageName = "opentelekomcloud_ims_image_v2.image_1"
 
 func TestAccImsImageV2_basic(t *testing.T) {
-	var image cloudimages.Image
+	var image images.ImageInfo
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -50,7 +50,7 @@ func TestAccImsImageV2_basic(t *testing.T) {
 }
 
 func TestAccImsImageV2_volume(t *testing.T) {
-	var image cloudimages.Image
+	var image images.ImageInfo
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -91,7 +91,7 @@ func testAccCheckImsImageV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckImsImageV2Exists(n string, image *cloudimages.Image) resource.TestCheckFunc {
+func testAccCheckImsImageV2Exists(n string, image *images.ImageInfo) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -135,16 +135,16 @@ func testAccCheckImsImageV2Tags(n string, k string, v string) resource.TestCheck
 			return fmt.Errorf("error creating OpenTelekomCloud image client: %s", err)
 		}
 
-		found, err := tags.Get(imageClient, rs.Primary.ID).Extract()
+		found, err := tags.ListImageTags(imageClient, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		if found.Tags == nil {
+		if len(found) == 0 {
 			return fmt.Errorf("IMS Tags not found")
 		}
 
-		for _, tag := range found.Tags {
+		for _, tag := range found {
 			if k != tag.Key {
 				continue
 			}
