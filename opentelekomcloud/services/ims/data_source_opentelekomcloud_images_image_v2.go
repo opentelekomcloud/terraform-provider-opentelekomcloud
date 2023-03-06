@@ -375,7 +375,7 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 		d.Set("checksum", img.Checksum),
 		d.Set("size_bytes", img.Size),
 		d.Set("created_at", img.CreatedAt.Format(time.RFC3339)),
-		d.Set("updated_at", img.UpdatedAt),
+		d.Set("updated_at", img.UpdatedAt.Format(time.RFC3339)),
 		d.Set("file", img.File),
 		d.Set("schema", img.Schema),
 		// d.Set("metadata", img.Metadata),
