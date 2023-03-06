@@ -688,9 +688,9 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	mErr = multierror.Append(mErr,
-		d.Set("update_at", time.Unix(updateAt, 0).String()),
-		d.Set("create_at", time.Unix(createAt, 0).String()),
-		d.Set("charging_start_time", time.Unix(chargingStartTime, 0).String()),
+		d.Set("update_at", time.Unix(updateAt, 0).Format(time.RFC3339)),
+		d.Set("create_at", time.Unix(createAt, 0).Format(time.RFC3339)),
+		d.Set("charging_start_time", time.Unix(chargingStartTime, 0).Format(time.RFC3339)),
 	)
 
 	components := make([]map[string]interface{}, len(mrsCluster.ComponentList))
