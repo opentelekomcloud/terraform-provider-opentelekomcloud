@@ -44,4 +44,14 @@ The following arguments are supported:
 
 * `description` - The description of the project.
 
+* `domain_id` - ID of an enterprise account to which a project belongs.
+
+* `enabled` - Whether a project is available.
+
+* `is_domain` - Indicates whether the user calling the API is a tenant.
+
+* `name` - Project name.
+
+* `parent_id` - Parent ID of the project.
+
 * `region` - Indicates the region where the project is present.
