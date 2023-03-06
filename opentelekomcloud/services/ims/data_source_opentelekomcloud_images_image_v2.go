@@ -356,7 +356,7 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 				"specific search criteria, or set `most_recent` attribute to true")
 		}
 	} else {
-		img.Id = ims[0].Id
+		img = ims[0]
 	}
 
 	log.Printf("[DEBUG] Single Image found: %s", img.Id)
@@ -367,8 +367,8 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 		d.Set("tags", img.Tags),
 		d.Set("container_format", img.ContainerFormat),
 		d.Set("disk_format", img.DiskFormat),
-		// d.Set("min_disk_gb", img.MinDiskGigabytes),
-		// d.Set("min_ram_mb", img.MinRAMMegabytes),
+		d.Set("min_disk_gb", img.MinDisk),
+		d.Set("min_ram_mb", img.MinRam),
 		d.Set("owner", img.Owner),
 		d.Set("protected", img.Protected),
 		d.Set("visibility", img.Visibility),
