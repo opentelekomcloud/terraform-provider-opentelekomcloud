@@ -140,7 +140,7 @@ func resourceImagesImageAccessV2Read(_ context.Context, d *schema.ResourceData, 
 	mErr := multierror.Append(
 		d.Set("status", member.Status),
 		d.Set("member_id", member.MemberId),
-		d.Set("created_at", member.CreatedAt),
+		d.Set("created_at", member.CreatedAt.Format(time.RFC3339)),
 		d.Set("update_at", member.UpdatedAt),
 		d.Set("image_id", member.ImageId),
 		d.Set("schema", member.Schema),
