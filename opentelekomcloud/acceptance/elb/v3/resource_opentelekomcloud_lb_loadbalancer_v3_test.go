@@ -33,12 +33,14 @@ func TestAccLBV3LoadBalancer_basic(t *testing.T) {
 				Config: testAccLBV3LoadBalancerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV3LoadBalancerExists(resourceLBName, &lb),
+					resource.TestCheckResourceAttr(resourceLBName, "deletion_protection", "true"),
 				),
 			},
 			{
 				Config: testAccLBV3LoadBalancerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceLBName, "name", "loadbalancer_1_updated"),
+					resource.TestCheckResourceAttr(resourceLBName, "deletion_protection", "false"),
 				),
 			},
 		},
@@ -163,6 +165,8 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
     bandwidth_share_type = "PER"
   }
 
+  deletion_protection = true
+
   tags = {
     muh = "value-create"
     kuh = "value-create"
@@ -186,6 +190,8 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
     bandwidth_size       = 10
     bandwidth_share_type = "PER"
   }
+
+  deletion_protection = false
 
   tags = {
     muh = "value-create"

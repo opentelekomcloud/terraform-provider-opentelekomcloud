@@ -37,6 +37,8 @@ func TestLBPoolV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourcePoolName, "name", ""),
 					resource.TestCheckResourceAttr(resourcePoolName, "session_persistence.#", "1"),
 					resource.TestCheckResourceAttr(resourcePoolName, "ip_version", "dualstack"),
+					resource.TestCheckResourceAttr(resourcePoolName, "type", "instance"),
+					resource.TestCheckResourceAttr(resourcePoolName, "member_deletion_protection", "true"),
 				),
 			},
 			{
@@ -44,6 +46,7 @@ func TestLBPoolV3_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testLBPoolV3Exists(resourcePoolName, &pool),
 					resource.TestCheckResourceAttr(resourcePoolName, "name", "pool_1"),
+					resource.TestCheckResourceAttr(resourcePoolName, "member_deletion_protection", "false"),
 				),
 			},
 			{
@@ -156,6 +159,10 @@ resource "opentelekomcloud_lb_pool_v3" "pool" {
   session_persistence {
     type = "SOURCE_IP"
   }
+  type   = "instance"
+  vpc_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+
+  member_deletion_protection = true
 }
 
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
@@ -180,6 +187,8 @@ resource "opentelekomcloud_lb_pool_v3" "pool" {
     type                = "SOURCE_IP"
     persistence_timeout = "30"
   }
+
+  member_deletion_protection = false
 }
 
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
@@ -203,6 +212,8 @@ resource "opentelekomcloud_lb_pool_v3" "pool" {
   session_persistence {
     type = "HTTP_COOKIE"
   }
+
+  member_deletion_protection = false
 }
 
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

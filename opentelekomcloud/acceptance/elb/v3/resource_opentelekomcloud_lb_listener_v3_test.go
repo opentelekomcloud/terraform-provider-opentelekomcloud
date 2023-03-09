@@ -39,6 +39,9 @@ func TestAccLBV3Listener_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1"),
 					resource.TestCheckResourceAttr(resourceListenerName, "description", "some interesting description"),
 					resource.TestCheckResourceAttr(resourceListenerName, "tls_ciphers_policy", "tls-1-2-fs"),
+					resource.TestCheckResourceAttr(resourceListenerName, "advanced_forwarding", "true"),
+					resource.TestCheckResourceAttr(resourceListenerName, "sni_match_algo", "wildcard"),
+					resource.TestCheckResourceAttr(resourceListenerName, "security_policy_id", ""),
 				),
 			},
 			{
@@ -47,6 +50,9 @@ func TestAccLBV3Listener_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1_updated"),
 					resource.TestCheckResourceAttr(resourceListenerName, "description", ""),
 					resource.TestCheckResourceAttr(resourceListenerName, "tls_ciphers_policy", "tls-1-2-fs-with-1-3"),
+					resource.TestCheckResourceAttr(resourceListenerName, "advanced_forwarding", "true"),
+					resource.TestCheckResourceAttr(resourceListenerName, "sni_match_algo", "longest_suffix"),
+					resource.TestCheckResourceAttr(resourceListenerName, "security_policy_id", ""),
 				),
 			},
 		},
@@ -232,6 +238,9 @@ resource "opentelekomcloud_lb_listener_v3" "listener_1" {
   default_tls_container_ref = opentelekomcloud_lb_certificate_v3.certificate_1.id
   tls_ciphers_policy        = "tls-1-2-fs"
 
+  advanced_forwarding = true
+  sni_match_algo      = "wildcard"
+
   insert_headers {
     forwarded_host = true
   }
@@ -263,6 +272,8 @@ resource "opentelekomcloud_lb_listener_v3" "listener_1" {
   protocol_port             = 443
   default_tls_container_ref = opentelekomcloud_lb_certificate_v3.certificate_1.id
   tls_ciphers_policy        = "tls-1-2-fs-with-1-3"
+
+  sni_match_algo      = "longest_suffix"
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, privateKey, certificate)
 
