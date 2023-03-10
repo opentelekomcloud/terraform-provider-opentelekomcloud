@@ -1,5 +1,5 @@
 ---
 fixes:
   - |
-    **[DCS]** Fixed documentation examples for ``data_source/opentelekomcloud_dcs_az_v1`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[DCS]** Fixed documentation examples for ``data_source/opentelekomcloud_dcs_az_v1`` (`#2110 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2110>`_)
 
