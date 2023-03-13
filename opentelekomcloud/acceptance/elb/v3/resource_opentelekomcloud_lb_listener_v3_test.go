@@ -273,7 +273,7 @@ resource "opentelekomcloud_lb_listener_v3" "listener_1" {
   default_tls_container_ref = opentelekomcloud_lb_certificate_v3.certificate_1.id
   tls_ciphers_policy        = "tls-1-2-fs-with-1-3"
 
-  sni_match_algo      = "longest_suffix"
+  sni_match_algo = "longest_suffix"
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, privateKey, certificate)
 
