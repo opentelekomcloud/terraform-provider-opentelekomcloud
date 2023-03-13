@@ -6,7 +6,7 @@ subcategory: "Dedicated Load Balancer (DLB)"
 
 Manages a Dedicated Load Balancer Policy resource within OpenTelekomCloud.
 
-## Example Usage
+## Example Usage Basic
 
 ```hcl
 resource "opentelekomcloud_lb_loadbalancer_v3" "this" {
@@ -33,6 +33,81 @@ resource "opentelekomcloud_lb_policy_v3" "this" {
   listener_id      = opentelekomcloud_lb_listener_v3.this.id
   redirect_pool_id = opentelekomcloud_lb_pool_v3.this.id
   position         = 37
+}
+```
+
+## Fixed Response Example
+
+```hcl
+resource "opentelekomcloud_lb_loadbalancer_v3" "this" {
+  router_id   = var.router_id
+  network_ids = [var.network_id]
+
+  availability_zones = [var.az]
+}
+
+resource "opentelekomcloud_lb_listener_v3" "this" {
+  loadbalancer_id     = opentelekomcloud_lb_loadbalancer_v3.this.id
+  protocol            = "HTTP"
+  protocol_port       = 8080
+  advanced_forwarding = true
+}
+
+resource "opentelekomcloud_lb_pool_v3" "this" {
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.this.id
+  lb_algorithm    = "ROUND_ROBIN"
+  protocol        = "HTTP"
+}
+
+resource "opentelekomcloud_lb_policy_v3" "this" {
+  action      = "FIXED_RESPONSE"
+  listener_id = opentelekomcloud_lb_listener_v3.this.id
+  position    = 37
+  priority    = 10
+
+  fixed_response_config {
+    status_code  = "200"
+    content_type = "text/plain"
+    message_body = "Fixed Response"
+  }
+}
+```
+
+## Redirect To Url Example
+
+```hcl
+resource "opentelekomcloud_lb_loadbalancer_v3" "this" {
+  router_id   = var.router_id
+  network_ids = [var.network_id]
+
+  availability_zones = [var.az]
+}
+
+resource "opentelekomcloud_lb_listener_v3" "this" {
+  loadbalancer_id     = opentelekomcloud_lb_loadbalancer_v3.this.id
+  protocol            = "HTTP"
+  protocol_port       = 8080
+  advanced_forwarding = true
+}
+
+resource "opentelekomcloud_lb_pool_v3" "this" {
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.this.id
+  lb_algorithm    = "ROUND_ROBIN"
+  protocol        = "HTTP"
+}
+
+resource "opentelekomcloud_lb_policy_v3" "this" {
+  action      = "REDIRECT_TO_URL"
+  listener_id = opentelekomcloud_lb_listener_v3.this.id
+  position    = 37
+  priority    = 10
+
+  redirect_url = "https://www.google.com:443"
+
+  redirect_url_config {
+    status_code = "301"
+    query       = "name=my_name"
+  }
 }
 ```
 
@@ -81,6 +156,47 @@ The following arguments are supported:
   If type is set to `PATH` and `compare_type` to `STARTS_WITH` or `EQUAL_TO`, the value must start with
   a slash `/` and can contain only letters, digits, and special characters `_~';@^-%#&$.*+?,=!:|/()[]{}`.
 
+* `priority` - (Optional) Specifies the forwarding policy priority.
+  A smaller value indicates a higher priority. The value must be unique for forwarding policies of the same listener.
+  This parameter will take effect only when `advanced_forwarding` is set to `true`.
+  If this parameter is passed and `advanced_forwarding` is set to `false`, an error will be returned.
+  This parameter is unsupported for shared load balancers and not available in `eu-nl`.
+
+* `fixed_response_config` - (Optional) Specifies the configuration of the page that will be returned.
+  This parameter will take effect when `advanced_forwarding` is set to `true`.
+  If this parameter is passed and `advanced_forwarding` is set to `false`, an error will be returned.
+  Not available in `eu-nl`.
+  * `status_code` - (Required) Specifies the fixed HTTP status code configured in the forwarding rule.
+    The value can be any integer in the range of `200-299`, `400-499`, or `500-599`.
+  * `content_type` - (Optional) - Specifies the format of the response body.
+  * `message_body` - (Optional) - Specifies the content of the response message body.
+
+* `redirect_url` - (Optional) Specifies the URL to which requests are forwarded.
+
+* `redirect_url_config` - (Optional) Specifies the URL to which requests are forwarded.
+  For dedicated load balancers, This parameter will take effect when `advanced_forwarding` is set to `true`.
+  If it is passed when `advanced_forwarding` is set to `false`, an error will be returned. Not available in `eu-nl`.
+  * `protocol` - (Optional) - Specifies the protocol for redirection. The value can be `HTTP`, `HTTPS`,
+    or `${protocol}`.
+    The default value is `${protocol}`, indicating that the protocol of the request will be used.
+  * `host` - (Optional) - Specifies the host name that requests are redirected to.
+    The value can contain only letters, digits, hyphens (-), and periods (.) and must start with a letter or digit.
+    The default value is `${host}`, indicating that the host of the request will be used.
+  * `port` - (Optional) - Specifies the port that requests are redirected to. The default value is `${port}`,
+    indicating that the port of the request will be used.
+  * `path` - (Optional) - Specifies the path that requests are redirected to.
+    The default value is `${path}`, indicating that the path of the request will be used.
+    The value can contain only letters, digits, and special characters `_~';@^- %#&$.*+?,=!:|/()[]{}`
+    and must start with a slash (`/`).
+  * `query` - (Optional) - Specifies the query string set in the URL for redirection.
+    The default value is `${query}`, indicating that the query string of the request will be used.
+  * `status_code` - (Required) - Specifies the status code returned after the requests are redirected.
+    The value can be `301`, `302`, `303`, `307`, or `308`.
+
+* `redirect_pools_config` - (Optional) Specifies the configuration of the backend server group that the requests
+  are forwarded to. This parameter is valid only when action is set to `REDIRECT_TO_POOL`.
+  * `pool_id` - (Required) - Specifies the ID of the backend server group.
+  * `weight` - (Required) - Specifies the weight of the backend server group. The value ranges from 0 to 100.
 
 ## Attributes Reference
 

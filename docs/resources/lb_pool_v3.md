@@ -86,6 +86,14 @@ The `session_persistence` block supports:
   * If the protocol of the backend server group is HTTP or HTTPS, the value ranges from `1` to `1440`,
   and the default value is `1440`.
 
+* `member_deletion_protection` - (Optional) Specifies whether to enable removal protection for the pool members.
+  `true`: Enable removal protection.
+  `false` (default): Disable removal protection.
+
+* `vpc_id` - (Optional) Specifies the ID of the VPC where the backend server group works.
+
+* `type` - (Optional) Specifies the type of the backend server group.
+
 
 ## Attributes Reference
 

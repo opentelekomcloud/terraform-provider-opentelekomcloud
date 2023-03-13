@@ -71,6 +71,49 @@ as the leftmost label of the domain name.
 If type is set to `PATH` and `compare_type` to `STARTS_WITH` or `EQUAL_TO`, the value must start with
 a slash `/` and can contain only letters, digits, and special characters `_~';@^-%#&$.*+?,=!:|/()[]{}`.
 
+* `conditions` - (Optional) Specifies the matching conditions of the forwarding rule.
+  This parameter is available only when `advanced_forwarding` is set to `true`.
+  Not available in `eu-nl`.
+  * `key` - (Optional) Specifies the key of match item.
+
+->If type is set to `HOST_NAME`, `PATH`, `METHOD`, or `SOURCE_IP`, this parameter is left blank.
+If type is set to `HEADER`, key indicates the name of the HTTP header parameter.
+The value can contain 1 to 40 characters, including letters, digits, hyphens (`-`), and underscores (`_`).
+If type is set to `QUERY_STRING`, key indicates the name of the query parameter.
+The value is case-sensitive and can contain 1 to 128 characters.
+Spaces, square brackets (`[ ]`), curly brackets (`{ }`), angle brackets (`< >`), backslashes (`\`),
+double quotation marks (` `), pound signs (`#`), ampersands (`&`), vertical bars (`|`),
+percent signs (`%`), and tildes (`~`) are not supported.
+All keys in the conditions list in the same rule must be the same.
+
+  * `value` - (Required) - Specifies the value of the match item.
+
+->If type is set to `HOST_NAME`, key is left blank, and value indicates the domain name,
+which can contain 1 to 128 characters, including letters, digits, hyphens (`-`), periods (`.`), and asterisks (`*`),
+and must start with a letter, digit, or asterisk (`*`).
+If you want to use a wildcard domain name, enter an asterisk (`*`) as the leftmost label of the domain name.
+If type is set to `PATH`, key is left blank, and value indicates the request path,
+which can contain 1 to 128 characters.
+If compare_type is set to `STARTS_WITH` or `EQUAL_TO` for the forwarding rule,
+the value must start with a slash (`/`) and can contain only letters, digits,
+and special characters `_~';@^-%#&$.*+?,=!:|/()[]{}`
+If type is set to `HEADER`, key indicates the name of the HTTP header parameter,
+and value indicates the value of the HTTP header parameter.
+The value can contain 1 to 128 characters. Asterisks (`*`) and question marks (`?`) are allowed,
+but spaces and double quotation marks are not allowed. An asterisk can match zero or more characters,
+and a question mark can match 1 character.
+If type is set to `QUERY_STRING`, key indicates the name of the query parameter,
+and value indicates the value of the query parameter.
+The value is case-sensitive and can contain 1 to 128 characters. Spaces, square brackets (`[ ]`),
+curly brackets (`{ }`), angle brackets (`< >`), backslashes (`\`), double quotation marks (` `), pound signs (`#`),
+ampersands (`&`), vertical bars (`|`), percent signs (`%`), and tildes (`~`) are not supported.
+Asterisks (`*`) and question marks (`?`) are allowed. An asterisk can match zero or more characters,
+and a question mark can match 1 character.
+If type is set to `METHOD`, key is left blank, and value indicates the HTTP method.
+The value can be `GET`, `PUT`, `POST`, `DELETE`, `PATCH`, `HEAD`, or `OPTIONS`.
+If type is set to `SOURCE_IP`, key is left blank, and value indicates the source IP address of the request.
+The value is an `IPv4` or `IPv6` CIDR block, for example, `192.168.0.2/32` or `2049::49/64`.
+All keys in the conditions list in the same rule must be the same.
 
 ## Attributes Reference
 
