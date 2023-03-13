@@ -31,7 +31,8 @@ func ResourceLBRuleV3() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"HOST_NAME", "PATH",
+					"HOST_NAME", "PATH", "METHOD",
+					"HEADER", "QUERY_STRING", "SOURCE_IP",
 				}, false),
 			},
 			"compare_type": {
