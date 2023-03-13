@@ -295,16 +295,16 @@ resource "opentelekomcloud_lb_listener_v3" "this" {
 }
 
 resource "opentelekomcloud_lb_pool_v3" "this" {
-  loadbalancer_id     = opentelekomcloud_lb_loadbalancer_v3.this.id
-  lb_algorithm        = "ROUND_ROBIN"
-  protocol            = "HTTP"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.this.id
+  lb_algorithm    = "ROUND_ROBIN"
+  protocol        = "HTTP"
 }
 
 resource "opentelekomcloud_lb_policy_v3" "this" {
-  action           = "FIXED_RESPONSE"
-  listener_id      = opentelekomcloud_lb_listener_v3.this.id
-  position         = 37
-  priority         = 10
+  action      = "FIXED_RESPONSE"
+  listener_id = opentelekomcloud_lb_listener_v3.this.id
+  position    = 37
+  priority    = 10
 
   fixed_response_config {
     status_code  = "200"
@@ -338,12 +338,12 @@ resource "opentelekomcloud_lb_pool_v3" "this" {
 }
 
 resource "opentelekomcloud_lb_policy_v3" "this" {
-  name             = "policy_updated"
-  description      = "some interesting description"
-  action           = "FIXED_RESPONSE"
-  listener_id      = opentelekomcloud_lb_listener_v3.this.id
-  position         = 37
-  priority         = 11
+  name        = "policy_updated"
+  description = "some interesting description"
+  action      = "FIXED_RESPONSE"
+  listener_id = opentelekomcloud_lb_listener_v3.this.id
+  position    = 37
+  priority    = 11
 
   fixed_response_config {
     status_code  = "202"
@@ -371,22 +371,22 @@ resource "opentelekomcloud_lb_listener_v3" "this" {
 }
 
 resource "opentelekomcloud_lb_pool_v3" "this" {
-  loadbalancer_id     = opentelekomcloud_lb_loadbalancer_v3.this.id
-  lb_algorithm        = "ROUND_ROBIN"
-  protocol            = "HTTP"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.this.id
+  lb_algorithm    = "ROUND_ROBIN"
+  protocol        = "HTTP"
 }
 
 resource "opentelekomcloud_lb_policy_v3" "this" {
-  action           = "REDIRECT_TO_URL"
-  listener_id      = opentelekomcloud_lb_listener_v3.this.id
-  position         = 37
-  priority         = 10
+  action      = "REDIRECT_TO_URL"
+  listener_id = opentelekomcloud_lb_listener_v3.this.id
+  position    = 37
+  priority    = 10
 
   redirect_url = "https://www.google.com:443"
 
   redirect_url_config {
-    status_code  = "301"
-    query        = "name=my_name"
+    status_code = "301"
+    query       = "name=my_name"
   }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
@@ -415,16 +415,16 @@ resource "opentelekomcloud_lb_pool_v3" "this" {
 }
 
 resource "opentelekomcloud_lb_policy_v3" "this" {
-  name             = "policy_updated"
-  description      = "some interesting description"
-  action           = "REDIRECT_TO_URL"
-  listener_id      = opentelekomcloud_lb_listener_v3.this.id
-  position         = 37
-  priority         = 11
+  name        = "policy_updated"
+  description = "some interesting description"
+  action      = "REDIRECT_TO_URL"
+  listener_id = opentelekomcloud_lb_listener_v3.this.id
+  position    = 37
+  priority    = 11
 
   redirect_url_config {
-    status_code  = "308"
-    query        = "name=my_name_updated"
+    status_code = "308"
+    query       = "name=my_name_updated"
   }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
