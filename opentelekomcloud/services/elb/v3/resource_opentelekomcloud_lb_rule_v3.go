@@ -63,8 +63,41 @@ func ResourceLBRuleV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"conditions": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
 		},
 	}
+}
+
+func getConditions(d *schema.ResourceData) []rules.Condition {
+	conditionListRaw := d.Get("conditions").(*schema.Set).List()
+	var conditionList []rules.Condition
+
+	for _, rule := range conditionListRaw {
+		ruleRaw := rule.(map[string]interface{})
+
+		conditionList = append(conditionList, rules.Condition{
+			Key:   ruleRaw["key"].(string),
+			Value: ruleRaw["value"].(string),
+		})
+	}
+
+	return conditionList
 }
 
 func resourceLBRuleV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -81,6 +114,7 @@ func resourceLBRuleV3Create(ctx context.Context, d *schema.ResourceData, meta in
 		CompareType: rules.CompareType(d.Get("compare_type").(string)),
 		Value:       d.Get("value").(string),
 		ProjectID:   d.Get("project_id").(string),
+		Conditions:  getConditions(d),
 	}
 	policyID := d.Get("policy_id").(string)
 
@@ -112,11 +146,19 @@ func resourceLBRuleV3Read(ctx context.Context, d *schema.ResourceData, meta inte
 		return common.CheckDeletedDiag(d, err, "error viewing details of LB Rule v3")
 	}
 
+	var conditionsList []interface{}
+	for _, v := range rule.Conditions {
+		conditionsList = append(conditionsList, map[string]interface{}{
+			"key":   v.Key,
+			"value": v.Value,
+		})
+	}
 	mErr := multierror.Append(
 		d.Set("project_id", rule.ProjectID),
 		d.Set("type", rule.Type),
 		d.Set("compare_type", rule.CompareType),
 		d.Set("value", rule.Value),
+		d.Set("conditions", conditionsList),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -142,6 +184,9 @@ func resourceLBRuleV3Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 	if d.HasChange("value") {
 		updateOpts.Value = d.Get("value").(string)
+	}
+	if d.HasChange("conditions") {
+		updateOpts.Conditions = getConditions(d)
 	}
 
 	_, err = rules.Update(client, policyID(d), ruleID(d), updateOpts).Extract()
