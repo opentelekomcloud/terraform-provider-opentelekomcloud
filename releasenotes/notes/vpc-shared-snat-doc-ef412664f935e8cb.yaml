@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPN]** Minor fix for `shared` argument in documentation for ``resource/opentelekomcloud_vpc_v1``and ``resource/opentelekomcloud_networking_network_v2`` (`#2101 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2101>`_)

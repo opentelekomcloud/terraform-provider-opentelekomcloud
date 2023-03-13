@@ -63,8 +63,8 @@ The following arguments are supported:
   the existing network.
 
 * `shared` - (Optional)  Specifies whether the network resource can be accessed
-  by any tenant or not. Changing this updates the sharing capabalities of the
-  existing network.
+  by any tenant or not. Changing this updates the sharing capabilities of the
+  existing network. Shared SNAT only available in eu-de region.
 
 * `tenant_id` - (Optional) The owner of the network. Required if admin wants to
   create a network for another tenant. Changing this creates a new network.
