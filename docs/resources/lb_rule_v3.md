@@ -112,7 +112,7 @@ and a question mark can match 1 character.
 If type is set to `METHOD`, key is left blank, and value indicates the HTTP method.
 The value can be `GET`, `PUT`, `POST`, `DELETE`, `PATCH`, `HEAD`, or `OPTIONS`.
 If type is set to `SOURCE_IP`, key is left blank, and value indicates the source IP address of the request.
-The value is an `IPv4` or `IPv6` CIDR block, for example, `192.168.0.2/32` or `2049::49/64`.
+The value is an `IPv4` or `IPv6` CIDR block, for example, `192.168.0.2/32` or `elb`.
 All keys in the conditions list in the same rule must be the same.
 
 ## Attributes Reference
