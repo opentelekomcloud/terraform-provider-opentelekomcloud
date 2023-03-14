@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    **[IAM]** Add response attributes description for ``data_source/opentelekomcloud_identity_project_v3``
+    (`#2104 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2104>`_)
