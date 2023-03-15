@@ -94,7 +94,7 @@ The following arguments are supported:
 * `advanced_forwarding` - (Optional) Specifies whether to enable advanced forwarding.
   If advanced forwarding is enabled, more flexible forwarding policies and rules are supported.
   The value can be `true` (enable advanced forwarding) or `false` (disable advanced forwarding),
-  and the default value is `false`.
+  and the default value is `false`. Changing this creates a new Listener.
 
 * `sni_match_algo` - (Optional) Specifies how wildcard domain name matches with the SNI certificates
   used by the listener.
