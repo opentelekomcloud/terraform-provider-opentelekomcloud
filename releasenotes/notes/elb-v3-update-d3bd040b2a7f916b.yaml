@@ -1,0 +1,27 @@
+---
+enhancements:
+  - |
+    **[ELB]** Add ``deletion_protection`` argument to ``resource/opentelekomcloud_lb_loadbalancer_v3``
+    (`#2109 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2109>`_)
+  - |
+    **[ELB]** Add ``advanced_forwarding``, ``sni_match_algo`` and ``security_policy_id`` arguments to
+    ``resource/opentelekomcloud_lb_listener_v3``
+    (`#2109 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2109>`_)
+  - |
+    **[ELB]** Add ``member_deletion_protection``, ``vpc_id`` and ``type`` arguments to
+    ``resource/opentelekomcloud_lb_pool_v3``
+    (`#2109 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2109>`_)
+  - |
+    **[ELB]** Add ``priority``, ``fixed_response_config``, ``redirect_url``, ``redirect_url_config``
+    and ``redirect_pools_config`` argumentss to ``resource/opentelekomcloud_lb_policy_v3``
+    (`#2109 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2109>`_)
+  - |
+    **[ELB]** Add ``conditions`` argument to ``resource/opentelekomcloud_lb_rule_v3``
+    (`#2109 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2109>`_)
+  - |
+    **[ELB]** Add ``deletion_protection`` attribute to ``data_source/opentelekomcloud_lb_loadbalancer_v3``
+    (`#2109 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2109>`_)
+  - |
+    **[ELB]** Add ``advanced_forwarding``,``sni_match_algo`` and ``security_policy_id`` attributes to
+    ``data_source/opentelekomcloud_lb_listener_v3``
+    (`#2109 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2109>`_)

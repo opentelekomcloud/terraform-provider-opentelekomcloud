@@ -84,6 +84,16 @@ func ResourceListenerV3() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"sni_match_algo": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"security_policy_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"tls_ciphers_policy": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -159,6 +169,12 @@ func ResourceListenerV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"advanced_forwarding": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -191,6 +207,7 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	adminStateUp := d.Get("admin_state_up").(bool)
 	protocol := listeners.Protocol(d.Get("protocol").(string))
+	enhanceL7policy := d.Get("advanced_forwarding").(bool)
 	opts := listeners.CreateOpts{
 		AdminStateUp:           &adminStateUp,
 		CAContainerRef:         d.Get("client_ca_tls_container_ref").(string),
@@ -208,6 +225,9 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		ClientTimeout:          d.Get("client_timeout").(int),
 		MemberTimeout:          d.Get("member_timeout").(int),
 		InsertHeaders:          getInsertHeaders(d),
+		EnhanceL7policy:        &enhanceL7policy,
+		SniMatchAlgo:           d.Get("sni_match_algo").(string),
+		SecurityPolicy:         d.Get("security_policy_id").(string),
 	}
 	switch protocol {
 	case listeners.ProtocolHTTPS:
@@ -279,6 +299,9 @@ func setLBListenerFields(d *schema.ResourceData, listener *listeners.Listener) d
 		d.Set("created_at", listener.CreatedAt),
 		d.Set("updated_at", listener.UpdatedAt),
 		d.Set("tags", common.TagsToMap(listener.Tags)),
+		d.Set("advanced_forwarding", listener.EnhanceL7policy),
+		d.Set("sni_match_algo", listener.SniMatchAlgo),
+		d.Set("security_policy_id", listener.SecurityPolicy),
 	)
 
 	switch listeners.Protocol(listener.Protocol) {
@@ -355,6 +378,18 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	if d.HasChange("member_timeout") {
 		updateOpts.MemberTimeout = d.Get("member_timeout").(int)
+	}
+	// Unable to disable this for now
+	// https://jira.tsi-dev.otc-service.com/browse/BM-1640
+	// if d.HasChange("advanced_forwarding") {
+	// 	enhanceL7policy := d.Get("advanced_forwarding").(bool)
+	// 	updateOpts.EnhanceL7policy = &enhanceL7policy
+	// }
+	if d.HasChange("sni_match_algo") {
+		updateOpts.SniMatchAlgo = d.Get("sni_match_algo").(string)
+	}
+	if d.HasChange("security_policy_id") {
+		updateOpts.SecurityPolicy = d.Get("security_policy_id").(string)
 	}
 
 	log.Printf("[DEBUG] Updating listener %s with options: %#v", d.Id(), updateOpts)

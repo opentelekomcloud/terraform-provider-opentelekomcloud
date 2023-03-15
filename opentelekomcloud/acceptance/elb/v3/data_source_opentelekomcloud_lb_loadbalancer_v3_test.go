@@ -11,7 +11,7 @@ import (
 
 const dataLBName = "data.opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1"
 
-func TestLoadBalancerV3_basic(t *testing.T) {
+func TestDataSourceLoadBalancerV3_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -26,6 +26,7 @@ func TestLoadBalancerV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(dataLBName, "router_id"),
 					resource.TestCheckResourceAttr(dataLBName, "availability_zones.#", "1"),
 					resource.TestCheckResourceAttr(dataLBName, "name", "loadbalancer_1"),
+					resource.TestCheckResourceAttr(dataLBName, "deletion_protection", "false"),
 				),
 			},
 			{
@@ -35,6 +36,7 @@ func TestLoadBalancerV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(dataLBName, "router_id"),
 					resource.TestCheckResourceAttr(dataLBName, "availability_zones.#", "1"),
 					resource.TestCheckResourceAttr(dataLBName, "name", "loadbalancer_1"),
+					resource.TestCheckResourceAttr(dataLBName, "deletion_protection", "false"),
 				),
 			},
 		},

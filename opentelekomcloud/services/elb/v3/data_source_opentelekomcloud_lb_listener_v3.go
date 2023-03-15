@@ -139,6 +139,18 @@ func DataSourceListenerV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"advanced_forwarding": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"sni_match_algo": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"security_policy_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }

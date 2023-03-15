@@ -91,6 +91,16 @@ The following arguments are supported:
 
 * `tags` - (Optional) Tags key/value pairs to associate with the loadbalancer listener.
 
+* `advanced_forwarding` - (Optional) Specifies whether to enable advanced forwarding.
+  If advanced forwarding is enabled, more flexible forwarding policies and rules are supported.
+  The value can be `true` (enable advanced forwarding) or `false` (disable advanced forwarding),
+  and the default value is `false`. Changing this creates a new Listener.
+
+* `sni_match_algo` - (Optional) Specifies how wildcard domain name matches with the SNI certificates
+  used by the listener.
+
+* `security_policy_id` - (Optional) Specifies the ID of the custom security policy.
+
 ## Attributes Reference
 
 In addition, the following attributes are exported:

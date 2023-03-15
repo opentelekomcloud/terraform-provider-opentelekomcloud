@@ -177,6 +177,10 @@ The `public_ip` block supports:
 * `bandwidth_share_type` - (Optional) Bandwidth sharing type. Possible values are: `PER`, `WHOLE`.
   Required when creating a new EIP.
 
+* `deletion_protection` - (Optional) Specifies whether to enable deletion protection for the load balancer.
+  `true`: Enable deletion protection.
+  `false` (default): Disable deletion protection.
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:

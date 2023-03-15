@@ -184,6 +184,11 @@ func ResourceLoadBalancerV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"deletion_protection": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -220,19 +225,21 @@ func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, m
 
 	adminStateUp := d.Get("admin_state_up").(bool)
 	ipTargetEnable := d.Get("ip_target_enable").(bool)
+	deletionProtection := d.Get("deletion_protection").(bool)
 	createOpts := loadbalancers.CreateOpts{
-		Name:                 d.Get("name").(string),
-		Description:          d.Get("description").(string),
-		VipAddress:           d.Get("vip_address").(string),
-		VipSubnetCidrID:      d.Get("subnet_id").(string),
-		L4Flavor:             d.Get("l4_flavor").(string),
-		VpcID:                d.Get("router_id").(string),
-		AvailabilityZoneList: common.ExpandToStringSlice(d.Get("availability_zones").(*schema.Set).List()),
-		Tags:                 common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
-		AdminStateUp:         &adminStateUp,
-		L7Flavor:             d.Get("l7_flavor").(string),
-		ElbSubnetIDs:         common.ExpandToStringSlice(d.Get("network_ids").(*schema.Set).List()),
-		IpTargetEnable:       &ipTargetEnable,
+		Name:                     d.Get("name").(string),
+		Description:              d.Get("description").(string),
+		VipAddress:               d.Get("vip_address").(string),
+		VipSubnetCidrID:          d.Get("subnet_id").(string),
+		L4Flavor:                 d.Get("l4_flavor").(string),
+		VpcID:                    d.Get("router_id").(string),
+		AvailabilityZoneList:     common.ExpandToStringSlice(d.Get("availability_zones").(*schema.Set).List()),
+		Tags:                     common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
+		AdminStateUp:             &adminStateUp,
+		L7Flavor:                 d.Get("l7_flavor").(string),
+		ElbSubnetIDs:             common.ExpandToStringSlice(d.Get("network_ids").(*schema.Set).List()),
+		IpTargetEnable:           &ipTargetEnable,
+		DeletionProtectionEnable: &deletionProtection,
 	}
 
 	// currently API supports only a single EIP
@@ -315,6 +322,10 @@ func resourceLoadBalancerV3Update(ctx context.Context, d *schema.ResourceData, m
 		ipTargetEnable := d.Get("ip_target_enable").(bool)
 		updateOpts.IpTargetEnable = &ipTargetEnable
 	}
+	if d.HasChange("deletion_protection") {
+		deletionProtection := d.Get("deletion_protection").(bool)
+		updateOpts.DeletionProtectionEnable = &deletionProtection
+	}
 
 	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
 	_, err = loadbalancers.Update(client, d.Id(), updateOpts).Extract()
@@ -385,6 +396,7 @@ func setLoadBalancerFields(d *schema.ResourceData, meta interface{}, lb *loadbal
 		d.Set("tags", tagMap),
 		d.Set("created_at", lb.CreatedAt),
 		d.Set("updated_at", lb.UpdatedAt),
+		d.Set("deletion_protection", lb.DeletionProtectionEnable),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {

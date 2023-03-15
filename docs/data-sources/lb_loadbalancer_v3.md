@@ -65,3 +65,5 @@ In addition, the following attributes are exported:
 * `created_at` - The time the LoadBalancer was created.
 
 * `updated_at` - The time the LoadBalancer was last updated.
+
+* `deletion_protection` - Specifies whether to enable deletion protection for the load balancer.
