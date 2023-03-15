@@ -83,7 +83,7 @@ func TestAccLBV3LoadBalancer_import(t *testing.T) {
 		CheckDestroy:      testAccCheckLBV3LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV3LoadBalancerConfigBasic,
+				Config: testAccLBV3LoadBalancerConfigImport,
 			},
 			{
 				ResourceName:            resourceLBName,
@@ -159,7 +159,7 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   availability_zones = ["%s"]
 
   public_ip {
-    ip_type              = "5_gray"
+    ip_type              = "5_bgp"
     bandwidth_name       = "lb_band"
     bandwidth_size       = 10
     bandwidth_share_type = "PER"
@@ -185,7 +185,7 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   availability_zones = ["%s"]
 
   public_ip {
-    ip_type              = "5_gray"
+    ip_type              = "5_bgp"
     bandwidth_name       = "lb_band"
     bandwidth_size       = 10
     bandwidth_share_type = "PER"
@@ -211,7 +211,7 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   availability_zones = ["%s"]
 
   public_ip {
-    ip_type              = "5_gray"
+    ip_type              = "5_bgp"
     bandwidth_name       = "lb_band"
     bandwidth_size       = 10
     bandwidth_share_type = "PER"
@@ -231,5 +231,29 @@ resource "opentelekomcloud_vpc_bandwidth_v2" "bw" {
 resource "opentelekomcloud_vpc_bandwidth_associate_v2" "associate" {
   bandwidth    = opentelekomcloud_vpc_bandwidth_v2.bw.id
   floating_ips = [opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.public_ip.0.id]
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3LoadBalancerConfigImport = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name        = "loadbalancer_1"
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+
+  public_ip {
+    ip_type              = "5_bgp"
+    bandwidth_name       = "lb_band"
+    bandwidth_size       = 10
+    bandwidth_share_type = "PER"
+  }
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
