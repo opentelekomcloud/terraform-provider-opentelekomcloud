@@ -166,7 +166,9 @@ The `public_ip` block supports:
   Required when creating a new EIP.
 
 ->
-  In `eu-de` region the value can only be `5_gray`.
+  In `eu-de` region the value can be `5_gray`, `5_bgp` or `5_mailbgp`.
+  In `eu-nl` region the value can only be `5_bgp` and `5_mailbgp`.
+  In `eu-ch2` region the value can only be `5_bgp`.
 
 * `bandwidth_name` - (Optional) Bandwidth name. Required when creating a new EIP.
 
