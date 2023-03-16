@@ -162,7 +162,7 @@ The `public_ip` block supports:
 
 * `id` - (Optional) ID of an existing elastic IP. Required when using existing EIP.
 
-* `ip_type` - (Optional) Elastic IP type. The value can be `5_gray` and `5_mailbgp`.
+* `ip_type` - (Optional) Elastic IP type. The value can be `5_gray`, `5_bgp` and `5_mailbgp`.
   Required when creating a new EIP.
 
 ->
