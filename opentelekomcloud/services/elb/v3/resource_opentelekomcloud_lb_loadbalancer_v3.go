@@ -374,7 +374,9 @@ func setLoadBalancerFields(d *schema.ResourceData, meta interface{}, lb *loadbal
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		info["_managed"] = d.Get("public_ip.0._managed")
+		if v, ok := d.GetOk("public_ip.0._managed"); ok {
+			info["_managed"] = v
+		}
 		publicIpInfo[0] = info
 	}
 	tagMap := common.TagsToMap(lb.Tags)
