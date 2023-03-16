@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ELB]** Fix setting `_managed` field for manually created resources in ``data/opentelekomcloud_lb_loadbalancer_v3`` (`#2116 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2116>`_)
