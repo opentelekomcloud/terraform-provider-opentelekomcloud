@@ -186,7 +186,7 @@ func resourceImsDataImageV2Create(ctx context.Context, d *schema.ResourceData, m
 			tagmap := d.Get("tags").(map[string]interface{})
 			if len(tagmap) > 0 {
 				log.Printf("[DEBUG] Setting tags: %v", tagmap)
-				err = setTagForImage(d, meta, entity.Entities.ImageId, tagmap)
+				err = setTagForImage(d, meta, entity.Entities.SubJobsResult[0].Entities.ImageId, tagmap)
 				if err != nil {
 					return fmterr.Errorf("error setting OpenTelekomCloud tags of image:%s", err)
 				}

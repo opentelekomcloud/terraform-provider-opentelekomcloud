@@ -256,10 +256,11 @@ func resourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf("error creating OpenTelekomCloud image client: %s", err)
 	}
 
-	img, err := images.Get(imageClient, d.Id())
+	imgs, err := ims.ListImages(imageClient, ims.ListImagesOpts{Id: d.Id()})
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "image")
 	}
+	img := imgs[0]
 
 	log.Printf("[DEBUG] Retrieved Image %s: %#v", d.Id(), img)
 
@@ -472,10 +473,11 @@ func resourceImagesImageV2File(d *schema.ResourceData) (string, error) {
 
 func resourceImagesImageV2RefreshFunc(client *golangsdk.ServiceClient, id string, _ int64, _ string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		img, err := images.Get(client, id)
+		imgs, err := ims.ListImages(client, ims.ListImagesOpts{Id: id})
 		if err != nil {
 			return nil, "", err
 		}
+		img := imgs[0]
 		log.Printf("[DEBUG] OpenTelekomCloud image status is: %s", img.Status)
 
 		// Huawei provider doesn't have this set initially.

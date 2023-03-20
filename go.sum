@@ -211,6 +211,16 @@ github.com/opentelekomcloud/gophertelekomcloud v0.5.29-0.20230301210115-a8f7c82e
 github.com/opentelekomcloud/gophertelekomcloud v0.5.29-0.20230301210115-a8f7c82ec097/go.mod h1:9Deb3q2gJvq5dExV+aX+iO+G+mD9Zr9uFt+YY9ONmq0=
 github.com/opentelekomcloud/gophertelekomcloud v0.5.29-0.20230306115528-df2a7454ae23 h1:im2rtmramC0YF6FOUl0y60vLTyK+wCx5VgWVrzu6q7U=
 github.com/opentelekomcloud/gophertelekomcloud v0.5.29-0.20230306115528-df2a7454ae23/go.mod h1:9Deb3q2gJvq5dExV+aX+iO+G+mD9Zr9uFt+YY9ONmq0=
+github.com/opentelekomcloud/gophertelekomcloud v0.5.29-0.20230320133336-67f0caef1d13 h1:Ls16R7VcMVYdRWDrE49UJglPg/IoKu2A5eaTxkkWiTQ=
+github.com/opentelekomcloud/gophertelekomcloud v0.5.29-0.20230320133336-67f0caef1d13/go.mod h1:9Deb3q2gJvq5dExV+aX+iO+G+mD9Zr9uFt+YY9ONmq0=
+github.com/opentelekomcloud/gophertelekomcloud v0.5.29-0.20230320140228-d769260c620c h1:io1/qHJufeuR6hwmX2mHTjvFPXsQqF6ZtwsQ6mYc8fE=
+github.com/opentelekomcloud/gophertelekomcloud v0.5.29-0.20230320140228-d769260c620c/go.mod h1:9Deb3q2gJvq5dExV+aX+iO+G+mD9Zr9uFt+YY9ONmq0=
+github.com/opentelekomcloud/gophertelekomcloud v0.5.29-0.20230320141437-88cbca6ba6df h1:PH6gfhKAJrqAnsgm6j7eJrTZnaeJs5GXG4wXJXMrytE=
+github.com/opentelekomcloud/gophertelekomcloud v0.5.29-0.20230320141437-88cbca6ba6df/go.mod h1:9Deb3q2gJvq5dExV+aX+iO+G+mD9Zr9uFt+YY9ONmq0=
+github.com/opentelekomcloud/gophertelekomcloud v0.5.29-0.20230320142235-9a7ae73e1f69 h1:X9fv6jvVdwhNsA3HLGjS/CCXMyRE5slzFSNiMCVbOUY=
+github.com/opentelekomcloud/gophertelekomcloud v0.5.29-0.20230320142235-9a7ae73e1f69/go.mod h1:9Deb3q2gJvq5dExV+aX+iO+G+mD9Zr9uFt+YY9ONmq0=
+github.com/opentelekomcloud/gophertelekomcloud v0.5.29-0.20230320144239-53bc060d9295 h1:ETkW5qmsauJ6jWvL+mFR4BLyIrQZTwSfaCDfW/zaj4g=
+github.com/opentelekomcloud/gophertelekomcloud v0.5.29-0.20230320144239-53bc060d9295/go.mod h1:9Deb3q2gJvq5dExV+aX+iO+G+mD9Zr9uFt+YY9ONmq0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

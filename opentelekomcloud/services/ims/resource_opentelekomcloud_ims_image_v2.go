@@ -11,9 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/image/v2/images"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v1/others"
-	ims "github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
 
 	tagCommon "github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/tags"
@@ -176,7 +175,7 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	switch {
 	case common.HasFilledOpt(d, "instance_id"):
-		createOpts := ims.CreateImageFromECSOpts{
+		createOpts := images.CreateImageFromECSOpts{
 			Name:        d.Get("name").(string),
 			Description: d.Get("description").(string),
 			InstanceId:  d.Get("instance_id").(string),
@@ -185,9 +184,9 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 			ImageTags:   imageTags,
 		}
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
-		jobId, err = ims.CreateImageFromECS(client, createOpts)
+		jobId, err = images.CreateImageFromECS(client, createOpts)
 	case common.HasFilledOpt(d, "volume_id"):
-		createOpts := ims.CreateImageFromDiskOpts{
+		createOpts := images.CreateImageFromDiskOpts{
 			Name:        d.Get("name").(string),
 			Description: d.Get("description").(string),
 			VolumeId:    d.Get("volume_id").(string),
@@ -198,13 +197,13 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 			ImageTags:   imageTags,
 		}
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
-		jobId, err = ims.CreateImageFromDisk(client, createOpts)
+		jobId, err = images.CreateImageFromDisk(client, createOpts)
 	case common.HasFilledOpt(d, "image_url"):
 		if !common.HasFilledOpt(d, "min_disk") {
 			return fmterr.Errorf("error creating OpenTelekomCloud IMS: 'min_disk' must be specified")
 		}
 
-		createOpts := ims.CreateImageFromOBSOpts{
+		createOpts := images.CreateImageFromOBSOpts{
 			Name:        d.Get("name").(string),
 			Description: d.Get("description").(string),
 			ImageUrl:    d.Get("image_url").(string),
@@ -218,7 +217,7 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 			ImageTags:   imageTags,
 		}
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
-		jobId, err = ims.CreateImageFromOBS(client, createOpts)
+		jobId, err = images.CreateImageFromOBS(client, createOpts)
 	}
 
 	if err != nil {
@@ -244,14 +243,14 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceImsImageV2Read(ctx, d, meta)
 }
 
-func GetCloudImage(client *golangsdk.ServiceClient, id string) (*ims.ImageInfo, error) {
-	img, err := images.Get(client, id)
+func GetCloudImage(client *golangsdk.ServiceClient, id string) (*images.ImageInfo, error) {
+	imgs, err := images.ListImages(client, images.ListImagesOpts{Id: id})
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve images: %s", err)
 	}
-
+	img := imgs[0]
 	log.Printf("[DEBUG] Retrieved Image %s: %#v", id, img)
-	return img, nil
+	return &img, nil
 }
 
 func resourceImsImageV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -331,8 +330,8 @@ func resourceImsImageV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if d.HasChange("name") {
-		updateOpts := make([]ims.UpdateImageOpts, 0)
-		v := ims.UpdateImageOpts{
+		updateOpts := make([]images.UpdateImageOpts, 0)
+		v := images.UpdateImageOpts{
 			Op:    "replace",
 			Path:  "/name",
 			Value: d.Get("name").(string),
@@ -340,7 +339,7 @@ func resourceImsImageV2Update(ctx context.Context, d *schema.ResourceData, meta 
 		updateOpts = append(updateOpts, v)
 
 		log.Printf("[DEBUG] Update Options: %#v", updateOpts)
-		_, err = ims.UpdateImage(client, d.Id(), updateOpts)
+		_, err = images.UpdateImage(client, d.Id(), updateOpts)
 		if err != nil {
 			return fmterr.Errorf("error updating image: %s", err)
 		}
