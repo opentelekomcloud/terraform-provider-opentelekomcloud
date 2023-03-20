@@ -8,11 +8,30 @@ Use this data source to get the ID of an available DCS AZ from OpenTelekomCloud.
 
 ## Example Usage
 
+### Query AZ `id` by providing `name` argument
+
 ```hcl
 data "opentelekomcloud_dcs_az_v1" "az1" {
-  name = "AZ1"
-  port = "8004"
-  code = "sa-chile-1a"
+  name = "eu-de-01"
+}
+```
+
+### Query AZ `id` by providing `port` and `code` arguments
+
+```hcl
+data "opentelekomcloud_dcs_az_v1" "az2" {
+  port = "8003"
+  code = "eu-de-02"
+}
+```
+
+### Query AZ `id` by providing all arguments
+
+```hcl
+data "opentelekomcloud_dcs_az_v1" "az2" {
+  name = "eu-de-02"
+  port = "8003"
+  code = "eu-de-02"
 }
 ```
 

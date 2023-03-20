@@ -51,6 +51,40 @@ func TestAccLBV3Rule_basic(t *testing.T) {
 	})
 }
 
+func TestAccLBV3Rule_condition(t *testing.T) {
+	var rule rules.ForwardingRule
+
+	t.Parallel()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LbPool, Count: 1},
+		{Q: quotas.LbPolicy, Count: 1},
+		{Q: quotas.LoadBalancer, Count: 1},
+		{Q: quotas.LbListener, Count: 1},
+	}
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV3RuleDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV3RuleConfigCondition,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3RuleExists(resourceRuleName, &rule),
+					resource.TestCheckResourceAttr(resourceRuleName, "conditions.0.value", "/"),
+				),
+			},
+			{
+				Config: testAccLBV3RuleConfigConditionUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRuleName, "conditions.0.value", "/home"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccLBRuleV3_import(t *testing.T) {
 	t.Parallel()
 	qts := []*quotas.ExpectedQuota{
@@ -206,5 +240,90 @@ resource "opentelekomcloud_lb_rule_v3" "this" {
   compare_type = "REGEX"
   value        = "^.*$"
   policy_id    = opentelekomcloud_lb_policy_v3.this.id
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3RuleConfigCondition = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "this" {
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+}
+
+resource "opentelekomcloud_lb_listener_v3" "this" {
+  loadbalancer_id     = opentelekomcloud_lb_loadbalancer_v3.this.id
+  protocol            = "HTTP"
+  protocol_port       = 8080
+  advanced_forwarding = true
+}
+
+resource "opentelekomcloud_lb_pool_v3" "this" {
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.this.id
+  lb_algorithm    = "ROUND_ROBIN"
+  protocol        = "HTTP"
+}
+
+resource "opentelekomcloud_lb_policy_v3" "this" {
+  action           = "REDIRECT_TO_POOL"
+  listener_id      = opentelekomcloud_lb_listener_v3.this.id
+  redirect_pool_id = opentelekomcloud_lb_pool_v3.this.id
+  position         = 37
+}
+
+resource "opentelekomcloud_lb_rule_v3" "this" {
+  type         = "PATH"
+  compare_type = "EQUAL_TO"
+  value        = "/test"
+  policy_id    = opentelekomcloud_lb_policy_v3.this.id
+  conditions {
+    value = "/"
+  }
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3RuleConfigConditionUpdate = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "this" {
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+}
+
+resource "opentelekomcloud_lb_listener_v3" "this" {
+  loadbalancer_id     = opentelekomcloud_lb_loadbalancer_v3.this.id
+  protocol            = "HTTP"
+  protocol_port       = 8080
+  advanced_forwarding = true
+}
+
+resource "opentelekomcloud_lb_pool_v3" "this" {
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.this.id
+  lb_algorithm    = "ROUND_ROBIN"
+  protocol        = "HTTP"
+}
+
+resource "opentelekomcloud_lb_policy_v3" "this" {
+  name             = "policy_updated"
+  description      = "some interesting description"
+  action           = "REDIRECT_TO_POOL"
+  listener_id      = opentelekomcloud_lb_listener_v3.this.id
+  redirect_pool_id = opentelekomcloud_lb_pool_v3.this.id
+  position         = 37
+}
+
+resource "opentelekomcloud_lb_rule_v3" "this" {
+  type         = "PATH"
+  compare_type = "EQUAL_TO"
+  value        = "/test"
+  policy_id    = opentelekomcloud_lb_policy_v3.this.id
+
+  conditions {
+    value = "/home"
+  }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

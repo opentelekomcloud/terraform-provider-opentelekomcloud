@@ -162,11 +162,13 @@ The `public_ip` block supports:
 
 * `id` - (Optional) ID of an existing elastic IP. Required when using existing EIP.
 
-* `ip_type` - (Optional) Elastic IP type. The value can be `5_gray` and `5_mailbgp`.
+* `ip_type` - (Optional) Elastic IP type. The value can be `5_gray`, `5_bgp` and `5_mailbgp`.
   Required when creating a new EIP.
 
 ->
-  In `eu-de` region the value can only be `5_gray`.
+  In `eu-de` region the value can be `5_gray`, `5_bgp` or `5_mailbgp`.
+  In `eu-nl` region the value can only be `5_bgp` and `5_mailbgp`.
+  In `eu-ch2` region the value can only be `5_bgp`.
 
 * `bandwidth_name` - (Optional) Bandwidth name. Required when creating a new EIP.
 
@@ -176,6 +178,10 @@ The `public_ip` block supports:
 
 * `bandwidth_share_type` - (Optional) Bandwidth sharing type. Possible values are: `PER`, `WHOLE`.
   Required when creating a new EIP.
+
+* `deletion_protection` - (Optional) Specifies whether to enable deletion protection for the load balancer.
+  `true`: Enable deletion protection.
+  `false` (default): Disable deletion protection.
 
 ## Attributes Reference
 

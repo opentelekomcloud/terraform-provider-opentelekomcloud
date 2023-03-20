@@ -113,6 +113,21 @@ func ResourceLBPoolV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"member_deletion_protection": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"vpc_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -125,15 +140,18 @@ func resourceLBPoolV3Create(ctx context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		return fmterr.Errorf(ErrCreateClient, err)
 	}
-
+	deletionProtection := d.Get("member_deletion_protection").(bool)
 	opts := pools.CreateOpts{
-		LBMethod:       d.Get("lb_algorithm").(string),
-		Protocol:       d.Get("protocol").(string),
-		LoadbalancerID: d.Get("loadbalancer_id").(string),
-		ListenerID:     d.Get("listener_id").(string),
-		ProjectID:      d.Get("project_id").(string),
-		Name:           d.Get("name").(string),
-		Description:    d.Get("description").(string),
+		LBMethod:                 d.Get("lb_algorithm").(string),
+		Protocol:                 d.Get("protocol").(string),
+		LoadbalancerID:           d.Get("loadbalancer_id").(string),
+		ListenerID:               d.Get("listener_id").(string),
+		ProjectID:                d.Get("project_id").(string),
+		Name:                     d.Get("name").(string),
+		Description:              d.Get("description").(string),
+		DeletionProtectionEnable: &deletionProtection,
+		Type:                     d.Get("type").(string),
+		VpcId:                    d.Get("vpc_id").(string),
 	}
 
 	if d.Get("session_persistence.#").(int) > 0 {
@@ -173,6 +191,9 @@ func resourceLBPoolV3Read(ctx context.Context, d *schema.ResourceData, meta inte
 		d.Set("protocol", pool.Protocol),
 		d.Set("session_persistence", expandPersistence(pool.Persistence)),
 		d.Set("ip_version", pool.IpVersion),
+		d.Set("member_deletion_protection", pool.DeletionProtectionEnable),
+		d.Set("type", pool.Type),
+		d.Set("vpc_id", pool.VpcId),
 	)
 	if len(pool.Loadbalancers) > 0 {
 		mErr = multierror.Append(mErr, d.Set("loadbalancer_id", pool.Loadbalancers[0].ID))
@@ -232,6 +253,17 @@ func resourceLBPoolV3Update(ctx context.Context, d *schema.ResourceData, meta in
 		persistMap := d.Get("session_persistence.0").(map[string]interface{})
 		opts.Persistence = mapToPersistence(persistMap)
 	}
+	if d.HasChange("member_deletion_protection") {
+		memberDeletionProtection := d.Get("member_deletion_protection").(bool)
+		opts.DeletionProtectionEnable = &memberDeletionProtection
+	}
+	// https://jira.tsi-dev.otc-service.com/browse/BM-1642
+	// if d.HasChange("type") {
+	// 	opts.Type = d.Get("type").(string)
+	// }
+	// if d.HasChange("vpc_id") {
+	// 	opts.VpcId = d.Get("vpc_id").(string)
+	// }
 
 	_, err = pools.Update(client, d.Id(), opts).Extract()
 	if err != nil {

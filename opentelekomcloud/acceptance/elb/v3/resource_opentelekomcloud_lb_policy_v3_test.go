@@ -49,6 +49,86 @@ func TestAccLBV3Policy_basic(t *testing.T) {
 	})
 }
 
+func TestAccLBV3Policy_fixedResponse(t *testing.T) {
+	var policy policies.Policy
+
+	t.Parallel()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LbPool, Count: 1},
+		{Q: quotas.LbPolicy, Count: 1},
+		{Q: quotas.LoadBalancer, Count: 1},
+		{Q: quotas.LbListener, Count: 1},
+	}
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV3PolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV3PolicyConfigFixedResponse,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3PolicyExists(resourcePolicyName, &policy),
+					resource.TestCheckResourceAttr(resourcePolicyName, "priority", "10"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "fixed_response_config.0.status_code", "200"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "fixed_response_config.0.content_type", "text/plain"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "fixed_response_config.0.message_body", "Fixed Response"),
+				),
+			},
+			{
+				Config: testAccLBV3PolicyConfigFixedResponseUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourcePolicyName, "name", "policy_updated"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "priority", "11"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "fixed_response_config.0.status_code", "202"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "fixed_response_config.0.content_type", "text/plain"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "fixed_response_config.0.message_body", "Fixed Response update"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccLBV3Policy_redirectUrl(t *testing.T) {
+	var policy policies.Policy
+
+	t.Parallel()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LbPool, Count: 1},
+		{Q: quotas.LbPolicy, Count: 1},
+		{Q: quotas.LoadBalancer, Count: 1},
+		{Q: quotas.LbListener, Count: 1},
+	}
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV3PolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV3PolicyConfigRedirectUrl,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3PolicyExists(resourcePolicyName, &policy),
+					resource.TestCheckResourceAttr(resourcePolicyName, "redirect_url", "https://www.google.com:443"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "redirect_url_config.0.status_code", "301"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "redirect_url_config.0.query", "name=my_name"),
+				),
+			},
+			{
+				Config: testAccLBV3PolicyConfigRedirectUrlUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourcePolicyName, "name", "policy_updated"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "redirect_url", "https://www.google.com:443"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "redirect_url_config.0.status_code", "308"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "redirect_url_config.0.query", "name=my_name_updated"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccLBPolicyV3_import(t *testing.T) {
 	t.Parallel()
 	qts := []*quotas.ExpectedQuota{
@@ -193,6 +273,158 @@ resource "opentelekomcloud_lb_policy_v3" "this" {
     type         = "HOST_NAME"
     compare_type = "EQUAL_TO"
     value        = "abc.com"
+  }
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3PolicyConfigFixedResponse = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "this" {
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+}
+
+resource "opentelekomcloud_lb_listener_v3" "this" {
+  loadbalancer_id     = opentelekomcloud_lb_loadbalancer_v3.this.id
+  protocol            = "HTTP"
+  protocol_port       = 8080
+  advanced_forwarding = true
+}
+
+resource "opentelekomcloud_lb_pool_v3" "this" {
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.this.id
+  lb_algorithm    = "ROUND_ROBIN"
+  protocol        = "HTTP"
+}
+
+resource "opentelekomcloud_lb_policy_v3" "this" {
+  action      = "FIXED_RESPONSE"
+  listener_id = opentelekomcloud_lb_listener_v3.this.id
+  position    = 37
+  priority    = 10
+
+  fixed_response_config {
+    status_code  = "200"
+    content_type = "text/plain"
+    message_body = "Fixed Response"
+  }
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3PolicyConfigFixedResponseUpdate = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "this" {
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+}
+
+resource "opentelekomcloud_lb_listener_v3" "this" {
+  loadbalancer_id     = opentelekomcloud_lb_loadbalancer_v3.this.id
+  protocol            = "HTTP"
+  protocol_port       = 8080
+  advanced_forwarding = true
+}
+
+resource "opentelekomcloud_lb_pool_v3" "this" {
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.this.id
+  lb_algorithm    = "ROUND_ROBIN"
+  protocol        = "HTTP"
+}
+
+resource "opentelekomcloud_lb_policy_v3" "this" {
+  name        = "policy_updated"
+  description = "some interesting description"
+  action      = "FIXED_RESPONSE"
+  listener_id = opentelekomcloud_lb_listener_v3.this.id
+  position    = 37
+  priority    = 11
+
+  fixed_response_config {
+    status_code  = "202"
+    content_type = "text/plain"
+    message_body = "Fixed Response update"
+  }
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3PolicyConfigRedirectUrl = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "this" {
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+}
+
+resource "opentelekomcloud_lb_listener_v3" "this" {
+  loadbalancer_id     = opentelekomcloud_lb_loadbalancer_v3.this.id
+  protocol            = "HTTP"
+  protocol_port       = 8080
+  advanced_forwarding = true
+}
+
+resource "opentelekomcloud_lb_pool_v3" "this" {
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.this.id
+  lb_algorithm    = "ROUND_ROBIN"
+  protocol        = "HTTP"
+}
+
+resource "opentelekomcloud_lb_policy_v3" "this" {
+  action      = "REDIRECT_TO_URL"
+  listener_id = opentelekomcloud_lb_listener_v3.this.id
+  position    = 37
+  priority    = 10
+
+  redirect_url = "https://www.google.com:443"
+
+  redirect_url_config {
+    status_code = "301"
+    query       = "name=my_name"
+  }
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3PolicyConfigRedirectUrlUpdate = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "this" {
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+}
+
+resource "opentelekomcloud_lb_listener_v3" "this" {
+  loadbalancer_id     = opentelekomcloud_lb_loadbalancer_v3.this.id
+  protocol            = "HTTP"
+  protocol_port       = 8080
+  advanced_forwarding = true
+}
+
+resource "opentelekomcloud_lb_pool_v3" "this" {
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.this.id
+  lb_algorithm    = "ROUND_ROBIN"
+  protocol        = "HTTP"
+}
+
+resource "opentelekomcloud_lb_policy_v3" "this" {
+  name        = "policy_updated"
+  description = "some interesting description"
+  action      = "REDIRECT_TO_URL"
+  listener_id = opentelekomcloud_lb_listener_v3.this.id
+  position    = 37
+  priority    = 11
+
+  redirect_url_config {
+    status_code = "308"
+    query       = "name=my_name_updated"
   }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

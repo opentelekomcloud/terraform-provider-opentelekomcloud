@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[ELB]** add new `ip_type` and updated doc for ``resource/opentelekomcloud_lb_loadbalancer_v2`` (`#2115 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2115>`_)

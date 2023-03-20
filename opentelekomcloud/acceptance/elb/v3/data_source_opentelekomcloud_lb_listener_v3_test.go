@@ -30,6 +30,9 @@ func TestDataSourceListenerV3_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(dataSourceListenerName, "protocol_port", "80"),
 					resource.TestCheckResourceAttrSet(dataSourceListenerName, "loadbalancer_id"),
+					resource.TestCheckResourceAttr(dataSourceListenerName, "advanced_forwarding", "false"),
+					resource.TestCheckResourceAttr(dataSourceListenerName, "sni_match_algo", ""),
+					resource.TestCheckResourceAttr(dataSourceListenerName, "security_policy_id", ""),
 				),
 			},
 		},
