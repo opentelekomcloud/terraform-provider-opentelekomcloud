@@ -245,11 +245,8 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 
 func GetCloudImage(client *golangsdk.ServiceClient, id string) (*images.ImageInfo, error) {
 	imgs, err := images.ListImages(client, images.ListImagesOpts{Id: id})
-	if err != nil {
+	if err != nil || len(imgs) < 1 {
 		return nil, fmt.Errorf("unable to retrieve images: %s", err)
-	}
-	if len(imgs) < 1 {
-		return nil, nil
 	}
 	img := imgs[0]
 	log.Printf("[DEBUG] Retrieved Image %s: %#v", id, img)
