@@ -248,6 +248,9 @@ func GetCloudImage(client *golangsdk.ServiceClient, id string) (*images.ImageInf
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve images: %s", err)
 	}
+	if len(imgs) < 1 {
+		return nil, nil
+	}
 	img := imgs[0]
 	log.Printf("[DEBUG] Retrieved Image %s: %#v", id, img)
 	return &img, nil
