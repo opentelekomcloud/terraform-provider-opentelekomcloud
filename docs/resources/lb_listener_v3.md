@@ -24,8 +24,8 @@ resource "opentelekomcloud_lb_listener_v3" "listener_1" {
 
 ```hcl
 resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
-  name                      = "group_2"
-  description               = "some interesting description 2"
+  name        = "group_2"
+  description = "some interesting description 2"
 
   ip_list {
     ip          = "192.168.10.11"
@@ -34,11 +34,11 @@ resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
 }
 
 resource "opentelekomcloud_lb_listener_v3" "listener_1" {
-  name                      = "listener_1"
-  description               = "some interesting description"
-  loadbalancer_id           = opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.id
-  protocol                  = "HTTP"
-  protocol_port             = 8080
+  name            = "listener_1"
+  description     = "some interesting description"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.id
+  protocol        = "HTTP"
+  protocol_port   = 8080
 
   advanced_forwarding = true
   sni_match_algo      = "wildcard"
