@@ -122,8 +122,8 @@ func testAccCheckLBV3IpGroupExists(n string, listener *ipgroups.IpGroup) resourc
 
 const testAccLBV3IpGroupConfigBasic = `
 resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
-  name                      = "group_1"
-  description               = "some interesting description"
+  name        = "group_1"
+  description = "some interesting description"
 
   ip_list {
     ip          = "192.168.10.10"
@@ -138,8 +138,8 @@ resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
 
 const testAccLBV3IpGroupConfigUpdate = `
 resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
-  name                      = "group_1"
-  description               = "description update"
+  name        = "group_1"
+  description = "description update"
 
   ip_list {
     ip          = "192.168.50.10"

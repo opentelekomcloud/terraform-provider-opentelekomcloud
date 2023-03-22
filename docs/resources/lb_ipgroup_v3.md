@@ -10,8 +10,8 @@ Manages a Dedicated Load Balancer IP address group resource within OpenTelekomCl
 
 ```hcl
 resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
-  name                      = "group_1"
-  description               = "group description"
+  name        = "group_1"
+  description = "group description"
 
   ip_list {
     ip          = "192.168.50.10"
