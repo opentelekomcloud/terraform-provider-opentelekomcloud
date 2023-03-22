@@ -375,7 +375,7 @@ resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
 
   ip_list {
     ip          = "192.168.10.10"
-	description = "first"
+    description = "first"
   }
 }
 
@@ -385,7 +385,7 @@ resource "opentelekomcloud_lb_ipgroup_v3" "group_2" {
 
   ip_list {
     ip          = "192.168.10.11"
-	description = "second"
+    description = "second"
   }
 }
 
@@ -427,7 +427,7 @@ resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
 
   ip_list {
     ip          = "192.168.10.10"
-	description = "first"
+    description = "first"
   }
 }
 
@@ -437,7 +437,7 @@ resource "opentelekomcloud_lb_ipgroup_v3" "group_2" {
 
   ip_list {
     ip          = "192.168.10.11"
-	description = "second"
+    description = "second"
   }
 }
 

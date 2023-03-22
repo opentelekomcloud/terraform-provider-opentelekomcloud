@@ -29,7 +29,7 @@ resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
 
   ip_list {
     ip          = "192.168.10.11"
-	description = "one"
+    description = "one"
   }
 }
 
