@@ -120,7 +120,7 @@ func testAccCheckLBV3IpGroupExists(n string, listener *ipgroups.IpGroup) resourc
 	}
 }
 
-var testAccLBV3IpGroupConfigBasic = fmt.Sprintf(`
+const testAccLBV3IpGroupConfigBasic = `
 resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
   name                      = "group_1"
   description               = "some interesting description"
@@ -134,9 +134,9 @@ resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
 	description = "second"
   }
 }
-`)
+`
 
-var testAccLBV3IpGroupConfigUpdate = fmt.Sprintf(`
+const testAccLBV3IpGroupConfigUpdate = `
 resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
   name                      = "group_1"
   description               = "description update"
@@ -154,4 +154,4 @@ resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
 	description = "three"
   }
 }
-`)
+`
