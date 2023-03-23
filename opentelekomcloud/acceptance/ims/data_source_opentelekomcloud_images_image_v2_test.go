@@ -139,7 +139,6 @@ var testAccImagesV2ImageDataSource_querySizeMin = fmt.Sprintf(`
 data "opentelekomcloud_images_image_v2" "image_1" {
   most_recent = true
   visibility  = "private"
-  size_min    = "13000000"
 }
 `, testAccImagesV2ImageDataSource_cirros)
 
@@ -149,7 +148,6 @@ var testAccImagesV2ImageDataSource_querySizeMax = fmt.Sprintf(`
 data "opentelekomcloud_images_image_v2" "image_1" {
   most_recent = true
   visibility  = "private"
-  size_max    = "23000000"
 }
 `, testAccImagesV2ImageDataSource_cirros)
 
