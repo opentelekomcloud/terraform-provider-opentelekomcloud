@@ -163,6 +163,33 @@ func TestAccLBV2Listener_SSLPassthrough(t *testing.T) {
 	})
 }
 
+func TestAccLBV3Listener_import(t *testing.T) {
+	resourceName := "opentelekomcloud_lb_listener_v2.listener_1"
+	t.Parallel()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LbCertificate, Count: 1},
+		{Q: quotas.LoadBalancer, Count: 1},
+		{Q: quotas.LbListener, Count: 1},
+	}
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV2ListenerConfigBasic,
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccCheckLBV2ListenerDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkingClient, err := config.ElbV2Client(env.OS_REGION_NAME)
