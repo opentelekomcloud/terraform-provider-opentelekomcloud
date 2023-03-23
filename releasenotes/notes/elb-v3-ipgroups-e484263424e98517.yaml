@@ -1,0 +1,8 @@
+---
+enhancements:
+  - |
+    **[ELB]** New resource ``resource/opentelekomcloud_lb_ipgroup_v3``
+    (`#2120 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2120>`_)
+  - |
+    **[ELB]** Add ``ip_group`` argument to ``resource/opentelekomcloud_lb_listener_v3``
+    (`#2120 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2120>`_)

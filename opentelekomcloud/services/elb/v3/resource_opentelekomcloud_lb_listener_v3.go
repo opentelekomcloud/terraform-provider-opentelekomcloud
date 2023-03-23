@@ -175,7 +175,43 @@ func ResourceListenerV3() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"ip_group": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"enable": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
+	}
+}
+func getIpGroup(d *schema.ResourceData) *listeners.IpGroup {
+	if d.Get("ip_group.#").(int) == 0 {
+		return nil
+	}
+	ipGroupRaw := d.Get("ip_group.0").(map[string]interface{})
+	enable := ipGroupRaw["enable"].(bool)
+	return &listeners.IpGroup{
+		IpGroupID: ipGroupRaw["id"].(string),
+		Enable:    &enable,
+		Type:      ipGroupRaw["type"].(string),
 	}
 }
 
@@ -228,6 +264,7 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		EnhanceL7policy:        &enhanceL7policy,
 		SniMatchAlgo:           d.Get("sni_match_algo").(string),
 		SecurityPolicy:         d.Get("security_policy_id").(string),
+		IpGroup:                getIpGroup(d),
 	}
 	switch protocol {
 	case listeners.ProtocolHTTPS:
@@ -279,6 +316,13 @@ func setLBListenerFields(d *schema.ResourceData, listener *listeners.Listener) d
 			"forwarded_host":     listener.InsertHeaders.ForwardedHost,
 		},
 	}
+	ipGroup := []map[string]interface{}{
+		{
+			"id":     listener.IpGroup.IpGroupID,
+			"enable": listener.IpGroup.Enable,
+			"type":   listener.IpGroup.Type,
+		},
+	}
 	mErr := multierror.Append(
 		d.Set("admin_state_up", listener.AdminStateUp),
 		d.Set("client_ca_tls_container_ref", listener.CAContainerRef),
@@ -302,6 +346,7 @@ func setLBListenerFields(d *schema.ResourceData, listener *listeners.Listener) d
 		d.Set("advanced_forwarding", listener.EnhanceL7policy),
 		d.Set("sni_match_algo", listener.SniMatchAlgo),
 		d.Set("security_policy_id", listener.SecurityPolicy),
+		d.Set("ip_group", ipGroup),
 	)
 
 	switch listeners.Protocol(listener.Protocol) {
@@ -390,6 +435,13 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	if d.HasChange("security_policy_id") {
 		updateOpts.SecurityPolicy = d.Get("security_policy_id").(string)
+	}
+	if d.HasChange("ip_group") {
+		ipGroupRaw := d.Get("ip_group.0").(map[string]interface{})
+		updateOpts.IpGroup = &listeners.IpGroupUpdate{
+			IpGroupId: ipGroupRaw["id"].(string),
+			Type:      ipGroupRaw["type"].(string),
+		}
 	}
 
 	log.Printf("[DEBUG] Updating listener %s with options: %#v", d.Id(), updateOpts)
