@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/image/v2/members"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/members"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
@@ -51,7 +51,7 @@ func ResourceImagesImageAccessV2ParseID(id string) (string, string, error) {
 
 func waitForImageRequestStatus(client *golangsdk.ServiceClient, imageID, memberID, status string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := members.GetMember(client, members.GetMemberOpts{
+		n, err := members.Get(client, members.MemberOpts{
 			ImageId:  imageID,
 			MemberId: memberID,
 		})

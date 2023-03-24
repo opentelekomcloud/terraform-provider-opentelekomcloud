@@ -79,7 +79,6 @@ func resourceImagesImageAccessV2Create(ctx context.Context, d *schema.ResourceDa
 	if err != nil {
 		return fmterr.Errorf("error requesting share for private image: %w", err)
 	}
-
 	state := &resource.StateChangeConf{
 		Target:  []string{"pending"},
 		Refresh: waitForImageRequestStatus(client, imageID, memberID, "pending"),

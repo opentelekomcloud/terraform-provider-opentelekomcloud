@@ -20,8 +20,9 @@ func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 	acceptResourceName := "opentelekomcloud_images_image_access_accept_v2.accept_1"
 	privateImageID := os.Getenv("OS_PRIVATE_IMAGE_ID")
 	shareProjectID := os.Getenv("OS_PROJECT_ID_2")
-	if privateImageID == "" || shareProjectID == "" {
-		t.Skip("OS_PRIVATE_IMAGE_ID or OS_PROJECT_ID_2 are empty, but test requires")
+	shareCloudID := os.Getenv("OS_CLOUD_2")
+	if privateImageID == "" || shareProjectID == "" || shareCloudID == "" {
+		t.Skip("OS_PRIVATE_IMAGE_ID or OS_PROJECT_ID_2 or OS_CLOUD_2 are empty, but test requires")
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -81,6 +82,8 @@ func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 func testAccImagesImageAccessAcceptV2Basic(privateImageID, projectToShare string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_images_image_access_v2" "access_1" {
+  provider = "opentelekomcloud"
+
   image_id  = "%[1]s"
   member_id = "%[2]s"
 }
@@ -88,7 +91,7 @@ resource "opentelekomcloud_images_image_access_v2" "access_1" {
 %[3]s
 
 resource "opentelekomcloud_images_image_access_accept_v2" "accept_1" {
-  provider = "%s"
+  provider = "%[4]s"
 
   depends_on = [opentelekomcloud_images_image_access_v2.access_1]
 
@@ -102,6 +105,8 @@ resource "opentelekomcloud_images_image_access_accept_v2" "accept_1" {
 func testAccImagesImageAccessAcceptV2Update(privateImageID, projectToShare string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_images_image_access_v2" "access_1" {
+  provider = "opentelekomcloud"
+
   image_id  = "%[1]s"
   member_id = "%[2]s"
 }
