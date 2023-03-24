@@ -79,12 +79,14 @@ In addition, the following attributes are exported:
 
 * `sni_container_refs` - Lists the IDs of SNI certificates (server certificates with domain names) used by the listener.
 
-* `advanced_forwarding` - (Optional) Specifies whether to enable advanced forwarding.
+* `advanced_forwarding` - Specifies whether to enable advanced forwarding.
 
-* `sni_match_algo` - (Optional) Specifies how wildcard domain name matches with the SNI certificates
+* `sni_match_algo` - Specifies how wildcard domain name matches with the SNI certificates
   used by the listener.
 
-* `security_policy_id` - (Optional) Specifies the ID of the custom security policy.
+* `security_policy_id` - Specifies the ID of the custom security policy.
+
+* `ip_group` - Specifies the IP address group associated with the listener.
 
 * `tags` - Tags key/value pairs to associate with the loadbalancer listener.
 
