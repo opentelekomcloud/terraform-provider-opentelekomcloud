@@ -2,7 +2,6 @@ package ims
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"regexp"
 	"sort"
@@ -49,6 +48,16 @@ func DataSourceImagesImageV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"size_min": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+			"size_max": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
 			"sort_key": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -74,20 +83,13 @@ func DataSourceImagesImageV2() *schema.Resource {
 				Default:  false,
 				ForceNew: true,
 			},
-			"properties": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				ForceNew: true,
-			},
 			"container_format": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"disk_format": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"min_disk_gb": {
 				Type:     schema.TypeInt,
@@ -99,8 +101,7 @@ func DataSourceImagesImageV2() *schema.Resource {
 			},
 			"protected": {
 				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"checksum": {
 				Type:     schema.TypeString,
@@ -116,13 +117,11 @@ func DataSourceImagesImageV2() *schema.Resource {
 			},
 			"created_at": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"updated_at": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"file": {
 				Type:     schema.TypeString,
@@ -140,137 +139,91 @@ func DataSourceImagesImageV2() *schema.Resource {
 			},
 			"image_type": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"is_registered": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"whole_image": {
 				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"system_cmk_id": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"os_bit": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"os_type": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"platform": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"support_disk_intensive": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"support_high_performance": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"support_kvm": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"support_kvm_gpu_type": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"support_kvm_infiniband": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"support_large_memory": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"support_xen": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"support_xen_gpu_type": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"support_xen_hana": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"id": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"limit": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
-			},
-			"marker": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"member_status": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"min_disk": {
 				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(int)
-					// from 1 to 1024
-					if value < 1 || value > 1024 {
-						errors = append(errors, fmt.Errorf(
-							"%q must be between 1 and 1024 GB, got: %d", k, value))
-					}
-					return
-				},
+				Computed: true,
 			},
 			"min_ram": {
 				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
-			},
-			"sort_dir": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"status": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"virtual_env_type": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 		},
 	}

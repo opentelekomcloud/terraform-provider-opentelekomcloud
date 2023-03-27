@@ -37,9 +37,6 @@ data "opentelekomcloud_images_image_v2" "latest-debian" {
 
 * `owner` - (Optional) The owner (UUID) of the image.
 
-* `properties` - (Optional) a map of key/value pairs to match an image with.
-  All specified properties must be matched.
-
 * `size_min` - (Optional) The minimum size (in bytes) of the image to return.
 
 * `size_max` - (Optional) The maximum size (in bytes) of the image to return.
