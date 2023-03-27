@@ -151,6 +151,26 @@ func DataSourceListenerV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"ip_group": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"enable": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
