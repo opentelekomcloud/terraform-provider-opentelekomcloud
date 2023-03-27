@@ -288,11 +288,11 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 		Visibility: d.Get("visibility").(string),
 		Owner:      d.Get("owner").(string),
 		Status:     "active",
-		// SizeMin:    int64(d.Get("size_min").(int)),
-		// SizeMax:    int64(d.Get("size_max").(int)),
-		SortKey: d.Get("sort_key").(string),
-		SortDir: d.Get("sort_direction").(string),
-		Tag:     d.Get("tag").(string),
+		SizeMin:    int64(d.Get("size_min").(int)),
+		SizeMax:    int64(d.Get("size_max").(int)),
+		SortKey:    d.Get("sort_key").(string),
+		SortDir:    d.Get("sort_direction").(string),
+		Tag:        d.Get("tag").(string),
 	}
 
 	log.Printf("[DEBUG] List Options: %#v", listOpts)
@@ -307,7 +307,7 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 	if nameRegex, ok := d.GetOk("name_regex"); ok {
 		r := regexp.MustCompile(nameRegex.(string))
 		for _, image := range ims {
-			if r.MatchString(img.Name) {
+			if r.MatchString(image.Name) {
 				filteredImages = append(filteredImages, image)
 			}
 		}
