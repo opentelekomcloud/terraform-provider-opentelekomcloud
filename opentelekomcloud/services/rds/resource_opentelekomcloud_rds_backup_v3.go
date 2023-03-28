@@ -30,7 +30,7 @@ func ResourceRdsBackupV3() *schema.Resource {
 			},
 			"backup_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"type": {
 				Type:     schema.TypeString,
@@ -43,7 +43,8 @@ func ResourceRdsBackupV3() *schema.Resource {
 			},
 			"name": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Required: true,
+				ForceNew: true,
 			},
 			"size": {
 				Type:     schema.TypeInt,
@@ -59,6 +60,12 @@ func ResourceRdsBackupV3() *schema.Resource {
 			},
 			"end_time": {
 				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 				Computed: true,
 			},
 			"databases": {
@@ -91,7 +98,7 @@ func resourceRDSv3BackupCreate(ctx context.Context, d *schema.ResourceData, meta
 		InstanceID:  d.Get("instance_id").(string),
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
-		Databases:   d.Get("databases").([]backups.BackupDatabase),
+		Databases:   resourceDatabaseExpand(d),
 	}
 
 	backup, err := backups.Create(client, opts)
@@ -158,4 +165,19 @@ func resourceRDSv3BackupRead(_ context.Context, d *schema.ResourceData, meta int
 		return fmterr.Errorf("error setting RDSv3 instance backup fields: %w", err)
 	}
 	return nil
+}
+
+func resourceDatabaseExpand(d *schema.ResourceData) []backups.BackupDatabase {
+	var backupsDatabases []backups.BackupDatabase
+	dbRaw := d.Get("databases").([]interface{})
+	log.Printf("[DEBUG] dbRaw: %+v", dbRaw)
+	for i := range dbRaw {
+		db := dbRaw[i].(map[string]interface{})
+		dbReq := backups.BackupDatabase{
+			Name: db["name"].(string),
+		}
+		backupsDatabases = append(backupsDatabases, dbReq)
+	}
+	log.Printf("[DEBUG] backupsDatabases: %+v", backupsDatabases)
+	return backupsDatabases
 }
