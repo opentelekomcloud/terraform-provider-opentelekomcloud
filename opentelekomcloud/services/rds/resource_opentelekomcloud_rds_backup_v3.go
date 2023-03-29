@@ -66,7 +66,6 @@ func ResourceRdsBackupV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Computed: true,
 			},
 			"databases": {
 				Type:     schema.TypeList,
@@ -144,7 +143,7 @@ func resourceRDSv3BackupRead(_ context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		return fmterr.Errorf("error listing backups: %w", err)
 	}
-	if len(backupList) < 1 {
+	if len(backupList) == 0 {
 		return common.DataSourceTooFewDiag
 	}
 	backup := backupList[0]
