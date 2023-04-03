@@ -146,3 +146,11 @@ This resource provides the following timeouts configuration options:
 * `create` - Default is 20 minutes.
 
 * `update` - Default is 30 minutes.
+
+## Import
+
+Backup can be imported using  `cluster_id`, e.g.
+
+```sh
+terraform import opentelekomcloud_css_cluster_v1.cluster 5c77b71c-5b35-4f50-8984-76387e42451a
+```

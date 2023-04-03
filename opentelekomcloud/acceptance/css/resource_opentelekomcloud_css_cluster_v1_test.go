@@ -140,6 +140,28 @@ func TestAccCssClusterV1_encrypted(t *testing.T) {
 	})
 }
 
+func TestAccCSSInstanceV1_importBasic(t *testing.T) {
+	var instanceName = fmt.Sprintf("css_%s", acctest.RandString(5))
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCssClusterV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCssClusterV1Basic(instanceName),
+			},
+			{
+				ResourceName:      resourceClusterName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"admin_pass",
+				},
+			},
+		},
+	})
+}
+
 func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.CssV1Client(env.OS_REGION_NAME)
