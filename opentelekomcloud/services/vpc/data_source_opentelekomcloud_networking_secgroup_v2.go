@@ -3,8 +3,10 @@ package vpc
 import (
 	"context"
 	"log"
+	"regexp"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/groups"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -32,6 +34,11 @@ func DataSourceNetworkingSecGroupV2() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsValidRegExp,
 			},
 			"tenant_id": {
 				Type:     schema.TypeString,
@@ -68,6 +75,23 @@ func dataSourceNetworkingSecGroupV2Read(_ context.Context, d *schema.ResourceDat
 	allSecGroups, err := groups.ExtractGroups(pages)
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve security groups: %s", err)
+	}
+
+	var filteredGroups []groups.SecGroup
+	if nameRegex, ok := d.GetOk("name_regex"); ok {
+		r := regexp.MustCompile(nameRegex.(string))
+		for _, group := range allSecGroups {
+			if r.MatchString(group.Name) {
+				filteredGroups = append(filteredGroups, group)
+			}
+		}
+		if len(filteredGroups) < 1 {
+			return fmterr.Errorf("no Security Group found by regex: %s", d.Get("name_regex"))
+		}
+		if len(filteredGroups) > 1 {
+			return fmterr.Errorf("more than one Security Group with regex: %s", d.Get("name_regex"))
+		}
+		allSecGroups = filteredGroups
 	}
 
 	if len(allSecGroups) < 1 {

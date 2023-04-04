@@ -20,7 +20,7 @@ func TestAccOpenTelekomCloudNetworkingSecGroupV2DataSource_basic(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceGroup,
+				Config: testAccNetworkingSecGroupV2DataSourceGroup,
 			},
 			{
 				Config: testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceBasic,
@@ -42,6 +42,27 @@ func TestAccOpenTelekomCloudNetworkingSecGroupV2DataSource_basic(t *testing.T) {
 	})
 }
 
+func TestAccOpenTelekomCloudNetworkingSecGroupV2DataSource_regex(t *testing.T) {
+	dataSourceName := "data.opentelekomcloud_networking_secgroup_v2.secgroup_1"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingSecGroupV2DataSourceGroup,
+			},
+			{
+				Config: testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceRegex,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingSecGroupV2DataSourceID(dataSourceName),
+					resource.TestCheckResourceAttr(dataSourceName, "name", "secgroup_1_ds"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkingSecGroupV2DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -57,7 +78,7 @@ func testAccCheckNetworkingSecGroupV2DataSourceID(n string) resource.TestCheckFu
 	}
 }
 
-const testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceGroup = `
+const testAccNetworkingSecGroupV2DataSourceGroup = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name        = "secgroup_1_ds"
   description = "My neutron security group"
@@ -70,7 +91,7 @@ var testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceBasic = fmt.Sprintf(`
 data "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name = opentelekomcloud_networking_secgroup_v2.secgroup_1.name
 }
-`, testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceGroup)
+`, testAccNetworkingSecGroupV2DataSourceGroup)
 
 var testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceSecGroupID = fmt.Sprintf(`
 %s
@@ -78,4 +99,12 @@ var testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceSecGroupID = fmt.Sprint
 data "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   secgroup_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 }
-`, testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceGroup)
+`, testAccNetworkingSecGroupV2DataSourceGroup)
+
+var testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceRegex = fmt.Sprintf(`
+%s
+
+data "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
+  name_regex  = "^secgroup_1.+"
+}
+`, testAccNetworkingSecGroupV2DataSourceGroup)
