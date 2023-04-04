@@ -3,12 +3,14 @@ package rds
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/backups"
+	backups "github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/backups"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -19,9 +21,15 @@ func ResourceRdsBackupV3() *schema.Resource {
 		CreateContext: resourceRDSv3BackupCreate,
 		ReadContext:   resourceRDSv3BackupRead,
 		DeleteContext: resourceRDSv3BackupDelete,
+
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(60 * time.Minute),
+		},
+
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -55,10 +63,6 @@ func ResourceRdsBackupV3() *schema.Resource {
 				Computed: true,
 			},
 			"begin_time": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"end_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -100,9 +104,40 @@ func resourceRDSv3BackupCreate(ctx context.Context, d *schema.ResourceData, meta
 		Databases:   resourceDatabaseExpand(d),
 	}
 
+	// check if rds instance exists
+	rds, err := instances.List(client, instances.ListOpts{
+		Id: opts.InstanceID,
+	})
+	if err != nil {
+		return fmterr.Errorf("error getting RDSv3 instance: %w", err)
+	}
+
+	// wait until rds instance is active
+	err = instances.WaitForStateAvailable(client, 120, opts.InstanceID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if len(rds.Instances) == 0 {
+		return fmterr.Errorf("RDSv3 instance not found")
+	}
+
 	backup, err := backups.Create(client, opts)
 	if err != nil {
 		fmterr.Errorf("error creating new RDSv3 backup: %w", err)
+	}
+
+	err = backups.WaitForBackup(client, backup.InstanceID, backup.ID, "COMPLETED")
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if backup == nil {
+		return diag.Errorf("backup not created")
+	}
+	// Check if backup.InstanceID and backup.ID are not empty
+	if backup.InstanceID == "" || backup.ID == "" {
+		return diag.Errorf("backup instance ID or backup ID is empty")
 	}
 
 	log.Printf("[DEBUG] RDSv3 backup created: %#v", backup)
@@ -135,8 +170,7 @@ func resourceRDSv3BackupRead(_ context.Context, d *schema.ResourceData, meta int
 
 	opts := backups.ListOpts{
 		InstanceID: d.Get("instance_id").(string),
-		BackupID:   d.Get("backup_id").(string),
-		BackupType: d.Get("type").(string),
+		BackupID:   d.Id(),
 	}
 
 	backupList, err := backups.List(client, opts)
@@ -150,15 +184,13 @@ func resourceRDSv3BackupRead(_ context.Context, d *schema.ResourceData, meta int
 
 	d.SetId(backup.ID)
 	mErr := multierror.Append(
+		d.Set("instance_id", backup.InstanceID),
 		d.Set("name", backup.Name),
+		d.Set("description", backup.Description),
+		d.Set("databases", expandDatabases(backup.Databases)),
 		d.Set("status", backup.Status),
 		d.Set("type", backup.Type),
-		d.Set("size", backup.Size),
 		d.Set("begin_time", backup.BeginTime),
-		d.Set("end_time", backup.EndTime),
-		d.Set("databases", expandDatabases(backup.Databases)),
-		d.Set("db_version", backup.Datastore.Version),
-		d.Set("db_type", backup.Datastore.Type),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting RDSv3 instance backup fields: %w", err)
