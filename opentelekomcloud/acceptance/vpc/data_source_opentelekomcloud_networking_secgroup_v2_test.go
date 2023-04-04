@@ -105,6 +105,6 @@ var testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceRegex = fmt.Sprintf(`
 %s
 
 data "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name_regex  = "^secgroup_1.+"
+  name_regex = "^secgroup_1.+"
 }
 `, testAccNetworkingSecGroupV2DataSourceGroup)
