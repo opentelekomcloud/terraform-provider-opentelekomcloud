@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[VPC]** Add ``name_regex`` attribute for filtering in ``data-source/opentelekomcloud_networking_secgroup_v2`` (`#2133 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2133>`_)
