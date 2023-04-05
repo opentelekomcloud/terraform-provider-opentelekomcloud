@@ -36,18 +36,21 @@ The following arguments are supported:
 ## Attributes Reference
 The following attributes are exported:
 
-* `backup_id` - The ID of the backup.
+* `id` - The ID of the backup.
 * `instance_id` - The ID of the RDS instance to which the backup belongs.
 * `name` - The name of the backup.
-* `type` - The type of the backup.
 * `description` - The description of the backup.
-* `created_at` - The creation time of the backup.
-* `updated_at` - The update time of the backup.
-
-## Import
-
-Backups can be imported using the id, e.g.
-
-```sh
-terraform import opentelekomcloud_rds_backup_v3.my_backup 7117d38e-4c8f-1234-a707-bd96b97d024c
-```
+* `databases` - The list of self-built Microsoft SQL Server databases that are partially backed up.
+                (Only Microsoft SQL Server support partial backups.)
+* `begin_time` - Indicates the backup start time in the "yyyy-mm-ddThh:mm:ssZ" format,
+                 where "T" indicates the start time of the time field, and "Z" indicates the time zone offset.
+* `status` - Indicates the backup status. Value:
+             - BUILDING: Backup in progress
+             - COMPLETED: Backup completed
+             - FAILED: Backup failed
+             - DELETING: Backup being deleted
+* `type` - Indicates the backup type. Value:
+           - auto: automated full backup
+           - manual: manual full backup
+           - fragment: differential full backup
+           - incremental: automated incremental backup

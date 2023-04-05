@@ -2,13 +2,16 @@ package rds
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	backups "github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/backups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -127,7 +130,22 @@ func resourceRDSv3BackupCreate(ctx context.Context, d *schema.ResourceData, meta
 		fmterr.Errorf("error creating new RDSv3 backup: %w", err)
 	}
 
-	err = backups.WaitForBackup(client, backup.InstanceID, backup.ID, "COMPLETED")
+	if backup == nil {
+		return diag.Errorf("backup not created")
+	}
+
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"BUILDING"},
+		Target:     []string{"COMPLETED"},
+		Refresh:    waitForRDSBackupActive(client, backup.InstanceID, backup.ID),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      5 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+
+	if _, err := stateConf.WaitForStateContext(ctx); err != nil {
+		return fmterr.Errorf("error waiting for backup to become 'COMPLETED': %s", err)
+	}
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -153,10 +171,18 @@ func resourceRDSv3BackupDelete(_ context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf(errCreateClient, err)
 	}
 
+	instanceID := d.Get("instance_id").(string)
+
 	err = backups.Delete(client, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud RDSv3 backup: %s", err)
 	}
+
+	err = waitForRDSBackupDeletion(client, instanceID, d.Id(), d.Timeout(schema.TimeoutDelete))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	d.SetId("")
 	return nil
 }
@@ -211,4 +237,53 @@ func resourceDatabaseExpand(d *schema.ResourceData) []backups.BackupDatabase {
 	}
 	log.Printf("[DEBUG] backupsDatabases: %+v", backupsDatabases)
 	return backupsDatabases
+}
+
+func waitForRDSBackupActive(client *golangsdk.ServiceClient, instanceID, backupID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		opts := backups.ListOpts{
+			InstanceID: instanceID,
+			BackupID:   backupID,
+		}
+		backupList, err := backups.List(client, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		if len(backupList) == 0 {
+			return nil, "", fmt.Errorf("backup not found")
+		}
+		backup := backupList[0]
+
+		return backup, string(backup.Status), nil
+	}
+}
+
+func waitForRDSBackupDeletion(client *golangsdk.ServiceClient, instanceID, backupID string, timeout time.Duration) error {
+	startTime := time.Now()
+	for {
+		backupList, err := backups.List(client, backups.ListOpts{
+			InstanceID: instanceID,
+			BackupID:   backupID,
+		})
+		if err != nil {
+			return err
+		}
+		found := false
+		for _, backup := range backupList {
+			if backup.ID == backupID {
+				found = true
+				if backup.Status != "DELETING" {
+					return fmt.Errorf("backup is in unexpected state: %s", backup.Status)
+				}
+			}
+		}
+		if !found {
+			break
+		}
+		if time.Since(startTime) > timeout {
+			return fmt.Errorf("backup deletion timed out")
+		}
+		time.Sleep(10 * time.Second)
+	}
+	return nil
 }

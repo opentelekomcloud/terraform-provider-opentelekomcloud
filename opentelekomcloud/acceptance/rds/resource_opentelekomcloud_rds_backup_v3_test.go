@@ -1,8 +1,11 @@
 package acceptance
 
 import (
+	"context"
 	"fmt"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -29,7 +32,7 @@ func TestAccResourceRDSV3Backup_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_backup_"+postfix),
 					resource.TestCheckResourceAttr(resourceName, "type", "manual"),
 					resource.TestCheckResourceAttr(resourceName, "description", ""),
-					resource.TestCheckResourceAttrSet(resourceName, "backup_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
 				),
 			},
 		},
@@ -37,6 +40,8 @@ func TestAccResourceRDSV3Backup_basic(t *testing.T) {
 }
 
 func testAccCheckRdsBackupV3Destroy(s *terraform.State) error {
+	const backupDeleteRetryTimeout = 5 * time.Minute
+
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.RdsV3Client(env.OS_REGION_NAME)
 	if err != nil {
@@ -48,15 +53,30 @@ func testAccCheckRdsBackupV3Destroy(s *terraform.State) error {
 			continue
 		}
 
-		backup, err := backups.List(client, backups.ListOpts{
-			BackupID:   rs.Primary.ID,
-			InstanceID: rs.Primary.Attributes["instance_id"],
+		err = resource.RetryContext(context.Background(), backupDeleteRetryTimeout, func() *resource.RetryError {
+			backupList, err := backups.List(client, backups.ListOpts{
+				BackupID:   rs.Primary.ID,
+				InstanceID: rs.Primary.Attributes["instance_id"],
+			})
+
+			if err != nil && !strings.Contains(err.Error(), "The backup file does not exist") {
+				return resource.NonRetryableError(fmt.Errorf("error listing backups: %s", err))
+			}
+
+			for _, backup := range backupList {
+				if backup.ID == rs.Primary.ID {
+					if backup.Status == "DELETING" {
+						return resource.RetryableError(fmt.Errorf("backup is still in a deleting state"))
+					}
+					return resource.NonRetryableError(fmt.Errorf("backup still exists"))
+				}
+			}
+
+			return nil
 		})
+
 		if err != nil {
-			return fmt.Errorf("error getting backup %s: %s", rs.Primary.ID, err)
-		}
-		if backup != nil {
-			return fmt.Errorf("backup still exists")
+			return err
 		}
 	}
 
