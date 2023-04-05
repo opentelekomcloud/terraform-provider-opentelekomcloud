@@ -13,8 +13,6 @@ import (
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/backup"
 	res "github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/resource"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -68,11 +66,21 @@ func ResourceCSBSBackupV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"tags": {
-				Type:         schema.TypeMap,
-				Optional:     true,
-				ValidateFunc: common.ValidateTags,
-				ForceNew:     true,
-				Elem:         &schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
 			},
 			"status": {
 				Type:     schema.TypeString,
@@ -270,11 +278,6 @@ func resourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("error retrieving backup: %s", err)
 	}
 
-	tagsMap := make(map[string]string)
-	for _, tag := range backupObject.Tags {
-		tagsMap[tag.Key] = tag.Value
-	}
-
 	mErr := multierror.Append(
 		d.Set("resource_id", backupObject.ResourceId),
 		d.Set("backup_name", backupObject.Name),
@@ -285,7 +288,7 @@ func resourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("vm_metadata", flattenCSBSVMMetadata(backupObject)),
 		d.Set("backup_record_id", backupObject.CheckpointId),
 		d.Set("region", config.GetRegion(d)),
-		d.Set("tags", tagsMap),
+		d.Set("tags", flattenCSBSTags(backupObject.Tags)),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
