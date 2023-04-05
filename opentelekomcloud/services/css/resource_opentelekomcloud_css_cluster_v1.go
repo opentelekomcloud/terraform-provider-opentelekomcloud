@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/flavors"
@@ -161,9 +160,9 @@ func ResourceCssClusterV1() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"7.6.2", "7.9.3", "7.10.2",
-							}, false),
+							// ValidateFunc: validation.StringInSlice([]string{
+							// 	"7.6.2", "7.9.3", "7.10.2", "Opensearch_1.3.6",
+							// }, false),
 							Default: "7.6.2",
 						},
 					},
