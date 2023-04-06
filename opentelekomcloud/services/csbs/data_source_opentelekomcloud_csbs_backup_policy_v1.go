@@ -129,9 +129,21 @@ func DataSourceCSBSBackupPolicyV1() *schema.Resource {
 				},
 			},
 			"tags": {
-				Type:     schema.TypeMap,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
 			},
 		},
 	}
@@ -176,11 +188,6 @@ func dataSourceCSBSBackupPolicyV1Read(_ context.Context, d *schema.ResourceData,
 
 	d.SetId(backupPolicy.ID)
 
-	tagsMap := make(map[string]string)
-	for _, tag := range backupPolicy.Tags {
-		tagsMap[tag.Key] = tag.Value
-	}
-
 	mErr := multierror.Append(
 		d.Set("name", backupPolicy.Name),
 		d.Set("id", backupPolicy.ID),
@@ -191,7 +198,7 @@ func dataSourceCSBSBackupPolicyV1Read(_ context.Context, d *schema.ResourceData,
 		d.Set("region", config.GetRegion(d)),
 		d.Set("resource", flattenCSBSPolicyResources(backupPolicy)),
 		d.Set("scheduled_operation", flattenCSBSScheduledOperations(backupPolicy)),
-		d.Set("tags", tagsMap),
+		d.Set("tags", flattenCSBSTags(backupPolicy.Tags)),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {

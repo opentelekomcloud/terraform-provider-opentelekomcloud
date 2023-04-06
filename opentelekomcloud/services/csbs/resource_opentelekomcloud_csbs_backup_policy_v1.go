@@ -6,13 +6,11 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/policies"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -172,11 +170,21 @@ func ResourceCSBSBackupPolicyV1() *schema.Resource {
 				},
 			},
 			"tags": {
-				Type:         schema.TypeMap,
-				Optional:     true,
-				ValidateFunc: common.ValidateTags,
-				ForceNew:     true,
-				Elem:         &schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
 			},
 		},
 	}
@@ -263,11 +271,6 @@ func resourceCSBSBackupPolicyRead(_ context.Context, d *schema.ResourceData, met
 		return fmterr.Errorf(errorSaveMsg, "scheduler_operation", d.Id(), err)
 	}
 
-	tagsMap := make(map[string]string)
-	for _, tag := range backupPolicy.Tags {
-		tagsMap[tag.Key] = tag.Value
-	}
-
 	me := multierror.Append(nil,
 		d.Set("name", backupPolicy.Name),
 		d.Set("common", backupPolicy.Parameters.Common),
@@ -276,7 +279,7 @@ func resourceCSBSBackupPolicyRead(_ context.Context, d *schema.ResourceData, met
 		d.Set("provider_id", backupPolicy.ProviderId),
 		d.Set("created_at", backupPolicy.CreatedAt.Format(time.RFC3339)),
 		d.Set("region", config.GetRegion(d)),
-		d.Set("tags", tagsMap),
+		d.Set("tags", flattenCSBSTags(backupPolicy.Tags)),
 	)
 
 	return diag.FromErr(me.ErrorOrNil())
