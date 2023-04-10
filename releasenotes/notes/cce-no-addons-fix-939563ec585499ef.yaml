@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Addon status check at ``resource/opentelekomcloud_cce_cluster_v3`` creation (`#2140 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2140>`_)
