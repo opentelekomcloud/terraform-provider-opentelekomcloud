@@ -71,5 +71,5 @@ release:
     owner: opentelekomcloud
     name: terraform-provider-opentelekomcloud
   footer: |
-    **Full Changelog**: https://docs-beta.otc.t-systems.com/releasenotes/terraform-provider-opentelekomcloud#{{ replace .Tag "." "-" }}
+    **Full Changelog**: https://docs.otc.t-systems.com/releasenotes/terraform-provider-opentelekomcloud#{{ replace .Tag "." "-" }}
   prerelease: auto
