@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[ELB]** Fix error messages typo in ``data/opentelekomcloud_lb_loadbalancer_v2`` (`#2143 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2143>`_)
+    **[ELB]** Fix error messages typo in ``resource/opentelekomcloud_lb_loadbalancer_v2`` (`#2143 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2143>`_)
