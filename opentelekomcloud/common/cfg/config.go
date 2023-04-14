@@ -425,11 +425,17 @@ func buildClientByAKSK(c *Config) error {
 			Domain:   c.DomainName,
 		}
 	}
-
+	if c.SecurityToken != "" {
+		dao.ProjectId = c.TenantID
+		dao.ProjectName = c.TenantName
+	}
 	for _, ao := range []*golangsdk.AKSKAuthOptions{&pao, &dao} {
 		ao.IdentityEndpoint = c.IdentityEndpoint
 		ao.AccessKey = c.AccessKey
 		ao.SecretKey = c.SecretKey
+		if c.SecurityToken != "" {
+			ao.SecurityToken = c.SecurityToken
+		}
 	}
 	return c.genClients(pao, dao)
 }
