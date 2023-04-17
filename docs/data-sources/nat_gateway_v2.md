@@ -44,4 +44,6 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attribute is exported:
 
+* `id` - ID of NAT gateway.
+
 * `region` - Region of NAT gateway.

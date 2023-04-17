@@ -115,7 +115,6 @@ func dataSourceNatGatewayV2Read(_ context.Context, d *schema.ResourceData, meta 
 	d.SetId(natGateway.ID)
 
 	mErr := multierror.Append(
-		d.Set("nat_id", natGateway.ID),
 		d.Set("tenant_id", natGateway.TenantID),
 		d.Set("name", natGateway.Name),
 		d.Set("description", natGateway.Description),
