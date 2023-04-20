@@ -517,8 +517,8 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   availability_zone = "%s"
   key_pair          = "%s"
-  runtime            = "containerd"
-  os                 = "EulerOS 2.9"
+  runtime           = "containerd"
+  os                = "EulerOS 2.9"
 
   root_volume {
     size       = 40
