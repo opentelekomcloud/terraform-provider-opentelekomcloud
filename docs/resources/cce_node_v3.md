@@ -18,9 +18,10 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = var.cluster_id
   availability_zone = var.availability_zone
 
-  os        = "EulerOS 2.5"
+  os        = "EulerOS 2.9"
   flavor_id = "s2.large.2"
   key_pair  = var.ssh_key
+  runtime   = "containerd"
 
   bandwidth_size = 100
 
@@ -74,6 +75,10 @@ The following arguments are supported:
 * `k8s_tags` - (Optional) Tags of a Kubernetes node, key/value pair format.
 
 * `annotations` - (Optional) Node annotation, key/value pair format. Changing this parameter will create a new resource
+
+* `runtime` - (Optional) Container runtime. Changing this parameter will create a new resource. Options are:
+              `docker` - Docker
+              `containerd` - Containerd
 
 * `taints` - (Optional) Taints to created nodes to configure anti-affinity.
   * `key` - (Required) A key must contain 1 to 63 characters starting with a letter or digit. Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed. A DNS subdomain name can be used as the prefix of a key.
