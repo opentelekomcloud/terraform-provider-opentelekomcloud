@@ -356,6 +356,21 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
       "unremovableNodeRecheckTimeout" : 5,
       "tenant_id" : data.opentelekomcloud_identity_project_v3.project.id,
     }
+    flavor = <<EOF
+    {
+      "description": "custom resources",
+      "name": "custom-resources",
+      "replicas": 2,
+      "resources": [
+        {
+          "limitsCpu": "8000m",
+          "limitsMem": "4Gi",
+          "name": "autoscaler",
+          "requestsCpu": "4000m",
+          "requestsMem": "2Gi"
+        }
+      ]
+    EOF
   }
 }
 `, common.DataSourceSubnet, common.DataSourceProject, cName)

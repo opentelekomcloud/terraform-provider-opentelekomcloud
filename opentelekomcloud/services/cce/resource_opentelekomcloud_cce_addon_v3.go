@@ -74,6 +74,22 @@ func ResourceCCEAddonV3() *schema.Resource {
 							Required: true,
 							ForceNew: true,
 						},
+						"flavor": {
+							Type:          schema.TypeMap,
+							Optional:      true,
+							ForceNew:      true,
+							Elem:          &schema.Schema{Type: schema.TypeString},
+							ConflictsWith: []string{"values.0.flavor_json"},
+						},
+						"flavor_json": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: common.ValidateJsonString,
+							StateFunc: func(v interface{}) string {
+								jsonString, _ := common.NormalizeJsonString(v)
+								return jsonString
+							},
+						},
 					},
 				},
 			},
@@ -91,7 +107,7 @@ func resourceCCEAddonV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	clusterID := d.Get("cluster_id").(string)
-	basic, custom, err := getAddonValues(d)
+	basic, custom, flavor, err := getAddonValues(d)
 	if err != nil {
 		return fmterr.Errorf("error getting values for CCE addon: %w", err)
 	}
@@ -115,6 +131,7 @@ func resourceCCEAddonV3Create(ctx context.Context, d *schema.ResourceData, meta 
 			Values: addons.Values{
 				Basic:    basic,
 				Advanced: custom,
+				Flavor:   flavor,
 			},
 		},
 	}, clusterID).Extract()
@@ -169,14 +186,33 @@ func resourceCCEAddonV3Read(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func getAddonValues(d *schema.ResourceData) (basic, custom map[string]interface{}, err error) {
-	valLength := d.Get("values.#").(int)
-	if valLength == 0 {
-		err = fmt.Errorf("no values are set for CCE addon")
+func getAddonValues(d *schema.ResourceData) (basic, custom, flavor map[string]interface{}, err error) {
+	values := d.Get("values").([]interface{})
+	if len(values) == 0 {
+		basic = map[string]interface{}{}
 		return
 	}
-	basic = d.Get("values.0.basic").(map[string]interface{})
-	custom = d.Get("values.0.custom").(map[string]interface{})
+	valuesMap := values[0].(map[string]interface{})
+
+	if basicRaw := valuesMap["basic"].(map[string]interface{}); len(basicRaw) != 0 {
+		basic = basicRaw
+	}
+
+	if customRaw := valuesMap["custom"].(map[string]interface{}); len(customRaw) != 0 {
+		custom = customRaw
+	}
+
+	if flavorRaw := valuesMap["flavor"].(map[string]interface{}); len(flavorRaw) != 0 {
+		flavor = flavorRaw
+	}
+	if flavorJsonRaw := valuesMap["flavor_json"].(string); flavorJsonRaw != "" {
+		err = json.Unmarshal([]byte(flavorJsonRaw), &flavor)
+		if err != nil {
+			err = fmt.Errorf("Error unmarshalling flavor json %s", err)
+			return
+		}
+	}
+
 	return
 }
 
