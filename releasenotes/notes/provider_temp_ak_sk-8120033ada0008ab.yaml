@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[Provider]** Enable authorization via temporary AK/SK  (`#2144 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2144>`_)
