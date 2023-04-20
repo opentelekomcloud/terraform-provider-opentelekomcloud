@@ -207,6 +207,12 @@ func ResourceCCENodePoolV3() *schema.Resource {
 						},
 					}},
 			},
+			"runtime": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "docker",
+			},
 			"key_pair": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -361,6 +367,9 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 				Taints:   resourceCCENodeTaints(d),
 				K8sTags:  resourceCCENodeK8sTags(d),
 				UserTags: resourceCCENodePoolUserTags(d),
+				Runtime: nodes.RuntimeSpec{
+					Name: d.Get("runtime").(string),
+				},
 			},
 		},
 	}
