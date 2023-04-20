@@ -240,11 +240,12 @@ var testAccCCENodePoolV3Basic = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
-  os                 = "EulerOS 2.5"
+  os                 = "EulerOS 2.9"
   flavor             = "s2.large.2"
   initial_node_count = 1
   availability_zone  = "%s"
   key_pair           = "%s"
+  runtime            = "containerd"
 
   scale_enable             = false
   min_node_count           = 1

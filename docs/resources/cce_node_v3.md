@@ -18,9 +18,10 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = var.cluster_id
   availability_zone = var.availability_zone
 
-  os        = "EulerOS 2.5"
+  os        = "EulerOS 2.9"
   flavor_id = "s2.large.2"
   key_pair  = var.ssh_key
+  runtime   = "containerd"
 
   bandwidth_size = 100
 
