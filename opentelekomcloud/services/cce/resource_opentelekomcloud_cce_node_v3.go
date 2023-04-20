@@ -384,7 +384,6 @@ func ResourceCCENodeV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Computed: true,
 				Default:  "docker",
 			},
 		},
