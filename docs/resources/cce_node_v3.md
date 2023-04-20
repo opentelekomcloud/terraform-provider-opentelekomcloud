@@ -76,8 +76,8 @@ The following arguments are supported:
 * `annotations` - (Optional) Node annotation, key/value pair format. Changing this parameter will create a new resource
 
 * `runtime` - (Optional) Container runtime. Changing this parameter will create a new resource. Options are:
-  `docker` - Docker
-  `containerd` - Containerd
+              `docker` - Docker
+              `containerd` - Containerd
 
 * `taints` - (Optional) Taints to created nodes to configure anti-affinity.
   * `key` - (Required) A key must contain 1 to 63 characters starting with a letter or digit. Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed. A DNS subdomain name can be used as the prefix of a key.
