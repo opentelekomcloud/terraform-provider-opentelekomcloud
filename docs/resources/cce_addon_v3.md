@@ -67,12 +67,12 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
 
   values {
     basic = {
-      "cceEndpoint": "https://cce.eu-de.otc.t-systems.com",
-      "ecsEndpoint": "https://ecs.eu-de.otc.t-systems.com",
-      "image_version": "1.25.7",
-      "region": "eu-de",
-      "swr_addr": "100.125.7.25:20202",
-      "swr_user": "cce-addons"
+      "cceEndpoint" : "https://cce.eu-de.otc.t-systems.com",
+      "ecsEndpoint" : "https://ecs.eu-de.otc.t-systems.com",
+      "image_version" : "1.25.7",
+      "region" : "eu-de",
+      "swr_addr" : "100.125.7.25:20202",
+      "swr_user" : "cce-addons"
     }
     custom = {
       "cluster_id" : opentelekomcloud_cce_cluster_v3.cluster_1.id,
@@ -113,6 +113,7 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
       }
 	EOF
   }
+}
 ```
 
 ## Argument Reference
