@@ -56,6 +56,8 @@ The following arguments are supported:
 
     * `custom` - (Required) Custom parameters of the add-on.
 
+    * `flavor` - (Optional) Specifies the json string vary depending on the add-on.
+
 Arguments which can be passed to the `basic` and `custom` addon parameters depends on the addon type and version.
 For more detailed description of addons for k8s version `v1.17.9` see [addons description](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/blob/devel/opentelekomcloud/services/cce/addon-templates-v1.17.9.md).
 For more detailed description of addons for k8s version `v1.19.8` see [addons description](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/blob/devel/opentelekomcloud/services/cce/addon-templates-v1.19.8.md).

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -26,6 +27,7 @@ func ResourceCCEAddonV3() *schema.Resource {
 		DeleteContext: resourceCCEAddonV3Delete,
 
 		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(5 * time.Minute),
 		},
 
@@ -75,13 +77,6 @@ func ResourceCCEAddonV3() *schema.Resource {
 							ForceNew: true,
 						},
 						"flavor": {
-							Type:          schema.TypeMap,
-							Optional:      true,
-							ForceNew:      true,
-							Elem:          &schema.Schema{Type: schema.TypeString},
-							ConflictsWith: []string{"values.0.flavor_json"},
-						},
-						"flavor_json": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ValidateFunc: common.ValidateJsonString,
@@ -147,6 +142,21 @@ func resourceCCEAddonV3Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	d.SetId(addon.Metadata.Id)
 
+	log.Printf("[DEBUG] Waiting for CCEAddon (%s) to become available", addon.Metadata.Id)
+	stateConf := &resource.StateChangeConf{
+		Pending:      []string{"installing", "abnormal"},
+		Target:       []string{"running", "available", "abnormal"},
+		Refresh:      waitForCCEAddonActive(client, addon.Metadata.Id, clusterID),
+		Timeout:      d.Timeout(schema.TimeoutCreate),
+		Delay:        10 * time.Second,
+		PollInterval: 10 * time.Second,
+	}
+
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("Error creating CCEAddon: %s", err)
+	}
+
 	clientCtx := common.CtxWithClient(ctx, client, keyClientAddonV3)
 	return resourceCCEAddonV3Read(clientCtx, d, meta)
 }
@@ -187,28 +197,20 @@ func resourceCCEAddonV3Read(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func getAddonValues(d *schema.ResourceData) (basic, custom, flavor map[string]interface{}, err error) {
-	values := d.Get("values").([]interface{})
-	if len(values) == 0 {
-		basic = map[string]interface{}{}
+	valLength := d.Get("values.#").(int)
+	if valLength == 0 {
+		err = fmt.Errorf("no values are set for CCE addon")
 		return
 	}
+	basic = d.Get("values.0.basic").(map[string]interface{})
+	custom = d.Get("values.0.custom").(map[string]interface{})
+	values := d.Get("values").([]interface{})
 	valuesMap := values[0].(map[string]interface{})
 
-	if basicRaw := valuesMap["basic"].(map[string]interface{}); len(basicRaw) != 0 {
-		basic = basicRaw
-	}
-
-	if customRaw := valuesMap["custom"].(map[string]interface{}); len(customRaw) != 0 {
-		custom = customRaw
-	}
-
-	if flavorRaw := valuesMap["flavor"].(map[string]interface{}); len(flavorRaw) != 0 {
-		flavor = flavorRaw
-	}
-	if flavorJsonRaw := valuesMap["flavor_json"].(string); flavorJsonRaw != "" {
+	if flavorJsonRaw := valuesMap["flavor"].(string); flavorJsonRaw != "" {
 		err = json.Unmarshal([]byte(flavorJsonRaw), &flavor)
 		if err != nil {
-			err = fmt.Errorf("Error unmarshalling flavor json %s", err)
+			err = fmt.Errorf("error unmarshalling flavor json %s", err)
 			return
 		}
 	}
@@ -345,4 +347,15 @@ func resourceCCEAddonV3Import(_ context.Context, d *schema.ResourceData, meta in
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func waitForCCEAddonActive(cceAddonClient *golangsdk.ServiceClient, id, clusterID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		n, err := addons.Get(cceAddonClient, id, clusterID).Extract()
+		if err != nil {
+			return nil, "", err
+		}
+
+		return n, n.Status.Status, nil
+	}
 }
