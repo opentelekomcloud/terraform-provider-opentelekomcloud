@@ -380,6 +380,12 @@ func ResourceCCENodeV3() *schema.Resource {
 					},
 				},
 			},
+			"runtime": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "docker",
+			},
 		},
 	}
 }
@@ -540,6 +546,7 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 			},
 			BillingMode: d.Get("billing_mode").(int),
 			Count:       1,
+			Runtime:     nodes.RuntimeSpec{Name: d.Get("runtime").(string)},
 			ExtendParam: nodes.ExtendParam{
 				ChargingMode:            d.Get("extend_param_charging_mode").(int),
 				EcsPerformanceType:      d.Get("ecs_performance_type").(string),

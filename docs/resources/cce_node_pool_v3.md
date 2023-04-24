@@ -16,7 +16,7 @@ variable "availability_zone" {}
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool_1" {
   cluster_id         = var.cluster_id
   name               = "opentelekomcloud-cce-node-pool-test"
-  os                 = "EulerOS 2.5"
+  os                 = "EulerOS 2.9"
   flavor             = "s2.xlarge.2"
   initial_node_count = 2
   availability_zone  = var.availability_zone
@@ -27,6 +27,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool_1" {
   max_node_count           = 9
   scale_down_cooldown_time = 100
   priority                 = 1
+  runtime                  = "containerd"
 
   root_volume {
     size       = 40
@@ -112,6 +113,10 @@ the AZ based on the AZ sequence. For more details see
 * `user_tags` - (Optional) Tag of a VM, key/value pair format. Changing this parameter will create a new resource.
 
 * `k8s_tags` - (Optional) Tags of a Kubernetes node, key/value pair format.
+
+* `runtime` - (Optional) Container runtime. Changing this parameter will create a new resource. Options are:
+             `docker` - Docker
+             `containerd` - Containerd
 
 * `taints` - (Optional) Taints to created nodes to configure anti-affinity.
   * `key` - (Required) A key must contain 1 to 63 characters starting with a letter or digit. Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed. A DNS subdomain name can be used as the prefix of a key.

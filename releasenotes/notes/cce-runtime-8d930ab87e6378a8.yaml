@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[CCE]** Runtime options for ``resource/opentelekomcloud_cce_node_pool_v3``, ``resource/opentelekomcloud_cce_node_v3`` and ``data_source/opentelekomcloud_cce_node_pool_v3``
+    (`#2146 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2146>`_)

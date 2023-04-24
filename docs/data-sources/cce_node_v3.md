@@ -67,3 +67,5 @@ All above argument parameters can be exported as attribute parameters along with
   * `volumetype` - Disk type.
   * `extend_param` - Disk expansion parameters.
   * `kms_id` - The Encryption KMS ID of the data volume.
+
+* `runtime` - The runtime of the node.
