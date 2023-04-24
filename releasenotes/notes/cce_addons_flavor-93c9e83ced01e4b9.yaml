@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CCE]** Add possibility to provide `flavor` in json format for ``resource/opentelekomcloud_cce_addon_v3`` documentation (`#2147 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2147>`_)
