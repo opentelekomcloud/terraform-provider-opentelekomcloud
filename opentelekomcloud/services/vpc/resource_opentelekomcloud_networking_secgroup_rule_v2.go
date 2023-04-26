@@ -126,8 +126,8 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 	opts := rules.CreateOpts{
 		Description:    d.Get("description").(string),
 		SecGroupID:     d.Get("security_group_id").(string),
-		PortRangeMin:   d.Get("port_range_min").(int),
-		PortRangeMax:   d.Get("port_range_max").(int),
+		PortRangeMin:   &portRangeMin,
+		PortRangeMax:   &portRangeMax,
 		RemoteGroupID:  d.Get("remote_group_id").(string),
 		RemoteIPPrefix: d.Get("remote_ip_prefix").(string),
 		TenantID:       d.Get("tenant_id").(string),
