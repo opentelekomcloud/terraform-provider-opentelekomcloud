@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -100,9 +101,11 @@ func testAccCheckIdentityV3ProtocolDestroy(s *terraform.State) error {
 	return nil
 }
 
+var domainId = os.Getenv("OS_TEST_DOMAINID")
+
 var (
 	mapping                        = tools.RandomString("mapping-", 3)
-	protocolName                   = tools.RandomString("prot", 3)
+	protocolName                   = "saml"
 	testAccIdentityV3ProtocolBasic = fmt.Sprintf(`
 %s
 
@@ -125,8 +128,23 @@ resource "opentelekomcloud_identity_protocol_v3" "saml" {
   mapping_id  = opentelekomcloud_identity_mapping_v3.mapping.id
 
   metadata {
-    metadata = file("saml-metadata.xml")
+    metadata  = <<EOT
+<?xml version="1.0"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+                     validUntil="2023-04-28T16:06:53Z"
+                     cacheDuration="PT604800S"
+                     entityID="https://idp.hfbk-dresden.de/idp/shibboleth">
+    <md:SPSSODescriptor AuthnRequestsSigned="false" WantAssertionsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
+        <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+                                     Location="https://idp.hfbk-dresden.de/idp/profile/SAML2/POST/SLO"
+                                     index="1" />
+
+    </md:SPSSODescriptor>
+</md:EntityDescriptor>
+EOT
+    domain_id = "%s"
   }
 }
-`, testAccIdentityV3ProviderBasic, testAccIdentityV3MappingBasic(mapping), protocolName)
+`, testAccIdentityV3ProviderBasic, testAccIdentityV3MappingBasic(mapping), protocolName, domainId)
 )
