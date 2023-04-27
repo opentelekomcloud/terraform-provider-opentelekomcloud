@@ -121,8 +121,10 @@ func resourceIdentityProtocolV3Read(ctx context.Context, d *schema.ResourceData,
 		return fmterr.Errorf("error setting protocol attributes: %w", err)
 	}
 
-	if err := setMetadata(d, meta); err != nil {
-		return fmterr.Errorf("error downloading metadata: %w", err)
+	if d.Get("metadata.#") != 0 {
+		if err := setMetadata(d, meta); err != nil {
+			return fmterr.Errorf("error downloading metadata: %w", err)
+		}
 	}
 
 	return nil

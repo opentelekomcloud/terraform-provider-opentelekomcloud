@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IAM]** Fix `metadata` setting for ``resource/opentelekomcloud_identity_protocol_v3`` (`#2151 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2151>`_)
