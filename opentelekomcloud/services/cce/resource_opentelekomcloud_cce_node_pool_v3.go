@@ -211,7 +211,9 @@ func ResourceCCENodePoolV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "docker",
+				ValidateFunc: validation.StringInSlice([]string{
+					"docker", "containerd",
+				}, false),
 			},
 			"key_pair": {
 				Type:         schema.TypeString,
@@ -457,6 +459,7 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("scale_enable", s.Spec.Autoscaling.Enable),
 		d.Set("root_volume", rootVolume),
 		d.Set("status", s.Status.Phase),
+		d.Set("runtime", s.Spec.NodeTemplate.Runtime.Name),
 	)
 
 	if s.Spec.Autoscaling.Enable {

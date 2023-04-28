@@ -384,7 +384,9 @@ func ResourceCCENodeV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "docker",
+				ValidateFunc: validation.StringInSlice([]string{
+					"docker", "containerd",
+				}, false),
 			},
 		},
 	}
@@ -698,6 +700,7 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 		d.Set("public_ip", node.Status.PublicIP),
 		d.Set("status", node.Status.Phase),
 		d.Set("subnet_id", node.Spec.NodeNicSpec.PrimaryNic.SubnetId),
+		d.Set("runtime", node.Spec.Runtime.Name),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("[DEBUG] Error saving main conf to state for OpenTelekomCloud Node (%s): %w", d.Id(), err)
