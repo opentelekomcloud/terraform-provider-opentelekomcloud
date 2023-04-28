@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[CCE]** Fix for runtime trigger recreation of ``resource/opentelekomcloud_cce_node_pool_v3``, ``resource/opentelekomcloud_cce_node_v3``
+    (`#2146 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2153>`_)
+    Anyway, handle with high caution, as it may cause recreation of existing resources if runtime is changed.
