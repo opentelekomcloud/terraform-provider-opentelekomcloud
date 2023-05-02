@@ -50,7 +50,7 @@ func ResourceCCENodePoolV3() *schema.Resource {
 		},
 
 		Importer: &schema.ResourceImporter{
-			StateContext: common.ImportByPath("cluster_id", "id"),
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		CustomizeDiff: common.MultipleCustomizeDiffs(
