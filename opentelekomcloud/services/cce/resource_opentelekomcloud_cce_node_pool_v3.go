@@ -468,7 +468,6 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 	if s.Spec.NodeTemplate.Runtime.Name == "null" {
 		if v, ok := d.GetOk("runtime"); ok {
 			mErr = multierror.Append(mErr, d.Set("runtime", v.(string)))
-
 		}
 	} else {
 		mErr = multierror.Append(mErr, d.Set("runtime", "docker"))

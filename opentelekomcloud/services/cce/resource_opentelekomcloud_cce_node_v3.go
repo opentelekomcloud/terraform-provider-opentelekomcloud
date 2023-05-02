@@ -715,6 +715,10 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 		mErr = multierror.Append(mErr, d.Set("runtime", node.Spec.Runtime.Name))
 	}
 
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("Error setting 'runtime' for OpenTelekomCloud Node (%s): %w", d.Id(), err)
+	}
+
 	var volumes []map[string]interface{}
 	for _, dataVolume := range node.Spec.DataVolumes {
 		volume := make(map[string]interface{})
