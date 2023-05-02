@@ -76,7 +76,8 @@ The following arguments are supported:
 
 * `annotations` - (Optional) Node annotation, key/value pair format. Changing this parameter will create a new resource
 
-* `runtime` - (Optional) Container runtime. Changing this parameter will create a new resource. Options are:
+* `runtime` - (Optional) Container runtime. Changing this parameter will create a new resource.
+              Use with high-caution, may trigger resource recreation. Options are:
               `docker` - Docker
               `containerd` - Containerd
 

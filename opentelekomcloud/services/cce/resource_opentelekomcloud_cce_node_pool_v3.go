@@ -210,8 +210,11 @@ func ResourceCCENodePoolV3() *schema.Resource {
 			"runtime": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
-				Default:  "docker",
+				ValidateFunc: validation.StringInSlice([]string{
+					"docker", "containerd",
+				}, false),
 			},
 			"key_pair": {
 				Type:         schema.TypeString,
@@ -367,11 +370,14 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 				Taints:   resourceCCENodeTaints(d),
 				K8sTags:  resourceCCENodeK8sTags(d),
 				UserTags: resourceCCENodePoolUserTags(d),
-				Runtime: nodes.RuntimeSpec{
-					Name: d.Get("runtime").(string),
-				},
 			},
 		},
+	}
+
+	if v, ok := d.GetOk("runtime"); ok {
+		createOpts.Spec.NodeTemplate.Runtime = nodes.RuntimeSpec{
+			Name: v.(string),
+		}
 	}
 
 	clusterID := d.Get("cluster_id").(string)
@@ -458,6 +464,18 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("root_volume", rootVolume),
 		d.Set("status", s.Status.Phase),
 	)
+
+	if s.Spec.NodeTemplate.Runtime.Name == "null" {
+		if v, ok := d.GetOk("runtime"); ok {
+			mErr = multierror.Append(mErr, d.Set("runtime", v.(string)))
+		}
+	} else {
+		mErr = multierror.Append(mErr, d.Set("runtime", "docker"))
+	}
+
+	if s.Spec.NodeTemplate.Runtime.Name != "" {
+		mErr = multierror.Append(mErr, d.Set("runtime", s.Spec.NodeTemplate.Runtime.Name))
+	}
 
 	if s.Spec.Autoscaling.Enable {
 		mErr = multierror.Append(mErr,

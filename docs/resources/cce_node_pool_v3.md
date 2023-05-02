@@ -114,9 +114,10 @@ the AZ based on the AZ sequence. For more details see
 
 * `k8s_tags` - (Optional) Tags of a Kubernetes node, key/value pair format.
 
-* `runtime` - (Optional) Container runtime. Changing this parameter will create a new resource. Options are:
-             `docker` - Docker
-             `containerd` - Containerd
+* `runtime` - (Optional) Container runtime. Changing this parameter will create a new resource.
+              Use with high-caution, may trigger resource recreation. Options are:
+              `docker` - Docker
+              `containerd` - Containerd
 
 * `taints` - (Optional) Taints to created nodes to configure anti-affinity.
   * `key` - (Required) A key must contain 1 to 63 characters starting with a letter or digit. Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed. A DNS subdomain name can be used as the prefix of a key.

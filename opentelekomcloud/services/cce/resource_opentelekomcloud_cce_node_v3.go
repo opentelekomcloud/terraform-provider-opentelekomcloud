@@ -383,8 +383,11 @@ func ResourceCCENodeV3() *schema.Resource {
 			"runtime": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
-				Default:  "docker",
+				ValidateFunc: validation.StringInSlice([]string{
+					"docker", "containerd",
+				}, false),
 			},
 		},
 	}
@@ -546,7 +549,6 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 			},
 			BillingMode: d.Get("billing_mode").(int),
 			Count:       1,
-			Runtime:     nodes.RuntimeSpec{Name: d.Get("runtime").(string)},
 			ExtendParam: nodes.ExtendParam{
 				ChargingMode:            d.Get("extend_param_charging_mode").(int),
 				EcsPerformanceType:      d.Get("ecs_performance_type").(string),
@@ -563,6 +565,12 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 			K8sTags:  resourceCCENodeK8sTags(d),
 			Taints:   resourceCCENodeTaints(d),
 		},
+	}
+
+	if v, ok := d.GetOk("runtime"); ok {
+		createOpts.Spec.Runtime = nodes.RuntimeSpec{
+			Name: v.(string),
+		}
 	}
 
 	if ip := d.Get("private_ip").(string); ip != "" {
@@ -701,6 +709,14 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("[DEBUG] Error saving main conf to state for OpenTelekomCloud Node (%s): %w", d.Id(), err)
+	}
+
+	if node.Spec.Runtime.Name != "" {
+		mErr = multierror.Append(mErr, d.Set("runtime", node.Spec.Runtime.Name))
+	}
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("Error setting 'runtime' for OpenTelekomCloud Node (%s): %w", d.Id(), err)
 	}
 
 	var volumes []map[string]interface{}
