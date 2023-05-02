@@ -50,7 +50,7 @@ func ResourceCCENodePoolV3() *schema.Resource {
 		},
 
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: common.ImportByPath("cluster_id", "id"),
 		},
 
 		CustomizeDiff: common.MultipleCustomizeDiffs(
@@ -464,6 +464,15 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("root_volume", rootVolume),
 		d.Set("status", s.Status.Phase),
 	)
+
+	if s.Spec.NodeTemplate.Runtime.Name == "null" {
+		if v, ok := d.GetOk("runtime"); ok {
+			mErr = multierror.Append(mErr, d.Set("runtime", v.(string)))
+
+		}
+	} else {
+		mErr = multierror.Append(mErr, d.Set("runtime", "docker"))
+	}
 
 	if s.Spec.NodeTemplate.Runtime.Name != "" {
 		mErr = multierror.Append(mErr, d.Set("runtime", s.Spec.NodeTemplate.Runtime.Name))
