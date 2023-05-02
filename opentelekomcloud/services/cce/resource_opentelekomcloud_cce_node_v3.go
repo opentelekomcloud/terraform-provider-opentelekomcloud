@@ -383,7 +383,7 @@ func ResourceCCENodeV3() *schema.Resource {
 			"runtime": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"docker", "containerd",
 				}, false),
