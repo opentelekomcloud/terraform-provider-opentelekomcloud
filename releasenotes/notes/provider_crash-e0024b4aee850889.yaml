@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[Provider]** Fix provider plugin crash in cases when `clouds.yaml` file is improperly formatted (`#2154 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2154>`_)
