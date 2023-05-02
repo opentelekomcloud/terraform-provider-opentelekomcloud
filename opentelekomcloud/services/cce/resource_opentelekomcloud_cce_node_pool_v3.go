@@ -370,11 +370,14 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 				Taints:   resourceCCENodeTaints(d),
 				K8sTags:  resourceCCENodeK8sTags(d),
 				UserTags: resourceCCENodePoolUserTags(d),
-				Runtime: nodes.RuntimeSpec{
-					Name: d.Get("runtime").(string),
-				},
 			},
 		},
+	}
+
+	if v, ok := d.GetOk("runtime"); ok {
+		createOpts.Spec.NodeTemplate.Runtime = nodes.RuntimeSpec{
+			Name: v.(string),
+		}
 	}
 
 	clusterID := d.Get("cluster_id").(string)

@@ -549,7 +549,6 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 			},
 			BillingMode: d.Get("billing_mode").(int),
 			Count:       1,
-			Runtime:     nodes.RuntimeSpec{Name: d.Get("runtime").(string)},
 			ExtendParam: nodes.ExtendParam{
 				ChargingMode:            d.Get("extend_param_charging_mode").(int),
 				EcsPerformanceType:      d.Get("ecs_performance_type").(string),
@@ -566,6 +565,12 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 			K8sTags:  resourceCCENodeK8sTags(d),
 			Taints:   resourceCCENodeTaints(d),
 		},
+	}
+
+	if v, ok := d.GetOk("runtime"); ok {
+		createOpts.Spec.Runtime = nodes.RuntimeSpec{
+			Name: v.(string),
+		}
 	}
 
 	if ip := d.Get("private_ip").(string); ip != "" {
