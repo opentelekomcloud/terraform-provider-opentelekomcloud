@@ -459,8 +459,11 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("scale_enable", s.Spec.Autoscaling.Enable),
 		d.Set("root_volume", rootVolume),
 		d.Set("status", s.Status.Phase),
-		d.Set("runtime", s.Spec.NodeTemplate.Runtime.Name),
 	)
+
+	if s.Spec.NodeTemplate.Runtime.Name != "" {
+		mErr = multierror.Append(mErr, d.Set("runtime", s.Spec.NodeTemplate.Runtime.Name))
+	}
 
 	if s.Spec.Autoscaling.Enable {
 		mErr = multierror.Append(mErr,
