@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[УСЫ]** Fixed setting additional fields in ``data-source/opentelekomcloud_compute_instances_v2`` (`#2161 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2161>`_)
