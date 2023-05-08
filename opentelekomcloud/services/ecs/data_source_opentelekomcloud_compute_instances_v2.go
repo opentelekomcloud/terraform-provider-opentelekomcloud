@@ -224,7 +224,7 @@ func dataSourceComputeInstancesV2Read(_ context.Context, d *schema.ResourceData,
 		}
 		imageName, errIms := getImageName(item.Image["id"].(string), d, meta)
 		if errIms != nil {
-			return fmterr.Errorf("unable to retrieve OpenTelekomCloud image: %w", errIms)
+			return fmterr.Errorf("unable to retrieve OpenTelekomCloud image: %s", errIms)
 		}
 		floatingIp := ""
 		var networks []map[string]interface{}
@@ -239,7 +239,7 @@ func dataSourceComputeInstancesV2Read(_ context.Context, d *schema.ResourceData,
 
 		nets, errNet := servers.GetNICs(client, item.ID).Extract()
 		if errNet != nil {
-			return fmterr.Errorf("unable to retrieve OpenTelekomCloud network: %w", errIms)
+			return fmterr.Errorf("unable to retrieve OpenTelekomCloud network: %s", errIms)
 		}
 		for _, net := range nets {
 			networks = append(networks, map[string]interface{}{
@@ -287,7 +287,7 @@ func getImageName(imageId string, d *schema.ResourceData, meta interface{}) (str
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			return "", nil
 		}
-		return "", fmterr.Errorf("unable to retrieve OpenTelekomCloud image: %w", err)
+		return "", fmterr.Errorf("unable to retrieve OpenTelekomCloud image: %s", err)
 	}
 
 	return ims.Name, nil
