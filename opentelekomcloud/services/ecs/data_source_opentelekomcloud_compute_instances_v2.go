@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -222,9 +223,9 @@ func dataSourceComputeInstancesV2Read(_ context.Context, d *schema.ResourceData,
 		for _, sg := range item.SecurityGroups {
 			secGrpNames = append(secGrpNames, sg["name"].(string))
 		}
-		imageName, errIms := getImageName(item.Image["id"].(string), d, meta)
-		if errIms != nil {
-			return diag.Errorf("unable to retrieve OpenTelekomCloud image: %s", errIms)
+		imageName, err := getImageName(item.Image["id"].(string), d, meta)
+		if err != nil {
+			return diag.Errorf("unable to retrieve OpenTelekomCloud image: %s", err)
 		}
 		floatingIp := ""
 		var networks []map[string]interface{}
@@ -237,9 +238,9 @@ func dataSourceComputeInstancesV2Read(_ context.Context, d *schema.ResourceData,
 			}
 		}
 
-		nets, errNet := servers.GetNICs(client, item.ID).Extract()
-		if errNet != nil {
-			return diag.Errorf("unable to retrieve OpenTelekomCloud network: %s", errIms)
+		nets, err := servers.GetNICs(client, item.ID).Extract()
+		if err != nil {
+			return fmterr.Errorf("unable to retrieve OpenTelekomCloud network: %s", err)
 		}
 		for _, net := range nets {
 			networks = append(networks, map[string]interface{}{
@@ -274,12 +275,12 @@ func dataSourceComputeInstancesV2Read(_ context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func getImageName(imageId string, d *schema.ResourceData, meta interface{}) (string, diag.Diagnostics) {
+func getImageName(imageId string, d *schema.ResourceData, meta interface{}) (string, error) {
 	config := meta.(*cfg.Config)
 	log.Print("[DEBUG] Creating image client")
 	client, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {
-		return "", fmterr.Errorf(errCreateV2Client, err)
+		return "", fmt.Errorf(errCreateV2Client, err)
 	}
 
 	ims, err := images.Get(client, imageId).Extract()
@@ -287,7 +288,7 @@ func getImageName(imageId string, d *schema.ResourceData, meta interface{}) (str
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			return "", nil
 		}
-		return "", fmterr.Errorf("unable to retrieve OpenTelekomCloud image: %s", err)
+		return "", fmt.Errorf("unable to retrieve OpenTelekomCloud image: %s", err)
 	}
 
 	return ims.Name, nil
