@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/availabilityzones"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
@@ -283,6 +284,9 @@ func getImageName(imageId string, d *schema.ResourceData, meta interface{}) (str
 
 	ims, err := images.Get(client, imageId).Extract()
 	if err != nil {
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
+			return "", nil
+		}
 		return "", fmterr.Errorf("unable to retrieve OpenTelekomCloud image: %w", err)
 	}
 
