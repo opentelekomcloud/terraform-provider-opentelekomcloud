@@ -782,6 +782,15 @@ func waitForInstalledAddons(ctx context.Context, d *schema.ResourceData, config 
 		return fmt.Errorf("error waiting for addons to be assigned: %w", err)
 	}
 
+	return nil
+}
+
+func removeAddons(ctx context.Context, d *schema.ResourceData, config *cfg.Config) error {
+	client, err := config.CceV3AddonClient(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf("error creating CCE Addon client: %w", logHttpError(err))
+	}
+
 	instances, err := addons.ListAddonInstances(client, d.Id()).Extract()
 	if err != nil {
 		return fmt.Errorf("error listing cluster addons: %w", err)
@@ -800,19 +809,7 @@ func waitForInstalledAddons(ctx context.Context, d *schema.ResourceData, config 
 			return fmt.Errorf("error waiting for addons to be installed: %w", err)
 		}
 	}
-	return nil
-}
 
-func removeAddons(ctx context.Context, d *schema.ResourceData, config *cfg.Config) error {
-	client, err := config.CceV3AddonClient(config.GetRegion(d))
-	if err != nil {
-		return fmt.Errorf("error creating CCE Addon client: %w", logHttpError(err))
-	}
-
-	instances, err := addons.ListAddonInstances(client, d.Id()).Extract()
-	if err != nil {
-		return fmt.Errorf("error listing cluster addons: %w", err)
-	}
 	for _, instance := range instances.Items {
 		addonID := instance.Metadata.ID
 		if err := addons.Delete(client, addonID, d.Id()).ExtractErr(); err != nil {
