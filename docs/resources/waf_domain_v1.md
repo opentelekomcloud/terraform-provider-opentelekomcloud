@@ -2,7 +2,7 @@
 subcategory: "Web Application Firewall (WAF)"
 ---
 
-Up-to-date reference of API arguments for WAF domain service you can get at
+Up-to-date reference of API arguments for WAF domain you can get at
 `https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/domain_names`.
 
 # opentelekomcloud_waf_domain_v1

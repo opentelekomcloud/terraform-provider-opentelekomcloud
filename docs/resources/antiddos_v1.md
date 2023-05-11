@@ -2,7 +2,7 @@
 subcategory: "Anti-DDoS"
 ---
 
-Up-to-date reference of API arguments for Anti-DDoS you can get at
+Up-to-date reference of API arguments for Anti-DDoS service you can get at
 `https://docs.otc.t-systems.com/anti-ddos/api-ref/api/anti-ddos_apis`.
 
 # opentelekomcloud_antiddos_v1

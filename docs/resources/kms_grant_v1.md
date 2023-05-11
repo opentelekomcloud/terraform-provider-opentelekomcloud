@@ -2,7 +2,7 @@
 subcategory: "Key Management Service (KMS)"
 ---
 
-Up-to-date reference of API arguments for KMS you can get at
+Up-to-date reference of API arguments for KMS grant you can get at
 `https://docs.otc.t-systems.com/key-management-service/api-ref/apis`.
 
 # opentelekomcloud_kms_grant_v1

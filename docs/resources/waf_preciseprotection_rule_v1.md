@@ -2,7 +2,7 @@
 subcategory: "Web Application Firewall (WAF)"
 ---
 
-Up-to-date reference of API arguments for WAF precise protection rules you can get at
+Up-to-date reference of API arguments for WAF precise protection rule you can get at
 `https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/precise_protection_rules`.
 
 # opentelekomcloud_waf_preciseprotection_rule_v1

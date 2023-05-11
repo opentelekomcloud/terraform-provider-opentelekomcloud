@@ -2,7 +2,7 @@
 subcategory: "Web Application Firewall (WAF)"
 ---
 
-Up-to-date reference of API arguments for WAF web tamper protection rules you can get at
+Up-to-date reference of API arguments for WAF web tamper protection rule you can get at
 `https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/web_tamper_protection_rules`.
 
 # opentelekomcloud_waf_webtamperprotection_rule_v1

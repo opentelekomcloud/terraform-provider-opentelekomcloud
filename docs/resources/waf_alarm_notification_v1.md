@@ -2,7 +2,7 @@
 subcategory: "Web Application Firewall (WAF)"
 ---
 
-Up-to-date reference of API arguments for WAF alarm notification service you can get at
+Up-to-date reference of API arguments for WAF alarm notification you can get at
 `https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/alarm_notification`.
 
 # opentelekomcloud_waf_alarm_notification_v1

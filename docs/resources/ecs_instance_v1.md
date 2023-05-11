@@ -2,7 +2,7 @@
 subcategory: "Elastic Cloud Server (ECS)"
 ---
 
-Up-to-date reference of API arguments for ECS you can get at
+Up-to-date reference of API arguments for ECS instance you can get at
 `https://docs.otc.t-systems.com/elastic-cloud-server/api-ref/apis_recommended/lifecycle_management`.
 
 # opentelekomcloud_ecs_instance_v1

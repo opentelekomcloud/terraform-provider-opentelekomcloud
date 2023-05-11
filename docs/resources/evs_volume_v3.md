@@ -2,8 +2,8 @@
 subcategory: "Elastic Volume Service (EVS)"
 ---
 
-Up-to-date reference of API arguments for VPC subnet rule you can get at
-`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/native_openstack_neutron_apis_v2.0/subnet`.
+Up-to-date reference of API arguments for EVS you can get at
+`https://docs.otc.t-systems.com/elastic-volume-service/api-ref/unrecommended_apis/openstack_cinder_api_v3`.
 
 # opentelekomcloud_evs_volume_v3
 
