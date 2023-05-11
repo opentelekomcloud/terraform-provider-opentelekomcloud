@@ -2,6 +2,9 @@
 subcategory: "Cloud Search Service (CSS)"
 ---
 
+Up-to-date reference of API arguments for CSS snapshot you can get at
+`https://docs.otc.t-systems.com/cloud-search-service/api-ref/snapshot_management_apis`.
+
 # opentelekomcloud_css_snapshot_configuration_v1
 
 Manages a CSS configuration of automatic snapshot creation.

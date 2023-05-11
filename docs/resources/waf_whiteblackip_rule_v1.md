@@ -2,6 +2,9 @@
 subcategory: "Web Application Firewall (WAF)"
 ---
 
+Up-to-date reference of API arguments for WAF white and black ip rule you can get at
+`https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/blacklist_and_whitelist_rules`.
+
 # opentelekomcloud_waf_whiteblackip_rule_v1
 
 Manages a WAF WhiteBlackIP Rule resource within OpenTelekomCloud.

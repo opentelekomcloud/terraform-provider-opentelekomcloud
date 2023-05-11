@@ -2,6 +2,9 @@
 subcategory: "Web Application Firewall (WAF)"
 ---
 
+Up-to-date reference of API arguments for WAF policy service you can get at
+`https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/policies`.
+
 # opentelekomcloud_waf_policy_v1
 
 Manages a WAF policy resource within OpenTelekomCloud.

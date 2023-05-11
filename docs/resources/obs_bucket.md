@@ -2,6 +2,9 @@
 subcategory: "Object Storage Service (OBS)"
 ---
 
+Up-to-date reference of API arguments for OBS bucket you can get at
+`https://docs.otc.t-systems.com/object-storage-service/api-ref/apis/operations_on_buckets`.
+
 # opentelekomcloud_obs_bucket
 
 Provides an OBS bucket resource within OpenTelekomCloud.

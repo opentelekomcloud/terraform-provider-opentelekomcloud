@@ -2,6 +2,9 @@
 subcategory: "Elastic Load Balancer (ELB)"
 ---
 
+Up-to-date reference of API arguments for ELB pool you can get at
+`https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v2.0/backend_server_group`.
+
 # opentelekomcloud_lb_pool_v2
 
 Manages an Enhanced LB pool resource within OpenTelekomCloud.

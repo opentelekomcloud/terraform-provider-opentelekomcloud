@@ -2,6 +2,9 @@
 subcategory: "Identity and Access Management (IAM)"
 ---
 
+Up-to-date reference of API arguments for IAM credential you can get at
+`https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/access_key_management`.
+
 # opentelekomcloud_identity_credential_v3
 
 Manages permanent access key for an OpenTelekomCloud user.

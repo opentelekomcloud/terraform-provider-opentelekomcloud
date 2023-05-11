@@ -2,6 +2,9 @@
 subcategory: "Software Repository for Container (SWR)"
 ---
 
+Up-to-date reference of API arguments for SWR permission you can get at
+`https://docs.otc.t-systems.com/software-repository-container/api-ref/api`.
+
 # opentelekomcloud_swr_organization_permissions_v2
 
 Manages user permissions for the SWR organization resource within Open Telekom Cloud.

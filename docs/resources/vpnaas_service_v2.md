@@ -2,6 +2,9 @@
 subcategory: "Virtual Private Network (VPN)"
 ---
 
+Up-to-date reference of API arguments for VPNAAS service you can get at
+`https://docs.otc.t-systems.com/virtual-private-network/api-ref/native_openstack_apis/vpn_service_managemen`.
+
 # opentelekomcloud_vpnaas_service_v2
 
 Manages a V2 VPN service resource within OpenTelekomCloud.
@@ -58,7 +61,7 @@ The following attributes are exported:
 
 * `subnet_id` - See Argument Reference above.
 
-* `status` - Indicates whether IPsec VPN service is currently operational. Values are `ACTIVE`, 
+* `status` - Indicates whether IPsec VPN service is currently operational. Values are `ACTIVE`,
   `DOWN`, `BUILD`, `ERROR`, `PENDING_CREATE`, `PENDING_UPDATE` or `PENDING_DELETE`.
 
 * `external_v6_ip` - The read-only external (public) IPv6 address that is used for the VPN service.

@@ -2,6 +2,9 @@
 subcategory: "Dedicated Host (DEH)"
 ---
 
+Up-to-date reference of API arguments for DEH host you can get at
+`https://docs.otc.t-systems.com/dedicated-host/api-ref/api`.
+
 # opentelekomcloud_deh_host_v1
 
 Allocates a Dedicated Host to a tenant and set minimum required parameters for this Dedicated Host.

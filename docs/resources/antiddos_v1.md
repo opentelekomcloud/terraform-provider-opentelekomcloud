@@ -2,6 +2,9 @@
 subcategory: "Anti-DDoS"
 ---
 
+Up-to-date reference of API arguments for Anti-DDoS you can get at
+`https://docs.otc.t-systems.com/anti-ddos/api-ref/api/anti-ddos_apis`.
+
 # opentelekomcloud_antiddos_v1
 
 Anti-DDoS monitors the service traffic from the Internet to ECSs, ELB instances, and BMSs to detect attack traffic in real time. It then cleans attack traffic according to user-configured defense policies so that services run as normal.

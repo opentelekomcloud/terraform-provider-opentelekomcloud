@@ -2,6 +2,9 @@
 subcategory: "Storage Disaster Recovery Service (SDRS)"
 ---
 
+Up-to-date reference of API arguments for SDRS protection group you can get at
+`https://docs.otc.t-systems.com/storage-disaster-recovery-service/api-ref/sdrs_apis/protection_group`.
+
 # opentelekomcloud_sdrs_protectiongroup_v1
 
 Manages a SDRS protection group resource within OpenTelekomCloud.

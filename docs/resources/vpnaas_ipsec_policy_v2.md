@@ -2,6 +2,9 @@
 subcategory: "Virtual Private Network (VPN)"
 ---
 
+Up-to-date reference of API arguments for VPNAAS ipsec policy service you can get at
+`https://docs.otc.t-systems.com/virtual-private-network/api-ref/native_openstack_apis/ipsec_policy_management`.
+
 # opentelekomcloud_vpnaas_ipsec_policy_v2
 
 Manages a V2 IPSec policy resource within OpenTelekomCloud.

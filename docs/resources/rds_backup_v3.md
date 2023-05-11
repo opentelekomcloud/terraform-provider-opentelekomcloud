@@ -2,6 +2,9 @@
 subcategory: "Relational Database Service (RDS)"
 ---
 
+Up-to-date reference of API arguments for RDS backup rule you can get at
+`https://docs.otc.t-systems.com/relational-database-service/api-ref/api_v3_recommended/backup_and_restoration`.
+
 # opentelekomcloud_rds_backup_v3
 
 Manages a manual RDS backup.

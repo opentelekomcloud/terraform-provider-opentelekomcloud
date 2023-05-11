@@ -2,6 +2,9 @@
 subcategory: "Resource Template Service (RTS)"
 ---
 
+Up-to-date reference of API arguments for RTS stack you can get at
+`https://docs.otc.t-systems.com/resource-template-service/api-ref/apis/stack_management`.
+
 # opentelekomcloud_rts_stack_v1
 
 Provides an OpenTelekomCloud Stack.

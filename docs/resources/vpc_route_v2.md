@@ -2,6 +2,9 @@
 subcategory: "Virtual Private Cloud (VPC)"
 ---
 
+Up-to-date reference of API arguments for VPC route you can get at
+`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/vpc_route`.
+
 # opentelekomcloud_vpc_route_v2
 
 Provides a resource to create a route within OpenTelekomCloud.

@@ -2,6 +2,9 @@
 subcategory: "Virtual Private Cloud (VPC)"
 ---
 
+Up-to-date reference of API arguments for VPC service you can get at
+`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/virtual_private_cloud`.
+
 # opentelekomcloud_vpc_v1
 
 Manages a VPC v1 resource within OpenTelekomCloud.

@@ -2,6 +2,9 @@
 subcategory: "Relational Database Service (RDS)"
 ---
 
+Up-to-date reference of API arguments for RDS instance you can get at
+`https://docs.otc.t-systems.com/relational-database-service/api-ref/api_v1_to_be_discarded/db_instance_management`.
+
 **DEPRECATED**
 # opentelekomcloud_rds_instance_v1
 
@@ -207,12 +210,11 @@ The `datastore` block supports:
 
 * Available value for attributes
 
-type | version
----- | ---
-PostgreSQL | 9.5.5 <br> 9.6.3 <br> 9.6.5
-MySQL| 5.6.33 <br>5.6.30  <br>5.6.34 <br>5.6.35 <br>5.6.36 <br>5.7.17 <br>5.7.20
-SQLServer| 2014 SP2 SE
-
+| type       | version                                                                   |
+|------------|---------------------------------------------------------------------------|
+| PostgreSQL | 9.5.5 <br> 9.6.3 <br> 9.6.5                                               |
+| MySQL      | 5.6.33 <br>5.6.30  <br>5.6.34 <br>5.6.35 <br>5.6.36 <br>5.7.17 <br>5.7.20 |
+| SQLServer  | 2014 SP2 SE                                                               |
 
 The `volume` block supports:
 

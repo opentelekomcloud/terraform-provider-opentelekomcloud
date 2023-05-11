@@ -2,6 +2,9 @@
 subcategory: "Virtual Private Network (VPN)"
 ---
 
+Up-to-date reference of API arguments for VPNAAS ike policy service you can get at
+`https://docs.otc.t-systems.com/virtual-private-network/api-ref/native_openstack_apis/ike_policy_management`.
+
 # opentelekomcloud_vpnaas_ike_policy_v2
 
 Manages a V2 IKE policy resource within OpenTelekomCloud.

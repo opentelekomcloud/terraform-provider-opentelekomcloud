@@ -2,6 +2,9 @@
 subcategory: "Elastic Load Balancer (ELB)"
 ---
 
+Up-to-date reference of API arguments for ELB listener you can get at
+`https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v2.0/listener`.
+
 # opentelekomcloud_lb_listener_v2
 
 Manages an Enhanced LB listener resource within OpenTelekomCloud.

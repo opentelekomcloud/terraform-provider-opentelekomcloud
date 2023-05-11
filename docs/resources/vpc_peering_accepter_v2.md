@@ -2,6 +2,9 @@
 subcategory: "Virtual Private Cloud (VPC)"
 ---
 
+Up-to-date reference of API arguments for VPC peering accepter you can get at
+`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/vpc_peering_connection`.
+
 # opentelekomcloud_vpc_peering_connection_accepter_v2
 
 Provides a resource to manage the accepter's side of a VPC Peering Connection within OpenTelekomCloud.

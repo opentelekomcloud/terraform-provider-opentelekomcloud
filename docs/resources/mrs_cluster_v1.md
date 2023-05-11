@@ -2,6 +2,9 @@
 subcategory: "MapReduce Service (MRS)"
 ---
 
+Up-to-date reference of API arguments for MRS cluster you can get at
+`https://docs.otc.t-systems.com/mapreduce-service/api-ref/apis/cluster_management_apis_v1`.
+
 # opentelekomcloud_mrs_cluster_v1
 
 Manages resource cluster within OpenTelekomCloud MRS.

@@ -1,6 +1,10 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
 ---
+
+Up-to-date reference of API arguments for VPC bandwidth you can get at
+`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/bandwidth_v2.0`.
+
 # opentelekomcloud_vpc_bandwidth_v2
 
 Provides a resource to create a shared bandwidth within Open Telekom Cloud.

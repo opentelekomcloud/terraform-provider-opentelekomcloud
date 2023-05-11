@@ -2,6 +2,9 @@
 subcategory: "Key Management Service (KMS)"
 ---
 
+Up-to-date reference of API arguments for KMS you can get at
+`https://docs.otc.t-systems.com/key-management-service/api-ref/apis`.
+
 # opentelekomcloud_kms_key_v1
 
 Manages a V1 KMS key resource within OpenTelekomCloud.

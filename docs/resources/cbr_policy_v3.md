@@ -2,6 +2,9 @@
 subcategory: "Cloud Backup and Recovery (CBR)"
 ---
 
+Up-to-date reference of API arguments for CBR policy you can get at
+`https://docs.otc.t-systems.com/cloud-backup-recovery/api-ref/cbr_apis/policies`.
+
 # opentelekomcloud_cbr_policy_v3
 
 Manages a V3 CBR policy resource within OpenTelekomCloud.

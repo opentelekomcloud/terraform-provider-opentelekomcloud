@@ -2,6 +2,9 @@
 subcategory: "Relational Database Service (RDS)"
 ---
 
+Up-to-date reference of API arguments for RDS replica you can get at
+`https://docs.otc.t-systems.com/relational-database-service/api-ref/api_v3_recommended/db_instance_management`.
+
 # opentelekomcloud_rds_read_replica_v3
 
 Manages a RDSv3 read replica resource within OpenTelekomCloud.

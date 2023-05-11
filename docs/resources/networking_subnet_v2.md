@@ -2,6 +2,9 @@
 subcategory: "Virtual Private Cloud (VPC)"
 ---
 
+Up-to-date reference of API arguments for VPC subnet rule you can get at
+`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/native_openstack_neutron_apis_v2.0/subnet`.
+
 # opentelekomcloud_networking_subnet_v2
 
 Manages a V2 Neutron subnet resource within OpenTelekomCloud.
