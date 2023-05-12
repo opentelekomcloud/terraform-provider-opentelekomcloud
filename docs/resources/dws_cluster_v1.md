@@ -2,6 +2,9 @@
 subcategory: "Data Warehouse Service (DWS)"
 ---
 
+Up-to-date reference of API arguments for DWS cluster you can get at
+`https://docs.otc.t-systems.com/data-warehouse-service/api-ref/api_description/cluster_management_apis`.
+
 # opentelekomcloud_dws_cluster_v1
 
 Manages Cluster in the Data Warehouse Service.

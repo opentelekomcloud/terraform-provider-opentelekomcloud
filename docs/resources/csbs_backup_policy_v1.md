@@ -2,6 +2,9 @@
 subcategory: "Cloud Server Backup Service (CSBS)"
 ---
 
+Up-to-date reference of API arguments for CSBS backup policy you can get at
+`https://docs.otc.t-systems.com/cloud-server-backup-service/api-ref/api_description/backup_policy_management`.
+
 # opentelekomcloud_csbs_backup_policy_v1
 
 Provides an OpenTelekomCloud Backup Policy of Resources.

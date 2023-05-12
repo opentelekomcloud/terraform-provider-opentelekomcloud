@@ -2,6 +2,9 @@
 subcategory: "NAT"
 ---
 
+Up-to-date reference of API arguments for NAT gateway you can get at
+`https://docs.otc.t-systems.com/nat-gateway/api-ref/api_v2.0/nat_gateway_service`.
+
 # opentelekomcloud_nat_gateway_v2
 
 Manages a V2 NAT Gateway resource within OpenTelekomCloud.

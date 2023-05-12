@@ -2,6 +2,9 @@
 subcategory: "Virtual Private Cloud (VPC)"
 ---
 
+Up-to-date reference of API arguments for VPC bandwidth association you can get at
+`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/bandwidth_v2.0`.
+
 # opentelekomcloud_vpc_bandwidth_associate_v2
 
 Provides a resource to associate floating IP with a shared bandwidth within Open Telekom Cloud.

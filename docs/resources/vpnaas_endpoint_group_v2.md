@@ -2,6 +2,9 @@
 subcategory: "Virtual Private Network (VPN)"
 ---
 
+Up-to-date reference of API arguments for VPNAAS endpoint group you can get at
+`https://docs.otc.t-systems.com/virtual-private-network/api-ref/native_openstack_apis/vpn_endpoint_group_management`.
+
 # opentelekomcloud_vpnaas_endpoint_group_v2
 
 Manages a V2 Endpoint Group resource within OpenTelekomCloud.

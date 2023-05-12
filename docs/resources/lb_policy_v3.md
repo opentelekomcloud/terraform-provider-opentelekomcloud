@@ -2,6 +2,9 @@
 subcategory: "Dedicated Load Balancer (DLB)"
 ---
 
+Up-to-date reference of API arguments for DLB policy you can get at
+`https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v3/forwarding_policy`.
+
 # opentelekomcloud_lb_policy_v3
 
 Manages a Dedicated Load Balancer Policy resource within OpenTelekomCloud.

@@ -2,6 +2,9 @@
 subcategory: "Cloud Eye (CES)"
 ---
 
+Up-to-date reference of API arguments for CES alarm rule you can get at
+`https://docs.otc.t-systems.com/cloud-eye/api-ref/api_description/alarm_rule_managements`.
+
 # opentelekomcloud_ces_alarmrule
 
 Manages a V1 CES Alarm Rule resource within OpenTelekomCloud.

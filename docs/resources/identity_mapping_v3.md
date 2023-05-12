@@ -2,6 +2,9 @@
 subcategory: "Identity and Access Management (IAM)"
 ---
 
+Up-to-date reference of API arguments for IAM mapping you can get at
+`https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/federated_identity_authentication_management/mapping`.
+
 # opentelekomcloud_identity_mapping_v3
 
 -> You _must_ have security admin privileges in your OpenTelekomCloud

@@ -2,6 +2,9 @@
 subcategory: "Virtual Private Cloud (VPC)"
 ---
 
+Up-to-date reference of API arguments for VPC router route you can get at
+`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/native_openstack_neutron_apis_v2.0/router`.
+
 # opentelekomcloud_networking_router_route_v2
 
 Creates a routing entry on a OpenTelekomCloud V2 router.

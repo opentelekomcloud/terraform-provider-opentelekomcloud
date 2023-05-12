@@ -2,6 +2,9 @@
 subcategory: "Dedicated Load Balancer (DLB)"
 ---
 
+Up-to-date reference of API arguments for DLB l7 rule you can get at
+`https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v3/forwarding_rule`.
+
 # opentelekomcloud_lb_rule_v3
 
 Manages a Dedicated Load Balancer Rule resource within OpenTelekomCloud.

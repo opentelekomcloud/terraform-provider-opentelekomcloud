@@ -2,6 +2,9 @@
 subcategory: "Image Management Service (IMS)"
 ---
 
+Up-to-date reference of API arguments for Image sharing accept you can get at
+`https://docs.otc.t-systems.com/image-management-service/api-ref/native_openstack_apis/image_sharing_native_openstack_apis`.
+
 # opentelekomcloud_images_image_access_v2
 
 Manages membership status for the shared OpenTelekomCloud Glance Image within the destination project, which has a member proposal.

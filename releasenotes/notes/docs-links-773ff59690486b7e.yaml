@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[DOCS]** links to doc portal in ``docs/resources/*`` (`#2167 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2167>`_)

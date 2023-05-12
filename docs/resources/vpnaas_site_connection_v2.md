@@ -2,6 +2,9 @@
 subcategory: "Virtual Private Network (VPN)"
 ---
 
+Up-to-date reference of API arguments for VPNAAS site connection you can get at
+`https://docs.otc.t-systems.com/virtual-private-network/api-ref/native_openstack_apis/ipsec_connection_management`.
+
 # opentelekomcloud_vpnaas_site_connection_v2
 
 Manages a V2 site connection resource within OpenTelekomCloud.

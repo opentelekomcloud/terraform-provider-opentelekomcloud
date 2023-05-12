@@ -2,6 +2,9 @@
 subcategory: "Object Storage Service (OBS)"
 ---
 
+Up-to-date reference of API arguments for OBS bucket policy you can get at
+`https://docs.otc.t-systems.com/object-storage-service/api-ref/apis/advanced_bucket_settings`.
+
 # opentelekomcloud_obs_bucket_policy
 
 Attaches a policy to an OBS bucket resource within OpenTelekomCloud.

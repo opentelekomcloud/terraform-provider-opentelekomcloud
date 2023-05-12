@@ -2,6 +2,9 @@
 subcategory: "Relational Database Service (RDS)"
 ---
 
+Up-to-date reference of API arguments for RDS instance rule you can get at
+`https://docs.otc.t-systems.com/relational-database-service/api-ref/api_v3_recommended/db_instance_management`.
+
 # opentelekomcloud_rds_instance_v3
 
 Manages RDS instance v3 resource.

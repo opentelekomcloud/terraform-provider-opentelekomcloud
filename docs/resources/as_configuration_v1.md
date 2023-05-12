@@ -2,6 +2,9 @@
 subcategory: "Autoscaling"
 ---
 
+Up-to-date reference of API arguments for AS configuration you can get at
+`https://docs.otc.t-systems.com/auto-scaling/api-ref/apis/as_configurations`.
+
 # opentelekomcloud_as_configuration_v1
 
 Manages a V1 AS Configuration resource within OpenTelekomCloud.

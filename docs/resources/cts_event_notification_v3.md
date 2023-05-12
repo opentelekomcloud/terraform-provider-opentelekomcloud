@@ -2,6 +2,9 @@
 subcategory: "Cloud Trace Service (CTS)"
 ---
 
+Up-to-date reference of API arguments for CTS event notification you can get at
+`https://docs.otc.t-systems.com/cloud-trace-service/api-ref/api_description/key_event_notification_management`.
+
 # opentelekomcloud_cts_event_notification_v3
 
 Allows to send SMS, email, or HTTP/HTTPS notifications through pre-configured SMN topics to subscribers.

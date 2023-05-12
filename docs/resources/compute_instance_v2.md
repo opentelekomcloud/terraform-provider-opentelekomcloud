@@ -2,6 +2,10 @@
 subcategory: "Elastic Cloud Server (ECS)"
 ---
 
+Up-to-date reference of API arguments for ECS management you can get at
+`https://docs.otc.t-systems.com/elastic-cloud-server/api-ref/openstack_nova_apis/lifecycle_management`.
+
+
 # opentelekomcloud_compute_instance_v2
 
 Manages a V2 VM instance resource within OpenTelekomCloud.

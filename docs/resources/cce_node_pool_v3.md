@@ -2,6 +2,9 @@
 subcategory: "Cloud Container Engine (CCE)"
 ---
 
+Up-to-date reference of API arguments for CCE cluster node pool you can get at
+`https://docs.otc.t-systems.com/cloud-container-engine/api-ref/apis/cluster_management`.
+
 # opentelekomcloud_cce_node_pool_v3
 
 Provides a node pool resource management of a container cluster.

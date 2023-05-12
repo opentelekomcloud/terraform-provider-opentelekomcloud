@@ -2,6 +2,9 @@
 subcategory: "Dedicated Load Balancer (DLB)"
 ---
 
+Up-to-date reference of API arguments for DLB certificate you can get at
+`https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v3/certificate`.
+
 # opentelekomcloud_lb_certificate_v3
 
 Manages a V3 certificate resource within OpenTelekomCloud.

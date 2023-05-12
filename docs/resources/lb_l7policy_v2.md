@@ -2,6 +2,9 @@
 subcategory: "Elastic Load Balancer (ELB)"
 ---
 
+Up-to-date reference of API arguments for ELB l7 policy you can get at
+`https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v2.0/forwarding_policy`.
+
 # opentelekomcloud_lb_l7policy_v2
 
 Manages a Load Balancer L7 Policy resource within OpenTelekomCloud.

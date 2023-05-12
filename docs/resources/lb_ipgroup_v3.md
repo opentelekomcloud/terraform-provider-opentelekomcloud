@@ -2,6 +2,9 @@
 subcategory: "Dedicated Load Balancer (DLB)"
 ---
 
+Up-to-date reference of API arguments for DLB ip group you can get at
+`https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v3/ip_address_group`.
+
 # opentelekomcloud_lb_ipgroup_v3
 
 Manages a Dedicated Load Balancer IP address group resource within OpenTelekomCloud.

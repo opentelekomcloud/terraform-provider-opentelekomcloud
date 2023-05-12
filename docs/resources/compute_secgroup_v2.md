@@ -2,6 +2,9 @@
 subcategory: "Elastic Cloud Server (ECS)"
 ---
 
+Up-to-date reference of API arguments for ECS security group management you can get at
+`https://docs.otc.t-systems.com/elastic-cloud-server/api-ref/openstack_nova_apis/security_group_management`.
+
 # opentelekomcloud_compute_secgroup_v2
 
 Manages a V2 security group resource within OpenTelekomCloud.

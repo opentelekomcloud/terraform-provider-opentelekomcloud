@@ -1,6 +1,9 @@
 ---
-subcategory: "Firewall"
+subcategory: "Virtual Private Cloud (VPC)"
 ---
+
+Up-to-date reference of API arguments for VPC firewall group you can get at
+`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/native_openstack_neutron_apis_v2.0/firewall`.
 
 # opentelekomcloud_fw_firewall_group_v2
 

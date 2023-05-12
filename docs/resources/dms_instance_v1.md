@@ -2,6 +2,9 @@
 subcategory: "Distributed Message Service (DMS)"
 ---
 
+Up-to-date reference of API arguments for DMS instance you can get at
+`https://docs.otc.t-systems.com/distributed-message-service/api-ref/out-of-date_apis/api_v1/apis_for_managing_instances`.
+
 # opentelekomcloud_dms_instance_v1
 
 Manages a DMS instance in the OpenTelekomCloud DMS Service (Kafka Premium/Platinum).

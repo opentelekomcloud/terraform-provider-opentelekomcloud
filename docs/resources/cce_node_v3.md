@@ -2,6 +2,9 @@
 subcategory: "Cloud Container Engine (CCE)"
 ---
 
+Up-to-date reference of API arguments for CCE cluster node you can get at
+`https://docs.otc.t-systems.com/cloud-container-engine/api-ref/apis/cluster_management`.
+
 # opentelekomcloud_cce_node_v3
 
 Add a node to a container cluster.
