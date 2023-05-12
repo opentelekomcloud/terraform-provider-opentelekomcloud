@@ -252,10 +252,9 @@ func ResourceDcsInstanceV1() *schema.Resource {
 				Computed: true,
 			},
 			"enable_whitelist": {
-				Type:         schema.TypeBool,
-				Computed:     true,
-				Optional:     true,
-				RequiredWith: []string{"whitelist"},
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"whitelist": {
 				Type:     schema.TypeSet,
@@ -273,7 +272,6 @@ func ResourceDcsInstanceV1() *schema.Resource {
 						},
 					},
 				},
-				RequiredWith: []string{"enable_whitelist"},
 			},
 		},
 	}
@@ -558,10 +556,19 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 				whitelistGroups = append(whitelistGroups, resourceMap)
 			}
 
-			mErr = multierror.Append(
-				d.Set("enable_whitelist", w.Enable),
-				d.Set("whitelist", whitelistGroups),
-			)
+			if len(whitelistGroups) > 0 {
+				mErr = multierror.Append(
+					d.Set("enable_whitelist", w.Enable),
+					d.Set("whitelist", whitelistGroups),
+				)
+				if err := mErr.ErrorOrNil(); err != nil {
+					return diag.FromErr(err)
+				}
+			} else {
+				if err := d.Set("enable_whitelist", false); err != nil {
+					return diag.FromErr(err)
+				}
+			}
 		}
 	}
 
@@ -625,7 +632,7 @@ func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	if d.HasChange("enable_whitelist") || d.HasChange("whitelist") {
+	if d.HasChanges("enable_whitelist", "whitelist") {
 		getResp, err := whitelists.Get(client, d.Id())
 		if err != nil {
 			return diag.FromErr(err)
