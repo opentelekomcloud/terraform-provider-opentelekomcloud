@@ -187,8 +187,6 @@ The following attributes are exported:
 
 * `capacity` - See Argument Reference above.
 
-* `access_user` - See Argument Reference above.
-
 * `password` - See Argument Reference above.
 
 * `vpc_id` - See Argument Reference above.
