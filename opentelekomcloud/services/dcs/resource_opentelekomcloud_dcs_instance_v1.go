@@ -252,10 +252,9 @@ func ResourceDcsInstanceV1() *schema.Resource {
 				Computed: true,
 			},
 			"enable_whitelist": {
-				Type:         schema.TypeBool,
-				Computed:     true,
-				Optional:     true,
-				RequiredWith: []string{"whitelist"},
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
 			},
 			"whitelist": {
 				Type:     schema.TypeSet,
@@ -273,7 +272,6 @@ func ResourceDcsInstanceV1() *schema.Resource {
 						},
 					},
 				},
-				RequiredWith: []string{"enable_whitelist"},
 			},
 		},
 	}
@@ -467,7 +465,7 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 		stateConf := &resource.StateChangeConf{
 			Pending: []string{"UPDATING"},
 			Target:  []string{"SUCCESS"},
-			Refresh: dcsInstanceV1WhitelistRefreshFunc(client, d.Id(), nil),
+			Refresh: dcsInstanceV1WhitelistRefreshFunc(client, d.Id()),
 			Timeout: d.Timeout(schema.TimeoutCreate),
 			Delay:   4 * time.Second,
 		}
@@ -562,6 +560,9 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 				d.Set("enable_whitelist", w.Enable),
 				d.Set("whitelist", whitelistGroups),
 			)
+			if err := mErr.ErrorOrNil(); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 
@@ -625,21 +626,19 @@ func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	if d.HasChange("enable_whitelist") || d.HasChange("whitelist") {
-		getResp, err := whitelists.Get(client, d.Id())
-		if err != nil {
-			return diag.FromErr(err)
-		}
+	if d.HasChanges("enable_whitelist", "whitelist") {
+		enable := d.Get("enable_whitelist").(bool)
 		whitelistOpts := getInstanceWhitelistOpts(d)
 		if err := whitelists.Put(client, d.Id(), whitelistOpts); err != nil {
 			return fmterr.Errorf("error updating redis whitelist of DCS instance: %w", err)
 		}
 		stateConf := &resource.StateChangeConf{
-			Pending: []string{"UPDATING"},
-			Target:  []string{"SUCCESS"},
-			Refresh: dcsInstanceV1WhitelistRefreshFunc(client, d.Id(), getResp),
-			Timeout: d.Timeout(schema.TimeoutCreate),
-			Delay:   4 * time.Second,
+			Pending:      []string{strconv.FormatBool(!enable)},
+			Target:       []string{strconv.FormatBool(enable)},
+			Refresh:      refreshForWhiteListEnableStatus(client, d.Id()),
+			Timeout:      d.Timeout(schema.TimeoutUpdate),
+			Delay:        5 * time.Second,
+			PollInterval: 5 * time.Second,
 		}
 
 		_, err = stateConf.WaitForStateContext(ctx)
@@ -714,15 +713,21 @@ func dcsInstanceV1ConfigStateRefreshFunc(client *golangsdk.ServiceClient, instan
 	}
 }
 
-func dcsInstanceV1WhitelistRefreshFunc(client *golangsdk.ServiceClient, instanceID string, getResp *whitelists.Whitelist) resource.StateRefreshFunc {
+func refreshForWhiteListEnableStatus(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		r, err := whitelists.Get(client, instanceID)
+		if err != nil {
+			return nil, "", err
+		}
+		return r, strconv.FormatBool(r.Enable), nil
+	}
+}
+
+func dcsInstanceV1WhitelistRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		v, err := whitelists.Get(client, instanceID)
 		if err != nil {
 			return nil, "", err
-		}
-		// first logical condition - on resource creation, second - on update
-		if getResp == nil && len(v.Groups) == 0 || v == getResp {
-			return v, "UPDATING", nil
 		}
 		return v, "SUCCESS", nil
 	}
