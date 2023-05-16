@@ -57,16 +57,18 @@ func ResourceNetworkingSecGroupRuleV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"port_range_min": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				RequiredWith: []string{"protocol"},
 			},
 			"port_range_max": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				RequiredWith: []string{"port_range_min"},
 			},
 			"protocol": {
 				Type:     schema.TypeString,
@@ -113,21 +115,9 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	portRangeMin := d.Get("port_range_min").(int)
-	portRangeMax := d.Get("port_range_max").(int)
-	protocol := d.Get("protocol").(string)
-
-	if protocol == "" {
-		if portRangeMin != 0 || portRangeMax != 0 {
-			return fmterr.Errorf("A protocol must be specified when using port_range_min and port_range_max")
-		}
-	}
-
 	opts := rules.CreateOpts{
 		Description:    d.Get("description").(string),
 		SecGroupID:     d.Get("security_group_id").(string),
-		PortRangeMin:   &portRangeMin,
-		PortRangeMax:   &portRangeMax,
 		RemoteGroupID:  d.Get("remote_group_id").(string),
 		RemoteIPPrefix: d.Get("remote_ip_prefix").(string),
 		TenantID:       d.Get("tenant_id").(string),
@@ -146,6 +136,12 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 	if v, ok := d.GetOk("protocol"); ok {
 		protocol := resourceNetworkingSecGroupRuleV2DetermineProtocol(v.(string))
 		opts.Protocol = protocol
+
+		portRangeMin := d.Get("port_range_min").(int)
+		opts.PortRangeMin = &portRangeMin
+
+		portRangeMax := d.Get("port_range_max").(int)
+		opts.PortRangeMax = &portRangeMax
 	}
 
 	log.Printf("[DEBUG] Create OpenTelekomCloud Neutron security group: %#v", opts)
