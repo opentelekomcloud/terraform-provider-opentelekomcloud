@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[DCS]** Removed `access_user` from documentation for ``resource/opentelekomcloud_dcs_instance_v1`` (`#2172 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2172>`_)
+
