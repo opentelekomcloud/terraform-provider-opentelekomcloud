@@ -72,7 +72,7 @@ func ResourceDcsInstanceV1() *schema.Resource {
 			"password": {
 				Type:      schema.TypeString,
 				Sensitive: true,
-				Required:  true,
+				Optional:  true,
 				ForceNew:  true,
 			},
 			"vpc_id": {
@@ -198,6 +198,10 @@ func ResourceDcsInstanceV1() *schema.Resource {
 						},
 					},
 				},
+			},
+			"no_password_access": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"order_id": {
 				Type:     schema.TypeString,
@@ -531,6 +535,7 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("maintain_begin", v.MaintainBegin),
 		d.Set("maintain_end", v.MaintainEnd),
 		d.Set("ip", v.IP),
+		d.Set("no_password_access", v.NoPasswordAccess),
 	)
 
 	if v.EngineVersion == "3.0" {

@@ -109,7 +109,7 @@ The following arguments are supported:
   For a DCS Redis instance in cluster mode, the cache capacity can be `64`, `128`, `256`, `512` GB.
   Changing this creates a new instance.
 
-* `password` - (Required) Indicates the password of an instance. An instance password
+* `password` - (Optional) Indicates the password of an instance. An instance password
   must meet the following complexity requirements: Must be 8 to 32 characters long.
   Must contain at least 3 of the following character types: lowercase letters, uppercase
   letters, digits, and special characters (`~!@#$%^&*()-_=+\|[{}]:'",<.>/?).
@@ -247,3 +247,13 @@ The following attributes are exported:
   `RESTARTING`, `EXTENDING`, `RESTORING`
 
 * `created_at` - Time at which the DCS instance is created. For example, `2017-03-31T12:24:46.297Z`.
+
+* `no_password_access` - An indicator of whether a DCS instance can be accessed in password-free mode.
+  `true` when password not set.
+
+## Import
+
+DCS instance can be imported using  `instance_name`, e.g.
+```shell
+$ terraform import opentelekomcloud_dcs_instance_v1.instance instance_name
+```
