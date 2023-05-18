@@ -72,7 +72,7 @@ The `instances` block supports:
 
 * `key_pair` - The key pair that is used to authenticate the instance.
 
-* `security_groups` - An array of one or more security group Names to associate with the instance.
+* `security_groups_ids` - An array of one or more security group Ids to associate with the instance.
 
 * `availability_zone` - The availability zone of this server.
 
