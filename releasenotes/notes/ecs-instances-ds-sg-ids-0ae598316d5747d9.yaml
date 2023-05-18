@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ECS]** Storing security groups ids in ``data-source/opentelekomcloud_compute_instances_v2`` (`#2178 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2178>`_)
