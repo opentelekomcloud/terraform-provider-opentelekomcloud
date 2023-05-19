@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[RDS]** Additional test for `parameters` block in ``resource/opentelekomcloud_rds_instance_v3`` (`#2179 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2179>`_)
