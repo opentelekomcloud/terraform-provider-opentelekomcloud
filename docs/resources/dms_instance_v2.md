@@ -138,6 +138,7 @@ The following arguments are supported:
 
 * `access_user` - (Optional) Indicates a username. A username consists of 4 to 64 characters
   and supports only letters, digits, and hyphens (-).
+  * Providing `access_user` and `password` enables `ssl` for the instance.
 
 * `password` - (Optional) Indicates the password of an instance. An instance password
   must meet the following complexity requirements: Must be 8 to 32 characters long.
