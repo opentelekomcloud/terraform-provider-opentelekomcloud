@@ -1,4 +1,4 @@
 ---
 enhancements:
   - |
-    **[DMS]** Add new resource ``resource/opentelekomcloud_dms_user_permission_v1`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[DMS]** Add new resource ``resource/opentelekomcloud_dms_user_permission_v1`` (`#2181 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2181>`_)
