@@ -41,6 +41,7 @@ func ResourceLTSTransferV2() *schema.Resource {
 			"obs_bucket_name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"storage_format": {
 				Type:     schema.TypeString,
