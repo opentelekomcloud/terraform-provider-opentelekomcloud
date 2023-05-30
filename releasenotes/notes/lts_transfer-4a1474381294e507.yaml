@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[LTS]** New LTS transfer resource ``resource/opentelekomcloud_logtank_transfer_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
