@@ -12,9 +12,9 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
-func DataSourceCceAddonTemplatesV3() *schema.Resource {
+func DataSourceCceAddonTemplateV3() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceCceAddonTemplatesV3Read,
+		ReadContext: dataSourceCceAddonTemplateV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"addon_version": {
@@ -56,7 +56,7 @@ func DataSourceCceAddonTemplatesV3() *schema.Resource {
 	}
 }
 
-func dataSourceCceAddonTemplatesV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceCceAddonTemplateV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {

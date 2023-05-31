@@ -19,7 +19,7 @@ data "opentelekomcloud_cce_addon_template_v3" "template" {
 
 The following arguments are supported:
 
-* `addon_version` -  (Required) The version of the CCE cluster. For example: `1.23.6`.
+* `addon_version` -  (Required) The version of the CCE cluster addon. For example: `1.23.6`.
 
 * `addon_name` - (Required) The name of the CCE addon. For example: `autoscaler`.
 
