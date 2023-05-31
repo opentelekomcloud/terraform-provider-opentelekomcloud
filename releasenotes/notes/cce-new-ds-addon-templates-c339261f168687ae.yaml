@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Data Source:** ``opentelekomcloud_cce_addon_templates_v3`` (`#2184 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2184>`_)
