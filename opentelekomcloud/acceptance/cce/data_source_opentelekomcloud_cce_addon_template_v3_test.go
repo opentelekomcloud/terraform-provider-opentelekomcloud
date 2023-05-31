@@ -9,7 +9,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccCCEAddonTemplatesV3DataSource_basic(t *testing.T) {
+func TestAccCCEAddonTemplateV3DataSource_basic(t *testing.T) {
 	dataSourceName := "data.opentelekomcloud_cce_addon_template_v3.template"
 
 	resource.Test(t, resource.TestCase{
@@ -19,7 +19,7 @@ func TestAccCCEAddonTemplatesV3DataSource_basic(t *testing.T) {
 			{
 				Config: testAccCCEAddonTemplateMappingV3DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCEAddonTemplatesV3DataSourceID(dataSourceName),
+					testAccCheckCCEAddonTemplateV3DataSourceID(dataSourceName),
 					resource.TestCheckResourceAttr(dataSourceName, "cluster_versions", "v1.(15|17|19|21).*"),
 					resource.TestCheckResourceAttr(dataSourceName, "image_version", ""),
 					resource.TestCheckResourceAttr(dataSourceName, "swr_addr", "100.125.7.25:20202"),
@@ -30,7 +30,7 @@ func TestAccCCEAddonTemplatesV3DataSource_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckCCEAddonTemplatesV3DataSourceID(n string) resource.TestCheckFunc {
+func testAccCheckCCEAddonTemplateV3DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
