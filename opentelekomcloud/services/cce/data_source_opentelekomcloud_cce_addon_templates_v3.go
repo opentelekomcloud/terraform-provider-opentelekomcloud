@@ -185,13 +185,13 @@ func unpackVersions(version []string) []string {
 func matchVersion(version, pattern string) bool {
 	match, _ := regexp.MatchString("^"+pattern+"$", version)
 	if match {
-		return true
+		return match
 	}
 	// Handle wildcard pattern
 	wildcardPattern := pattern[:len(pattern)-3]
 	match, _ = regexp.MatchString("^"+wildcardPattern+"$", version)
 	if match {
-		return true
+		return match
 	}
-	return false
+	return match
 }
