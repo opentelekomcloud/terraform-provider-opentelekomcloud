@@ -190,8 +190,5 @@ func matchVersion(version, pattern string) bool {
 	// Handle wildcard pattern
 	wildcardPattern := pattern[:len(pattern)-3]
 	match, _ = regexp.MatchString("^"+wildcardPattern+"$", version)
-	if match {
-		return match
-	}
 	return match
 }
