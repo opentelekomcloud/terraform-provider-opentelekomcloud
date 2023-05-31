@@ -404,6 +404,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_lb_whitelist_v2":                    elbv2.ResourceWhitelistV2(),
 			"opentelekomcloud_logtank_group_v2":                   lts.ResourceLTSGroupV2(),
 			"opentelekomcloud_logtank_topic_v2":                   lts.ResourceLTSTopicV2(),
+			"opentelekomcloud_logtank_transfer_v2":                lts.ResourceLTSTransferV2(),
 			"opentelekomcloud_mrs_cluster_v1":                     mrs.ResourceMRSClusterV1(),
 			"opentelekomcloud_mrs_job_v1":                         mrs.ResourceMRSJobV1(),
 			"opentelekomcloud_nat_gateway_v2":                     nat.ResourceNatGatewayV2(),
