@@ -389,10 +389,11 @@ func TestResourceS3BucketObjectAcl_validation(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.Value, func(t *testing.T) {
+			tx := tc
 			t.Parallel()
-			_, errors := s3s.ValidateS3BucketObjectAclType(tc.Value, "acl")
-			if len(errors) != tc.ErrCount {
-				t.Fatalf("Expected to trigger %d validation errors, but got %d", tc.ErrCount, len(errors))
+			_, errors := s3s.ValidateS3BucketObjectAclType(tx.Value, "acl")
+			if len(errors) != tx.ErrCount {
+				t.Fatalf("Expected to trigger %d validation errors, but got %d", tx.ErrCount, len(errors))
 			}
 		})
 	}
@@ -421,9 +422,10 @@ func TestResourceS3BucketObjectStorageClass_validation(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.Value, func(t *testing.T) {
+			tx := tc
 			t.Parallel()
-			_, errors := validateS3BucketObjectStorageClassType(tc.Value, "storage_class")
-			if len(errors) != tc.ErrCount {
+			_, errors := validateS3BucketObjectStorageClassType(tx.Value, "storage_class")
+			if len(errors) != tx.ErrCount {
 				t.Fatalf("Expected not to trigger a validation error")
 			}
 		})
