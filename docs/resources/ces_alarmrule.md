@@ -182,3 +182,11 @@ The following attributes are exported:
   * `ok`: The alarm status is normal;
   * `alarm`: An alarm is generated;
   * `insufficient_data`: The required data is insufficient;
+
+## Import
+
+CES alarms can be imported using alarm rule `id`, e.g.
+
+```sh
+terraform import opentelekomcloud_ces_alarmrule.alarmrule c1881895-cdcb-4d23-96cb-032e6a3ee667
+```
