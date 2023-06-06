@@ -51,6 +51,25 @@ func TestCESAlarmRule_basic(t *testing.T) {
 	})
 }
 
+func TestAccCESAlarmRules_importBasic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testCESAlarmRuleDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testCESAlarmRuleBasic,
+			},
+
+			{
+				ResourceName:      resourceAlarmRuleName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccCheckCESV1AlarmValidation(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

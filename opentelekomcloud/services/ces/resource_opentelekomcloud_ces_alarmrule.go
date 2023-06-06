@@ -27,6 +27,10 @@ func ResourceAlarmRule() *schema.Resource {
 		UpdateContext: resourceAlarmRuleUpdate,
 		DeleteContext: resourceAlarmRuleDelete,
 
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
 		CustomizeDiff: checkCesAlarmRestrictions,
 
 		Timeouts: &schema.ResourceTimeout{
