@@ -50,6 +50,10 @@ The following arguments are supported:
   be a string of `1` to `128` characters that can consist of numbers, lowercase letters,
   uppercase letters, underscores (_), or hyphens (-).
 
+* `alarm_type` - (Optional) Specifies the alarm rule type.
+  `EVENT.SYS`: The alarm rule is created for system events.
+  `EVENT.CUSTOM`: The alarm rule is created for custom events.
+
 * `alarm_description` - (Optional) Alarm description. The value can be a string of `0` to `256` characters.
 
 * `alarm_level` - (Optional) Specifies the alarm severity. The value can be `1`, `2`, `3` or `4`,
@@ -122,6 +126,17 @@ The `condition` block supports:
 
 * `count` - (Required) Specifies the number of consecutive occurrence times.
   The value ranges from `1` to `5`.
+
+* `alarm_frequency` - (Optional) Specifies frequency for alarm triggering. If argument is not provided alarm will be triggered once.
+  `300`: Cloud Eye triggers the alarm every 5 minutes.
+  `600`: Cloud Eye triggers the alarm every 10 minutes.
+  `900`: Cloud Eye triggers the alarm every 15 minutes.
+  `1800`: Cloud Eye triggers the alarm every 30 minutes.
+  `3600`: Cloud Eye triggers the alarm every hour.
+  `10800`: Cloud Eye triggers the alarm every 3 hours.
+  `21600`: Cloud Eye triggers the alarm every 6 hours.
+  `43200`: Cloud Eye triggers the alarm every 12 hours.
+  `86400`: Cloud Eye triggers the alarm every day.
 
 the `alarm_actions` block supports:
 
