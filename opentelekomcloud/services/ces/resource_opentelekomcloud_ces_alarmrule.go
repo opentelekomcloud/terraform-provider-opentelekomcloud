@@ -65,6 +65,15 @@ func ResourceAlarmRule() *schema.Resource {
 				Default:      2,
 				ValidateFunc: validation.IntBetween(1, 4),
 			},
+			"alarm_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"EVENT.SYS", "EVENT.CUSTOM",
+				}, false),
+			},
 			"metric": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -179,6 +188,14 @@ func ResourceAlarmRule() *schema.Resource {
 							Required:     true,
 							ForceNew:     true,
 							ValidateFunc: validation.IntBetween(1, 5),
+						},
+						"alarm_frequency": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							ForceNew: true,
+							ValidateFunc: validation.IntInSlice([]int{
+								0, 300, 600, 900, 1800, 3600, 10800, 21600, 43200, 86400,
+							}),
 						},
 					},
 				},
@@ -320,6 +337,7 @@ func resourceAlarmRuleCreate(ctx context.Context, d *schema.ResourceData, meta i
 	conditionElement := conditionListRaw[0].(map[string]interface{})
 	createOpts := alarms.CreateAlarmOpts{
 		AlarmName:          d.Get("alarm_name").(string),
+		AlarmType:          d.Get("alarm_type").(string),
 		AlarmDescription:   d.Get("alarm_description").(string),
 		AlarmLevel:         d.Get("alarm_level").(int),
 		AlarmActions:       getAlarmAction(d, "alarm_actions"),
@@ -334,6 +352,7 @@ func resourceAlarmRuleCreate(ctx context.Context, d *schema.ResourceData, meta i
 			Value:              conditionElement["value"].(float64),
 			Unit:               conditionElement["unit"].(string),
 			Count:              conditionElement["count"].(int),
+			SuppressDuration:   conditionElement["alarm_frequency"].(int),
 		},
 	}
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -393,6 +412,7 @@ func resourceAlarmRuleRead(ctx context.Context, d *schema.ResourceData, meta int
 			"value":               alarm.Condition.Value,
 			"unit":                alarm.Condition.Unit,
 			"count":               alarm.Condition.Count,
+			"alarm_frequency":     alarm.Condition.SuppressDuration,
 		},
 	}
 
@@ -420,6 +440,7 @@ func resourceAlarmRuleRead(ctx context.Context, d *schema.ResourceData, meta int
 
 	mErr := multierror.Append(
 		d.Set("alarm_name", alarm.AlarmName),
+		d.Set("alarm_type", alarm.AlarmType),
 		d.Set("alarm_description", alarm.AlarmDescription),
 		d.Set("alarm_level", alarm.AlarmLevel),
 		d.Set("metric", metricInfo),
