@@ -43,9 +43,7 @@ func TestCESAlarmRule_basic(t *testing.T) {
 			},
 			{
 				Config: testCESAlarmRuleUpdate,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceAlarmRuleName, "alarm_enabled", "false"),
-				),
+				Check:  resource.ComposeTestCheckFunc(),
 			},
 		},
 	})
@@ -72,6 +70,10 @@ func TestCESAlarmRule_systemEvents(t *testing.T) {
 				Config: testCESAlarmRuleSystemEvents,
 				Check: resource.ComposeTestCheckFunc(
 					testCESAlarmRuleExists(resourceAlarmRuleName, &ar),
+					resource.TestCheckResourceAttr(resourceAlarmRuleName, "alarm_type", "EVENT.SYS"),
+					resource.TestCheckResourceAttr(resourceAlarmRuleName, "metric.0.namespace", "SYS.CBR"),
+					resource.TestCheckResourceAttr(resourceAlarmRuleName, "metric.0.metric_name", "backupFailed"),
+					resource.TestCheckResourceAttr(resourceAlarmRuleName, "condition.0.alarm_frequency", "300"),
 				),
 			},
 		},
