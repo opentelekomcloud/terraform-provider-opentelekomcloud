@@ -100,7 +100,7 @@ func ResourceAlarmRule() *schema.Resource {
 						},
 						"dimensions": {
 							Type:     schema.TypeList,
-							Required: true,
+							Optional: true,
 							MaxItems: 3,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{

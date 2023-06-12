@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[CES]** Update documentation for ``resource/opentelekomcloud_ces_alarmrule`` (`#2190 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2190>`_)

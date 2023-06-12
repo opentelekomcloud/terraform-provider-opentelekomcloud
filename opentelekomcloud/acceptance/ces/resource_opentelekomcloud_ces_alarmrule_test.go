@@ -376,10 +376,6 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
   metric {
     namespace   = "SYS.CBR"
     metric_name = "backupFailed"
-    dimensions {
-      name  = "instance_id"
-      value = "test-id"
-    }
   }
   condition {
     period              = 300
