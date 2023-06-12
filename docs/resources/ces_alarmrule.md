@@ -9,7 +9,12 @@ Up-to-date reference of API arguments for CES alarm rule you can get at
 
 Manages a V1 CES Alarm Rule resource within OpenTelekomCloud.
 
+~>
+  Alarm rule `namespaces` and `dimensions` are available on our [github link](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/devel/opentelekomcloud/services/ces/interconnected_services.md) or [official documentation](https://docs.otc.t-systems.com/cloud-eye/api-ref/appendix/services_interconnected_with_cloud_eye.html).
+
 ## Example Usage
+
+### Basic alarm rule for single ECS monitoring
 
 ```hcl
 variable server_id {}
@@ -37,6 +42,37 @@ resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
 
   alarm_actions {
     type              = "notification"
+    notification_list = [var.smn_topic_id]
+  }
+}
+```
+
+### CBR system event alarm rule to monitor all CBR resources
+
+```hcl
+variable smn_topic_id {}
+
+resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
+  alarm_name = "alarm_rule1"
+  alarm_type = "EVENT.SYS"
+
+  metric {
+    namespace   = "SYS.CBR"
+    metric_name = "backupFailed"
+  }
+  condition {
+    period              = 300
+    filter              = "average"
+    comparison_operator = ">"
+    value               = 6
+    unit                = "B/s"
+    count               = 1
+    alarm_frequency     = 300
+  }
+  alarm_action_enabled = false
+
+  alarm_actions {
+    type = "notification"
     notification_list = [var.smn_topic_id]
   }
 }
@@ -89,11 +125,13 @@ The `metric` block supports:
 
 * `metric_name` - (Required) Specifies the metric name. The value can be a string
   of `1` to `64` characters that must start with a letter and can consists of uppercase
-  letters, lowercase letters, numbers, underscores (_) or slashes (/).
+  letters, lowercase letters, numbers, underscores (_) or slashes (/).</br>
+  [Available metrics.](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/devel/opentelekomcloud/services/ces/interconnected_services.md)
 
-* `dimensions` - (Required) Specifies the list of metric dimensions. Currently,
-  the maximum length of the dimension list that are supported is `3`. The structure
-  is described below.
+* `dimensions` - (Optional) Specifies the list of metric dimensions.
+  If CES `alarm_type` is set to `EVENT.SYS` leaving this argument empty will enable monitoring for all service instances.
+  Otherwise, argument is `required`. Currently, the maximum length of the dimension list that are supported is `3`.
+  The structure is described below.
 
 The `dimensions` block supports:
 
@@ -104,6 +142,8 @@ The `dimensions` block supports:
 * `value` - (Required) Specifies the dimension value. The value can be a string
   of `1` to `64` characters that must start with a letter or a number and can consists
   of uppercase letters, lowercase letters, numbers, underscores (_), or hyphens (-).
+
+  ~> [Available dimensions can be checked here.](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/devel/opentelekomcloud/services/ces/interconnected_services.md)
 
 The `condition` block supports:
 
