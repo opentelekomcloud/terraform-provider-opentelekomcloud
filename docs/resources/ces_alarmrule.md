@@ -72,7 +72,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
   alarm_action_enabled = false
 
   alarm_actions {
-    type = "notification"
+    type              = "notification"
     notification_list = [var.smn_topic_id]
   }
 }
