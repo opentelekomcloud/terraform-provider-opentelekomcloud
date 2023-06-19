@@ -162,6 +162,10 @@ func testAccCheckWafDomainV1CertificateChanged(n string, domain *domains.Domain)
 }
 
 const testAccWafDomainV1Basic = `
+variable "content" {
+	default = "<h1>Hello world</h1>"
+}
+
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
 resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
@@ -194,6 +198,13 @@ resource "opentelekomcloud_waf_domain_v1" "domain_1" {
   proxy           = true
   sip_header_name = "default"
   sip_header_list = ["X-Forwarded-For"]
+
+  block_page {
+  	template = "custom"
+	status_code = "200"
+    content_type = "application/json"
+    content = var.content
+  }
 }
 `
 
@@ -232,6 +243,9 @@ resource "opentelekomcloud_waf_domain_v1" "domain_1" {
   certificate_id = opentelekomcloud_waf_certificate_v1.certificate_1.id
   policy_id      = opentelekomcloud_waf_policy_v1.policy_2.id
   proxy          = false
+  block_page {
+  	template = "default"
+  }
 }
 `
 
