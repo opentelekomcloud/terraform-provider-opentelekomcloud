@@ -2,4 +2,4 @@
 enhancements:
   - |
     **[WAF]** Alarm page configuration added for ``resource/opentelekomcloud_waf_domain_v1``
-    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    (`#2192 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2192>`_)
