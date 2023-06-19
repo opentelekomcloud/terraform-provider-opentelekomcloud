@@ -33,6 +33,7 @@ func TestAccWafDomainV1Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceDomainName, "server.0.server_protocol", "HTTP"),
 					resource.TestCheckResourceAttr(resourceDomainName, "server.0.client_protocol", "HTTPS"),
 					resource.TestCheckResourceAttr(resourceDomainName, "cipher", "cipher_1"),
+					resource.TestCheckResourceAttr(resourceDomainName, "block_page.0.template", "default"),
 				),
 			},
 			{
@@ -42,6 +43,9 @@ func TestAccWafDomainV1Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceDomainName, "hostname", "www.b.com"),
 					resource.TestCheckResourceAttr(resourceDomainName, "sip_header_name", ""),
 					resource.TestCheckResourceAttr(resourceDomainName, "cipher", "cipher_default"),
+					resource.TestCheckResourceAttr(resourceDomainName, "block_page.0.template", "custom"),
+					resource.TestCheckResourceAttr(resourceDomainName, "block_page.0.status_code", "200"),
+					resource.TestCheckResourceAttr(resourceDomainName, "block_page.0.content_type", "application/json"),
 				),
 			},
 			{
@@ -162,10 +166,6 @@ func testAccCheckWafDomainV1CertificateChanged(n string, domain *domains.Domain)
 }
 
 const testAccWafDomainV1Basic = `
-variable "content" {
-	default = "<h1>Hello world</h1>"
-}
-
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
 resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
@@ -198,17 +198,17 @@ resource "opentelekomcloud_waf_domain_v1" "domain_1" {
   proxy           = true
   sip_header_name = "default"
   sip_header_list = ["X-Forwarded-For"]
-
   block_page {
-  	template = "custom"
-	status_code = "200"
-    content_type = "application/json"
-    content = var.content
+    template = "default"
   }
 }
 `
 
 const testAccWafDomainV1Update = `
+variable "content" {
+  default = "<h1>Hello world</h1>"
+}
+
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
 resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
@@ -243,8 +243,12 @@ resource "opentelekomcloud_waf_domain_v1" "domain_1" {
   certificate_id = opentelekomcloud_waf_certificate_v1.certificate_1.id
   policy_id      = opentelekomcloud_waf_policy_v1.policy_2.id
   proxy          = false
+
   block_page {
-  	template = "default"
+    template     = "custom"
+    status_code  = "200"
+    content_type = "application/json"
+    content      = var.content
   }
 }
 `
@@ -281,5 +285,8 @@ resource "opentelekomcloud_waf_domain_v1" "domain_1" {
   certificate_id = opentelekomcloud_waf_certificate_v1.certificate_2.id
   policy_id      = opentelekomcloud_waf_policy_v1.policy_2.id
   proxy          = false
+  block_page {
+    template = "default"
+  }
 }
 `
