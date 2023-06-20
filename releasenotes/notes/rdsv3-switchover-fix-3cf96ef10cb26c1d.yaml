@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[RDS]** Fix forcing update after switchover by storing `azs` in computed attribute `availability_zones` in ``resource/opentelekomcloud_rds_instance_v3`` (`#2194 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2194>`_)
+  - |
+    **[RDS]** Temporary fix for PostrgeSQL failed `backup_strategy` setting of `start_time` in ``resource/opentelekomcloud_rds_instance_v3`` (`#2194 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2194>`_)
