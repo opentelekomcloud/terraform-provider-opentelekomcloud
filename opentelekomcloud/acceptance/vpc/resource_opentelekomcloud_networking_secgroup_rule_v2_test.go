@@ -156,7 +156,27 @@ func TestAccNetworkingV2SecGroupRule_ICMP(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2SecGroupRuleICMP,
+				Config: testAccNetworkingV2SecGroupRuleICMPEchoReply,
+				Check: resource.ComposeTestCheckFunc(
+					TestAccCheckNetworkingV2SecGroupExists(resourceNwSecGroupName, &secgroup1),
+					testAccCheckNetworkingV2SecGroupRuleExists(resourceNwSGRuleName, &secgroupRule1),
+					resource.TestCheckResourceAttr(resourceNwSGRuleName, "direction", "ingress"),
+					resource.TestCheckResourceAttr(resourceNwSGRuleName, "port_range_min", "0"),
+					resource.TestCheckResourceAttr(resourceNwSGRuleName, "port_range_max", "0"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2SecGroupRuleICMPAll,
+				Check: resource.ComposeTestCheckFunc(
+					TestAccCheckNetworkingV2SecGroupExists(resourceNwSecGroupName, &secgroup1),
+					testAccCheckNetworkingV2SecGroupRuleExists(resourceNwSGRuleName, &secgroupRule1),
+					resource.TestCheckResourceAttr(resourceNwSGRuleName, "direction", "ingress"),
+					resource.TestCheckResourceAttr(resourceNwSGRuleName, "port_range_min", "0"),
+					resource.TestCheckResourceAttr(resourceNwSGRuleName, "port_range_max", "255"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2SecGroupRuleICMPEcho,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SecGroupExists(resourceNwSecGroupName, &secgroup1),
 					testAccCheckNetworkingV2SecGroupRuleExists(resourceNwSGRuleName, &secgroupRule1),
@@ -340,7 +360,23 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
 }
 `
 
-const testAccNetworkingV2SecGroupRuleICMP = `
+const testAccNetworkingV2SecGroupRuleError = `
+resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
+  name        = "secgroup_1"
+  description = "terraform security group rule acceptance test"
+}
+
+resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
+  direction         = "egress"
+  ethertype         = "IPv4"
+  remote_ip_prefix  = "0.0.0.0/0"
+  port_range_min    = 0
+  port_range_max    = 22
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
+}
+`
+
+const testAccNetworkingV2SecGroupRuleICMPEcho = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name        = "secgroup_1"
   description = "terraform security group rule acceptance test"
@@ -357,18 +393,38 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
 }
 `
 
-const testAccNetworkingV2SecGroupRuleError = `
+const testAccNetworkingV2SecGroupRuleICMPAll = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name        = "secgroup_1"
   description = "terraform security group rule acceptance test"
 }
 
 resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
-  direction         = "egress"
+  description       = "all ICMP ports"
+  direction         = "ingress"
   ethertype         = "IPv4"
+  protocol          = "icmp"
+  port_range_min    = null
+  port_range_max    = null
   remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
+}
+`
+
+const testAccNetworkingV2SecGroupRuleICMPEchoReply = `
+resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
+  name        = "secgroup_1"
+  description = "terraform security group rule acceptance test"
+}
+
+resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
+  description       = "echo ICMP"
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "icmp"
   port_range_min    = 0
-  port_range_max    = 22
+  port_range_max    = 0
+  remote_ip_prefix  = "0.0.0.0/0"
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 }
 `

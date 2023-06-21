@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/rules"
 
@@ -135,13 +136,18 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 
 	if v, ok := d.GetOk("protocol"); ok {
 		protocol := resourceNetworkingSecGroupRuleV2DetermineProtocol(v.(string))
-		opts.Protocol = protocol
 
 		portRangeMin := d.Get("port_range_min").(int)
-		opts.PortRangeMin = &portRangeMin
-
 		portRangeMax := d.Get("port_range_max").(int)
+		opts.PortRangeMin = &portRangeMin
 		opts.PortRangeMax = &portRangeMax
+		opts.Protocol = protocol
+		if opts.Protocol == rules.ProtocolICMP {
+			if checkNull(d, "port_range_min") && checkNull(d, "port_range_max") {
+				opts.PortRangeMin = pointerto.Int(0)
+				opts.PortRangeMax = pointerto.Int(255)
+			}
+		}
 	}
 
 	log.Printf("[DEBUG] Create OpenTelekomCloud Neutron security group: %#v", opts)
@@ -174,13 +180,20 @@ func resourceNetworkingSecGroupRuleV2Read(ctx context.Context, d *schema.Resourc
 		return common.CheckDeletedDiag(d, err, "OpenTelekomCloud Security Group Rule")
 	}
 
+	portRangeMin := securityGroupRule.PortRangeMin
+	portRangeMax := securityGroupRule.PortRangeMax
+	if securityGroupRule.Protocol == "icmp" && portRangeMin == nil && portRangeMax == nil {
+		portRangeMin = pointerto.Int(0)
+		portRangeMax = pointerto.Int(255)
+	}
+
 	mErr := multierror.Append(
 		d.Set("description", securityGroupRule.Description),
 		d.Set("direction", securityGroupRule.Direction),
 		d.Set("ethertype", securityGroupRule.EtherType),
 		d.Set("protocol", securityGroupRule.Protocol),
-		d.Set("port_range_min", securityGroupRule.PortRangeMin),
-		d.Set("port_range_max", securityGroupRule.PortRangeMax),
+		d.Set("port_range_min", portRangeMin),
+		d.Set("port_range_max", portRangeMax),
 		d.Set("remote_group_id", securityGroupRule.RemoteGroupID),
 		d.Set("remote_ip_prefix", securityGroupRule.RemoteIPPrefix),
 		d.Set("security_group_id", securityGroupRule.SecGroupID),
@@ -330,4 +343,9 @@ func waitForSecGroupRuleDelete(client *golangsdk.ServiceClient, secGroupRuleId s
 		log.Printf("[DEBUG] OpenTelekomCloud Neutron Security Group Rule %s still active.\n", secGroupRuleId)
 		return r, "ACTIVE", nil
 	}
+}
+
+func checkNull(d *schema.ResourceData, value string) bool {
+	raw := d.GetRawConfig()
+	return raw.GetAttr(value).IsNull()
 }
