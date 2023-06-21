@@ -178,6 +178,7 @@ func TestAccRdsInstanceV3HA(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "ha_replication_mode", "semisync"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.type", "ULTRAHIGH"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "MySQL"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "availability_zones.#", "2"),
 				),
 			},
 		},

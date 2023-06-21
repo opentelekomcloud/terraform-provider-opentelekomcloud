@@ -434,6 +434,8 @@ The `restore_point` block supports:
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
+* `availability_zones` - Indicates the instance AZs.
+
 * `created` - Indicates the creation time.
 
 * `nodes` - Indicates the instance nodes information. Structure is documented below.
