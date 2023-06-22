@@ -143,9 +143,9 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 		opts.PortRangeMax = &portRangeMax
 		opts.Protocol = protocol
 		if opts.Protocol == rules.ProtocolICMP {
-			if checkNull(d, "port_range_min") && checkNull(d, "port_range_max") {
-				opts.PortRangeMin = pointerto.Int(0)
-				opts.PortRangeMax = pointerto.Int(255)
+			if portRangeMin == 0 && portRangeMax == 255 {
+				opts.PortRangeMin = nil
+				opts.PortRangeMax = nil
 			}
 		}
 	}
@@ -343,9 +343,4 @@ func waitForSecGroupRuleDelete(client *golangsdk.ServiceClient, secGroupRuleId s
 		log.Printf("[DEBUG] OpenTelekomCloud Neutron Security Group Rule %s still active.\n", secGroupRuleId)
 		return r, "ACTIVE", nil
 	}
-}
-
-func checkNull(d *schema.ResourceData, value string) bool {
-	raw := d.GetRawConfig()
-	return raw.GetAttr(value).IsNull()
 }
