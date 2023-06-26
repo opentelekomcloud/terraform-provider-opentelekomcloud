@@ -10,7 +10,6 @@ linters:
   disable-all: true
   enable:
     - asciicheck
-    - deadcode
     - errcheck
     - gocritic
     - gofmt
@@ -18,14 +17,11 @@ linters:
     - gosimple
     - govet
     - ineffassign
-    - nakedret
     - misspell
     - staticcheck
-    - structcheck
     - typecheck
     - unused
     - unconvert
-    - varcheck
     - vet
     - vetshadow
     - whitespace
