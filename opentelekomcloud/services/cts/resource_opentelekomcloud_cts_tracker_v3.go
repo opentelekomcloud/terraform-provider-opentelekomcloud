@@ -190,30 +190,32 @@ func resourceCTSTrackerV3Update(ctx context.Context, d *schema.ResourceData, met
 		TrackerName: trackerName,
 	}
 
-	if d.HasChange("status") {
-		updateOpts.Status = d.Get("status").(string)
-		if updateOpts.Status == "enabled" {
-			// tracker needs to be enabled for other parameters to be applied
-			_, err = tracker.Update(client, updateOpts)
-			if err != nil {
-				return fmterr.Errorf("error updating CTS tracker: %w", err)
-			}
+	oldStatus, newStatus := d.GetChange("status")
+	if oldStatus.(string) == "disabled" {
+		// tracker needs to be enabled for other parameters to be applied
+		_, err = tracker.Update(client, tracker.UpdateOpts{
+			TrackerType: trackerName,
+			TrackerName: trackerName,
+			Status:      "enabled",
+		})
+		if err != nil {
+			return fmterr.Errorf("error updating CTS tracker: %w", err)
 		}
 	}
 
+	if d.HasChange("status") {
+		updateOpts.Status = d.Get("status").(string)
+	}
 	if d.HasChange("is_lts_enabled") {
 		updateOpts.IsLtsEnabled = pointerto.Bool(d.Get("is_lts_enabled").(bool))
 	}
-
 	if d.HasChange("bucket_name") {
 		updateOpts.ObsInfo.BucketName = d.Get("bucket_name").(string)
 	}
-
 	if d.HasChange("file_prefix_name") {
 		updateOpts.ObsInfo.FilePrefixName = d.Get("file_prefix_name").(string)
 		updateOpts.ObsInfo.BucketName = d.Get("bucket_name").(string)
 	}
-
 	if d.HasChange("is_obs_created") {
 		updateOpts.ObsInfo.IsObsCreated = pointerto.Bool(d.Get("is_obs_created").(bool))
 	}
@@ -221,6 +223,18 @@ func resourceCTSTrackerV3Update(ctx context.Context, d *schema.ResourceData, met
 	_, err = tracker.Update(client, updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating CTS tracker: %w", err)
+	}
+
+	// disable tracker in case when status changed from enabled to disabled
+	if oldStatus.(string) != newStatus.(string) && newStatus.(string) == "disabled" {
+		_, err = tracker.Update(client, tracker.UpdateOpts{
+			TrackerType: trackerName,
+			TrackerName: trackerName,
+			Status:      "disabled",
+		})
+		if err != nil {
+			return fmterr.Errorf("error updating CTS tracker: %w", err)
+		}
 	}
 
 	return resourceCTSTrackerV3Read(ctx, d, meta)
