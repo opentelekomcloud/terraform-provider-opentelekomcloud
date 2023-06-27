@@ -667,6 +667,13 @@ func (c *Config) CbrV3Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) DisV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewDISServiceV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) ComputeV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewComputeV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
