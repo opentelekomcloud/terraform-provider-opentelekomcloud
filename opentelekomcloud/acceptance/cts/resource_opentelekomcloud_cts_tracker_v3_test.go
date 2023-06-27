@@ -170,7 +170,7 @@ resource "opentelekomcloud_cts_tracker_v3" "tracker_v3" {
   bucket_name      = opentelekomcloud_obs_bucket.bucket.bucket
   file_prefix_name = "yO8Q1"
   is_lts_enabled   = false
-  status = "enabled"
+  status           = "enabled"
 }
 `, bucketName)
 }
