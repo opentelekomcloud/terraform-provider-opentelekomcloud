@@ -548,7 +548,6 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			if err != nil {
 				return fmterr.Errorf("error updating instance SSL configuration: %s ", err)
 			}
-			return nil
 		} else {
 			return diag.Errorf("only MySQL database support SSL enable and disable")
 		}
