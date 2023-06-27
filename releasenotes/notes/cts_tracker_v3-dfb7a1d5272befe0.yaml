@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **[CTS]** New resource ``resource/opentelekomcloud_cts_tracker_v3`` for SWISSCLOUD (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[CTS]** New resource ``resource/opentelekomcloud_cts_tracker_v3`` for SWISSCLOUD (`#2203 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2203>`_)
