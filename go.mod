@@ -14,7 +14,7 @@ require (
 	github.com/jinzhu/copier v0.3.5
 	github.com/keybase/go-crypto v0.0.0-20200123153347-de78d2cb44f4
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/opentelekomcloud/gophertelekomcloud v0.6.3-0.20230621145858-35930a8cab9c
+	github.com/opentelekomcloud/gophertelekomcloud v0.7.1-0.20230627162845-82076c1d49f5
 	github.com/unknwon/com v1.0.1
 	golang.org/x/crypto v0.1.0
 	golang.org/x/sync v0.1.0

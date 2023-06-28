@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[DIS]** Add new resource ``resource/opentelekomcloud_dis_stream_v2`` (`#2204 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2204>`_)
