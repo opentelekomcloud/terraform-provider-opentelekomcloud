@@ -327,6 +327,7 @@ func queryAndSetPartitionsToState(client *golangsdk.ServiceClient, d *schema.Res
 				"status":                partition.Status,
 				"hash_range":            partition.HashRange,
 				"sequence_number_range": partition.SequenceNumberRange,
+				"parent_partitions":     partition.ParentPartitions,
 			})
 		}
 
