@@ -230,7 +230,7 @@ func GetSetChanges(d *schema.ResourceData, key string) (removed, added *schema.S
 	return oldSet.Difference(newSet), newSet.Difference(oldSet)
 }
 
-// CheckNull returns true if schema parameter is not empty
+// CheckNull returns true if schema parameter is empty
 func CheckNull(element string, d *schema.ResourceData) bool {
 	return d.GetRawConfig().GetAttr(element).IsNull()
 }
