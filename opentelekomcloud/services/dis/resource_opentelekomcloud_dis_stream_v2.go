@@ -54,18 +54,27 @@ func ResourceDisStreamV2() *schema.Resource {
 				Computed: true,
 				Optional: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"COMMON", "ADVANCED",
+				}, false),
 			},
 			"data_type": {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"BLOB",
+				}, false),
 			},
 			"compression_format": {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"snappy", "gzip", "zip",
+				}, false),
 			},
 			"auto_scale_min_partition_count": {
 				Type:         schema.TypeInt,
@@ -152,14 +161,13 @@ func resourceDisStreamV2Create(ctx context.Context, d *schema.ResourceData, meta
 		Tags:              common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 	}
 
+	opts.AutoScaleEnabled = pointerto.Bool(false)
 	autoScaleMinPartitionCount := d.Get("auto_scale_min_partition_count").(int)
 	autoScaleMaxPartitionCount := d.Get("auto_scale_max_partition_count").(int)
 	if autoScaleMinPartitionCount > 0 && autoScaleMaxPartitionCount > 0 {
 		opts.AutoScaleEnabled = pointerto.Bool(true)
 		opts.AutoScaleMinPartitionCount = &autoScaleMinPartitionCount
 		opts.AutoScaleMaxPartitionCount = &autoScaleMaxPartitionCount
-	} else {
-		opts.AutoScaleEnabled = pointerto.Bool(false)
 	}
 
 	log.Printf("[DEBUG] Creating new Stream: %#v", opts)
