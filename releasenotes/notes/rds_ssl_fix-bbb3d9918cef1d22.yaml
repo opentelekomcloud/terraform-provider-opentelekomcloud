@@ -1,5 +1,5 @@
 ---
 fixes:
   - |
-    **[RDS]** Fix ``resource/opentelekomcloud_rds_instance_v3`` attribute read when SSL is enabled (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[RDS]** Fix ``resource/opentelekomcloud_rds_instance_v3`` attribute read when SSL is enabled (`#2205 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2205>`_)
 
