@@ -65,24 +65,31 @@ The following arguments are supported:
 
 All above argument parameters can be exported as attribute parameters.
 
-* `created` - Time when the stream is created. The value is a 13-bit timestamp..
+* `created` - Time when the stream is created. The value is a timestamp.
 
 * `readable_partition_count` - Total number of readable partitions (including partitions in ACTIVE and DELETED state).
 
 * `writable_partition_count` - Total number of writable partitions (including partitions in ACTIVE state only).
 
-* `status` - Current status of the stream
-  `CREATING`: creating
-  `RUNNING`: running
-  `TERMINATING`: deleting
-  `TERMINATED`: deleted
+* `status` - Current status of the stream, can be:
+  * `CREATING`: creating
+  * `RUNNING`: running
+  * `TERMINATING`: deleting
+  * `TERMINATED`: deleted
 
 * `stream_id` - Unique identifier of the stream.
 
+* `partitions` - Stream partitions details.
+  * `id`: Unique identifier of the partition.
+  * `status`: Current status of the partition.
+  * `hash_range`: Possible value range of the hash key used by the partition.
+  * `sequence_number_range`: Sequence number range of the partition.
+  * `parent_partitions`: Parent partition.
+
 ## Import
 
-Stream can be imported using the stream id, e.g.
+Stream can be imported using the stream name, e.g.
 
 ```shell
-terraform import opentelekomcloud_dis_stream_v2.stream_1 Mh1NYdBHWdV0JPoNFTy
+terraform import opentelekomcloud_dis_stream_v2.stream_1 my_stream
 ```
