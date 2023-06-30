@@ -331,7 +331,10 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 		d.Set("updated_at", img.UpdatedAt.Format(time.RFC3339)),
 		d.Set("file", img.File),
 		d.Set("schema", img.Schema),
-		// d.Set("metadata", img.Metadata),
+		d.Set("id", img.Id),
+		d.Set("status", img.Status),
+		d.Set("os_type", img.OsType),
+		d.Set("platform", img.Platform),
 	)
 
 	if mErr.ErrorOrNil() != nil {
