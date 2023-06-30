@@ -11,7 +11,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/availabilityzones"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/image/v2/images"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
@@ -292,7 +292,7 @@ func getImageName(imageId string, d *schema.ResourceData, meta interface{}) (str
 		return "", fmt.Errorf(errCreateV2Client, err)
 	}
 
-	ims, err := images.Get(client, imageId).Extract()
+	ims, err := images.Get(client, imageId)
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			return "", nil
