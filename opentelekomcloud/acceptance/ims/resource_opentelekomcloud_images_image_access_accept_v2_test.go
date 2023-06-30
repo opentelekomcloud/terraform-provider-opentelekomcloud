@@ -20,8 +20,9 @@ func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 	acceptResourceName := "opentelekomcloud_images_image_access_accept_v2.accept_1"
 	privateImageID := os.Getenv("OS_PRIVATE_IMAGE_ID")
 	shareProjectID := os.Getenv("OS_PROJECT_ID_2")
+	shareProjectName := os.Getenv("OS_PROJECT_NAME_2")
 	shareCloudID := os.Getenv("OS_CLOUD_2")
-	if privateImageID == "" || shareProjectID == "" || shareCloudID == "" {
+	if privateImageID == "" || shareProjectID == "" || shareCloudID == "" || shareProjectName == "" {
 		t.Skip("OS_PRIVATE_IMAGE_ID or OS_PROJECT_ID_2 or OS_CLOUD_2 are empty, but test requires")
 	}
 
