@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Move wait for complete addon installation to another function to speed up cluster provisioning in  ``resource/opentelekomcloud_cce_cluster_v3`` (`#2164 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2164>`_)

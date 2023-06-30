@@ -73,8 +73,9 @@ resource "opentelekomcloud_csbs_backup_v1" "csbs" {
   resource_id   = opentelekomcloud_compute_instance_v2.instance_1.id
   resource_type = "OS::Nova::Server"
 
-  tags = {
-    muh = "kuh"
+  tags {
+    key   = "kuh"
+    value = "muh"
   }
 }
 

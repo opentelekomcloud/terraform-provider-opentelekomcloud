@@ -2,11 +2,19 @@
 subcategory: "Cloud Eye (CES)"
 ---
 
+Up-to-date reference of API arguments for CES alarm rule you can get at
+`https://docs.otc.t-systems.com/cloud-eye/api-ref/api_description/alarm_rule_managements`.
+
 # opentelekomcloud_ces_alarmrule
 
 Manages a V1 CES Alarm Rule resource within OpenTelekomCloud.
 
+~>
+  Alarm rule `namespaces` and `dimensions` are available on our [github link](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/devel/opentelekomcloud/services/ces/interconnected_services.md) or [official documentation](https://docs.otc.t-systems.com/cloud-eye/api-ref/appendix/services_interconnected_with_cloud_eye.html).
+
 ## Example Usage
+
+### Basic alarm rule for single ECS monitoring
 
 ```hcl
 variable server_id {}
@@ -39,6 +47,37 @@ resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
 }
 ```
 
+### CBR system event alarm rule to monitor all CBR resources
+
+```hcl
+variable smn_topic_id {}
+
+resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
+  alarm_name = "alarm_rule1"
+  alarm_type = "EVENT.SYS"
+
+  metric {
+    namespace   = "SYS.CBR"
+    metric_name = "backupFailed"
+  }
+  condition {
+    period              = 300
+    filter              = "average"
+    comparison_operator = ">"
+    value               = 6
+    unit                = "B/s"
+    count               = 1
+    alarm_frequency     = 300
+  }
+  alarm_action_enabled = false
+
+  alarm_actions {
+    type              = "notification"
+    notification_list = [var.smn_topic_id]
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -46,6 +85,10 @@ The following arguments are supported:
 * `alarm_name` - (Required) Specifies the name of an alarm rule. The value can
   be a string of `1` to `128` characters that can consist of numbers, lowercase letters,
   uppercase letters, underscores (_), or hyphens (-).
+
+* `alarm_type` - (Optional) Specifies the alarm rule type.
+  `EVENT.SYS`: The alarm rule is created for system events.
+  `EVENT.CUSTOM`: The alarm rule is created for custom events.
 
 * `alarm_description` - (Optional) Alarm description. The value can be a string of `0` to `256` characters.
 
@@ -82,11 +125,13 @@ The `metric` block supports:
 
 * `metric_name` - (Required) Specifies the metric name. The value can be a string
   of `1` to `64` characters that must start with a letter and can consists of uppercase
-  letters, lowercase letters, numbers, underscores (_) or slashes (/).
+  letters, lowercase letters, numbers, underscores (_) or slashes (/).</br>
+  [Available metrics.](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/devel/opentelekomcloud/services/ces/interconnected_services.md)
 
-* `dimensions` - (Required) Specifies the list of metric dimensions. Currently,
-  the maximum length of the dimension list that are supported is `3`. The structure
-  is described below.
+* `dimensions` - (Optional) Specifies the list of metric dimensions.
+  If CES `alarm_type` is set to `EVENT.SYS` leaving this argument empty will enable monitoring for all service instances.
+  Otherwise, argument is `required`. Currently, the maximum length of the dimension list that are supported is `3`.
+  The structure is described below.
 
 The `dimensions` block supports:
 
@@ -97,6 +142,8 @@ The `dimensions` block supports:
 * `value` - (Required) Specifies the dimension value. The value can be a string
   of `1` to `64` characters that must start with a letter or a number and can consists
   of uppercase letters, lowercase letters, numbers, underscores (_), or hyphens (-).
+
+  ~> [Available dimensions can be checked here.](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/devel/opentelekomcloud/services/ces/interconnected_services.md)
 
 The `condition` block supports:
 
@@ -119,6 +166,17 @@ The `condition` block supports:
 
 * `count` - (Required) Specifies the number of consecutive occurrence times.
   The value ranges from `1` to `5`.
+
+* `alarm_frequency` - (Optional) Specifies frequency for alarm triggering. If argument is not provided alarm will be triggered once.
+  `300`: Cloud Eye triggers the alarm every 5 minutes.
+  `600`: Cloud Eye triggers the alarm every 10 minutes.
+  `900`: Cloud Eye triggers the alarm every 15 minutes.
+  `1800`: Cloud Eye triggers the alarm every 30 minutes.
+  `3600`: Cloud Eye triggers the alarm every hour.
+  `10800`: Cloud Eye triggers the alarm every 3 hours.
+  `21600`: Cloud Eye triggers the alarm every 6 hours.
+  `43200`: Cloud Eye triggers the alarm every 12 hours.
+  `86400`: Cloud Eye triggers the alarm every day.
 
 the `alarm_actions` block supports:
 
@@ -179,3 +237,11 @@ The following attributes are exported:
   * `ok`: The alarm status is normal;
   * `alarm`: An alarm is generated;
   * `insufficient_data`: The required data is insufficient;
+
+## Import
+
+CES alarms can be imported using alarm rule `id`, e.g.
+
+```sh
+terraform import opentelekomcloud_ces_alarmrule.alarmrule c1881895-cdcb-4d23-96cb-032e6a3ee667
+```

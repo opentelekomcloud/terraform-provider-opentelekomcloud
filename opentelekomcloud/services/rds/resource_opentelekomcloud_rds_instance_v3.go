@@ -182,20 +182,17 @@ func ResourceRdsInstanceV3() *schema.Resource {
 				Type:     schema.TypeList,
 				Computed: true,
 				Optional: true,
-				ForceNew: false,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"start_time": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: false,
 						},
 						"keep_days": {
 							Type:     schema.TypeInt,
 							Computed: true,
 							Optional: true,
-							ForceNew: false,
 						},
 					},
 				},
@@ -281,6 +278,13 @@ func ResourceRdsInstanceV3() *schema.Resource {
 			"ssl_enable": {
 				Type:     schema.TypeBool,
 				Optional: true,
+			},
+			"availability_zones": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	}
@@ -370,6 +374,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		dbPortString = ""
 	}
 
+	datastore := resourceRDSDataStore(d)
 	var r *instances.CreateRds
 	if _, ok := d.GetOk("restore_point"); ok {
 		restoreOpts := backups.RestoreToNewOpts{
@@ -396,7 +401,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	} else {
 		createOpts := instances.CreateRdsOpts{
 			Name:             d.Get("name").(string),
-			Datastore:        resourceRDSDataStore(d),
+			Datastore:        datastore,
 			Ha:               resourceRDSHa(d),
 			ConfigurationId:  d.Get("param_group_id").(string),
 			Port:             dbPortString,
@@ -465,6 +470,22 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
+	var backupOpts backups.UpdateOpts
+
+	// workaround for https://jira.tsi-dev.otc-service.com/browse/BM-2388
+	if strings.ToLower(datastore.Type) == "postgresql" && common.HasFilledOpt(d, "backup_strategy") {
+		backupRaw := resourceRDSBackupStrategy(d)
+		backupOpts.KeepDays = backupRaw.KeepDays
+		backupOpts.StartTime = backupRaw.StartTime
+		backupOpts.Period = "1,2,3,4,5,6,7"
+		backupOpts.InstanceId = d.Id()
+		log.Printf("[DEBUG] Backup Strategy Opts: %#v", backupOpts)
+
+		if err = backups.Update(client, backupOpts); err != nil {
+			return fmterr.Errorf("error updating OpenTelekomCloud RDSv3 Backup Strategy: %s", err)
+		}
+	}
+
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
 
 	ip := getPublicIP(d)
@@ -527,7 +548,6 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			if err != nil {
 				return fmterr.Errorf("error updating instance SSL configuration: %s ", err)
 			}
-			return nil
 		} else {
 			return diag.Errorf("only MySQL database support SSL enable and disable")
 		}
@@ -1080,7 +1100,7 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		fmterr.Errorf("RDSv3 instance expects 1 or 2 nodes, but got %d", n)
 	}
 
-	if err := d.Set("availability_zone", availabilityZones); err != nil {
+	if err := d.Set("availability_zones", availabilityZones); err != nil {
 		return diag.FromErr(err)
 	}
 

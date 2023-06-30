@@ -2,6 +2,9 @@
 subcategory: "Distributed Message Service (DMS)"
 ---
 
+Up-to-date reference of API arguments for DMS instance you can get at
+`https://docs.otc.t-systems.com/distributed-message-service/api-ref/apis_v2_recommended/lifecycle_management`.
+
 # opentelekomcloud_dms_instance_v2
 
 Manages a DMS instance in the OpenTelekomCloud DMS Service (Kafka Premium/Platinum).
@@ -135,6 +138,7 @@ The following arguments are supported:
 
 * `access_user` - (Optional) Indicates a username. A username consists of 4 to 64 characters
   and supports only letters, digits, and hyphens (-).
+  * Providing `access_user` and `password` enables `ssl` for the instance.
 
 * `password` - (Optional) Indicates the password of an instance. An instance password
   must meet the following complexity requirements: Must be 8 to 32 characters long.

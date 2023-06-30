@@ -2,6 +2,9 @@
 subcategory: "Document Database Service (DDS)"
 ---
 
+Up-to-date reference of API arguments for DDS instance you can get at
+`https://docs.otc.t-systems.com/document-database-service/api-ref/apis_v3.0_recommended/db_instance_management`.
+
 # opentelekomcloud_dds_instance_v3
 
 Manages DDS instance resource within OpenTelekomCloud

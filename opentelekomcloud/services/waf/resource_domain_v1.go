@@ -83,6 +83,43 @@ func ResourceWafDomainV1() *schema.Resource {
 					},
 				},
 			},
+			"block_page": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"template": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"redirect_url": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"status_code": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							RequiredWith: []string{"block_page.0.content_type", "block_page.0.content"},
+						},
+						"content_type": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							RequiredWith: []string{"block_page.0.status_code", "block_page.0.content"},
+						},
+						"content": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							RequiredWith: []string{"block_page.0.status_code", "block_page.0.content_type"},
+						},
+					},
+				},
+			},
 			"tls": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -229,6 +266,26 @@ func resourceWafDomainV1Create(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
+	if blockPage, ok := d.GetOk("block_page"); ok {
+		blockItem := blockPage.([]interface{})[0].(map[string]interface{})
+		updateOpts := domains.UpdateOpts{
+			BlockPage: &domains.BlockPage{
+				Template:    blockItem["template"].(string),
+				RedirectUrl: blockItem["redirect_url"].(string),
+			},
+		}
+		if blockItem["content"].(string) != "" {
+			updateOpts.BlockPage.CustomPage = &domains.CustomPage{
+				Content:     blockItem["content"].(string),
+				ContentType: blockItem["content_type"].(string),
+				StatusCode:  blockItem["status_code"].(string),
+			}
+		}
+		if _, err := domains.Update(client, d.Id(), updateOpts).Extract(); err != nil {
+			return fmterr.Errorf("error updating alarm page configuration: %w", err)
+		}
+	}
+
 	return resourceWafDomainV1Read(ctx, d, meta)
 }
 
@@ -272,8 +329,22 @@ func resourceWafDomainV1Read(_ context.Context, d *schema.ResourceData, meta int
 		servers[i]["address"] = server.Address
 		servers[i]["port"] = strconv.Itoa(server.Port)
 	}
+
+	blockPage := []map[string]interface{}{
+		{
+			"template":     n.BlockPage.Template,
+			"redirect_url": n.BlockPage.RedirectUrl,
+		},
+	}
+
+	if n.BlockPage.CustomPage != nil {
+		blockPage[0]["status_code"] = n.BlockPage.CustomPage.StatusCode
+		blockPage[0]["content_type"] = n.BlockPage.CustomPage.ContentType
+		blockPage[0]["content"] = n.BlockPage.CustomPage.Content
+	}
+
 	mErr = multierror.Append(mErr,
-		d.Set("server", servers),
+		d.Set("block_page", blockPage),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting WAF fields: %w", err)
@@ -323,6 +394,23 @@ func resourceWafDomainV1Update(ctx context.Context, d *schema.ResourceData, meta
 		tls := d.Get("tls").(string)
 		updateOpts.TLS = tls
 	}
+
+	if d.HasChange("block_page") {
+		blockPage := d.Get("block_page")
+		blockItem := blockPage.([]interface{})[0].(map[string]interface{})
+		updateOpts.BlockPage = &domains.BlockPage{
+			Template:    blockItem["template"].(string),
+			RedirectUrl: blockItem["redirect_url"].(string),
+		}
+		if blockItem["content"].(string) != "" {
+			updateOpts.BlockPage.CustomPage = &domains.CustomPage{
+				Content:     blockItem["content"].(string),
+				ContentType: blockItem["content_type"].(string),
+				StatusCode:  blockItem["status_code"].(string),
+			}
+		}
+	}
+
 	log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
 
 	_, err = domains.Update(client, d.Id(), updateOpts).Extract()

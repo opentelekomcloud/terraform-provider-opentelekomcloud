@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/rules"
 
@@ -57,16 +58,18 @@ func ResourceNetworkingSecGroupRuleV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"port_range_min": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				RequiredWith: []string{"protocol"},
 			},
 			"port_range_max": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				RequiredWith: []string{"port_range_min"},
 			},
 			"protocol": {
 				Type:     schema.TypeString,
@@ -113,21 +116,9 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	portRangeMin := d.Get("port_range_min").(int)
-	portRangeMax := d.Get("port_range_max").(int)
-	protocol := d.Get("protocol").(string)
-
-	if protocol == "" {
-		if portRangeMin != 0 || portRangeMax != 0 {
-			return fmterr.Errorf("A protocol must be specified when using port_range_min and port_range_max")
-		}
-	}
-
 	opts := rules.CreateOpts{
 		Description:    d.Get("description").(string),
 		SecGroupID:     d.Get("security_group_id").(string),
-		PortRangeMin:   d.Get("port_range_min").(int),
-		PortRangeMax:   d.Get("port_range_max").(int),
 		RemoteGroupID:  d.Get("remote_group_id").(string),
 		RemoteIPPrefix: d.Get("remote_ip_prefix").(string),
 		TenantID:       d.Get("tenant_id").(string),
@@ -145,7 +136,18 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 
 	if v, ok := d.GetOk("protocol"); ok {
 		protocol := resourceNetworkingSecGroupRuleV2DetermineProtocol(v.(string))
+
+		portRangeMin := d.Get("port_range_min").(int)
+		portRangeMax := d.Get("port_range_max").(int)
+		opts.PortRangeMin = &portRangeMin
+		opts.PortRangeMax = &portRangeMax
 		opts.Protocol = protocol
+		if opts.Protocol == rules.ProtocolICMP {
+			if portRangeMin == 0 && portRangeMax == 255 {
+				opts.PortRangeMin = nil
+				opts.PortRangeMax = nil
+			}
+		}
 	}
 
 	log.Printf("[DEBUG] Create OpenTelekomCloud Neutron security group: %#v", opts)
@@ -178,13 +180,20 @@ func resourceNetworkingSecGroupRuleV2Read(ctx context.Context, d *schema.Resourc
 		return common.CheckDeletedDiag(d, err, "OpenTelekomCloud Security Group Rule")
 	}
 
+	portRangeMin := securityGroupRule.PortRangeMin
+	portRangeMax := securityGroupRule.PortRangeMax
+	if securityGroupRule.Protocol == "icmp" && portRangeMin == nil && portRangeMax == nil {
+		portRangeMin = pointerto.Int(0)
+		portRangeMax = pointerto.Int(255)
+	}
+
 	mErr := multierror.Append(
 		d.Set("description", securityGroupRule.Description),
 		d.Set("direction", securityGroupRule.Direction),
 		d.Set("ethertype", securityGroupRule.EtherType),
 		d.Set("protocol", securityGroupRule.Protocol),
-		d.Set("port_range_min", securityGroupRule.PortRangeMin),
-		d.Set("port_range_max", securityGroupRule.PortRangeMax),
+		d.Set("port_range_min", portRangeMin),
+		d.Set("port_range_max", portRangeMax),
 		d.Set("remote_group_id", securityGroupRule.RemoteGroupID),
 		d.Set("remote_ip_prefix", securityGroupRule.RemoteIPPrefix),
 		d.Set("security_group_id", securityGroupRule.SecGroupID),

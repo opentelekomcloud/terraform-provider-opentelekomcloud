@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[DCS]** Support import for ``resource/opentelekomcloud_css_cluster_v1`` (`#2132 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2132>`_)

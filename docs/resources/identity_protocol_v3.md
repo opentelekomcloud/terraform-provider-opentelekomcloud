@@ -2,6 +2,9 @@
 subcategory: "Identity and Access Management (IAM)"
 ---
 
+Up-to-date reference of API arguments for IAM protocol you can get at
+`https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/federated_identity_authentication_management/protocol`.
+
 # opentelekomcloud_identity_protocol_v3
 
 Manages identity protocol resource providing binding between identity provider and identity mappings.

@@ -33,6 +33,7 @@ func TestAccCCENodesV3DataSource_basic(t *testing.T) {
 					testAccCheckCCENodeV3DataSourceID(dataSourceNodesName),
 					resource.TestCheckResourceAttr(dataSourceNodesName, "name", cceNodeName),
 					resource.TestCheckResourceAttr(dataSourceNodesName, "flavor_id", "s2.large.2"),
+					resource.TestCheckResourceAttr(dataSourceNodesName, "runtime", "docker"),
 				),
 			},
 		},

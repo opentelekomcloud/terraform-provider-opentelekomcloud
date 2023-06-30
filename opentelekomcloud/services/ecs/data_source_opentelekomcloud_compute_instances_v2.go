@@ -2,11 +2,16 @@ package ecs
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/availabilityzones"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
@@ -83,10 +88,6 @@ func DataSourceComputeInstancesV2() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"flavor_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"status": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -103,7 +104,7 @@ func DataSourceComputeInstancesV2() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"security_group_ids": {
+						"security_groups_ids": {
 							Type:     schema.TypeList,
 							Computed: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
@@ -180,17 +181,22 @@ func dataSourceComputeInstancesV2Read(_ context.Context, d *schema.ResourceData,
 		Status:   d.Get("status").(string),
 		TenantID: d.Get("project_id").(string),
 	}
-	var allServers []servers.Server
 	allPages, err := servers.List(client, opts).AllPages()
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve OpenTelekomCloud servers: %w", err)
 	}
-	allServers, err = servers.ExtractServers(allPages)
+
+	type ServerWithExt struct {
+		servers.Server
+		availabilityzones.ServerAvailabilityZoneExt
+	}
+	var allServers []ServerWithExt
+	err = servers.ExtractServersInto(allPages, &allServers)
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve OpenTelekomCloud servers: %w", err)
 	}
 
-	instances := make([]servers.Server, 0, len(allServers))
+	instances := make([]ServerWithExt, 0, len(allServers))
 	ids := make([]string, 0, len(allServers))
 
 	for _, server := range allServers {
@@ -214,20 +220,58 @@ func dataSourceComputeInstancesV2Read(_ context.Context, d *schema.ResourceData,
 
 	result := make([]map[string]interface{}, len(instances))
 	for i, item := range instances {
-		var secGrpNames []string
-		for _, sg := range item.SecurityGroups {
-			secGrpNames = append(secGrpNames, sg["name"].(string))
+		var secGrpIds []string
+		allSgPages, err := secgroups.ListByServer(client, item.ID).AllPages()
+		if err != nil {
+			return fmterr.Errorf("unable to retrieve OpenTelekomCloud security groups: %w", err)
+		}
+		sgs, err := secgroups.ExtractSecurityGroups(allSgPages)
+		if err != nil {
+			return fmterr.Errorf("error extracting OpenTelekomCloud security groups from response: %s", err)
+		}
+		for _, sg := range sgs {
+			secGrpIds = append(secGrpIds, sg.ID)
+		}
+		imageName, err := getImageName(item.Image["id"].(string), d, meta)
+		if err != nil {
+			return diag.Errorf("unable to retrieve OpenTelekomCloud image: %s", err)
+		}
+		floatingIp := ""
+		var networks []map[string]interface{}
+		for _, ips := range item.Addresses {
+			for _, ip := range ips.([]interface{}) {
+				address := ip.(map[string]interface{})
+				if address["OS-EXT-IPS:type"] == "floating" {
+					floatingIp = address["addr"].(string)
+				}
+			}
 		}
 
+		nets, err := servers.GetNICs(client, item.ID).Extract()
+		if err != nil {
+			return fmterr.Errorf("unable to retrieve OpenTelekomCloud network: %s", err)
+		}
+		for _, net := range nets {
+			networks = append(networks, map[string]interface{}{
+				"uuid": net.NetID,
+				"port": net.PortID,
+				"mac":  net.MACAddress,
+			})
+		}
 		server := map[string]interface{}{
-			"id":                 item.ID,
-			"name":               item.Name,
-			"image_id":           item.Image["id"],
-			"flavor_id":          item.Flavor["id"],
-			"status":             item.Status,
-			"key_pair":           item.KeyName,
-			"security_group_ids": secGrpNames,
-			"project_id":         item.TenantID,
+			"id":                  item.ID,
+			"name":                item.Name,
+			"image_id":            item.Image["id"],
+			"image_name":          imageName,
+			"flavor_id":           item.Flavor["id"],
+			"status":              item.Status,
+			"key_pair":            item.KeyName,
+			"security_groups_ids": secGrpIds,
+			"project_id":          item.TenantID,
+			"availability_zone":   item.AvailabilityZone,
+			"public_ip":           floatingIp,
+			"system_disk_id":      item.VolumesAttached[0]["id"],
+			"network":             networks,
 		}
 
 		result[i] = server
@@ -238,4 +282,23 @@ func dataSourceComputeInstancesV2Read(_ context.Context, d *schema.ResourceData,
 	}
 
 	return nil
+}
+
+func getImageName(imageId string, d *schema.ResourceData, meta interface{}) (string, error) {
+	config := meta.(*cfg.Config)
+	log.Print("[DEBUG] Creating image client")
+	client, err := config.ImageV2Client(config.GetRegion(d))
+	if err != nil {
+		return "", fmt.Errorf(errCreateV2Client, err)
+	}
+
+	ims, err := images.Get(client, imageId).Extract()
+	if err != nil {
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
+			return "", nil
+		}
+		return "", fmt.Errorf("unable to retrieve OpenTelekomCloud image: %s", err)
+	}
+
+	return ims.Name, nil
 }

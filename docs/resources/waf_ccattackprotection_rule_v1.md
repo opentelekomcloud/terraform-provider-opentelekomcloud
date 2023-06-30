@@ -2,6 +2,9 @@
 subcategory: "Web Application Firewall (WAF)"
 ---
 
+Up-to-date reference of API arguments for WAF CC attack protection rule you can get at
+`https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/cc_attack_protection_rules`.
+
 # opentelekomcloud_waf_ccattackprotection_rule_v1
 
 Manages a WAF CC Attack Protection Rule resource within OpenTelekomCloud.

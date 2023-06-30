@@ -2,6 +2,9 @@
 subcategory: "Web Application Firewall (WAF)"
 ---
 
+Up-to-date reference of API arguments for WAF domain you can get at
+`https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/domain_names`.
+
 # opentelekomcloud_waf_domain_v1
 
 Manages a WAF domain resource within OpenTelekomCloud.
@@ -9,6 +12,8 @@ Manages a WAF domain resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
+variable "content" {}
+
 resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
   name    = "cert_1"
   content = "-----BEGIN CERTIFICATE-----MIIDIjCCAougAwIBAgIJALV96mEtVF4EMA0GCSqGSIb3DQEBBQUAMGoxCzAJBgNVBAYTAnh4MQswCQYDVQQIEwJ4eDELMAkGA1UEBxMCeHgxCzAJBgNVBAoTAnh4MQswCQYDVQQLEwJ-----END CERTIFICATE-----"
@@ -27,6 +32,12 @@ resource "opentelekomcloud_waf_domain_v1" "domain_1" {
   proxy           = true
   sip_header_name = "default"
   sip_header_list = ["X-Forwarded-For"]
+  block_page {
+    template     = "custom"
+    status_code  = "200"
+    content_type = "application/json"
+    content      = var.content
+  }
 }
 ```
 
@@ -41,6 +52,14 @@ The following arguments are supported:
   `front_protocol`/`client_protocol` is set to `HTTPS`.
 
 * `server` - (Required) Array of server object. The server object structure is documented below.
+  The `server` block supports:
+  * `client_protocol` - (Optional) Protocol type of the client. The options are HTTP and HTTPS.
+    Required if `front_protocol` is not set
+  * `server_protocol` - (Optional) Protocol used by WAF to forward client requests to the server.
+    The options are HTTP and HTTPS. Required if `back_protocol` is not set.
+  * `address` - (Required) IP address or domain name of the web server that the client accesses.
+    For example, `192.168.1.1` or `www.bla-bla.com`.
+  * `port` - (Required) Port number used by the web server. The value ranges from `0` to `65535`, for example, `8080`.
 
 * `proxy` - (Required) Specifies whether a proxy is configured.
 
@@ -70,22 +89,18 @@ The following arguments are supported:
 * `tls` - (Optional) Minimum TLS version for accessing the protected domain name  if `client_protocol` is set to `HTTPS`.
   Possible values are: `TLS v1.1` and `TLS v1.2`.
 
-The `server` block supports:
+* `block_page` - (Optional) Alarm page configuration
+  The `block_page` block supports:
+  * `template` - (Required) Template name which can be `default`, `custom` or `redirect`.
 
-* `client_protocol` - (Optional) Protocol type of the client. The options are HTTP and HTTPS.
-  Required if `front_protocol` is not set
+  -> Redirection arguments (`redirect` template):
+  * `redirect_url` - (Optional) URL of the redirected page.
 
-* `front_protocol` **DEPRECATED** - (Optional)  Same as `client_protocol`. Required if `client_protocol` is not set.
-
-* `server_protocol` - (Optional) Protocol used by WAF to forward client requests to the server.
-  The options are HTTP and HTTPS. Required if `back_protocol` is not set.
-
-* `back_protocol` **DEPRECATED** - (Optional) Same as `server_protocol`. Required if `server_protocol` is not set.
-
-* `address` - (Required) IP address or domain name of the web server that the client accesses.
-  For example, `192.168.1.1` or `www.bla-bla.com`.
-
-* `port` - (Required) Port number used by the web server. The value ranges from `0` to `65535`, for example, `8080`.
+  -> Custom alarm page arguments (`custom` template):
+  * `status_code` - (Optional) Status Codes for custom.
+  * `content_type` - (Optional) The content type of the custom alarm page.
+    The value can be `text/html`, `text/xml`, or `application/json`.
+  * `content` - (Optional) The page content based on the selected page type.
 
 ## Attributes Reference
 

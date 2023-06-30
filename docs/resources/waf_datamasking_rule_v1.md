@@ -2,6 +2,9 @@
 subcategory: "Web Application Firewall (WAF)"
 ---
 
+Up-to-date reference of API arguments for WAF datamasking rule you can get at
+`https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/data_masking_rules`.
+
 # opentelekomcloud_waf_datamasking_rule_v1
 
 Manages a WAF Data Masking Rule resource within OpenTelekomCloud.

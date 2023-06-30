@@ -2,6 +2,9 @@
 subcategory: "Software Repository for Container (SWR)"
 ---
 
+Up-to-date reference of API arguments for SWR domain you can get at
+`https://docs.otc.t-systems.com/software-repository-container/api-ref/api`.
+
 # opentelekomcloud_swr_domain_v2
 
 Manages the SWR image sharing domain resource within Open Telekom Cloud.

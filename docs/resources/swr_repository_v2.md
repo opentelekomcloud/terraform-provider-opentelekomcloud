@@ -2,6 +2,9 @@
 subcategory: "Software Repository for Container (SWR)"
 ---
 
+Up-to-date reference of API arguments for SWR repository you can get at
+`https://docs.otc.t-systems.com/software-repository-container/api-ref/api`.
+
 # opentelekomcloud_swr_organization_v2
 
 Manages the SWR repository resource within Open Telekom Cloud.

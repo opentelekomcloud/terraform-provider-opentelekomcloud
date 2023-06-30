@@ -2,6 +2,9 @@
 subcategory: "Identity and Access Management (IAM)"
 ---
 
+Up-to-date reference of API arguments for IAM project you can get at
+`https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/project_management`.
+
 # opentelekomcloud_identity_project_v3
 
 Manages a Project resource within OpenTelekomCloud Identity And Access

@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[CSS]** Remove CSS cluster datastore validation ``resource/opentelekomcloud_css_cluster_v1``
+    (`#2135 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2135>`_)

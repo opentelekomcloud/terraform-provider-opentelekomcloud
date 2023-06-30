@@ -19,6 +19,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dcs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dds"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/deh"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dis"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dms"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dns"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dws"
@@ -235,7 +236,8 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cbr_backup_ids_v3":               cbr.DataSourceCBRBackupsIdsV3(),
 			"opentelekomcloud_cce_cluster_v3":                  cce.DataSourceCCEClusterV3(),
 			"opentelekomcloud_cce_cluster_kubeconfig_v3":       cce.DataSourceCCEClusterKubeConfigV3(),
-			"opentelekomcloud_cce_addon_template_v3":           cce.DataSourceCceAddonTemplatesV3(),
+			"opentelekomcloud_cce_addon_template_v3":           cce.DataSourceCceAddonTemplateV3(),
+			"opentelekomcloud_cce_addon_templates_v3":          cce.DataSourceCceAddonTemplatesV3(),
 			"opentelekomcloud_cce_node_ids_v3":                 cce.DataSourceCceNodeIdsV3(),
 			"opentelekomcloud_cce_node_v3":                     cce.DataSourceCceNodesV3(),
 			"opentelekomcloud_compute_availability_zones_v2":   ecs.DataSourceComputeAvailabilityZonesV2(),
@@ -281,6 +283,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_lb_loadbalancer_v3":              elbv3.DataSourceLoadBalancerV3(),
 			"opentelekomcloud_lb_listener_v3":                  elbv3.DataSourceListenerV3(),
 			"opentelekomcloud_lb_member_ids_v2":                elbv2.DataSourceLBMemberIDsV2(),
+			"opentelekomcloud_nat_gateway_v2":                  nat.DataSourceNatGatewayV2(),
 			"opentelekomcloud_networking_network_v2":           vpc.DataSourceNetworkingNetworkV2(),
 			"opentelekomcloud_networking_port_v2":              vpc.DataSourceNetworkingPortV2(),
 			"opentelekomcloud_networking_secgroup_v2":          vpc.DataSourceNetworkingSecGroupV2(),
@@ -343,17 +346,22 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_csbs_backup_policy_v1":              csbs.ResourceCSBSBackupPolicyV1(),
 			"opentelekomcloud_cts_event_notification_v3":          cts.ResourceCTSEventNotificationV3(),
 			"opentelekomcloud_cts_tracker_v1":                     cts.ResourceCTSTrackerV1(),
+			"opentelekomcloud_cts_tracker_v3":                     cts.ResourceCTSTrackerV3(),
 			"opentelekomcloud_css_cluster_v1":                     css.ResourceCssClusterV1(),
 			"opentelekomcloud_css_snapshot_configuration_v1":      css.ResourceCssSnapshotConfigurationV1(),
 			"opentelekomcloud_dcs_instance_v1":                    dcs.ResourceDcsInstanceV1(),
 			"opentelekomcloud_dds_instance_v3":                    dds.ResourceDdsInstanceV3(),
 			"opentelekomcloud_deh_host_v1":                        deh.ResourceDeHHostV1(),
+			"opentelekomcloud_dis_stream_v2":                      dis.ResourceDisStreamV2(),
+			"opentelekomcloud_dis_app_v2":                         dis.ResourceDisAppV2(),
 			"opentelekomcloud_dns_ptrrecord_v2":                   dns.ResourceDNSPtrRecordV2(),
 			"opentelekomcloud_dns_recordset_v2":                   dns.ResourceDNSRecordSetV2(),
 			"opentelekomcloud_dns_zone_v2":                        dns.ResourceDNSZoneV2(),
 			"opentelekomcloud_dms_instance_v1":                    dms.ResourceDmsInstancesV1(),
 			"opentelekomcloud_dms_instance_v2":                    dms.ResourceDmsInstancesV2(),
 			"opentelekomcloud_dms_topic_v1":                       dms.ResourceDmsTopicsV1(),
+			"opentelekomcloud_dms_user_v2":                        dms.ResourceDmsUsersV2(),
+			"opentelekomcloud_dms_user_permission_v1":             dms.ResourceDmsUsersPermissionV1(),
 			"opentelekomcloud_dws_cluster_v1":                     dws.ResourceDcsInstanceV1(),
 			"opentelekomcloud_ecs_instance_v1":                    ecs.ResourceEcsInstanceV1(),
 			"opentelekomcloud_evs_volume_v3":                      evs.ResourceEvsStorageVolumeV3(),
@@ -400,6 +408,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_lb_whitelist_v2":                    elbv2.ResourceWhitelistV2(),
 			"opentelekomcloud_logtank_group_v2":                   lts.ResourceLTSGroupV2(),
 			"opentelekomcloud_logtank_topic_v2":                   lts.ResourceLTSTopicV2(),
+			"opentelekomcloud_logtank_transfer_v2":                lts.ResourceLTSTransferV2(),
 			"opentelekomcloud_mrs_cluster_v1":                     mrs.ResourceMRSClusterV1(),
 			"opentelekomcloud_mrs_job_v1":                         mrs.ResourceMRSJobV1(),
 			"opentelekomcloud_nat_gateway_v2":                     nat.ResourceNatGatewayV2(),
@@ -420,6 +429,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_obs_bucket":                         obs.ResourceObsBucket(),
 			"opentelekomcloud_obs_bucket_object":                  obs.ResourceObsBucketObject(),
 			"opentelekomcloud_obs_bucket_policy":                  obs.ResourceObsBucketPolicy(),
+			"opentelekomcloud_rds_backup_v3":                      rds.ResourceRdsBackupV3(),
 			"opentelekomcloud_rds_instance_v1":                    rds.ResourceRdsInstance(),
 			"opentelekomcloud_rds_instance_v3":                    rds.ResourceRdsInstanceV3(),
 			"opentelekomcloud_rds_parametergroup_v3":              rds.ResourceRdsConfigurationV3(),

@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CES]** Import support added for ``resource/opentelekomcloud_ces_alarmrule`` (`#2186 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2186>`_)

@@ -2,6 +2,9 @@
 subcategory: "Volume Backup Service (VBS)"
 ---
 
+Up-to-date reference of API arguments for VBS backup share you can get at
+`https://docs.otc.t-systems.com/volume-backup-service/api-ref/api_description/vbs_backups`.
+
 # opentelekomcloud_vbs_backup_share_v2
 
 Provides an VBS Backup Share resource within OpenTelekomCloud.

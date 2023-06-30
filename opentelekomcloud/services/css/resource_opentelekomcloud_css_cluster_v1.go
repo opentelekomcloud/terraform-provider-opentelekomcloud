@@ -3,6 +3,7 @@ package css
 import (
 	"context"
 	"fmt"
+	"log"
 	"math"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/flavors"
@@ -26,6 +26,10 @@ func ResourceCssClusterV1() *schema.Resource {
 		ReadContext:   resourceCssClusterV1Read,
 		UpdateContext: resourceCssClusterV1Update,
 		DeleteContext: resourceCssClusterV1Delete,
+
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceClusterV2ImportState,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
@@ -156,9 +160,9 @@ func ResourceCssClusterV1() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"7.6.2", "7.9.3", "7.10.2",
-							}, false),
+							// ValidateFunc: validation.StringInSlice([]string{
+							// 	"7.6.2", "7.9.3", "7.10.2", "Opensearch_1.3.6",
+							// }, false),
 							Default: "7.6.2",
 						},
 					},
@@ -440,4 +444,61 @@ func checkCssClusterFlavorRestrictions(_ context.Context, d *schema.ResourceDiff
 	}
 
 	return nil
+}
+
+func resourceClusterV2ImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*cfg.Config)
+	client, err := config.CssV1Client(config.GetRegion(d))
+	if err != nil {
+		return nil, fmt.Errorf("error creating CSS v1 client: %s", err)
+	}
+
+	if diagRead := resourceCssClusterV1Read(ctx, d, meta); diagRead.HasError() {
+		return nil, fmt.Errorf("error reading opentelekomcloud_css_cluster_v1 %s: %s", d.Id(), diagRead[0].Summary)
+	}
+
+	cluster, err := clusters.Get(client, d.Id())
+	if err != nil {
+		return nil, common.CheckDeleted(d, err, "Cluster")
+	}
+
+	var nodes []map[string]interface{}
+	for _, instance := range cluster.Instances {
+		volume := map[string]interface{}{}
+		volume["volume_type"] = instance.Volume.Type
+		volume["size"] = instance.Volume.Size
+		volume["encryption_key"] = cluster.CmkID
+		volumeList := []interface{}{volume}
+
+		network := map[string]interface{}{}
+		network["network_id"] = cluster.SubnetID
+		network["security_group_id"] = cluster.SecurityGroupID
+		network["vpc_id"] = cluster.VpcID
+		networkList := []interface{}{network}
+
+		mapping := map[string]interface{}{
+			"availability_zone": instance.AvailabilityZone,
+			"flavor":            instance.SpecCode,
+			"volume":            volumeList,
+			"network_info":      networkList,
+		}
+		nodes = append(nodes, mapping)
+	}
+
+	mErr := multierror.Append(nil,
+		d.Set("name", cluster.Name),
+		d.Set("enable_https", cluster.HttpsEnabled),
+		d.Set("enable_authority", cluster.AuthorityEnabled),
+		d.Set("expect_node_num", len(cluster.Instances)),
+		d.Set("node_config", nodes),
+		d.Set("datastore", extractDatastore(cluster)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return nil, fmt.Errorf("error setting addon attributes: %w", err)
+	}
+
+	log.Printf("[DEBUG] Retrieved CSS cluster %s during the import: %#v", d.Id(), cluster)
+
+	return []*schema.ResourceData{d}, nil
 }

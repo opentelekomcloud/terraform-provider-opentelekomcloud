@@ -2,6 +2,9 @@
 subcategory: "Resource Template Service (RTS)"
 ---
 
+Up-to-date reference of API arguments for RTS deployment you can get at
+`https://docs.otc.t-systems.com/resource-template-service/api-ref/apis/software_configuration_management`.
+
 # opentelekomcloud_rts_software_deployment_v1
 
 Provides an RTS software deployment resource within OpenTelekomCloud.

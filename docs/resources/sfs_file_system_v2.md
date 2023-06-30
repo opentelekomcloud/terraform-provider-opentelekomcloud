@@ -2,6 +2,9 @@
 subcategory: "Scalable File Service (SFS)"
 ---
 
+Up-to-date reference of API arguments for SFS file system you can get at
+`https://docs.otc.t-systems.com/scalable-file-service/api-ref/sfs_capacity-oriented_apis/file_systems`.
+
 # opentelekomcloud_sfs_file_system_v2
 
 Provides a Scalable File System resource.

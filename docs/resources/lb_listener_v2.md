@@ -2,6 +2,9 @@
 subcategory: "Elastic Load Balancer (ELB)"
 ---
 
+Up-to-date reference of API arguments for ELB listener you can get at
+`https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v2.0/listener`.
+
 # opentelekomcloud_lb_listener_v2
 
 Manages an Enhanced LB listener resource within OpenTelekomCloud.
@@ -112,3 +115,11 @@ The following attributes are exported:
 * `admin_state_up` - See Argument Reference above.
 
 * `tags` - See Argument Reference above.
+
+## Import
+
+Listeners can be imported using the `id`, e.g.
+
+```shell
+terraform import opentelekomcloud_lb_listener_v2.listener_1 7117d38e-4c8f-4624-a505-bd96b97d024c
+```

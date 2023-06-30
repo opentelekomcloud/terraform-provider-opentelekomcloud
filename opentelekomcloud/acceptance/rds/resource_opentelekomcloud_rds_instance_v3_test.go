@@ -55,7 +55,7 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 	})
 }
 
-func TestAccRdsPostgre13V3Basic(t *testing.T) {
+func TestAccRdsPostgre13V3ParamsBasic(t *testing.T) {
 	postfix := acctest.RandString(3)
 	var rdsInstance instances.InstanceResponse
 
@@ -65,7 +65,7 @@ func TestAccRdsPostgre13V3Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRdsPostrgre13V3Basic(postfix),
+				Config: testAccRdsPostrgre13V3ParamsBasic(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.large"),
@@ -76,6 +76,16 @@ func TestAccRdsPostgre13V3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.size", "40"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.muh", "value-create"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.kuh", "value-create"),
+				),
+			},
+			{
+				Config: testAccRdsPostrgre13V3ParamsBasicUpdate(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.large"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8635"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "PostgreSQL"),
 				),
 			},
 		},
@@ -168,6 +178,7 @@ func TestAccRdsInstanceV3HA(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "ha_replication_mode", "semisync"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.type", "ULTRAHIGH"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "MySQL"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "availability_zones.#", "2"),
 				),
 			},
 		},
@@ -879,7 +890,7 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
-func testAccRdsPostrgre13V3Basic(postfix string) string {
+func testAccRdsPostrgre13V3ParamsBasic(postfix string) string {
 	return fmt.Sprintf(`
 %s
 %s
@@ -908,6 +919,42 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   parameters = {
     max_prepared_transactions = "200"
     max_connections           = "250"
+    autovacuum_max_workers    = "20"
+  }
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccRdsPostrgre13V3ParamsBasicUpdate(postfix string) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "13"
+    port     = "8635"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+  flavor = "rds.pg.c2.large"
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+  parameters = {
+    max_prepared_transactions = "250"
+    max_connections           = "300"
+    autovacuum_max_workers    = "30"
   }
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)

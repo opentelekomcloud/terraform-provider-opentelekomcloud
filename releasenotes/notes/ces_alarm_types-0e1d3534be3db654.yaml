@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CES]** Introduce `alarm_type` and `alarm_frequency` arguments for ``resource/opentelekomcloud_ces_alarmrule`` (`#2189 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2189>`_)

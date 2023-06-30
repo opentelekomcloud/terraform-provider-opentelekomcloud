@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ELB]** Fix setting `ip_group` field in ``data/opentelekomcloud_lb_listener_v3`` (`#2126 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2126>`_)

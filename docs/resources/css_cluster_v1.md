@@ -2,6 +2,9 @@
 subcategory: "Cloud Search Service (CSS)"
 ---
 
+Up-to-date reference of API arguments for CSS cluster you can get at
+`https://docs.otc.t-systems.com/cloud-search-service/api-ref/cluster_management_apis`.
+
 # opentelekomcloud_css_cluster_v1
 
 Manages a CSS cluster resource.
@@ -146,3 +149,11 @@ This resource provides the following timeouts configuration options:
 * `create` - Default is 20 minutes.
 
 * `update` - Default is 30 minutes.
+
+## Import
+
+Backup can be imported using  `cluster_id`, e.g.
+
+```sh
+terraform import opentelekomcloud_css_cluster_v1.cluster 5c77b71c-5b35-4f50-8984-76387e42451a
+```

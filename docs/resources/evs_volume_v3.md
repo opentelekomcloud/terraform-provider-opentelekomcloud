@@ -2,6 +2,9 @@
 subcategory: "Elastic Volume Service (EVS)"
 ---
 
+Up-to-date reference of API arguments for EVS you can get at
+`https://docs.otc.t-systems.com/elastic-volume-service/api-ref/unrecommended_apis/openstack_cinder_api_v3`.
+
 # opentelekomcloud_evs_volume_v3
 
 Manages a V3 volume resource within OpenTelekomCloud.

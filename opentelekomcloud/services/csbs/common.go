@@ -6,10 +6,27 @@ import (
 )
 
 func resourceCSBSTagsV1(d *schema.ResourceData) []tags.ResourceTag {
-	backupTags := d.Get("tags").(map[string]interface{})
-	var tagSlice []tags.ResourceTag
-	for k, v := range backupTags {
-		tagSlice = append(tagSlice, tags.ResourceTag{Key: k, Value: v.(string)})
+	rawTags := d.Get("tags").(*schema.Set).List()
+	tagsRaw := make([]tags.ResourceTag, len(rawTags))
+	for i, raw := range rawTags {
+		rawMap := raw.(map[string]interface{})
+		tagsRaw[i] = tags.ResourceTag{
+			Key:   rawMap["key"].(string),
+			Value: rawMap["value"].(string),
+		}
 	}
-	return tagSlice
+	return tagsRaw
+}
+
+func flattenCSBSTags(resourceTags []tags.ResourceTag) []map[string]interface{} {
+	var tagsList []map[string]interface{}
+	for _, tag := range resourceTags {
+		mapping := map[string]interface{}{
+			"key":   tag.Key,
+			"value": tag.Value,
+		}
+		tagsList = append(tagsList, mapping)
+	}
+
+	return tagsList
 }

@@ -2,6 +2,9 @@
 subcategory: "Simple Message Notification (SMN)"
 ---
 
+Up-to-date reference of API arguments for SMN topic you can get at
+`https://docs.otc.t-systems.com/simple-message-notification/api-ref/apis/topic_operations`.
+
 # opentelekomcloud_smn_topic_v2
 
 Manages a V2 topic resource within OpenTelekomCloud.

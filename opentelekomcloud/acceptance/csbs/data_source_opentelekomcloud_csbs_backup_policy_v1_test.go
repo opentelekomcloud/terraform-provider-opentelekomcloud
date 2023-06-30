@@ -78,6 +78,10 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
     max_backups     = "2"
     trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
   }
+  tags {
+    key   = "kuh"
+    value = "muh"
+  }
 }
 
 data "opentelekomcloud_csbs_backup_policy_v1" "csbs_policy" {

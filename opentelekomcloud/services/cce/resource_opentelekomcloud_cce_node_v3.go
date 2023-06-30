@@ -380,6 +380,15 @@ func ResourceCCENodeV3() *schema.Resource {
 					},
 				},
 			},
+			"runtime": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"docker", "containerd",
+				}, false),
+			},
 		},
 	}
 }
@@ -558,6 +567,12 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 		},
 	}
 
+	if v, ok := d.GetOk("runtime"); ok {
+		createOpts.Spec.Runtime = nodes.RuntimeSpec{
+			Name: v.(string),
+		}
+	}
+
 	if ip := d.Get("private_ip").(string); ip != "" {
 		createOpts.Spec.NodeNicSpec.PrimaryNic.FixedIPs = []string{ip}
 	}
@@ -694,6 +709,14 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("[DEBUG] Error saving main conf to state for OpenTelekomCloud Node (%s): %w", d.Id(), err)
+	}
+
+	if node.Spec.Runtime.Name != "" {
+		mErr = multierror.Append(mErr, d.Set("runtime", node.Spec.Runtime.Name))
+	}
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("Error setting 'runtime' for OpenTelekomCloud Node (%s): %w", d.Id(), err)
 	}
 
 	var volumes []map[string]interface{}

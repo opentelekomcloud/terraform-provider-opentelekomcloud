@@ -177,11 +177,11 @@ func resourceLoadBalancerV2Read(ctx context.Context, d *schema.ResourceData, met
 	// save tags
 	resourceTags, err := tags.Get(client, "loadbalancers", d.Id()).Extract()
 	if err != nil {
-		return fmterr.Errorf("error fetching OpenTelekomCloud LoadCalancer tags: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud LoadBalancer tags: %s", err)
 	}
 	tagMap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagMap); err != nil {
-		return fmterr.Errorf("error saving tags for OpenTelekomCloud LoadCalancer: %s", err)
+		return fmterr.Errorf("error saving tags for OpenTelekomCloud LoadBalancer: %s", err)
 	}
 
 	return nil

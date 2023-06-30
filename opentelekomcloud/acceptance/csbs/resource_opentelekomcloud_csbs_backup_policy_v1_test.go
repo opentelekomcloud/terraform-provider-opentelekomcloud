@@ -320,8 +320,9 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
     month_backups   = "2"
     timezone        = "UTC+03:00"
   }
-  tags = {
-    muh = "kuh"
+  tags {
+    key   = "kuh"
+    value = "muh"
   }
 }
 `, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsFlavorID)

@@ -62,14 +62,34 @@ The `instances` block supports:
 
 * `name` - The instance name.
 
-* `image_id` - The image ID of the instance.
+* `image_id` - The image ID used to create the server.
 
-* `flavor_id` - The flavor ID.
+* `image_name` - The image name used to create the server.
+
+* `flavor_id` - The flavor ID used to create the server.
 
 * `status` - The instance status.
 
 * `key_pair` - The key pair that is used to authenticate the instance.
 
-* `security_group_ids` - An array of one or more security group IDs to associate with the instance.
+* `security_groups_ids` - An array of one or more security group Ids to associate with the instance.
+
+* `availability_zone` - The availability zone of this server.
 
 * `project_id` - The instance project ID.
+
+* `network` - An array of maps, detailed below.
+
+The `network` block is defined as:
+
+* `uuid` - The UUID of the network
+
+* `name` - The name of the network
+
+* `fixed_ip_v4` - The IPv4 address assigned to this network port. Not supported.
+
+* `fixed_ip_v6` - The IPv6 address assigned to this network port. Not supported.
+
+* `port` - The port UUID for this network
+
+* `mac` - The MAC address assigned to this network interface.

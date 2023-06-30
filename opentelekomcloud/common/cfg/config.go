@@ -425,11 +425,17 @@ func buildClientByAKSK(c *Config) error {
 			Domain:   c.DomainName,
 		}
 	}
-
+	if c.SecurityToken != "" {
+		dao.ProjectId = c.TenantID
+		dao.ProjectName = c.TenantName
+	}
 	for _, ao := range []*golangsdk.AKSKAuthOptions{&pao, &dao} {
 		ao.IdentityEndpoint = c.IdentityEndpoint
 		ao.AccessKey = c.AccessKey
 		ao.SecretKey = c.SecretKey
+		if c.SecurityToken != "" {
+			ao.SecurityToken = c.SecurityToken
+		}
 	}
 	return c.genClients(pao, dao)
 }
@@ -661,6 +667,13 @@ func (c *Config) CbrV3Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) DisV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewDISServiceV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) ComputeV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewComputeV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
@@ -835,6 +848,13 @@ func (c *Config) DehV1Client(region string) (*golangsdk.ServiceClient, error) {
 
 func (c *Config) DmsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewDMSServiceV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) DmsV11Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewDMSServiceV11(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
 		Availability: c.getEndpointType(),
 	})

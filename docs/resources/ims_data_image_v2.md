@@ -2,6 +2,9 @@
 subcategory: "Image Management Service (IMS)"
 ---
 
+Up-to-date reference of API arguments for IMS data image you can get at
+`https://docs.otc.t-systems.com/image-management-service/api-ref/ims_apis/image`.
+
 # opentelekomcloud_ims_data_image_v2
 
 Manages a V2 Data Image resource within OpenTelekomCloud IMS.

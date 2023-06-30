@@ -35,6 +35,10 @@ func ResourceListenerV2() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceListenerV2ImportState,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -424,4 +428,31 @@ func updateTransparentIPEnable(d *schema.ResourceData, config *cfg.Config) error
 	opts := v3listeners.UpdateOpts{TransparentClientIP: &enable}
 	_, err = v3listeners.Update(client, d.Id(), opts).Extract()
 	return err
+}
+
+func resourceListenerV2ImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*cfg.Config)
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV2Client(config.GetRegion(d))
+	})
+	if err != nil {
+		return nil, fmt.Errorf(ErrCreationV2Client, err)
+	}
+
+	listener, err := listeners.Get(client, d.Id()).Extract()
+	if err != nil {
+		return nil, common.CheckDeleted(d, err, "Listener")
+	}
+
+	log.Printf("[DEBUG] Retrieved Listener %s during the import: %#v", d.Id(), listener)
+
+	var loadbalancerID string
+	if listener.Loadbalancers[0].ID != "" {
+		loadbalancerID = listener.Loadbalancers[0].ID
+	}
+	if err := d.Set("loadbalancer_id", loadbalancerID); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

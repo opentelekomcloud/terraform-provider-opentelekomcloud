@@ -2,6 +2,9 @@
 subcategory: "NAT"
 ---
 
+Up-to-date reference of API arguments for NAT snat you can get at
+`https://docs.otc.t-systems.com/nat-gateway/api-ref/api_v2.0/snat_rules`.
+
 # opentelekomcloud_nat_snat_rule_v2
 
 Manages a V2 snat rule resource within OpenTelekomCloud Nat.

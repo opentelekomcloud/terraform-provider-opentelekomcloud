@@ -183,9 +183,21 @@ func DataSourceCSBSBackupV1() *schema.Resource {
 				},
 			},
 			"tags": {
-				Type:     schema.TypeMap,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
 			},
 		},
 	}
@@ -236,11 +248,6 @@ func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta 
 
 	d.SetId(backupObject.Id)
 
-	tagsMap := make(map[string]string)
-	for _, tag := range backupObject.Tags {
-		tagsMap[tag.Key] = tag.Value
-	}
-
 	mErr := multierror.Append(
 		d.Set("backup_record_id", backupObject.CheckpointId),
 		d.Set("backup_name", backupObject.Name),
@@ -255,7 +262,7 @@ func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("volume_backups", flattenCSBSVolumeBackups(&backupObject)),
 		d.Set("vm_metadata", flattenCSBSVMMetadata(&backupObject)),
 		d.Set("region", config.GetRegion(d)),
-		d.Set("tags", tagsMap),
+		d.Set("tags", flattenCSBSTags(backupObject.Tags)),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {

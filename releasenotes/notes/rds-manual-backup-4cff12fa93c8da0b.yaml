@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    *New Resource:** ``opentelekomcloud_rds_backup_v3``
+    (`#2121 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2121>`_)

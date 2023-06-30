@@ -43,9 +43,57 @@ func TestCESAlarmRule_basic(t *testing.T) {
 			},
 			{
 				Config: testCESAlarmRuleUpdate,
+				Check:  resource.ComposeTestCheckFunc(),
+			},
+		},
+	})
+}
+
+func TestCESAlarmRule_systemEvents(t *testing.T) {
+	var ar alarms.MetricAlarms
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := ecs.QuotasForFlavor(env.OsFlavorID)
+			qts = append(qts,
+				&quotas.ExpectedQuota{Q: quotas.Server, Count: 1},
+				&quotas.ExpectedQuota{Q: quotas.Volume, Count: 1},
+				&quotas.ExpectedQuota{Q: quotas.VolumeSize, Count: 4},
+			)
+			quotas.BookMany(t, qts)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testCESAlarmRuleDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testCESAlarmRuleSystemEvents,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceAlarmRuleName, "alarm_enabled", "false"),
+					testCESAlarmRuleExists(resourceAlarmRuleName, &ar),
+					resource.TestCheckResourceAttr(resourceAlarmRuleName, "alarm_type", "EVENT.SYS"),
+					resource.TestCheckResourceAttr(resourceAlarmRuleName, "metric.0.namespace", "SYS.CBR"),
+					resource.TestCheckResourceAttr(resourceAlarmRuleName, "metric.0.metric_name", "backupFailed"),
+					resource.TestCheckResourceAttr(resourceAlarmRuleName, "condition.0.alarm_frequency", "300"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccCESAlarmRules_importBasic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testCESAlarmRuleDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testCESAlarmRuleBasic,
+			},
+
+			{
+				ResourceName:      resourceAlarmRuleName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -314,3 +362,37 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_s" {
   alarm_action_enabled = false
 }
 `, common.DataSourceSubnet)
+
+const testCESAlarmRuleSystemEvents = `
+resource "opentelekomcloud_smn_topic_v2" "topic_1" {
+  name         = "topic_2"
+  display_name = "The display name of topic_1"
+}
+
+resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
+  alarm_name = "alarm_rule1"
+  alarm_type = "EVENT.SYS"
+
+  metric {
+    namespace   = "SYS.CBR"
+    metric_name = "backupFailed"
+  }
+  condition {
+    period              = 300
+    filter              = "average"
+    comparison_operator = ">"
+    value               = 6
+    unit                = "B/s"
+    count               = 1
+    alarm_frequency     = 300
+  }
+  alarm_action_enabled = false
+
+  alarm_actions {
+    type = "notification"
+    notification_list = [
+      opentelekomcloud_smn_topic_v2.topic_1.topic_urn
+    ]
+  }
+}
+`

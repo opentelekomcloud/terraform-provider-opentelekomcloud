@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[DCS]** `whitelist` and `enable_whitelist` not depends from each other now in ``resource/opentelekomcloud_dcs_instance_v1`` (`#2170 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2170>`_)

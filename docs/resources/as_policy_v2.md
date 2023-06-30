@@ -2,6 +2,9 @@
 subcategory: "Autoscaling"
 ---
 
+Up-to-date reference of API arguments for AS policy you can get at
+`https://docs.otc.t-systems.com/auto-scaling/api-ref/apis/as_policies`.
+
 # opentelekomcloud_as_policy_v2
 
 Manages a V2 AS Policy resource within OpenTelekomCloud.
