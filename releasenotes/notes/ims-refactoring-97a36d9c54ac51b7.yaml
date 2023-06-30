@@ -1,0 +1,6 @@
+---
+other:
+  - |
+    **[IMS]** Refactoring of ``resource/opentelekomcloud_ims_*`` (`#2088 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2088>`_)
+  - |
+    **[IMS]** Refactoring of ``resource/opentelekomcloud_images_*`` (`#2088 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2088>`_)

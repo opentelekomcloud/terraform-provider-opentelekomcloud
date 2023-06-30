@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/members"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/image/v2/members"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -84,10 +84,11 @@ func resourceImagesImageAccessAcceptV2Create(ctx context.Context, d *schema.Reso
 		return fmterr.Errorf("error waiting for `%s` status: %w", pendingStatus, err)
 	}
 
-	opts := members.UpdateOpts{
-		Status: status,
-	}
-	_, err = members.Update(client, imageID, memberID, opts).Extract()
+	_, err = members.Update(client, members.UpdateOpts{
+		ImageId:  imageID,
+		MemberId: memberID,
+		Status:   status,
+	})
 	if err != nil {
 		return fmterr.Errorf("error setting a member status to the image share: %w", err)
 	}
@@ -119,16 +120,19 @@ func resourceImagesImageAccessAcceptV2Read(_ context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	member, err := members.Get(client, imageID, memberID).Extract()
+	member, err := members.Get(client, members.MemberOpts{
+		ImageId:  imageID,
+		MemberId: memberID,
+	})
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "image_access_accept_v2")
 	}
 
 	mErr := multierror.Append(
 		d.Set("status", member.Status),
-		d.Set("member_id", member.MemberID),
-		d.Set("created_at", member.CreatedAt),
-		d.Set("image_id", member.ImageID),
+		d.Set("member_id", member.MemberId),
+		d.Set("created_at", member.CreatedAt.Format(time.RFC3339)),
+		d.Set("image_id", member.ImageId),
 		d.Set("schema", member.Schema),
 	)
 
@@ -153,9 +157,11 @@ func resourceImagesImageAccessAcceptV2Update(ctx context.Context, d *schema.Reso
 
 	status := d.Get("status").(string)
 	opts := members.UpdateOpts{
-		Status: status,
+		ImageId:  imageID,
+		MemberId: memberID,
+		Status:   status,
 	}
-	_, err = members.Update(client, imageID, memberID, opts).Extract()
+	_, err = members.Update(client, opts)
 	if err != nil {
 		return fmterr.Errorf("error updating the image with the member: %w", err)
 	}
@@ -187,9 +193,11 @@ func resourceImagesImageAccessAcceptV2Delete(ctx context.Context, d *schema.Reso
 	// reject status on the consumer side
 	status := "rejected"
 	opts := members.UpdateOpts{
-		Status: status,
+		ImageId:  imageID,
+		MemberId: memberID,
+		Status:   status,
 	}
-	if err := members.Update(client, imageID, memberID, opts).Err; err != nil {
+	if _, err := members.Update(client, opts); err != nil {
 		return common.CheckDeletedDiag(d, err, "image_access_accept_v2")
 	}
 	state := &resource.StateChangeConf{

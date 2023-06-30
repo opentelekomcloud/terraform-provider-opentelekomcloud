@@ -7,7 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/members"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/image/v2/members"
+	ims2 "github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/members"
+
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -15,7 +17,7 @@ import (
 )
 
 func TestAccImagesImageAccessV2Basic(t *testing.T) {
-	var member members.Member
+	var member ims2.Member
 	accessResourceName := "opentelekomcloud_images_image_access_v2.access_1"
 
 	privateImageID := os.Getenv("OS_PRIVATE_IMAGE_ID")
@@ -58,7 +60,10 @@ func testAccCheckImagesImageAccessV2Destroy(s *terraform.State) error {
 			return err
 		}
 
-		_, err = members.Get(client, imageID, memberID).Extract()
+		_, err = members.Get(client, members.MemberOpts{
+			ImageId:  imageID,
+			MemberId: memberID,
+		})
 		if err == nil {
 			return fmt.Errorf("image share still exists")
 		}
@@ -67,7 +72,7 @@ func testAccCheckImagesImageAccessV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckImagesImageAccessV2Exists(n string, member *members.Member) resource.TestCheckFunc {
+func testAccCheckImagesImageAccessV2Exists(n string, member *ims2.Member) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -89,12 +94,15 @@ func testAccCheckImagesImageAccessV2Exists(n string, member *members.Member) res
 			return err
 		}
 
-		found, err := members.Get(client, imageID, memberID).Extract()
+		found, err := members.Get(client, members.MemberOpts{
+			ImageId:  imageID,
+			MemberId: memberID,
+		})
 		if err != nil {
 			return err
 		}
 
-		id := fmt.Sprintf("%s/%s", found.ImageID, found.MemberID)
+		id := fmt.Sprintf("%s/%s", found.ImageId, found.MemberId)
 		if id != rs.Primary.ID {
 			return fmt.Errorf("image member not found")
 		}

@@ -10,13 +10,14 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/imagedata"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/image/v2/images"
+	ims "github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -99,11 +100,6 @@ func ResourceImagesImageV2() *schema.Resource {
 				ConflictsWith: []string{"image_source_url"},
 			},
 
-			"metadata": {
-				Type:     schema.TypeMap,
-				Computed: true,
-			},
-
 			"min_disk_gb": {
 				Type:             schema.TypeInt,
 				Optional:         true,
@@ -184,16 +180,14 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error creating OpenTelekomCloud image client: %s", err)
 	}
 
-	protected := d.Get("protected").(bool)
-	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
-	createOpts := &images.CreateOpts{
+	createOpts := images.CreateOpts{
 		Name:            d.Get("name").(string),
 		ContainerFormat: d.Get("container_format").(string),
 		DiskFormat:      d.Get("disk_format").(string),
 		MinDisk:         d.Get("min_disk_gb").(int),
-		MinRAM:          d.Get("min_ram_mb").(int),
-		Protected:       &protected,
-		Visibility:      &visibility,
+		MinRam:          d.Get("min_ram_mb").(int),
+		Protected:       d.Get("protected").(bool),
+		Visibility:      d.Get("visibility").(string),
 	}
 
 	if v, ok := d.GetOk("tags"); ok {
@@ -204,12 +198,12 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 	d.Partial(true)
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	newImg, err := images.Create(imageClient, createOpts).Extract()
+	newImg, err := images.Create(imageClient, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating Image: %s", err)
 	}
 
-	d.SetId(newImg.ID)
+	d.SetId(newImg.Id)
 
 	// downloading/getting image file props
 	imgFilePath, err := resourceImagesImageV2File(d)
@@ -231,15 +225,15 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 	}()
 	log.Printf("[WARN] Uploading image %s (%d bytes). This can be pretty long.", d.Id(), fileSize)
 
-	res := imagedata.Upload(imageClient, d.Id(), imgFile)
-	if res.Err != nil {
-		return fmterr.Errorf("error while uploading file %q: %s", imgFilePath, res.Err)
+	res := images.Upload(imageClient, d.Id(), imgFile)
+	if res != nil {
+		return fmterr.Errorf("error while uploading file %q: %s", imgFilePath, res)
 	}
 
 	// wait for active
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{string(images.ImageStatusQueued), string(images.ImageStatusSaving)},
-		Target:     []string{string(images.ImageStatusActive)},
+		Pending:    []string{"queued", "saving"},
+		Target:     []string{"active"},
 		Refresh:    resourceImagesImageV2RefreshFunc(imageClient, d.Id(), fileSize, fileChecksum),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
@@ -262,31 +256,31 @@ func resourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf("error creating OpenTelekomCloud image client: %s", err)
 	}
 
-	img, err := images.Get(imageClient, d.Id()).Extract()
+	imgs, err := ims.ListImages(imageClient, ims.ListImagesOpts{Id: d.Id()})
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "image")
 	}
+	img := imgs[0]
 
 	log.Printf("[DEBUG] Retrieved Image %s: %#v", d.Id(), img)
 
+	size, _ := strconv.Atoi(img.ImageSize)
 	mErr := multierror.Append(
 		d.Set("owner", img.Owner),
 		d.Set("status", img.Status),
 		d.Set("file", img.File),
 		d.Set("schema", img.Schema),
 		d.Set("checksum", img.Checksum),
-		d.Set("size_bytes", img.SizeBytes),
-		d.Set("metadata", img.Metadata),
-		d.Set("created_at", img.CreatedAt.String()),
-		d.Set("update_at", img.UpdatedAt.String()),
+		d.Set("size_bytes", size),
+		d.Set("created_at", img.CreatedAt.Format(time.RFC3339)),
+		d.Set("update_at", img.UpdatedAt.Format(time.RFC3339)),
 		d.Set("container_format", img.ContainerFormat),
 		d.Set("disk_format", img.DiskFormat),
-		d.Set("min_disk_gb", img.MinDiskGigabytes),
-		d.Set("min_ram_mb", img.MinRAMMegabytes),
+		d.Set("min_disk_gb", img.MinDisk),
+		d.Set("min_ram_mb", img.MinRam),
 		d.Set("file", img.File),
 		d.Set("name", img.Name),
 		d.Set("protected", img.Protected),
-		d.Set("size_bytes", img.SizeBytes),
 		d.Set("tags", img.Tags),
 		d.Set("visibility", img.Visibility),
 		d.Set("region", config.GetRegion(d)),
@@ -306,30 +300,36 @@ func resourceImagesImageV2Update(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error creating OpenTelekomCloud image client: %s", err)
 	}
 
-	updateOpts := make(images.UpdateOpts, 0)
+	updateOpts := make([]ims.UpdateImageOpts, 0)
 
 	if d.HasChange("visibility") {
-		visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
-		v := images.UpdateVisibility{Visibility: visibility}
-		updateOpts = append(updateOpts, v)
+		updateOpts = append(updateOpts, ims.UpdateImageOpts{
+			Op:    "replace",
+			Path:  "/visibility",
+			Value: d.Get("visibility").(string),
+		})
 	}
 
 	if d.HasChange("name") {
-		v := images.ReplaceImageName{NewName: d.Get("name").(string)}
-		updateOpts = append(updateOpts, v)
+		updateOpts = append(updateOpts, ims.UpdateImageOpts{
+			Op:    "replace",
+			Path:  "/name",
+			Value: d.Get("name").(string),
+		})
 	}
 
 	if d.HasChange("tags") {
 		tags := d.Get("tags").(*schema.Set).List()
-		v := images.ReplaceImageTags{
-			NewTags: resourceImagesImageV2BuildTags(tags),
-		}
-		updateOpts = append(updateOpts, v)
+		updateOpts = append(updateOpts, ims.UpdateImageOpts{
+			Op:    "replace",
+			Path:  "/tags",
+			Value: resourceImagesImageV2BuildTags(tags),
+		})
 	}
 
 	log.Printf("[DEBUG] Update Options: %#v", updateOpts)
 
-	_, err = images.Update(imageClient, d.Id(), updateOpts).Extract()
+	_, err = images.Update(imageClient, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating image: %s", err)
 	}
@@ -345,7 +345,10 @@ func resourceImagesImageV2Delete(_ context.Context, d *schema.ResourceData, meta
 	}
 
 	log.Printf("[DEBUG] Deleting Image %s", d.Id())
-	if err := images.Delete(imageClient, d.Id()).Err; err != nil {
+	if err := images.Delete(imageClient, images.DeleteImageOpts{
+		ImageId:      d.Id(),
+		DeleteBackup: true,
+	}); err != nil {
 		return fmterr.Errorf("error deleting Image: %s", err)
 	}
 
@@ -397,21 +400,6 @@ func resourceImagesImageV2ValidateContainerFormat(v interface{}, k string) (ws [
 	}
 	errors = append(errors, fmt.Errorf("%q must be one of %v", k, ContainerFormats))
 	return
-}
-
-func resourceImagesImageV2VisibilityFromString(v string) images.ImageVisibility {
-	switch v {
-	case "public":
-		return images.ImageVisibilityPublic
-	case "private":
-		return images.ImageVisibilityPrivate
-	case "shared":
-		return images.ImageVisibilityShared
-	case "community":
-		return images.ImageVisibilityCommunity
-	}
-
-	return ""
 }
 
 func fileMD5Checksum(f *os.File) (string, error) {
@@ -485,10 +473,11 @@ func resourceImagesImageV2File(d *schema.ResourceData) (string, error) {
 
 func resourceImagesImageV2RefreshFunc(client *golangsdk.ServiceClient, id string, _ int64, _ string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		img, err := images.Get(client, id).Extract()
+		imgs, err := ims.ListImages(client, ims.ListImagesOpts{Id: id})
 		if err != nil {
 			return nil, "", err
 		}
+		img := imgs[0]
 		log.Printf("[DEBUG] OpenTelekomCloud image status is: %s", img.Status)
 
 		// Huawei provider doesn't have this set initially.
@@ -497,7 +486,7 @@ func resourceImagesImageV2RefreshFunc(client *golangsdk.ServiceClient, id string
 				return img, fmt.Sprintf("%s", img.Status), fmt.Errorf("error wrong size %v or checksum %q", img.SizeBytes, img.Checksum)
 			}
 		*/
-		return img, string(img.Status), nil
+		return img, img.Status, nil
 	}
 }
 
@@ -508,15 +497,4 @@ func resourceImagesImageV2BuildTags(v []interface{}) []string {
 	}
 
 	return tags
-}
-
-func resourceImagesImageV2ExpandProperties(v map[string]interface{}) map[string]string {
-	properties := map[string]string{}
-	for key, value := range v {
-		if v, ok := value.(string); ok {
-			properties[key] = v
-		}
-	}
-
-	return properties
 }

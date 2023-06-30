@@ -18,9 +18,9 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/startstop"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/flavors"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/images"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 	ecstags "github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservertags"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ims"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -818,7 +818,10 @@ func setImageInformations(computeClient *golangsdk.ServiceClient, server *bms.Se
 	imageId := server.Image.ID
 	if imageId != "" {
 		_ = d.Set("image_id", imageId)
-		if image, err := images.Get(computeClient, imageId).Extract(); err != nil {
+		if image, err := images.ListImages(computeClient, images.ListImagesOpts{
+			Id:    imageId,
+			Limit: 1,
+		}); err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				// If the image name can't be found, set the value to "Image not found".
 				// The most likely scenario is that the image no longer exists in the Image Service
@@ -828,7 +831,7 @@ func setImageInformations(computeClient *golangsdk.ServiceClient, server *bms.Se
 			}
 			return err
 		} else {
-			_ = d.Set("image_name", image.Name)
+			_ = d.Set("image_name", image[0].Name)
 		}
 	}
 

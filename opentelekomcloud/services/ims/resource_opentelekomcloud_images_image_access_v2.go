@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/members"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/image/v2/members"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -72,14 +72,13 @@ func resourceImagesImageAccessV2Create(ctx context.Context, d *schema.ResourceDa
 	memberID := d.Get("member_id").(string)
 	imageID := d.Get("image_id").(string)
 
-	createOpts := members.CreateOpts{
-		Member: memberID,
-	}
-	_, err = members.Create(client, imageID, createOpts).Extract()
+	_, err = members.Create(client, members.MemberOpts{
+		ImageId:  imageID,
+		MemberId: memberID,
+	})
 	if err != nil {
 		return fmterr.Errorf("error requesting share for private image: %w", err)
 	}
-
 	state := &resource.StateChangeConf{
 		Target:  []string{"pending"},
 		Refresh: waitForImageRequestStatus(client, imageID, memberID, "pending"),
@@ -95,11 +94,11 @@ func resourceImagesImageAccessV2Create(ctx context.Context, d *schema.ResourceDa
 
 	status := d.Get("status").(string)
 	if status != "" {
-		opts := members.UpdateOpts{
-			Status: status,
-		}
-
-		_, err := members.Update(client, imageID, memberID, opts).Extract()
+		_, err := members.Update(client, members.UpdateOpts{
+			ImageId:  imageID,
+			MemberId: memberID,
+			Status:   status,
+		})
 		if err != nil {
 			return fmterr.Errorf("error updating the image status: %w", err)
 		}
@@ -129,17 +128,20 @@ func resourceImagesImageAccessV2Read(_ context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	member, err := members.Get(client, imageID, memberID).Extract()
+	member, err := members.Get(client, members.MemberOpts{
+		ImageId:  imageID,
+		MemberId: memberID,
+	})
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "image_access_v2")
 	}
 
 	mErr := multierror.Append(
 		d.Set("status", member.Status),
-		d.Set("member_id", member.MemberID),
-		d.Set("created_at", member.CreatedAt),
-		d.Set("update_at", member.UpdatedAt),
-		d.Set("image_id", member.ImageID),
+		d.Set("member_id", member.MemberId),
+		d.Set("created_at", member.CreatedAt.Format(time.RFC3339)),
+		d.Set("update_at", member.UpdatedAt.Format(time.RFC3339)),
+		d.Set("image_id", member.ImageId),
 		d.Set("schema", member.Schema),
 	)
 
@@ -163,11 +165,11 @@ func resourceImagesImageAccessV2Update(ctx context.Context, d *schema.ResourceDa
 	}
 
 	status := d.Get("status").(string)
-	updateOpts := members.UpdateOpts{
-		Status: status,
-	}
-
-	_, err = members.Update(client, imageID, memberID, updateOpts).Extract()
+	_, err = members.Update(client, members.UpdateOpts{
+		ImageId:  imageID,
+		MemberId: memberID,
+		Status:   status,
+	})
 	if err != nil {
 		return fmterr.Errorf("error updating share request: %w", err)
 	}
@@ -196,7 +198,10 @@ func resourceImagesImageAccessV2Delete(_ context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	if err := members.Delete(client, imageID, memberID).ExtractErr(); err != nil {
+	if err := members.Delete(client, members.MemberOpts{
+		ImageId:  imageID,
+		MemberId: memberID,
+	}); err != nil {
 		return fmterr.Errorf("error deleting share request: %w", err)
 	}
 

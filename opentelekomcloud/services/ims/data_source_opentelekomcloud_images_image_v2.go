@@ -5,12 +5,13 @@ import (
 	"log"
 	"regexp"
 	"sort"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -61,7 +62,6 @@ func DataSourceImagesImageV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "name",
 			},
 			"sort_direction": {
 				Type:     schema.TypeString,
@@ -83,12 +83,6 @@ func DataSourceImagesImageV2() *schema.Resource {
 				Default:  false,
 				ForceNew: true,
 			},
-			"properties": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				ForceNew: true,
-			},
-			// Computed values
 			"container_format": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -143,6 +137,94 @@ func DataSourceImagesImageV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
+			"image_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"is_registered": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"whole_image": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"system_cmk_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"os_bit": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"os_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"platform": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"support_disk_intensive": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"support_high_performance": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"support_kvm": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"support_kvm_gpu_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"support_kvm_infiniband": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"support_large_memory": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"support_xen": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"support_xen_gpu_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"support_xen_hana": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"member_status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"min_disk": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"min_ram": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"virtual_env_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -154,13 +236,11 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf("error creating OpenTelekomCloud IMSv2 client: %w", err)
 	}
 
-	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
-
-	listOpts := images.ListOpts{
+	listOpts := images.ListImagesOpts{
 		Name:       d.Get("name").(string),
-		Visibility: visibility,
+		Visibility: d.Get("visibility").(string),
 		Owner:      d.Get("owner").(string),
-		Status:     images.ImageStatusActive,
+		Status:     "active",
 		SizeMin:    int64(d.Get("size_min").(int)),
 		SizeMax:    int64(d.Get("size_max").(int)),
 		SortKey:    d.Get("sort_key").(string),
@@ -170,93 +250,91 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 
 	log.Printf("[DEBUG] List Options: %#v", listOpts)
 
-	var image images.Image
-	allPages, err := images.List(client, listOpts).AllPages()
+	var img images.ImageInfo
+	ims, err := images.ListImages(client, listOpts)
 	if err != nil {
 		return fmterr.Errorf("unable to query images: %s", err)
 	}
 
-	allImages, err := images.ExtractImages(allPages)
-	if err != nil {
-		return fmterr.Errorf("unable to retrieve images: %s", err)
-	}
-
-	var filteredImages []images.Image
+	var filteredImages []images.ImageInfo
 	if nameRegex, ok := d.GetOk("name_regex"); ok {
 		r := regexp.MustCompile(nameRegex.(string))
-		for _, image := range allImages {
+		for _, image := range ims {
 			if r.MatchString(image.Name) {
 				filteredImages = append(filteredImages, image)
 			}
 		}
-		allImages = filteredImages
+		ims = filteredImages
 	}
 
-	properties := d.Get("properties").(map[string]interface{})
-	imageProperties := resourceImagesImageV2ExpandProperties(properties)
-	if len(filteredImages) > 1 && len(imageProperties) > 0 {
-		for _, image := range filteredImages {
-			if len(image.Properties) > 0 {
-				match := true
-				for searchKey, searchValue := range imageProperties {
-					imageValue, ok := image.Properties[searchKey]
-					if !ok {
-						match = false
-						break
-					}
+	// properties := d.Get("properties").(map[string]interface{})
+	// imageProperties := resourceImagesImageV2ExpandProperties(properties)
+	// if len(filteredImages) > 1 && len(imageProperties) > 0 {
+	// 	for _, image := range filteredImages {
+	// 		if len(image.) > 0 {
+	// 			match := true
+	// 			for searchKey, searchValue := range imageProperties {
+	// 				imageValue, ok := image.Properties[searchKey]
+	// 				if !ok {
+	// 					match = false
+	// 					break
+	// 				}
+	//
+	// 				if searchValue != imageValue {
+	// 					match = false
+	// 					break
+	// 				}
+	// 			}
+	//
+	// 			if match {
+	// 				filteredImages = append(filteredImages, image)
+	// 			}
+	// 		}
+	// 	}
+	// 	allImages = filteredImages
+	// }
 
-					if searchValue != imageValue {
-						match = false
-						break
-					}
-				}
-
-				if match {
-					filteredImages = append(filteredImages, image)
-				}
-			}
-		}
-		allImages = filteredImages
-	}
-
-	if len(allImages) < 1 {
+	if len(ims) < 1 {
 		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again")
 	}
 
-	if len(allImages) > 1 {
+	if len(ims) > 1 {
 		recent := d.Get("most_recent").(bool)
 		log.Printf("[DEBUG] Multiple results found and `most_recent` is set to: %t", recent)
 		if recent {
-			image = mostRecentImage(allImages)
+			img = mostRecentImage(ims)
 		} else {
 			return fmterr.Errorf("your query returned more than one result. Please try a more " +
 				"specific search criteria, or set `most_recent` attribute to true")
 		}
 	} else {
-		image = allImages[0]
+		img = ims[0]
 	}
 
-	log.Printf("[DEBUG] Single Image found: %s", image.ID)
-	d.SetId(image.ID)
+	log.Printf("[DEBUG] Single Image found: %s", img.Id)
+	d.SetId(img.Id)
 
 	mErr := multierror.Append(nil,
-		d.Set("name", image.Name),
-		d.Set("tags", image.Tags),
-		d.Set("container_format", image.ContainerFormat),
-		d.Set("disk_format", image.DiskFormat),
-		d.Set("min_disk_gb", image.MinDiskGigabytes),
-		d.Set("min_ram_mb", image.MinRAMMegabytes),
-		d.Set("owner", image.Owner),
-		d.Set("protected", image.Protected),
-		d.Set("visibility", image.Visibility),
-		d.Set("checksum", image.Checksum),
-		d.Set("size_bytes", image.SizeBytes),
-		d.Set("created_at", image.CreatedAt.String()),
-		d.Set("updated_at", image.UpdatedAt.String()),
-		d.Set("file", image.File),
-		d.Set("schema", image.Schema),
-		d.Set("metadata", image.Metadata),
+		d.Set("name", img.Name),
+		d.Set("tags", img.Tags),
+		d.Set("container_format", img.ContainerFormat),
+		d.Set("disk_format", img.DiskFormat),
+		d.Set("min_disk_gb", img.MinDisk),
+		d.Set("min_ram_mb", img.MinRam),
+		d.Set("owner", img.Owner),
+		d.Set("protected", img.Protected),
+		d.Set("visibility", img.Visibility),
+		d.Set("checksum", img.Checksum),
+		d.Set("size_bytes", img.Size),
+		d.Set("created_at", img.CreatedAt.Format(time.RFC3339)),
+		d.Set("updated_at", img.UpdatedAt.Format(time.RFC3339)),
+		d.Set("file", img.File),
+		d.Set("schema", img.Schema),
+		d.Set("id", img.Id),
+		d.Set("status", img.Status),
+		d.Set("os_type", img.OsType),
+		d.Set("platform", img.Platform),
 	)
 
 	if mErr.ErrorOrNil() != nil {
@@ -266,7 +344,7 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-type imageSort []images.Image
+type imageSort []images.ImageInfo
 
 func (a imageSort) Len() int {
 	return len(a)
@@ -283,7 +361,7 @@ func (a imageSort) Less(i, j int) bool {
 }
 
 // Returns the most recent Image out of a slice of images.
-func mostRecentImage(images []images.Image) images.Image {
+func mostRecentImage(images []images.ImageInfo) images.ImageInfo {
 	sortedImages := images
 	sort.Sort(imageSort(sortedImages))
 	return sortedImages[len(sortedImages)-1]

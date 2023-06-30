@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/image/v2/images"
+	ims "github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -15,7 +16,7 @@ import (
 )
 
 func TestAccImagesImageV2_basic(t *testing.T) {
-	var image images.Image
+	var image ims.ImageInfo
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -41,7 +42,7 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 }
 
 func TestAccImagesImageV2_name(t *testing.T) {
-	var image images.Image
+	var image ims.ImageInfo
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -69,7 +70,7 @@ func TestAccImagesImageV2_name(t *testing.T) {
 }
 
 func TestAccImagesImageV2_tags(t *testing.T) {
-	var image images.Image
+	var image ims.ImageInfo
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -109,7 +110,7 @@ func TestAccImagesImageV2_tags(t *testing.T) {
 }
 
 func TestAccImagesImageV2_visibility(t *testing.T) {
-	var image images.Image
+	var image ims.ImageInfo
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -140,7 +141,7 @@ func TestAccImagesImageV2_visibility(t *testing.T) {
 }
 
 func TestAccImagesImageV2_timeout(t *testing.T) {
-	var image images.Image
+	var image ims.ImageInfo
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -169,7 +170,7 @@ func testAccCheckImagesImageV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := images.Get(imageClient, rs.Primary.ID).Extract()
+		_, err := images.Get(imageClient, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("image still exists")
 		}
@@ -178,7 +179,7 @@ func testAccCheckImagesImageV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckImagesImageV2Exists(n string, image *images.Image) resource.TestCheckFunc {
+func testAccCheckImagesImageV2Exists(n string, image *ims.ImageInfo) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -195,12 +196,12 @@ func testAccCheckImagesImageV2Exists(n string, image *images.Image) resource.Tes
 			return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 		}
 
-		found, err := images.Get(imageClient, rs.Primary.ID).Extract()
+		found, err := images.Get(imageClient, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		if found.ID != rs.Primary.ID {
+		if found.Id != rs.Primary.ID {
 			return fmt.Errorf("image not found")
 		}
 
@@ -227,12 +228,12 @@ func testAccCheckImagesImageV2HasTag(n, tag string) resource.TestCheckFunc {
 			return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 		}
 
-		found, err := images.Get(imageClient, rs.Primary.ID).Extract()
+		found, err := images.Get(imageClient, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		if found.ID != rs.Primary.ID {
+		if found.Id != rs.Primary.ID {
 			return fmt.Errorf("image not found")
 		}
 
@@ -263,12 +264,12 @@ func testAccCheckImagesImageV2TagCount(n string, expected int) resource.TestChec
 			return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 		}
 
-		found, err := images.Get(imageClient, rs.Primary.ID).Extract()
+		found, err := images.Get(imageClient, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		if found.ID != rs.Primary.ID {
+		if found.Id != rs.Primary.ID {
 			return fmt.Errorf("image not found")
 		}
 

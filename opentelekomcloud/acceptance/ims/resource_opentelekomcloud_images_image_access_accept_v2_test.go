@@ -7,7 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/members"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/image/v2/members"
+	ims2 "github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/members"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -15,12 +16,14 @@ import (
 )
 
 func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
-	var member members.Member
+	var member ims2.Member
 	acceptResourceName := "opentelekomcloud_images_image_access_accept_v2.accept_1"
 	privateImageID := os.Getenv("OS_PRIVATE_IMAGE_ID")
 	shareProjectID := os.Getenv("OS_PROJECT_ID_2")
-	if privateImageID == "" || shareProjectID == "" {
-		t.Skip("OS_PRIVATE_IMAGE_ID or OS_PROJECT_ID_2 are empty, but test requires")
+	shareProjectName := os.Getenv("OS_PROJECT_NAME_2")
+	shareCloudID := os.Getenv("OS_CLOUD_2")
+	if privateImageID == "" || shareProjectID == "" || shareCloudID == "" || shareProjectName == "" {
+		t.Skip("OS_PRIVATE_IMAGE_ID or OS_PROJECT_ID_2 or OS_CLOUD_2 are empty, but test requires")
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -65,7 +68,10 @@ func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 			return err
 		}
 
-		_, err = members.Get(client, imageID, memberID).Extract()
+		_, err = members.Get(client, members.MemberOpts{
+			ImageId:  imageID,
+			MemberId: memberID,
+		})
 		if err == nil {
 			return fmt.Errorf("image membership still exists")
 		}
@@ -77,6 +83,8 @@ func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 func testAccImagesImageAccessAcceptV2Basic(privateImageID, projectToShare string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_images_image_access_v2" "access_1" {
+  provider = "opentelekomcloud"
+
   image_id  = "%[1]s"
   member_id = "%[2]s"
 }
@@ -84,7 +92,7 @@ resource "opentelekomcloud_images_image_access_v2" "access_1" {
 %[3]s
 
 resource "opentelekomcloud_images_image_access_accept_v2" "accept_1" {
-  provider = "%s"
+  provider = "%[4]s"
 
   depends_on = [opentelekomcloud_images_image_access_v2.access_1]
 
@@ -98,6 +106,8 @@ resource "opentelekomcloud_images_image_access_accept_v2" "accept_1" {
 func testAccImagesImageAccessAcceptV2Update(privateImageID, projectToShare string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_images_image_access_v2" "access_1" {
+  provider = "opentelekomcloud"
+
   image_id  = "%[1]s"
   member_id = "%[2]s"
 }
