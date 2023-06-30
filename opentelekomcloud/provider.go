@@ -23,6 +23,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dis"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dms"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dns"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/drs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dws"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ecs"
 	elbv2 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v2"
@@ -368,6 +369,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_dms_topic_v1":                       dms.ResourceDmsTopicsV1(),
 			"opentelekomcloud_dms_user_v2":                        dms.ResourceDmsUsersV2(),
 			"opentelekomcloud_dms_user_permission_v1":             dms.ResourceDmsUsersPermissionV1(),
+			"opentelekomcloud_drs_task_v3":                        drs.ResourceDrsTaskV3(),
 			"opentelekomcloud_dws_cluster_v1":                     dws.ResourceDcsInstanceV1(),
 			"opentelekomcloud_ecs_instance_v1":                    ecs.ResourceEcsInstanceV1(),
 			"opentelekomcloud_evs_volume_v3":                      evs.ResourceEvsStorageVolumeV3(),
