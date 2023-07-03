@@ -28,7 +28,7 @@ func TestAccDisAppV2_basic(t *testing.T) {
 				Config: testAccDisV2AppBasic(appName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDisV2AppExists(resourceAppName, &cls),
-					resource.TestCheckResourceAttr(resourceAppName, "app_name", appName),
+					resource.TestCheckResourceAttr(resourceAppName, "name", appName),
 				),
 			},
 			{
@@ -93,7 +93,7 @@ func testAccCheckDisV2AppExists(n string, cls *apps.GetAppResponse) resource.Tes
 func testAccDisV2AppBasic(appName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dis_app_v2" "app_1" {
-  app_name = "%s"
+  name = "%s"
 }
 `, appName)
 }

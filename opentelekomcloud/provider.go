@@ -354,6 +354,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_deh_host_v1":                        deh.ResourceDeHHostV1(),
 			"opentelekomcloud_dis_stream_v2":                      dis.ResourceDisStreamV2(),
 			"opentelekomcloud_dis_app_v2":                         dis.ResourceDisAppV2(),
+			"opentelekomcloud_dis_checkpoint_v2":                  dis.ResourceDisCheckpointV2(),
 			"opentelekomcloud_dns_ptrrecord_v2":                   dns.ResourceDNSPtrRecordV2(),
 			"opentelekomcloud_dns_recordset_v2":                   dns.ResourceDNSRecordSetV2(),
 			"opentelekomcloud_dns_zone_v2":                        dns.ResourceDNSZoneV2(),

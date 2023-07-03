@@ -30,7 +30,7 @@ func ResourceDisAppV2() *schema.Resource {
 			Update: schema.DefaultTimeout(2 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-			"app_name": {
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -46,7 +46,7 @@ func ResourceDisAppV2() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"app_id": {
+			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -100,13 +100,13 @@ func resourceDisAppV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
 	opts := apps.CreateAppOpts{
-		AppName: d.Get("app_name").(string),
+		AppName: d.Get("name").(string),
 	}
 
 	log.Printf("[DEBUG] Creating new App: %s", opts.AppName)
 	err = apps.CreateApp(client, opts)
 	if err != nil {
-		return fmterr.Errorf("error creating DIS streams: %s", err)
+		return fmterr.Errorf("error creating DIS app: %s", err)
 	}
 
 	d.SetId(opts.AppName)
@@ -130,8 +130,8 @@ func resourceDisAppV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	mErr := multierror.Append(
-		d.Set("app_name", app.AppName),
-		d.Set("app_id", app.AppId),
+		d.Set("name", app.AppName),
+		d.Set("id", app.AppId),
 		d.Set("created", app.CreateTime),
 		d.Set("commit_checkpoint_stream_names", app.CommitCheckPointStreamNames),
 	)

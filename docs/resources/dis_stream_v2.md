@@ -13,7 +13,7 @@ Manages a DIS Stream in the OpenTelekomCloud DIS Service.
 
 ```hcl
 resource "opentelekomcloud_dis_stream_v2" "stream_1" {
-  stream_name                    = "MyStream"
+  name                           = "MyStream"
   partition_count                = 3
   stream_type                    = "COMMON"
   retention_period               = 24
@@ -33,7 +33,7 @@ resource "opentelekomcloud_dis_stream_v2" "stream_1" {
 
 The following arguments are supported:
 
-* `stream_name` - (Required) Name of the stream. The stream name can contain 1 to 64 characters,
+* `name` - (Required) Name of the stream. The stream name can contain 1 to 64 characters,
   including letters, digits, underscores (_), and hyphens (-).
 
 * `partition_count` - (Required) Number of partitions. Partitions are the base throughput unit of a DIS stream.

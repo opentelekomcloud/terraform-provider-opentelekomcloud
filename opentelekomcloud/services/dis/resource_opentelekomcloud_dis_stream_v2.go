@@ -33,7 +33,7 @@ func ResourceDisStreamV2() *schema.Resource {
 			Update: schema.DefaultTimeout(2 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-			"stream_name": {
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -152,7 +152,7 @@ func resourceDisStreamV2Create(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
 	opts := streams.CreateStreamOpts{
-		StreamName:        d.Get("stream_name").(string),
+		StreamName:        d.Get("name").(string),
 		PartitionCount:    d.Get("partition_count").(int),
 		StreamType:        d.Get("stream_type").(string),
 		DataDuration:      pointerto.Int(d.Get("retention_period").(int)),
@@ -173,7 +173,7 @@ func resourceDisStreamV2Create(ctx context.Context, d *schema.ResourceData, meta
 	log.Printf("[DEBUG] Creating new Stream: %#v", opts)
 	err = streams.CreateStream(client, opts)
 	if err != nil {
-		return fmterr.Errorf("error creating DIS streams: %s", err)
+		return fmterr.Errorf("error creating DIS stream: %s", err)
 	}
 
 	d.SetId(opts.StreamName)
@@ -199,7 +199,7 @@ func resourceDisStreamV2Read(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	mErr := multierror.Append(
-		d.Set("stream_name", stream.StreamName),
+		d.Set("name", stream.StreamName),
 		d.Set("auto_scale_max_partition_count", stream.AutoScaleMaxPartitionCount),
 		d.Set("auto_scale_min_partition_count", stream.AutoScaleMinPartitionCount),
 		d.Set("compression_format", stream.CompressionFormat),
