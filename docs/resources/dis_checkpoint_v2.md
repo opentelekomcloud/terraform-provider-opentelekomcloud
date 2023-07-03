@@ -13,7 +13,7 @@ Manages a DIS Checkpoints in the OpenTelekomCloud DIS Service.
 
 ```hcl
 resource "opentelekomcloud_dis_stream_v2" "stream_1" {
-  name                    = "my_stream"
+  name                           = "my_stream"
   partition_count                = 3
   stream_type                    = "COMMON"
   retention_period               = 24
