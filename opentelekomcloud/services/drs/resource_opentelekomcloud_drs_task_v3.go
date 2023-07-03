@@ -2,7 +2,9 @@ package drs
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 	"regexp"
 	"time"
 
@@ -12,8 +14,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/drs/v3/public"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceDrsTaskV3() *schema.Resource {
@@ -314,9 +319,9 @@ func resourceDrsJobCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.FromErr(err)
 	}
 
-	rst, err := jobs.Create(client, *opts)
+	rst, err := public.BatchCreateTasks(client, *opts)
 	if err != nil {
-		return fmtp.DiagErrorf("Error creating DRS job: %s", err)
+		return fmterr.Errorf("Error creating DRS job: %s", err)
 	}
 
 	jobId := rst.Results[0].Id
@@ -330,7 +335,7 @@ func resourceDrsJobCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	valid := testConnections(client, jobId, opts.Jobs[0])
 	if !valid {
-		return fmtp.DiagErrorf("Test db connection of job=%s failed", jobId)
+		return fmterr.Errorf("Test db connection of job=%s failed", jobId)
 	}
 
 	err = reUpdateJob(client, jobId, opts.Jobs[0], d.Get("migrate_definer").(bool))
@@ -341,17 +346,17 @@ func resourceDrsJobCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	// configTransSpeed
 	if v, ok := d.GetOk("limit_speed"); ok {
 		configRaw := v.([]interface{})
-		speedLimits := make([]jobs.SpeedLimitInfo, len(configRaw))
+		speedLimits := make([]public.SpeedLimitInfo, len(configRaw))
 		for i, v := range configRaw {
 			tmp := v.(map[string]interface{})
-			speedLimits[i] = jobs.SpeedLimitInfo{
+			speedLimits[i] = public.SpeedLimitInfo{
 				Speed: tmp["speed"].(string),
 				Begin: tmp["begin_time"].(string),
 				End:   tmp["end_time"].(string),
 			}
 		}
-		_, err = jobs.LimitSpeed(client, jobs.BatchLimitSpeedReq{
-			SpeedLimits: []jobs.LimitSpeedReq{
+		_, err = public.BatchSetSpeed(client, public.BatchLimitSpeedOpts{
+			SpeedLimits: []public.LimitSpeedReq{
 				{
 					JobId:      jobId,
 					SpeedLimit: speedLimits,
@@ -360,7 +365,7 @@ func resourceDrsJobCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		})
 
 		if err != nil {
-			return fmtp.DiagErrorf("Limit speed of job=%s failed, error: %s", jobId, err)
+			return fmterr.Errorf("Limit speed of job=%s failed, error: %s", jobId, err)
 		}
 	}
 
@@ -369,18 +374,18 @@ func resourceDrsJobCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.FromErr(err)
 	}
 
-	startReq := jobs.StartJobReq{
-		Jobs: []jobs.StartInfo{
+	startReq := public.BatchStartJobOpts{
+		Jobs: []public.StartInfo{
 			{
 				JobId:     jobId,
 				StartTime: d.Get("start_time").(string),
 			},
 		},
 	}
-	_, err = jobs.Start(client, startReq)
+	_, err = public.BatchStartTasks(client, startReq)
 
 	if err != nil {
-		return fmtp.DiagErrorf("start DRS job failed,error: %s", err)
+		return fmterr.Errorf("start DRS job failed,error: %s", err)
 	}
 
 	err = waitingforJobStatus(ctx, client, jobId, "start", d.Timeout(schema.TimeoutCreate))
@@ -391,30 +396,18 @@ func resourceDrsJobCreate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceDrsJobRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*config.Config)
+	config := meta.(*cfg.Config)
 	region := config.GetRegion(d)
 	client, err := config.DrsV3Client(region)
 	if err != nil {
 		return diag.Errorf("Error creating DRS v3 client, error: %s", err)
 	}
 
-	detailResp, err := jobs.Get(client, jobs.QueryJobReq{Jobs: []string{d.Id()}})
+	detailResp, err := public.BatchListTaskDetails(client, public.BatchQueryTaskOpts{Jobs: []string{d.Id()}})
 	if err != nil {
 		return common.CheckDeletedDiag(d, parseDrsJobErrorToError404(err), "Error retrieving DRS job")
 	}
 	detail := detailResp.Results[0]
-
-	// net_type is not in detail, so query by list
-	listResp, err := jobs.List(client, jobs.ListJobsReq{
-		CurPage:   1,
-		PerPage:   1,
-		Name:      d.Id(),
-		DbUseType: detail.DbUseType,
-	})
-
-	if err != nil {
-		return fmtp.DiagErrorf("Query the job list by jobId=%s, error: %s", d.Id(), err)
-	}
 
 	mErr := multierror.Append(
 		d.Set("region", region),
@@ -422,7 +415,7 @@ func resourceDrsJobRead(_ context.Context, d *schema.ResourceData, meta interfac
 		d.Set("type", detail.DbUseType),
 		d.Set("engine_type", detail.InstInfo.EngineType),
 		d.Set("direction", detail.JobDirection),
-		d.Set("net_type", listResp.Jobs[0].NetType),
+		d.Set("net_type", detail.NetType),
 		d.Set("public_ip", detail.InstInfo.PublicIp),
 		d.Set("private_ip", detail.InstInfo.Ip),
 		d.Set("destination_db_readnoly", detail.IsTargetReadonly),
@@ -436,33 +429,33 @@ func resourceDrsJobRead(_ context.Context, d *schema.ResourceData, meta interfac
 	)
 
 	if mErr.ErrorOrNil() != nil {
-		return fmtp.DiagErrorf("Error setting DRS job fields: %s", mErr)
+		return fmterr.Errorf("Error setting DRS job fields: %s", mErr)
 	}
 
 	return nil
 }
 
 func resourceDrsJobUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*config.Config)
+	config := meta.(*cfg.Config)
 	region := config.GetRegion(d)
 	client, err := config.DrsV3Client(region)
 	if err != nil {
 		return diag.Errorf("Error creating DRS v3 client, error: %s", err)
 	}
 
-	detailResp, err := jobs.Get(client, jobs.QueryJobReq{Jobs: []string{d.Id()}})
+	detailResp, err := public.BatchListTaskDetails(client, public.BatchQueryTaskOpts{Jobs: []string{d.Id()}})
 	if err != nil {
 		return common.CheckDeletedDiag(d, parseDrsJobErrorToError404(err), "Error retrieving DRS job")
 	}
 	detail := detailResp.Results[0]
 
-	if utils.StrSliceContains(
+	if common.StrSliceContains(
 		[]string{"RELEASE_RESOURCE_COMPLETE", "RELEASE_RESOURCE_STARTED", "RELEASE_RESOURCE_FAILED"}, detail.Status) {
 		return nil
 	}
 
-	updateParams := jobs.UpdateReq{
-		Jobs: []jobs.UpdateJobReq{
+	updateParams := public.BatchModifyJobOpts{
+		Jobs: []public.ModifyJobReq{
 			{
 				JobId:       d.Id(),
 				Name:        d.Get("name").(string),
@@ -471,46 +464,46 @@ func resourceDrsJobUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		},
 	}
 
-	_, err = jobs.Update(client, updateParams)
+	_, err = public.BatchUpdateTask(client, updateParams)
 	if err != nil {
-		return fmtp.DiagErrorf("Update job=%s failed,error: %s", d.Id(), err)
+		return fmterr.Errorf("Update job=%s failed,error: %s", d.Id(), err)
 	}
 
 	return resourceDrsJobRead(ctx, d, meta)
 }
 
 func resourceDrsJobDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*config.Config)
+	config := meta.(*cfg.Config)
 	region := config.GetRegion(d)
 	client, err := config.DrsV3Client(region)
 	if err != nil {
 		return diag.Errorf("Error creating DRS v3 client, error: %s", err)
 	}
 
-	detailResp, err := jobs.Get(client, jobs.QueryJobReq{Jobs: []string{d.Id()}})
+	detailResp, err := public.BatchListTaskDetails(client, public.BatchQueryTaskOpts{Jobs: []string{d.Id()}})
 	if err != nil {
 		return common.CheckDeletedDiag(d, parseDrsJobErrorToError404(err), "Error retrieving DRS job")
 	}
 
 	// force terminate
-	if !utils.StrSliceContains([]string{"CREATE_FAILED", "RELEASE_RESOURCE_COMPLETE", "RELEASE_CHILD_TRANSFER_COMPLETE"},
+	if !common.StrSliceContains([]string{"CREATE_FAILED", "RELEASE_RESOURCE_COMPLETE", "RELEASE_CHILD_TRANSFER_COMPLETE"},
 		detailResp.Results[0].Status) {
 		if !d.Get("force_destroy").(bool) {
-			return fmtp.DiagErrorf("The job=%s cannot be deleted when it is running. If you want to forcibly delete " +
+			return fmterr.Errorf("The job=%s cannot be deleted when it is running. If you want to forcibly delete " +
 				"the job please set force_destroy to True.")
 		}
 
-		dErr := jobs.Delete(client, jobs.BatchDeleteJobReq{
-			Jobs: []jobs.DeleteJobReq{
+		_, dErr := public.BatchDeleteTasks(client, public.BatchDeleteTasksOpts{
+			Jobs: []public.DeleteJobReq{
 				{
-					DeleteType: jobs.DeleteTypeForceTerminate,
+					DeleteType: "force_terminate",
 					JobId:      d.Id(),
 				},
 			},
 		})
 
-		if dErr.Err != nil {
-			return fmtp.DiagErrorf("Terminate DRS job failed. %q: %s", d.Id(), dErr)
+		if dErr != nil {
+			return fmterr.Errorf("Terminate DRS job failed. %q: %s", d.Id(), dErr)
 		}
 
 		err = waitingforJobStatus(ctx, client, d.Id(), "terminate", d.Timeout(schema.TimeoutDelete))
@@ -520,16 +513,16 @@ func resourceDrsJobDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// delete
-	dErr := jobs.Delete(client, jobs.BatchDeleteJobReq{
-		Jobs: []jobs.DeleteJobReq{
+	_, dErr := public.BatchDeleteTasks(client, public.BatchDeleteTasksOpts{
+		Jobs: []public.DeleteJobReq{
 			{
-				DeleteType: jobs.DeleteTypeDelete,
+				DeleteType: "delete",
 				JobId:      d.Id(),
 			},
 		},
 	})
-	if dErr.Err != nil {
-		return fmtp.DiagErrorf("Delete DRS job failed. %q: %s", d.Id(), dErr)
+	if dErr != nil {
+		return fmterr.Errorf("Delete DRS job failed. %q: %s", d.Id(), dErr)
 	}
 
 	d.SetId("")
@@ -558,16 +551,16 @@ func waitingforJobStatus(ctx context.Context, client *golangsdk.ServiceClient, i
 		Pending: pending,
 		Target:  target,
 		Refresh: func() (interface{}, string, error) {
-			resp, err := jobs.Status(client, jobs.QueryJobReq{Jobs: []string{id}})
+			resp, err := public.BatchListTaskStatus(client, public.BatchQueryTaskOpts{Jobs: []string{id}})
 			if err != nil {
 				return nil, "", err
 			}
 			if resp.Count == 0 || resp.Results[0].ErrorCode != "" {
-				return resp, "failed", fmtp.Errorf("%s: %s", resp.Results[0].ErrorCode, resp.Results[0].ErrorMessage)
+				return resp, "failed", fmt.Errorf("%s: %s", resp.Results[0].ErrorCode, resp.Results[0].ErrorMessage)
 			}
 
 			if resp.Results[0].Status == "CREATE_FAILED" || resp.Results[0].Status == "RELEASE_RESOURCE_FAILED" {
-				return resp, "failed", fmtp.Errorf("%s", resp.Results[0].Status)
+				return resp, "failed", fmt.Errorf("%s", resp.Results[0].Status)
 			}
 
 			return resp, resp.Results[0].Status, nil
@@ -579,12 +572,12 @@ func waitingforJobStatus(ctx context.Context, client *golangsdk.ServiceClient, i
 
 	_, err := stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmtp.Errorf("Error waiting for DRS job (%s) to be %s: %s", id, statusType, err)
+		return fmt.Errorf("error waiting for DRS job (%s) to be %s: %s", id, statusType, err)
 	}
 	return nil
 }
 
-func buildCreateParamter(d *schema.ResourceData, projectId) (*jobs.BatchCreateJobReq, error) {
+func buildCreateParamter(d *schema.ResourceData, projectId string) (*public.BatchCreateTaskOpts, error) {
 	jobDirection := d.Get("direction").(string)
 
 	sourceDb, err := buildDbConfigParamter(d, "source_db", projectId)
@@ -599,14 +592,14 @@ func buildCreateParamter(d *schema.ResourceData, projectId) (*jobs.BatchCreateJo
 
 	var subnetId string
 	if jobDirection == "up" {
-		if targetDb.InstanceId == "" {
-			return nil, fmtp.Errorf("destination_db.0.instance_id is required When diretion is down.")
+		if targetDb.InstId == "" {
+			return nil, fmt.Errorf("destination_db.0.instance_id is required When diretion is down")
 		}
 		subnetId = targetDb.SubnetId
 
 	} else {
-		if sourceDb.InstanceId == "" {
-			return nil, fmtp.Errorf("source_db.0.instance_id is required When diretion is down.")
+		if sourceDb.InstId == "" {
+			return nil, fmt.Errorf("source_db.0.instance_id is required When diretion is down")
 		}
 		subnetId = sourceDb.SubnetId
 	}
@@ -616,38 +609,36 @@ func buildCreateParamter(d *schema.ResourceData, projectId) (*jobs.BatchCreateJo
 		bindEip = true
 	}
 
-	job := jobs.CreateJobReq{
-		Name:             d.Get("name").(string),
-		DbUseType:        d.Get("type").(string),
-		EngineType:       d.Get("engine_type").(string),
-		JobDirection:     jobDirection,
-		NetType:          d.Get("net_type").(string),
-		BindEip:          utils.Bool(bindEip),
-		IsTargetReadonly: utils.Bool(d.Get("destination_db_readnoly").(bool)),
-		TaskType:         d.Get("migration_type").(string),
-		Description:      d.Get("description").(string),
-		MultiWrite:       utils.Bool(d.Get("multi_write").(bool)),
-		ExpiredDays:      fmt.Sprint(d.Get("expired_days").(int)),
-		NodeType:         "high",
-		SourceEndpoint:   *sourceDb,
-		TargetEndpoint:   *targetDb,
-		SubnetId:         subnetId,
-		Tags:             utils.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
+	job := public.CreateJobOpts{
+		Name:              d.Get("name").(string),
+		DbUseType:         d.Get("type").(string),
+		EngineType:        d.Get("engine_type").(string),
+		JobDirection:      jobDirection,
+		NetType:           d.Get("net_type").(string),
+		BindEip:           pointerto.Bool(bindEip),
+		IsTargetReadonly:  pointerto.Bool(d.Get("destination_db_readnoly").(bool)),
+		TaskType:          d.Get("migration_type").(string),
+		Description:       d.Get("description").(string),
+		MultiWrite:        pointerto.Bool(d.Get("multi_write").(bool)),
+		ExpiredDays:       fmt.Sprint(d.Get("expired_days").(int)),
+		NodeType:          "high",
+		SourceEndpoint:    *sourceDb,
+		TargetEndpoint:    *targetDb,
+		CustomizeSubnetId: subnetId,
+		Tags:              common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 	}
 
-	return &jobs.BatchCreateJobReq{Jobs: []jobs.CreateJobReq{job}}, nil
+	return &public.BatchCreateTaskOpts{Jobs: []public.CreateJobOpts{job}}, nil
 }
 
-func buildDbConfigParamter(d *schema.ResourceData, dbType, projectId string) (*jobs.Endpoint, error) {
+func buildDbConfigParamter(d *schema.ResourceData, dbType, projectId string) (*public.Endpoint, error) {
 	configRaw := d.Get(dbType).([]interface{})[0].(map[string]interface{})
-	configs := jobs.Endpoint{
+	configs := public.Endpoint{
 		DbType:          configRaw["engine_type"].(string),
 		Ip:              configRaw["ip"].(string),
-		DbName:          configRaw["name"].(string),
 		DbUser:          configRaw["user"].(string),
 		DbPassword:      configRaw["password"].(string),
-		DbPort:          golangsdk.IntToPointer(configRaw["port"].(int)),
-		InstanceId:      configRaw["instance_id"].(string),
+		DbPort:          configRaw["port"].(int),
 		Region:          configRaw["region"].(string),
 		SubnetId:        configRaw["subnet_id"].(string),
 		ProjectId:       projectId,
@@ -655,13 +646,13 @@ func buildDbConfigParamter(d *schema.ResourceData, dbType, projectId string) (*j
 		SslCertCheckSum: configRaw["ssl_cert_check_sum"].(string),
 		SslCertKey:      configRaw["ssl_cert_key"].(string),
 		SslCertName:     configRaw["ssl_cert_name"].(string),
-		SslLink:         utils.Bool(configRaw["ssl_enabled"].(bool)),
+		SslLink:         configRaw["ssl_enabled"].(bool),
 	}
 	return &configs, nil
 }
 
 func parseDrsJobErrorToError404(respErr error) error {
-	var apiError jobs.JobDetailResp
+	var apiError public.BatchCreateTasksResponse
 
 	if errCode, ok := respErr.(golangsdk.ErrDefault400); ok {
 		pErr := json.Unmarshal(errCode.Body, &apiError)
@@ -673,7 +664,7 @@ func parseDrsJobErrorToError404(respErr error) error {
 	return respErr
 }
 
-func setDbInfoToState(d *schema.ResourceData, endpoint jobs.Endpoint, fieldName string) error {
+func setDbInfoToState(d *schema.ResourceData, endpoint public.Endpoint, fieldName string) error {
 	result := make([]interface{}, 1)
 	item := map[string]interface{}{
 		"engine_type":        endpoint.DbType,
@@ -681,8 +672,8 @@ func setDbInfoToState(d *schema.ResourceData, endpoint jobs.Endpoint, fieldName 
 		"port":               endpoint.DbPort,
 		"password":           endpoint.DbPassword,
 		"user":               endpoint.DbUser,
-		"instance_id":        endpoint.InstanceId,
-		"name":               endpoint.InstanceName,
+		"instance_id":        endpoint.InstId,
+		"name":               endpoint.InstName,
 		"region":             endpoint.Region,
 		"subnet_id":          endpoint.SubnetId,
 		"ssl_cert_password":  endpoint.SslCertPassword,
@@ -696,11 +687,11 @@ func setDbInfoToState(d *schema.ResourceData, endpoint jobs.Endpoint, fieldName 
 	return d.Set(fieldName, result)
 }
 
-func testConnections(client *golangsdk.ServiceClient, jobId string, opts jobs.CreateJobReq) (valid bool) {
-	reqParams := jobs.TestConnectionsReq{
-		Jobs: []jobs.TestEndPoint{
+func testConnections(client *golangsdk.ServiceClient, jobId string, opts public.CreateJobOpts) (valid bool) {
+	reqParams := public.BatchTestConnectionOpts{
+		Jobs: []public.TestEndPoint{
 			{
-				JobId:        jobId,
+				Id:           jobId,
 				NetType:      opts.NetType,
 				EndPointType: "so",
 				ProjectId:    client.ProjectID,
@@ -712,11 +703,11 @@ func testConnections(client *golangsdk.ServiceClient, jobId string, opts jobs.Cr
 				DbUser:       opts.SourceEndpoint.DbUser,
 				DbPassword:   opts.SourceEndpoint.DbPassword,
 				DbPort:       opts.SourceEndpoint.DbPort,
-				SslLink:      opts.SourceEndpoint.SslLink,
-				InstId:       opts.SourceEndpoint.InstanceId,
+				SslLink:      &opts.SourceEndpoint.SslLink,
+				InstId:       opts.SourceEndpoint.InstId,
 			},
 			{
-				JobId:        jobId,
+				Id:           jobId,
 				NetType:      opts.NetType,
 				EndPointType: "ta",
 				ProjectId:    client.ProjectID,
@@ -728,14 +719,14 @@ func testConnections(client *golangsdk.ServiceClient, jobId string, opts jobs.Cr
 				DbUser:       opts.TargetEndpoint.DbUser,
 				DbPassword:   opts.TargetEndpoint.DbPassword,
 				DbPort:       opts.TargetEndpoint.DbPort,
-				SslLink:      opts.TargetEndpoint.SslLink,
-				InstId:       opts.TargetEndpoint.InstanceId,
+				SslLink:      &opts.TargetEndpoint.SslLink,
+				InstId:       opts.TargetEndpoint.InstId,
 			},
 		},
 	}
-	rsp, err := jobs.TestConnections(client, reqParams)
+	rsp, err := public.BatchTestConnections(client, reqParams)
 	if err != nil || rsp.Count != 2 {
-		logp.Printf("[ERROR]Test connections of job=%s failed,error: %s", jobId, err)
+		log.Printf("[ERROR]Test connections of job=%s failed,error: %s", jobId, err)
 		return false
 	}
 
@@ -743,17 +734,17 @@ func testConnections(client *golangsdk.ServiceClient, jobId string, opts jobs.Cr
 	return
 }
 
-func reUpdateJob(client *golangsdk.ServiceClient, jobId string, opts jobs.CreateJobReq, migrateDefiner bool) error {
-	reqParams := jobs.UpdateReq{
-		Jobs: []jobs.UpdateJobReq{
+func reUpdateJob(client *golangsdk.ServiceClient, jobId string, opts public.CreateJobOpts, migrateDefiner bool) error {
+	reqParams := public.BatchModifyJobOpts{
+		Jobs: []public.ModifyJobReq{
 			{
 				JobId:            jobId,
 				Name:             opts.Name,
 				NetType:          opts.NetType,
 				EngineType:       opts.EngineType,
 				NodeType:         opts.NodeType,
-				StoreDbInfo:      true,
-				IsRecreate:       utils.Bool(false),
+				StoreDbInfo:      pointerto.Bool(true),
+				IsRecreate:       pointerto.Bool(false),
 				DbUseType:        opts.DbUseType,
 				Description:      opts.Description,
 				TaskType:         opts.TaskType,
@@ -766,58 +757,58 @@ func reUpdateJob(client *golangsdk.ServiceClient, jobId string, opts jobs.Create
 		},
 	}
 
-	_, err := jobs.Update(client, reqParams)
+	_, err := public.BatchUpdateTask(client, reqParams)
 	if err != nil {
-		return fmtp.Errorf("Update job failed,error: %s", err)
+		return fmt.Errorf("update job failed,error: %s", err)
 	}
 
 	return nil
 }
 
 func preCheck(ctx context.Context, client *golangsdk.ServiceClient, jobId string, timeout time.Duration) error {
-	_, err := jobs.PreCheckJobs(client, jobs.BatchPrecheckReq{
-		Jobs: []jobs.PreCheckInfo{
+	_, err := public.BatchCheckTasks(client, public.BatchPreCheckReq{
+		Jobs: []public.PreCheckInfo{
 			{
 				JobId:        jobId,
-				PrecheckMode: "forStartJob",
+				PreCheckMode: "forStartJob",
 			},
 		},
 	})
 	if err != nil {
-		return fmtp.Errorf("Start job=%s preCheck failed,error: %s", jobId, err)
+		return fmt.Errorf("start job=%s preCheck failed,error: %s", jobId, err)
 	}
 
-	stateConf := &resource.StateChangeConf{
-		Pending: []string{"pending"},
-		Target:  []string{"complete"},
-		Refresh: func() (interface{}, string, error) {
-			resp, err := jobs.CheckResults(client, jobs.QueryPrecheckResultReq{
-				Jobs: []string{jobId},
-			})
-			if err != nil {
-				return nil, "", err
-			}
-			if resp.Count == 0 || resp.Results[0].ErrorCode != "" {
-				return resp, "failed", fmtp.Errorf("%s: %s", resp.Results[0].ErrorCode, resp.Results[0].ErrorMsg)
-			}
-
-			if resp.Results[0].Process != "100%" {
-				return resp, "pending", nil
-			}
-
-			if resp.Results[0].TotalPassedRate == "100%" {
-				return resp, "complete", nil
-			}
-
-			return resp, "failed", fmtp.Errorf("Some preCheck item failed: %s", resp)
-		},
-		Timeout:      timeout,
-		PollInterval: 20 * timeout,
-		Delay:        20 * time.Second,
-	}
-	_, err = stateConf.WaitForStateContext(ctx)
-	if err != nil {
-		return fmtp.Errorf("Error waiting for DRS job (%s) to be terminate: %s", jobId, err)
-	}
+	// stateConf := &resource.StateChangeConf{
+	// 	Pending: []string{"pending"},
+	// 	Target:  []string{"complete"},
+	// 	Refresh: func() (interface{}, string, error) {
+	// 		resp, err := public.PreCheckResults(client, public.QueryPrecheckResultReq{
+	// 			Jobs: []string{jobId},
+	// 		})
+	// 		if err != nil {
+	// 			return nil, "", err
+	// 		}
+	// 		if resp.Count == 0 || resp.Results[0].ErrorCode != "" {
+	// 			return resp, "failed", fmtp.Errorf("%s: %s", resp.Results[0].ErrorCode, resp.Results[0].ErrorMsg)
+	// 		}
+	//
+	// 		if resp.Results[0].Process != "100%" {
+	// 			return resp, "pending", nil
+	// 		}
+	//
+	// 		if resp.Results[0].TotalPassedRate == "100%" {
+	// 			return resp, "complete", nil
+	// 		}
+	//
+	// 		return resp, "failed", fmtp.Errorf("Some preCheck item failed: %s", resp)
+	// 	},
+	// 	Timeout:      timeout,
+	// 	PollInterval: 20 * timeout,
+	// 	Delay:        20 * time.Second,
+	// }
+	// _, err = stateConf.WaitForStateContext(ctx)
+	// if err != nil {
+	// 	return fmt.Errorf("error waiting for DRS job (%s) to be terminate: %s", jobId, err)
+	// }
 	return nil
 }
