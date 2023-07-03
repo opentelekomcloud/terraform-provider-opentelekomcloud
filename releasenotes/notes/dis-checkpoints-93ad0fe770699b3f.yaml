@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[DIS]** New resource ``resource/opentelekomcloud_dis_checkpoint_v2`` (`#2211 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2211>`_)
