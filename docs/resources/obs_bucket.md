@@ -29,7 +29,7 @@ resource "opentelekomcloud_obs_bucket" "b" {
 
 ```hcl
 resource "opentelekomcloud_obs_bucket" "b" {
-  bucket = "my-tf-test-bucket"
+  bucket      = "my-tf-test-bucket"
   parallel_fs = true
 }
 ```

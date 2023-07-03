@@ -631,8 +631,8 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 func testAccObsBucketPfs(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
-  bucket        = "tf-test-bucket-%d"
-  parallel_fs   = true
+  bucket      = "tf-test-bucket-%d"
+  parallel_fs = true
 }
 `, randInt)
 }
