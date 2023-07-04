@@ -22,7 +22,7 @@ resource "opentelekomcloud_cts_tracker_v3" "tracker_v3" {
   bucket_name      = var.bucket_name
   file_prefix_name = "prefix"
   is_lts_enabled   = true
-  status           = enabled
+  status           = "enabled"
 }
 ```
 

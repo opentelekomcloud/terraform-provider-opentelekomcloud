@@ -58,6 +58,11 @@ func ResourceObsBucket() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"parallel_fs": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
 			"logging": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -311,6 +316,10 @@ func ResourceObsBucket() *schema.Resource {
 					},
 				},
 			},
+			"bucket_version": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -331,9 +340,10 @@ func resourceObsBucketCreate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	opts := &obs.CreateBucketInput{
-		Bucket:       bucket,
-		ACL:          obs.AclType(acl),
-		StorageClass: obs.StorageClassType(class),
+		Bucket:            bucket,
+		ACL:               obs.AclType(acl),
+		IsFSFileInterface: d.Get("parallel_fs").(bool),
+		StorageClass:      obs.StorageClassType(class),
 	}
 	opts.Location = config.GetRegion(d)
 	log.Printf("[DEBUG] OBS bucket create opts: %#v", opts)
@@ -501,6 +511,11 @@ func resourceObsBucketRead(_ context.Context, d *schema.ResourceData, meta inter
 
 	// Read notifications settings
 	if err := setObsBucketNotifications(client, d); err != nil {
+		return diag.FromErr(err)
+	}
+
+	// Read parallel_fs
+	if err := setObsBucketMetadata(client, d); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -1334,7 +1349,7 @@ func setObsBucketEncryption(client *obs.ObsClient, d *schema.ResourceData) error
 	config, err := client.GetBucketEncryption(d.Id())
 	if err != nil {
 		if oErr, ok := err.(obs.ObsError); ok {
-			if oErr.BaseModel.StatusCode == 404 {
+			if oErr.BaseModel.StatusCode == 404 || oErr.Code == "NoSuchEncryptionConfiguration" || oErr.Code == "FsNotSupport" {
 				return nil
 			}
 		}
@@ -1390,6 +1405,36 @@ func setObsBucketNotifications(client *obs.ObsClient, d *schema.ResourceData) er
 		}
 	}
 	return d.Set("event_notifications", configs)
+}
+
+func setObsBucketMetadata(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+	bucket := d.Id()
+	input := &obs.GetBucketMetadataInput{
+		Bucket: bucket,
+	}
+	output, err := obsClient.GetBucketMetadata(input)
+	if err != nil {
+		return fmt.Errorf("error getting metadata of OBS bucket '%s': %w", bucket, err)
+	}
+	log.Printf("[DEBUG] getting metadata of OBS bucket %s: %#v", bucket, output)
+
+	mErr := multierror.Append(
+		d.Set("bucket_version", output.Version),
+	)
+
+	if output.FSStatus == "Enabled" {
+		mErr = multierror.Append(mErr,
+			d.Set("parallel_fs", true),
+		)
+	} else {
+		mErr = multierror.Append(mErr,
+			d.Set("parallel_fs", false),
+		)
+	}
+	if mErr.ErrorOrNil() != nil {
+		return fmt.Errorf("error saving metadata of OBS bucket %s: %s", bucket, mErr)
+	}
+	return nil
 }
 
 func filterRulesToMapSlice(src []obs.FilterRule) []interface{} {

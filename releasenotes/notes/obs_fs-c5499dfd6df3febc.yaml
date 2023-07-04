@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[OBS]** Added file system creation for ``resource/opentelekomcloud_obs_bucket`` (`#2210 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2210>`_)

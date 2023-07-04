@@ -25,6 +25,15 @@ resource "opentelekomcloud_obs_bucket" "b" {
 }
 ```
 
+### Parallel file system bucket
+
+```hcl
+resource "opentelekomcloud_obs_bucket" "b" {
+  bucket      = "my-tf-test-bucket"
+  parallel_fs = true
+}
+```
+
 ### Enable versioning
 
 ```hcl
@@ -245,6 +254,8 @@ The following arguments are supported:
 * `storage_class` - (Optional) Specifies the storage class of the bucket. OBS provides three storage classes:
   `STANDARD`, `WARM` (Infrequent Access) and `COLD` (Archive). Defaults to `STANDARD`.
 
+* `parallel_fs` - (Optional) Whether enable a bucket as a parallel file system.
+
 * `acl` - (Optional) Specifies the ACL policy for a bucket. The predefined common policies are as follows:
   `private`, `public-read`, `public-read-write` and `log-delivery-write`. Defaults to `private`.
 
@@ -399,13 +410,15 @@ The `filter_rule` object supports the following
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
 * `id` - The name of the bucket.
 
 * `bucket_domain_name` - The bucket domain name. Will be of format `bucketname.obs.region.otc.t-systems.com`.
 
 * `region` - The region this bucket resides in.
+
+* `bucket_version` - The OBS version of the bucket.
 
 ## Import
 

@@ -217,6 +217,26 @@ func TestAccObsBucket_notifications(t *testing.T) {
 	})
 }
 
+func TestAccObsBucket_pfs(t *testing.T) {
+	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_obs_bucket.bucket"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObsBucketPfs(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "parallel_fs", "true"),
+					resource.TestCheckResourceAttr(resourceName, "bucket_version", "3.0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckObsBucketDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
@@ -604,6 +624,15 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
   }
 
   depends_on = [opentelekomcloud_smn_topic_attribute_v2.policy]
+}
+`, randInt)
+}
+
+func testAccObsBucketPfs(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket      = "tf-test-bucket-%d"
+  parallel_fs = true
 }
 `, randInt)
 }
