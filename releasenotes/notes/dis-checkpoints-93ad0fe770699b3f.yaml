@@ -1,0 +1,9 @@
+---
+features:
+  |
+  **[DIS]** New resource ``resource/opentelekomcloud_dis_checkpoint_v2`` (`#2211 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2211>`_)
+fixes:
+  - |
+    **[DIS]** rename `app_name` to `name` and `app_id` to `id` in ``resource/opentelekomcloud_dis_app_v2`` (`#2211 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2211>`_)
+  - |
+    **[DIS]** rename `stream_name` to `name` in  ``resource/opentelekomcloud_dis_stream_v2`` (`#2211 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2211>`_)

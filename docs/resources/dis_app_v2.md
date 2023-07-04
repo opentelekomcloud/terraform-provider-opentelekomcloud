@@ -13,7 +13,7 @@ Manages a DIS Apps in the OpenTelekomCloud DIS Service.
 
 ```hcl
 resource "opentelekomcloud_dis_app_v2" "app_1" {
-  app_name = "app_name"
+  name = "app_name"
 }
 ```
 
@@ -21,7 +21,7 @@ resource "opentelekomcloud_dis_app_v2" "app_1" {
 
 The following arguments are supported:
 
-* `app_name` - (Required) Name of the consumer application to be created
+* `name` - (Required) Name of the consumer application to be created
   The application name contains 1 to 200 characters. Only letters, digits, hyphens (-), and underscores (_) are allowed.
 
 ## Attributes Reference
@@ -30,7 +30,7 @@ Above argument parameter can be exported as attribute parameters.
 
 * `created` - Time when the app is created. The value is a timestamp.
 
-* `app_id` - Unique identifier of the app.
+* `id` - Unique identifier of the app.
 
 * `commit_checkpoint_stream_names` - List of associated streams.
 

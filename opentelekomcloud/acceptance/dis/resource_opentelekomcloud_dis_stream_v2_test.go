@@ -28,7 +28,7 @@ func TestAccDisStreamV2_basic(t *testing.T) {
 				Config: testAccDisV2StreamBasic(streamName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDisV2StreamExists(resourceName, &cls),
-					resource.TestCheckResourceAttr(resourceName, "stream_name", streamName),
+					resource.TestCheckResourceAttr(resourceName, "name", streamName),
 					resource.TestCheckResourceAttr(resourceName, "partitions.#", "3"),
 				),
 			},
@@ -36,7 +36,7 @@ func TestAccDisStreamV2_basic(t *testing.T) {
 				Config: testAccDisV2StreamBasicUpdated(streamName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDisV2StreamExists(resourceName, &cls),
-					resource.TestCheckResourceAttr(resourceName, "stream_name", streamName),
+					resource.TestCheckResourceAttr(resourceName, "name", streamName),
 					resource.TestCheckResourceAttr(resourceName, "partitions.#", "4"),
 				),
 			},
@@ -102,7 +102,7 @@ func testAccCheckDisV2StreamExists(n string, cls *streams.DescribeStreamResponse
 func testAccDisV2StreamBasic(streamName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dis_stream_v2" "stream_1" {
-  stream_name                    = "%s"
+  name                           = "%s"
   partition_count                = 3
   stream_type                    = "COMMON"
   retention_period               = 24
@@ -122,7 +122,7 @@ resource "opentelekomcloud_dis_stream_v2" "stream_1" {
 func testAccDisV2StreamBasicUpdated(streamName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dis_stream_v2" "stream_1" {
-  stream_name                    = "%s"
+  name                           = "%s"
   partition_count                = 4
   stream_type                    = "COMMON"
   retention_period               = 24
