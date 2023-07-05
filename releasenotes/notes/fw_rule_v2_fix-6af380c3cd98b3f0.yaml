@@ -1,8 +1,4 @@
 ---
 fixes:
   - |
-    Add normal bug fixes here, or remove this section.  All of the list items
-    in this section are combined when the release notes are rendered, so the
-    text needs to be worded so that it does not depend on any information only
-    available in another section, such as the prelude. This may mean repeating
-    some details.
+    **[FW]** Fix resource update from `tcp` tp `icmp` protocol for ``resource/opentelekomcloud_fw_rule_v2`` (`#2212 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2212>`_)
