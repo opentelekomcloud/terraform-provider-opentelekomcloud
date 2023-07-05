@@ -213,15 +213,6 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		if protocol == "icmp" {
 			updateOpts.DestinationPort = nil
 			updateOpts.SourcePort = nil
-		} else {
-			sourcePort := d.Get("source_port").(string)
-			destPort := d.Get("destination_port").(string)
-			if sourcePort != "" {
-				updateOpts.SourcePort = &sourcePort
-			}
-			if destPort != "" {
-				updateOpts.DestinationPort = &destPort
-			}
 		}
 	}
 	if d.HasChange("action") {
