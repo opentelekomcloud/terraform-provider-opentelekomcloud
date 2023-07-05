@@ -104,6 +104,31 @@ func TestAccFWRuleV2_anyProtocol(t *testing.T) {
 	})
 }
 
+func TestAccFWRuleV2_TCPtoICMP(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWRuleV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFWRuleV2_TCP,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "protocol", "tcp"),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "destination_port", "23"),
+				),
+			},
+			{
+				Config: testAccFWRuleV2_ICMP,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "protocol", "icmp"),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "destination_port", ""),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "source_port", ""),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckFWRuleV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
@@ -218,5 +243,28 @@ resource "opentelekomcloud_fw_rule_v2" "rule_1" {
   ip_version        = 4
   source_ip_address = "192.168.199.0/24"
   enabled           = true
+}
+`
+
+const testAccFWRuleV2_TCP = `
+resource "opentelekomcloud_fw_rule_v2" "rule_1" {
+  name             = "rule_1"
+  description      = "Tcp protocol"
+  protocol         = "tcp"
+  ip_version       = 4
+  enabled          = true
+  action           = "deny"
+  destination_port = "23"
+}
+`
+
+const testAccFWRuleV2_ICMP = `
+resource "opentelekomcloud_fw_rule_v2" "rule_1" {
+  name        = "rule_1"
+  description = "ICMP protocol"
+  protocol    = "icmp"
+  ip_version  = 4
+  enabled     = true
+  action      = "allow"
 }
 `
