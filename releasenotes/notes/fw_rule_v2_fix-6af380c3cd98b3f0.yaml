@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[FW]** Fix resource update from `tcp` tp `icmp` protocol for ``resource/opentelekomcloud_fw_rule_v2`` (`#2212 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2212>`_)
+    **[FW]** Fix resource update from `tcp`/`udp` to `icmp` protocol for ``resource/opentelekomcloud_fw_rule_v2`` (`#2212 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2212>`_)
