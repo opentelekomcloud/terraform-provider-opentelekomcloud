@@ -193,9 +193,27 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
 	}
+	if d.HasChange("destination_port") {
+		destinationPort := d.Get("destination_port").(string)
+		updateOpts.DestinationPort = &destinationPort
+		if *updateOpts.DestinationPort == "" {
+			updateOpts.DestinationPort = nil
+		}
+	}
+	if d.HasChange("source_port") {
+		sourcePort := d.Get("source_port").(string)
+		updateOpts.SourcePort = &sourcePort
+		if *updateOpts.SourcePort == "" {
+			updateOpts.SourcePort = nil
+		}
+	}
 	if d.HasChange("protocol") {
 		protocol := d.Get("protocol").(string)
 		updateOpts.Protocol = &protocol
+		if protocol == "icmp" {
+			updateOpts.DestinationPort = nil
+			updateOpts.SourcePort = nil
+		}
 	}
 	if d.HasChange("action") {
 		action := d.Get("action").(string)
@@ -209,23 +227,14 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		sourceIPAddress := d.Get("source_ip_address").(string)
 		updateOpts.SourceIPAddress = &sourceIPAddress
 	}
-	if d.HasChange("source_port") {
-		sourcePort := d.Get("source_port").(string)
-		updateOpts.SourcePort = &sourcePort
-	}
 	if d.HasChange("destination_ip_address") {
 		destinationIPAddress := d.Get("destination_ip_address").(string)
 		updateOpts.DestinationIPAddress = &destinationIPAddress
-	}
-	if d.HasChange("destination_port") {
-		destinationPort := d.Get("destination_port").(string)
-		updateOpts.DestinationPort = &destinationPort
 	}
 	if d.HasChange("enabled") {
 		enabled := d.Get("enabled").(bool)
 		updateOpts.Enabled = &enabled
 	}
-
 	log.Printf("[DEBUG] Updating firewall rules: %#v", updateOpts)
 	err = rules.Update(networkingClient, d.Id(), updateOpts).Err
 	if err != nil {
