@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[DIS]** New resource ``resource/opentelekomcloud_dis_dump_task_v2`` (`#2213 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2213>`_)
