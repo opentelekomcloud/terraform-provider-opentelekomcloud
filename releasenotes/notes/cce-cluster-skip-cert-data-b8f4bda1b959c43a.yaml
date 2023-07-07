@@ -1,0 +1,8 @@
+---
+enhancements:
+  - |
+    **[CCE]** Allow skipping user certificate operations with ``ignore_certificate_users_data`` argument for ``resource/opentelekomcloud_cce_cluster_v3``
+    (`#2217 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2217>`_)
+  - |
+    **[CCE]** Allow skipping cluster certificate operations with ``ignore_certificate_clusters_data`` argument for ``resource/opentelekomcloud_cce_cluster_v3``
+    (`#2217 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2217>`_)

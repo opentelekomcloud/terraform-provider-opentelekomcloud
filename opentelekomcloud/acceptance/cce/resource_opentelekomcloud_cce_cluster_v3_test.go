@@ -43,6 +43,10 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceClusterName, "kubernetes_svc_ip_range", "10.247.0.0/16"),
 					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_control"),
 					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_node"),
+					resource.TestCheckResourceAttr(resourceClusterName, "certificate_clusters.#", "1"),
+					resource.TestCheckResourceAttr(resourceClusterName, "certificate_clusters.0.name", "internalCluster"),
+					resource.TestCheckResourceAttr(resourceClusterName, "certificate_users.#", "1"),
+					resource.TestCheckResourceAttr(resourceClusterName, "certificate_users.0.name", "user"),
 				),
 			},
 			{
@@ -195,6 +199,29 @@ func TestAccCCEClusterV3NoAddons(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCEClusterV3Exists(resourceClusterName, &cluster),
 					resource.TestCheckResourceAttr(resourceClusterName, "installed_addons.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCCEClusterV3NoUserClusterDataSet(t *testing.T) {
+	var cluster clusters.Clusters
+
+	t.Parallel()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCEClusterV3NoUserClusterData(randClusterName()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCEClusterV3Exists(resourceClusterName, &cluster),
+					resource.TestCheckResourceAttr(resourceClusterName, "certificate_clusters.#", "0"),
+					resource.TestCheckResourceAttr(resourceClusterName, "certificate_users.#", "0"),
 				),
 			},
 		},
@@ -523,6 +550,25 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   no_addons               = true
+}
+`, common.DataSourceSubnet, clusterName)
+}
+
+func testAccCCEClusterV3NoUserClusterData(clusterName string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  container_network_type  = "overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+
+  ignore_certificate_clusters_data = true
+  ignore_certificate_users_data    = true
 }
 `, common.DataSourceSubnet, clusterName)
 }
