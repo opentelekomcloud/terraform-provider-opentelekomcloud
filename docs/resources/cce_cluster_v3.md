@@ -201,6 +201,10 @@ The following arguments are supported:
 
 * `ignore_addons` - (Optional) Skip all cluster addons operations.
 
+* `ignore_certificate_users_data` - (Optional) Skip sensitive user data.
+
+* `ignore_certificate_clusters_data` - (Optional) Skip sensitive cluster data.
+
 * `kube_proxy_mode` - Service forwarding mode. Two modes are available:
   * `iptables`: Traditional kube-proxy uses iptables rules to implement service load balancing.
     In this mode, too many iptables rules will be generated when many services are deployed.

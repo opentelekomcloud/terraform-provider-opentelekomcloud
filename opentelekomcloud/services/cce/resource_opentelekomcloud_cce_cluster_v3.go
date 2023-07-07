@@ -231,6 +231,10 @@ func ResourceCCEClusterV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"ignore_certificate_clusters_data": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"certificate_clusters": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -250,6 +254,10 @@ func ResourceCCEClusterV3() *schema.Resource {
 						},
 					},
 				},
+			},
+			"ignore_certificate_users_data": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			"certificate_users": {
 				Type:     schema.TypeList,
@@ -497,29 +505,33 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf("error retrieving opentelekomcloud CCE cluster cert: %w", err)
 	}
 
-	// Set Certificate Clusters
 	var clusterList []map[string]interface{}
-	for _, clusterObj := range cert.Clusters {
-		clusterCert := map[string]interface{}{
-			"name":                       clusterObj.Name,
-			"server":                     clusterObj.Cluster.Server,
-			"certificate_authority_data": clusterObj.Cluster.CertAuthorityData,
+	if !d.Get("ignore_certificate_clusters_data").(bool) {
+		// Set Certificate Clusters
+		for _, clusterObj := range cert.Clusters {
+			clusterCert := map[string]interface{}{
+				"name":                       clusterObj.Name,
+				"server":                     clusterObj.Cluster.Server,
+				"certificate_authority_data": clusterObj.Cluster.CertAuthorityData,
+			}
+			clusterList = append(clusterList, clusterCert)
 		}
-		clusterList = append(clusterList, clusterCert)
 	}
 	if err := d.Set("certificate_clusters", clusterList); err != nil {
 		return diag.FromErr(err)
 	}
 
-	// Set Certificate Users
 	var userList []map[string]interface{}
-	for _, userObj := range cert.Users {
-		userCert := map[string]interface{}{
-			"name":                    userObj.Name,
-			"client_certificate_data": userObj.User.ClientCertData,
-			"client_key_data":         userObj.User.ClientKeyData,
+	if !d.Get("ignore_certificate_users_data").(bool) {
+		// Set Certificate Users
+		for _, userObj := range cert.Users {
+			userCert := map[string]interface{}{
+				"name":                    userObj.Name,
+				"client_certificate_data": userObj.User.ClientCertData,
+				"client_key_data":         userObj.User.ClientKeyData,
+			}
+			userList = append(userList, userCert)
 		}
-		userList = append(userList, userCert)
 	}
 	if err := d.Set("certificate_users", userList); err != nil {
 		return diag.FromErr(err)
