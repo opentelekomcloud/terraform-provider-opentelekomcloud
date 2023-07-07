@@ -350,6 +350,11 @@ The following arguments are supported:
 * `parameters` - (Optional) Map of additional configuration parameters. Values should be strings. Parameters set here
   overrides values from configuration template (parameter group).
 
+* `lower_case_table_names` - Specifies the case-sensitive state of the database table name,
+  the default value is "1". Changing this parameter will create a new resource.
+  + 0: Table names are stored as fixed and table names are case-sensitive.
+  + 1: Table names will be stored in lower case and table names are not case-sensitive.
+
 * `public_ips` - (Optional) Specifies floating IP to be assigned to the instance.
   This should be a list with single element only.
 

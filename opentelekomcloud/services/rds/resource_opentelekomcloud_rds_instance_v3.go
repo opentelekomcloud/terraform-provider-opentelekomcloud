@@ -286,6 +286,12 @@ func ResourceRdsInstanceV3() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"lower_case_table_names": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Computed: false,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -393,6 +399,12 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			SecurityGroupId:  d.Get("security_group_id").(string),
 			RestorePoint:     resourceRestorePoint(d),
 		}
+		if ok := d.Get("lower_case_table_names").(string); ok != "" {
+			lowerCase := &instances.Param{
+				LowerCaseTableNames: ok,
+			}
+			restoreOpts.UnchangeableParam = lowerCase
+		}
 		restored, err := backups.RestoreToNew(client, restoreOpts)
 		if err != nil {
 			return fmterr.Errorf("error creating new RDSv3 instance from backup: %w", err)
@@ -416,6 +428,12 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			SubnetId:         d.Get("subnet_id").(string),
 			SecurityGroupId:  d.Get("security_group_id").(string),
 			ChargeInfo:       resourceRDSChangeMode(),
+		}
+		if ok := d.Get("lower_case_table_names").(string); ok != "" {
+			lowerCase := &instances.Param{
+				LowerCaseTableNames: ok,
+			}
+			createOpts.UnchangeableParam = lowerCase
 		}
 		created, err := instances.Create(client, createOpts)
 		if err != nil {
@@ -1057,6 +1075,7 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("vpc_id", rdsInstance.VpcId),
 		d.Set("created", rdsInstance.Created),
 		d.Set("ha_replication_mode", rdsInstance.Ha.ReplicationMode),
+		d.Set("lower_case_table_names", d.Get("lower_case_table_names").(string)),
 	)
 
 	if me.ErrorOrNil() != nil {
