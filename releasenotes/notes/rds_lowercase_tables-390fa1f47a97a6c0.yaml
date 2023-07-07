@@ -1,4 +1,4 @@
 ---
 enhancements:
   - |
-    **[RDS]** Implement parameter to manage case-sensitive state of the database table name ``resource/opentelekomcloud_rds_instance_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[RDS]** Implement parameter to manage case-sensitive state of the database table name ``resource/opentelekomcloud_rds_instance_v3`` (`#2218 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2218>`_)
