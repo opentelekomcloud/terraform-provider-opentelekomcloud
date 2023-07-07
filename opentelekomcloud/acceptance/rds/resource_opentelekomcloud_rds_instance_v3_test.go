@@ -40,6 +40,7 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.keep_days", "1"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.muh", "value-create"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.kuh", "value-create"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "lower_case_table_names", "0"),
 				),
 			},
 			{
@@ -49,6 +50,7 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.size", "100"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.muh", "value-update"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8636"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "lower_case_table_names", "0"),
 				),
 			},
 		},
@@ -108,6 +110,7 @@ func TestAccRdsInstanceV3RestoreBackup(t *testing.T) {
 				Config: testAccRdsInstanceV3Basic(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "lower_case_table_names", "0"),
 				),
 			},
 			{
@@ -121,6 +124,7 @@ func TestAccRdsInstanceV3RestoreBackup(t *testing.T) {
 					resource.TestCheckResourceAttr(restoredResourceName, "flavor", "rds.pg.c2.large"),
 					resource.TestCheckResourceAttr(restoredResourceName, "volume.0.size", "40"),
 					resource.TestCheckResourceAttr(restoredResourceName, "tags.muh", "value-create"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "lower_case_table_names", "0"),
 				),
 			},
 		},
@@ -412,6 +416,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     muh = "value-create"
     kuh = "value-create"
   }
+  lower_case_table_names = "0"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
@@ -449,6 +454,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   tags = {
     muh = "value-update"
   }
+  lower_case_table_names = "0"
 }
 `, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
@@ -796,6 +802,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     muh = "value-create"
     kuh = "value-create"
   }
+  lower_case_table_names = "0"
 }
 
 data "opentelekomcloud_rds_backup_v3" "backup" {
@@ -834,6 +841,7 @@ resource "opentelekomcloud_rds_instance_v3" "from_backup" {
     muh = "value-create"
     kuh = "value-create"
   }
+  lower_case_table_names = "0"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
