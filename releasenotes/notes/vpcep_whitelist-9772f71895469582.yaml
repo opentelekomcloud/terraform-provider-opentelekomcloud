@@ -1,4 +1,4 @@
 ---
 enhancements:
   - |
-    **[VPCEP]** Domain whitelist implementation for ``opentelekomcloud_vpcep_service_v1`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[VPCEP]** Domain whitelist implementation for ``opentelekomcloud_vpcep_service_v1`` (`#2221 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2221>`_)
