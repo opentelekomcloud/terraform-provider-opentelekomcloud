@@ -43,7 +43,7 @@ func DataSourceIdentityProjectsV3() *schema.Resource {
 						},
 						"project_id": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Computed: true,
 						},
 						"enabled": {
 							Type:     schema.TypeBool,
