@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[IAM]** Add project IDs for ``data/opentelekomcloud_identity_projects_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[IAM]** Add project IDs for ``data/opentelekomcloud_identity_projects_v3`` (`#2224 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2224>`_)
