@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -639,11 +640,43 @@ func (c *Config) NewObjectStorageClient(region string) (*obs.ObsClient, error) {
 	}
 
 	setUpOBSLogging()
+	proxyConfigure, err := obsProxyConf()
+	if err != nil {
+		return nil, err
+	}
 
 	return obs.New(
 		cred.AccessKey, cred.SecretKey, client.Endpoint,
-		obs.WithSecurityToken(cred.SecurityToken), obs.WithSignature(obs.SignatureObs),
+		obs.WithSecurityToken(cred.SecurityToken), obs.WithSignature(obs.SignatureObs), proxyConfigure,
 	)
+}
+
+func obsProxyConf() (obs.Configurer, error) {
+	proxyConfigure := obs.WithProxyUrl("")
+	httpProxy := os.Getenv("HTTP_PROXY")
+	httpsProxy := os.Getenv("HTTPS_PROXY")
+
+	if httpProxy != "" {
+		if httpsProxy != "" {
+			_, err := url.ParseRequestURI(httpsProxy)
+			if err != nil {
+				return proxyConfigure, err
+			}
+			return obs.WithProxyUrl(httpsProxy), nil
+		}
+		_, err := url.ParseRequestURI(httpProxy)
+		if err != nil {
+			return proxyConfigure, err
+		}
+		return obs.WithProxyUrl(httpProxy), nil
+	} else if httpsProxy != "" {
+		_, err := url.ParseRequestURI(httpsProxy)
+		if err != nil {
+			return proxyConfigure, err
+		}
+		return obs.WithProxyUrl(httpsProxy), nil
+	}
+	return proxyConfigure, nil
 }
 
 func (c *Config) BlockStorageV2Client(region string) (*golangsdk.ServiceClient, error) {
