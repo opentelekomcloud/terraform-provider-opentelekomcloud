@@ -656,25 +656,18 @@ func obsProxyConf() (obs.Configurer, error) {
 	httpProxy := os.Getenv("HTTP_PROXY")
 	httpsProxy := os.Getenv("HTTPS_PROXY")
 
-	if httpProxy != "" {
-		if httpsProxy != "" {
-			_, err := url.ParseRequestURI(httpsProxy)
-			if err != nil {
-				return proxyConfigure, err
-			}
-			return obs.WithProxyUrl(httpsProxy), nil
-		}
-		_, err := url.ParseRequestURI(httpProxy)
-		if err != nil {
-			return proxyConfigure, err
-		}
-		return obs.WithProxyUrl(httpProxy), nil
-	} else if httpsProxy != "" {
+	if httpsProxy != "" {
 		_, err := url.ParseRequestURI(httpsProxy)
 		if err != nil {
 			return proxyConfigure, err
 		}
 		return obs.WithProxyUrl(httpsProxy), nil
+	} else if httpProxy != "" {
+		_, err := url.ParseRequestURI(httpProxy)
+		if err != nil {
+			return proxyConfigure, err
+		}
+		return obs.WithProxyUrl(httpProxy), nil
 	}
 	return proxyConfigure, nil
 }
