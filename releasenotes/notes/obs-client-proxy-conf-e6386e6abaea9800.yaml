@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[OBS]** client respects `HTTP_PROXY` and `HTTPS_PROXY` environment variables while creation (`#2225 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2225>`_)
