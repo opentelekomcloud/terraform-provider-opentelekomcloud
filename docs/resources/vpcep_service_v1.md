@@ -14,6 +14,8 @@ Manages a VPC Endpoint Service v1 resource within OpenTelekomCloud.
 ```hcl
 variable os_subnet_id {}
 variable vpc_id {}
+variable domain_id_1 {}
+variable domain_id_2 {}
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "lb_1" {
   vip_subnet_id = var.os_subnet_id
@@ -29,6 +31,8 @@ resource "opentelekomcloud_vpcep_service_v1" "service" {
     client_port = 80
     server_port = 8080
   }
+
+  whitelist = [var.domain_id_1, var.domain_id_2]
 
   tags = {
     "key" : "value",
@@ -83,6 +87,8 @@ The following arguments are supported:
   * `LB`: The backend resource is an enhanced load balancer.
 
 * `port` - (Required) Lists the port mappings opened to the VPC endpoint service. See below for the details.
+
+* `whitelist` - (Optional) Lists of domain IDs of target users.
 
 * `tcp_proxy` - (Optional) Specifies whether the client IP address and port number or `marker_id` information is
   transmitted to the server.

@@ -156,6 +156,7 @@ resource "opentelekomcloud_vpcep_service_v1" "service" {
   tags = {
     "key" : "value",
   }
+  whitelist = ["698f9bf85ca9437a9b2f41132ab3aa0e"]
 }
 `, common.DataSourceSubnet, name)
 }
@@ -184,12 +185,13 @@ resource "opentelekomcloud_vpcep_service_v1" "service" {
   port {
     client_port = 81
     server_port = 8081
-    protocol    = "UDP"
+    protocol    = "TCP"
   }
 
   tags = {
     "key" : "value",
   }
+  whitelist = ["698f9bf85ca9437a9b2f41132ab3aa0e", "e8df38eb4e4f4f148e06d8db527059c7"]
 }
 `, common.DataSourceSubnet, name)
 }

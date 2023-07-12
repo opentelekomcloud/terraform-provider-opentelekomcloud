@@ -3,6 +3,7 @@ package vpcep
 import (
 	"context"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -10,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpcep/v1/endpoints"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpcep/v1/services"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -124,6 +126,14 @@ func ResourceVPCEPServiceV1() *schema.Resource {
 				),
 				DiffSuppressFunc: common.SuppressCaseInsensitive,
 			},
+			"whitelist": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"tags": {
 				Type:         schema.TypeMap,
 				Optional:     true,
@@ -175,6 +185,14 @@ func resourceVPCEPServiceCreate(ctx context.Context, d *schema.ResourceData, met
 		return fmterr.Errorf("error waiting for VPC EP service to become available: %w", err)
 	}
 
+	endpointList := getEndpointDomains(d)
+	if endpointList != nil {
+		_, err = endpoints.BatchUpdateWhitelist(client, d.Id(), *endpointList)
+		if err != nil {
+			return fmterr.Errorf("error updating VPC EP whitelist domains: %w", err)
+		}
+	}
+
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)
 	return resourceVPCEPServiceRead(clientCtx, d, meta)
 }
@@ -198,6 +216,11 @@ func resourceVPCEPServiceRead(ctx context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf("error reading VPC EP service: %w", err)
 	}
 
+	whitelist, err := endpoints.GetWhitelist(client, d.Id())
+	if err != nil {
+		fmterr.Errorf("error querying VPC EP whitelist: %w", err)
+	}
+
 	mErr := multierror.Append(
 		d.Set("port_id", svc.PortID),
 		d.Set("pool_id", svc.PoolID),
@@ -209,6 +232,7 @@ func resourceVPCEPServiceRead(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("server_type", svc.ServerType),
 		d.Set("port", portsSlice(svc.Ports)),
 		d.Set("tags", common.TagsToMap(svc.Tags)),
+		d.Set("whitelist", whitelistSlice(*whitelist)),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -246,7 +270,7 @@ func resourceVPCEPServiceUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	_, err = services.Update(client, d.Id(), opts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error creating VPC EP service: %w", err)
+		return fmterr.Errorf("error updating VPC EP service: %w", err)
 	}
 
 	err = services.WaitForServiceStatus(
@@ -255,6 +279,42 @@ func resourceVPCEPServiceUpdate(ctx context.Context, d *schema.ResourceData, met
 	)
 	if err != nil {
 		return fmterr.Errorf("error waiting for VPC EP service to become available: %w", err)
+	}
+
+	if d.HasChange("whitelist") {
+		o, n := d.GetChange("whitelist")
+		oldr := o.(*schema.Set)
+		newr := n.(*schema.Set)
+		var whitelistRemove []string
+		var whitelistAdd []string
+
+		for _, r := range oldr.Difference(newr).List() {
+			whitelistRemove = append(whitelistRemove, "iam:domain::"+r.(string))
+		}
+
+		if len(whitelistRemove) > 0 {
+			_, err = endpoints.BatchUpdateWhitelist(client, d.Id(), endpoints.BatchUpdateReq{
+				Permissions: whitelistRemove,
+				Action:      "remove",
+			})
+			if err != nil {
+				return fmterr.Errorf("error updating VPC EP whitelist domains: %w", err)
+			}
+		}
+
+		for _, r := range newr.Difference(oldr).List() {
+			whitelistAdd = append(whitelistAdd, "iam:domain::"+r.(string))
+		}
+
+		if len(whitelistAdd) > 0 {
+			_, err = endpoints.BatchUpdateWhitelist(client, d.Id(), endpoints.BatchUpdateReq{
+				Permissions: whitelistAdd,
+				Action:      "add",
+			})
+			if err != nil {
+				return fmterr.Errorf("error updating VPC EP whitelist domains: %w", err)
+			}
+		}
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)
@@ -318,6 +378,21 @@ func getPorts(d *schema.ResourceData) []services.PortMapping {
 	return pMapping
 }
 
+func getEndpointDomains(d *schema.ResourceData) *endpoints.BatchUpdateReq {
+	whitelistSet := d.Get("whitelist").(*schema.Set).List()
+	if len(whitelistSet) == 0 {
+		return nil
+	}
+	var whitelistMapping endpoints.BatchUpdateReq
+	var whiteList []string
+	for _, w := range whitelistSet {
+		whiteList = append(whiteList, "iam:domain::"+w.(string))
+	}
+	whitelistMapping.Permissions = whiteList
+	whitelistMapping.Action = "add"
+	return &whitelistMapping
+}
+
 func portsSlice(pts []services.PortMapping) []interface{} {
 	ports := make([]interface{}, len(pts))
 	for i, p := range pts {
@@ -328,4 +403,12 @@ func portsSlice(pts []services.PortMapping) []interface{} {
 		}
 	}
 	return ports
+}
+
+func whitelistSlice(whitelist endpoints.GetWhitelistResponse) []string {
+	var domains []string
+	for _, perm := range whitelist.Permissions {
+		domains = append(domains, strings.TrimPrefix(perm.Permission, "iam:domain::"))
+	}
+	return domains
 }
