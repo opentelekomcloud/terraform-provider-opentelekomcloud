@@ -41,6 +41,10 @@ func DataSourceIdentityProjectsV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"project_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 						"enabled": {
 							Type:     schema.TypeBool,
 							Computed: true,
@@ -83,6 +87,7 @@ func dataSourceIdentityProjectsV3Read(_ context.Context, d *schema.ResourceData,
 			"parent_id":   item.ParentID,
 			"enabled":     item.Enabled,
 			"is_domain":   item.IsDomain,
+			"project_id":  item.ID,
 		}
 		flattenProjects = append(flattenProjects, project)
 	}
