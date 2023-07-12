@@ -8,6 +8,7 @@ Up-to-date reference of API arguments for OBS bucket you can get at
 # opentelekomcloud_obs_bucket
 
 Provides an OBS bucket resource within OpenTelekomCloud.
+Now respects HTTP_PROXY, HTTPS_PROXY environment variables.
 
 ## Example Usage
 
