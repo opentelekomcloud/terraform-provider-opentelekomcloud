@@ -92,7 +92,8 @@ func dataSourceIdentityProjectsV3Read(_ context.Context, d *schema.ResourceData,
 		flattenProjects = append(flattenProjects, project)
 	}
 
-	d.SetId(client.DomainID)
+	// Domain ID are same for all listed projects
+	d.SetId(allProjects[0].DomainID)
 	mErr := multierror.Append(
 		d.Set("region", config.GetRegion(d)),
 		d.Set("projects", flattenProjects),
