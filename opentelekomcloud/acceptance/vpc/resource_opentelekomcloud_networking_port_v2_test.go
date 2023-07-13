@@ -161,6 +161,31 @@ func TestAccNetworkingV2Port_portSecurity_enabled(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Port_noPortSecurityNoSecurityGroups(t *testing.T) {
+	var port testPortWithExtensions
+	resourceName := "opentelekomcloud_networking_port_v2.port_1"
+	t.Parallel()
+	qts := subnetQuotas()
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2PortSecurityDisabled,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortWithExtensionsExists(resourceName, &port),
+					resource.TestCheckResourceAttr(resourceName, "port_security_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "security_group_ids.#", "0"),
+					testAccCheckNetworkingV2PortPortSecurity(&port, false),
+				),
+			},
+		},
+	})
+}
+
 func TestAccNetworkingV2Port_timeout(t *testing.T) {
 	var network networks.Network
 	var port ports.Port

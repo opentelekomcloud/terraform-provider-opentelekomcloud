@@ -193,33 +193,27 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 		common.MapValueSpecs(d),
 	}
 
-	if noSecurityGroups {
-		securityGroups = []string{}
-		createOpts.SecurityGroups = &securityGroups
-	}
-
-	// Only set SecurityGroups if one was specified.
-	// Otherwise this would mimic the no_security_groups action.
-	if len(securityGroups) > 0 {
-		createOpts.SecurityGroups = &securityGroups
-	}
-
-	// Declare a finalCreateOpts interface to hold either the
+	// Declare a extendedCreateOpts interface to hold either the
 	// base create options.
-	var finalCreateOpts ports.CreateOptsBuilder
-	finalCreateOpts = createOpts
+	var extendedCreateOpts ports.CreateOptsBuilder
+	extendedCreateOpts = createOpts
 
 	// Add the port security attribute if specified.
-	if v, ok := d.GetOk("port_security_enabled"); ok {
-		portSecurityEnabled := v.(bool)
-		finalCreateOpts = portsecurity.PortCreateOptsExt{
-			CreateOptsBuilder:   finalCreateOpts,
-			PortSecurityEnabled: &portSecurityEnabled,
+	portSecurityEnabled := d.Get("port_security_enabled").(bool)
+	extendedCreateOpts = portsecurity.PortCreateOptsExt{
+		CreateOptsBuilder:   extendedCreateOpts,
+		PortSecurityEnabled: &portSecurityEnabled,
+	}
+
+	if noSecurityGroups {
+		if portSecurityEnabled {
+			securityGroups = []string{}
+			createOpts.SecurityGroups = &securityGroups
 		}
 	}
 
-	log.Printf("[DEBUG] Create Options: %#v", finalCreateOpts)
-	p, err := ports.Create(client, finalCreateOpts).Extract()
+	log.Printf("[DEBUG] Create Options: %#v", extendedCreateOpts)
+	p, err := ports.Create(client, extendedCreateOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud Neutron port: %w", err)
 	}
