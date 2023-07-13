@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix `port_security_enabled` false value handling in case of `no_security_groups` enabled for ``resource/opentelekomcloud_networking_port_v2`` (`#2228 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2228>`_)
