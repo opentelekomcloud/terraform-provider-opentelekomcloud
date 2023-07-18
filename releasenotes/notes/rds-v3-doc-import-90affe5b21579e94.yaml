@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[RDS]** Updated note regarding importing ``resource/opentelekomcloud_rds_instance_v3`` documentation (`#2230 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2230>`_)
