@@ -153,6 +153,24 @@ resource "opentelekomcloud_identity_provider" "provider" {
   protocol    = "saml"
   status      = true
   description = "test-provider"
+  mapping_rules = jsonencode(
+    [
+      {
+        "local" : [
+          {
+            "user" : {
+              "name" : "samltestid-{0}"
+            }
+          }
+        ],
+        "remote" : [
+          {
+            "type" : "uid"
+          }
+        ]
+      }
+    ]
+  )
 }
   `, providerName)
 }
@@ -210,6 +228,28 @@ resource "opentelekomcloud_identity_provider" "provider" {
   protocol    = "oidc"
   status      = false
   description = "test-provider-updated"
+  mapping_rules = jsonencode(
+    [
+      {
+        "local" : [
+          {
+            "user" : {
+              "name" : "{0}"
+            }
+          },
+          {
+            "groups" : "[\"admin\",\"manager\"]"
+          }
+        ],
+        "remote" : [
+          {
+            "type" : "uid"
+          }
+        ]
+      }
+    ]
+  )
+
   access_config {
     access_type  = "program"
     provider_url = "https://accounts.example.com"

@@ -2,6 +2,7 @@ package iam
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"regexp"
@@ -54,24 +55,36 @@ func ResourceIdentityProvider() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{protocolSAML, protocolOIDC}, false),
 			},
+			"mapping_rules": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: common.ValidateJsonString,
+				StateFunc: func(v interface{}) string {
+					jsonString, _ := common.NormalizeJsonString(v)
+					return jsonString
+				},
+			},
 			"status": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
 			"metadata": {
-				Type:      schema.TypeString,
-				Optional:  true,
-				StateFunc: common.GetHashOrEmpty,
+				Type:          schema.TypeString,
+				Optional:      true,
+				StateFunc:     common.GetHashOrEmpty,
+				ConflictsWith: []string{"access_config"},
 			},
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"access_config": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
+				Type:          schema.TypeList,
+				Optional:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"metadata"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"access_type": {
@@ -140,6 +153,10 @@ func ResourceIdentityProvider() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
+									"groups": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
 								},
 							},
 						},
@@ -166,6 +183,11 @@ func ResourceIdentityProvider() *schema.Resource {
 						},
 					},
 				},
+			},
+			"links": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"login_link": {
 				Type:     schema.TypeString,
@@ -281,13 +303,31 @@ func importMetadata(conf *cfg.Config, d *schema.ResourceData, meta interface{}) 
 // createProtocol create protocol and default mapping
 func createProtocol(client *golangsdk.ServiceClient, d *schema.ResourceData) error {
 	providerID := d.Get("name").(string)
-
-	// Create default mapping
-	defaultConversionRules := getDefaultConversionOpts()
+	var mapping *mappings.Mapping
+	var err error
 	conversionRuleID := "mapping_" + providerID
-	mapping, err := mappings.Create(client, conversionRuleID, *defaultConversionRules).Extract()
-	if err != nil {
-		return fmt.Errorf("error in creating default conversion rule: %s", err)
+	if rulesRaw := d.Get("mapping_rules").(string); rulesRaw == "" {
+		// Create default mapping
+		defaultConversionRules := getDefaultConversionOpts()
+		mapping, err = mappings.Create(client, conversionRuleID, *defaultConversionRules).Extract()
+		if err != nil {
+			return fmt.Errorf("error in creating default conversion rule: %s", err)
+		}
+	} else {
+		// Create custom mapping
+		rulesBytes := []byte(rulesRaw)
+		rules := make([]mappings.RuleOpts, 1)
+		if err = json.Unmarshal(rulesBytes, &rules); err != nil {
+			return err
+		}
+
+		createOpts := mappings.CreateOpts{
+			Rules: rules,
+		}
+		mapping, err = mappings.Create(client, conversionRuleID, createOpts).Extract()
+		if err != nil {
+			return fmt.Errorf(mappingError, "creating", err)
+		}
 	}
 
 	// Create protocol
@@ -305,6 +345,7 @@ func createProtocol(client *golangsdk.ServiceClient, d *schema.ResourceData) err
 		log.Printf("[ERROR] Error creating protocol, and the mapping that has been created. Error: %s", mErr)
 		return fmt.Errorf("error creating identity provider protocol: %s", mErr.Error())
 	}
+
 	return nil
 }
 
@@ -371,8 +412,10 @@ func resourceIdentityProviderRead(_ context.Context, d *schema.ResourceData, met
 	conversions, err := mappings.Get(client, conversionRuleID).Extract()
 	if err == nil {
 		conversionRules := buildConversionRulesAttr(conversions)
-		err = d.Set("conversion_rules", conversionRules)
-		mErr = multierror.Append(mErr, err)
+		mErr = multierror.Append(mErr,
+			d.Set("conversion_rules", conversionRules),
+			d.Set("links", conversions.Links),
+		)
 	}
 
 	// Query and set metadata of the protocol SAML provider
@@ -425,12 +468,17 @@ func buildConversionRulesAttr(conversions *mappings.Mapping) []interface{} {
 	for _, v := range conversions.Rules {
 		localRules := make([]map[string]interface{}, 0, len(v.Local))
 		for _, localRule := range v.Local {
-			username := localRule.User.Name
-			r := map[string]interface{}{
-				"username": username,
+			r := map[string]interface{}{}
+			if localRule.User != nil {
+				r["username"] = localRule.User.Name
 			}
+
 			if localRule.Group != nil {
 				r["group"] = localRule.Group.Name
+			}
+
+			if localRule.Groups != "" {
+				r["groups"] = localRule.Groups
 			}
 			localRules = append(localRules, r)
 		}
@@ -522,6 +570,13 @@ func resourceIdentityProviderUpdate(ctx context.Context, d *schema.ResourceData,
 		}
 	}
 
+	if d.HasChange("mapping_rules") {
+		err = updateMappingRules(d, meta)
+		if err != nil {
+			mErr = multierror.Append(mErr, err)
+		}
+	}
+
 	if err = mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error in updating provider: %s", err)
 	}
@@ -560,6 +615,27 @@ func updateAccessConfig(d *schema.ResourceData, meta interface{}) error {
 	opts.IdpIp = d.Id()
 	_, err = providers.UpdateOIDC(clientAdmin, opts)
 	return err
+}
+
+func updateMappingRules(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*cfg.Config)
+	client, err := config.IdentityV3Client(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf(clientCreationFail, err)
+	}
+	updateOpts := mappings.UpdateOpts{}
+	rulesRaw := d.Get("mapping_rules").(string)
+	rulesBytes := []byte(rulesRaw)
+	rules := make([]mappings.RuleOpts, 1)
+	if err = json.Unmarshal(rulesBytes, &rules); err != nil {
+		return err
+	}
+	updateOpts.Rules = rules
+	_, err = mappings.Update(client, "mapping_"+d.Id(), updateOpts).Extract()
+	if err != nil {
+		return fmt.Errorf(mappingError, "updating", err)
+	}
+	return nil
 }
 
 func resourceIdentityProviderDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

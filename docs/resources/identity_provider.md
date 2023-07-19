@@ -19,6 +19,24 @@ cloud to use this resource. Please refer to [User Management Model](https://docs
 resource "opentelekomcloud_identity_provider" "provider_1" {
   name     = "example_com_provider_saml"
   protocol = "saml"
+  mapping_rules = jsonencode(
+    [
+      {
+        "local" : [
+          {
+            "user" : {
+              "name" : "samltestid"
+            }
+          }
+        ],
+        "remote" : [
+          {
+            "type" : "uid"
+          }
+        ]
+      }
+    ]
+  )
 }
 ```
 
@@ -68,6 +86,9 @@ The following arguments are supported:
 * `status` - (Optional) Enabled status for the identity provider. Default: `true`.
 
 * `description` - (Optional) Specifies the description of the identity provider.
+
+* `mapping_rules` - (Optional) Rules used to map federated users to local users.
+  Details on `mapping_rules` are available in [this link](https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/federated_identity_authentication_management/mapping/creating_a_mapping.html#en-us-topic-0057845590) under `rules` section.
 
 * `metadata` - (Optional) Specifies the metadata of the IDP(Identity Provider) server.
   This field is used to import a metadata file to IAM to implement federated identity authentication.
@@ -124,6 +145,8 @@ In addition to all arguments above, the following attributes are exported:
 
 * `login_link` - The login link of the identity provider.
 
+* `links` - Resource links of an identity mapping.
+
 * `conversion_rules` - The identity conversion rules of the identity provider.
   The structure is documented below.
 
@@ -138,6 +161,8 @@ The `local` block supports:
 * `username` - The name of a federated user on the cloud platform.
 
 * `group` - The user group to which the federated user belongs on the cloud platform.
+
+* `groups` - The user groups to which the federated user belongs on the cloud platform.
 
 The `remote` block supports:
 
