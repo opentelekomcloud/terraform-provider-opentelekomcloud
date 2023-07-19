@@ -482,6 +482,7 @@ terraform import opentelekomcloud_rds_instance_v3.instance_1 7117d38e-4c8f-4624-
 ## Notes
 
 But due to some attributes missing from the API response, it's required to ignore changes as below.
+Also, for some MySQL versions the `lower_case_table_names` should be also added.
 
 ```hcl
 resource "opentelekomcloud_rds_instance_v3" "instance_1" {
@@ -490,6 +491,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance_1" {
   lifecycle {
     ignore_changes = [
       "db",
+      "availability_zone",
     ]
   }
 }
