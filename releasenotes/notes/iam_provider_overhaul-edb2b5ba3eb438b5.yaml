@@ -2,4 +2,4 @@
 features:
   - |
     **[IAM]** New ``resource/opentelekomcloud_identity_provider`` resource to manage identity providers
-    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/>`_)
+    (`#2232 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/2232>`_)
