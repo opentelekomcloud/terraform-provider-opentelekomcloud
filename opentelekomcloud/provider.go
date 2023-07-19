@@ -378,6 +378,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_identity_project_v3":                iam.ResourceIdentityProjectV3(),
 			"opentelekomcloud_identity_protocol_v3":               iam.ResourceIdentityProtocolV3(),
 			"opentelekomcloud_identity_provider_v3":               iam.ResourceIdentityProviderV3(),
+			"opentelekomcloud_identity_provider":                  iam.ResourceIdentityProvider(),
 			"opentelekomcloud_identity_role_v3":                   iam.ResourceIdentityRoleV3(),
 			"opentelekomcloud_identity_role_assignment_v3":        iam.ResourceIdentityRoleAssignmentV3(),
 			"opentelekomcloud_identity_user_group_membership_v3":  iam.ResourceIdentityUserGroupMembershipV3(),
