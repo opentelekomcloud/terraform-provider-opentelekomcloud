@@ -1,4 +1,4 @@
 ---
 enhancements:
   - |
-    **[IAM]** Added `oidc` support for ``resource/opentelekomcloud_identity_protocol_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[IAM]** Added `oidc` support for ``resource/opentelekomcloud_identity_protocol_v3`` (`#2233 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2233>`_)
