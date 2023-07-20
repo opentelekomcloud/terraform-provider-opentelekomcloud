@@ -1,7 +1,9 @@
 package common
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 	"regexp"
@@ -157,12 +159,13 @@ func IsResourceNotFound(err error) bool {
 }
 
 func ExpandToStringSlice(v []interface{}) []string {
-	s := make([]string, len(v))
-	for i, val := range v {
-		if strVal, ok := val.(string); ok {
-			s[i] = strVal
+	s := make([]string, 0, len(v))
+	for _, val := range v {
+		if strVal, ok := val.(string); ok && strVal != "" {
+			s = append(s, strVal)
 		}
 	}
+
 	return s
 }
 
@@ -233,4 +236,29 @@ func GetSetChanges(d *schema.ResourceData, key string) (removed, added *schema.S
 // CheckNull returns true if schema parameter is empty
 func CheckNull(element string, d *schema.ResourceData) bool {
 	return d.GetRawConfig().GetAttr(element).IsNull()
+}
+
+func CompareJsonTemplateAreEquivalent(tem1, tem2 string) (bool, error) {
+	var obj1 interface{}
+	err := json.Unmarshal([]byte(tem1), &obj1)
+	if err != nil {
+		return false, err
+	}
+
+	canonicalJson1, _ := json.Marshal(obj1)
+
+	var obj2 interface{}
+	err = json.Unmarshal([]byte(tem2), &obj2)
+	if err != nil {
+		return false, err
+	}
+
+	canonicalJson2, _ := json.Marshal(obj2)
+
+	equal := bytes.Equal(canonicalJson1, canonicalJson2)
+	if !equal {
+		log.Printf("[DEBUG] Canonical template are not equal.\nFirst: %s\nSecond: %s\n",
+			canonicalJson1, canonicalJson2)
+	}
+	return equal, nil
 }
