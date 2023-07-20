@@ -3,14 +3,18 @@ package iam
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/federation/metadata"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/federation/protocols"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/federation/providers"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
@@ -27,9 +31,10 @@ func ResourceIdentityProtocolV3() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"protocol": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{protocolSAML, protocolOIDC}, false),
 			},
 			"provider_id": {
 				Type:     schema.TypeString,
@@ -44,12 +49,67 @@ func ResourceIdentityProtocolV3() *schema.Resource {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
-
+			"access_config": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"metadata"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"access_type": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"program", "program_console"}, false),
+						},
+						"provider_url": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"client_id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"signing_key": {
+							Type:     schema.TypeString,
+							Required: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								equal, _ := common.CompareJsonTemplateAreEquivalent(old, new)
+								return equal
+							},
+						},
+						"authorization_endpoint": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"scopes": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 10,
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"response_type": {
+							Type: schema.TypeString,
+							// Computed: true,
+							Optional: true,
+							Default:  "id_token",
+						},
+						"response_mode": {
+							Type:         schema.TypeString,
+							Computed:     true,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"fragment", "form_post"}, false),
+						},
+					},
+				},
+			},
 			"metadata": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				MaxItems: 1,
+				Type:          schema.TypeList,
+				Optional:      true,
+				Computed:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"access_config"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"xaccount_type": {
@@ -89,9 +149,43 @@ func resourceIdentityProtocolV3Create(ctx context.Context, d *schema.ResourceDat
 
 	d.SetId(fmt.Sprintf("%s/%s", provider(d), protocol(d)))
 
-	if d.Get("metadata.#") != 0 {
+	if d.Get("metadata.#") != 0 && protocol(d) == protocolSAML {
 		if err := uploadMetadata(d, meta); err != nil {
 			return fmterr.Errorf("error uploading metadata: %w", err)
+		}
+	}
+
+	if ac, ok := d.GetOk("access_config"); ok && protocol(d) == protocolOIDC {
+		// Create access config for oidc provider.
+		config := meta.(*cfg.Config)
+		clientAdmin, err := config.IdentityV30Client()
+		if err != nil {
+			return fmterr.Errorf(clientCreationFail, err)
+		}
+		accessConfigArr := ac.([]interface{})
+		accessConfig := accessConfigArr[0].(map[string]interface{})
+
+		accessType := accessConfig["access_type"].(string)
+		createAccessTypeOpts := providers.CreateOIDCOpts{
+			AccessMode: accessType,
+			IdpUrl:     accessConfig["provider_url"].(string),
+			ClientId:   accessConfig["client_id"].(string),
+			SigningKey: accessConfig["signing_key"].(string),
+			IdpIp:      provider(d),
+		}
+
+		if accessType == "program_console" {
+			scopes := common.ExpandToStringSlice(accessConfig["scopes"].([]interface{}))
+			createAccessTypeOpts.Scope = strings.Join(scopes, scopeSpilt)
+			createAccessTypeOpts.AuthEndpoint = accessConfig["authorization_endpoint"].(string)
+			createAccessTypeOpts.ResponseType = accessConfig["response_type"].(string)
+			createAccessTypeOpts.ResponseMode = accessConfig["response_mode"].(string)
+		}
+		log.Printf("[DEBUG] Create access type of provider: %#v", opts)
+
+		_, err = providers.CreateOIDC(clientAdmin, createAccessTypeOpts)
+		if err != nil {
+			return fmterr.Errorf("Error creating the provider access config: %s", err)
 		}
 	}
 
@@ -108,14 +202,14 @@ func resourceIdentityProtocolV3Read(ctx context.Context, d *schema.ResourceData,
 	if err := setProviderAndProtocol(d); err != nil {
 		return diag.FromErr(err)
 	}
-	protocol, err := protocols.Get(client, provider(d), protocol(d)).Extract()
+	prot, err := protocols.Get(client, provider(d), protocol(d)).Extract()
 	if err != nil {
 		return fmterr.Errorf("error reading protocol: %w", err)
 	}
 
 	mErr := multierror.Append(
-		d.Set("mapping_id", protocol.MappingID),
-		d.Set("links", protocol.Links),
+		d.Set("mapping_id", prot.MappingID),
+		d.Set("links", prot.Links),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting protocol attributes: %w", err)
@@ -125,6 +219,39 @@ func resourceIdentityProtocolV3Read(ctx context.Context, d *schema.ResourceData,
 		if err := setMetadata(d, meta); err != nil {
 			return fmterr.Errorf("error downloading metadata: %w", err)
 		}
+	}
+
+	if protocol(d) == protocolOIDC {
+		config := meta.(*cfg.Config)
+		clientOIDC, err := config.IdentityV30Client()
+		if err != nil {
+			return fmterr.Errorf(clientCreationFail, err)
+		}
+		accessType, err := providers.GetOIDC(clientOIDC, d.Id())
+		if err == nil {
+			scopes := strings.Split(accessType.Scope, scopeSpilt)
+			accessTypeConfig := []interface{}{
+				map[string]interface{}{
+					"access_type":            accessType.AccessMode,
+					"provider_url":           accessType.IdpUrl,
+					"client_id":              accessType.ClientId,
+					"signing_key":            accessType.SigningKey,
+					"scopes":                 scopes,
+					"response_mode":          accessType.ResponseMode,
+					"authorization_endpoint": accessType.AuthEndpoint,
+					"response_type":          accessType.ResponseType,
+				},
+			}
+
+			mErr = multierror.Append(
+				mErr,
+				d.Set("access_config", accessTypeConfig),
+			)
+		}
+	}
+	if err = mErr.ErrorOrNil(); err != nil {
+		log.Printf("[ERROR] Error setting identity protocol attributes %s: %s", d.Id(), err)
+		return fmterr.Errorf("Error setting identity protocol attributes: %s", err)
 	}
 
 	return nil
@@ -143,6 +270,13 @@ func resourceIdentityProtocolV3Update(ctx context.Context, d *schema.ResourceDat
 		_, err = protocols.Update(client, provider(d), protocol(d), opts).Extract()
 		if err != nil {
 			return fmterr.Errorf("error updating protocol: %w", err)
+		}
+	}
+
+	if d.HasChange("access_config") && d.Get("protocol") == protocolOIDC {
+		err = updateAccessConfig(d, meta)
+		if err != nil {
+			return fmterr.Errorf("error updating access_config: %w", err)
 		}
 	}
 
