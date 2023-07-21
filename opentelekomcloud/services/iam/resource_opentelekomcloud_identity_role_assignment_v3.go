@@ -53,6 +53,13 @@ func ResourceIdentityRoleAssignmentV3() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+
+			"all_projects": {
+				Type:          schema.TypeBool,
+				ConflictsWith: []string{"project_id"},
+				Optional:      true,
+				ForceNew:      true,
+			},
 		},
 	}
 }
@@ -70,15 +77,23 @@ func resourceIdentityRoleAssignmentV3Create(ctx context.Context, d *schema.Resou
 	groupID := d.Get("group_id").(string)
 	projectID := d.Get("project_id").(string)
 	roleID := d.Get("role_id").(string)
-	opts := roles.AssignOpts{
-		DomainID:  domainID,
-		GroupID:   groupID,
-		ProjectID: projectID,
-	}
 
-	err = roles.Assign(identityClient, roleID, opts).ExtractErr()
-	if err != nil {
-		return fmterr.Errorf("error assigning role: %s", err)
+	if !d.Get("all_projects").(bool) {
+		opts := roles.AssignOpts{
+			DomainID:  domainID,
+			GroupID:   groupID,
+			ProjectID: projectID,
+		}
+
+		err = roles.Assign(identityClient, roleID, opts).ExtractErr()
+		if err != nil {
+			return fmterr.Errorf("error assigning role: %s", err)
+		}
+	} else {
+		err = roles.UpdateGroupAllProjects(identityClient, domainID, groupID, roleID)
+		if err != nil {
+			return fmterr.Errorf("error assigning role to all projects: %s", err)
+		}
 	}
 
 	d.SetId(buildRoleAssignmentID(domainID, projectID, groupID, roleID))
@@ -95,19 +110,30 @@ func resourceIdentityRoleAssignmentV3Read(ctx context.Context, d *schema.Resourc
 	if err != nil {
 		return fmterr.Errorf(clientCreationFail, err)
 	}
+	var mErr *multierror.Error
+	var roleAssignmentId string
 
-	roleAssignment, err := getRoleAssignment(identityClient, d)
+	domainID, projectID, groupID, _ := ExtractRoleAssignmentID(d.Id())
+
+	if !d.Get("all_projects").(bool) {
+		roleAssignmentId, err = getRoleAssignment(identityClient, d)
+	} else {
+		err = getAllProjectsRoleAssignment(identityClient, d)
+		if err != nil {
+			diag.FromErr(err)
+		}
+		_, _, _, roleAssignmentId = ExtractRoleAssignmentID(d.Id())
+	}
 	if err != nil {
 		return fmterr.Errorf("error getting role assignment: %s", err)
 	}
-	domainID, projectID, groupID, _ := ExtractRoleAssignmentID(d.Id())
 
-	log.Printf("[DEBUG] Retrieved OpenStack role assignment: %#v", roleAssignment)
-	mErr := multierror.Append(
+	log.Printf("[DEBUG] Retrieved OpenStack role assignment ID: %s", roleAssignmentId)
+	mErr = multierror.Append(
 		d.Set("domain_id", domainID),
 		d.Set("project_id", projectID),
 		d.Set("group_id", groupID),
-		d.Set("role_id", roleAssignment.ID),
+		d.Set("role_id", roleAssignmentId),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
@@ -124,22 +150,28 @@ func resourceIdentityRoleAssignmentV3Delete(ctx context.Context, d *schema.Resou
 	if err != nil {
 		return fmterr.Errorf(clientCreationFail, err)
 	}
-
 	domainID, projectID, groupID, roleID := ExtractRoleAssignmentID(d.Id())
-	opts := roles.UnassignOpts{
-		DomainID:  domainID,
-		GroupID:   groupID,
-		ProjectID: projectID,
-	}
-	err = roles.Unassign(identityClient, roleID, opts).ExtractErr()
-	if err != nil {
-		return fmterr.Errorf("error unassigning role: %s", err)
+	if !d.Get("all_projects").(bool) {
+		opts := roles.UnassignOpts{
+			DomainID:  domainID,
+			GroupID:   groupID,
+			ProjectID: projectID,
+		}
+		err = roles.Unassign(identityClient, roleID, opts).ExtractErr()
+		if err != nil {
+			return fmterr.Errorf("error unassigning role: %s", err)
+		}
+	} else {
+		err = roles.RemoveGroupAllProjects(identityClient, domainID, groupID, roleID)
+		if err != nil {
+			return fmterr.Errorf("error assigning role to all projects: %s", err)
+		}
 	}
 
 	return nil
 }
 
-func getRoleAssignment(identityClient *golangsdk.ServiceClient, d *schema.ResourceData) (roles.RoleAssignment, error) {
+func getRoleAssignment(identityClient *golangsdk.ServiceClient, d *schema.ResourceData) (string, error) {
 	domainID, projectID, groupID, roleID := ExtractRoleAssignmentID(d.Id())
 
 	opts := roles.ListAssignmentsOpts{
@@ -167,7 +199,15 @@ func getRoleAssignment(identityClient *golangsdk.ServiceClient, d *schema.Resour
 		return true, nil
 	})
 
-	return assignment, err
+	return assignment.ID, err
+}
+
+func getAllProjectsRoleAssignment(identityClient *golangsdk.ServiceClient, d *schema.ResourceData) error {
+	domainID, _, groupID, roleID := ExtractRoleAssignmentID(d.Id())
+
+	err := roles.CheckGroupAllProjects(identityClient, domainID, groupID, roleID)
+
+	return err
 }
 
 // Role assignments have no ID in OpenStack. Build an ID out of the IDs that make up the role assignment
