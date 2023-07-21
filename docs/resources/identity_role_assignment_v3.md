@@ -58,6 +58,30 @@ resource "opentelekomcloud_identity_role_assignment_v3" "role_assignment_1" {
 }
 ```
 
+### Assign Role for All Projects (existing and future)
+
+```hcl
+variable "domain_id" {
+  default     = "01aafcf63744d988ebef2b1e04c5c34"
+  description = "this is the domain id"
+}
+
+resource "opentelekomcloud_identity_group_v3" "group_1" {
+  name = "group_1"
+}
+
+data "opentelekomcloud_identity_role_v3" "role_1" {
+  name = "secu_admin" #security admin
+}
+
+resource "opentelekomcloud_identity_role_assignment_v3" "role_assignment_1" {
+  group_id     = opentelekomcloud_identity_group_v3.group_1.id
+  domain_id    = var.domain_id
+  role_id      = data.opentelekomcloud_identity_role_v3.role_1.id
+  all_projects = true
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -69,6 +93,9 @@ The following arguments are supported:
 * `project_id` - (Optional; Required if `domain_id` is empty) The project to assign the role in.
 
 * `role_id` - (Required) The role to assign.
+
+* `all_projects` - (Optional) Whether to assign role for all existing and future projects.
+  `domain_id` has to be specified if `all_projects` is set to `true`.
 
 ## Attributes Reference
 

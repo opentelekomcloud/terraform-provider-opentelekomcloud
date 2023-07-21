@@ -62,6 +62,14 @@ func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 						"opentelekomcloud_identity_role_assignment_v3.role_assignment_1", "role_id", &role.ID),
 				),
 			},
+			{
+				Config: testAccIdentityRoleAssignAllProjectsV3_basic(domainId, groupName, roleName),
+				Check: resource.ComposeTestCheckFunc(resource.TestCheckResourceAttrPtr(
+					"opentelekomcloud_identity_role_assignment_v3.role_assignment_1", "group_id", &group.ID),
+					resource.TestCheckResourceAttrPtr(
+						"opentelekomcloud_identity_role_assignment_v3.role_assignment_1", "role_id", &role.ID),
+				),
+			},
 		},
 	})
 }
@@ -246,6 +254,25 @@ resource "opentelekomcloud_identity_role_assignment_v3" "role_assignment_1" {
   group_id  = opentelekomcloud_identity_group_v3.group_1.id
   domain_id = "%s"
   role_id   = data.opentelekomcloud_identity_role_v3.role_1.id
+}
+`, group_name, role_name, domain_id)
+}
+
+func testAccIdentityRoleAssignAllProjectsV3_basic(domain_id string, group_name string, role_name string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_identity_group_v3" "group_1" {
+  name = "%s"
+}
+
+data "opentelekomcloud_identity_role_v3" "role_1" {
+  name = "%s"
+}
+
+resource "opentelekomcloud_identity_role_assignment_v3" "role_assignment_1" {
+  group_id     = opentelekomcloud_identity_group_v3.group_1.id
+  domain_id    = "%s"
+  role_id      = data.opentelekomcloud_identity_role_v3.role_1.id
+  all_projects = true
 }
 `, group_name, role_name, domain_id)
 }
