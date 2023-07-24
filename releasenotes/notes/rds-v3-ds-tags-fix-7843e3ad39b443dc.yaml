@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    **[RDS]** Set tags attribute in ``data_source/opentelekomcloud_rds_instance_v3``
+    (`#2236 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2236>`_)

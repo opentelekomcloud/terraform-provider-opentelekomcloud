@@ -275,5 +275,12 @@ func dataSourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting RDSv3 rdsInstance backup fields: %w", err)
 	}
+
+	tagMap := common.TagsToMap(rdsInstance.Tags)
+	mErr = multierror.Append(mErr, d.Set("tags", tagMap))
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("error setting tags values: %w", err)
+	}
+
 	return nil
 }
