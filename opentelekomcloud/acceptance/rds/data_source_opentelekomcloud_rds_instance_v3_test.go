@@ -26,6 +26,8 @@ func TestAccRdsInstanceDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(dataSourceName, "datastore_type", "PostgreSQL"),
 					resource.TestCheckResourceAttr(dataSourceName, "port", "8635"),
 					resource.TestCheckResourceAttr(dataSourceName, "flavor", "rds.pg.c2.large"),
+					resource.TestCheckResourceAttr(dataSourceName, "tags.muh", "value-create"),
+					resource.TestCheckResourceAttr(dataSourceName, "tags.kuh", "value-create"),
 				),
 			},
 		},
