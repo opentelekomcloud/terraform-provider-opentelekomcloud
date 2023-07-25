@@ -61,7 +61,7 @@ func ResourceDcsInstanceV1() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"3.0", "4.0", "5.0",
+					"3.0", "4.0", "5.0", "6.0",
 				}, false),
 			},
 			"capacity": {
@@ -743,6 +743,13 @@ func validateEngine(_ context.Context, d *schema.ResourceDiff, _ interface{}) er
 
 	if _, ok := d.GetOk("whitelist"); ok && engineVersion == "3.0" {
 		return fmt.Errorf("DCS Redis 3.0 instance does not support whitelisting")
+	}
+
+	resourceSpecCode, ok := d.GetOk("resource_spec_code")
+	if ok {
+		if resourceSpecCode.(string) == "dcs.cluster" && engineVersion == "6.0" {
+			return fmt.Errorf("DCS Redis 6.0 instance does not support cluster mode")
+		}
 	}
 
 	return nil
