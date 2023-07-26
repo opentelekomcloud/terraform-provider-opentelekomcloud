@@ -139,7 +139,7 @@ func TestAccASV1Configuration_invalidResourceSpecCode(t *testing.T) {
 			{
 				Config:      testAccDcsV1InstanceResourceSpecCode(instanceName),
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`DCS Redis 6.0 instance does not support cluster mode.+`),
+				ExpectError: regexp.MustCompile(`DCS Redis 6.0 instance does not support cluster mode+`),
 			},
 		},
 	})
@@ -452,7 +452,7 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   available_zones    = [data.opentelekomcloud_dcs_az_v1.az_1.id]
   product_id         = data.opentelekomcloud_dcs_product_v1.product_1.id
   security_group_id  = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-	resource_spec_code = "dcs.cluster"
+  resource_spec_code = "dcs.cluster"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)
 }
