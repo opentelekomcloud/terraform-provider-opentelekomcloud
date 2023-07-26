@@ -12,7 +12,7 @@ Manages a WAF dedicated instance resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-data "opentelekomcloud_vpc_subnet_v1" "shared_subnet"  {
+data "opentelekomcloud_vpc_subnet_v1" "shared_subnet" {
   name = "my_subnet"
 }
 

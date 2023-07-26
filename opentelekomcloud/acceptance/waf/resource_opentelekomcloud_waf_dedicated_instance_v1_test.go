@@ -135,17 +135,17 @@ func testAccWafDedicatedInstanceV1_basic(instanceName, arch, flavor string) stri
 %s
 
 resource "opentelekomcloud_waf_dedicated_instance_v1" "wafd_1" {
-    name              = "%[4]s"
-    availability_zone = "%[3]s"
-    specification     = "waf.instance.professional"
-    flavor            = "%[6]s"
-    architecture      = "%[5]s"
-    vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-    subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  name              = "%[4]s"
+  availability_zone = "%[3]s"
+  specification     = "waf.instance.professional"
+  flavor            = "%[6]s"
+  architecture      = "%[5]s"
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
-    security_group = [
-      data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-    ]
+  security_group = [
+    data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  ]
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName, arch, flavor)
 }
@@ -157,17 +157,17 @@ func testAccWafDedicatedInstanceV1_update(instanceName, arch, flavor string) str
 %s
 
 resource "opentelekomcloud_waf_dedicated_instance_v1" "wafd_1" {
-    name              = "%[4]s-updated"
-    availability_zone = "%[3]s"
-    specification     = "waf.instance.professional"
-    flavor            = "%[6]s"
-    architecture      = "%[5]s"
-    vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-    subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  name              = "%[4]s-updated"
+  availability_zone = "%[3]s"
+  specification     = "waf.instance.professional"
+  flavor            = "%[6]s"
+  architecture      = "%[5]s"
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
-    security_group = [
-      data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-    ]
+  security_group = [
+    data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  ]
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName, arch, flavor)
 }
