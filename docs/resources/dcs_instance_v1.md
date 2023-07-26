@@ -100,7 +100,7 @@ The following arguments are supported:
 * `engine` - (Required) Indicates a cache engine. Only `Redis` is supported. Changing this
   creates a new instance.
 
-* `engine_version` - (Required) Indicates the version of a cache engine, which can be `3.0`/`4.0`/`5.0`.
+* `engine_version` - (Required) Indicates the version of a cache engine, which can be `3.0`/`4.0`/`5.0`/`6.0`.
   Changing this creates a new instance.
 
 * `capacity` - (Required) Indicates the Cache capacity. Unit: GB.
@@ -229,7 +229,7 @@ The following attributes are exported:
 * `resource_spec_code` - Resource specifications.
   * `dcs.single_node`: indicates a DCS instance in single-node mode.
   * `dcs.master_standby`: indicates a DCS instance in master/standby mode.
-  * `dcs.cluster`: indicates a DCS instance in cluster mode.
+  * `dcs.cluster`: indicates a DCS instance in cluster mode. Not available with version `6.0`.
 
 * `used_memory` - Size of the used memory. Unit: MB.
 

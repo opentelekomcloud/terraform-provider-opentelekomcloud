@@ -123,7 +123,23 @@ func TestAccASV1Configuration_invalidEngineVersion(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccDcsV1InstanceEngineValidation(instanceName),
-				ExpectError: regexp.MustCompile(`expected engine_version to be one of \[3.0 4.0 5.0\].+`),
+				ExpectError: regexp.MustCompile(`expected engine_version to be one of \[3.0 4.0 5.0 6.0\].+`),
+			},
+		},
+	})
+}
+
+func TestAccASV1Configuration_invalidResourceSpecCode(t *testing.T) {
+	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDcsV1InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccDcsV1InstanceResourceSpecCode(instanceName),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`DCS Redis 6.0 instance does not support cluster mode+`),
 			},
 		},
 	})
@@ -406,6 +422,37 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   available_zones   = [data.opentelekomcloud_dcs_az_v1.az_1.id]
   product_id        = data.opentelekomcloud_dcs_product_v1.product_1.id
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)
+}
+
+func testAccDcsV1InstanceResourceSpecCode(instanceName string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+data "opentelekomcloud_dcs_az_v1" "az_1" {
+  port = "8002"
+  code = "%s"
+}
+
+data "opentelekomcloud_dcs_product_v1" "product_1" {
+  spec_code = "redis.single.xu1.tiny.128"
+}
+
+resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
+  name               = "%s"
+  engine_version     = "6.0"
+  password           = "Hungarian_rapsody"
+  engine             = "Redis"
+  capacity           = 0.125
+  vpc_id             = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  available_zones    = [data.opentelekomcloud_dcs_az_v1.az_1.id]
+  product_id         = data.opentelekomcloud_dcs_product_v1.product_1.id
+  security_group_id  = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  resource_spec_code = "dcs.cluster"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)
 }
