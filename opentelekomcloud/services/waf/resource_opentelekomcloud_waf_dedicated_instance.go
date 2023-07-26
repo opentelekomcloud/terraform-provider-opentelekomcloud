@@ -106,26 +106,8 @@ func ResourceWafDedicatedInstance() *schema.Resource {
 				Computed: true,
 			},
 			"created_at": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Computed: true,
-			},
-			"hosts": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-							Optional: true,
-						},
-						"hostname": {
-							Type:     schema.TypeString,
-							Computed: true,
-							Optional: true,
-						},
-					},
-				},
 			},
 		},
 	}
@@ -133,20 +115,9 @@ func ResourceWafDedicatedInstance() *schema.Resource {
 
 func resourceWafDedicatedInstanceCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	region := config.GetRegion(d)
-	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.WafDedicatedV1Client(region)
-	})
+	client, err := getWafdClient(ctx, d, config)
 	if err != nil {
 		return fmterr.Errorf(errCreationV1DedicatedClient, err)
-	}
-	if region == "eu-ch2" {
-		client, err = common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-			return config.WafDedicatedSwissV1Client(region)
-		})
-		if err != nil {
-			return fmterr.Errorf(errCreationV1DedicatedClient, err)
-		}
 	}
 
 	sg := d.Get("security_group").([]interface{})
@@ -157,12 +128,12 @@ func resourceWafDedicatedInstanceCreate(ctx context.Context, d *schema.ResourceD
 	log.Printf("[DEBUG] The security_group parameters: %+v.", groups)
 
 	opts := instances.CreateOpts{
-		Region:           region,
+		Region:           config.GetRegion(d),
 		ChargeMode:       payPerUseMode,
 		AvailabilityZone: d.Get("availability_zone").(string),
 		Architecture:     d.Get("architecture").(string),
 		InstanceName:     d.Get("name").(string),
-		Specification:    d.Get("specification_code").(string),
+		Specification:    d.Get("specification").(string),
 		Flavor:           d.Get("flavor").(string),
 		VpcId:            d.Get("vpc_id").(string),
 		SubnetId:         d.Get("subnet_id").(string),
@@ -190,26 +161,23 @@ func resourceWafDedicatedInstanceCreate(ctx context.Context, d *schema.ResourceD
 		return fmterr.Errorf("error creating OpenTelekomCloud WAF dedicated instance: %s", err)
 	}
 
+	if err == nil {
+		err = updateInstanceName(client, r.Instances[0].Id, d.Get("name").(string))
+	}
+	if err != nil {
+		log.Printf("[DEBUG] Error while waiting to create Waf dedicated instance. %s : %#v", d.Id(), err)
+		return diag.FromErr(err)
+	}
+
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
 	return resourceWafDedicatedInstanceRead(clientCtx, d, meta)
 }
 
 func resourceWafDedicatedInstanceRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	region := config.GetRegion(d)
-	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.WafDedicatedV1Client(region)
-	})
+	client, err := getWafdClient(ctx, d, config)
 	if err != nil {
 		return fmterr.Errorf(errCreationV1DedicatedClient, err)
-	}
-	if region == "eu-ch2" {
-		client, err = common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-			return config.WafDedicatedSwissV1Client(region)
-		})
-		if err != nil {
-			return fmterr.Errorf(errCreationV1DedicatedClient, err)
-		}
 	}
 	instance, err := instances.Get(client, d.Id())
 	if err != nil {
@@ -233,20 +201,10 @@ func resourceWafDedicatedInstanceRead(ctx context.Context, d *schema.ResourceDat
 		d.Set("status", instance.Status),
 		d.Set("access_status", instance.AccessStatus),
 		d.Set("upgradable", upgradable),
-		d.Set("specification", instance.Specification),
+		d.Set("specification", instance.ResourceSpecification),
 		d.Set("created_at", instance.CreatedAt),
 		d.Set("billing_status", instance.BillingStatus),
 	)
-
-	hosts := make([]map[string]interface{}, len(instance.Hosts))
-	for i, host := range instance.Hosts {
-		hosts[i] = make(map[string]interface{})
-		hosts[i]["id"] = host.ID
-		hosts[i]["hostname"] = host.Hostname
-	}
-	if err := d.Set("hosts", hosts); err != nil {
-		return diag.FromErr(err)
-	}
 
 	if mErr.ErrorOrNil() != nil {
 		return fmterr.Errorf("error setting opentelekomcloud WAF dedicated instance fields: %w", err)
@@ -256,28 +214,15 @@ func resourceWafDedicatedInstanceRead(ctx context.Context, d *schema.ResourceDat
 
 func resourceWafDedicatedInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	region := config.GetRegion(d)
-	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.WafDedicatedV1Client(region)
-	})
+	client, err := getWafdClient(ctx, d, config)
 	if err != nil {
 		return fmterr.Errorf(errCreationV1DedicatedClient, err)
 	}
-	if region == "eu-ch2" {
-		client, err = common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-			return config.WafDedicatedSwissV1Client(region)
-		})
-		if err != nil {
-			return fmterr.Errorf(errCreationV1DedicatedClient, err)
-		}
-	}
 
 	if d.HasChanges("name") {
-		_, err = instances.Update(client, d.Id(), instances.UpdateOpts{
-			Name: d.Get("name").(string),
-		})
+		err = updateInstanceName(client, d.Id(), d.Get("name").(string))
 		if err != nil {
-			return fmterr.Errorf("error updating opentelekomcloud WAF dedicated instance: %w", err)
+			return diag.FromErr(err)
 		}
 	}
 
@@ -329,20 +274,9 @@ func waitForInstanceDeleted(client *golangsdk.ServiceClient, id string) resource
 
 func resourceWafDedicatedInstanceDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	region := config.GetRegion(d)
-	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.WafDedicatedV1Client(region)
-	})
+	client, err := getWafdClient(ctx, d, config)
 	if err != nil {
 		return fmterr.Errorf(errCreationV1DedicatedClient, err)
-	}
-	if region == "eu-ch2" {
-		client, err = common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-			return config.WafDedicatedSwissV1Client(region)
-		})
-		if err != nil {
-			return fmterr.Errorf(errCreationV1DedicatedClient, err)
-		}
 	}
 
 	err = instances.Delete(client, d.Id())
@@ -365,5 +299,37 @@ func resourceWafDedicatedInstanceDelete(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 	d.SetId("")
+	return nil
+}
+
+func getWafdClient(ctx context.Context, d *schema.ResourceData, config *cfg.Config) (*golangsdk.ServiceClient, error) {
+	var client *golangsdk.ServiceClient
+	var err error
+	region := config.GetRegion(d)
+	if region != "eu-ch2" {
+		client, err = common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+			return config.WafDedicatedV1Client(region)
+		})
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		client, err = common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+			return config.WafDedicatedSwissV1Client(region)
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
+}
+
+func updateInstanceName(client *golangsdk.ServiceClient, id string, name string) error {
+	_, err := instances.Update(client, id, instances.UpdateOpts{
+		Name: name,
+	})
+	if err != nil {
+		return fmt.Errorf("error updating opentelekomcloud WAF dedicated instance: %w", err)
+	}
 	return nil
 }
