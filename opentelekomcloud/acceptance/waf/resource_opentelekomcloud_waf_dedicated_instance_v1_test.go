@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -19,6 +20,7 @@ const wafdInstanceResourceName = "opentelekomcloud_waf_dedicated_instance_v1.waf
 func TestAccWafDedicatedInstanceV1_basic(t *testing.T) {
 	var inst instances.Instance
 	var instanceName = fmt.Sprintf("wafd_instance_%s", acctest.RandString(5))
+	log.Printf("[DEBUG] The opentelekomcloud Waf dedicated instance test running in '%s' region.", env.OS_REGION_NAME)
 	arch := "x86"
 	flavor := "s2.large.2"
 	if env.OS_REGION_NAME == "eu-ch2" {
