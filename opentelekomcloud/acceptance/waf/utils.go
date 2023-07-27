@@ -8,7 +8,9 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func getAccWafdClient(client *golangsdk.ServiceClient, err error, config *cfg.Config) (*golangsdk.ServiceClient, error) {
+func getAccWafdClient(config *cfg.Config) (*golangsdk.ServiceClient, error) {
+	var client *golangsdk.ServiceClient
+	var err error
 	if env.OS_REGION_NAME != "eu-ch2" {
 		client, err = config.WafDedicatedV1Client(env.OS_REGION_NAME)
 		if err != nil {

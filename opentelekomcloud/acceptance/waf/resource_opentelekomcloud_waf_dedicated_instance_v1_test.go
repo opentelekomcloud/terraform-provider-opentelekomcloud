@@ -61,10 +61,8 @@ func TestAccWafDedicatedInstanceV1_basic(t *testing.T) {
 }
 
 func testAccCheckWafDedicatedInstanceV1Destroy(s *terraform.State) error {
-	var client *golangsdk.ServiceClient
-	var err error
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err = getAccWafdClient(client, err, config)
+	client, err := getAccWafdClient(config)
 	if err != nil {
 		return err
 	}
@@ -86,8 +84,6 @@ func testAccCheckWafDedicatedInstanceV1Destroy(s *terraform.State) error {
 
 func testAccCheckWafDedicatedInstanceV1Exists(n string, instance *instances.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		var client *golangsdk.ServiceClient
-		var err error
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("not found: %s", n)
@@ -98,7 +94,7 @@ func testAccCheckWafDedicatedInstanceV1Exists(n string, instance *instances.Inst
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err = getAccWafdClient(client, err, config)
+		client, err := getAccWafdClient(config)
 		if err != nil {
 			return err
 		}
