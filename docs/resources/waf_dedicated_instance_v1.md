@@ -9,6 +9,8 @@ Up-to-date reference of API arguments for WAF datamasking rule you can get at
 
 Manages a WAF dedicated instance resource within OpenTelekomCloud.
 
+-> **Note:** For this resource region must be set in environment variable `OS_REGION_NAME` or in `clouds.yaml`
+
 ## Example Usage
 
 ```hcl

@@ -64,16 +64,9 @@ func testAccCheckWafDedicatedInstanceV1Destroy(s *terraform.State) error {
 	var client *golangsdk.ServiceClient
 	var err error
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	if env.OS_REGION_NAME != "eu-ch2" {
-		client, err = config.WafDedicatedV1Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud Waf dedicated client: %s", err)
-		}
-	} else {
-		client, err = config.WafDedicatedSwissV1Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud Waf dedicated client: %s", err)
-		}
+	client, err = getAccWafdClient(client, err, config)
+	if err != nil {
+		return err
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -105,16 +98,9 @@ func testAccCheckWafDedicatedInstanceV1Exists(n string, instance *instances.Inst
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		if env.OS_REGION_NAME != "eu-ch2" {
-			client, err = config.WafDedicatedV1Client(env.OS_REGION_NAME)
-			if err != nil {
-				return fmt.Errorf("error creating OpenTelekomCloud Waf dedicated client: %s", err)
-			}
-		} else {
-			client, err = config.WafDedicatedSwissV1Client(env.OS_REGION_NAME)
-			if err != nil {
-				return fmt.Errorf("error creating OpenTelekomCloud Waf dedicated client: %s", err)
-			}
+		client, err = getAccWafdClient(client, err, config)
+		if err != nil {
+			return err
 		}
 
 		var found *instances.Instance
