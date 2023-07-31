@@ -74,18 +74,49 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
 }
 ```
 
-#### Already existing
+#### Already existing opentelekomcloud_networking_floatingip_v2
 
 ```hcl
-resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
-  name        = "example-loadbalancer"
-  subnet_id   = var.subnet_id
-  network_ids = [var.network_id]
+resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name        = "loadbalancer_1"
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
 
-  availability_zones = [var.az]
+  availability_zones = ["eu-de-01"]
 
   public_ip {
-    id = var.eip_id
+    id = opentelekomcloud_networking_floatingip_v2.fip_1.id
+  }
+}
+
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
+```
+
+#### Or opentelekomcloud_vpc_eip_v1
+
+```hcl
+resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name        = "loadbalancer_1"
+  router_id   = opentelekomcloud_vpc_subnet_v1.this.vpc_id
+  network_ids = [opentelekomcloud_vpc_subnet_v1.this.network_id]
+
+  availability_zones = ["eu-de-01"]
+
+  public_ip {
+    id = opentelekomcloud_vpc_eip_v1.fip_1.id
+  }
+}
+
+resource "opentelekomcloud_vpc_eip_v1" "fip_1" {
+  bandwidth {
+    charge_mode = "traffic"
+    name        = "eip"
+    share_type  = "PER"
+    size        = 100
+  }
+
+  publicip {
+    type = "5_bgp"
   }
 }
 ```

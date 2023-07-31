@@ -72,6 +72,29 @@ func TestAccLBV3LoadBalancer_bandwidth(t *testing.T) {
 	})
 }
 
+func TestAccLBV3LoadBalancer_eipAssignment(t *testing.T) {
+	var lb loadbalancers.LoadBalancer
+
+	qts := lbQuotas()
+	t.Parallel()
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV3LoadBalancerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV3LoadBalancerConfigAssignEip,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3LoadBalancerExists(resourceLBName, &lb),
+					resource.TestCheckResourceAttr(resourceLBName, "public_ip.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccLBV3LoadBalancer_import(t *testing.T) {
 	qts := lbQuotas()
 	t.Parallel()
@@ -256,4 +279,28 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
     kuh = "value-create"
   }
 }
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3LoadBalancerConfigAssignEip = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name        = "loadbalancer_1"
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+
+  public_ip {
+    id = opentelekomcloud_networking_floatingip_v2.fip_1.id
+  }
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
+
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

@@ -115,7 +115,7 @@ func ResourceLoadBalancerV3() *schema.Resource {
 							ExactlyOneOf: []string{"public_ip.0.id"},
 							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{
-								"5_gray", "5_mailbgp", "5_bgp",
+								"5_gray", "5_mailbgp", "5_bgp", "5_geantaccess",
 							}, false),
 						},
 						"bandwidth_name": {
