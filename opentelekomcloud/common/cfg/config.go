@@ -1020,17 +1020,17 @@ func (c *Config) WafV1Client(region string) (*golangsdk.ServiceClient, error) {
 }
 
 func (c *Config) WafDedicatedV1Client(region string) (*golangsdk.ServiceClient, error) {
-	return openstack.NewWAFDV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       region,
-		Availability: c.getEndpointType(),
-	})
-}
-
-func (c *Config) WafDedicatedSwissV1Client(region string) (*golangsdk.ServiceClient, error) {
-	return openstack.NewWAFDSwissV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       region,
-		Availability: c.getEndpointType(),
-	})
+	if region != "eu-ch2" {
+		return openstack.NewWAFDV1(c.HwClient, golangsdk.EndpointOpts{
+			Region:       region,
+			Availability: c.getEndpointType(),
+		})
+	} else {
+		return openstack.NewWAFDSwissV1(c.HwClient, golangsdk.EndpointOpts{
+			Region:       region,
+			Availability: c.getEndpointType(),
+		})
+	}
 }
 
 func (c *Config) RdsV3Client(region string) (*golangsdk.ServiceClient, error) {
