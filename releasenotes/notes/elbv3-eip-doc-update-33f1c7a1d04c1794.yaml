@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[ELB]** Updated EIP section in ``resource/opentelekomcloud_lb_loadbalancer_v3`` documentation (`#2243 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2243>`_)
