@@ -186,7 +186,7 @@ func resourceWafDedicatedInstanceV1Read(ctx context.Context, d *schema.ResourceD
 
 	instance, err := instances.Get(client, d.Id())
 	if err != nil {
-		return common.CheckDeletedDiag(d, err, "error retrieving opentelekomcloud WAF dedicated instance.")
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud WAF dedicated instance.")
 	}
 	upgradable := false
 	if instance.Upgradable == 1 {
