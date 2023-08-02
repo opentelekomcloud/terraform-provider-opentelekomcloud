@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/policies"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -176,6 +177,10 @@ func ResourceWafDedicatedDomain() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"created_at": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -241,11 +246,6 @@ func resourceWafDedicatedDomainV1Create(ctx context.Context, d *schema.ResourceD
 	}
 
 	if d.HasChanges("tls", "cipher", "pci_3ds", "pci_dss") {
-		protectStatus := d.Get("protect_status").(int)
-		opts := domains.UpdateOpts{
-			ProtectStatus: protectStatus,
-		}
-		_, err = domains.Update(client, d.Id(), opts)
 		if err := updateWafDedicatedDomain(client, d); err != nil {
 			return diag.FromErr(err)
 		}
@@ -283,14 +283,17 @@ func resourceWafDedicatedDomainV1Read(ctx context.Context, d *schema.ResourceDat
 		d.Set("protocol", domain.Protocol),
 		d.Set("tls", domain.Tls),
 		d.Set("cipher", domain.Cipher),
+		d.Set("created_at", domain.CreatedAt),
 	)
 
+	complianceCertification := make(map[string]interface{})
 	if domain.Flag.Pci3ds != "" {
 		pci3ds, err := strconv.ParseBool(domain.Flag.Pci3ds)
 		if err != nil {
 			log.Printf("[WARN] error parse bool pci 3ds, %s", err)
 		}
 		mErr = multierror.Append(mErr, d.Set("pci_3ds", pci3ds))
+		complianceCertification["pci_3ds"] = pci3ds
 	}
 
 	if domain.Flag.PciDss != "" {
@@ -299,36 +302,32 @@ func resourceWafDedicatedDomainV1Read(ctx context.Context, d *schema.ResourceDat
 			log.Printf("[WARN] error parse bool pci dss, %s", err)
 		}
 		mErr = multierror.Append(mErr, d.Set("pci_dss", pciDss))
+		complianceCertification["pci_dss"] = pciDss
 	}
 
 	if mErr.ErrorOrNil() != nil {
 		return fmterr.Errorf("error setting OpenTelekomCloud WAF domain fields: %s", err)
 	}
 
-	complianceCertification := map[string]interface{}{
-		"pci_dss": domain.Flag.Pci3ds,
-		"pci_3ds": domain.Flag.PciDss,
-	}
-
 	if err := d.Set("compliance_certification", complianceCertification); err != nil {
 		return diag.FromErr(err)
 	}
 
-	trafficMark := map[string]interface{}{
-		"ip_tag":      strings.Join(domain.TrafficMark.Sip, ","),
-		"session_tag": domain.TrafficMark.Cookie,
-		"user_tag":    domain.TrafficMark.Params,
+	trafficMark := map[string]interface{}{}
+	if domain.TrafficMark != nil {
+		trafficMark["ip_tag"] = strings.Join(domain.TrafficMark.Sip, ",")
+		trafficMark["session_tag"] = domain.TrafficMark.Cookie
+		trafficMark["user_tag"] = domain.TrafficMark.Params
 	}
-
 	if err := d.Set("traffic_identifier", trafficMark); err != nil {
 		return diag.FromErr(err)
 	}
 
-	alarmPage := map[string]interface{}{
-		"template_name": domain.BlockPage.Template,
-		"redirect_url":  domain.BlockPage.RedirectUrl,
+	alarmPage := map[string]interface{}{}
+	if domain.BlockPage != nil {
+		alarmPage["template_name"] = domain.BlockPage.Template
+		alarmPage["redirect_url"] = domain.BlockPage.RedirectUrl
 	}
-
 	if err := d.Set("alarm_page", alarmPage); err != nil {
 		return diag.FromErr(err)
 	}
@@ -360,12 +359,36 @@ func resourceWafDedicatedDomainV1Update(ctx context.Context, d *schema.ResourceD
 		}
 	}
 
-	// will be added later when policy API be ready for use
-	// if d.HasChanges("policy_id") {
-	// }
+	if d.HasChanges("policy_id") {
+		err := updateWafDedicatedPolicy(d, meta)
+		if err != nil {
+			return err
+		}
+	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
 	return resourceWafDedicatedDomainV1Read(clientCtx, d, meta)
+}
+
+func updateWafDedicatedPolicy(d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	client, err := config.WafV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF Client: %s", err)
+	}
+
+	_, newId := d.GetChange("policy_id")
+	policyId := newId.(string)
+	updateHostsOpts := policies.UpdateHostsOpts{
+		Hosts: []string{d.Id()},
+	}
+	log.Printf("[DEBUG] Bind OpenTelekomCloud Waf dedicated domain %s to policy %s", d.Id(), policyId)
+
+	_, err = policies.UpdateHosts(client, policyId, updateHostsOpts).Extract()
+	if err != nil {
+		return fmterr.Errorf("error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
+	}
+	return nil
 }
 
 func resourceWafDedicatedDomainV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
