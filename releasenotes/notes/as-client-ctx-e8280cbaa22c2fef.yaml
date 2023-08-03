@@ -1,0 +1,10 @@
+---
+enhancements:
+  - |
+    **[AS]** Reduce amount of init client requests in ``resource/opentelekomcloud_as_configuration_v1`` (`#2251 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2251>`_)
+  - |
+    **[AS]** Reduce amount of init client requests in ``resource/opentelekomcloud_as_group_v1`` (`#2251 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2251>`_)
+  - |
+    **[AS]** Reduce amount of init client requests in ``resource/opentelekomcloud_as_policy_v1`` (`#2251 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2251>`_)
+  - |
+    **[AS]** Reduce amount of init client requests in ``resource/opentelekomcloud_as_policy_v2`` (`#2251 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2251>`_)
