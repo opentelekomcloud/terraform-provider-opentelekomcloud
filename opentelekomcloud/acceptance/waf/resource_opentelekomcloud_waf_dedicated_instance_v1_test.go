@@ -64,7 +64,7 @@ func TestAccWafDedicatedInstanceV1_basic(t *testing.T) {
 
 func testAccCheckWafDedicatedInstanceV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := getAccWafdClient(config)
+	client, err := config.WafDedicatedV1Client(env.OS_REGION_NAME)
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func testAccCheckWafDedicatedInstanceV1Exists(n string, instance *instances.Inst
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := getAccWafdClient(config)
+		client, err := config.WafDedicatedV1Client(env.OS_REGION_NAME)
 		if err != nil {
 			return err
 		}

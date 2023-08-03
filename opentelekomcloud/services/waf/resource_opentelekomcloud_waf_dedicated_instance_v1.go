@@ -20,10 +20,10 @@ import (
 
 func ResourceWafDedicatedInstance() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceWafDedicatedInstanceCreate,
-		ReadContext:   resourceWafDedicatedInstanceRead,
-		UpdateContext: resourceWafDedicatedInstanceUpdate,
-		DeleteContext: resourceWafDedicatedInstanceDelete,
+		CreateContext: resourceWafDedicatedInstanceV1Create,
+		ReadContext:   resourceWafDedicatedInstanceV1Read,
+		UpdateContext: resourceWafDedicatedInstanceV1Update,
+		DeleteContext: resourceWafDedicatedInstanceV1Delete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -113,9 +113,11 @@ func ResourceWafDedicatedInstance() *schema.Resource {
 	}
 }
 
-func resourceWafDedicatedInstanceCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafDedicatedInstanceV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := getWafdClient(ctx, d, config)
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.WafDedicatedV1Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1DedicatedClient, err)
 	}
@@ -170,18 +172,21 @@ func resourceWafDedicatedInstanceCreate(ctx context.Context, d *schema.ResourceD
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
-	return resourceWafDedicatedInstanceRead(clientCtx, d, meta)
+	return resourceWafDedicatedInstanceV1Read(clientCtx, d, meta)
 }
 
-func resourceWafDedicatedInstanceRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafDedicatedInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := getWafdClient(ctx, d, config)
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.WafDedicatedV1Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1DedicatedClient, err)
 	}
+
 	instance, err := instances.Get(client, d.Id())
 	if err != nil {
-		return common.CheckDeletedDiag(d, err, "error retrieving opentelekomcloud WAF dedicated instance.")
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud WAF dedicated instance.")
 	}
 	upgradable := false
 	if instance.Upgradable == 1 {
@@ -212,9 +217,11 @@ func resourceWafDedicatedInstanceRead(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceWafDedicatedInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafDedicatedInstanceV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := getWafdClient(ctx, d, config)
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.WafDedicatedV1Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1DedicatedClient, err)
 	}
@@ -227,7 +234,7 @@ func resourceWafDedicatedInstanceUpdate(ctx context.Context, d *schema.ResourceD
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
-	return resourceWafDedicatedInstanceRead(clientCtx, d, meta)
+	return resourceWafDedicatedInstanceV1Read(clientCtx, d, meta)
 }
 
 func waitForInstanceCreated(client *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
@@ -272,9 +279,11 @@ func waitForInstanceDeleted(client *golangsdk.ServiceClient, id string) resource
 	}
 }
 
-func resourceWafDedicatedInstanceDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafDedicatedInstanceV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := getWafdClient(ctx, d, config)
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.WafDedicatedV1Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1DedicatedClient, err)
 	}
@@ -300,28 +309,6 @@ func resourceWafDedicatedInstanceDelete(ctx context.Context, d *schema.ResourceD
 	}
 	d.SetId("")
 	return nil
-}
-
-func getWafdClient(ctx context.Context, d *schema.ResourceData, config *cfg.Config) (*golangsdk.ServiceClient, error) {
-	var client *golangsdk.ServiceClient
-	var err error
-	region := config.GetRegion(d)
-	if region != "eu-ch2" {
-		client, err = common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-			return config.WafDedicatedV1Client(region)
-		})
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		client, err = common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-			return config.WafDedicatedSwissV1Client(region)
-		})
-		if err != nil {
-			return nil, err
-		}
-	}
-	return client, nil
 }
 
 func updateInstanceName(client *golangsdk.ServiceClient, id string, name string) error {
