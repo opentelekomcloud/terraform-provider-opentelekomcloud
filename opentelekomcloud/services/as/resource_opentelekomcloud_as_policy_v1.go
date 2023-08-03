@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/policies"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -188,11 +189,13 @@ func getPolicyAction(rawPolicyAction map[string]interface{}) policies.Action {
 
 func resourceASPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	asClient, err := config.AutoscalingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.AutoscalingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
-	log.Printf("[DEBUG] asClient: %#v", asClient)
+
 	err = validateParameters(d)
 	if err != nil {
 		return fmterr.Errorf("error creating ASPolicy: %s", err)
@@ -218,23 +221,27 @@ func resourceASPolicyCreate(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	log.Printf("[DEBUG] Create AS policy Options: %#v", createOpts)
-	asPolicyId, err := policies.Create(asClient, createOpts)
+	asPolicyId, err := policies.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating ASPolicy: %s", err)
 	}
 	d.SetId(asPolicyId)
 	log.Printf("[DEBUG] Create AS Policy %q Success!", asPolicyId)
-	return resourceASPolicyRead(ctx, d, meta)
+
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
+	return resourceASPolicyRead(clientCtx, d, meta)
 }
 
-func resourceASPolicyRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceASPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	asClient, err := config.AutoscalingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.AutoscalingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
-	asPolicy, err := policies.Get(asClient, d.Id())
+	asPolicy, err := policies.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "AS Policy")
 	}
@@ -274,9 +281,11 @@ func resourceASPolicyRead(_ context.Context, d *schema.ResourceData, meta interf
 
 func resourceASPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	asClient, err := config.AutoscalingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.AutoscalingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	err = validateParameters(d)
@@ -302,7 +311,7 @@ func resourceASPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		updateOpts.Action = policyAction
 	}
 	log.Printf("[DEBUG] Update AS policy Options: %#v", updateOpts)
-	asPolicyID, err := policies.Update(asClient, d.Id(), updateOpts)
+	asPolicyID, err := policies.Update(client, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating ASPolicy %q: %s", asPolicyID, err)
 	}
@@ -310,14 +319,17 @@ func resourceASPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceASPolicyRead(ctx, d, meta)
 }
 
-func resourceASPolicyDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceASPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	asClient, err := config.AutoscalingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.AutoscalingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
+
 	log.Printf("[DEBUG] Begin to delete AS policy %q", d.Id())
-	if delErr := policies.Delete(asClient, d.Id()); delErr != nil {
+	if delErr := policies.Delete(client, d.Id()); delErr != nil {
 		return fmterr.Errorf("error deleting AS policy: %s", delErr)
 	}
 

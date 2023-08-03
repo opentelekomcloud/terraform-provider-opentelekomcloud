@@ -38,7 +38,7 @@ func TestAccASPolicyV2_basic(t *testing.T) {
 					testAccCheckASV2PolicyExists(resourceName, &asPolicy),
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.operation", "ADD"),
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.percentage", "15"),
-					resource.TestCheckResourceAttr(resourceName, "scaling_policy_name", "as_policy"),
+					resource.TestCheckResourceAttr(resourceName, "scaling_policy_name", "as_policy_pol_v2"),
 					resource.TestCheckResourceAttr(resourceName, "cool_down_time", "300"),
 				),
 			},
@@ -47,7 +47,7 @@ func TestAccASPolicyV2_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV2PolicyExists(resourceName, &asPolicy),
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.percentage", "30"),
-					resource.TestCheckResourceAttr(resourceName, "scaling_policy_name", "as_policy_update"),
+					resource.TestCheckResourceAttr(resourceName, "scaling_policy_name", "as_policy_pol_v2_update"),
 					resource.TestCheckResourceAttr(resourceName, "cool_down_time", "100"),
 				),
 			},
@@ -80,7 +80,7 @@ func TestAccASPolicyV2_withSize(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.operation", "ADD"),
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.percentage", "0"),
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.size", "1"),
-					resource.TestCheckResourceAttr(resourceName, "scaling_policy_name", "as_policy"),
+					resource.TestCheckResourceAttr(resourceName, "scaling_policy_name", "as_policy_pol_v2_size"),
 					resource.TestCheckResourceAttr(resourceName, "cool_down_time", "100"),
 				),
 			},
@@ -166,7 +166,7 @@ var testAccASPolicyV2Basic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
-  scaling_configuration_name = "as_config"
+  scaling_configuration_name = "as_config_pol_v2"
 
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
@@ -180,7 +180,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
 }
 
 resource "opentelekomcloud_as_group_v1" "as_group"{
-  scaling_group_name       = "as_group"
+  scaling_group_name       = "as_group_pol_v2"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
 
   networks {
@@ -196,7 +196,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
 }
 
 resource "opentelekomcloud_as_policy_v2" "as_policy"{
-  scaling_policy_name   = "as_policy"
+  scaling_policy_name   = "as_policy_pol_v2"
   scaling_policy_type   = "RECURRENCE"
   scaling_resource_id   = opentelekomcloud_as_group_v1.as_group.id
   scaling_resource_type = "SCALING_GROUP"
@@ -225,7 +225,7 @@ var testAccASPolicyV2Update = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
-  scaling_configuration_name = "as_config"
+  scaling_configuration_name = "as_config_pol_v2"
 
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
@@ -239,7 +239,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
 }
 
 resource "opentelekomcloud_as_group_v1" "as_group"{
-  scaling_group_name       = "as_group"
+  scaling_group_name       = "as_group_pol_v2"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
 
   networks {
@@ -255,7 +255,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
 }
 
 resource "opentelekomcloud_as_policy_v2" "as_policy"{
-  scaling_policy_name   = "as_policy_update"
+  scaling_policy_name   = "as_policy_pol_v2_update"
   scaling_policy_type   = "RECURRENCE"
   scaling_resource_id   = opentelekomcloud_as_group_v1.as_group.id
   scaling_resource_type = "SCALING_GROUP"
@@ -285,7 +285,7 @@ var testAccASPolicyV2ActionWithSize = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
-  scaling_configuration_name = "as_config"
+  scaling_configuration_name = "as_config_pol_v2_size"
 
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
@@ -299,7 +299,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
 }
 
 resource "opentelekomcloud_as_group_v1" "as_group"{
-  scaling_group_name       = "as_group"
+  scaling_group_name       = "as_group_pol_v2_size"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
 
   networks {
@@ -315,7 +315,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
 }
 
 resource "opentelekomcloud_as_policy_v2" "as_policy"{
-  scaling_policy_name   = "as_policy"
+  scaling_policy_name   = "as_policy_pol_v2_size"
   scaling_policy_type   = "RECURRENCE"
   scaling_resource_id   = opentelekomcloud_as_group_v1.as_group.id
   scaling_resource_type = "SCALING_GROUP"
@@ -345,7 +345,7 @@ var testAccASPolicyV2ActionConflict = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
-  scaling_configuration_name = "as_config"
+  scaling_configuration_name = "as_config_pol_v2_conflict"
 
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
@@ -359,7 +359,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
 }
 
 resource "opentelekomcloud_as_group_v1" "as_group"{
-  scaling_group_name       = "as_group"
+  scaling_group_name       = "as_group_pol_v2_conflict"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
 
   networks {
@@ -375,7 +375,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
 }
 
 resource "opentelekomcloud_as_policy_v2" "as_policy"{
-  scaling_policy_name   = "as_policy"
+  scaling_policy_name   = "as_policy_pol_v2_conflict"
   scaling_policy_type   = "RECURRENCE"
   scaling_resource_id   = opentelekomcloud_as_group_v1.as_group.id
   scaling_resource_type = "SCALING_GROUP"

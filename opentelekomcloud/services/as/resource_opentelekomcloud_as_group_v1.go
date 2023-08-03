@@ -338,9 +338,11 @@ func refreshInstancesLifeStates(client *golangsdk.ServiceClient, groupID string,
 
 func resourceASGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.AutoscalingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.AutoscalingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	minNum := d.Get("min_instance_number").(int)
@@ -428,14 +430,17 @@ func resourceASGroupCreate(ctx context.Context, d *schema.ResourceData, meta int
 
 	d.SetId(asGroupID)
 
-	return resourceASGroupRead(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
+	return resourceASGroupRead(clientCtx, d, meta)
 }
 
-func resourceASGroupRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceASGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.AutoscalingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.AutoscalingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	asGroup, err := groups.Get(client, d.Id())
@@ -513,9 +518,11 @@ func resourceASGroupRead(_ context.Context, d *schema.ResourceData, meta interfa
 
 func resourceASGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.AutoscalingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.AutoscalingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 	d.Partial(true)
 
@@ -568,14 +575,18 @@ func resourceASGroupUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	d.Partial(false)
-	return resourceASGroupRead(ctx, d, meta)
+
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
+	return resourceASGroupRead(clientCtx, d, meta)
 }
 
 func resourceASGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.AutoscalingV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.AutoscalingV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	log.Printf("[DEBUG] Begin to get instances of AutoScaling Group %q", d.Id())
