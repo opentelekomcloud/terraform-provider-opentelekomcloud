@@ -125,10 +125,24 @@ func testAccWafDedicatedDomainV1_basic(name string) string {
 	return fmt.Sprintf(`
 %s
 
+resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
+  name            = "domain_policy_1"
+  protection_mode = "log"
+  full_detection  = false
+  level           = 2
+
+  options {
+    crawler    = true
+    web_attack = true
+  }
+}
+
 resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
   domain      = "www.%s.com"
-  keep_policy = false
+  keep_policy = true
   proxy       = true
+
+  policy_id = opentelekomcloud_waf_dedicated_policy_v1.policy_1.id
 
   server {
     client_protocol = "HTTP"
@@ -145,6 +159,18 @@ resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
 func testAccWafDedicatedDomainV1_basicUpdate(name string) string {
 	return fmt.Sprintf(`
 %s
+
+resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
+  name            = "domain_policy_1"
+  protection_mode = "log"
+  full_detection  = false
+  level           = 2
+
+  options {
+    crawler    = true
+    web_attack = true
+  }
+}
 
 resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
   domain      = "www.%s.com"
