@@ -203,7 +203,7 @@ func resourceWafDedicatedPolicyV1Create(ctx context.Context, d *schema.ResourceD
 
 	if d.HasChanges("protection_mode", "level", "options", "full_detection") {
 		if err := updateWafPolicy(ctx, d, meta); err != nil {
-			return fmterr.Errorf("error creating OpenTelekomCloud WAF dedicated policy: %s", err)
+			return err
 		}
 	}
 
@@ -278,7 +278,7 @@ func resourceWafDedicatedPolicyV1Update(ctx context.Context, d *schema.ResourceD
 
 	if d.HasChanges("name", "protection_mode", "level", "options", "full_detection") {
 		if err := updateWafPolicy(ctx, d, meta); err != nil {
-			return fmterr.Errorf("error updating OpenTelekomCloud WAF dedicated policy: %s", err)
+			return err
 		}
 	}
 
