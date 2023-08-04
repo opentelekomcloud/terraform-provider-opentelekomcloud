@@ -171,7 +171,7 @@ var testAccASV1ConfigurationBasic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
-  scaling_configuration_name = "hth_as_config"
+  scaling_configuration_name = "as_config_basic"
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
@@ -194,7 +194,7 @@ var testAccASV1ConfigurationPublicIP = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
-  scaling_configuration_name = "as_config"
+  scaling_configuration_name = "as_config_eip"
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
@@ -231,7 +231,7 @@ var testAccASV1ConfigurationInvalidDiskSize = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
-  scaling_configuration_name = "as_config"
+  scaling_configuration_name = "as_config_invalid_ds"
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
@@ -268,7 +268,7 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgroup_3" {
 }
 
 resource "opentelekomcloud_as_configuration_v1" "as_config" {
-  scaling_configuration_name = "as_config"
+  scaling_configuration_name = "as_config_multiple_sg"
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {

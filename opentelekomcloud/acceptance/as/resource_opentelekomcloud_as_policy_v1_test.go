@@ -102,7 +102,7 @@ var testAccASV1PolicyBasic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
-  scaling_configuration_name = "as_config"
+  scaling_configuration_name = "as_config_pol_v1"
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
@@ -115,7 +115,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
 }
 
 resource "opentelekomcloud_as_group_v1" "as_group"{
-  scaling_group_name       = "as_group"
+  scaling_group_name       = "as_group_pol_v1"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   delete_instances         = "yes"
   delete_publicip          = true
@@ -129,7 +129,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
 }
 
 resource "opentelekomcloud_as_policy_v1" "as_policy"{
-  scaling_policy_name = "as_policy"
+  scaling_policy_name = "as_policy_v1"
   scaling_group_id    = opentelekomcloud_as_group_v1.as_group.id
   scaling_policy_type = "SCHEDULED"
   scaling_policy_action {
@@ -137,7 +137,7 @@ resource "opentelekomcloud_as_policy_v1" "as_policy"{
     instance_number = 1
   }
   scheduled_policy {
-    launch_time = "2022-12-22T12:00Z"
+    launch_time = "2023-12-22T12:00Z"
   }
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_KEYPAIR_NAME)
