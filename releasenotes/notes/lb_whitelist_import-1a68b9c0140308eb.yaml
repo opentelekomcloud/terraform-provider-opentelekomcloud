@@ -1,4 +1,4 @@
 ---
 enhancements:
   - |
-    **[ELB]** Add import support for ``resource/opentelekomcloud_lb_whitelist_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[ELB]** Add import support for ``resource/opentelekomcloud_lb_whitelist_v2`` (`#2257 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2257>`_)
