@@ -48,6 +48,24 @@ func TestAccLBV2Whitelist_basic(t *testing.T) {
 	})
 }
 
+func TestAccLBV2Whitelist_import(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV2WhitelistDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV2WhitelistConfigBasic,
+			},
+			{
+				ResourceName:      resourceWhitelistName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccCheckLBV2WhitelistDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.ElbV2Client(env.OS_REGION_NAME)
