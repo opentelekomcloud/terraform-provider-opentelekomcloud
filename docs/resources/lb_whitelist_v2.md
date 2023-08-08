@@ -47,3 +47,11 @@ The following attributes are exported:
 * `enable_whitelist` - See Argument Reference above.
 
 * `whitelist` - See Argument Reference above.
+
+## Import
+
+Load Balancer Whitelist can be imported using the Whitelist ID, e.g.:
+
+```shell
+terraform import opentelekomcloud_lb_whitelist_v2.this 8a7a79c2-cf17-4e65-b2ae-ddc8bfcf6c74
+```

@@ -21,6 +21,9 @@ func ResourceWhitelistV2() *schema.Resource {
 		ReadContext:   resourceWhitelistV2Read,
 		UpdateContext: resourceWhitelistV2Update,
 		DeleteContext: resourceWhitelistV2Delete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"tenant_id": {
