@@ -41,6 +41,7 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.muh", "value-create"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.kuh", "value-create"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "lower_case_table_names", "0"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "ssl_enable", "true"),
 				),
 			},
 			{
@@ -183,6 +184,7 @@ func TestAccRdsInstanceV3HA(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.type", "ULTRAHIGH"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "MySQL"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "availability_zones.#", "2"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "ssl_enable", "false"),
 				),
 			},
 		},

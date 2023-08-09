@@ -277,6 +277,7 @@ func ResourceRdsInstanceV3() *schema.Resource {
 			},
 			"ssl_enable": {
 				Type:     schema.TypeBool,
+				Computed: true,
 				Optional: true,
 			},
 			"availability_zones": {
@@ -566,8 +567,6 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			if err != nil {
 				return fmterr.Errorf("error updating instance SSL configuration: %s ", err)
 			}
-		} else {
-			return diag.Errorf("only MySQL database support SSL enable and disable")
 		}
 	}
 
@@ -1076,6 +1075,7 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("created", rdsInstance.Created),
 		d.Set("ha_replication_mode", rdsInstance.Ha.ReplicationMode),
 		d.Set("lower_case_table_names", d.Get("lower_case_table_names").(string)),
+		d.Set("ssl_enable", *rdsInstance.EnableSSL),
 	)
 
 	if me.ErrorOrNil() != nil {
