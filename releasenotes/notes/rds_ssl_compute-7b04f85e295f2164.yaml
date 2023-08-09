@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[RDS]** Enable ``resource/opentelekomcloud_rds_instance_v3`` SSL parameter read (`#2258 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2258>`_)
