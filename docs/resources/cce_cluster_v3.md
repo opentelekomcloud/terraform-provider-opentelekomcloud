@@ -238,6 +238,9 @@ The following arguments are supported:
 * `delete_all_network` - (Optional) Specified whether to delete all associated network resources when deleting the CCE
   cluster. valid values are **true**, **try** and **false**. Default is **false**.
 
+-> Note: Cluster custom deletion info and properties can be checked here:
+  [Deleting a Specified Cluster.](https://docs.otc.t-systems.com/cloud-container-engine/api-ref/apis/cluster_management/deleting_a_specified_cluster.html)
+
 ## Attributes Reference
 
 All above argument parameters can be exported as attribute parameters along with attribute reference.
