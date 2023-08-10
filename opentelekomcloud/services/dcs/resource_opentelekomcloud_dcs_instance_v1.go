@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/configs"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/lifecycle"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/others"
@@ -29,7 +30,7 @@ func ResourceDcsInstanceV1() *schema.Resource {
 		UpdateContext: resourceDcsInstancesV1Update,
 		DeleteContext: resourceDcsInstancesV1Delete,
 
-		CustomizeDiff: validateEngine,
+		CustomizeDiff: common.MultipleCustomizeDiffs(validateEngine, validateSSL),
 
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceDcsInstanceV1ImportState,
@@ -260,6 +261,11 @@ func ResourceDcsInstanceV1() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"enable_ssl": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
 			"whitelist": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -416,6 +422,7 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 		InstanceBackupPolicy: getInstanceBackupPolicy(d),
 		MaintainBegin:        d.Get("maintain_begin").(string),
 		MaintainEnd:          d.Get("maintain_end").(string),
+		EnableSsl:            pointerto.Bool(d.Get("enable_ssl").(bool)),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -752,6 +759,16 @@ func validateEngine(_ context.Context, d *schema.ResourceDiff, _ interface{}) er
 		}
 	}
 
+	return nil
+}
+
+func validateSSL(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	ssl := d.Get("enable_ssl").(bool)
+	if ssl {
+		if v, ok := d.GetOk("engine_version"); ok && v.(string) != "6.0" {
+			return fmt.Errorf("only DCS Redis 6.0 support ssl")
+		}
+	}
 	return nil
 }
 

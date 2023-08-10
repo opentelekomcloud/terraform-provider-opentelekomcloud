@@ -210,6 +210,27 @@ func TestAccDcsInstancesV1_Whitelist(t *testing.T) {
 	})
 }
 
+func TestAccDcsInstancesV1_SSL(t *testing.T) {
+	var instance lifecycle.Instance
+	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDcsV1InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDcsV1InstanceSSL(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDcsV1InstanceExists(resourceInstanceName, instance),
+					resource.TestCheckResourceAttr(resourceInstanceName, "name", instanceName),
+					resource.TestCheckResourceAttr(resourceInstanceName, "engine", "Redis"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDCSInstanceV1_importBasic(t *testing.T) {
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
 	resource.Test(t, resource.TestCase{
@@ -736,6 +757,36 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   subnet_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   available_zones = [data.opentelekomcloud_dcs_az_v1.az_1.id]
   product_id      = data.opentelekomcloud_dcs_product_v1.product_1.id
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)
+}
+
+func testAccDcsV1InstanceSSL(instanceName string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+data "opentelekomcloud_dcs_az_v1" "az_1" {
+  port = "8002"
+  code = "%s"
+}
+
+data "opentelekomcloud_dcs_product_v1" "product_1" {
+  spec_code = "redis.ha.xu1.tiny.r2.128"
+}
+
+resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
+  name            = "%s"
+  engine_version  = "6.0"
+  password        = "Hungarian_rapsody"
+  engine          = "Redis"
+  capacity        = 0.125
+  vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  available_zones = [data.opentelekomcloud_dcs_az_v1.az_1.id]
+  product_id      = data.opentelekomcloud_dcs_product_v1.product_1.id
+  enable_ssl      = true
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)
 }
