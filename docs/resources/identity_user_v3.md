@@ -69,12 +69,6 @@ In addition to all arguments above, the following attributes are exported:
 
 * `last_login` - The time when the IAM user last login.
 
-## Attributes Reference
-
-In addition to all arguments above, the following attributes are exported:
-
-* `domain_id` - See Argument Reference above.
-
 ## Import
 
 Users can be imported using the `id`, e.g.
