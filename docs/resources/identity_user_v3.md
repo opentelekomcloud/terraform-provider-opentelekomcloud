@@ -57,7 +57,7 @@ The following arguments are supported:
 
 -> Welcome Email will be sent when email is set/changed and `send_welcome_email` is set to `true`.
 
-## Attribute Reference
+## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
