@@ -355,6 +355,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   kubernetes_svc_ip_range = "10.247.0.0/16"
   ignore_addons           = true
   kube_proxy_mode         = "ipvs"
+  delete_all_storage      = "true"
+  delete_all_network      = "true"
 }
 `, common.DataSourceSubnet, clusterName)
 }

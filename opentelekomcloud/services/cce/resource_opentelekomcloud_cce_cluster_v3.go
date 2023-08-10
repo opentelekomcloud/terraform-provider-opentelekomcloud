@@ -303,8 +303,37 @@ func ResourceCCEClusterV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"delete_efs": associateDeleteSchema,
+			"delete_eni": associateDeleteSchema,
+			"delete_evs": associateDeleteSchema,
+			"delete_net": associateDeleteSchema,
+			"delete_obs": associateDeleteSchema,
+			"delete_sfs": associateDeleteSchema,
+			"delete_all_storage": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"true", "try", "false",
+				}, true),
+			},
+			"delete_all_network": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"true", "try", "false",
+				}, true),
+			},
 		},
 	}
+}
+
+var associateDeleteSchema *schema.Schema = &schema.Schema{
+	Type:     schema.TypeString,
+	Optional: true,
+	ValidateFunc: validation.StringInSlice([]string{
+		"true", "try", "false",
+	}, true),
+	ConflictsWith: []string{"delete_all_storage", "delete_all_network"},
 }
 
 func resourceClusterLabelsV3(d *schema.ResourceData) map[string]string {
@@ -661,7 +690,33 @@ func resourceCCEClusterV3Delete(ctx context.Context, d *schema.ResourceData, met
 		return fmterr.Errorf(cceClientError, err)
 	}
 
-	err = clusters.Delete(client, d.Id()).ExtractErr()
+	deleteOpts := clusters.DeleteOpts{}
+	var deleteAll bool
+	if v, ok := d.GetOk("delete_all_storage"); ok && v.(string) != "false" {
+		deleteOpt := d.Get("delete_all_storage").(string)
+		deleteOpts.DeleteEfs = deleteOpt
+		deleteOpts.DeleteEvs = deleteOpt
+		deleteOpts.DeleteObs = deleteOpt
+		deleteOpts.DeleteSfs = deleteOpt
+		deleteAll = true
+	}
+	if v, ok := d.GetOk("delete_all_network"); ok && v.(string) != "false" {
+		deleteOpt := d.Get("delete_all_network").(string)
+		deleteOpts.DeleteENI = deleteOpt
+		deleteOpts.DeleteNet = deleteOpt
+		deleteAll = true
+	}
+
+	if !deleteAll {
+		deleteOpts.DeleteEfs = d.Get("delete_efs").(string)
+		deleteOpts.DeleteENI = d.Get("delete_eni").(string)
+		deleteOpts.DeleteEvs = d.Get("delete_evs").(string)
+		deleteOpts.DeleteNet = d.Get("delete_net").(string)
+		deleteOpts.DeleteObs = d.Get("delete_obs").(string)
+		deleteOpts.DeleteSfs = d.Get("delete_sfs").(string)
+	}
+
+	err = clusters.DeleteWithOpts(client, d.Id(), deleteOpts)
 	if err != nil {
 		return fmterr.Errorf("error deleting opentelekomcloud CCE Cluster: %w", err)
 	}
