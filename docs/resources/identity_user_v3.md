@@ -80,7 +80,7 @@ terraform import opentelekomcloud_identity_user_v3.user_1 89c60255-9bd6-460c-822
 Due to the security reasons, `password` can not be imported. It can be ignored as shown below.
 
 ```hcl
-resource "huaweicloud_identity_user" "user_1" {
+resource "opentelekomcloud_identity_user_v3" "user_1" {
   lifecycle {
     ignore_changes = [
       password,
