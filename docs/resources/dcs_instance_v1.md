@@ -128,6 +128,10 @@ The following arguments are supported:
 * `product_id` - (Required) Product ID used to differentiate DCS instance types.
   Changing this creates a new instance.
 
+* `enable_ssl` - (Optional) An indicator of whether to enable SSL for public access to a DCS Redis instance.
+  Only DCS Redis 6.0 is supported.
+  Changing this creates a new instance.
+
 * `maintain_begin` - (Optional) Indicates the time at which a maintenance time window starts.
   Format: `HH:mm:ss`. The start time and end time of a maintenance time window must indicate the time segment of
   a supported maintenance time window. For details, see section
