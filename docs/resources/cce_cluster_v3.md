@@ -214,6 +214,33 @@ The following arguments are supported:
     This mode supports incremental updates and can keep connections uninterrupted during service updates.
     It is suitable for large-sized clusters.
 
+* `delete_evs` - (Optional) Specified whether to delete associated EVS disks when deleting the CCE cluster.
+  valid values are **true**, **try** and **false**. Default is **false**.
+
+* `delete_obs` - (Optional) Specified whether to delete associated OBS buckets when deleting the CCE cluster.
+  valid values are **true**, **try** and **false**. Default is **false**.
+
+* `delete_sfs` - (Optional) Specified whether to delete associated SFS file systems when deleting the CCE
+  cluster. valid values are **true**, **try** and **false**. Default is **false**.
+
+* `delete_efs` - (Optional) Specified whether to unbind associated SFS Turbo file systems when deleting the CCE
+  cluster. valid values are **true**, **try** and **false**. Default is **false**.
+
+* `delete_eni` - (Optional) Specified whether to delete ENI ports when deleting the CCE
+  cluster. valid values are **true**, **try** and **false**. Default is **false**.
+
+* `delete_net` - (Optional) Specified whether to delete cluster Service/ingress-related resources, such as ELB when deleting the CCE
+  cluster. valid values are **true**, **try** and **false**. Default is **false**.
+
+* `delete_all_storage` - (Optional) Specified whether to delete all associated storage resources when deleting the CCE
+  cluster. valid values are **true**, **try** and **false**. Default is **false**.
+
+* `delete_all_network` - (Optional) Specified whether to delete all associated network resources when deleting the CCE
+  cluster. valid values are **true**, **try** and **false**. Default is **false**.
+
+-> Note: Cluster custom deletion info and properties can be checked here:
+  [Deleting a Specified Cluster.](https://docs.otc.t-systems.com/cloud-container-engine/api-ref/apis/cluster_management/deleting_a_specified_cluster.html)
+
 ## Attributes Reference
 
 All above argument parameters can be exported as attribute parameters along with attribute reference.
