@@ -1,4 +1,4 @@
 ---
 enhancements:
   - |
-    **[DCS]** `enable_ssl` feature implemented for ``resource/opentelekomcloud_dcs_instance_v1`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[DCS]** `enable_ssl` feature implemented for ``resource/opentelekomcloud_dcs_instance_v1`` (`#2260 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2260>`_)
