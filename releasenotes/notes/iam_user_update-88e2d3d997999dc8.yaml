@@ -1,0 +1,4 @@
+other:
+  - |
+    **[IAM]** Resource ``resource/opentelekomcloud_identity_user_v3`` reworked after API change
+    (`#2259 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2259>`_)
