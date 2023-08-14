@@ -494,7 +494,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	// workaround for https://jira.tsi-dev.otc-service.com/browse/BM-2388
 	if strings.ToLower(datastore.Type) == "postgresql" && common.HasFilledOpt(d, "backup_strategy") {
 		backupRaw := resourceRDSBackupStrategy(d)
-		backupOpts.KeepDays = backupRaw.KeepDays
+		backupOpts.KeepDays = &backupRaw.KeepDays
 		backupOpts.StartTime = backupRaw.StartTime
 		backupOpts.Period = "1,2,3,4,5,6,7"
 		backupOpts.InstanceId = d.Id()
@@ -806,14 +806,16 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 
 	if d.HasChange("backup_strategy") {
 		backupRaw := resourceRDSBackupStrategy(d)
-		updateBackupOpts.KeepDays = backupRaw.KeepDays
-		updateBackupOpts.StartTime = backupRaw.StartTime
-		updateBackupOpts.Period = "1,2,3,4,5,6,7"
-		updateBackupOpts.InstanceId = d.Id()
-		log.Printf("[DEBUG] updateOpts: %#v", updateBackupOpts)
+		if backupRaw.KeepDays != 0 {
+			updateBackupOpts.KeepDays = &backupRaw.KeepDays
+			updateBackupOpts.StartTime = backupRaw.StartTime
+			updateBackupOpts.Period = "1,2,3,4,5,6,7"
+			updateBackupOpts.InstanceId = d.Id()
+			log.Printf("[DEBUG] updateOpts: %#v", updateBackupOpts)
 
-		if err = backups.Update(client, updateBackupOpts); err != nil {
-			return fmterr.Errorf("error updating OpenTelekomCloud RDSv3 Instance: %s", err)
+			if err = backups.Update(client, updateBackupOpts); err != nil {
+				return fmterr.Errorf("error updating OpenTelekomCloud RDSv3 Instance: %s", err)
+			}
 		}
 	}
 
@@ -1125,8 +1127,15 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 
 	var backupStrategyList []map[string]interface{}
 	backupStrategy := make(map[string]interface{})
-	backupStrategy["start_time"] = rdsInstance.BackupStrategy.StartTime
 	backupStrategy["keep_days"] = rdsInstance.BackupStrategy.KeepDays
+	// if `keep_days` is set to 0 backend returns empty `start_time`
+	// which forces instance update
+	if backupStrategy["keep_days"] != 0 {
+		backupStrategy["start_time"] = rdsInstance.BackupStrategy.StartTime
+	} else {
+		backupRaw := resourceRDSBackupStrategy(d)
+		backupStrategy["start_time"] = backupRaw.StartTime
+	}
 	backupStrategyList = append(backupStrategyList, backupStrategy)
 	if err := d.Set("backup_strategy", backupStrategyList); err != nil {
 		return fmterr.Errorf("error setting backup strategy: %s", err)

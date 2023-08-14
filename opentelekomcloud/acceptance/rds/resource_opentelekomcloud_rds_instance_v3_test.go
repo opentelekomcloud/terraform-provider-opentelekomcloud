@@ -37,7 +37,7 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "PostgreSQL"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8635"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.size", "40"),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.keep_days", "1"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.keep_days", "0"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.muh", "value-create"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.kuh", "value-create"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "lower_case_table_names", "0"),
@@ -412,7 +412,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   flavor = "rds.pg.c2.large"
   backup_strategy {
     start_time = "08:00-09:00"
-    keep_days  = 1
+    keep_days  = 0
   }
   tags = {
     muh = "value-create"
