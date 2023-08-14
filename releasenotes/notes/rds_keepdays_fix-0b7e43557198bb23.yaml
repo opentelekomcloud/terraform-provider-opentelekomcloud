@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[RDS]** RDS `keep_days` zero value fix for ``resource/opentelekomcloud_rds_instance_v3`` (`#2262 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2262>`_)
+    **[RDS]** RDS `keep_days` zero value fix for ``resource/opentelekomcloud_rds_instance_v3`` (`#2263 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2263>`_)
