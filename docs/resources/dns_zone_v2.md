@@ -92,7 +92,7 @@ The following arguments are supported:
 
 * `description` - (Optional) A description of the zone.
 
-* `router` - (Optional) The Router(VPC) configuration for the private zone.
+* `router` - (Optional) The Routers(VPCs) configuration for the private zone.
   it is required when type is `private`.
 
 * `tags` - (Optional) The key/value pairs to associate with the zone.
