@@ -50,6 +50,32 @@ resource "opentelekomcloud_dns_zone_v2" "private_example_com" {
 }
 ```
 
+### Private Zone Configuration with multiple routers
+
+```hcl
+resource "opentelekomcloud_dns_zone_v2" "private_example_com" {
+  name        = "private.example.com."
+  email       = "private@example.com"
+  description = "An example for private zone"
+  ttl         = 3000
+  type        = "private"
+
+  router {
+    router_id     = var.vpc_id_1
+    router_region = var.region
+  }
+
+  router {
+    router_id     = var.vpc_id_2
+    router_region = var.region
+  }
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
