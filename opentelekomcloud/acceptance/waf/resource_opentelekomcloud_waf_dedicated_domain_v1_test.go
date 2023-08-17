@@ -62,6 +62,43 @@ func TestAccWafDedicatedDomainV1_basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccWafDedicatedDomainV1_cert(hostName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckWafDedicatedDomainV1Exists(
+						wafdIDomainResourceName, &domain),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "domain", fmt.Sprintf("www.%s.com", hostName)),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "proxy", "false"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "tls", "TLS v1.1"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "cipher", "cipher_1"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "server.#", "1"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "server.0.client_protocol", "HTTPS"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "server.0.server_protocol", "HTTP"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "server.0.port", "8080"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "server.0.address", "192.168.0.20"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "server.0.type", "ipv4"),
+				),
+			},
+			{
+				Config: testAccWafDedicatedDomainV1_certUpdate(hostName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckWafDedicatedDomainV1Exists(
+						wafdIDomainResourceName, &domain),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "domain", fmt.Sprintf("www.%s.com", hostName)),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "proxy", "true"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "tls", "TLS v1.2"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "cipher", "cipher_2"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "pci_3ds", "true"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "pci_dss", "true"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "server.#", "2"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "server.0.client_protocol", "HTTPS"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "server.0.server_protocol", "HTTP"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "server.0.port", "8443"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "server.0.address", "192.168.0.20"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "server.1.address", "192.168.0.21"),
+					resource.TestCheckResourceAttr(wafdIDomainResourceName, "server.1.port", "8443"),
+				),
+			},
+			{
 				ResourceName:            wafdIDomainResourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -195,4 +232,75 @@ resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
   }
 }
 `, common.DataSourceSubnet, name)
+}
+
+func testAccWafDedicatedDomainV1_cert(name string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
+  domain         = "www.%s.com"
+  certificate_id = opentelekomcloud_waf_dedicated_certificate_v1.cert_1.id
+  keep_policy    = false
+  proxy          = false
+  tls            = "TLS v1.1"
+  cipher         = "cipher_1"
+
+  server {
+    client_protocol = "HTTPS"
+    server_protocol = "HTTP"
+    address         = "192.168.0.20"
+    port            = 8080
+    type            = "ipv4"
+    vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  }
+
+  depends_on = [
+    opentelekomcloud_waf_dedicated_certificate_v1.cert_1
+  ]
+}
+
+%s
+`, common.DataSourceSubnet, name, testAccWafDedicatedCertificateV1Basic)
+}
+
+func testAccWafDedicatedDomainV1_certUpdate(name string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
+  domain         = "www.%s.com"
+  certificate_id = opentelekomcloud_waf_dedicated_certificate_v1.cert_1.id
+  keep_policy    = false
+  proxy          = true
+  tls            = "TLS v1.2"
+  cipher         = "cipher_2"
+  pci_3ds        = true
+  pci_dss        = true
+
+  server {
+    client_protocol = "HTTPS"
+    server_protocol = "HTTP"
+    address         = "192.168.0.20"
+    port            = 8443
+    type            = "ipv4"
+    vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  }
+
+  server {
+    client_protocol = "HTTPS"
+    server_protocol = "HTTP"
+    address         = "192.168.0.21"
+    port            = 8443
+    type            = "ipv4"
+    vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  }
+
+  depends_on = [
+    opentelekomcloud_waf_dedicated_certificate_v1.cert_1
+  ]
+}
+
+%s
+`, common.DataSourceSubnet, name, testAccWafDedicatedCertificateV1Basic)
 }
