@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[WAF]** Add new resource ``resource/opentelekomcloud_waf_dedicated_certificate_v1`` (`#2267 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2267>`_)
