@@ -13,6 +13,7 @@ Manages a WAF dedicated domain resource within OpenTelekomCloud.
 
 ## Example Usage
 
+### Basic
 ```hcl
 data "opentelekomcloud_vpc_subnet_v1" "shared_subnet" {
   name = "my_subnet"
@@ -31,6 +32,57 @@ resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
     type            = "ipv4"
     vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   }
+}
+```
+
+### With certificate
+```hcl
+data "opentelekomcloud_vpc_subnet_v1" "shared_subnet" {
+  name = "my_subnet"
+}
+
+resource "opentelekomcloud_waf_dedicated_certificate_v1" "certificate_1" {
+  name    = "certificate_1"
+  content = <<EOT
+-----BEGIN CERTIFICATE-----
+MIIFazCCA1OgAwIBAgIUN3w1KX8/T/HWVxZIOdHXPhUOnsAwDQYJKoZIhvcNAQEL
+BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
+...
+dKvZbPEsygYRIjwyhHHUh/YXH8KDI/uu6u6AxDckQ3rP1BkkKXr5NPBGjVgM3ZI=
+-----END CERTIFICATE-----
+EOT
+  key     = <<EOT
+-----BEGIN PRIVATE KEY-----
+MIIJQQIBADANBgkqhkiG9w0BAQEFAASCCSswggknAgEAAoICAQC+9uwFVenCdPD9
+5LWSWMuy4riZW718wxBpYV5Y9N8nM7N0qZLLdpImZrzBbaBldTI+AZGI3Nupuurw
+...
+s9urs/Kk/tbQhsEvu0X8FyGwo0zH6rG8apTFTlac+v4mJ4vlpxSvT5+FW2lgLISE
++4sM7kp0qO3/p+45HykwBY5iHq3H
+-----END PRIVATE KEY-----
+EOT
+
+}
+
+resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
+  domain         = "www.mydom.com"
+  certificate_id = opentelekomcloud_waf_dedicated_certificate_v1.certificate_1.id
+  keep_policy    = false
+  proxy          = false
+  tls            = "TLS v1.1"
+  cipher         = "cipher_1"
+
+  server {
+    client_protocol = "HTTPS"
+    server_protocol = "HTTP"
+    address         = "192.168.0.20"
+    port            = 8443
+    type            = "ipv4"
+    vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  }
+
+  depends_on = [
+    opentelekomcloud_waf_dedicated_certificate_v1.certificate_1
+  ]
 }
 ```
 
