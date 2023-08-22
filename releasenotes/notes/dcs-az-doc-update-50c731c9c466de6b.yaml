@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[DCS]** Added link to data source in `available_zones` attribute documentation for ``resource/opentelekomcloud_dcs_instance_v1`` (`#2274 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2274>`_)
+
