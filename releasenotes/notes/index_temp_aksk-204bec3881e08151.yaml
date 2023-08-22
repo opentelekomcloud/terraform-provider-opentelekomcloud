@@ -1,5 +1,5 @@
 ---
 other:
   - |
-    **[Index]** Added authentication example for  ``docs/index.md``
+    **[Index]** Added authentication example for ``docs/index.md``
     (`#2275 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2275>`_)
