@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    **[Index]** Added authentication example for  ``docs/index.md``
+    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
