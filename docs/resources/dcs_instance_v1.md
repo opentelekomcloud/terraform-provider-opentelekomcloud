@@ -122,7 +122,13 @@ The following arguments are supported:
 * `subnet_id` - (Required) Specifies the subnet Network ID. Changing this creates a new instance.
 
 * `available_zones` - (Required) IDs of the AZs where cache nodes reside. For details
-  on how to query AZs, see [Querying AZ Information](https://docs.otc.t-systems.com/en-us/api/dcs/dcs-api-0312039.html).
+  on how to query AZs, see [Querying AZ Information](https://docs.otc.t-systems.com/en-us/api/dcs/dcs-api-0312039.html)
+  or use [opentelekomcloud_dcs_az_v1 data source](https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs/data-sources/dcs_az_v1):
+  ```hcl
+  data "opentelekomcloud_dcs_az_v1" "az1" {
+    name = "eu-de-01"
+  }
+  ```
   Changing this creates a new instance.
 
 * `product_id` - (Required) Product ID used to differentiate DCS instance types.
