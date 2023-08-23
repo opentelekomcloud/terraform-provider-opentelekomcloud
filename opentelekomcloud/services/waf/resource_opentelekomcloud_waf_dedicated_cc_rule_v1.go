@@ -316,10 +316,6 @@ func resourceWafDedicatedCcRuleV1Read(ctx context.Context, d *schema.ResourceDat
 		d.Set("created_at", rule.CreatedAt),
 	)
 
-	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.FromErr(err)
-	}
-
 	var conditions []map[string]interface{}
 	for _, conditionObj := range rule.Conditions {
 		condition := map[string]interface{}{
@@ -343,6 +339,10 @@ func resourceWafDedicatedCcRuleV1Read(ctx context.Context, d *schema.ResourceDat
 		d.Set("conditions", conditions),
 		d.Set("action", action),
 	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
