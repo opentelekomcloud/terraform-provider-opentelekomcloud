@@ -25,3 +25,11 @@ func stepWAFRuleImport(resourceName string) resource.TestStep {
 		ImportStateIdFunc: ruleImportStateIDFunc(resourceName),
 	}
 }
+
+func dedicatedRuleImportStateIDFunc(resourceName, resourcePolicyName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		policyID := s.RootModule().Resources[resourcePolicyName].Primary.ID
+		ccRuleID := s.RootModule().Resources[resourceName].Primary.ID
+		return fmt.Sprintf("%s/%s", policyID, ccRuleID), nil
+	}
+}
