@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[WAF]** Add new resource ``resource/opentelekomcloud_waf_dedicated_cc_rule_v1`` (`#2278 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2278>`_)
