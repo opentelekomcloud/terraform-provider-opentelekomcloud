@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/listeners"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -424,12 +425,6 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	if d.HasChange("member_timeout") {
 		updateOpts.MemberTimeout = d.Get("member_timeout").(int)
 	}
-	// Unable to disable this for now
-	// https://jira.tsi-dev.otc-service.com/browse/BM-1640
-	// if d.HasChange("advanced_forwarding") {
-	// 	enhanceL7policy := d.Get("advanced_forwarding").(bool)
-	// 	updateOpts.EnhanceL7policy = &enhanceL7policy
-	// }
 	if d.HasChange("sni_match_algo") {
 		updateOpts.SniMatchAlgo = d.Get("sni_match_algo").(string)
 	}
@@ -439,6 +434,7 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	if d.HasChange("ip_group") {
 		ipGroupRaw := d.Get("ip_group.0").(map[string]interface{})
 		updateOpts.IpGroup = &listeners.IpGroupUpdate{
+			Enable:    pointerto.Bool(ipGroupRaw["enable"].(bool)),
 			IpGroupId: ipGroupRaw["id"].(string),
 			Type:      ipGroupRaw["type"].(string),
 		}
