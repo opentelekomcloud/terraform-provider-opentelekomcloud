@@ -486,9 +486,8 @@ func resourceDmsInstancesV2Delete(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("[DEBUG] Waiting for instance (%s) to delete", d.Id())
 
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{"RUNNING"},
-		// Taking too long to delete instance when KMS is enabled
-		Target:     []string{"DELETED", "DELETING"},
+		Pending:    []string{"DELETING", "RUNNING"},
+		Target:     []string{"DELETED"},
 		Refresh:    instancesV2StateRefreshFunc(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
