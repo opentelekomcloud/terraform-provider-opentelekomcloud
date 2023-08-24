@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CCE]** Set ``subnet_id`` and ``max_pods`` attributes in ``resource/opentelekomcloud_cce_node_pool_v3`` (`#2284 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2284>`_)
