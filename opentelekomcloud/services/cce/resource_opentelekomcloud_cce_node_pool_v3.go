@@ -16,7 +16,6 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodepools"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -232,6 +231,7 @@ func ResourceCCENodePoolV3() *schema.Resource {
 			"subnet_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"preinstall": {
@@ -249,6 +249,7 @@ func ResourceCCENodePoolV3() *schema.Resource {
 			"max_pods": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"docker_base_size": {
@@ -461,6 +462,8 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("os", s.Spec.NodeTemplate.Os),
 		d.Set("key_pair", s.Spec.NodeTemplate.Login.SshKey),
 		d.Set("scale_enable", s.Spec.Autoscaling.Enable),
+		d.Set("max_pods", s.Spec.NodeTemplate.ExtendParam.MaxPods),
+		d.Set("subnet_id", s.Spec.NodeTemplate.NodeNicSpec.PrimaryNic.SubnetId),
 		d.Set("root_volume", rootVolume),
 		d.Set("status", s.Status.Phase),
 	)

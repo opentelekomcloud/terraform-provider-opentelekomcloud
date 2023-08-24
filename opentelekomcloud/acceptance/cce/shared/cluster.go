@@ -55,7 +55,7 @@ func createSharedCluster(t *testing.T) string {
 			},
 			Spec: clusters.Spec{
 				Type:        "VirtualMachine",
-				Flavor:      "cce.s1.small",
+				Flavor:      "cce.s1.medium",
 				Description: "Shared cluster for CCE acceptance tests",
 				ContainerNetwork: clusters.ContainerNetworkSpec{
 					Mode: "overlay_l2",
