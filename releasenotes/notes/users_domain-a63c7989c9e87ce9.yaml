@@ -1,5 +1,5 @@
 ---
 fixes:
   - |
-    **[IAM]** Fix ``resource/opentelekomcloud_identity_user_v3`` to return `domain_id` attribute (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[IAM]** Fix ``resource/opentelekomcloud_identity_user_v3`` to return `domain_id` attribute (`#2283 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2283>`_)
 
