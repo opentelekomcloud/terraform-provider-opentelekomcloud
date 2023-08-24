@@ -37,6 +37,7 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPtr(resourceName, "name", &user.Name),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "email", "test@acme.org"),
+					resource.TestCheckResourceAttrSet(resourceName, "domain_id"),
 				),
 			},
 			{
@@ -46,6 +47,7 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPtr(resourceName, "name", &user.Name),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "email", "test2@acme.org"),
+					resource.TestCheckResourceAttrSet(resourceName, "domain_id"),
 				),
 			},
 		},
