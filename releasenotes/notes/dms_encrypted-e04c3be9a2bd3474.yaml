@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[DMS]** Add encryption for ``resource/opentelekomcloud_dms_instance_v2`` (`#2280 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2280>`_)
