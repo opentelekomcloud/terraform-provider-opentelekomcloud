@@ -166,7 +166,7 @@ func TestAccLBV3Listener_ipGroup(t *testing.T) {
 					testAccCheckLBV3ListenerExists(resourceListenerName, &listener),
 					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1_updated"),
 					resource.TestCheckResourceAttr(resourceListenerName, "ip_group.#", "1"),
-					resource.TestCheckResourceAttr(resourceListenerName, "ip_group.0.enable", "true"),
+					resource.TestCheckResourceAttr(resourceListenerName, "ip_group.0.enable", "false"),
 					resource.TestCheckResourceAttr(resourceListenerName, "ip_group.0.type", "white"),
 				),
 			},
@@ -451,7 +451,7 @@ resource "opentelekomcloud_lb_listener_v3" "listener_1" {
 
   ip_group {
     id     = opentelekomcloud_lb_ipgroup_v3.group_2.id
-    enable = true
+    enable = false
   }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
