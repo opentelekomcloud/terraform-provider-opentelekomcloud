@@ -14,6 +14,7 @@ import (
 )
 
 const resourceIpGroupName = "opentelekomcloud_lb_ipgroup_v3.group_1"
+const resourceIpGroupName2 = "opentelekomcloud_lb_ipgroup_v3.group_2"
 
 func TestAccLBV3IpGroup_basic(t *testing.T) {
 	var ipgroup ipgroups.IpGroup
@@ -46,11 +47,21 @@ func TestAccLBV3IpGroup_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccLBV3IpGroupConfigEmptyIp,
+				Config: testAccLBV3IpGroupConfigUpdateEmptyIp,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV3IpGroupExists(resourceIpGroupName, &ipgroup),
 					resource.TestCheckResourceAttr(resourceIpGroupName, "name", "group_1"),
 					resource.TestCheckResourceAttr(resourceIpGroupName, "description", "description update"),
+					resource.TestCheckResourceAttr(resourceIpGroupName, "ip_list.#", "0"),
+				),
+			},
+			{
+				Config: testAccLBV3IpGroupConfigCreateEmptyIp,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3IpGroupExists(resourceIpGroupName2, &ipgroup),
+					resource.TestCheckResourceAttr(resourceIpGroupName2, "name", "group_2"),
+					resource.TestCheckResourceAttr(resourceIpGroupName2, "description", "empty group"),
+					resource.TestCheckResourceAttr(resourceIpGroupName2, "ip_list.#", "0"),
 				),
 			},
 		},
@@ -164,9 +175,16 @@ resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
 }
 `
 
-const testAccLBV3IpGroupConfigEmptyIp = `
+const testAccLBV3IpGroupConfigUpdateEmptyIp = `
 resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
   name        = "group_1"
   description = "description update"
+}
+`
+
+const testAccLBV3IpGroupConfigCreateEmptyIp = `
+resource "opentelekomcloud_lb_ipgroup_v3" "group_2" {
+  name        = "group_2"
+  description = "empty group"
 }
 `

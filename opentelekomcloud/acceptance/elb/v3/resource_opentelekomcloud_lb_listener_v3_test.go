@@ -171,7 +171,7 @@ func TestAccLBV3Listener_ipGroup(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccLBV3ListenerConfigIpGroupAllIpAddresses,
+				Config: testAccLBV3ListenerConfigIpGroupRemoveAllIpAddresses,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV3ListenerExists(resourceListenerName, &listener),
 					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1_updated"),
@@ -466,7 +466,7 @@ resource "opentelekomcloud_lb_listener_v3" "listener_1" {
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
-var testAccLBV3ListenerConfigIpGroupAllIpAddresses = fmt.Sprintf(`
+var testAccLBV3ListenerConfigIpGroupRemoveAllIpAddresses = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
