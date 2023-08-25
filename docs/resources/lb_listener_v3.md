@@ -140,6 +140,9 @@ The following arguments are supported:
 
 * `ip_group` - (Optional) Specifies the IP address group associated with the listener.
   * `id` - (Required) Specifies the ID of the IP address group associated with the listener.
+    Specifies the ID of the IP address group associated with the listener.
+    If `ip_list` in `opentelekomcloud_lb_ipgroup_v3` is set to an empty array `[]` and type to `whitelist`, no IP addresses are allowed to access the listener.
+    If `ip_list` in `opentelekomcloud_lb_ipgroup_v3` is set to an empty array `[]` and type to `blacklist`, any IP address is allowed to access the listener.
   * `enable` - (Optional) Specifies whether to enable access control.
     `true` (default): Access control will be enabled.
     `false`: Access control will be disabled.

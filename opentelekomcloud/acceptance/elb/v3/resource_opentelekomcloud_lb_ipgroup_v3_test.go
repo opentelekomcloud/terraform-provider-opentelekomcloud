@@ -45,6 +45,14 @@ func TestAccLBV3IpGroup_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceIpGroupName, "ip_list.#", "3"),
 				),
 			},
+			{
+				Config: testAccLBV3IpGroupConfigEmptyIp,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3IpGroupExists(resourceIpGroupName, &ipgroup),
+					resource.TestCheckResourceAttr(resourceIpGroupName, "name", "group_1"),
+					resource.TestCheckResourceAttr(resourceIpGroupName, "description", "description update"),
+				),
+			},
 		},
 	})
 }
@@ -153,5 +161,12 @@ resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
     ip          = "192.168.150.10"
     description = "three"
   }
+}
+`
+
+const testAccLBV3IpGroupConfigEmptyIp = `
+resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
+  name        = "group_1"
+  description = "description update"
 }
 `

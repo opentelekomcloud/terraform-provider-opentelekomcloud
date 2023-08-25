@@ -170,6 +170,16 @@ func TestAccLBV3Listener_ipGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceListenerName, "ip_group.0.type", "white"),
 				),
 			},
+			{
+				Config: testAccLBV3ListenerConfigIpGroupAllIpAddresses,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3ListenerExists(resourceListenerName, &listener),
+					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1_updated"),
+					resource.TestCheckResourceAttr(resourceListenerName, "ip_group.#", "1"),
+					resource.TestCheckResourceAttr(resourceListenerName, "ip_group.0.enable", "false"),
+					resource.TestCheckResourceAttr(resourceListenerName, "ip_group.0.type", "black"),
+				),
+			},
 		},
 	})
 }
@@ -452,6 +462,48 @@ resource "opentelekomcloud_lb_listener_v3" "listener_1" {
   ip_group {
     id     = opentelekomcloud_lb_ipgroup_v3.group_2.id
     enable = false
+  }
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3ListenerConfigIpGroupAllIpAddresses = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name        = "loadbalancer_1_updated"
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+}
+
+resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
+  name        = "group_1"
+  description = "some interesting description 1"
+
+  ip_list {
+    ip          = "192.168.10.10"
+    description = "first"
+  }
+}
+
+resource "opentelekomcloud_lb_ipgroup_v3" "group_2" {
+  name        = "group_2_empty"
+  description = "some interesting description 2"
+}
+
+resource "opentelekomcloud_lb_listener_v3" "listener_1" {
+  name            = "listener_1_updated"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.id
+  protocol        = "HTTP"
+  protocol_port   = 8080
+
+  sni_match_algo = "longest_suffix"
+
+  ip_group {
+    id     = opentelekomcloud_lb_ipgroup_v3.group_2.id
+    enable = false
+    type   = "black"
   }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

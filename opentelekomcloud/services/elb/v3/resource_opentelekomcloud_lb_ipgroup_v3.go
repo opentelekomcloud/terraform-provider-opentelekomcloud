@@ -2,6 +2,7 @@ package v3
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/go-multierror"
@@ -39,7 +40,7 @@ func ResourceIpGroupV3() *schema.Resource {
 			},
 			"ip_list": {
 				Type:     schema.TypeSet,
-				Required: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip": {
@@ -182,6 +183,14 @@ func resourceIpGroupV3Update(ctx context.Context, d *schema.ResourceData, meta i
 	}
 	if d.HasChange("ip_list") {
 		updateOpts.IpList = getIpList(d)
+		if updateOpts.IpList == nil {
+			err = batchDeleteAllIps(client, d)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			clientCtx := common.CtxWithClient(ctx, client, keyClient)
+			return resourceIpGroupV3Read(clientCtx, d, meta)
+		}
 	}
 
 	log.Printf("[DEBUG] Updating Ip Group %s with options: %#v", d.Id(), updateOpts)
@@ -193,6 +202,35 @@ func resourceIpGroupV3Update(ctx context.Context, d *schema.ResourceData, meta i
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)
 	return resourceIpGroupV3Read(clientCtx, d, meta)
+}
+
+func batchDeleteAllIps(client *golangsdk.ServiceClient, d *schema.ResourceData) error {
+	ipGroup, err := ipgroups.Get(client, d.Id())
+	if err != nil {
+		return fmt.Errorf("error getting the Ip Group: %w", err)
+	}
+	var ipList []ipgroups.IpList
+	for _, v := range ipGroup.IpList {
+		ipList = append(ipList, ipgroups.IpList{
+			Ip: v.Ip,
+		})
+	}
+	_, err = ipgroups.DeleteIpFromList(client,
+		ipGroup.ID,
+		ipgroups.BatchDeleteOpts{IpList: ipList})
+	if err != nil {
+		return fmt.Errorf("error deleting the Ips from Ip Group: %w", err)
+	}
+	var updateOpts ipgroups.UpdateOpts
+	if d.HasChanges("name", "description") {
+		updateOpts.Name = d.Get("name").(string)
+		updateOpts.Description = d.Get("description").(string)
+		err = ipgroups.Update(client, d.Id(), updateOpts)
+		if err != nil {
+			return fmt.Errorf("error updating the Ip Group: %w", err)
+		}
+	}
+	return nil
 }
 
 func resourceIpGroupV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
