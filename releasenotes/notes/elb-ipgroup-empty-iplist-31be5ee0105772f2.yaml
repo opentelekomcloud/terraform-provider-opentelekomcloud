@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[ELB]** Now can create ``ip_group`` with empty ``ip_list`` in ``resource/opentelekomcloud_lb_ipgroup_v3`` (`#2285 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2285>`_)
+    **[ELB]** Now can create or update ``ip_group`` with empty ``ip_list`` in ``resource/opentelekomcloud_lb_ipgroup_v3`` (`#2285 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2285>`_)
