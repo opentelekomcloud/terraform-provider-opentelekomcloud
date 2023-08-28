@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
@@ -806,16 +807,17 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 
 	if d.HasChange("backup_strategy") {
 		backupRaw := resourceRDSBackupStrategy(d)
+		updateBackupOpts.InstanceId = d.Id()
 		if backupRaw.KeepDays != 0 {
 			updateBackupOpts.KeepDays = &backupRaw.KeepDays
 			updateBackupOpts.StartTime = backupRaw.StartTime
 			updateBackupOpts.Period = "1,2,3,4,5,6,7"
-			updateBackupOpts.InstanceId = d.Id()
 			log.Printf("[DEBUG] updateOpts: %#v", updateBackupOpts)
-
-			if err = backups.Update(client, updateBackupOpts); err != nil {
-				return fmterr.Errorf("error updating OpenTelekomCloud RDSv3 Instance: %s", err)
-			}
+		} else {
+			updateBackupOpts.KeepDays = pointerto.Int(0)
+		}
+		if err = backups.Update(client, updateBackupOpts); err != nil {
+			return fmterr.Errorf("error updating OpenTelekomCloud RDSv3 Instance: %s", err)
 		}
 	}
 
