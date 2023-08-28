@@ -179,8 +179,6 @@ func ResourceListenerV3() *schema.Resource {
 			"ip_group": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -203,6 +201,7 @@ func ResourceListenerV3() *schema.Resource {
 		},
 	}
 }
+
 func getIpGroup(d *schema.ResourceData) *listeners.IpGroup {
 	if d.Get("ip_group.#").(int) == 0 {
 		return nil
@@ -317,12 +316,15 @@ func setLBListenerFields(d *schema.ResourceData, listener *listeners.Listener) d
 			"forwarded_host":     listener.InsertHeaders.ForwardedHost,
 		},
 	}
-	ipGroup := []map[string]interface{}{
-		{
-			"id":     listener.IpGroup.IpGroupID,
-			"enable": listener.IpGroup.Enable,
-			"type":   listener.IpGroup.Type,
-		},
+	var ipGroup []map[string]interface{}
+	if listener.IpGroup.Enable != nil {
+		ipGroup = []map[string]interface{}{
+			{
+				"id":     listener.IpGroup.IpGroupID,
+				"enable": listener.IpGroup.Enable,
+				"type":   listener.IpGroup.Type,
+			},
+		}
 	}
 	mErr := multierror.Append(
 		d.Set("admin_state_up", listener.AdminStateUp),
@@ -437,6 +439,9 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 			Enable:    pointerto.Bool(ipGroupRaw["enable"].(bool)),
 			IpGroupId: ipGroupRaw["id"].(string),
 			Type:      ipGroupRaw["type"].(string),
+		}
+		if ipGroupRaw["id"].(string) == "" {
+			updateOpts.IpGroup = &listeners.IpGroupUpdate{}
 		}
 	}
 

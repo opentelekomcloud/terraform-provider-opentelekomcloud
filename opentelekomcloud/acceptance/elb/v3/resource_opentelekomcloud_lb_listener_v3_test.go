@@ -175,9 +175,7 @@ func TestAccLBV3Listener_ipGroup(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV3ListenerExists(resourceListenerName, &listener),
 					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1_updated"),
-					resource.TestCheckResourceAttr(resourceListenerName, "ip_group.#", "1"),
-					resource.TestCheckResourceAttr(resourceListenerName, "ip_group.0.enable", "false"),
-					resource.TestCheckResourceAttr(resourceListenerName, "ip_group.0.type", "black"),
+					resource.TestCheckResourceAttr(resourceListenerName, "ip_group.#", "0"),
 				),
 			},
 		},
@@ -499,11 +497,5 @@ resource "opentelekomcloud_lb_listener_v3" "listener_1" {
   protocol_port   = 8080
 
   sni_match_algo = "longest_suffix"
-
-  ip_group {
-    id     = opentelekomcloud_lb_ipgroup_v3.group_2.id
-    enable = false
-    type   = "black"
-  }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
