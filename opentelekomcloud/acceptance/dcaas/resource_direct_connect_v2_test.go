@@ -37,11 +37,11 @@ func TestDirectConnectV2Resource_basic(t *testing.T) {
 func testAccDirectConnectV2Resource_basic(directConnectName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_direct_connect_v2" "direct_connect" {
-	name                   = "%s"
-	port_type              = "1G"
-	location               = "Biere"
-	bandwidth              = 100
-	provider_name          = "OTC"
+  name          = "%s"
+  port_type     = "1G"
+  location      = "Biere"
+  bandwidth     = 100
+  provider_name = "OTC"
 }
 `, directConnectName)
 }
