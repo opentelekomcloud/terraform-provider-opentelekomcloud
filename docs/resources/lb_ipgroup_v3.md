@@ -31,20 +31,29 @@ resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
 }
 ```
 
+## Example empty ip list
+
+```hcl
+resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
+  name        = "group_1"
+  description = "group description"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
-* `name` - (Optional) Specifies the IP address group name.
+* `name` - (Optional, String) Specifies the IP address group name.
 
-* `description` - (Optional) Provides supplementary information about the IP address group.
+* `description` - (Optional, String) Provides supplementary information about the IP address group.
 
-* `project_id` - (Optional) Specifies the project ID of the IP address group.
+* `project_id` - (Optional, String) Specifies the project ID of the IP address group.
 
-* `ip_list` - (Required) Specifies the IP addresses or CIDR blocks in the IP address group. [] indicates any IP address.
-  * `ip` - (Required) Specifies the IP addresses in the IP address group.
+* `ip_list` - (Optional, List) Specifies the IP addresses or CIDR blocks in the IP address group. [] indicates any IP address.
+  * `ip` - (Required, String) Specifies the IP addresses in the IP address group.
     IPv6 is unsupported. The value cannot be an IPv6 address.
-  * `description` - (Optional) Provides remarks about the IP address group.
+  * `description` - (Optional, String) Provides remarks about the IP address group.
 
 ## Attributes Reference
 

@@ -39,7 +39,7 @@ func ResourceIpGroupV3() *schema.Resource {
 			},
 			"ip_list": {
 				Type:     schema.TypeSet,
-				Required: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip": {
@@ -76,7 +76,7 @@ func ResourceIpGroupV3() *schema.Resource {
 	}
 }
 
-func getIpList(d *schema.ResourceData) []ipgroups.IpGroupOption {
+func getIpList(d *schema.ResourceData) *[]ipgroups.IpGroupOption {
 	ipListRaw := d.Get("ip_list").(*schema.Set).List()
 	var ipList []ipgroups.IpGroupOption
 
@@ -89,7 +89,7 @@ func getIpList(d *schema.ResourceData) []ipgroups.IpGroupOption {
 		})
 	}
 
-	return ipList
+	return &ipList
 }
 
 func resourceIpGroupV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
