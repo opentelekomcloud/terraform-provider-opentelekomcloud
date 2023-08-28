@@ -59,6 +59,19 @@ provider "opentelekomcloud" {
 }
 ```
 
+### Temporary AKSK
+
+```hcl
+provider "opentelekomcloud" {
+  access_key     = var.access_key
+  secret_key     = var.secret_key
+  security_token = var.security_token
+  domain_name    = var.domain_name
+  tenant_name    = var.tenant_name
+  auth_url       = "https://iam.eu-de.otc.t-systems.com/v3"
+}
+```
+
 ### Token
 
 ```hcl
@@ -126,6 +139,21 @@ provider "opentelekomcloud" {
   delegated_project  = var.delegated_project
   access_key         = var.access_key
   secret_key         = var.secret_key
+  domain_name        = var.domain_name
+  auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
+}
+```
+
+### Temporary AKSK
+
+```hcl
+provider "opentelekomcloud" {
+  agency_name        = var.agency_name
+  agency_domain_name = var.agency_domain_name
+  delegated_project  = var.delegated_project
+  access_key         = var.access_key
+  secret_key         = var.secret_key
+  security_token     = var.security_token
   domain_name        = var.domain_name
   auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
 }
@@ -200,7 +228,7 @@ The following arguments are supported:
   band of Terraform. If omitted, the `OS_AUTH_TOKEN` or `OS_TOKEN` environment
   variable is used.
 
-* `security_token` - (Optional) Security token to use for OBS federated authentication.
+* `security_token` - (Optional) Security token required to authenticate with temporary AK/SK.
 
 * `passcode` - (Optional) One-time password provided by your authentication app.
 

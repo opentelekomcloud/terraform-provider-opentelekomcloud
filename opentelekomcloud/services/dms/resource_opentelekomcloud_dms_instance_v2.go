@@ -159,20 +159,19 @@ func ResourceDmsInstancesV2() *schema.Resource {
 					"produce_reject", "time_base",
 				}, false),
 			},
-			// Not supported on current version
-			// "disk_encrypted_enable": {
-			// 	Type:     schema.TypeBool,
-			// 	Optional: true,
-			// 	Computed: true,
-			// 	ForceNew: true,
-			// },
-			// "disk_encrypted_key": {
-			// 	Type:         schema.TypeString,
-			// 	Optional:     true,
-			// 	Computed:     true,
-			// 	ForceNew:     true,
-			// 	RequiredWith: []string{"disk_encrypted_enable"},
-			// },
+			"disk_encrypted_enable": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"disk_encrypted_key": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ForceNew:     true,
+				RequiredWith: []string{"disk_encrypted_enable"},
+			},
 			"specification": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -310,11 +309,11 @@ func resourceDmsInstancesV2Create(ctx context.Context, d *schema.ResourceData, m
 		createOpts.PublicIpID = strings.Join(ipList, ",")
 	}
 
-	// if d.Get("disk_encrypted_enable").(bool) {
-	// 	diskEncryptedEnable := true
-	// 	createOpts.DiskEncryptedEnable = &diskEncryptedEnable
-	// 	createOpts.DiskEncryptedKey = d.Get("disk_encrypted_key").(string)
-	// }
+	if d.Get("disk_encrypted_enable").(bool) {
+		diskEncryptedEnable := true
+		createOpts.DiskEncryptedEnable = &diskEncryptedEnable
+		createOpts.DiskEncryptedKey = d.Get("disk_encrypted_key").(string)
+	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	v, err := instances.Create(client, createOpts)
@@ -396,8 +395,8 @@ func resourceDmsInstancesV2Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("public_connect_address", flattenPublicIps(v.PublicConnectionAddress)),
 		d.Set("public_bandwidth", v.PublicBandWidth),
 		d.Set("ssl_enable", v.SslEnable),
-		// d.Set("disk_encrypted_enable", v.DiskEncrypted),
-		// d.Set("disk_encrypted_key", v.DiskEncryptedKey),
+		d.Set("disk_encrypted_enable", v.DiskEncrypted),
+		d.Set("disk_encrypted_key", v.DiskEncryptedKey),
 		d.Set("subnet_cidr", v.SubnetCIDR),
 		d.Set("total_storage_space", v.TotalStorageSpace),
 		d.Set("storage_resource_id", v.StorageResourceID),

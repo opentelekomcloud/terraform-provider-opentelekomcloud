@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ELB]** Now possible to disable ``ip_group`` on update in ``resource/opentelekomcloud_lb_listener_v3`` (`#2282 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2282>`_)

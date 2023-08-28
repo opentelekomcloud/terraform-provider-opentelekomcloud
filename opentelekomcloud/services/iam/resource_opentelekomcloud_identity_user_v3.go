@@ -98,6 +98,10 @@ func ResourceIdentityUserV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"domain_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -178,6 +182,7 @@ func resourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, met
 		d.Set("pwd_reset", user.PasswordStatus),
 		d.Set("create_time", user.CreateAt),
 		d.Set("last_login", user.LastLogin),
+		d.Set("domain_id", user.DomainID),
 	)
 
 	if err = mErr.ErrorOrNil(); err != nil {

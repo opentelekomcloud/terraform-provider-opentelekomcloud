@@ -195,6 +195,10 @@ The following arguments are supported:
   * Provided ip amount should be same as amount of DMS cluster nodes.
   * Example: `["0f2a51dc-93ce-42af","d967d49b-6659-4052","002872f4-82a4-4f6e-9a4e"]`.
 
+* `disk_encrypted_enable` - (Optional) - Indicates whether disk encryption is enabled.
+
+* `disk_encrypted_key` - (Optional) - Disk encryption key. If disk encryption is not enabled, this parameter is left blank.
+
 * `tags` - (Optional) Tags key/value pairs to associate with the instance.
 
 ## Attributes Reference

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/listeners"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -178,8 +179,6 @@ func ResourceListenerV3() *schema.Resource {
 			"ip_group": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -202,6 +201,7 @@ func ResourceListenerV3() *schema.Resource {
 		},
 	}
 }
+
 func getIpGroup(d *schema.ResourceData) *listeners.IpGroup {
 	if d.Get("ip_group.#").(int) == 0 {
 		return nil
@@ -316,12 +316,15 @@ func setLBListenerFields(d *schema.ResourceData, listener *listeners.Listener) d
 			"forwarded_host":     listener.InsertHeaders.ForwardedHost,
 		},
 	}
-	ipGroup := []map[string]interface{}{
-		{
-			"id":     listener.IpGroup.IpGroupID,
-			"enable": listener.IpGroup.Enable,
-			"type":   listener.IpGroup.Type,
-		},
+	var ipGroup []map[string]interface{}
+	if listener.IpGroup.Enable != nil {
+		ipGroup = []map[string]interface{}{
+			{
+				"id":     listener.IpGroup.IpGroupID,
+				"enable": listener.IpGroup.Enable,
+				"type":   listener.IpGroup.Type,
+			},
+		}
 	}
 	mErr := multierror.Append(
 		d.Set("admin_state_up", listener.AdminStateUp),
@@ -424,12 +427,6 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	if d.HasChange("member_timeout") {
 		updateOpts.MemberTimeout = d.Get("member_timeout").(int)
 	}
-	// Unable to disable this for now
-	// https://jira.tsi-dev.otc-service.com/browse/BM-1640
-	// if d.HasChange("advanced_forwarding") {
-	// 	enhanceL7policy := d.Get("advanced_forwarding").(bool)
-	// 	updateOpts.EnhanceL7policy = &enhanceL7policy
-	// }
 	if d.HasChange("sni_match_algo") {
 		updateOpts.SniMatchAlgo = d.Get("sni_match_algo").(string)
 	}
@@ -439,8 +436,12 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	if d.HasChange("ip_group") {
 		ipGroupRaw := d.Get("ip_group.0").(map[string]interface{})
 		updateOpts.IpGroup = &listeners.IpGroupUpdate{
+			Enable:    pointerto.Bool(ipGroupRaw["enable"].(bool)),
 			IpGroupId: ipGroupRaw["id"].(string),
 			Type:      ipGroupRaw["type"].(string),
+		}
+		if ipGroupRaw["id"].(string) == "" {
+			updateOpts.IpGroup = &listeners.IpGroupUpdate{}
 		}
 	}
 
