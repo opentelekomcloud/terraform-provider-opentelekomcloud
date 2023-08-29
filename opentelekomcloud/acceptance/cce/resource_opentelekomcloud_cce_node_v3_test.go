@@ -20,6 +20,7 @@ const (
 	resourceNameNode  = "opentelekomcloud_cce_node_v3.node_1"
 	resourceNameNode2 = "opentelekomcloud_cce_node_v3.node_2"
 	resourceNameNode3 = "opentelekomcloud_cce_node_v3.node_3"
+	resourceNameNode4 = "opentelekomcloud_cce_node_v3.node_4"
 )
 
 func TestAccCCENodesV3Basic(t *testing.T) {
@@ -101,6 +102,7 @@ func TestAccCCENodesV3OS(t *testing.T) {
 	var node nodes.Nodes
 	var node2 nodes.Nodes
 	var node3 nodes.Nodes
+	var node4 nodes.Nodes
 
 	t.Parallel()
 	shared.BookCluster(t)
@@ -120,6 +122,8 @@ func TestAccCCENodesV3OS(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameNode2, "os", "CentOS 7.7"),
 					testAccCheckCCENodeV3Exists(resourceNameNode3, shared.DataSourceClusterName, &node3),
 					resource.TestCheckResourceAttr(resourceNameNode3, "os", "EulerOS 2.9"),
+					testAccCheckCCENodeV3Exists(resourceNameNode4, shared.DataSourceClusterName, &node4),
+					resource.TestCheckResourceAttr(resourceNameNode4, "os", "Ubuntu 22.04"),
 				),
 			},
 		},
@@ -490,6 +494,26 @@ resource "opentelekomcloud_cce_node_v3" "node_3" {
   name       = "test-node"
   flavor_id  = "s2.large.2"
   os         = "EulerOS 2.9"
+
+  availability_zone = "%[2]s"
+  key_pair          = "%[3]s"
+
+  root_volume {
+    size       = 40
+    volumetype = "SATA"
+  }
+
+  data_volumes {
+    size       = 100
+    volumetype = "SATA"
+  }
+}
+
+resource "opentelekomcloud_cce_node_v3" "node_4" {
+  cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
+  name       = "test-node"
+  flavor_id  = "s2.large.2"
+  os         = "Ubuntu 22.04"
 
   availability_zone = "%[2]s"
   key_pair          = "%[3]s"
