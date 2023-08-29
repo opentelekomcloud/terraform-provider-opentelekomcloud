@@ -1,36 +1,29 @@
 ---
 subcategory: "Direct Connect (DCaaS)"
 ---
-# opentelekomcloud_direct_connect_v2 (Resource)
+# opentelekomcloud_direct_connect_v2 (Data Source)
 
-Up-to-date reference of API arguments for Direct Connect (DCaaS) you can get at
-`https://docs.otc.t-systems.com/direct-connect/api-ref/apis/connection/creating_a_connection.html#en-dc-topic-0055025315`.
 
 Example usage
 -----------------
+
 ```hcl
-resource "opentelekomcloud_direct_connect_v2" "direct_connect" {
-  name              = "direct_connect"
-  bandwidth         = 100
-  location          = "location"
-  provider_name     = "provider_name"
-  port_type         = "port_type"
-  admin_state_up    = true
+data "opentelekomcloud_direct_connect_v2" "direct_connect" {
+  id = "direct_connect_id"
 }
 ```
-
 
 ## Schema
 
 ### Required
 
+- `id` (String) - Specifies the direct connection ID.
+
+### Read-Only
 - `bandwidth` (Number) - Specifies the bandwidth of the connection in Mbit/s.
 - `location` (String) - Specifies the connection access location.
 - `provider_name` (String) - Specifies the carrier who provides the leased line.
 - `port_type` (String) - Specifies the type of the port used by the connection. The value can be 1G, 10G, 40G, or 100G.
-
-### Optional
-
 - `admin_state_up` (Boolean)  - Specifies the administrative status of the connection. The value can be true or false.
 - `charge_mode` (String) - Specifies the billing mode. The value can only be port for operations connections.
 - `description` (String) - Provides supplementary information about the connection.
@@ -44,13 +37,10 @@ resource "opentelekomcloud_direct_connect_v2" "direct_connect" {
 - `provider_status` (String) - Specifies the status of the carrier's leased line. The value can be ACTIVE or DOWN.
 - `redundant_id` (String) - Specifies the ID of the redundant connection using the same gateway.
 - `status` (String) - Specifies the connection status.
-The value can be ACTIVE, DOWN, BUILD, ERROR, PENDING_DELETE, DELETED, APPLY, DENY, PENDING_PAY, PAID, ORDERING, ACCEPT, or REJECTED.
+  The value can be ACTIVE, DOWN, BUILD, ERROR, PENDING_DELETE, DELETED, APPLY, DENY, PENDING_PAY, PAID, ORDERING, ACCEPT, or REJECTED.
 - `tenant_id` (String) - Specifies the project ID.
 - `type` (String) - Specifies the connection type. The value can only be hosted.
 - `vlan` (Number) - Specifies the VLAN ID of the connection.
-
-### Read-Only
-
 - `applicant` (String) - This is a reserved field, which is not used currently.
 - `apply_time` (String) - Specifies the time when the connection was requested.
 - `building_line_product_id` (String) - This is a reserved field, which is not used currently.
