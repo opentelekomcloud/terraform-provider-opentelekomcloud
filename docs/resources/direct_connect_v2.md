@@ -10,12 +10,12 @@ Example usage
 -----------------
 ```hcl
 resource "opentelekomcloud_direct_connect_v2" "direct_connect" {
-  name              = "direct_connect"
-  bandwidth         = 100
-  location          = "location"
-  provider_name     = "provider_name"
-  port_type         = "port_type"
-  admin_state_up    = true
+  name           = "direct_connect"
+  bandwidth      = 100
+  location       = "location"
+  provider_name  = "provider_name"
+  port_type      = "port_type"
+  admin_state_up = true
 }
 ```
 
