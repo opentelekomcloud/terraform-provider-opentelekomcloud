@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    [CCE] Support ``Ubuntu 22.04`` in ``resource/opentelekomcloud_cce_node_v3`` (`#2292 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2292>`_)
