@@ -73,7 +73,7 @@ data "opentelekomcloud_dms_az_v1" "az_1" {
 data "opentelekomcloud_dms_product_v1" "product_1" {
   engine        = "kafka"
   instance_type = "cluster"
-  version       = "1.1.0"
+  version       = "2.7"
 }
 
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
@@ -89,13 +89,13 @@ resource "opentelekomcloud_dms_instance_v2" "instance_1" {
   name              = "%s"
   engine            = "kafka"
   storage_space     = data.opentelekomcloud_dms_product_v1.product_1.storage
-  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   available_zones   = [data.opentelekomcloud_dms_az_v1.az_1.id]
   product_id        = data.opentelekomcloud_dms_product_v1.product_1.id
   engine_version    = data.opentelekomcloud_dms_product_v1.product_1.version
   storage_spec_code = data.opentelekomcloud_dms_product_v1.product_1.storage_spec_code
+  security_group_id = resource.opentelekomcloud_networking_secgroup_v2.secgroup_1.id
+  vpc_id            = var.vpc_id
+  subnet_id         = var.subnet_id
   enable_publicip   = true
   publicip_id = [opentelekomcloud_networking_floatingip_v2.fip_1.id,
     opentelekomcloud_networking_floatingip_v2.fip_2.id,
@@ -116,7 +116,7 @@ The following arguments are supported:
 * `engine` - (Required) Indicates a message engine. Only `kafka` is supported now.
 
 * `engine_version` - (Required) Indicates the version of a message engine.
-  Only `2.3.0` is supported now.
+  Options: `1.1.0`, `2.3.0`, `2.7`.
 
 * `specification` - (Optional) This parameter is mandatory if the engine is `kafka`.
   Indicates the baseline bandwidth of a Kafka instance, that is, the maximum amount
