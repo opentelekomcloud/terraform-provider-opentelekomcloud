@@ -11,6 +11,7 @@ import (
 
 func TestDirectConnectV2Datasource_basic(t *testing.T) {
 	var directConnectName = fmt.Sprintf("dc-%s", acctest.RandString(5))
+	const dc = "opentelekomcloud_direct_connect_v2.direct_connect"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -20,7 +21,7 @@ func TestDirectConnectV2Datasource_basic(t *testing.T) {
 			{
 				Config: testAccDirectConnectV2Datasource_basic(directConnectName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.opentelekomcloud_direct_connect_v2.direct_connect", "bandwidth", "100"),
+					resource.TestCheckResourceAttr(dc, "bandwidth", "100"),
 				),
 			},
 		},

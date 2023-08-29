@@ -345,8 +345,6 @@ func resourceDirectConnectV2Read(ctx context.Context, d *schema.ResourceData, me
 	}
 	log.Printf("[DEBUG] Direct Connect read result: %#v", directConnect)
 
-	d.SetId(directConnect.ID)
-
 	mErr := multierror.Append(err,
 		d.Set("tenant_id", directConnect.TenantID),
 		d.Set("name", directConnect.Name),

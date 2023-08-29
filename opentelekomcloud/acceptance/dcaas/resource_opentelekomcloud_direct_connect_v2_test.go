@@ -19,6 +19,8 @@ func TestDirectConnectV2Resource_basic(t *testing.T) {
 	directConnectName := fmt.Sprintf("dc-%s", acctest.RandString(5))
 	directConnectNameUpdated := fmt.Sprintf("dc-updated-%s", acctest.RandString(5))
 
+	const dc = "opentelekomcloud_direct_connect_v2.direct_connect"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -27,15 +29,15 @@ func TestDirectConnectV2Resource_basic(t *testing.T) {
 			{
 				Config: testAccDirectConnectV2Resource_basic(directConnectName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_direct_connect_v2.direct_connect", "bandwidth", "50"),
-					resource.TestCheckResourceAttrSet("opentelekomcloud_direct_connect_v2.direct_connect", "id"),
+					resource.TestCheckResourceAttr(dc, "bandwidth", "50"),
+					resource.TestCheckResourceAttrSet(dc, "id"),
 				),
 			},
 			{
 				Config: testAccDirectConnectV2ResourceUpdate_basic(directConnectNameUpdated),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_direct_connect_v2.direct_connect", "bandwidth", "100"),
-					resource.TestCheckResourceAttrSet("opentelekomcloud_direct_connect_v2.direct_connect", "id"),
+					resource.TestCheckResourceAttr(dc, "bandwidth", "100"),
+					resource.TestCheckResourceAttrSet(dc, "id"),
 				),
 			},
 		},
