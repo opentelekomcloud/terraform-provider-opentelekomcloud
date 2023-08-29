@@ -16,7 +16,8 @@ import (
 )
 
 func TestDirectConnectV2Resource_basic(t *testing.T) {
-	var directConnectName = fmt.Sprintf("dc-%s", acctest.RandString(5))
+	directConnectName := fmt.Sprintf("dc-%s", acctest.RandString(5))
+	directConnectNameUpdated := fmt.Sprintf("dc-updated-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -25,6 +26,13 @@ func TestDirectConnectV2Resource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDirectConnectV2Resource_basic(directConnectName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("opentelekomcloud_direct_connect_v2.direct_connect", "bandwidth", "50"),
+					resource.TestCheckResourceAttrSet("opentelekomcloud_direct_connect_v2.direct_connect", "id"),
+				),
+			},
+			{
+				Config: testAccDirectConnectV2ResourceUpdate_basic(directConnectNameUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("opentelekomcloud_direct_connect_v2.direct_connect", "bandwidth", "100"),
 					resource.TestCheckResourceAttrSet("opentelekomcloud_direct_connect_v2.direct_connect", "id"),
@@ -35,6 +43,18 @@ func TestDirectConnectV2Resource_basic(t *testing.T) {
 }
 
 func testAccDirectConnectV2Resource_basic(directConnectName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_direct_connect_v2" "direct_connect" {
+  name          = "%s"
+  port_type     = "1G"
+  location      = "Biere"
+  bandwidth     = 50
+  provider_name = "OTC"
+}
+`, directConnectName)
+}
+
+func testAccDirectConnectV2ResourceUpdate_basic(directConnectName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_direct_connect_v2" "direct_connect" {
   name          = "%s"

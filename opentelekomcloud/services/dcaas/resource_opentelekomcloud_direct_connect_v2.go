@@ -20,6 +20,7 @@ func ResourceDirectConnectV2() *schema.Resource {
 		CreateContext: resourceDirectConnectV2Create,
 		ReadContext:   resourceDirectConnectV2Read,
 		DeleteContext: resourceDirectConnectV2Delete,
+		UpdateContext: resourceDirectConnectV2Update,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -47,11 +48,13 @@ func ResourceDirectConnectV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"location": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -67,21 +70,25 @@ func ResourceDirectConnectV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+				ForceNew: true,
 			},
 			"device_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+				ForceNew: true,
 			},
 			"interface_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+				ForceNew: true,
 			},
 			"redundant_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+				ForceNew: true,
 			},
 			"provider_name": {
 				Type:     schema.TypeString,
@@ -97,41 +104,49 @@ func ResourceDirectConnectV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+				ForceNew: true,
 			},
 			"hosting_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+				ForceNew: true,
 			},
 			"charge_mode": {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+				ForceNew: true,
 			},
 			"order_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+				ForceNew: true,
 			},
 			"product_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+				ForceNew: true,
 			},
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+				ForceNew: true,
 			},
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Computed: true,
 				Optional: true,
+				ForceNew: true,
 			},
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+				ForceNew: true,
 			},
 			"vlan": {
 				Type:     schema.TypeInt,
@@ -259,6 +274,59 @@ func resourceDirectConnectV2Create(ctx context.Context, d *schema.ResourceData, 
 	}
 	d.SetId(directConnect.ID)
 	log.Printf("[INFO] Direct Connect created: %s", directConnect.ID)
+	return resourceDirectConnectV2Read(ctx, d, meta)
+}
+
+func resourceDirectConnectV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.DCaaSV2Client(config.GetRegion(d))
+	})
+	if err != nil {
+		return fmterr.Errorf(errCreateClient, err)
+	}
+
+	if d.HasChange("name") {
+		opt := dcaas.UpdateOpts{
+			Name: d.Get("name").(string),
+		}
+		err = dcaas.Update(client, d.Id(), opt)
+		if err != nil {
+			return fmterr.Errorf("error updating direct connect: %s", err)
+		}
+	}
+
+	if d.HasChange("bandwidth") {
+		opt := dcaas.UpdateOpts{
+			Bandwidth: d.Get("bandwidth").(int),
+		}
+		err = dcaas.Update(client, d.Id(), opt)
+		log.Printf("[INFO] Direct Connect updated: %s", d.Id())
+		if err != nil {
+			return fmterr.Errorf("error updating direct connect: %s", err)
+		}
+	}
+
+	if d.HasChange("description") {
+		opt := dcaas.UpdateOpts{
+			Description: d.Get("description").(string),
+		}
+		err = dcaas.Update(client, d.Id(), opt)
+		if err != nil {
+			return fmterr.Errorf("error updating direct connect: %s", err)
+		}
+	}
+
+	if d.HasChange("provider_status") {
+		opt := dcaas.UpdateOpts{
+			ProviderStatus: d.Get("provider_status").(string),
+		}
+		err = dcaas.Update(client, d.Id(), opt)
+		if err != nil {
+			return fmterr.Errorf("error updating direct connect: %s", err)
+		}
+	}
+
 	return resourceDirectConnectV2Read(ctx, d, meta)
 }
 
