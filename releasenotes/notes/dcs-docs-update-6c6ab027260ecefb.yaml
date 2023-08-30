@@ -1,0 +1,7 @@
+---
+other:
+  - |
+    **[DCS]** Attributes types info and change in examples for ``docs/resource/dcs_instance_v1.md`` (`#2294 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2294>`_)
+  - |
+    **[DCS]** Attributes types info for ``docs/data-sources/dcs_az_v1.md`` (`#2294 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2294>`_)
+

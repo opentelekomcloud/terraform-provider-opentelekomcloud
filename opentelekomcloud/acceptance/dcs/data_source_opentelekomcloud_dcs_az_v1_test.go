@@ -25,6 +25,14 @@ func TestAccDcsAZV1DataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(dataAzName, "port", "8002"),
 				),
 			},
+			{
+				Config: testAccDcsAZV1DataSourceByName,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDcsAZV1DataSourceID(dataAzName),
+					resource.TestCheckResourceAttr(dataAzName, "port", "8002"),
+					resource.TestCheckResourceAttr(dataAzName, "code", env.OS_AVAILABILITY_ZONE),
+				),
+			},
 		},
 	})
 }
@@ -48,5 +56,11 @@ var testAccDcsAZV1DataSourceBasic = fmt.Sprintf(`
 data "opentelekomcloud_dcs_az_v1" "az1" {
   code = "%s"
   port = "8002"
+}
+`, env.OS_AVAILABILITY_ZONE)
+
+var testAccDcsAZV1DataSourceByName = fmt.Sprintf(`
+data "opentelekomcloud_dcs_az_v1" "az1" {
+  name = "%s"
 }
 `, env.OS_AVAILABILITY_ZONE)
