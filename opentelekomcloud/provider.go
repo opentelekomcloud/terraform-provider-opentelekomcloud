@@ -16,6 +16,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/csbs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/css"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/cts"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dcaas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dcs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dds"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/deh"
@@ -252,6 +253,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_csbs_backup_policy_v1":           csbs.DataSourceCSBSBackupPolicyV1(),
 			"opentelekomcloud_css_flavor_v1":                   css.DataSourceCSSFlavorV1(),
 			"opentelekomcloud_cts_tracker_v1":                  cts.DataSourceCTSTrackerV1(),
+			"opentelekomcloud_direct_connect_v2":               dcaas.DataSourceDirectConnectV2(),
 			"opentelekomcloud_dcs_az_v1":                       dcs.DataSourceDcsAZV1(),
 			"opentelekomcloud_dcs_maintainwindow_v1":           dcs.DataSourceDcsMaintainWindowV1(),
 			"opentelekomcloud_dcs_product_v1":                  dcs.DataSourceDcsProductV1(),
@@ -349,6 +351,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cts_tracker_v3":                     cts.ResourceCTSTrackerV3(),
 			"opentelekomcloud_css_cluster_v1":                     css.ResourceCssClusterV1(),
 			"opentelekomcloud_css_snapshot_configuration_v1":      css.ResourceCssSnapshotConfigurationV1(),
+			"opentelekomcloud_direct_connect_v2":                  dcaas.ResourceDirectConnectV2(),
 			"opentelekomcloud_dcs_instance_v1":                    dcs.ResourceDcsInstanceV1(),
 			"opentelekomcloud_dds_instance_v3":                    dds.ResourceDdsInstanceV3(),
 			"opentelekomcloud_deh_host_v1":                        deh.ResourceDeHHostV1(),

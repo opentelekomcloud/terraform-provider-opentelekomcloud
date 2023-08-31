@@ -865,6 +865,13 @@ func (c *Config) CsbsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) DCaaSV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewDCaaSV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) DehV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewDeHServiceV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,

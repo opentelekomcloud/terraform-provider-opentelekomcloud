@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[DCaaS]** Add new resource ``resource/opentelekomcloud_direct_connect_v2`` and new datasource ``data/opentelekomcloud_direct_connect_v2`` (`#2287 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2287>`_)
