@@ -30,14 +30,7 @@ func ResourceDirectConnectV2() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
-			},
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
 			},
 			"bandwidth": {
 				Type:     schema.TypeInt,
@@ -152,6 +145,7 @@ func ResourceDirectConnectV2() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"apply_time": {
 				Type:     schema.TypeString,
