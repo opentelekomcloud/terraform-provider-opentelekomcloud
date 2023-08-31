@@ -490,6 +490,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_waf_dedicated_policy_v1":            waf.ResourceWafDedicatedPolicy(),
 			"opentelekomcloud_waf_dedicated_certificate_v1":       waf.ResourceWafDedicatedCertificateV1(),
 			"opentelekomcloud_waf_dedicated_cc_rule_v1":           waf.ResourceWafDedicatedCcRuleV1(),
+			"opentelekomcloud_waf_dedicated_data_masking_rule_v1": waf.ResourceWafDedicatedDataMaskingRuleV1(),
 		},
 	}
 
