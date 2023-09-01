@@ -43,6 +43,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/sfs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/smn"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/swr"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/tms"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vbs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vpc"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vpcep"
@@ -457,6 +458,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_swr_organization_permissions_v2":    swr.ResourceSwrOrganizationPermissionsV2(),
 			"opentelekomcloud_swr_organization_v2":                swr.ResourceSwrOrganizationV2(),
 			"opentelekomcloud_swr_repository_v2":                  swr.ResourceSwrRepositoryV2(),
+			"opentelekomcloud_tms_tags_v1":                        tms.ResourceTmsTagV1(),
 			"opentelekomcloud_vpc_bandwidth_associate_v2":         vpc.ResourceBandwidthAssociateV2(),
 			"opentelekomcloud_vpc_bandwidth_v2":                   vpc.ResourceBandwidthV2(),
 			"opentelekomcloud_vpc_eip_v1":                         vpc.ResourceVpcEIPV1(),
