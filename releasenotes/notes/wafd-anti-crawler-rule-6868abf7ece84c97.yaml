@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[WAF]** Add new resource ``resource/opentelekomcloud_waf_dedicated_anti_crawler_rule_v1`` (`#2295 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2295>`_)
