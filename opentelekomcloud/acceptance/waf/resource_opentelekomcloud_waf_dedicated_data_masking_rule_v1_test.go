@@ -112,7 +112,7 @@ resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
 }
 
 resource "opentelekomcloud_waf_dedicated_data_masking_rule_v1" "rule_1" {
-  policy_id    = opentelekomcloud_waf_dedicated_policy_v1.policy_1.id
+  policy_id   = opentelekomcloud_waf_dedicated_policy_v1.policy_1.id
   name        = "data_masking_1"
   url         = "/login"
   category    = "params"
@@ -126,7 +126,7 @@ resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
 }
 
 resource "opentelekomcloud_waf_dedicated_data_masking_rule_v1" "rule_1" {
-  policy_id    = opentelekomcloud_waf_dedicated_policy_v1.policy_1.id
+  policy_id   = opentelekomcloud_waf_dedicated_policy_v1.policy_1.id
   name        = "data_masking_1_update"
   url         = "/login/update"
   category    = "header"
