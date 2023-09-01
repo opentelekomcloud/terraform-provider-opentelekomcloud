@@ -2,6 +2,9 @@
 subcategory: "Distributed Cache Service (DCS)"
 ---
 
+Up-to-date reference of API arguments for DCS AZ information you can get at
+`https://docs.otc.t-systems.com/distributed-cache-service/api-ref/other_apis/querying_az_information.html#dcs-api-0312039`.
+
 # opentelekomcloud_dcs_az_v1
 
 Use this data source to get the ID of an available DCS AZ from OpenTelekomCloud.
@@ -37,11 +40,11 @@ data "opentelekomcloud_dcs_az_v1" "az2" {
 
 ## Argument Reference
 
-* `name` - (Required) Indicates the name of an AZ.
+* `name` - (Optional, String) Indicates the name of an AZ.
 
-* `code` - (Optional) Indicates the code of an AZ.
+* `code` - (Optional, String) Indicates the code of an AZ.
 
-* `port` - (Required) Indicates the port number of an AZ.
+* `port` - (Optional, String) Indicates the port number of an AZ.
 
 
 ## Attributes Reference

@@ -29,6 +29,9 @@ func ResourceDmsInstancesV1() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
+		DeprecationMessage: "Support will be discontinued in favor of DMS v2. " +
+			"Please use `opentelekomcloud_dms_instance_v2` resource instead",
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,

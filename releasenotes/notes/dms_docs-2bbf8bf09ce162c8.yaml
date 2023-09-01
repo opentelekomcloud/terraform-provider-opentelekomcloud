@@ -1,0 +1,7 @@
+---
+other:
+  - |
+    **[DMS]** Update documentation with new engine version for ``resource/opentelekomcloud_dms_instance_v2`` (`#2293 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2293>`_)
+deprecations:
+  - |
+    **[DMS]** Deprecate ``resource/opentelekomcloud_dms_instance_v1`` (`#2293 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2293>`_)

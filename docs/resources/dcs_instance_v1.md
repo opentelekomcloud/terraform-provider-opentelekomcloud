@@ -23,7 +23,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 }
 
 data "opentelekomcloud_dcs_az_v1" "az_1" {
-  port = "8002"
+  name = "eu-de-01"
 }
 
 data "opentelekomcloud_dcs_product_v1" "product_1" {
@@ -52,12 +52,11 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
 }
 ```
 
-### Engine version 5.0 (please pay attention to proper selection of the spec_code):
+### Engine version 5.0 (please pay attention of proper selection of the spec_code):
 
 ```hcl
 data "opentelekomcloud_dcs_az_v1" "az_1" {
-  port = "8002"
-  code = "eu-de"
+  name = "eu-de-01"
 }
 
 data "opentelekomcloud_dcs_product_v1" "product_1" {
@@ -91,37 +90,40 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
 
 The following arguments are supported:
 
-* `name` - (Required) Indicates the name of an instance. An instance name starts with a letter,
+* `name` - (Required, String) Indicates the name of an instance. An instance name starts with a letter,
   consists of `4` to `64` characters, and supports only letters, digits, and hyphens (-).
 
-* `description` - (Optional) Indicates the description of an instance. It is a character
+* `description` - (Optional, String) Indicates the description of an instance. It is a character
   string containing not more than `1024` characters.
 
-* `engine` - (Required) Indicates a cache engine. Only `Redis` is supported. Changing this
+* `engine` - (Required, ForceNew, String) Indicates a cache engine. Only `Redis` is supported. Changing this
   creates a new instance.
 
-* `engine_version` - (Required) Indicates the version of a cache engine, which can be `3.0`/`4.0`/`5.0`/`6.0`.
+* `engine_version` - (Required, ForceNew, String) Indicates the version of a cache engine, which can be `3.0`/`4.0`/`5.0`/`6.0`.
   Changing this creates a new instance.
 
-* `capacity` - (Required) Indicates the Cache capacity. Unit: GB.
-  For a DCS Redis or Memcached instance in single-node or master/standby mode, the cache
-  capacity can be `2`, `4`, `8`, `16`, `32`, or `64` GB.
-  For a DCS Redis instance in cluster mode, the cache capacity can be `64`, `128`, `256`, `512` GB.
-  Changing this creates a new instance.
+* `capacity` - (Required, ForceNew, Float) Indicates the Cache capacity. Unit: GB.
+  + **Redis4.0, Redis5.0 and Redis6.0**: Stand-alone and active/standby type instance values: `0.125`, `0.25`,
+    `0.5`, `1`, `2`, `4`, `8`, `16`, `32` and `64`.
+    Cluster instance specifications support `4`,`8`,`16`, `24`, `32`, `48`, `64`, `96`, `128`, `192`, `256`,
+    `384`, `512`, `768` and `1024`.
+  + **Redis3.0**: Stand-alone and active/standby type instance values: `2`, `4`, `8`, `16`, `32` and `64`.
+    Proxy cluster instance specifications support `64`, `128`, `256`, `512`, and `1024`.
+  + **Memcached**: Stand-alone and active/standby type instance values: `2`, `4`, `8`, `16`, `32` and `64`.
 
-* `password` - (Optional) Indicates the password of an instance. An instance password
+* `password` - (Optional, ForceNew, String) Indicates the password of an instance. An instance password
   must meet the following complexity requirements: Must be 8 to 32 characters long.
   Must contain at least 3 of the following character types: lowercase letters, uppercase
   letters, digits, and special characters (`~!@#$%^&*()-_=+\|[{}]:'",<.>/?).
   Changing this creates a new instance.
 
-* `vpc_id` - (Required) Specifies the VPC ID. Changing this creates a new instance.
+* `vpc_id` - (Required, ForceNew, String) Specifies the VPC ID. Changing this creates a new instance.
 
-* `security_group_id` - (Optional) Security group ID. This parameter is mandatory when `engine_version` is `3.0`.
+* `security_group_id` - (Optional, String) Security group ID. This parameter is mandatory when `engine_version` is `3.0`.
 
-* `subnet_id` - (Required) Specifies the subnet Network ID. Changing this creates a new instance.
+* `subnet_id` - (Required, ForceNew, String) Specifies the subnet Network ID. Changing this creates a new instance.
 
-* `available_zones` - (Required) IDs of the AZs where cache nodes reside. For details
+* `available_zones` - (Required, ForceNew, List) IDs of the AZs where cache nodes reside. For details
   on how to query AZs, see [Querying AZ Information](https://docs.otc.t-systems.com/en-us/api/dcs/dcs-api-0312039.html)
   or use [opentelekomcloud_dcs_az_v1 data source](https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs/data-sources/dcs_az_v1):
   ```hcl
@@ -131,16 +133,16 @@ The following arguments are supported:
   ```
   Changing this creates a new instance.
 
-* `product_id` - (Required) Product ID used to differentiate DCS instance types.
+* `product_id` - (Required, ForceNew, String) Product ID used to differentiate DCS instance types.
   Changing this creates a new instance.
 
-* `maintain_begin` - (Optional) Indicates the time at which a maintenance time window starts.
+* `maintain_begin` - (Optional, String) Indicates the time at which a maintenance time window starts.
   Format: `HH:mm:ss`. The start time and end time of a maintenance time window must indicate the time segment of
   a supported maintenance time window. For details, see section
   [Querying Maintenance Time Windows](https://docs.otc.t-systems.com/api/dcs/dcs-api-0312041.html).
   The start time must be set to `22:00`, `02:00`, `06:00`, `10:00`, `14:00`, or `18:00`.
 
-* `maintain_end` - (Optional) Indicates the time at which a maintenance time window ends.
+* `maintain_end` - (Optional, String) Indicates the time at which a maintenance time window ends.
   Format: `HH:mm:ss`. The start time and end time of a maintenance time window must indicate the time segment of
   a supported maintenance time window. For details, see section
   [Querying Maintenance Time Windows](https://docs.otc.t-systems.com/api/dcs/dcs-api-0312041.html).
@@ -151,31 +153,31 @@ The following arguments are supported:
 blank, parameter `maintain_begin` is also blank. In this case, the system automatically allocates
 the default start time `02:00` and the default end time `06:00`.
 
-* `backup_policy` - (Optional) Describes the backup configuration to be used with the instance.
-  * `save_days` - (Optional) Retention time. Unit: day. Range: `1`–`7`.
-  * `backup_type` - (Optional) Backup type. Valid values are: `auto` automatic backup,
+* `backup_policy` - (Optional, List) Describes the backup configuration to be used with the instance.
+  * `save_days` - (Optional, Int) Retention time. Unit: day. Range: `1`–`7`.
+  * `backup_type` - (Optional, String) Backup type. Valid values are: `auto` automatic backup,
     `manual` manual backup (default).
-  * `begin_at` - (Required) Time at which backup starts. `00:00-01:00` indicates that backup
+  * `begin_at` - (Required, String) Time at which backup starts. `00:00-01:00` indicates that backup
     starts at `00:00:00`.
-  * `period_type` - (Required) Interval at which backup is performed.
+  * `period_type` - (Required, String) Interval at which backup is performed.
     Currently, only weekly backup is supported.
-  * `backup_at` - (Required) Day in a week on which backup starts. Range: `1`–`7`. Where: `1`
+  * `backup_at` - (Required, List) Day in a week on which backup starts. Range: `1`–`7`. Where: `1`
     indicates Monday; `7` indicates Sunday.
 
-* `configuration` - (Optional) Describes the array of configuration items of the DCS instance.
+* `configuration` - (Optional, List) Describes the array of configuration items of the DCS instance.
   Configured values can be found [here](https://docs.otc.t-systems.com/en-us/api/dcs/dcs-api-0312015.html#dcs-api-0312015__table1439111281351).
-  * `parameter_id` - (Required) Configuration item ID.
-  * `parameter_name` - (Required) Configuration item name.
-  * `parameter_value` - (Required) Value of the configuration item.
+  * `parameter_id` - (Required, String) Configuration item ID.
+  * `parameter_name` - (Required, String) Configuration item name.
+  * `parameter_value` - (Required, String) Value of the configuration item.
 
-* `enable_whitelist` - (Optional) Specifies whether to enable or disable `whitelist`. Only available when
+* `enable_whitelist` - (Optional, Bool) Specifies whether to enable or disable `whitelist`. Only available when
   `engine_version` is set to `4.0`/`5.0`. Parameter have to be used together with `whitelist`.
 
-* `whitelist` - (Optional) Describes the `whitelist` groups to be used with the instance. Only available when
+* `whitelist` - (Optional, List) Describes the `whitelist` groups to be used with the instance. Only available when
   `engine_version` is set to `4.0`/`5.0`. Parameter have to be used together with `enable_whitelist`.
   Resource fields:
-  * `group_name` - (Optional) Whitelist group name. A maximum of four groups can be created for each instance.
-  * `ip_list` - (Optional) List of IP addresses in the whitelist group. A maximum of 20 IP addresses or IP address
+  * `group_name` - (Required, String) Whitelist group name. A maximum of four groups can be created for each instance.
+  * `ip_list` - (Required, List) List of IP addresses in the whitelist group. A maximum of 20 IP addresses or IP address
   ranges can be added to an instance. Separate multiple IP addresses or IP address ranges with commas (,).
   IP address 0.0.0.0 and IP address range 0.0.0/0 are not supported.
 
