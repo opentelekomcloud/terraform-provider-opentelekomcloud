@@ -1094,6 +1094,16 @@ func (c *Config) DwsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return service, nil
 }
 
+func (c *Config) TmsV1Client() (*golangsdk.ServiceClient, error) {
+	service, err := c.IdentityV3Client()
+	if err != nil {
+		return nil, err
+	}
+	service.Endpoint = strings.Replace(service.Endpoint, "v3/", "v1.0/", 1)
+	service.Endpoint = strings.Replace(service.Endpoint, "iam", "tms", 1)
+	return service, nil
+}
+
 func reconfigProjectName(src Config, projectName ProjectName) (*Config, error) {
 	config := &Config{}
 	if err := copier.Copy(config, &src); err != nil {

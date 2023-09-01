@@ -3,6 +3,7 @@ package tms
 import (
 	"context"
 	"fmt"
+	"log"
 	"regexp"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/tms/v1/tags"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 )
 
@@ -61,9 +63,9 @@ func ResourceTmsTagV1() *schema.Resource {
 
 func resourceTmsTagV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.(config.GetRegion(d))
+	client, err := config.TmsV1Client()
 	if err != nil {
-		return diag.FromErr("Error creating Opentelekomcloud TMS client")
+		return fmterr.Errorf("Error creating Opentelekomcloud TMS client: %s", err)
 	}
 
 	var tagIds []string
@@ -80,49 +82,31 @@ func resourceTmsTagV1Create(ctx context.Context, d *schema.ResourceData, meta in
 		tagIds = append(tagIds, tagId)
 	}
 
-	createOpts := &tags.BatchOptsBuilder{
-		Body: &model.ReqCreatePredefineTag{
-			Tags:   predefineTags,
-			Action: model.GetReqCreatePredefineTagActionEnum().CREATE,
-		},
+	createOpts := &tags.BatchOpts{
+		Tags:   predefineTags,
+		Action: tags.ActionCreate,
 	}
 
-	logp.Printf("[DEBUG] Create TMS tag options: %#v", createOpts)
-	_, err = client.CreatePredefineTags(createOpts)
+	log.Printf("[DEBUG] Create TMS tag options: %#v", createOpts)
+	_, err = tags.BatchAction(client, "", createOpts).Extract()
 	if err != nil {
-		return fmtp.DiagErrorf("Error creating TMS tag: %s", err)
+		return fmterr.Errorf("Error creating Opentelekomcloud TMS tags: %s", err)
 	}
 
 	d.SetId(hashcode.Strings(tagIds))
-	return resourceTmsTagRead(ctx, d, meta)
+	return resourceTmsTagV1Read(ctx, d, meta)
 }
 
 func resourceTmsTagV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	c := meta.(*config.Config)
-	client, err := c.HcTmsV1Client(c.GetRegion(d))
+	config := meta.(*cfg.Config)
+	client, err := config.TmsV1Client()
 	if err != nil {
-		return fmtp.DiagErrorf("Error creating Opentelekomcloud TMS client: %s", err)
+		return fmterr.Errorf("Error creating Opentelekomcloud TMS client: %s", err)
 	}
 
-	var marker *string
-	var tags []model.PredefineTag
-	// List all predefine tags
-	for {
-		request := &model.ListPredefineTagsRequest{
-			Marker: marker,
-		}
-
-		response, err := client.ListPredefineTags(request)
-		if err != nil {
-			return fmtp.DiagErrorf("Error listing TMS tags: %s", err)
-		}
-		tagsResp := *response.Tags
-		if len(tagsResp) == 0 {
-			break
-		} else {
-			marker = response.Marker
-			tags = append(tags, tagsResp...)
-		}
+	allTags, err := tags.Get(client).Extract()
+	if err != nil {
+		return fmterr.Errorf("Error listing TMS predefined tags: %s", err)
 	}
 
 	// Check if the requested tag is missing on cloud side
@@ -133,7 +117,7 @@ func resourceTmsTagV1Read(ctx context.Context, d *schema.ResourceData, meta inte
 		key := tag["key"].(string)
 		value := tag["value"].(string)
 
-		for _, t := range tags {
+		for _, t := range allTags.Tags {
 			if key == t.Key && value == t.Value {
 				tagFound := map[string]interface{}{
 					"key":   key,
@@ -143,44 +127,44 @@ func resourceTmsTagV1Read(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 		}
 	}
-	d.Set("tags", tagList)
+	if err = d.Set("tags", tagList); err != nil {
+		return fmterr.Errorf("Error setting TMS tags: %s", err)
+	}
 
 	return nil
 }
 
 func resourceTmsTagV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	c := meta.(*cfg.Config)
-	client, err := c.HcTmsV1Client(c.GetRegion(d))
+	config := meta.(*cfg.Config)
+	client, err := config.TmsV1Client()
 	if err != nil {
-		return fmtp.DiagErrorf("Error creating Opentelekomcloud TMS client: %s", err)
+		return fmterr.Errorf("Error creating Opentelekomcloud TMS client")
 	}
 
-	var predefineTags []model.PredefineTagRequest
+	var predefineTags []tags.Tag
 	tagsRaw := d.Get("tags").([]interface{})
 	if len(tagsRaw) == 0 {
-		logp.Printf("[DEBUG] TMS tags are empty, no need to issue delete request")
+		log.Printf("[DEBUG] TMS tags are empty, no need to issue delete request")
 		return nil
 	}
 	for _, v := range tagsRaw {
 		tag := v.(map[string]interface{})
-		predefineTag := model.PredefineTagRequest{
+		predefineTag := tags.Tag{
 			Key:   tag["key"].(string),
 			Value: tag["value"].(string),
 		}
 		predefineTags = append(predefineTags, predefineTag)
 	}
 
-	deleteOpts := &model.DeletePredefineTagsRequest{
-		Body: &model.ReqDeletePredefineTag{
-			Tags:   predefineTags,
-			Action: model.GetReqDeletePredefineTagActionEnum().DELETE,
-		},
+	deleteOpts := &tags.BatchOpts{
+		Tags:   predefineTags,
+		Action: tags.ActionDelete,
 	}
 
-	logp.Printf("[DEBUG] Delete TMS tag options: %#v", deleteOpts)
-	_, err = client.DeletePredefineTags(deleteOpts)
+	log.Printf("[DEBUG] Delete TMS tag options: %#v", deleteOpts)
+	_, err = tags.BatchAction(client, "", deleteOpts).Extract()
 	if err != nil {
-		return fmtp.DiagErrorf("Error deleting TMS tag: %s", err)
+		return fmterr.Errorf("error deleting TMS tag: %s", err)
 	}
 
 	return nil
