@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[WAF]** Add new resource ``resource/opentelekomcloud_waf_dedicated_data_masking_rule_v1`` (`#2296 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2296>`_)
