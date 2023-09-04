@@ -778,37 +778,37 @@ func preCheck(ctx context.Context, client *golangsdk.ServiceClient, jobId string
 		return fmt.Errorf("start job=%s preCheck failed,error: %s", jobId, err)
 	}
 
-	// stateConf := &resource.StateChangeConf{
-	// 	Pending: []string{"pending"},
-	// 	Target:  []string{"complete"},
-	// 	Refresh: func() (interface{}, string, error) {
-	// 		resp, err := public.PreCheckResults(client, public.QueryPrecheckResultReq{
-	// 			Jobs: []string{jobId},
-	// 		})
-	// 		if err != nil {
-	// 			return nil, "", err
-	// 		}
-	// 		if resp.Count == 0 || resp.Results[0].ErrorCode != "" {
-	// 			return resp, "failed", fmtp.Errorf("%s: %s", resp.Results[0].ErrorCode, resp.Results[0].ErrorMsg)
-	// 		}
-	//
-	// 		if resp.Results[0].Process != "100%" {
-	// 			return resp, "pending", nil
-	// 		}
-	//
-	// 		if resp.Results[0].TotalPassedRate == "100%" {
-	// 			return resp, "complete", nil
-	// 		}
-	//
-	// 		return resp, "failed", fmtp.Errorf("Some preCheck item failed: %s", resp)
-	// 	},
-	// 	Timeout:      timeout,
-	// 	PollInterval: 20 * timeout,
-	// 	Delay:        20 * time.Second,
-	// }
-	// _, err = stateConf.WaitForStateContext(ctx)
-	// if err != nil {
-	// 	return fmt.Errorf("error waiting for DRS job (%s) to be terminate: %s", jobId, err)
-	// }
+	stateConf := &resource.StateChangeConf{
+		Pending: []string{"pending"},
+		Target:  []string{"complete"},
+		Refresh: func() (interface{}, string, error) {
+			resp, err := public.BatchCheckResults(client, public.BatchQueryPrecheckResultReq{
+				Jobs: []string{jobId},
+			})
+			if err != nil {
+				return nil, "", err
+			}
+			if resp.Count == 0 || resp.Results[0].ErrorCode != "" {
+				return resp, "failed", fmt.Errorf("%s: %s", resp.Results[0].ErrorCode, resp.Results[0].ErrorMsg)
+			}
+
+			if resp.Results[0].Process != "100%" {
+				return resp, "pending", nil
+			}
+
+			if resp.Results[0].TotalPassedRate == "100%" {
+				return resp, "complete", nil
+			}
+
+			return resp, "failed", fmt.Errorf("Some preCheck item failed: %s", resp)
+		},
+		Timeout:      timeout,
+		PollInterval: 20 * timeout,
+		Delay:        20 * time.Second,
+	}
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmt.Errorf("error waiting for DRS job (%s) to be terminate: %s", jobId, err)
+	}
 	return nil
 }
