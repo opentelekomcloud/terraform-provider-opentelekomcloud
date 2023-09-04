@@ -354,7 +354,7 @@ func resourceWafDedicatedDomainV1Update(ctx context.Context, d *schema.ResourceD
 		protectStatus := d.Get("protect_status").(int)
 		err = domains.UpdateProtectStatus(client, d.Id(), domains.ProtectUpdateOpts{ProtectStatus: protectStatus})
 		if err != nil {
-			return fmterr.Errorf("[ERROR] error change the protection status of OpenTelekomCloud WAF dedicate domain %s: %s",
+			return fmterr.Errorf("[ERROR] error change the protection status of OpenTelekomCloud WAF dedicated domain %s: %s",
 				d.Id(), err)
 		}
 	}
