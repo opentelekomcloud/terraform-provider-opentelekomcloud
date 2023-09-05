@@ -647,6 +647,7 @@ func buildDbConfigParamter(d *schema.ResourceData, dbType, projectId string) (*p
 		SslCertKey:      configRaw["ssl_cert_key"].(string),
 		SslCertName:     configRaw["ssl_cert_name"].(string),
 		SslLink:         configRaw["ssl_enabled"].(bool),
+		InstId:          configRaw["instance_id"].(string),
 	}
 	return &configs, nil
 }
