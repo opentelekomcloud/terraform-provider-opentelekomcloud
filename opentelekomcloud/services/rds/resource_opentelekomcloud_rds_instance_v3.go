@@ -736,10 +736,12 @@ func findPort(client *golangsdk.ServiceClient, privateIP string, subnetID string
 	}
 
 	for _, port := range portList {
-		address := port.FixedIPs[0]
-		if address.IPAddress == privateIP && address.SubnetID == subnetID {
-			id = port.ID
-			return
+		if len(port.FixedIPs) > 0 {
+			address := port.FixedIPs[0]
+			if address.IPAddress == privateIP && address.SubnetID == subnetID {
+				id = port.ID
+				return
+			}
 		}
 	}
 	return

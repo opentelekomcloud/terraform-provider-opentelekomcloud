@@ -146,6 +146,13 @@ func ResourceDrsTaskV3() *schema.Resource {
 				Default:  true,
 			},
 
+			"destination_db_readonly": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  false,
+			},
+
 			"limit_speed": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -300,6 +307,11 @@ func dbInfoSchemaResource() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+
+			"private_ip": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 
@@ -415,10 +427,10 @@ func resourceDrsJobRead(_ context.Context, d *schema.ResourceData, meta interfac
 		d.Set("type", detail.DbUseType),
 		d.Set("engine_type", detail.InstInfo.EngineType),
 		d.Set("direction", detail.JobDirection),
-		d.Set("net_type", detail.NetType),
+		// d.Set("net_type", detail.NetType),
 		d.Set("public_ip", detail.InstInfo.PublicIp),
 		d.Set("private_ip", detail.InstInfo.Ip),
-		d.Set("destination_db_readnoly", detail.IsTargetReadonly),
+		d.Set("destination_db_readonly", detail.IsTargetReadonly),
 		d.Set("migration_type", detail.TaskType),
 		d.Set("description", detail.Description),
 		d.Set("multi_write", detail.MultiWrite),
@@ -616,7 +628,7 @@ func buildCreateParamter(d *schema.ResourceData, projectId string) (*public.Batc
 		JobDirection:      jobDirection,
 		NetType:           d.Get("net_type").(string),
 		BindEip:           pointerto.Bool(bindEip),
-		IsTargetReadonly:  pointerto.Bool(d.Get("destination_db_readnoly").(bool)),
+		IsTargetReadonly:  pointerto.Bool(d.Get("destination_db_readonly").(bool)),
 		TaskType:          d.Get("migration_type").(string),
 		Description:       d.Get("description").(string),
 		MultiWrite:        pointerto.Bool(d.Get("multi_write").(bool)),
@@ -667,12 +679,14 @@ func parseDrsJobErrorToError404(respErr error) error {
 
 func setDbInfoToState(d *schema.ResourceData, endpoint public.Endpoint, fieldName string) error {
 	result := make([]interface{}, 1)
+	configRaw := d.Get(fieldName).([]interface{})[0].(map[string]interface{})
 	item := map[string]interface{}{
 		"engine_type":        endpoint.DbType,
-		"ip":                 endpoint.Ip,
+		"ip":                 configRaw["ip"].(string),
+		"private_ip":         endpoint.Ip,
 		"port":               endpoint.DbPort,
-		"password":           endpoint.DbPassword,
 		"user":               endpoint.DbUser,
+		"password":           configRaw["password"].(string),
 		"instance_id":        endpoint.InstId,
 		"name":               endpoint.InstName,
 		"region":             endpoint.Region,
@@ -684,7 +698,6 @@ func setDbInfoToState(d *schema.ResourceData, endpoint public.Endpoint, fieldNam
 		"ssl_enabled":        endpoint.SslLink,
 	}
 	result[0] = item
-	// lintignore:R001
 	return d.Set(fieldName, result)
 }
 
