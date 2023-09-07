@@ -54,5 +54,9 @@ var Descriptions = map[string]string{
 
 	"max_retries": "How many times HTTP connection should be retried until giving up.",
 
+	"max_backoff_retries": "How many times HTTP connection should be retried when rate limit reached",
+
+	"backoff_retry_timeout": "Timeout in seconds for backoff retry",
+
 	"passcode": "One-time MFA passcode",
 }
