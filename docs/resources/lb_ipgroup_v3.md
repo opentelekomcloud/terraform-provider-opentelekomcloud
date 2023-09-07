@@ -50,7 +50,8 @@ The following arguments are supported:
 
 * `project_id` - (Optional, String) Specifies the project ID of the IP address group.
 
-* `ip_list` - (Optional, List) Specifies the IP addresses or CIDR blocks in the IP address group. [] indicates any IP address.
+* `ip_list` - (Optional, List) Specifies the IP addresses or CIDR blocks in the IP address group.
+    Any IP address can be used if this block isn't specified.
   * `ip` - (Required, String) Specifies the IP addresses in the IP address group.
     IPv6 is unsupported. The value cannot be an IPv6 address.
   * `description` - (Optional, String) Provides remarks about the IP address group.
