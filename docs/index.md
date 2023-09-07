@@ -278,6 +278,16 @@ The following arguments are supported:
 * `max_retries` - (Optional) Maximum number of retries of HTTP requests failed
   due to connection issues.
 
+* `max_backoff_retries` - (Optional) Maximum number of retries of HTTP requests failed
+  due to reaching the rate limit. It can be set using the `OS_MAX_BACKOFF_RETRIES` environment
+  variable. If not set, default value is used.
+  Default: `5`
+
+* `backoff_retry_timeout` - (Optional) Timeout in seconds for backoff retry due to reaching the rate limit.
+  It can be set using the `OS_BACKOFF_RETRY_TIMEOUT` environment
+  variable. If not set, default value is used.
+  Default: `60` seconds.
+
 ## Additional Logging
 
 This provider has the ability to log all HTTP requests and responses between

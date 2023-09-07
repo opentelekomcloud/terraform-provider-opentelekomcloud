@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    **[Provider]** Added `max_backoff_retries` with default `5` and `backoff_retry_timeout` with default `60` arguments
+    to overcome limitations of rate limits (`#2302 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2302>`_)
