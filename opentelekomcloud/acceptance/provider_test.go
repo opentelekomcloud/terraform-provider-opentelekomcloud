@@ -3,7 +3,6 @@ package acceptance
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -157,7 +156,7 @@ func envVarFile(varName string) (string, error) {
 		return "", err
 	}
 
-	tmpFile, err := ioutil.TempFile("", varName)
+	tmpFile, err := os.CreateTemp("", varName)
 	if err != nil {
 		return "", fmt.Errorf("error creating temp file: %s", err)
 	}
@@ -196,11 +195,11 @@ clouds:
       password: %s
 `, cloudName, password)
 
-	th.AssertNoErr(t, ioutil.WriteFile(cloudsYamlFile, []byte(cloudsConfig), 0755))
+	th.AssertNoErr(t, os.WriteFile(cloudsYamlFile, []byte(cloudsConfig), 0755))
 	t.Cleanup(func() {
 		th.AssertNoErr(t, os.Remove(cloudsYamlFile))
 	})
-	th.AssertNoErr(t, ioutil.WriteFile(secureYamlFile, []byte(secureConfig), 0755))
+	th.AssertNoErr(t, os.WriteFile(secureYamlFile, []byte(secureConfig), 0755))
 	t.Cleanup(func() {
 		th.AssertNoErr(t, os.Remove(secureYamlFile))
 	})
