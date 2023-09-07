@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ELB]** Fix documentation for `ip_list` block in ``resource/opentelekomcloud_lb_ipgroup_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
