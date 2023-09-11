@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[WAF]** Add new resource ``resource/opentelekomcloud_waf_dedicated_known_attack_source_rule_v1`` (`#2303 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2303>`_)
