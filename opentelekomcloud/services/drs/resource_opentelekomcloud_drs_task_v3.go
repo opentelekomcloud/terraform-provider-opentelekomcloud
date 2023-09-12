@@ -192,6 +192,11 @@ func ResourceDrsTaskV3() *schema.Resource {
 				Computed: true,
 			},
 
+			"region": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"public_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
