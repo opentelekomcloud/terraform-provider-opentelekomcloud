@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -32,13 +33,6 @@ func ResourceDrsTaskV3() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
-
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -62,7 +56,7 @@ func ResourceDrsTaskV3() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{"mysql", "mongodb", "cloudDataGuard-mysql",
-					"gaussdbv5"}, false),
+					"gaussdbv5", "mysql-to-taurus", "postgresql"}, false),
 			},
 
 			"direction": {
@@ -84,13 +78,6 @@ func ResourceDrsTaskV3() *schema.Resource {
 				Required: true,
 				MaxItems: 1,
 				Elem:     dbInfoSchemaResource(),
-			},
-
-			"destination_db_readnoly": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-				Default:  true,
 			},
 
 			"net_type": {
@@ -151,6 +138,12 @@ func ResourceDrsTaskV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Default:  false,
+			},
+
+			"node_num": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
 			},
 
 			"limit_speed": {
@@ -421,6 +414,8 @@ func resourceDrsJobRead(_ context.Context, d *schema.ResourceData, meta interfac
 	}
 	detail := detailResp.Results[0]
 
+	nodeNum, _ := strconv.Atoi(detail.NodeNum)
+
 	mErr := multierror.Append(
 		d.Set("region", region),
 		d.Set("name", detail.Name),
@@ -436,6 +431,7 @@ func resourceDrsJobRead(_ context.Context, d *schema.ResourceData, meta interfac
 		d.Set("multi_write", detail.MultiWrite),
 		d.Set("created_at", detail.CreateTime),
 		d.Set("status", detail.Status),
+		d.Set("node_num", nodeNum),
 		setDbInfoToState(d, detail.SourceEndpoint, "source_db"),
 		setDbInfoToState(d, detail.TargetEndpoint, "destination_db"),
 	)
@@ -501,8 +497,8 @@ func resourceDrsJobDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	if !common.StrSliceContains([]string{"CREATE_FAILED", "RELEASE_RESOURCE_COMPLETE", "RELEASE_CHILD_TRANSFER_COMPLETE"},
 		detailResp.Results[0].Status) {
 		if !d.Get("force_destroy").(bool) {
-			return fmterr.Errorf("The job=%s cannot be deleted when it is running. If you want to forcibly delete " +
-				"the job please set force_destroy to True.")
+			return fmterr.Errorf("The job=%s cannot be deleted when it is running. If you want to forcibly delete "+
+				"the job please set force_destroy to True.", d.Id())
 		}
 
 		_, dErr := public.BatchDeleteTasks(client, public.BatchDeleteTasksOpts{
@@ -592,12 +588,12 @@ func waitingforJobStatus(ctx context.Context, client *golangsdk.ServiceClient, i
 func buildCreateParamter(d *schema.ResourceData, projectId string) (*public.BatchCreateTaskOpts, error) {
 	jobDirection := d.Get("direction").(string)
 
-	sourceDb, err := buildDbConfigParamter(d, "source_db", projectId)
+	sourceDb, err := buildDbConfigParameter(d, "source_db", projectId)
 	if err != nil {
 		return nil, err
 	}
 
-	targetDb, err := buildDbConfigParamter(d, "destination_db", projectId)
+	targetDb, err := buildDbConfigParameter(d, "destination_db", projectId)
 	if err != nil {
 		return nil, err
 	}
@@ -608,7 +604,6 @@ func buildCreateParamter(d *schema.ResourceData, projectId string) (*public.Batc
 			return nil, fmt.Errorf("destination_db.0.instance_id is required When diretion is down")
 		}
 		subnetId = targetDb.SubnetId
-
 	} else {
 		if sourceDb.InstId == "" {
 			return nil, fmt.Errorf("source_db.0.instance_id is required When diretion is down")
@@ -637,13 +632,14 @@ func buildCreateParamter(d *schema.ResourceData, projectId string) (*public.Batc
 		SourceEndpoint:    *sourceDb,
 		TargetEndpoint:    *targetDb,
 		CustomizeSubnetId: subnetId,
+		NodeNum:           d.Get("node_num").(int),
 		Tags:              common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 	}
 
 	return &public.BatchCreateTaskOpts{Jobs: []public.CreateJobOpts{job}}, nil
 }
 
-func buildDbConfigParamter(d *schema.ResourceData, dbType, projectId string) (*public.Endpoint, error) {
+func buildDbConfigParameter(d *schema.ResourceData, dbType, projectId string) (*public.Endpoint, error) {
 	configRaw := d.Get(dbType).([]interface{})[0].(map[string]interface{})
 	configs := public.Endpoint{
 		DbType:          configRaw["engine_type"].(string),
@@ -814,7 +810,7 @@ func preCheck(ctx context.Context, client *golangsdk.ServiceClient, jobId string
 				return resp, "complete", nil
 			}
 
-			return resp, "failed", fmt.Errorf("Some preCheck item failed: %s", resp)
+			return resp, "failed", fmt.Errorf("some precheck item failed: %s", resp.Results[0].ErrorMsg)
 		},
 		Timeout:      timeout,
 		PollInterval: 20 * timeout,
