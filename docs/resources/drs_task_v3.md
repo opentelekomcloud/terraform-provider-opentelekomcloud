@@ -2,12 +2,12 @@
 subcategory: "Data Replication Service (DRS)"
 ---
 
-Up-to-date reference of API arguments for DNS recordset you can get at
+Up-to-date reference of API arguments for DRS task you can get at
 `https://docs.otc.t-systems.com/data-replication-service/api-ref/api/public_api_management/index.html#drs-03-0101`.
 
 # opentelekomcloud_drs_task_v3
 
-Manages DRS job resource within OpentelekomCloud.
+Manages DRS task resource within OpenTelekomCloud.
 
 ## Example Usage
 
