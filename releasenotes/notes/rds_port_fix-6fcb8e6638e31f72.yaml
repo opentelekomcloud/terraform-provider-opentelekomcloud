@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[RDS]** RDS fix EIP assignment for ``resource/opentelekomcloud_rds_instance_v3`` (`#2304 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2304>`_)
