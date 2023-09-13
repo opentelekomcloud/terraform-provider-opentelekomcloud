@@ -513,6 +513,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_waf_dedicated_data_masking_rule_v1":        waf.ResourceWafDedicatedDataMaskingRuleV1(),
 			"opentelekomcloud_waf_dedicated_known_attack_source_rule_v1": waf.ResourceWafDedicatedKnownAttackSourceRuleV1(),
 			"opentelekomcloud_waf_dedicated_web_tamper_rule_v1":          waf.ResourceWafDedicatedWebTamperRuleV1(),
+			"opentelekomcloud_waf_dedicated_anti_leakage_rule_v1":        waf.ResourceWafDedicatedAntiLeakageRuleV1(),
 		},
 	}
 
