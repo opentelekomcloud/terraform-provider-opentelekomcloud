@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[WAF]** Add new resource ``resource/opentelekomcloud_waf_dedicated_web_tamper_rule_v1`` (`#2307 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2307>`_)
