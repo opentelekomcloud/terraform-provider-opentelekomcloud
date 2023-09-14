@@ -148,7 +148,7 @@ func ResourceNetworkingPortV2() *schema.Resource {
 			"port_security_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Computed: true,
+				Default:  true,
 			},
 		},
 	}
@@ -193,6 +193,10 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 		common.MapValueSpecs(d),
 	}
 
+	if len(securityGroups) > 0 {
+		createOpts.SecurityGroups = &securityGroups
+	}
+
 	// Declare a extendedCreateOpts interface to hold either the
 	// base create options.
 	var extendedCreateOpts ports.CreateOptsBuilder
@@ -203,13 +207,6 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 	extendedCreateOpts = portsecurity.PortCreateOptsExt{
 		CreateOptsBuilder:   extendedCreateOpts,
 		PortSecurityEnabled: &portSecurityEnabled,
-	}
-
-	if noSecurityGroups {
-		if portSecurityEnabled {
-			securityGroups = []string{}
-			createOpts.SecurityGroups = &securityGroups
-		}
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", extendedCreateOpts)

@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix security group assignment for ``resource/opentelekomcloud_networking_port_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
