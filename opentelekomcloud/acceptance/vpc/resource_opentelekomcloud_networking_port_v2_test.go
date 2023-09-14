@@ -331,7 +331,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 }
 
 resource "opentelekomcloud_networking_secgroup_v2" "group_1" {
-  name        = "terraform-sg-1"
+  name = "terraform-sg-1"
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {

@@ -169,8 +169,7 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 		pAsu = &asu
 	}
 
-	var securityGroups []string
-	securityGroups = ResourcePortSecurityGroupsV2(d)
+	securityGroups := ResourcePortSecurityGroupsV2(d)
 	noSecurityGroups := d.Get("no_security_groups").(bool)
 
 	// Check and make sure an invalid security group configuration wasn't given.
