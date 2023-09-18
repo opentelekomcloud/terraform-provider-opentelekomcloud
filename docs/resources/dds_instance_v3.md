@@ -169,10 +169,12 @@ The `datastore` block supports:
 * `type` - (Required) Specifies the database type. DDS Community Edition is supported.
   The value is `DDS-Community`.
 
-* `version` - (Required) Specifies the database version. The value is `3.2` or `3.4`.
+* `version` - (Required) Specifies the database version.
+The values are `3.2`, `3.4`, `4.0`, `4.2`, `4.4`.
 
-* `storage_engine` - (Optional) Specifies the storage engine. Currently, DDS supports the WiredTiger
-   storage engine. The value is `wiredTiger`.
+* `storage_engine` - (Optional) Specifies the storage engine. Currently, DDS supports the WiredTiger and RocksDB
+   storage engine. The values are `wiredTiger`, `rocksDB`.
+WiredTiger engine supports versions `3.2`, `3.4`, `4.0` while RocksDB supports versions `4.2`, `4.4`
 
 The `flavor` block supports:
 
