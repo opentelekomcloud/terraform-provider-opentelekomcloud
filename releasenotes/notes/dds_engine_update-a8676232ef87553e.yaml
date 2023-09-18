@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[DDS]** Add new engine support for ``resource/opentelekomcloud_dds_instance_v3`` (`#2312 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2312>`_)

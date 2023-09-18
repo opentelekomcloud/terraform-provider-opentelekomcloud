@@ -123,6 +123,29 @@ func TestAccDDSV3Instance_single(t *testing.T) {
 	})
 }
 
+func TestAccDDSV3InstanceRocksDB_basic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDDSV3InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: TestAccDDSInstanceRocksDBV3ConfigBasic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDDSV3InstanceExists(resourceInstanceName),
+					resource.TestCheckResourceAttr(resourceInstanceName, "name", "dds-instance"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "mode", "ReplicaSet"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "datastore.0.storage_engine", "rocksDB"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "ssl", "true"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.0.size", "20"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.0.num", "1"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.0.spec_code", "dds.mongodb.s2.medium.4.repset"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDDSInstanceV3_importBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -410,5 +433,36 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = "8"
+  }
+}`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var TestAccDDSInstanceRocksDBV3ConfigBasic = fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_dds_instance_v3" "instance" {
+  name              = "dds-instance"
+  availability_zone = "%s"
+  datastore {
+    type           = "DDS-Community"
+    version        = "4.2"
+    storage_engine = "rocksDB"
+  }
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  password          = "5ecuredPa55w0rd@"
+  mode              = "ReplicaSet"
+  flavor {
+    type      = "replica"
+    num       = 1
+    storage   = "ULTRAHIGH"
+    size      = 20
+    spec_code = "dds.mongodb.s2.medium.4.repset"
+  }
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = "1"
   }
 }`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

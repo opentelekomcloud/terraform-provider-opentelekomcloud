@@ -71,7 +71,7 @@ func ResourceDdsInstanceV3() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
-								"wiredTiger",
+								"wiredTiger", "rocksDB",
 							}, true),
 						},
 					},
