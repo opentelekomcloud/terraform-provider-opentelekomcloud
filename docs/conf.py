@@ -95,4 +95,9 @@ html_static_path = ['_static']
 html_copy_source = False
 
 # -- Options for PDF output --------------------------------------------------
-latex_documents = []
+latex_documents = [
+    ('index',
+     'terraform_otc.tex',
+     u'Terraform - Open Telekom Cloud Provider',
+     u'OpenTelekomCloud', 'manual'),
+]
