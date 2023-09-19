@@ -21,6 +21,12 @@ const (
 	defaultCount = 1
 	// Billing mode, payPerUseMode: pay pre use mode
 	payPerUseMode = 30
+	// ProtectionActionBlock block the request
+	ProtectionActionBlock = 0
+	// ProtectionActionAllow allow the request
+	ProtectionActionAllow = 1
+	// ProtectionActionLog log the request only
+	ProtectionActionLog = 2
 )
 
 func wafRuleImporter() *schema.ResourceImporter {

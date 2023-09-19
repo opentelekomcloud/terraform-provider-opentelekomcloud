@@ -3,7 +3,7 @@ subcategory: "Dedicated Web Application Firewall (WAFD)"
 ---
 
 Up-to-date reference of API arguments for WAF dedicated Information Leakage Protection rule you can get at
-`https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_an_information_leakage_protection_rule.html`.
+[Official Docs Portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_an_information_leakage_protection_rule.html).
 
 # opentelekomcloud_waf_dedicated_anti_leakage_rule_v1
 

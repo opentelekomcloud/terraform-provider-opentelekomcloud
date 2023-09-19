@@ -235,8 +235,8 @@ func resourceWafDedicatedAlarmMaskingRuleV1Read(ctx context.Context, d *schema.R
 	mErr := multierror.Append(
 		d.Set("policy_id", rule.PolicyId),
 		d.Set("rule", rule.Rule),
-		d.Set("conditions", rule.Conditions),
 		d.Set("advanced_settings", rule.Advanced),
+		d.Set("domains", rule.Domains),
 		d.Set("description", rule.Description),
 		d.Set("status", rule.Status),
 		d.Set("created_at", rule.CreatedAt),
