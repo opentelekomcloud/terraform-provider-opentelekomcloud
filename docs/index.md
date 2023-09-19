@@ -1,3 +1,10 @@
+```{toctree}
+:maxdepth: 2
+:hidden:
+data-sources/index
+resources/index
+```
+
 # Open Telekom Cloud Provider
 
 The Open Telekom Cloud provider is used to interact with the
