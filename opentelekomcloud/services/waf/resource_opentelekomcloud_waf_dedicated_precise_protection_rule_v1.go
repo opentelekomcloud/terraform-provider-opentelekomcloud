@@ -17,11 +17,11 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
-func ResourceWafDedicatedCcRuleV1() *schema.Resource {
+func ResourceWafDedicatedPreciseProtectionRuleV1() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceWafDedicatedCcRuleV1Create,
-		ReadContext:   resourceWafDedicatedCcRuleV1Read,
-		DeleteContext: resourceWafDedicatedCcRuleV1Delete,
+		CreateContext: resourceWafDedicatedPreciseProtectionRuleV1Create,
+		ReadContext:   resourceWafDedicatedPreciseProtectionRuleV1Read,
+		DeleteContext: resourceWafDedicatedPreciseProtectionRuleV1Delete,
 		Importer: &schema.ResourceImporter{
 			StateContext: common.ImportByPath("policy_id", "id"),
 		},
@@ -37,14 +37,24 @@ func ResourceWafDedicatedCcRuleV1() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"mode": {
-				Type:     schema.TypeInt,
+			"time": {
+				Type:     schema.TypeBool,
 				Required: true,
 				ForceNew: true,
 			},
-			"url": {
+			"start": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+			"terminal": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+			"description": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"conditions": {
@@ -55,15 +65,18 @@ func ResourceWafDedicatedCcRuleV1() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"category": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 							ForceNew: true,
 							ValidateFunc: validation.StringInSlice(
-								[]string{"url", "ip", "params", "cookie", "header"},
+								[]string{"url", "user-agent", "referer", "ip",
+									"method", "request_line", "request", "params",
+									"cookie", "header",
+								},
 								false),
 						},
 						"logic_operation": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"contain", "not_contain", "equal",
@@ -108,18 +121,10 @@ func ResourceWafDedicatedCcRuleV1() *schema.Resource {
 							Required: true,
 							ForceNew: true,
 							ValidateFunc: validation.StringInSlice(
-								[]string{"captcha", "block", "log", "dynamic_block"},
+								[]string{"block", "pass", "log"},
 								false),
 						},
-						"content_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-							ValidateFunc: validation.StringInSlice(
-								[]string{"application/json", "text/html", "text/xml"},
-								false),
-						},
-						"content": {
+						"followed_action_id": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
@@ -127,59 +132,9 @@ func ResourceWafDedicatedCcRuleV1() *schema.Resource {
 					},
 				},
 			},
-			"tag_type": {
-				Type:     schema.TypeString,
+			"priority": {
+				Type:     schema.TypeInt,
 				Required: true,
-				ForceNew: true,
-				ValidateFunc: validation.StringInSlice(
-					[]string{"ip", "cookie", "header", "other"},
-					false),
-			},
-			"tag_index": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"tag_category": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"tag_contents": {
-				Type:     schema.TypeList,
-				Optional: true,
-				ForceNew: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			"limit_num": {
-				Type:         schema.TypeInt,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IntBetween(1, 2147483647),
-			},
-			"limit_period": {
-				Type:         schema.TypeInt,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IntBetween(1, 3600),
-			},
-			"unlock_num": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IntBetween(0, 2147483647),
-			},
-			"lock_time": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IntBetween(0, 65535),
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
 				ForceNew: true,
 			},
 			"status": {
@@ -194,7 +149,7 @@ func ResourceWafDedicatedCcRuleV1() *schema.Resource {
 	}
 }
 
-func resourceWafDedicatedCcRuleV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafDedicatedPreciseProtectionRuleV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
 		return config.WafDedicatedV1Client(config.GetRegion(d))
@@ -203,33 +158,17 @@ func resourceWafDedicatedCcRuleV1Create(ctx context.Context, d *schema.ResourceD
 		return fmterr.Errorf(errCreationV1DedicatedClient, err)
 	}
 
-	tagC := d.Get("tag_contents").([]interface{})
-	tagContents := make([]string, len(tagC))
-	for i, v := range tagC {
-		tagContents[i] = v.(string)
-	}
-
-	tagCondition := rules.CcTagConditionObject{
-		Category: d.Get("tag_category").(string),
-		Contents: tagContents,
-	}
-
 	rawActionList := d.Get("action").(*schema.Set).List()
-	var action rules.CcActionObject
+	var action rules.CustomActionObject
 	if len(rawActionList) > 0 {
 		rawAction := rawActionList[0].(map[string]interface{})
-		action = rules.CcActionObject{
-			Category: rawAction["category"].(string),
-			Detail: &rules.CcDetailObject{
-				Response: &rules.CcResponseObject{
-					ContentType: rawAction["content_type"].(string),
-					Content:     rawAction["content"].(string),
-				},
-			},
+		action = rules.CustomActionObject{
+			Category:         rawAction["category"].(string),
+			FollowedActionId: rawAction["followed_action_id"].(string),
 		}
 	}
 
-	var conditionList []rules.CcConditionsObject
+	var conditionList []rules.CustomConditionsObject
 	conditions := d.Get("conditions").([]interface{})
 	for _, c := range conditions {
 		cond := c.(map[string]interface{})
@@ -240,7 +179,7 @@ func resourceWafDedicatedCcRuleV1Create(ctx context.Context, d *schema.ResourceD
 			contents[i] = content.(string)
 		}
 
-		condition := rules.CcConditionsObject{
+		condition := rules.CustomConditionsObject{
 			Category:       cond["category"].(string),
 			Index:          cond["index"].(string),
 			LogicOperation: cond["logic_operation"].(string),
@@ -250,36 +189,30 @@ func resourceWafDedicatedCcRuleV1Create(ctx context.Context, d *schema.ResourceD
 		conditionList = append(conditionList, condition)
 	}
 
-	mode := d.Get("mode").(int)
-	createOpts := rules.CreateCcOpts{
-		Mode:         &mode,
-		Url:          d.Get("url").(string),
-		Conditions:   conditionList,
-		Action:       &action,
-		TagType:      d.Get("tag_type").(string),
-		TagIndex:     d.Get("tag_index").(string),
-		TagCondition: &tagCondition,
-		LimitNum:     int64(d.Get("limit_num").(int)),
-		LimitPeriod:  int64(d.Get("limit_period").(int)),
-		UnlockNum:    int64(d.Get("unlock_num").(int)),
-		LockTime:     pointerto.Int(d.Get("lock_time").(int)),
-		Description:  d.Get("description").(string),
+	createOpts := rules.CreateCustomOpts{
+		Time:        pointerto.Bool(d.Get("time").(bool)),
+		Start:       int64(d.Get("start").(int)),
+		Terminal:    int64(d.Get("terminal").(int)),
+		Description: d.Get("description").(string),
+		Conditions:  conditionList,
+		Action:      &action,
+		Priority:    pointerto.Int(d.Get("priority").(int)),
 	}
 
 	policyID := d.Get("policy_id").(string)
-	rule, err := rules.CreateCc(client, policyID, createOpts)
+	rule, err := rules.CreateCustom(client, policyID, createOpts)
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud WAF Dedicated CC Attack Protection Rule: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF Dedicated Precise Protection Rule: %s", err)
 	}
 
-	log.Printf("[DEBUG] Waf dedicated cc attack protection rule created: %#v", rule)
+	log.Printf("[DEBUG] Waf dedicated precise protection rule created: %#v", rule)
 	d.SetId(rule.ID)
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
-	return resourceWafDedicatedCcRuleV1Read(clientCtx, d, meta)
+	return resourceWafDedicatedPreciseProtectionRuleV1Read(clientCtx, d, meta)
 }
 
-func resourceWafDedicatedCcRuleV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafDedicatedPreciseProtectionRuleV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
 		return config.WafDedicatedV1Client(config.GetRegion(d))
@@ -289,7 +222,7 @@ func resourceWafDedicatedCcRuleV1Read(ctx context.Context, d *schema.ResourceDat
 	}
 
 	policyID := d.Get("policy_id").(string)
-	rule, err := rules.GetCc(client, policyID, d.Id())
+	rule, err := rules.GetCustom(client, policyID, d.Id())
 
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -297,22 +230,16 @@ func resourceWafDedicatedCcRuleV1Read(ctx context.Context, d *schema.ResourceDat
 			return nil
 		}
 
-		return fmterr.Errorf("error retrieving OpenTelekomCloud Waf Dedicated CC Attack Protection Rule: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Waf Dedicated Precise Protection Rule: %s", err)
 	}
 
 	mErr := multierror.Append(
 		d.Set("policy_id", rule.PolicyId),
-		d.Set("mode", rule.Mode),
-		d.Set("url", rule.Url),
-		d.Set("limit_num", rule.LimitNum),
-		d.Set("limit_period", rule.LimitPeriod),
-		d.Set("lock_time", rule.LockTime),
-		d.Set("tag_type", rule.TagType),
-		d.Set("tag_index", rule.TagIndex),
-		d.Set("tag_category", rule.TagCondition.Category),
-		d.Set("tag_contents", rule.TagCondition.Contents),
 		d.Set("description", rule.Description),
-		d.Set("unlock_num", rule.UnlockNum),
+		d.Set("priority", rule.Priority),
+		d.Set("start", rule.Start),
+		d.Set("terminal", rule.Terminal),
+		d.Set("time", d.Get("time").(bool)),
 		d.Set("status", rule.Status),
 		d.Set("created_at", rule.CreatedAt),
 	)
@@ -331,9 +258,8 @@ func resourceWafDedicatedCcRuleV1Read(ctx context.Context, d *schema.ResourceDat
 
 	action := []map[string]interface{}{
 		{
-			"category":     rule.Action.Category,
-			"content_type": rule.Action.Detail.Response.ContentType,
-			"content":      rule.Action.Detail.Response.Content,
+			"category":           rule.Action.Category,
+			"followed_action_id": rule.Action.FollowedActionId,
 		},
 	}
 	mErr = multierror.Append(mErr,
@@ -348,7 +274,7 @@ func resourceWafDedicatedCcRuleV1Read(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceWafDedicatedCcRuleV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafDedicatedPreciseProtectionRuleV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
 		return config.WafDedicatedV1Client(config.GetRegion(d))
@@ -358,9 +284,9 @@ func resourceWafDedicatedCcRuleV1Delete(ctx context.Context, d *schema.ResourceD
 	}
 
 	policyID := d.Get("policy_id").(string)
-	err = rules.DeleteCcRule(client, policyID, d.Id())
+	err = rules.DeleteCustomRule(client, policyID, d.Id())
 	if err != nil {
-		return fmterr.Errorf("error deleting OpenTelekomCloud WAF Dedicated CC Attack Protection Rule: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud WAF Dedicated Precise Protection Rule: %s", err)
 	}
 
 	d.SetId("")

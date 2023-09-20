@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/apparentlymart/go-cidr v1.1.0
 	github.com/aws/aws-sdk-go v1.37.0
+	github.com/go-sql-driver/mysql v1.7.1
 	github.com/hashicorp/go-cleanhttp v0.5.2
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
 	github.com/hashicorp/go-multierror v1.1.1
@@ -14,7 +15,7 @@ require (
 	github.com/jinzhu/copier v0.3.5
 	github.com/keybase/go-crypto v0.0.0-20200123153347-de78d2cb44f4
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/opentelekomcloud/gophertelekomcloud v0.8.0
+	github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20230919120330-a995298c32fa
 	github.com/unknwon/com v1.0.1
 	golang.org/x/crypto v0.1.0
 	golang.org/x/sync v0.1.0
@@ -26,7 +27,6 @@ require (
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect

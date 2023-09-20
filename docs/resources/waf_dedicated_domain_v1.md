@@ -3,7 +3,7 @@ subcategory: "Dedicated Web Application Firewall (WAFD)"
 ---
 
 Up-to-date reference of API arguments for WAF dedicated domain you can get at
-`https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/managing_websites_protected_in_dedicated_mode/index.html`.
+[Official Docs Portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/managing_websites_protected_in_dedicated_mode/index.html).
 
 # opentelekomcloud_waf_dedicated_domain_v1
 
