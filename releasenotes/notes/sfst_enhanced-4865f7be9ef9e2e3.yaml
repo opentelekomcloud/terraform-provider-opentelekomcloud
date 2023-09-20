@@ -1,0 +1,7 @@
+---
+enhancements:
+  - |
+    **[SFS]** Add enhanced share support for ``resource/opentelekomcloud_sfs_turbo_share_v1`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+fixes:
+  - |
+    **[WAF]** Fix pointer for attribute in ``resource/opentelekomcloud_dns_recordset_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
