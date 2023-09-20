@@ -3,7 +3,7 @@ subcategory: "Dedicated Web Application Firewall (WAFD)"
 ---
 
 Up-to-date reference of API arguments for WAF dedicated Web Tamper rule you can get at
-`https://docs-beta.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_a_web_tamper_protection_rule.html`.
+[Official Docs Portal](https://docs-beta.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_a_web_tamper_protection_rule.html).
 
 # opentelekomcloud_waf_dedicated_web_tamper_rule_v1
 

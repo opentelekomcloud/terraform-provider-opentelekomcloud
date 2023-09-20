@@ -32,6 +32,7 @@ func TestAccWafDedicatedAntiLeakageRuleV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(wafdAntiLeakageRuleName, "contents.0", "id_card"),
 					resource.TestCheckResourceAttr(wafdAntiLeakageRuleName, "category", "sensitive"),
 					resource.TestCheckResourceAttr(wafdAntiLeakageRuleName, "description", "test description"),
+					resource.TestCheckResourceAttr(wafdAntiLeakageRuleName, "status", "1"),
 				),
 			},
 			{
@@ -43,6 +44,7 @@ func TestAccWafDedicatedAntiLeakageRuleV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(wafdAntiLeakageRuleName, "contents.0", "id_card"),
 					resource.TestCheckResourceAttr(wafdAntiLeakageRuleName, "category", "sensitive"),
 					resource.TestCheckResourceAttr(wafdAntiLeakageRuleName, "description", "test description updated"),
+					resource.TestCheckResourceAttr(wafdAntiLeakageRuleName, "status", "1"),
 				),
 			},
 			{

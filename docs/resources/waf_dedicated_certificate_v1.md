@@ -3,7 +3,7 @@ subcategory: "Dedicated Web Application Firewall (WAFD)"
 ---
 
 Up-to-date reference of API arguments for WAF dedicated certificate you can get at
-`https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/certificate_management/index.html`.
+[Official Docs Portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/certificate_management/index.html).
 
 # opentelekomcloud_waf_dedicated_certificate_v1
 

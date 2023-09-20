@@ -29,7 +29,7 @@ func TestAccWafDedicatedAlarmMaskingRuleV1_basic(t *testing.T) {
 					testAccCheckWafDedicatedAlarmMaskingRuleV1Exists(wafdAlarmMaskingRuleName, &rule),
 					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "domains.#", "1"),
 					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "domains.0", "www.example.com"),
-					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "rule", "091004"),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "rule", "all"),
 					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "description", "description"),
 					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "conditions.#", "1"),
 					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "conditions.0.category", "url"),

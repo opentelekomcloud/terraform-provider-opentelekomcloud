@@ -10,24 +10,24 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf-premium/v1/rules"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
-func ResourceWafDedicatedAlarmMaskingRuleV1() *schema.Resource {
+func ResourceWafDedicatedPreciseProtectionRuleV1() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceWafDedicatedAlarmMaskingRuleV1Create,
-		ReadContext:   resourceWafDedicatedAlarmMaskingRuleV1Read,
-		DeleteContext: resourceWafDedicatedAlarmMaskingRuleV1Delete,
+		CreateContext: resourceWafDedicatedPreciseProtectionRuleV1Create,
+		ReadContext:   resourceWafDedicatedPreciseProtectionRuleV1Read,
+		DeleteContext: resourceWafDedicatedPreciseProtectionRuleV1Delete,
 		Importer: &schema.ResourceImporter{
 			StateContext: common.ImportByPath("policy_id", "id"),
 		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
-			Update: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
@@ -37,34 +37,56 @@ func ResourceWafDedicatedAlarmMaskingRuleV1() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"domains": {
-				Type:     schema.TypeList,
+			"time": {
+				Type:     schema.TypeBool,
 				Required: true,
 				ForceNew: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"start": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+			"terminal": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"conditions": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"category": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 							ForceNew: true,
 							ValidateFunc: validation.StringInSlice(
-								[]string{"url", "ip", "params", "cookie", "header"},
+								[]string{"url", "user-agent", "referer", "ip",
+									"method", "request_line", "request", "params",
+									"cookie", "header",
+								},
 								false),
 						},
 						"logic_operation": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"contain", "not_contain", "equal",
 								"not_equal", "prefix", "not_prefix",
-								"suffix", "not_suffix",
+								"suffix", "not_suffix", "contain_any",
+								"not_contain_all", "equal_any", "not_equal_all",
+								"prefix_any", "not_prefix_all", "suffix_any",
+								"not_suffix_all", "num_greater", "num_less",
+								"num_equal", "num_not_equal", "exist",
+								"not_exist",
 							}, false),
 						},
 						"contents": {
@@ -75,6 +97,11 @@ func ResourceWafDedicatedAlarmMaskingRuleV1() *schema.Resource {
 								Type: schema.TypeString,
 							},
 						},
+						"value_list_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
 						"index": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -83,21 +110,21 @@ func ResourceWafDedicatedAlarmMaskingRuleV1() *schema.Resource {
 					},
 				},
 			},
-			"advanced_settings": {
-				Type:     schema.TypeList,
-				Optional: true,
+			"action": {
+				Type:     schema.TypeSet,
+				Required: true,
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"contents": {
-							Type:     schema.TypeList,
-							Optional: true,
+						"category": {
+							Type:     schema.TypeString,
+							Required: true,
 							ForceNew: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
+							ValidateFunc: validation.StringInSlice(
+								[]string{"block", "pass", "log"},
+								false),
 						},
-						"index": {
+						"followed_action_id": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
@@ -105,14 +132,9 @@ func ResourceWafDedicatedAlarmMaskingRuleV1() *schema.Resource {
 					},
 				},
 			},
-			"rule": {
-				Type:     schema.TypeString,
+			"priority": {
+				Type:     schema.TypeInt,
 				Required: true,
-				ForceNew: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
 				ForceNew: true,
 			},
 			"status": {
@@ -127,17 +149,26 @@ func ResourceWafDedicatedAlarmMaskingRuleV1() *schema.Resource {
 	}
 }
 
-func getDomains(d *schema.ResourceData) []string {
-	domains := d.Get("domains").([]interface{})
-	dom := make([]string, len(domains))
-	for i, domain := range domains {
-		dom[i] = domain.(string)
+func resourceWafDedicatedPreciseProtectionRuleV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.WafDedicatedV1Client(config.GetRegion(d))
+	})
+	if err != nil {
+		return fmterr.Errorf(errCreationV1DedicatedClient, err)
 	}
-	return dom
-}
 
-func getAmConditions(d *schema.ResourceData) []rules.IgnoreCondition {
-	var conditionList []rules.IgnoreCondition
+	rawActionList := d.Get("action").(*schema.Set).List()
+	var action rules.CustomActionObject
+	if len(rawActionList) > 0 {
+		rawAction := rawActionList[0].(map[string]interface{})
+		action = rules.CustomActionObject{
+			Category:         rawAction["category"].(string),
+			FollowedActionId: rawAction["followed_action_id"].(string),
+		}
+	}
+
+	var conditionList []rules.CustomConditionsObject
 	conditions := d.Get("conditions").([]interface{})
 	for _, c := range conditions {
 		cond := c.(map[string]interface{})
@@ -148,70 +179,40 @@ func getAmConditions(d *schema.ResourceData) []rules.IgnoreCondition {
 			contents[i] = content.(string)
 		}
 
-		condition := rules.IgnoreCondition{
+		condition := rules.CustomConditionsObject{
 			Category:       cond["category"].(string),
 			Index:          cond["index"].(string),
 			LogicOperation: cond["logic_operation"].(string),
+			ValueListId:    cond["value_list_id"].(string),
 			Contents:       contents,
 		}
 		conditionList = append(conditionList, condition)
 	}
-	return conditionList
-}
 
-func getAmAdvancedSettings(d *schema.ResourceData) []rules.AdvancedIgnoreObject {
-	var advancedList []rules.AdvancedIgnoreObject
-	advanced := d.Get("advanced_settings").([]interface{})
-	for _, a := range advanced {
-		adv := a.(map[string]interface{})
-		contentsRaw := adv["contents"].([]interface{})
-		contents := make([]string, len(contentsRaw))
-
-		for i, content := range contentsRaw {
-			contents[i] = content.(string)
-		}
-
-		advancedObj := rules.AdvancedIgnoreObject{
-			Index:    adv["index"].(string),
-			Contents: contents,
-		}
-		advancedList = append(advancedList, advancedObj)
-	}
-	return advancedList
-}
-
-func resourceWafDedicatedAlarmMaskingRuleV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*cfg.Config)
-	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.WafDedicatedV1Client(config.GetRegion(d))
-	})
-	if err != nil {
-		return fmterr.Errorf(errCreationV1DedicatedClient, err)
-	}
-
-	createOpts := rules.CreateIgnoreOpts{
-		Domains:     getDomains(d),
-		Conditions:  getAmConditions(d),
-		Mode:        1,
-		Rule:        d.Get("rule").(string),
-		Advanced:    getAmAdvancedSettings(d),
+	createOpts := rules.CreateCustomOpts{
+		Time:        pointerto.Bool(d.Get("time").(bool)),
+		Start:       int64(d.Get("start").(int)),
+		Terminal:    int64(d.Get("terminal").(int)),
 		Description: d.Get("description").(string),
+		Conditions:  conditionList,
+		Action:      &action,
+		Priority:    pointerto.Int(d.Get("priority").(int)),
 	}
 
 	policyID := d.Get("policy_id").(string)
-	rule, err := rules.CreateIgnore(client, policyID, createOpts)
+	rule, err := rules.CreateCustom(client, policyID, createOpts)
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud WAF Dedicated Alarms Masking Rule: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF Dedicated Precise Protection Rule: %s", err)
 	}
 
-	log.Printf("[DEBUG] Waf dedicated alarm masking rule created: %#v", rule)
+	log.Printf("[DEBUG] Waf dedicated precise protection rule created: %#v", rule)
 	d.SetId(rule.ID)
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
-	return resourceWafDedicatedAlarmMaskingRuleV1Read(clientCtx, d, meta)
+	return resourceWafDedicatedPreciseProtectionRuleV1Read(clientCtx, d, meta)
 }
 
-func resourceWafDedicatedAlarmMaskingRuleV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafDedicatedPreciseProtectionRuleV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
 		return config.WafDedicatedV1Client(config.GetRegion(d))
@@ -221,7 +222,7 @@ func resourceWafDedicatedAlarmMaskingRuleV1Read(ctx context.Context, d *schema.R
 	}
 
 	policyID := d.Get("policy_id").(string)
-	rule, err := rules.GetIgnore(client, policyID, d.Id())
+	rule, err := rules.GetCustom(client, policyID, d.Id())
 
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -229,15 +230,16 @@ func resourceWafDedicatedAlarmMaskingRuleV1Read(ctx context.Context, d *schema.R
 			return nil
 		}
 
-		return fmterr.Errorf("error retrieving OpenTelekomCloud Waf Dedicated Alarm Masking Rule: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Waf Dedicated Precise Protection Rule: %s", err)
 	}
 
 	mErr := multierror.Append(
 		d.Set("policy_id", rule.PolicyId),
-		d.Set("rule", rule.Rule),
-		d.Set("advanced_settings", rule.Advanced),
-		d.Set("domains", rule.Domains),
 		d.Set("description", rule.Description),
+		d.Set("priority", rule.Priority),
+		d.Set("start", rule.Start),
+		d.Set("terminal", rule.Terminal),
+		d.Set("time", d.Get("time").(bool)),
 		d.Set("status", rule.Status),
 		d.Set("created_at", rule.CreatedAt),
 	)
@@ -249,21 +251,20 @@ func resourceWafDedicatedAlarmMaskingRuleV1Read(ctx context.Context, d *schema.R
 			"index":           conditionObj.Index,
 			"contents":        conditionObj.Contents,
 			"logic_operation": conditionObj.LogicOperation,
+			"value_list_id":   conditionObj.ValueListId,
 		}
 		conditions = append(conditions, condition)
 	}
 
-	var advanced []map[string]interface{}
-	for _, advancedObj := range rule.Advanced {
-		adv := map[string]interface{}{
-			"index":    advancedObj.Index,
-			"contents": advancedObj.Contents,
-		}
-		advanced = append(advanced, adv)
+	action := []map[string]interface{}{
+		{
+			"category":           rule.Action.Category,
+			"followed_action_id": rule.Action.FollowedActionId,
+		},
 	}
 	mErr = multierror.Append(mErr,
 		d.Set("conditions", conditions),
-		d.Set("advanced_settings", advanced),
+		d.Set("action", action),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -273,7 +274,7 @@ func resourceWafDedicatedAlarmMaskingRuleV1Read(ctx context.Context, d *schema.R
 	return nil
 }
 
-func resourceWafDedicatedAlarmMaskingRuleV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafDedicatedPreciseProtectionRuleV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
 		return config.WafDedicatedV1Client(config.GetRegion(d))
@@ -283,9 +284,9 @@ func resourceWafDedicatedAlarmMaskingRuleV1Delete(ctx context.Context, d *schema
 	}
 
 	policyID := d.Get("policy_id").(string)
-	err = rules.DeleteIgnoreRule(client, policyID, d.Id())
+	err = rules.DeleteCustomRule(client, policyID, d.Id())
 	if err != nil {
-		return fmterr.Errorf("error deleting OpenTelekomCloud WAF Dedicated Alarm Masking Rule: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud WAF Dedicated Precise Protection Rule: %s", err)
 	}
 
 	d.SetId("")

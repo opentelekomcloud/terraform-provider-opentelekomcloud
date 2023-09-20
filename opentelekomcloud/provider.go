@@ -516,6 +516,8 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_waf_dedicated_anti_leakage_rule_v1":        waf.ResourceWafDedicatedAntiLeakageRuleV1(),
 			"opentelekomcloud_waf_dedicated_alarm_masking_rule_v1":       waf.ResourceWafDedicatedAlarmMaskingRuleV1(),
 			"opentelekomcloud_waf_dedicated_geo_ip_rule_v1":              waf.ResourceWafDedicatedGeoIpRuleV1(),
+			"opentelekomcloud_waf_dedicated_blacklist_rule_v1":           waf.ResourceWafDedicatedBlacklistRuleV1(),
+			"opentelekomcloud_waf_dedicated_precise_protection_rule_v1":  waf.ResourceWafDedicatedPreciseProtectionRuleV1(),
 		},
 	}
 
