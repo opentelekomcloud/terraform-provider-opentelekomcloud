@@ -1,10 +1,3 @@
-```{toctree}
-:maxdepth: 2
-:hidden:
-data-sources/index
-resources/index
-```
-
 # Open Telekom Cloud Provider
 
 The Open Telekom Cloud provider is used to interact with the
@@ -334,3 +327,14 @@ variables must also be set:
 
 You should be able to use any OpenTelekomCloud environment to develop on as long as the
 above environment variables are set.
+
+<div style="visibility:hidden">
+
+```{toctree}
+:maxdepth: 2
+:hidden:
+data-sources/index
+resources/index
+```
+
+</div>
