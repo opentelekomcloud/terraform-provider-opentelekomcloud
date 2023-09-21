@@ -46,7 +46,7 @@ smartquotes = False
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = '.md'
 
 # The encoding of source files.
 #
