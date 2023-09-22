@@ -20,6 +20,7 @@
     default-branch: devel
     templates:
       - release-notes-jobs
+      - helpcenter-base-jobs
     check:
       jobs:
         - otc-golangci-lint
