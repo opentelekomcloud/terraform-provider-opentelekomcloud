@@ -28,3 +28,10 @@ localrc
 
 dist
 releasenotes/build
+
+# Sphinx documentation
+docs/build
+docs/resources/index.md
+docs/data-sources/index.md
+.tox/
+terraform_provider_opentelekomcloud.egg-info/
