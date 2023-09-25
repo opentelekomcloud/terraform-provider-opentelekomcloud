@@ -122,6 +122,28 @@ func ResourceListenerV2() *schema.Resource {
 				Default:  true,
 				Optional: true,
 			},
+			"ip_group": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"enable": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+					},
+				},
+			},
 			"tags": common.TagsSchema(),
 		},
 	}
@@ -196,12 +218,15 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 			return fmterr.Errorf("error setting tags of LoadBalancer: %s", err)
 		}
 	}
-
 	d.SetId(listener.ID)
 
 	// using v3 API
 	if err := updateTransparentIPEnable(d, config); err != nil {
 		return fmterr.Errorf("error updating ELB v2 Listener `transparent_client_ip_enable`: %w", err)
+	}
+
+	if err := updateIpGroup(d, config, "create"); err != nil {
+		return fmterr.Errorf("error updating ELB v2 Listener `ip_group`: %w", err)
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)
@@ -240,9 +265,8 @@ func resourceListenerV2Read(ctx context.Context, d *schema.ResourceData, meta in
 		d.Set("admin_state_up", listener.AdminStateUp),
 
 		// done using v3 API
-		readTransparentIPEnable(d, config),
+		readV3parameters(d, config),
 	)
-
 	if mErr.ErrorOrNil() != nil {
 		return diag.FromErr(mErr)
 	}
@@ -340,6 +364,12 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
+	if d.HasChange("ip_group") {
+		if err := updateIpGroup(d, config, "update"); err != nil {
+			return fmterr.Errorf("error updating ELB v2 Listener `ip_group`: %w", err)
+		}
+	}
+
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)
 	return resourceListenerV2Read(clientCtx, d, meta)
 }
@@ -401,7 +431,7 @@ func elbV3Client(config *cfg.Config, region string) (*golangsdk.ServiceClient, e
 	return client, nil
 }
 
-func readTransparentIPEnable(d *schema.ResourceData, config *cfg.Config) error {
+func readV3parameters(d *schema.ResourceData, config *cfg.Config) error {
 	client, err := elbV3Client(config, config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf(v3.ErrCreateClient, err)
@@ -410,7 +440,25 @@ func readTransparentIPEnable(d *schema.ResourceData, config *cfg.Config) error {
 	if err != nil {
 		return err
 	}
-	return d.Set("transparent_client_ip_enable", listener.TransparentClientIP)
+	var ipGroup []map[string]interface{}
+	if listener.IpGroup.Enable != nil {
+		ipGroup = []map[string]interface{}{
+			{
+				"id":     listener.IpGroup.IpGroupID,
+				"enable": listener.IpGroup.Enable,
+				"type":   listener.IpGroup.Type,
+			},
+		}
+	}
+	mErr := multierror.Append(nil,
+		d.Set("transparent_client_ip_enable", listener.TransparentClientIP),
+		d.Set("ip_group", ipGroup),
+	)
+
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
+	return nil
 }
 
 func updateTransparentIPEnable(d *schema.ResourceData, config *cfg.Config) error {
@@ -427,6 +475,35 @@ func updateTransparentIPEnable(d *schema.ResourceData, config *cfg.Config) error
 
 	opts := v3listeners.UpdateOpts{TransparentClientIP: &enable}
 	_, err = v3listeners.Update(client, d.Id(), opts).Extract()
+	return err
+}
+
+func updateIpGroup(d *schema.ResourceData, config *cfg.Config, action string) error {
+	if action == "create" && d.Get("ip_group.#").(int) == 0 {
+		return nil
+	}
+	client, err := elbV3Client(config, config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf(v3.ErrCreateClient, err)
+	}
+	ipGroupRaw := d.Get("ip_group.0").(map[string]interface{})
+	enable := ipGroupRaw["enable"].(bool)
+
+	var opts v3listeners.UpdateOpts
+	opts.IpGroup = &v3listeners.IpGroupUpdate{
+		IpGroupId: ipGroupRaw["id"].(string),
+		Enable:    &enable,
+		Type:      ipGroupRaw["type"].(string),
+	}
+	if ipGroupRaw["id"].(string) == "" {
+		opts.IpGroup = &v3listeners.IpGroupUpdate{}
+	}
+
+	log.Printf("[DEBUG] Updating listener %s with options: %#v", d.Id(), opts)
+	_, err = v3listeners.Update(client, d.Id(), opts).Extract()
+	if err != nil {
+		return fmt.Errorf("unable to update Listener %s: %s", d.Id(), err)
+	}
 	return err
 }
 
