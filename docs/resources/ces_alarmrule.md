@@ -63,7 +63,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
   condition {
     period              = 300
     filter              = "average"
-    comparison_operator = "\>"
+    comparison_operator = ">"
     value               = 6
     unit                = "B/s"
     count               = 1
