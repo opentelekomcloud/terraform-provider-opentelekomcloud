@@ -163,6 +163,40 @@ func TestAccLBV2Listener_SSLPassthrough(t *testing.T) {
 	})
 }
 
+func TestAccLBV2Listener_v3listener(t *testing.T) {
+	resourceName := "opentelekomcloud_lb_listener_v2.listener_1"
+	resourceNameV3 := "opentelekomcloud_lb_listener_v3.listener_2"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.LoadBalancer, Count: 1},
+				{Q: quotas.LbListener, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV2IpGroupAssignmentWithV3Listener,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", "listener_1"),
+					resource.TestCheckResourceAttr(resourceNameV3, "ip_group.0.type", "white"),
+				),
+			},
+			{
+				Config: testAccLBV2IpGroupAssignmentWithV3Listener_update,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", "listener_1_updated"),
+					resource.TestCheckResourceAttr(resourceNameV3, "ip_group.0.type", "black"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccLBV3Listener_import(t *testing.T) {
 	resourceName := "opentelekomcloud_lb_listener_v2.listener_1"
 	t.Parallel()
@@ -665,3 +699,93 @@ resource "opentelekomcloud_lb_listener_v2" "elb_listener" {
 }
 `, common.DataSourceSubnet, count)
 }
+
+var testAccLBV2IpGroupAssignmentWithV3Listener = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
+  name          = "loadbalancer_1"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+}
+
+resource "opentelekomcloud_lb_listener_v2" "listener_1" {
+  name            = "listener_1"
+  protocol        = "HTTP"
+  protocol_port   = 8080
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
+}
+
+resource "opentelekomcloud_lb_whitelist_v2" "whitelist_1" {
+  enable_whitelist = true
+  whitelist        = "192.168.11.1,192.168.0.1/24"
+  listener_id      = opentelekomcloud_lb_listener_v2.listener_1.id
+}
+
+resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
+  name        = "group_1"
+  description = "some interesting description 1"
+
+  ip_list {
+    ip          = "192.168.10.10"
+    description = "first"
+  }
+}
+
+resource "opentelekomcloud_lb_listener_v3" "listener_2" {
+  name            = "listener_2"
+  protocol        = "HTTP"
+  protocol_port   = 8088
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
+
+  ip_group {
+    id     = opentelekomcloud_lb_ipgroup_v3.group_1.id
+    enable = true
+    type   = "white"
+  }
+}
+`, common.DataSourceSubnet)
+
+var testAccLBV2IpGroupAssignmentWithV3Listener_update = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
+  name          = "loadbalancer_1"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+}
+
+resource "opentelekomcloud_lb_listener_v2" "listener_1" {
+  name            = "listener_1_updated"
+  protocol        = "HTTP"
+  protocol_port   = 8080
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
+}
+
+resource "opentelekomcloud_lb_whitelist_v2" "whitelist_1" {
+  enable_whitelist = true
+  whitelist        = "192.168.11.1,192.168.0.1/24"
+  listener_id      = opentelekomcloud_lb_listener_v2.listener_1.id
+}
+
+resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
+  name        = "group_1"
+  description = "some interesting description 1"
+
+  ip_list {
+    ip          = "192.168.10.10"
+    description = "first"
+  }
+}
+
+resource "opentelekomcloud_lb_listener_v3" "listener_2" {
+  name            = "listener_2"
+  protocol        = "HTTP"
+  protocol_port   = 8088
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
+
+  ip_group {
+    id     = opentelekomcloud_lb_ipgroup_v3.group_1.id
+    enable = true
+    type   = "black"
+  }
+}
+`, common.DataSourceSubnet)
