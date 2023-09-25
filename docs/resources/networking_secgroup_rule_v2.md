@@ -38,7 +38,7 @@ But for `Any` values must be:
 * `port_range_min` = 0
 * `port_range_max` = 255
 
-#### Echo
+### Echo
 ```hcl
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name        = "secgroup_1"
@@ -56,7 +56,7 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_icmp_echo
 }
 ```
 
-#### Any
+### Any
 ```hcl
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name        = "secgroup_1"
