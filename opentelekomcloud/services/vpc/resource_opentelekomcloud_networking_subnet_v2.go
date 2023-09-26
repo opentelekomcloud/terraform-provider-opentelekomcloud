@@ -345,8 +345,8 @@ func resourceNetworkingSubnetV2Delete(ctx context.Context, d *schema.ResourceDat
 		Target:     []string{"DELETED"},
 		Refresh:    waitForSubnetDelete(networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Delay:      10 * time.Second,
+		MinTimeout: 6 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)

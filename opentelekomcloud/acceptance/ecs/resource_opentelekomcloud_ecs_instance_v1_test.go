@@ -19,7 +19,7 @@ const resourceInstanceV1Name = "opentelekomcloud_ecs_instance_v1.instance_1"
 
 func TestAccEcsV1InstanceBasic(t *testing.T) {
 	var instance cloudservers.CloudServer
-	qts := serverQuotas(10+4, "s2.medium.1")
+	qts := serverQuotas(10+4, getFlavorName())
 	t.Parallel()
 	quotas.BookMany(t, qts)
 
@@ -54,7 +54,7 @@ func TestAccEcsV1InstanceBasic(t *testing.T) {
 
 func TestAccEcsV1InstanceIp(t *testing.T) {
 	var instance cloudservers.CloudServer
-	qts := serverQuotas(10+4, "s2.medium.1")
+	qts := serverQuotas(10+4, getFlavorName())
 	t.Parallel()
 	quotas.BookMany(t, qts)
 
@@ -79,7 +79,7 @@ func TestAccEcsV1InstanceIp(t *testing.T) {
 
 func TestAccEcsV1InstanceDeleted(t *testing.T) {
 	var instance cloudservers.CloudServer
-	qts := serverQuotas(10+4, "s2.medium.1")
+	qts := serverQuotas(10+4, getFlavorName())
 	t.Parallel()
 	quotas.BookMany(t, qts)
 
@@ -122,7 +122,7 @@ func testAccEcsV1InstanceDeleted(t *testing.T, id string) {
 
 func TestAccEcsV1Instance_import(t *testing.T) {
 	t.Parallel()
-	qts := serverQuotas(10+4, "s2.medium.1")
+	qts := serverQuotas(10+4, getFlavorName())
 	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
@@ -173,7 +173,7 @@ func TestAccEcsV1InstanceDiskTypeValidation(t *testing.T) {
 }
 
 func TestAccEcsV1InstanceVPCValidation(t *testing.T) {
-	qts := serverQuotas(4, "s2.medium.1")
+	qts := serverQuotas(4, getFlavorName())
 	t.Parallel()
 	quotas.BookMany(t, qts)
 
@@ -195,7 +195,7 @@ func TestAccEcsV1InstanceVPCValidation(t *testing.T) {
 
 func TestAccEcsV1InstanceEncryption(t *testing.T) {
 	var instance cloudservers.CloudServer
-	qts := serverQuotas(10+4, "s2.medium.1")
+	qts := serverQuotas(10+4, getFlavorName())
 	t.Parallel()
 	quotas.BookMany(t, qts)
 
@@ -222,7 +222,7 @@ func TestAccEcsV1InstanceEncryption(t *testing.T) {
 
 func TestAccEcsV1InstanceVolumeAttach(t *testing.T) {
 	var instance cloudservers.CloudServer
-	qts := serverQuotas(10+4, "s2.medium.1")
+	qts := serverQuotas(10+4, getFlavorName())
 	t.Parallel()
 	quotas.BookMany(t, qts)
 
@@ -315,7 +315,7 @@ var testAccEcsV1InstanceBasic = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
-  flavor   = "s2.medium.1"
+  flavor   = "%s"
   vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
@@ -337,7 +337,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     kuh = "value-create"
   }
 }
-`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceImage, common.DataSourceSubnet, getFlavorName(), env.OS_AVAILABILITY_ZONE)
 
 var testAccEcsV1InstanceUpdate = fmt.Sprintf(`
 %s
@@ -349,7 +349,7 @@ var testAccEcsV1InstanceUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_updated"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
-  flavor   = "s2.medium.1"
+  flavor   = "%s"
   vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
@@ -371,7 +371,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     muh = "value-update"
   }
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, getFlavorName(), env.OS_AVAILABILITY_ZONE)
 
 var testAccEcsV1InstanceInvalidTypeForAZ = fmt.Sprintf(`
 %s
@@ -382,7 +382,7 @@ var testAccEcsV1InstanceInvalidTypeForAZ = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
-  flavor   = "s2.medium.1"
+  flavor   = "%s"
   vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
@@ -400,7 +400,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, common.DataSourceImage, common.DataSourceSubnet)
+`, common.DataSourceImage, common.DataSourceSubnet, getFlavorName())
 
 var testAccEcsV1InstanceInvalidType = fmt.Sprintf(`
 %s
@@ -410,7 +410,7 @@ var testAccEcsV1InstanceInvalidType = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
-  flavor   = "s2.medium.1"
+  flavor   = "%s"
   vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
@@ -428,7 +428,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, common.DataSourceImage, common.DataSourceSubnet)
+`, common.DataSourceImage, common.DataSourceSubnet, getFlavorName())
 
 var testAccEcsV1InstanceInvalidDataDisk = fmt.Sprintf(`
 %s
@@ -438,7 +438,7 @@ var testAccEcsV1InstanceInvalidDataDisk = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
-  flavor   = "s2.medium.1"
+  flavor   = "%s"
   vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
@@ -460,7 +460,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, common.DataSourceImage, common.DataSourceSubnet)
+`, common.DataSourceImage, common.DataSourceSubnet, getFlavorName())
 
 var testAccEcsV1InstanceInvalidVPC = fmt.Sprintf(`
 %s
@@ -470,7 +470,7 @@ var testAccEcsV1InstanceInvalidVPC = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
-  flavor   = "s2.medium.1"
+  flavor   = "%s"
   vpc_id   = "abs"
 
   nics {
@@ -488,7 +488,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, common.DataSourceImage, common.DataSourceSubnet)
+`, common.DataSourceImage, common.DataSourceSubnet, getFlavorName())
 
 var testAccEcsV1InstanceComputedVPC = fmt.Sprintf(`
 %s
@@ -508,7 +508,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet" {
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
-  flavor   = "s2.medium.1"
+  flavor   = "%s"
   vpc_id   = opentelekomcloud_vpc_v1.vpc.id
 
   nics {
@@ -526,7 +526,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, common.DataSourceImage)
+`, common.DataSourceImage, getFlavorName())
 
 var testAccEcsV1InstanceDataVolumeEncryption = fmt.Sprintf(`
 %s
@@ -536,7 +536,7 @@ var testAccEcsV1InstanceDataVolumeEncryption = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
-  flavor   = "s2.medium.1"
+  flavor   = "%s"
   vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
@@ -555,7 +555,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   }
   delete_disks_on_termination = true
 }
-`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KMS_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, getFlavorName(), env.OS_AVAILABILITY_ZONE, env.OS_KMS_ID)
 
 var testAccEcsV1InstanceIp = fmt.Sprintf(`
 %s
@@ -571,7 +571,7 @@ resource "opentelekomcloud_networking_floatingip_v2" "this" {
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
-  flavor   = "s2.medium.1"
+  flavor   = "%s"
   vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
@@ -595,7 +595,7 @@ resource "opentelekomcloud_networking_floatingip_associate_v2" "this" {
   floating_ip = opentelekomcloud_networking_floatingip_v2.this.address
   port_id     = opentelekomcloud_ecs_instance_v1.instance_1.nics.0.port_id
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, getFlavorName(), env.OS_AVAILABILITY_ZONE)
 
 var testAccEcsV1InstanceAttachVolume = fmt.Sprintf(`
 %s
@@ -611,14 +611,13 @@ resource "opentelekomcloud_blockstorage_volume_v2" "myvol" {
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
-  flavor   = "s2.medium.1"
+  flavor   = "%s"
   vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   availability_zone = "%s"
 
   nics {
     network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-    ip_address = "10.0.2.32"
   }
 
 }
@@ -627,7 +626,7 @@ resource "opentelekomcloud_compute_volume_attach_v2" "attached" {
   instance_id = opentelekomcloud_ecs_instance_v1.instance_1.id
   volume_id   = opentelekomcloud_blockstorage_volume_v2.myvol.id
 }
-`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, getFlavorName(), env.OS_AVAILABILITY_ZONE)
 
 var testAccEcsV1InstanceAttachVolumeRepeat = fmt.Sprintf(`
 %s
@@ -643,14 +642,13 @@ resource "opentelekomcloud_blockstorage_volume_v2" "myvol" {
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
-  flavor   = "s2.medium.1"
+  flavor   = "%s"
   vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   availability_zone = "%s"
 
   nics {
     network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-    ip_address = "10.0.2.32"
   }
 
 }
@@ -659,4 +657,4 @@ resource "opentelekomcloud_compute_volume_attach_v2" "attached" {
   instance_id = opentelekomcloud_ecs_instance_v1.instance_1.id
   volume_id   = opentelekomcloud_blockstorage_volume_v2.myvol.id
 }
-`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, getFlavorName(), env.OS_AVAILABILITY_ZONE)
