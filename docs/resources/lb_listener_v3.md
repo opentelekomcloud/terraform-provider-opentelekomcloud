@@ -156,7 +156,7 @@ In addition, the following attributes are exported:
 
 * `updated_at` - Indicates the update time.
 
-* `createa_at` - Indicates the creation time.
+* `created_at` - Indicates the creation time.
 
 ## Import
 

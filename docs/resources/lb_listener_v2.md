@@ -9,7 +9,7 @@ Up-to-date reference of API arguments for ELB listener you can get at
 
 Manages an Enhanced LB listener resource within OpenTelekomCloud.
 
-## Example Usage
+## Example Basic Usage
 
 ```hcl
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -19,6 +19,37 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
 
   tags = {
     muh = "kuh"
+  }
+}
+```
+
+## Example Ip Address Group
+
+```hcl
+resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
+  name          = "loadbalancer_1"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+}
+
+resource "opentelekomcloud_lb_ipgroup_v3" "group_1" {
+  name        = "group_1"
+  description = "some interesting description 1"
+
+  ip_list {
+    ip          = "192.168.10.10"
+    description = "first"
+  }
+}
+
+resource "opentelekomcloud_lb_listener_v2" "listener_1" {
+  name            = "listener_1_updated"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
+  protocol        = "HTTP"
+  protocol_port   = 8080
+
+  ip_group {
+    id     = opentelekomcloud_lb_ipgroup_v3.group_1.id
+    enable = false
   }
 }
 ```
@@ -84,6 +115,18 @@ The following arguments are supported:
 
 * `tags` - (Optional) Tags key/value pairs to associate with the loadbalancer listener.
 
+* `ip_group` - (Optional, List) Specifies the IP address group associated with the listener.
+  * `id` - (Required, String) Specifies the ID of the IP address group associated with the listener.
+    Specifies the ID of the IP address group associated with the listener.
+    If `ip_list` in `opentelekomcloud_lb_ipgroup_v3` is set to an empty array `[]` and type to `whitelist`, no IP addresses are allowed to access the listener.
+    If `ip_list` in `opentelekomcloud_lb_ipgroup_v3` is set to an empty array `[]` and type to `blacklist`, any IP address is allowed to access the listener.
+  * `enable` - (Optional, Bool) Specifies whether to enable access control.
+    `true` (default): Access control will be enabled.
+    `false`: Access control will be disabled.
+  * `type` - (Optional, String) Specifies how access to the listener is controlled.
+    `white` (default): A whitelist will be configured. Only IP addresses in the whitelist can access the listener.
+    `black`: A blacklist will be configured. IP addresses in the blacklist are not allowed to access the listener.
+  *
 ## Attributes Reference
 
 The following attributes are exported:
