@@ -11,12 +11,12 @@ Manages permanent access key for an OpenTelekomCloud user.
 
 ## Example Usage
 
-#### Create AK/SK for yourself
+### Create AK/SK for yourself
 ```hcl
 resource opentelekomcloud_identity_credential_v3 aksk {}
 ```
 
-#### Create user with AK/SK
+### Create user with AK/SK
 
 ```hcl
 resource opentelekomcloud_identity_user_v3 user {
