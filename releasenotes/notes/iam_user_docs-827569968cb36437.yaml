@@ -2,4 +2,4 @@
 fixes:
   - |
     **[IAM]** Fix ``resource/opentelekomcloud_identity_user_v3`` documentation
-    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/>`_)
+    (`#2323 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2323>`_)
