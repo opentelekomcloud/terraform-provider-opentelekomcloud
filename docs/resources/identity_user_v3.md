@@ -36,8 +36,7 @@ The following arguments are supported:
 * `phone` - (Optional) Specifies the mobile number with a maximum of 32 digits. This parameter must be used
   together with `country_code`.
 
-* `country_code` - (Optional) Specifies the country code. The country code of the Chinese mainland is 0086. This
-  parameter must be used together with `phone`.
+* `country_code` - (Optional) Specifies the country code. This parameter must be used together with `phone`.
 
 * `password` - (Optional) Specifies the password for the user with 6 to 32 characters. It must contain at least
   two of the following character types: uppercase letters, lowercase letters, digits, and special characters.
