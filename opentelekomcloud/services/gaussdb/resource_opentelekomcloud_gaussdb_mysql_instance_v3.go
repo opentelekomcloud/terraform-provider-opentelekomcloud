@@ -202,6 +202,18 @@ func ResourceGaussDBInstanceV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"node_count": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"created": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"nodes": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -374,7 +386,6 @@ func resourceGaussDBInstanceV3Create(ctx context.Context, d *schema.ResourceData
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	// Add password here, so it wouldn't show in the above log entry
 	createOpts.Password = d.Get("password").(string)
 
 	inst, err := instance.CreateInstance(client, createOpts)
@@ -385,11 +396,10 @@ func resourceGaussDBInstanceV3Create(ctx context.Context, d *schema.ResourceData
 	id := inst.Instance.Id
 	d.SetId(id)
 
-	// waiting for the instance to become ready
 	stateConf := &resource.StateChangeConf{
 		Pending:      []string{"BUILD", "BACKING UP"},
 		Target:       []string{"ACTIVE"},
-		Refresh:      GaussDBInstanceStateRefreshFunc(client, id),
+		Refresh:      GaussDBInstanceStateRefreshFunc(client, d.Id()),
 		Timeout:      d.Timeout(schema.TimeoutCreate),
 		Delay:        180 * time.Second,
 		PollInterval: 20 * time.Second,
@@ -431,7 +441,7 @@ func resourceGaussDBInstanceV3Read(_ context.Context, d *schema.ResourceData, me
 
 	port, err := strconv.Atoi(inst.Port)
 	if err != nil {
-		common.CheckDeletedDiag(d, err, "incorrect port")
+		common.CheckDeletedDiag(d, err, "incorrect port format")
 	}
 
 	mErr := multierror.Append(
@@ -457,6 +467,7 @@ func resourceGaussDBInstanceV3Read(_ context.Context, d *schema.ResourceData, me
 		d.Set("created", inst.Created),
 		d.Set("updated", inst.Updated),
 		d.Set("public_ip", inst.PublicIps),
+		d.Set("private_write_ip", []string{}),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
@@ -524,15 +535,14 @@ func resourceGaussDBInstanceV3Read(_ context.Context, d *schema.ResourceData, me
 	}
 
 	// save tags
-	var tag []map[string]interface{}
-	for _, sqlTag := range inst.Tags {
-		mapping := map[string]interface{}{
-			"key":   sqlTag.Key,
-			"value": sqlTag.Value,
-		}
-		tag = append(tag, mapping)
+	tagMap := make(map[string]string)
+	for _, v := range inst.Tags {
+		tagMap[v.Key] = v.Value
 	}
-	mErr = multierror.Append(d.Set("tags", tag))
+
+	if err := d.Set("tags", tagMap); err != nil {
+		return fmterr.Errorf("error saving tags for OpenTelekomCloud Mysql GaussDb: %s", err)
+	}
 
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
@@ -614,6 +624,7 @@ func resourceGaussDBInstanceV3Update(ctx context.Context, d *schema.ResourceData
 			}
 			createReplicaOpts := instance.CreateNodeOpts{
 				Priorities: priorities,
+				InstanceId: d.Id(),
 			}
 			log.Printf("[DEBUG] Create Replica Options: %+v", createReplicaOpts)
 
