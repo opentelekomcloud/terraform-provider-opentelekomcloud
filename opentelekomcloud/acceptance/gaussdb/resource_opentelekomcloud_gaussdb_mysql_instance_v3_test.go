@@ -23,13 +23,17 @@ func TestAccMysqlGaussdbInstanceV3Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", name),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "gaussdb.mysql.xlarge.x86.8"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "availability_zone_mode", "multi"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "charging_mode", "postPaid"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "port", "3306"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "ram", "128"),
 				),
 			},
 			{
 				Config: testAccGaussdbMySqlInstanceV3Update(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", name),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "gaussdb.mysql.xlarge.x86.8"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "gaussdb.mysql.2xlarge.x86.8"),
 				),
 			},
 		},
@@ -49,13 +53,7 @@ resource "opentelekomcloud_gaussdb_mysql_instance_v3" "instance" {
   password                 = "Test123!@#"
   availability_zone_mode   = "multi"
   master_availability_zone = "eu-de-01"
-  read_replicas = 1
-
-  tags = {
-    muh = "value-create"
-    kuh = "value-create"
-  }
-
+  read_replicas            = 1
 }
 `, common.DataSourceSubnet, common.DataSourceSecGroupDefault, postfix)
 }
@@ -73,13 +71,7 @@ resource "opentelekomcloud_gaussdb_mysql_instance_v3" "instance" {
   password                 = "Test123!@#"
   availability_zone_mode   = "multi"
   master_availability_zone = "eu-de-01"
-  read_replicas = 2
-
-  tags = {
-    muh = "value-create"
-    duh = "value-new"
-  }
-
+  read_replicas            = 1
 }
 `, common.DataSourceSubnet, common.DataSourceSecGroupDefault, postfix)
 }

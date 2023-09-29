@@ -167,8 +167,6 @@ func ResourceGaussDBInstanceV3() *schema.Resource {
 					},
 				},
 			},
-			"tags": common.TagsSchema(),
-
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -369,22 +367,6 @@ func resourceGaussDBInstanceV3Create(ctx context.Context, d *schema.ResourceData
 		createOpts.BackupStrategy = &backupOpts
 	}
 
-	// set tags
-	tagRaw := d.Get("tags").(map[string]interface{})
-	if len(tagRaw) > 0 {
-		var sqlTags []instance.MysqlTags
-
-		for k, v := range tagRaw {
-			tag := instance.MysqlTags{
-				Key:   k,
-				Value: v.(string),
-			}
-			sqlTags = append(sqlTags, tag)
-		}
-
-		createOpts.Tags = sqlTags
-	}
-
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	createOpts.Password = d.Get("password").(string)
 
@@ -532,16 +514,6 @@ func resourceGaussDBInstanceV3Read(_ context.Context, d *schema.ResourceData, me
 	mErr = multierror.Append(d.Set("backup_strategy", backupStrategyList))
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
-	}
-
-	// save tags
-	tagMap := make(map[string]string)
-	for _, v := range inst.Tags {
-		tagMap[v.Key] = v.Value
-	}
-
-	if err := d.Set("tags", tagMap); err != nil {
-		return fmterr.Errorf("error saving tags for OpenTelekomCloud Mysql GaussDb: %s", err)
 	}
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -692,14 +664,6 @@ func resourceGaussDBInstanceV3Update(ctx context.Context, d *schema.ResourceData
 		_, err = backup.UpdatePolicy(client, updateOpts)
 		if err != nil {
 			return fmterr.Errorf("error updating backup_strategy: %s", err)
-		}
-	}
-
-	// update tags
-	if d.HasChange("tags") {
-		tagErr := common.UpdateResourceTags(client, d, "instances", d.Id())
-		if tagErr != nil {
-			return fmterr.Errorf("error updating tags of Gaussdb mysql instance %q: %s", d.Id(), tagErr)
 		}
 	}
 
