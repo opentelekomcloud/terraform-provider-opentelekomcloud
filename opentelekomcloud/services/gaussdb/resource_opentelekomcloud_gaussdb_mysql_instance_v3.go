@@ -405,9 +405,6 @@ func resourceGaussDBInstanceV3Read(_ context.Context, d *schema.ResourceData, me
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "GaussDB instance")
 	}
-	if inst.Id == "" {
-		return fmterr.Errorf("error retrieving OpenTelekomCloud GaussDB instance: %s ", err)
-	}
 
 	log.Printf("[DEBUG] Retrieved instance %s: %#v", d.Id(), inst)
 
