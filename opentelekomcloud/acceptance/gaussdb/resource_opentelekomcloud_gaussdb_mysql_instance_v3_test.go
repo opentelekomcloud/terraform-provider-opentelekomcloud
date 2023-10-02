@@ -26,7 +26,7 @@ func TestAccMysqlGaussdbInstanceV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "availability_zone_mode", "multi"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "charging_mode", "postPaid"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "port", "3306"),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "ram", "128"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "nodes.0.ram", "32"),
 				),
 			},
 			{
@@ -35,6 +35,28 @@ func TestAccMysqlGaussdbInstanceV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", name),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "gaussdb.mysql.2xlarge.x86.8"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccGaussDBMySqlV3_importBasic(t *testing.T) {
+	name := "tf_gaussdb_import" + acctest.RandString(3)
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGaussdbMySqlInstanceV3Basic(name),
+			},
+
+			{
+				ResourceName:      instanceV3ResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"password",
+				},
 			},
 		},
 	})

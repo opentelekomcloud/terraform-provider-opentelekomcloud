@@ -165,3 +165,15 @@ GaussDB instance can be imported using the `id`, e.g.
 ```
 $ terraform import opentelekomcloud_gaussdb_mysql_instance_v3.instance_1 1a801c1e01e6458d8eed810912e29d0cin07
 ```
+
+Due to the security reasons, `password` can not be imported. It can be ignored as shown below.
+
+```hcl
+resource "opentelekomcloud_gaussdb_mysql_instance_v3" "instance_1" {
+  lifecycle {
+    ignore_changes = [
+      password,
+    ]
+  }
+}
+```

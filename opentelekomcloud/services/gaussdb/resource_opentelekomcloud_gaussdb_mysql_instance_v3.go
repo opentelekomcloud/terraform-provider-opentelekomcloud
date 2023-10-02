@@ -31,7 +31,7 @@ func ResourceGaussDBInstanceV3() *schema.Resource {
 		ReadContext:   resourceGaussDBInstanceV3Read,
 		DeleteContext: resourceGaussDBInstanceV3Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -375,8 +375,7 @@ func resourceGaussDBInstanceV3Create(ctx context.Context, d *schema.ResourceData
 		return fmterr.Errorf("error creating GaussDB instance : %s", err)
 	}
 
-	id := inst.Instance.Id
-	d.SetId(id)
+	d.SetId(inst.Instance.Id)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:      []string{"BUILD", "BACKING UP"},
@@ -389,7 +388,7 @@ func resourceGaussDBInstanceV3Create(ctx context.Context, d *schema.ResourceData
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", id, err)
+		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", d.Id(), err)
 	}
 
 	return resourceGaussDBInstanceV3Read(ctx, d, meta)
@@ -407,8 +406,7 @@ func resourceGaussDBInstanceV3Read(_ context.Context, d *schema.ResourceData, me
 		return common.CheckDeletedDiag(d, err, "GaussDB instance")
 	}
 	if inst.Id == "" {
-		d.SetId("")
-		return nil
+		return fmterr.Errorf("error retrieving OpenTelekomCloud GaussDB instance: %s ", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved instance %s: %#v", d.Id(), inst)
@@ -426,6 +424,8 @@ func resourceGaussDBInstanceV3Read(_ context.Context, d *schema.ResourceData, me
 		common.CheckDeletedDiag(d, err, "incorrect port format")
 	}
 
+	allNodes := *inst.Nodes
+
 	mErr := multierror.Append(
 		d.Set("region", inst.Region),
 		d.Set("project_id", inst.ProjectId),
@@ -433,6 +433,7 @@ func resourceGaussDBInstanceV3Read(_ context.Context, d *schema.ResourceData, me
 		d.Set("status", inst.Status),
 		d.Set("mode", inst.Type),
 		d.Set("vpc_id", inst.VpcId),
+		d.Set("flavor", allNodes[0].FlavorRef),
 		d.Set("subnet_id", inst.SubnetId),
 		d.Set("security_group_id", inst.SecurityGroupId),
 		d.Set("configuration_id", inst.ConfigurationId),
