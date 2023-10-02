@@ -30,6 +30,7 @@ import (
 	elbv3 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v3"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/evs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/fw"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/gaussdb"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/iam"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ims"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/kms"
@@ -389,6 +390,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_fw_firewall_group_v2":                      fw.ResourceFWFirewallGroupV2(),
 			"opentelekomcloud_fw_policy_v2":                              fw.ResourceFWPolicyV2(),
 			"opentelekomcloud_fw_rule_v2":                                fw.ResourceFWRuleV2(),
+			"opentelekomcloud_gaussdb_mysql_instance_v3":                 gaussdb.ResourceGaussDBInstanceV3(),
 			"opentelekomcloud_identity_agency_v3":                        iam.ResourceIdentityAgencyV3(),
 			"opentelekomcloud_identity_credential_v3":                    iam.ResourceIdentityCredentialV3(),
 			"opentelekomcloud_identity_group_v3":                         iam.ResourceIdentityGroupV3(),
