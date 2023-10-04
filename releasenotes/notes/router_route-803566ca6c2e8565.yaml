@@ -2,8 +2,8 @@
 deprecations:
   - |
     **[VPC]** Added deprecation warning for ``resource/opentelekomcloud_networking_router_route_v2``
-    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    (`#2328 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2328>`_)
 other:
   - |
     **[VPC]** Refactoring of ``resource/opentelekomcloud_networking_router_route_v2``
-    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    (`#2328 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2328>`_)

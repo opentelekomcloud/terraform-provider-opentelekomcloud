@@ -57,6 +57,9 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 	updateOpts := routers.UpdateOpts{}
 
 	routerId := d.Get("router_id").(string)
+	osMutexKV.Lock(routerId)
+	defer osMutexKV.Unlock(routerId)
+
 	destCidr := d.Get("destination_cidr").(string)
 	nextHop := d.Get("next_hop").(string)
 
@@ -65,7 +68,7 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Neutron Router: %s", err)
 	}
 
-	routeExists := false
+	var routeExists bool
 
 	rts := n.Routes
 	for _, r := range rts {
@@ -93,7 +96,7 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 		}
 		d.SetId(fmt.Sprintf("%s-route-%s-%s", routerId, destCidr, nextHop))
 	} else {
-		fmterr.Errorf("[DEBUG] Router %s has route already", routerId)
+		log.Printf("[DEBUG] Router %s has route already", routerId)
 	}
 
 	return resourceNetworkingRouterRouteV2Read(ctx, d, meta)
@@ -150,6 +153,8 @@ func resourceNetworkingRouterRouteV2Delete(_ context.Context, d *schema.Resource
 	}
 
 	routerId := d.Get("router_id").(string)
+	osMutexKV.Lock(routerId)
+	defer osMutexKV.Unlock(routerId)
 
 	n, err := routers.Get(networkingClient, routerId).Extract()
 	if err != nil {
