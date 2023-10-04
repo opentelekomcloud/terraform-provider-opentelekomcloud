@@ -8,8 +8,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/routers"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -18,9 +16,10 @@ import (
 
 func ResourceNetworkingRouterRouteV2() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceNetworkingRouterRouteV2Create,
-		ReadContext:   resourceNetworkingRouterRouteV2Read,
-		DeleteContext: resourceNetworkingRouterRouteV2Delete,
+		CreateContext:      resourceNetworkingRouterRouteV2Create,
+		ReadContext:        resourceNetworkingRouterRouteV2Read,
+		DeleteContext:      resourceNetworkingRouterRouteV2Delete,
+		DeprecationMessage: "use opentelekomcloud_vpc_route_v2 resource instead",
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -49,33 +48,29 @@ func ResourceNetworkingRouterRouteV2() *schema.Resource {
 }
 
 func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	routerId := d.Get("router_id").(string)
-	osMutexKV.Lock(routerId)
-	defer osMutexKV.Unlock(routerId)
-
-	var destCidr string = d.Get("destination_cidr").(string)
-	var nextHop string = d.Get("next_hop").(string)
-
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
+	updateOpts := routers.UpdateOpts{}
+
+	routerId := d.Get("router_id").(string)
+	osMutexKV.Lock(routerId)
+	defer osMutexKV.Unlock(routerId)
+
+	destCidr := d.Get("destination_cidr").(string)
+	nextHop := d.Get("next_hop").(string)
+
 	n, err := routers.Get(networkingClient, routerId).Extract()
 	if err != nil {
-		if _, ok := err.(golangsdk.ErrDefault404); ok {
-			d.SetId("")
-			return nil
-		}
-
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Neutron Router: %s", err)
 	}
 
-	var updateOpts routers.UpdateOpts
-	var routeExists bool = false
+	var routeExists bool
 
-	var rts []routers.Route = n.Routes
+	rts := n.Routes
 	for _, r := range rts {
 		if r.DestinationCIDR == destCidr && r.NextHop == nextHop {
 			routeExists = true
@@ -108,28 +103,23 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 }
 
 func resourceNetworkingRouterRouteV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	routerId := d.Get("router_id").(string)
-
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
+	routerId := d.Get("router_id").(string)
+
 	n, err := routers.Get(networkingClient, routerId).Extract()
 	if err != nil {
-		if _, ok := err.(golangsdk.ErrDefault404); ok {
-			d.SetId("")
-			return nil
-		}
-
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Neutron Router: %s", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved Router %s: %+v", routerId, n)
 
-	var destCidr string = d.Get("destination_cidr").(string)
-	var nextHop string = d.Get("next_hop").(string)
+	destCidr := d.Get("destination_cidr").(string)
+	nextHop := d.Get("next_hop").(string)
 
 	mErr := multierror.Append(
 		d.Set("next_hop", ""),
@@ -155,10 +145,6 @@ func resourceNetworkingRouterRouteV2Read(_ context.Context, d *schema.ResourceDa
 }
 
 func resourceNetworkingRouterRouteV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	routerId := d.Get("router_id").(string)
-	osMutexKV.Lock(routerId)
-	defer osMutexKV.Unlock(routerId)
-
 	config := meta.(*cfg.Config)
 
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
@@ -166,21 +152,21 @@ func resourceNetworkingRouterRouteV2Delete(_ context.Context, d *schema.Resource
 		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
+	routerId := d.Get("router_id").(string)
+	osMutexKV.Lock(routerId)
+	defer osMutexKV.Unlock(routerId)
+
 	n, err := routers.Get(networkingClient, routerId).Extract()
 	if err != nil {
-		if _, ok := err.(golangsdk.ErrDefault404); ok {
-			return nil
-		}
-
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Neutron Router: %s", err)
 	}
 
 	var updateOpts routers.UpdateOpts
 
-	var destCidr string = d.Get("destination_cidr").(string)
-	var nextHop string = d.Get("next_hop").(string)
+	destCidr := d.Get("destination_cidr").(string)
+	nextHop := d.Get("next_hop").(string)
 
-	var oldRts []routers.Route = n.Routes
+	oldRts := n.Routes
 	var newRts []routers.Route
 
 	for _, r := range oldRts {
