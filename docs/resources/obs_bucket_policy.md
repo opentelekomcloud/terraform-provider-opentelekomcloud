@@ -27,8 +27,8 @@ resource "opentelekomcloud_obs_bucket_policy" "policy" {
       "ID": ["*"]
     },
     "Action": [
-      "ListBucket",
-      "ListBucketVersions"
+      "GetObject",
+      "PutObject"
     ],
     "Resource": [
       "${opentelekomcloud_obs_bucket.bucket.bucket}/*"
