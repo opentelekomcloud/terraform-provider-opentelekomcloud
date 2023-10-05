@@ -1,4 +1,4 @@
 ---
 other:
   - |
-    **[OBS]** Fix documentation example for ``resource/opentelekomcloud_obs_bucket_policy`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[OBS]** Fix documentation example for ``resource/opentelekomcloud_obs_bucket_policy`` (`#2330 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2330>`_)
