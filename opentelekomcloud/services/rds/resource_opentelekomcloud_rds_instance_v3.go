@@ -90,6 +90,31 @@ func ResourceRdsInstanceV3() *schema.Resource {
 					},
 				},
 			},
+			"point_in_time_recovery": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"source_instance_id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"backup_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"restore_time": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+					},
+				},
+			},
 			"db": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -370,6 +395,10 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreateClient, err)
+	}
+
+	if _, ok := d.GetOk("point_in_time_recovery.0.source_instance_id"); ok {
+		return fmterr.Errorf("point in time restoration can be only produced on existing instance")
 	}
 
 	dbInfo := resourceRDSDbInfo(d)
@@ -792,6 +821,29 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreateClient, err)
+	}
+
+	if d.HasChange("point_in_time_recovery") {
+		rawPitr := d.Get("point_in_time_recovery").([]interface{})
+		pitr := rawPitr[0].(map[string]interface{})
+		pitrOpts := backups.RestorePITROpts{
+			Source: backups.Source{
+				BackupID:    pitr["backup_id"].(string),
+				InstanceID:  pitr["source_instance_id"].(string),
+				RestoreTime: int64(pitr["restore_time"].(int)),
+				Type:        pitr["type"].(string),
+			},
+			Target: backups.Target{
+				InstanceID: d.Id(),
+			},
+		}
+		_, err = backups.RestorePITR(client, pitrOpts)
+		if err != nil {
+			return fmterr.Errorf("error in point in time restoration: %s ", err)
+		}
+		if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	if d.HasChange("security_group_id") {

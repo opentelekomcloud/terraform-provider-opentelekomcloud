@@ -313,15 +313,15 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
 
 The following arguments are supported:
 
-* `availability_zone` - (Required) Specifies the AZ name. Changing this parameter will create a new resource.
+* `availability_zone` - (Required, ForceNew) Specifies the AZ name. Changing this parameter will create a new resource.
 
-* `db` - (Required) Specifies the database information. Structure is documented below. Changing this parameter will create a new resource.
+* `db` - (Required, ForceNew) Specifies the database information. Structure is documented below. Changing this parameter will create a new resource.
 
 * `flavor` - (Required) Specifies the specification code.
   Use data source [opentelekomcloud_rds_flavors_v3](../data-sources/rds_flavors_v3.md) to get a list of available flavor names.
   Examples could be `rds.pg.c2.medium` or   `rds.pg.c2.medium.ha` for HA clusters.
 
-* `name` - (Required) Specifies the DB instance name. The DB instance name of the same type
+* `name` - (Required, ForceNew) Specifies the DB instance name. The DB instance name of the same type
   must be unique for the same tenant. The value must be 4 to 64
   characters in length and start with a letter. It is case-sensitive
   and can contain only letters, digits, hyphens (-), and underscores
@@ -330,15 +330,15 @@ The following arguments are supported:
 * `security_group_id` - (Required) Specifies the security group which the RDS DB instance belongs to.
   Changing this parameter will create a new resource.
 
-* `subnet_id` - (Required) Specifies the subnet id. Changing this parameter will create a new resource.
+* `subnet_id` - (Required, ForceNew) Specifies the subnet id. Changing this parameter will create a new resource.
 
 * `volume` - (Required) Specifies the volume information. Structure is documented below.
 
-* `vpc_id` - (Required) Specifies the VPC ID. Changing this parameter will create a new resource.
+* `vpc_id` - (Required, ForceNew) Specifies the VPC ID. Changing this parameter will create a new resource.
 
 * `backup_strategy` - (Optional) Specifies the advanced backup policy. Structure is documented below.
 
-* `ha_replication_mode` - (Optional) Specifies the replication mode for the standby DB instance. For MySQL, the value
+* `ha_replication_mode` - (Optional, ForceNew) Specifies the replication mode for the standby DB instance. For MySQL, the value
   is async or semisync. For PostgreSQL, the value is async or sync. For Microsoft SQL Server, the value is sync.
 
 -> Async indicates the asynchronous replication mode. `semisync` indicates the
@@ -350,7 +350,7 @@ The following arguments are supported:
 * `parameters` - (Optional) Map of additional configuration parameters. Values should be strings. Parameters set here
   overrides values from configuration template (parameter group).
 
-* `lower_case_table_names` - Specifies the case-sensitive state of the database table name,
+* `lower_case_table_names` - (Optional, ForceNew) Specifies the case-sensitive state of the database table name,
   the default value is "1". Changing this parameter will create a new resource.
   + 0: Table names are stored as fixed and table names are case-sensitive.
   + 1: Table names will be stored in lower case and table names are not case-sensitive.
@@ -368,7 +368,8 @@ The following arguments are supported:
 
 * `tags` - (Optional) Tags key/value pairs to associate with the instance.
 
-* `restore_point` - (Optional) Specifies the restoration information.
+* `restore_point` - (Optional, ForceNew) Specifies the restoration information. By selecting this option a new RDS
+  instance will be created from separate instance backup.
 
 * `ssl_enable` - (Optional) Specifies whether SSL should be enabled for MySql instances.
 
@@ -400,12 +401,12 @@ The `db` block supports:
 
 The `volume` block supports:
 
-* `disk_encryption_id` - (Optional) Specifies the key ID for disk encryption. Changing this parameter will create a new resource.
+* `disk_encryption_id` - (Optional, ForceNew) Specifies the key ID for disk encryption. Changing this parameter will create a new resource.
 
 * `size` - (Required) Specifies the volume size. Its value range is from 40 GB to 4000
   GB. The value must be a multiple of 10. Changing this resize the volume.
 
-* `type` - (Required) Specifies the volume type. Its value can be any of the following
+* `type` - (Required, ForceNew) Specifies the volume type. Its value can be any of the following
   and is case-sensitive: COMMON: indicates the SATA type.
   ULTRAHIGH: indicates the SSD type.  Changing this parameter will create a new resource.
 
