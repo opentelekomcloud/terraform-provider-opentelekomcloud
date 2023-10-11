@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[RDS]** Enable restoration from backup to an existing RDS instance for ``resource/opentelekomcloud_rds_instance_v3`` (`#2337 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2337>`_)
