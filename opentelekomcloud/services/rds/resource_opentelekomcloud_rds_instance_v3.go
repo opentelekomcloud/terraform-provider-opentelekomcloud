@@ -90,10 +90,11 @@ func ResourceRdsInstanceV3() *schema.Resource {
 					},
 				},
 			},
-			"point_in_time_recovery": {
+			"restore_from_backup": {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
+				Computed: false,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"source_instance_id": {
@@ -319,6 +320,10 @@ func ResourceRdsInstanceV3() *schema.Resource {
 				Computed: false,
 				Optional: true,
 			},
+			"restored_backup_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -397,7 +402,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf(errCreateClient, err)
 	}
 
-	if _, ok := d.GetOk("point_in_time_recovery.0.source_instance_id"); ok {
+	if _, ok := d.GetOk("restore_from_backup.0.source_instance_id"); ok {
 		return fmterr.Errorf("point in time restoration can be only produced on existing instance")
 	}
 
@@ -823,26 +828,28 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf(errCreateClient, err)
 	}
 
-	if d.HasChange("point_in_time_recovery") {
-		rawPitr := d.Get("point_in_time_recovery").([]interface{})
-		pitr := rawPitr[0].(map[string]interface{})
-		pitrOpts := backups.RestorePITROpts{
-			Source: backups.Source{
-				BackupID:    pitr["backup_id"].(string),
-				InstanceID:  pitr["source_instance_id"].(string),
-				RestoreTime: int64(pitr["restore_time"].(int)),
-				Type:        pitr["type"].(string),
-			},
-			Target: backups.Target{
-				InstanceID: d.Id(),
-			},
-		}
-		_, err = backups.RestorePITR(client, pitrOpts)
-		if err != nil {
-			return fmterr.Errorf("error in point in time restoration: %s ", err)
-		}
-		if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
-			return diag.FromErr(err)
+	if d.HasChange("restore_from_backup") {
+		rawPitr := d.Get("restore_from_backup").([]interface{})
+		if len(rawPitr) > 0 {
+			pitr := rawPitr[0].(map[string]interface{})
+			pitrOpts := backups.RestorePITROpts{
+				Source: backups.Source{
+					BackupID:    pitr["backup_id"].(string),
+					InstanceID:  pitr["source_instance_id"].(string),
+					RestoreTime: int64(pitr["restore_time"].(int)),
+					Type:        pitr["type"].(string),
+				},
+				Target: backups.Target{
+					InstanceID: d.Id(),
+				},
+			}
+			_, err = backups.RestorePITR(client, pitrOpts)
+			if err != nil {
+				return fmterr.Errorf("error in point in time restoration: %s ", err)
+			}
+			if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 
@@ -1135,6 +1142,16 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("lower_case_table_names", d.Get("lower_case_table_names").(string)),
 		d.Set("ssl_enable", *rdsInstance.EnableSSL),
 	)
+
+	if v, ok := d.GetOk("restore_from_backup"); ok {
+		rawPitr := v.([]interface{})
+		if len(rawPitr) > 0 {
+			backupId := rawPitr[0].(map[string]interface{})["backup_id"]
+			if backupId != "" {
+				me = multierror.Append(me, d.Set("restored_backup_id", backupId))
+			}
+		}
+	}
 
 	if me.ErrorOrNil() != nil {
 		return diag.FromErr(me)

@@ -332,7 +332,7 @@ The following arguments are supported:
 
 * `subnet_id` - (Required, ForceNew) Specifies the subnet id. Changing this parameter will create a new resource.
 
-* `volume` - (Required) Specifies the volume information. Structure is documented below.
+* `volume` - (Required, ForceNew) Specifies the volume information. Structure is documented below.
 
 * `vpc_id` - (Required, ForceNew) Specifies the VPC ID. Changing this parameter will create a new resource.
 
@@ -369,13 +369,16 @@ The following arguments are supported:
 * `tags` - (Optional) Tags key/value pairs to associate with the instance.
 
 * `restore_point` - (Optional, ForceNew) Specifies the restoration information. By selecting this option a new RDS
-  instance will be created from separate instance backup.
+  instance will be created from separate instance backup. Structure is documented below.
+
+* `restore_from_backup` - (Optional) Specifies whether to restore database to an instance described in current resource.
+  Structure is documented below.
 
 * `ssl_enable` - (Optional) Specifies whether SSL should be enabled for MySql instances.
 
 The `db` block supports:
 
-* `password` - (Required) Specifies the database password. The value cannot be
+* `password` - (Required, ForceNew) Specifies the database password. The value cannot be
   empty and should contain 8 to 32 characters, including uppercase
   and lowercase letters, digits, and the following special
   characters: ~!@#%^*-_=+? You are advised to enter a strong
@@ -392,9 +395,9 @@ The `db` block supports:
   the default value is 5432. For Microsoft SQL Server, the default
   value is 1433.  Changing this parameter will create a new resource.
 
-* `type` - (Required) Specifies the DB engine. Value: MySQL, PostgreSQL, SQLServer. Changing this parameter will create a new resource.
+* `type` - (Required, ForceNew) Specifies the DB engine. Value: MySQL, PostgreSQL, SQLServer. Changing this parameter will create a new resource.
 
-* `version` - (Required) Specifies the database version. MySQL databases support MySQL 5.6
+* `version` - (Required, ForceNew) Specifies the database version. MySQL databases support MySQL 5.6
   and above. PostgreSQL databases support PostgreSQL 9.5 and above. Microsoft SQL Server
   databases support 2014 SE, 2016 SE, and above.
   Changing this parameter will create a new resource.
@@ -427,9 +430,27 @@ The `backup_strategy` block supports:
 
 The `restore_point` block supports:
 
-* `instance_id` - (Required) Specifies the original DB instance ID.
+* `instance_id` - (Required, ForceNew) Specifies the original DB instance ID.
+
+* `backup_id` - (Optional, ForceNew) Specifies the ID of the backup used to restore data.
+
+* `restore_time` - (Optional, ForceNew) Specifies the time point of data restoration in the UNIX timestamp.
+  The unit is millisecond and the time zone is UTC.
+
+-> Exactly one of `backup_id` and `restore_time` needs to be set.
+
+The `restore_from_backup` block supports:
+
+* `source_instance_id` - (Required) Specifies the source instance ID.
+
+* `type` - (Required) Specifies the restoration mode. The values can be:
+    * `backup` - Indicates using backup files for restoration.
+    In this mode `backup_id` is mandatory.
+    * `timestamp` - Indicates the point-in-time restoration mode.
+    In this mode `restore_time` is mandatory.
 
 * `backup_id` - (Optional) Specifies the ID of the backup used to restore data.
+  This parameter must be specified when the backup file is used for restoration.
 
 * `restore_time` - (Optional) Specifies the time point of data restoration in the UNIX timestamp.
   The unit is millisecond and the time zone is UTC.
@@ -443,6 +464,9 @@ In addition to the arguments listed above, the following computed attributes are
 * `availability_zones` - Indicates the instance AZs.
 
 * `created` - Indicates the creation time.
+
+* `restored_backup_id` - Indicates the backup ID in cases when instance was restored by using
+  `restore_from_backup` block.
 
 * `nodes` - Indicates the instance nodes information. Structure is documented below.
 

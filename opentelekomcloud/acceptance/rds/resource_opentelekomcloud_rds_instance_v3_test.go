@@ -357,12 +357,14 @@ func TestAccRdsInstanceV3RestoreToPITR(t *testing.T) {
 				Config: testAccRdsInstanceV3RestorePITRUpdate(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.large"),
+					resource.TestCheckResourceAttrSet(instanceV3ResourceName, "restored_backup_id"),
 				),
 			},
 			{
 				Config: testAccRdsInstanceV3RestorePITRBasic(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttrSet(instanceV3ResourceName, "restored_backup_id"),
 				),
 			},
 		},
@@ -1074,6 +1076,13 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     size = 40
   }
   flavor = "rds.pg.c2.large"
+  restore_from_backup {
+    source_instance_id = opentelekomcloud_rds_backup_v3.test.instance_id
+    backup_id          = opentelekomcloud_rds_backup_v3.test.id
+    type               = "backup"
+  }
+
+
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance_2" {
