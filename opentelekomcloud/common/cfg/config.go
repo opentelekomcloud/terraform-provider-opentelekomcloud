@@ -805,6 +805,13 @@ func (c *Config) SmnV2Client(projectName ProjectName) (*golangsdk.ServiceClient,
 	})
 }
 
+func (c *Config) SmnV2TagClient(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewSMNV2Tags(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) CesV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewCESClient(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
