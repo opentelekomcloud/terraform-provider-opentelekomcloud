@@ -127,10 +127,6 @@ func resourceTopicRead(_ context.Context, d *schema.ResourceData, meta interface
 		d.Set("create_time", topic.CreateTime),
 	)
 
-	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.FromErr(err)
-	}
-
 	// read tags
 	tagClient, err := config.SmnV2TagClient(config.GetRegion(d))
 	if err != nil {
@@ -147,6 +143,10 @@ func resourceTopicRead(_ context.Context, d *schema.ResourceData, meta interface
 		mErr = multierror.Append(mErr, d.Set("tags", tagMap))
 	} else {
 		return fmterr.Errorf("error saving tags for OpenTelekomCloud SMN topic: %s", err)
+	}
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
