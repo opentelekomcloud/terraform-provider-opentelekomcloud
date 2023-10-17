@@ -64,6 +64,12 @@ func ResourceVpcEIPV1() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
+						"name": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
 					},
 				},
 			},
@@ -177,6 +183,7 @@ func resourceVpcEIPV1Read(ctx context.Context, d *schema.ResourceData, meta inte
 			"type":       eip.Type,
 			"ip_address": eip.PublicAddress,
 			"port_id":    eip.PortID,
+			"name":       eip.Name,
 		},
 	}
 	if err := d.Set("publicip", publicIP); err != nil {
@@ -314,6 +321,7 @@ func resourcePublicIP(d *schema.ResourceData) eips.PublicIpOpts {
 	publicIPRaw := d.Get("publicip").([]interface{})[0].(map[string]interface{})
 
 	publicIpOpts := eips.PublicIpOpts{
+		Name:    publicIPRaw["name"].(string),
 		Type:    publicIPRaw["type"].(string),
 		Address: publicIPRaw["ip_address"].(string),
 	}

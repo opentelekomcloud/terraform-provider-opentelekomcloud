@@ -25,6 +25,23 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
 }
 ```
 
+## EIP with name
+
+```hcl
+resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
+  publicip {
+    type = "5_bgp"
+    name = "my_eip"
+  }
+  bandwidth {
+    name        = "test"
+    size        = 8
+    share_type  = "PER"
+    charge_mode = "traffic"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -47,6 +64,8 @@ The `publicip` block supports:
 
 * `port_id` - (Optional) The port id which this eip will associate with. If the value
   is `""` or this not specified, the eip will be in unbind state.
+
+* `name` - (Required) The ip name, which is a string of 1 to 64 characters.
 
 The `bandwidth` block supports:
 
@@ -78,6 +97,8 @@ The following attributes are exported:
 * `publicip/ip_address` - See Argument Reference above.
 
 * `publicip/port_id` - See Argument Reference above.
+
+* `publicip/name` - See Argument Reference above.
 
 * `bandwidth/name` - See Argument Reference above.
 
