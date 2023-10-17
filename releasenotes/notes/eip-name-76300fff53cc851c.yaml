@@ -1,0 +1,6 @@
+---
+enhancements:
+  - |
+    **[VPC]** Add ``name`` attribute to ``resource/opentelekomcloud_vpc_eip_v1`` (`#2345 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2345>`_)
+  - |
+    **[VPC]** Search by `name_regex` in ``data-source/opentelekomcloud_vpc_eip_v1*`` (`#2345 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2345>`_)
