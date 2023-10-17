@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[CSS]** Update OpenSearch documentation for ``resource/opentelekomcloud_css_cluster_v1`` (`#2344 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2344>`_)

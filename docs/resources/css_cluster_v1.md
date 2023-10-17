@@ -9,7 +9,9 @@ Up-to-date reference of API arguments for CSS cluster you can get at
 
 Manages a CSS cluster resource.
 
-## Example Usage
+## Example usage
+
+### Creating ElasticSearch v7.6.2
 
 ```hcl
 data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
@@ -19,6 +21,39 @@ data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 resource "opentelekomcloud_css_cluster_v1" "cluster" {
   name            = "terraform_test_cluster"
   expect_node_num = 1
+  node_config {
+    flavor = "css.medium.8"
+    network_info {
+      security_group_id = data.opentelekomcloud_networking_secgroup_v2.secgroup.id
+      network_id        = var.network_id
+      vpc_id            = var.vpc_id
+    }
+    volume {
+      volume_type = "COMMON"
+      size        = 40
+    }
+
+    availability_zone = var.availability_zone
+  }
+}
+```
+
+### Creating OpenSearch v1.3.6
+
+```hcl
+data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
+  name = var.security_group
+}
+
+resource "opentelekomcloud_css_cluster_v1" "cluster" {
+  name            = "terraform_test_cluster"
+  expect_node_num = 1
+  datastore {
+    version = "Opensearch_1.3.6"
+  }
+  enable_https     = true
+  enable_authority = true
+  admin_pass       = "QwertyUI!"
   node_config {
     flavor = "css.medium.8"
     network_info {
@@ -81,6 +116,14 @@ The `node_config` block supports:
   - Value range of flavor `css.xlarge.8`: 40 GB to 2560 GB
   - Value range of flavor `css.2xlarge.8`: 80 GB to 5120 GB
   - Value range of flavor `css.4xlarge.8`: 160 GB to 10240 GB
+  - Value range of flavor `css.xlarge.4`: 40 GB to 1,600 GB
+  - Value range of flavor `css.2xlarge.4`: 80 GB to 3,200 GB
+  - Value range of flavor `css.4xlarge.4`: 100 GB to 6,400 GB
+  - Value range of flavor `css.8xlarge.4`: 160 GB to 10,240 GB
+  - Value range of flavor `css.xlarge.2`: 40 GB to 800 GB
+  - Value range of flavor `css.2xlarge.2`: 80 GB to 1,600 GB
+  - Value range of flavor `css.4xlarge.2`: 100 GB to 3,200 GB
+  - Value range of flavor `css.8xlarge.2`: 320 GB to 10,240 GB
 
   Changing this parameter will create a new resource.
 
@@ -120,7 +163,8 @@ The `datastore` block contains:
 
 * `type` - Engine type. The default value is `elasticsearch`. Currently, the value can only be `elasticsearch`.
 
-* `version` - Engine version. The value can be `7.6.2` or `7.9.3` or `7.10.2`. The default value is `7.6.2`.
+* `version` - Engine version. The value can be `7.6.2`, `7.9.3`, `7.10.2` or `Opensearch_1.3.6`.
+  The default value is `7.6.2`.
 
 ## Attributes Reference
 

@@ -160,10 +160,7 @@ func ResourceCssClusterV1() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
-							// ValidateFunc: validation.StringInSlice([]string{
-							// 	"7.6.2", "7.9.3", "7.10.2", "Opensearch_1.3.6",
-							// }, false),
-							Default: "7.6.2",
+							Default:  "7.6.2",
 						},
 					},
 				},
