@@ -162,7 +162,7 @@ The following arguments are supported:
 * `router_id` - (Optional) ID of the router (or VPC) this LoadBalancer belongs to. Changing
   this creates a new LoadBalancer.
 
-* `subnet_id` - (Optional) The ID of the subnet to which the LoadBalancer belongs.
+* `subnet_id` - (Optional) The ID of the subnet to which the LoadBalancer belongs. Required when using `vip_address`.
 
 -> `router_id` and `subnet_id` cannot be left blank at the same time.
 
