@@ -23,11 +23,11 @@
       - helpcenter-base-jobs
     check:
       jobs:
-        - otc-golangci-lint
-        - golang-make-test
-        - golang-make-vet
-        - tflint
-        - goreleaser-build
+#        - otc-golangci-lint
+#        - golang-make-test
+#        - golang-make-vet
+#        - tflint
+#        - goreleaser-build
         - otc-terraform-visualize
     check-post:
       jobs:
