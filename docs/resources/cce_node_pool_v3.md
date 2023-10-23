@@ -31,6 +31,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool_1" {
   scale_down_cooldown_time = 100
   priority                 = 1
   runtime                  = "containerd"
+  agency_name              = "test-agency"
 
   root_volume {
     size       = 40
@@ -121,6 +122,8 @@ the AZ based on the AZ sequence. For more details see
               Use with high-caution, may trigger resource recreation. Options are:
               `docker` - Docker
               `containerd` - Containerd
+
+* `agency_name` - (Optional) IAM agency name. Changing this parameter will create a new resource.
 
 * `taints` - (Optional) Taints to created nodes to configure anti-affinity.
   * `key` - (Required) A key must contain 1 to 63 characters starting with a letter or digit. Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed. A DNS subdomain name can be used as the prefix of a key.

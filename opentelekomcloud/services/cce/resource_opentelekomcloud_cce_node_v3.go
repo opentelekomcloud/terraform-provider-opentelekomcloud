@@ -276,6 +276,11 @@ func ResourceCCENodeV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"agency_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"public_key": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -560,6 +565,7 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 				PostInstall:             base64PostInstall,
 				DockerBaseSize:          d.Get("docker_base_size").(int),
 				DockerLVMConfigOverride: d.Get("docker_lvm_config_override").(string),
+				AgencyName:              d.Get("agency_name").(string),
 			},
 			UserTags: resourceCCENodeTags(d),
 			K8sTags:  resourceCCENodeK8sTags(d),

@@ -59,6 +59,39 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 	})
 }
 
+func TestAccCCENodePoolsV3_agency(t *testing.T) {
+	var nodePool nodepools.NodePool
+
+	t.Parallel()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.Server, Count: 2},
+		{Q: quotas.Volume, Count: 2},
+		{Q: quotas.VolumeSize, Count: 40 + 100},
+	}
+	qts = append(qts, ecs.QuotasForFlavor("s2.large.2")...)
+	quotas.BookMany(t, qts)
+	shared.BookCluster(t)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodePoolV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodePoolV3Agency,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCENodePoolV3Exists(nodePoolResourceName, shared.DataSourceClusterName, &nodePool),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "name", "opentelekomcloud-cce-node-pool"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "flavor", "s2.large.2"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "os", "EulerOS 2.9"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "muh"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "data_volumes.0.extend_params.useType", "docker"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccCCENodePoolV3ImportBasic(t *testing.T) {
 	t.Parallel()
 	shared.BookCluster(t)
@@ -389,3 +422,51 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   max_pods         = 16
   docker_base_size = 32
 }`, shared.DataSourceCluster, env.OS_KEYPAIR_NAME)
+
+var testAccCCENodePoolV3Agency = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_identity_agency_v3" "agency_1" {
+  name                  = "test-agency-cce"
+  delegated_domain_name = "op_svc_evs"
+  project_role {
+    project = "eu-de"
+    roles = [
+      "KMS Administrator",
+    ]
+  }
+}
+
+resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
+  cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
+  name               = "opentelekomcloud-cce-node-pool"
+  os                 = "EulerOS 2.9"
+  flavor             = "s2.large.2"
+  initial_node_count = 1
+  availability_zone  = "%s"
+  key_pair           = "%s"
+  runtime            = "containerd"
+  agency_name        = opentelekomcloud_identity_agency_v3.agency_1.name
+
+  scale_enable             = false
+  min_node_count           = 1
+  max_node_count           = 3
+  scale_down_cooldown_time = 6
+  priority                 = 1
+
+  root_volume {
+    size       = 40
+    volumetype = "SSD"
+  }
+  data_volumes {
+    size       = 100
+    volumetype = "SSD"
+    extend_params = {
+      "useType" = "docker"
+    }
+  }
+
+  k8s_tags = {
+    "kubelet.kubernetes.io/namespace" = "muh"
+  }
+}`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
