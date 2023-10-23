@@ -60,6 +60,36 @@ func TestAccCCENodesV3Basic(t *testing.T) {
 	})
 }
 
+func TestAccCCENodesV3Agency(t *testing.T) {
+	var node nodes.Nodes
+
+	t.Parallel()
+	shared.BookCluster(t)
+	quotas.BookMany(t, singleNodeQuotas.X(2))
+
+	ip, _ := cidr.Host(shared.SubnetNet, 14)
+	privateIP := ip.String()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodeV3Agency(privateIP),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
+					resource.TestCheckResourceAttr(resourceNameNode, "name", "test-node"),
+					resource.TestCheckResourceAttr(resourceNameNode, "flavor_id", "s2.large.2"),
+					resource.TestCheckResourceAttr(resourceNameNode, "os", "EulerOS 2.9"),
+					resource.TestCheckResourceAttr(resourceNameNode, "private_ip", privateIP),
+					resource.TestCheckResourceAttr(resourceNameNode, "data_volumes.0.extend_params.useType", "docker"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccCCENodesV3Multiple(t *testing.T) {
 	t.Parallel()
 	shared.BookCluster(t)
@@ -887,3 +917,47 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   max_pods         = 16
   docker_base_size = 30
 }`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+
+func testAccCCENodeV3Agency(privateIP string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_identity_agency_v3" "agency_1" {
+  name                  = "test-agency-cce"
+  delegated_domain_name = "op_svc_evs"
+  project_role {
+    project = "eu-de"
+    roles = [
+      "KMS Administrator",
+    ]
+  }
+}
+
+resource "opentelekomcloud_cce_node_v3" "node_1" {
+  cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
+  name       = "test-node"
+  flavor_id  = "s2.large.2"
+
+  availability_zone = "%s"
+  key_pair          = "%s"
+  runtime           = "containerd"
+  os                = "EulerOS 2.9"
+  agency_name       = opentelekomcloud_identity_agency_v3.agency_1.name
+
+  root_volume {
+    size       = 40
+    volumetype = "SATA"
+  }
+
+  data_volumes {
+    size       = 100
+    volumetype = "SSD"
+    extend_params = {
+      "useType" = "docker"
+    }
+  }
+
+  private_ip = "%s"
+}
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
+}
