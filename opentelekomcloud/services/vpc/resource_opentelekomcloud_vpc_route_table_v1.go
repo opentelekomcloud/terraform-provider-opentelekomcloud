@@ -50,7 +50,7 @@ func ResourceVPCRouteTableV1() *schema.Resource {
 				Required: true,
 				ValidateFunc: validation.All(
 					validation.StringLenBetween(0, 64),
-					validation.StringMatch(regexp.MustCompile("^[0-9a-zA-Z-_\\.]*$"),
+					validation.StringMatch(regexp.MustCompile("^[0-9a-zA-Z-_.]*$"),
 						"only letters, digits, underscores (_), hyphens (-), and dot (.) are allowed"),
 				),
 			},
