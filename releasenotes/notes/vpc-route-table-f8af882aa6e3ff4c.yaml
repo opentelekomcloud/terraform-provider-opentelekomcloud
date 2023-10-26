@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[VPC]** Add new resource ``resource/opentelekomcloud_vpc_route_table_v1`` (`#2355 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2355>`_)
