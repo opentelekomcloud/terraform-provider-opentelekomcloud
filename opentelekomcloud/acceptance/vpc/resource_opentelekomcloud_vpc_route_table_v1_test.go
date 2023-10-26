@@ -223,7 +223,7 @@ resource "opentelekomcloud_vpc_route_table_v1" "table_1" {
   vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
   description = "created by terraform with subnets"
 
-  subnets     = [
+  subnets = [
     opentelekomcloud_vpc_subnet_v1.subnet_1-1.id,
     opentelekomcloud_vpc_subnet_v1.subnet_1-2.id,
   ]
