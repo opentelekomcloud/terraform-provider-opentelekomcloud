@@ -38,12 +38,11 @@ resource "opentelekomcloud_obs_bucket_object" "object" {
   etag   = filemd5("${var.folder_path}/${each.value}")
 }
 
-
-resource "opentelekomcloud_obs_bucket_object" "index" {
-  for_each = fileset(var.index_path, "**")
-
-  bucket = var.bucket
-  key    = each.value
-  source = "${var.index_path}/${each.value}"
-  etag   = filemd5("${var.index_path}/${each.value}")
-}
+#resource "opentelekomcloud_obs_bucket_object" "index" {
+#  for_each = fileset(var.index_path, "**")
+#
+#  bucket = var.bucket
+#  key    = each.value
+#  source = "${var.index_path}/${each.value}"
+#  etag   = filemd5("${var.index_path}/${each.value}")
+#}
