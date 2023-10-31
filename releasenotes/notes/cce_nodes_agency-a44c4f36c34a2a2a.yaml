@@ -1,0 +1,6 @@
+---
+enhancements:
+  - |
+    **[CCE]** Add agency support for ``resource/opentelekomcloud_cce_node_v3`` (`#2351 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2351>`_)
+  - |
+    **[CCE]** Add agency support for ``resource/opentelekomcloud_cce_node_pool_v3`` (`#2351 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2351>`_)

@@ -21,10 +21,11 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = var.cluster_id
   availability_zone = var.availability_zone
 
-  os        = "EulerOS 2.9"
-  flavor_id = "s2.large.2"
-  key_pair  = var.ssh_key
-  runtime   = "containerd"
+  os          = "EulerOS 2.9"
+  flavor_id   = "s2.large.2"
+  key_pair    = var.ssh_key
+  runtime     = "containerd"
+  agency_name = "test-agency"
 
   bandwidth_size = 100
 
@@ -84,6 +85,8 @@ The following arguments are supported:
               Use with high-caution, may trigger resource recreation. Options are:
               `docker` - Docker
               `containerd` - Containerd
+
+* `agency_name` - (Optional) IAM agency name. Changing this parameter will create a new resource.
 
 * `taints` - (Optional, ForceNew, List) Taints to created nodes to configure anti-affinity.
   * `key` - (Required, String) A key must contain 1 to 63 characters starting with a letter or digit. Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed. A DNS subdomain name can be used as the prefix of a key.

@@ -482,6 +482,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_vpc_v1":                                    vpc.ResourceVirtualPrivateCloudV1(),
 			"opentelekomcloud_vpc_peering_connection_v2":                 vpc.ResourceVpcPeeringConnectionV2(),
 			"opentelekomcloud_vpc_peering_connection_accepter_v2":        vpc.ResourceVpcPeeringConnectionAccepterV2(),
+			"opentelekomcloud_vpc_route_table_v1":                        vpc.ResourceVPCRouteTableV1(),
 			"opentelekomcloud_vpcep_endpoint_v1":                         vpcep.ResourceVPCEPEndpointV1(),
 			"opentelekomcloud_vpcep_service_v1":                          vpcep.ResourceVPCEPServiceV1(),
 			"opentelekomcloud_vpc_route_v2":                              vpc.ResourceVPCRouteV2(),

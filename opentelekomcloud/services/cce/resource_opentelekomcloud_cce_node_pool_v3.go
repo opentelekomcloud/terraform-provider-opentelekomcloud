@@ -252,6 +252,11 @@ func ResourceCCENodePoolV3() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"agency_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"docker_base_size": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -367,6 +372,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 					PostInstall:             base64PostInstall,
 					DockerBaseSize:          d.Get("docker_base_size").(int),
 					DockerLVMConfigOverride: d.Get("docker_lvm_config_override").(string),
+					AgencyName:              d.Get("agency_name").(string),
 				},
 				Taints:   resourceCCENodeTaints(d),
 				K8sTags:  resourceCCENodeK8sTags(d),

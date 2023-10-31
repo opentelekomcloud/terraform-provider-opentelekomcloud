@@ -524,22 +524,6 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	var backupOpts backups.UpdateOpts
-
-	// workaround for https://jira.tsi-dev.otc-service.com/browse/BM-2388
-	if strings.ToLower(datastore.Type) == "postgresql" && common.HasFilledOpt(d, "backup_strategy") {
-		backupRaw := resourceRDSBackupStrategy(d)
-		backupOpts.KeepDays = &backupRaw.KeepDays
-		backupOpts.StartTime = backupRaw.StartTime
-		backupOpts.Period = "1,2,3,4,5,6,7"
-		backupOpts.InstanceId = d.Id()
-		log.Printf("[DEBUG] Backup Strategy Opts: %#v", backupOpts)
-
-		if err = backups.Update(client, backupOpts); err != nil {
-			return fmterr.Errorf("error updating OpenTelekomCloud RDSv3 Backup Strategy: %s", err)
-		}
-	}
-
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
 
 	ip := getPublicIP(d)
