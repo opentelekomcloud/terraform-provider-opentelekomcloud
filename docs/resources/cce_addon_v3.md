@@ -31,14 +31,14 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 
 resource "opentelekomcloud_cce_addon_v3" "addon" {
   template_name    = "metrics-server"
-  template_version = "1.0.6"
+  template_version = "1.3.6"
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
     basic = {
-      "image_version" : "v0.3.7",
+      "image_version" : "v0.6.2",
       "swr_addr" : "100.125.7.25:20202",
-      "swr_user" : "hwofficial"
+      "swr_user" : "cce-addons"
     }
     custom = {}
   }
