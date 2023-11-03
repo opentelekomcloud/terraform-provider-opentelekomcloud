@@ -55,6 +55,7 @@ func ResourceDCEndpointGroupV2() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
 			},
 		},
 	}
@@ -144,14 +145,12 @@ func resourceDCEndpointGroupV2Update(ctx context.Context, d *schema.ResourceData
 	var updateOpts dceg.UpdateOpts
 
 	if d.HasChange("name") {
-		updateOpts = dceg.UpdateOpts{
-			Name: d.Get("name").(string),
-		}
+		newName := d.Get("name")
+		updateOpts.Name = newName.(string)
 	}
 	if d.HasChange("description") {
-		updateOpts = dceg.UpdateOpts{
-			Description: d.Get("description").(string),
-		}
+		newDescription := d.Get("description")
+		updateOpts.Description = newDescription.(string)
 	}
 	err = dceg.Update(client, d.Id(), updateOpts)
 	if err != nil {

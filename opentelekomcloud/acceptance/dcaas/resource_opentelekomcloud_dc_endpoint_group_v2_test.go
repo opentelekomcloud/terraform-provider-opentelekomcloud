@@ -1,12 +1,14 @@
 package dcaas
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	dcep "github.com/opentelekomcloud/gophertelekomcloud/openstack/dcaas/v2/dc-endpoint-group"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -19,13 +21,15 @@ func TestDCEndpointGroupV2Resource_basic(t *testing.T) {
 
 	const dceg = "opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group"
 
+	tenantID := env.OS_PROJECT_ID
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDCegV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDCegV2Resource_basic(DCegName),
+				Config: testAccDCegV2Resource_basic(DCegName, tenantID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(dceg, "description", "first"),
 					resource.TestCheckResourceAttrSet(dceg, "id"),
@@ -35,6 +39,7 @@ func TestDCEndpointGroupV2Resource_basic(t *testing.T) {
 				Config: testAccDCegV2ResourceUpdate_basic(DCegNameUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(dceg, "description", "second"),
+					resource.TestCheckResourceAttr(dceg, "name", DCegNameUpdated),
 					resource.TestCheckResourceAttrSet(dceg, "id"),
 				),
 			},
@@ -42,35 +47,35 @@ func TestDCEndpointGroupV2Resource_basic(t *testing.T) {
 	})
 }
 
-func testAccDCegV2Resource_basic(DCegName string) string {
+func testAccDCegV2Resource_basic(dcegName string, tenantID string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group" {
   name        = "%s"
   type        = "cidr"
   endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
   description = "first"
-  tenant_id   = "959db9b6017d4a1fa1c6fd17b6820f55"
+  tenant_id   = "%s"
 }
-`, DCegName)
+`, dcegName, tenantID)
 }
 
-func testAccDCegV2ResourceUpdate_basic(DCegName string) string {
+func testAccDCegV2ResourceUpdate_basic(dcegNameUpdated string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group" {
   name        = "%s"
-  description = "second"
   type        = "cidr"
+  description = "second"
+  tenant_id   = "%s"
   endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
-  tenant_id   = "959db9b6017d4a1fa1c6fd17b6820f55"
 }
-`, DCegName)
+`, dcegNameUpdated, env.OS_PROJECT_ID)
 }
 
 func testAccCheckDCegV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.DCaaSV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud DcaasV2 client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DCaasV2 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -78,11 +83,14 @@ func testAccCheckDCegV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := dcep.Get(client, rs.Primary.ID)
-		if err == nil {
-			return fmt.Errorf("DCeg still exists")
+		dceg, _ := dcep.Get(client, rs.Primary.ID)
+		if dceg != nil {
+			return fmt.Errorf("DC endpoint group still exists")
+		}
+		var errDefault404 golangsdk.ErrDefault404
+		if !errors.As(err, &errDefault404) {
+			return err
 		}
 	}
-
 	return nil
 }
