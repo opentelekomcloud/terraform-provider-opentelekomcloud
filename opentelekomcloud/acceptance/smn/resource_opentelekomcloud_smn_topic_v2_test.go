@@ -14,6 +14,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceTopicName = "opentelekomcloud_smn_topic_v2.topic_1"
+
 func TestAccSMNV2Topic_basic(t *testing.T) {
 	var topic topics.TopicGet
 
@@ -25,22 +27,19 @@ func TestAccSMNV2Topic_basic(t *testing.T) {
 			{
 				Config: TestAccSMNV2TopicConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic, env.OS_TENANT_NAME),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_smn_topic_v2.topic_1", "name", "topic_1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_smn_topic_v2.topic_1", "display_name",
-						"The display name of topic_1"),
+					testAccCheckSMNV2TopicExists(resourceTopicName, &topic, env.OS_TENANT_NAME),
+					resource.TestCheckResourceAttr(resourceTopicName, "name", "topic_1"),
+					resource.TestCheckResourceAttr(resourceTopicName, "display_name", "The display name of topic_1"),
+					resource.TestCheckResourceAttr(resourceTopicName, "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceTopicName, "tags.key", "value"),
 				),
 			},
 			{
 				Config: TestAccSMNV2TopicConfig_update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_smn_topic_v2.topic_1", "display_name",
-						"The update display name of topic_1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_smn_topic_v2.topic_1", "name", "topic_1"),
+					resource.TestCheckResourceAttr(resourceTopicName, "display_name", "The update display name of topic_1"),
+					resource.TestCheckResourceAttr(resourceTopicName, "name", "topic_1"),
+					resource.TestCheckResourceAttr(resourceTopicName, "tags.foo", "bar_ch"),
 				),
 			},
 		},
@@ -63,9 +62,8 @@ func TestAccSMNV2Topic_schemaProjectName(t *testing.T) {
 			{
 				Config: testAccSMNV2TopicConfig_projectName(env.OS_TENANT_NAME),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic, env.OS_TENANT_NAME),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_smn_topic_v2.topic_1", "project_name", string(env.OS_TENANT_NAME)),
+					testAccCheckSMNV2TopicExists(resourceTopicName, &topic, env.OS_TENANT_NAME),
+					resource.TestCheckResourceAttr(resourceTopicName, "project_name", string(env.OS_TENANT_NAME)),
 				),
 			},
 		},
@@ -130,6 +128,11 @@ var TestAccSMNV2TopicConfig_basic = `
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   name         = "topic_1"
   display_name = "The display name of topic_1"
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
 }
 `
 
@@ -137,6 +140,10 @@ var TestAccSMNV2TopicConfig_update = `
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   name         = "topic_1"
   display_name = "The update display name of topic_1"
+
+  tags = {
+    foo = "bar_ch"
+  }
 }
 `
 

@@ -3,10 +3,12 @@ package vpc
 import (
 	"context"
 	"log"
+	"regexp"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -30,11 +32,20 @@ func DataSourceVPCEipV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsValidRegExp,
+			},
 			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -100,6 +111,17 @@ func dataSourceVPCEipV1Read(_ context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf("unable to retrieve EIPs: %w", err)
 	}
 
+	var filteredEips []eips.PublicIp
+	if nameRegex, ok := d.GetOk("name_regex"); ok {
+		r := regexp.MustCompile(nameRegex.(string))
+		for _, ip := range refinedEIPs {
+			if r.MatchString(ip.Name) {
+				filteredEips = append(filteredEips, ip)
+			}
+		}
+		refinedEIPs = filteredEips
+	}
+
 	tagRaw := d.Get("tags").(map[string]interface{})
 	var refinedByTags []eips.PublicIp
 	networkingV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
@@ -158,6 +180,7 @@ func dataSourceVPCEipV1Read(_ context.Context, d *schema.ResourceData, meta inte
 		d.Set("public_ip_address", elasticIP.PublicAddress),
 		d.Set("tenant_id", elasticIP.TenantID),
 		d.Set("region", config.GetRegion(d)),
+		d.Set("name", elasticIP.Name),
 	)
 
 	// save tags

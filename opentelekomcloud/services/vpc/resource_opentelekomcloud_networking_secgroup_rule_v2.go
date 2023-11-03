@@ -61,21 +61,18 @@ func ResourceNetworkingSecGroupRuleV2() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
-				Computed:     true,
 				RequiredWith: []string{"protocol"},
 			},
 			"port_range_max": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
-				Computed:     true,
 				RequiredWith: []string{"port_range_min"},
 			},
 			"protocol": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Computed: true,
 			},
 			"remote_group_id": {
 				Type:     schema.TypeString,

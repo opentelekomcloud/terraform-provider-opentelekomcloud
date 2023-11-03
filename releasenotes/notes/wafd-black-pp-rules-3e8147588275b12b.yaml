@@ -1,0 +1,6 @@
+---
+features:
+  |
+  **[WAF]** Add new resource ``resource/opentelekomcloud_waf_dedicated_blacklist_rule_v1`` (`#2314 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2314>`_)
+  |
+  **[WAF]** Add new resource ``resource/opentelekomcloud_waf_dedicated_precise_protection_rule_v1`` (`#2314 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2314>`_)

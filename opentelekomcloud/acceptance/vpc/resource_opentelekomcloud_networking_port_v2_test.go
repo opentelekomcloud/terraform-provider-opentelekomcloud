@@ -330,6 +330,10 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 
+resource "opentelekomcloud_networking_secgroup_v2" "group_1" {
+  name = "terraform-sg-1"
+}
+
 resource "opentelekomcloud_networking_port_v2" "port_1" {
   name           = "port_1"
   admin_state_up = "true"
@@ -339,6 +343,9 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
     subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
+  security_group_ids = [
+    opentelekomcloud_networking_secgroup_v2.group_1.id
+  ]
 }
 `
 

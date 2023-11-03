@@ -24,6 +24,7 @@ import (
 	"github.com/jinzhu/copier"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/pathorcontents"
@@ -34,31 +35,33 @@ const (
 )
 
 type Config struct {
-	AccessKey        string
-	SecretKey        string
-	CACertFile       string
-	ClientCertFile   string
-	ClientKeyFile    string
-	Cloud            string
-	DomainID         string
-	DomainName       string
-	EndpointType     string
-	IdentityEndpoint string
-	Insecure         bool
-	Password         string
-	Passcode         string
-	Region           string
-	Swauth           bool
-	TenantID         string
-	TenantName       string
-	Token            string
-	SecurityToken    string
-	Username         string
-	UserID           string
-	AgencyName       string
-	AgencyDomainName string
-	DelegatedProject string
-	MaxRetries       int
+	AccessKey           string
+	SecretKey           string
+	CACertFile          string
+	ClientCertFile      string
+	ClientKeyFile       string
+	Cloud               string
+	DomainID            string
+	DomainName          string
+	EndpointType        string
+	IdentityEndpoint    string
+	Insecure            bool
+	Password            string
+	Passcode            string
+	Region              string
+	Swauth              bool
+	TenantID            string
+	TenantName          string
+	Token               string
+	SecurityToken       string
+	Username            string
+	UserID              string
+	AgencyName          string
+	AgencyDomainName    string
+	DelegatedProject    string
+	MaxRetries          int
+	MaxBackoffRetries   int
+	BackoffRetryTimeout int
 
 	UserAgent string
 
@@ -232,7 +235,6 @@ func (c *Config) GetCredentials() (*awsCredentials.Credentials, error) {
 
 	// Keep the default timeout (100ms) low as we don't want to wait in non-EC2 environments
 	client.Timeout = 100 * time.Millisecond
-
 	const userTimeoutEnvVar = "AWS_METADATA_TIMEOUT"
 	userTimeout := os.Getenv(userTimeoutEnvVar)
 	if userTimeout != "" {
@@ -519,6 +521,10 @@ func (c *Config) genClient(ao golangsdk.AuthOptionsProvider) (*golangsdk.Provide
 		osDebug = true
 	}
 
+	client.MaxBackoffRetries = pointerto.Int(c.MaxBackoffRetries)
+	defaultBackoffTimeout := time.Duration(c.BackoffRetryTimeout) * time.Second
+	client.BackoffRetryTimeout = &defaultBackoffTimeout
+
 	client.HTTPClient = http.Client{
 		Transport: &RoundTripper{
 			Rt:         transport,
@@ -700,6 +706,13 @@ func (c *Config) DisV2Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) DrsV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewDRSServiceV3(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) ComputeV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewComputeV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
@@ -716,6 +729,13 @@ func (c *Config) ComputeV2Client(region string) (*golangsdk.ServiceClient, error
 
 func (c *Config) DnsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewDNSV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) GaussDBV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewGaussDBV3(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
 		Availability: c.getEndpointType(),
 	})
@@ -781,6 +801,13 @@ func (c *Config) SmnV2Client(projectName ProjectName) (*golangsdk.ServiceClient,
 	}
 	return openstack.NewSMNV2(newConfig.HwClient, golangsdk.EndpointOpts{
 		Region:       c.GetRegion(nil),
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) SmnV2TagClient(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewSMNV2Tags(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
 		Availability: c.getEndpointType(),
 	})
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf-premium/v1/rules"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -261,7 +262,7 @@ func resourceWafDedicatedCcRuleV1Create(ctx context.Context, d *schema.ResourceD
 		LimitNum:     int64(d.Get("limit_num").(int)),
 		LimitPeriod:  int64(d.Get("limit_period").(int)),
 		UnlockNum:    int64(d.Get("unlock_num").(int)),
-		LockTime:     d.Get("lock_time").(int),
+		LockTime:     pointerto.Int(d.Get("lock_time").(int)),
 		Description:  d.Get("description").(string),
 	}
 

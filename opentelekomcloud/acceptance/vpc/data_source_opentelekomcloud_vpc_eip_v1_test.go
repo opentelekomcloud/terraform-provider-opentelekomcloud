@@ -12,6 +12,7 @@ func TestAccVpcEipV1DataSource_basic(t *testing.T) {
 	dataSourceNameByID := "data.opentelekomcloud_vpc_eip_v1.by_id"
 	dataSourceNameByTags := "data.opentelekomcloud_vpc_eip_v1.by_tags"
 	dataSourceNameByIP := "data.opentelekomcloud_vpc_eip_v1.by_ip"
+	dataSourceNameByRegex := "data.opentelekomcloud_vpc_eip_v1.by_regex"
 
 	t.Parallel()
 	quotas.BookOne(t, quotas.FloatingIP)
@@ -35,6 +36,7 @@ func TestAccVpcEipV1DataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(dataSourceNameByIP, "type", "5_bgp"),
 					resource.TestCheckResourceAttr(dataSourceNameByIP, "bandwidth_share_type", "PER"),
 					resource.TestCheckResourceAttr(dataSourceNameByIP, "status", "DOWN"),
+					resource.TestCheckResourceAttr(dataSourceNameByRegex, "name", "my_eip"),
 				),
 			},
 			{
@@ -48,6 +50,7 @@ const testAccDataSourceVpcEipV1Init = `
 resource "opentelekomcloud_vpc_eip_v1" "eip" {
   publicip {
     type = "5_bgp"
+    name = "my_eip"
   }
   bandwidth {
     name        = "acc-band"
@@ -57,8 +60,8 @@ resource "opentelekomcloud_vpc_eip_v1" "eip" {
   }
 
   tags = {
-    muh = "value-create"
-    kuh = "value-create"
+    otc-tf-test-1 = "value-create"
+    otc-tf-test-2 = "value-create"
   }
 }
 `
@@ -67,6 +70,7 @@ const testAccDataSourceVpcEipV1Config = `
 resource "opentelekomcloud_vpc_eip_v1" "eip" {
   publicip {
     type = "5_bgp"
+    name = "my_eip"
   }
   bandwidth {
     name        = "acc-band"
@@ -76,8 +80,8 @@ resource "opentelekomcloud_vpc_eip_v1" "eip" {
   }
 
   tags = {
-    muh = "value-create"
-    kuh = "value-create"
+    otc-tf-test-1 = "value-create"
+    otc-tf-test-2 = "value-create"
   }
 }
 
@@ -91,8 +95,12 @@ data "opentelekomcloud_vpc_eip_v1" "by_ip" {
 
 data "opentelekomcloud_vpc_eip_v1" "by_tags" {
   tags = {
-    muh = "value-create"
-    kuh = "value-create"
+    otc-tf-test-1 = "value-create"
+    otc-tf-test-2 = "value-create"
   }
+}
+
+data "opentelekomcloud_vpc_eip_v1" "by_regex" {
+  name_regex = "^my_.+"
 }
 `

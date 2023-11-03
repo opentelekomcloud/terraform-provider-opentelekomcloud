@@ -10,7 +10,7 @@ This resource can be useful for getting back a list of subnet ids for a VPC.
 
 ## Example Usage
 
-The following example shows outputing all cidr blocks for every subnet id in a VPC.
+The following example shows outputting all cidr blocks for every subnet id in a VPC.
 
 ```hcl
 data "opentelekomcloud_vpc_subnet_ids_v1" "subnet_ids" {
@@ -18,12 +18,12 @@ data "opentelekomcloud_vpc_subnet_ids_v1" "subnet_ids" {
 }
 
 data "opentelekomcloud_vpc_subnet_v1" "subnet" {
-  count = length(data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids.ids)
-  id    = data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids.ids[count.index]
+  for_each = data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids.ids
+  id       = each.value
 }
 
 output "subnet_cidr_blocks" {
-  value = data.opentelekomcloud_vpc_subnet_v1.subnet.*.cidr
+  value = [for s in data.opentelekomcloud_vpc_subnet_v1.subnet : s.cidr]
 }
 ```
 

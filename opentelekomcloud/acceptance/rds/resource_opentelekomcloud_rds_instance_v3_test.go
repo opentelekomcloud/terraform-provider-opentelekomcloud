@@ -338,6 +338,39 @@ func TestAccRdsInstanceV3TimeZoneAndSSL(t *testing.T) {
 	})
 }
 
+func TestAccRdsInstanceV3RestoreToPITR(t *testing.T) {
+	postfix := acctest.RandString(3)
+	var rdsInstance instances.InstanceResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsInstanceV3RestorePITRBasic(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+				),
+			},
+			{
+				Config: testAccRdsInstanceV3RestorePITRUpdate(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.large"),
+					resource.TestCheckResourceAttrSet(instanceV3ResourceName, "restored_backup_id"),
+				),
+			},
+			{
+				Config: testAccRdsInstanceV3RestorePITRBasic(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttrSet(instanceV3ResourceName, "restored_backup_id"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.RdsV3Client(env.OS_REGION_NAME)
@@ -966,6 +999,115 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     max_connections           = "300"
     autovacuum_max_workers    = "30"
   }
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccRdsInstanceV3RestorePITRBasic(postfix string) string {
+	return fmt.Sprintf(`
+%[1]s
+%[2]s
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%[3]s"
+  availability_zone = ["%[4]s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "10"
+    port     = "8635"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+  flavor = "rds.pg.c2.large"
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance_2" {
+  name              = "tf_rds_source_%[3]s"
+  availability_zone = ["%[4]s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "10"
+    port     = "8635"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+
+  flavor = "rds.pg.c2.large"
+}
+
+resource "opentelekomcloud_rds_backup_v3" "test" {
+  instance_id = opentelekomcloud_rds_instance_v3.instance_2.id
+  name        = "tf_rds_backup_%[5]s"
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE, postfix)
+}
+
+func testAccRdsInstanceV3RestorePITRUpdate(postfix string) string {
+	return fmt.Sprintf(`
+%[1]s
+%[2]s
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%[3]s"
+  availability_zone = ["%[4]s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "10"
+    port     = "8635"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+  flavor = "rds.pg.c2.large"
+  restore_from_backup {
+    source_instance_id = opentelekomcloud_rds_backup_v3.test.instance_id
+    backup_id          = opentelekomcloud_rds_backup_v3.test.id
+    type               = "backup"
+  }
+
+
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance_2" {
+  name              = "tf_rds_source_%[3]s"
+  availability_zone = ["%[4]s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "10"
+    port     = "8635"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+
+  flavor = "rds.pg.c2.large"
+}
+
+resource "opentelekomcloud_rds_backup_v3" "test" {
+  instance_id = opentelekomcloud_rds_instance_v3.instance_2.id
+  name        = "tf_rds_backup_%[3]s"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }

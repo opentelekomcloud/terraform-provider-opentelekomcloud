@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[SFS]** Add enhanced share support for ``resource/opentelekomcloud_sfs_turbo_share_v1`` (`#2316 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2316>`_)

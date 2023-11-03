@@ -243,7 +243,7 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	adminStateUp := d.Get("admin_state_up").(bool)
 	protocol := listeners.Protocol(d.Get("protocol").(string))
-	enhanceL7policy := d.Get("advanced_forwarding").(bool)
+
 	opts := listeners.CreateOpts{
 		AdminStateUp:           &adminStateUp,
 		CAContainerRef:         d.Get("client_ca_tls_container_ref").(string),
@@ -261,11 +261,16 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		ClientTimeout:          d.Get("client_timeout").(int),
 		MemberTimeout:          d.Get("member_timeout").(int),
 		InsertHeaders:          getInsertHeaders(d),
-		EnhanceL7policy:        &enhanceL7policy,
 		SniMatchAlgo:           d.Get("sni_match_algo").(string),
 		SecurityPolicy:         d.Get("security_policy_id").(string),
 		IpGroup:                getIpGroup(d),
 	}
+
+	forwardingInput := common.CheckNull("advanced_forwarding", d)
+	if !forwardingInput {
+		opts.EnhanceL7policy = pointerto.Bool(d.Get("advanced_forwarding").(bool))
+	}
+
 	switch protocol {
 	case listeners.ProtocolHTTPS:
 		http2Enable := d.Get("http2_enable").(bool)

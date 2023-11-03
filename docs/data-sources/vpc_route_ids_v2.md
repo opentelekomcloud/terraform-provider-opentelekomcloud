@@ -18,12 +18,12 @@ data "opentelekomcloud_vpc_route_ids_v2" "example" {
 }
 
 data "opentelekomcloud_vpc_route_v2" "vpc_route" {
-  count = length(data.opentelekomcloud_vpc_route_ids_v2.example.ids)
-  id    = data.opentelekomcloud_vpc_route_ids_v2.example.ids[count.index]
+  for_each = data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids.ids
+  id       = each.value
 }
 
 output "route_nexthop" {
-  value = [data.opentelekomcloud_vpc_route_v2.vpc_route.*.nexthop]
+  value = [for hop in data.opentelekomcloud_vpc_subnet_v1.subnet : hop.cidr]
 }
 ```
 

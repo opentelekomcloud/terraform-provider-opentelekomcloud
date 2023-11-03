@@ -32,6 +32,7 @@ func TestAccVpcV1EIP_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVpcV1EIPExists(resourceVPCEIPName, &eip),
 					resource.TestCheckResourceAttr(resourceVPCEIPName, "bandwidth.0.name", "acc-band"),
+					resource.TestCheckResourceAttr(resourceVPCEIPName, "publicip.0.name", "my_ip"),
 				),
 			},
 			{
@@ -39,6 +40,7 @@ func TestAccVpcV1EIP_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVpcV1EIPExists(resourceVPCEIPName, &eip),
 					resource.TestCheckResourceAttr(resourceVPCEIPName, "bandwidth.0.name", "acc-band-update"),
+					resource.TestCheckResourceAttr(resourceVPCEIPName, "publicip.0.name", "my_ip"),
 					resource.TestCheckResourceAttr(resourceVPCEIPName, "bandwidth.0.size", "25"),
 				),
 			},
@@ -151,6 +153,7 @@ const testAccVpcV1EIPBasic = `
 resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
   publicip {
     type = "5_bgp"
+    name = "my_ip"
   }
   bandwidth {
     name        = "acc-band"
@@ -169,6 +172,7 @@ const testAccVpcV1EIPUpdate = `
 resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
   publicip {
     type = "5_bgp"
+    name = "my_ip"
   }
   bandwidth {
     name        = "acc-band-update"

@@ -67,6 +67,12 @@ func ResourceSFSTurboShareV1() *schema.Resource {
 				ForceNew: true,
 				Default:  "STANDARD",
 			},
+			"enhanced": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
 			"availability_zone": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -103,6 +109,10 @@ func ResourceSFSTurboShareV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"expand_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -128,6 +138,10 @@ func resourceSFSTurboShareV1Create(ctx context.Context, d *schema.ResourceData, 
 		Metadata: shares.Metadata{
 			CryptKeyID: d.Get("crypt_key_id").(string),
 		},
+	}
+
+	if _, ok := d.GetOk("enhanced"); ok {
+		createOpts.Metadata.ExpandType = "bandwidth"
 	}
 
 	log.Printf("[DEBUG] Create SFS turbo with option: %+v", createOpts)
@@ -178,6 +192,7 @@ func resourceSFSTurboShareV1Read(ctx context.Context, d *schema.ResourceData, me
 		d.Set("subnet_id", share.SubnetID),
 		d.Set("security_group_id", share.SecurityGroupID),
 		d.Set("version", share.Version),
+		d.Set("expand_type", share.ExpandType),
 		d.Set("region", config.GetRegion(d)),
 		d.Set("availability_zone", share.AvailabilityZone),
 		d.Set("available_capacity", share.AvailCapacity),

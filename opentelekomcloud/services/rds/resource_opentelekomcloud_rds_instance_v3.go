@@ -90,6 +90,32 @@ func ResourceRdsInstanceV3() *schema.Resource {
 					},
 				},
 			},
+			"restore_from_backup": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Computed: false,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"source_instance_id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"backup_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"restore_time": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+					},
+				},
+			},
 			"db": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -294,6 +320,10 @@ func ResourceRdsInstanceV3() *schema.Resource {
 				Computed: false,
 				Optional: true,
 			},
+			"restored_backup_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -370,6 +400,10 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreateClient, err)
+	}
+
+	if _, ok := d.GetOk("restore_from_backup.0.source_instance_id"); ok {
+		return fmterr.Errorf("point in time restoration can be only produced on existing instance")
 	}
 
 	dbInfo := resourceRDSDbInfo(d)
@@ -487,22 +521,6 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			if err := tags.Create(client, "instances", r.Instance.Id, tagList).ExtractErr(); err != nil {
 				return fmterr.Errorf("error setting tags of RDSv3 instance: %w", err)
 			}
-		}
-	}
-
-	var backupOpts backups.UpdateOpts
-
-	// workaround for https://jira.tsi-dev.otc-service.com/browse/BM-2388
-	if strings.ToLower(datastore.Type) == "postgresql" && common.HasFilledOpt(d, "backup_strategy") {
-		backupRaw := resourceRDSBackupStrategy(d)
-		backupOpts.KeepDays = &backupRaw.KeepDays
-		backupOpts.StartTime = backupRaw.StartTime
-		backupOpts.Period = "1,2,3,4,5,6,7"
-		backupOpts.InstanceId = d.Id()
-		log.Printf("[DEBUG] Backup Strategy Opts: %#v", backupOpts)
-
-		if err = backups.Update(client, backupOpts); err != nil {
-			return fmterr.Errorf("error updating OpenTelekomCloud RDSv3 Backup Strategy: %s", err)
 		}
 	}
 
@@ -736,10 +754,12 @@ func findPort(client *golangsdk.ServiceClient, privateIP string, subnetID string
 	}
 
 	for _, port := range portList {
-		address := port.FixedIPs[0]
-		if address.IPAddress == privateIP && address.SubnetID == subnetID {
-			id = port.ID
-			return
+		if len(port.FixedIPs) > 0 {
+			address := port.FixedIPs[0]
+			if address.IPAddress == privateIP && address.SubnetID == subnetID {
+				id = port.ID
+				return
+			}
 		}
 	}
 	return
@@ -790,6 +810,31 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreateClient, err)
+	}
+
+	if d.HasChange("restore_from_backup") {
+		rawPitr := d.Get("restore_from_backup").([]interface{})
+		if len(rawPitr) > 0 {
+			pitr := rawPitr[0].(map[string]interface{})
+			pitrOpts := backups.RestorePITROpts{
+				Source: backups.Source{
+					BackupID:    pitr["backup_id"].(string),
+					InstanceID:  pitr["source_instance_id"].(string),
+					RestoreTime: int64(pitr["restore_time"].(int)),
+					Type:        pitr["type"].(string),
+				},
+				Target: backups.Target{
+					InstanceID: d.Id(),
+				},
+			}
+			_, err = backups.RestorePITR(client, pitrOpts)
+			if err != nil {
+				return fmterr.Errorf("error in point in time restoration: %s ", err)
+			}
+			if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
+				return diag.FromErr(err)
+			}
+		}
 	}
 
 	if d.HasChange("security_group_id") {
@@ -1081,6 +1126,16 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("lower_case_table_names", d.Get("lower_case_table_names").(string)),
 		d.Set("ssl_enable", *rdsInstance.EnableSSL),
 	)
+
+	if v, ok := d.GetOk("restore_from_backup"); ok {
+		rawPitr := v.([]interface{})
+		if len(rawPitr) > 0 {
+			backupId := rawPitr[0].(map[string]interface{})["backup_id"]
+			if backupId != "" {
+				me = multierror.Append(me, d.Set("restored_backup_id", backupId))
+			}
+		}
+	}
 
 	if me.ErrorOrNil() != nil {
 		return diag.FromErr(me)

@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix issue with port & protocol update for ``resource/opentelekomcloud_networking_secgroup_rule_v2`` (`#2341 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2341>`_)
+

@@ -15,6 +15,11 @@ Manages a V2 topic resource within OpenTelekomCloud.
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   name         = "topic_1"
   display_name = "The display name of topic_1"
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
 }
 ```
 
@@ -22,12 +27,14 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the topic to be created.
+* `name` - (Required, ForceNew, String) The name of the topic to be created.
 
-* `display_name` - (Optional) Topic display name, which is presented as the
+* `display_name` - (Optional, String) Topic display name, which is presented as the
   name of the email sender in an email message.
 
-* `project_name` - (Optional) The project name for the topic.
+* `project_name` - (Optional, ForceNew, String) The project name for the topic.
+
+* `tags` - (Optional, Map) Tags key/value pairs to associate with the instance.
 
 ## Attributes Reference
 

@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[DRS]** New resource ``resource/opentelekomcloud_drs_task_v3`` (`#2305 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2305>`_)

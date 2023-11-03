@@ -20,7 +20,7 @@ data "opentelekomcloud_networking_secgroup_rule_ids_v2" "sg_ids" {
 }
 
 output "secgroup_rule_ids" {
-  value = data.opentelekomcloud_networking_secgroup_rule_ids_v2.sg_ids.ids.*
+  value = [for id in data.opentelekomcloud_networking_secgroup_rule_ids_v2.sg_ids.ids : id]
 }
 ```
 
