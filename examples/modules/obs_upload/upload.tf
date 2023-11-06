@@ -7,6 +7,7 @@ terraform {
       version = ">= 1.35.9"
     }
   }
+  backend "s3" {}
 }
 
 provider "opentelekomcloud" {
