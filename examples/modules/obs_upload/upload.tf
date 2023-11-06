@@ -17,7 +17,7 @@ terraform {
 }
 
 provider "opentelekomcloud" {
-  cloud = "terraform"
+  cloud = "functest_cloud"
 }
 
 variable "module_files" {
