@@ -7,11 +7,17 @@ terraform {
       version = ">= 1.35.9"
     }
   }
-  backend "s3" {}
+  backend "s3" {
+    endpoints {
+      s3 = "https://obs.eu-de.otc.t-systems.com"
+    }
+    skip_region_validation      = true
+    skip_credentials_validation = true
+  }
 }
 
 provider "opentelekomcloud" {
-  cloud = "functest_cloud"
+  cloud = "terraform"
 }
 
 variable "module_files" {
