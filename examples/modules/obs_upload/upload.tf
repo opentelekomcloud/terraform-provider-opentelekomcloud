@@ -8,11 +8,10 @@ terraform {
     }
   }
   backend "s3" {
-    endpoints {
-      s3 = "https://obs.eu-de.otc.t-systems.com"
-    }
+    endpoint = "https://obs.eu-de.otc.t-systems.com"
     skip_region_validation      = true
     skip_credentials_validation = true
+    skip_requesting_account_id  = true
   }
 }
 
