@@ -368,6 +368,8 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_css_cluster_v1":                            css.ResourceCssClusterV1(),
 			"opentelekomcloud_css_snapshot_configuration_v1":             css.ResourceCssSnapshotConfigurationV1(),
 			"opentelekomcloud_direct_connect_v2":                         dcaas.ResourceDirectConnectV2(),
+			"opentelekomcloud_direct_connect_virtual_interface_v2":       dcaas.ResourceVirtualInterfaceV2(),
+			"opentelekomcloud_direct_connect_virtual_gateway_v2":         dcaas.ResourceVirtualGatewayV2(),
 			"opentelekomcloud_dcs_instance_v1":                           dcs.ResourceDcsInstanceV1(),
 			"opentelekomcloud_dds_instance_v3":                           dds.ResourceDdsInstanceV3(),
 			"opentelekomcloud_deh_host_v1":                               deh.ResourceDeHHostV1(),
