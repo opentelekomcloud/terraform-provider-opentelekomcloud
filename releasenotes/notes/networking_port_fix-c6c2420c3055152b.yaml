@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[VPC]** Fix amount of `fixed_ip` available for ``resource/opentelekomcloud_networking_port_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[VPC]** Fix amount of `fixed_ip` available for ``resource/opentelekomcloud_networking_port_v2`` (`#2365 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2365>`_)
