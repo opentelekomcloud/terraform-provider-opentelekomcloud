@@ -104,7 +104,7 @@ resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group" {
   type        = "cidr"
   endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
   description = "first"
-  project_id   = "%s"
+  project_id  = "%s"
 }
 `, dcegName, env.OS_PROJECT_ID)
 }
