@@ -12,15 +12,27 @@ Manages a V2 port resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
+resource "opentelekomcloud_networking_port_v2" "port_1" {
+  name           = "port_1"
+  admin_state_up = "true"
+  network_id     = opentelekomcloud_networking_network_v2.network_1.id
+
+  fixed_ip {
+    subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
+    ip_address = "192.168.199.23"
+  }
+}
+
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name           = "network_1"
   admin_state_up = "true"
 }
 
-resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name           = "port_1"
-  network_id     = opentelekomcloud_networking_network_v2.network_1.id
-  admin_state_up = "true"
+resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
+  name       = "subnet_1"
+  cidr       = "192.168.199.0/24"
+  ip_version = 4
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 ```
 
@@ -67,7 +79,7 @@ The following arguments are supported:
   creates a new port.
 
 * `fixed_ip` - (Optional) An array of desired IPs for this port. The structure is
-  described below.
+  described below. A single `fixed_ip` entry is allowed for a port.
 
 * `allowed_address_pairs` - (Optional) An IP/MAC Address pair of additional IP
   addresses that can be active on this port. The structure is described below.
