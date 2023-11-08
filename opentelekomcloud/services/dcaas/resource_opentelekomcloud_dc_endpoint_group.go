@@ -20,26 +20,30 @@ func ResourceDCEndpointGroupV2() *schema.Resource {
 		CreateContext: resourceDCEndpointGroupV2Create,
 		DeleteContext: resourceDCEndpointGroupV2Delete,
 		ReadContext:   resourceDCEndpointGroupV2Read,
-		UpdateContext: resourceDCEndpointGroupV2Update,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
-			Update: schema.DefaultTimeout(10 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
-			"tenant_id": {
+			"project_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"endpoints": {
 				Type:     schema.TypeList,
@@ -47,15 +51,16 @@ func ResourceDCEndpointGroupV2() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				ForceNew: true,
 			},
 			"type": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
 			},
 		},
 	}
@@ -72,19 +77,19 @@ func resourceDCEndpointGroupV2Create(ctx context.Context, d *schema.ResourceData
 
 	createOpts := dceg.CreateOpts{
 		Name:        d.Get("name").(string),
-		TenantId:    d.Get("tenant_id").(string),
+		TenantId:    d.Get("project_id").(string),
 		Description: d.Get("description").(string),
 		Endpoints:   GetEndpoints(d),
 		Type:        d.Get("type").(string),
 	}
 	log.Printf("[DEBUG] DC endpoint group V2 createOpts: %+v", createOpts)
 
-	created, err := dceg.Create(client, createOpts)
+	eg, err := dceg.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating DC endpoint group: %s", err)
 	}
-	d.SetId(created.ID)
-	log.Printf("[DEBUG] DC endpoint group V2 created: %+v", created)
+	d.SetId(eg.ID)
+	log.Printf("[DEBUG] DC endpoint group V2 created: %+v", eg)
 	return resourceDCEndpointGroupV2Read(ctx, d, meta)
 }
 
@@ -97,18 +102,18 @@ func resourceDCEndpointGroupV2Read(ctx context.Context, d *schema.ResourceData, 
 		return fmterr.Errorf(errCreateClient, err)
 	}
 
-	created, err := dceg.Get(client, d.Id())
+	eg, err := dceg.Get(client, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error reading DC endpoint group: %s", err)
 	}
-	log.Printf("[DEBUG] DC endpoint group V2 read: %+v", created)
+	log.Printf("[DEBUG] DC endpoint group V2 read: %+v", eg)
 
 	mErr := multierror.Append(
-		d.Set("name", created.Name),
-		d.Set("tenant_id", created.TenantId),
-		d.Set("description", created.Description),
-		d.Set("endpoints", created.Endpoints),
-		d.Set("type", created.Type),
+		d.Set("name", eg.Name),
+		d.Set("project_id", eg.TenantId),
+		d.Set("description", eg.Description),
+		d.Set("endpoints", eg.Endpoints),
+		d.Set("type", eg.Type),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
@@ -132,31 +137,6 @@ func resourceDCEndpointGroupV2Delete(ctx context.Context, d *schema.ResourceData
 	log.Printf("[DEBUG] DC endpoint group V2 deleted: %s", d.Id())
 	d.SetId("")
 	return nil
-}
-
-func resourceDCEndpointGroupV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*cfg.Config)
-	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
-		return config.DCaaSV2Client(config.GetRegion(d))
-	})
-	if err != nil {
-		return fmterr.Errorf(errCreateClient, err)
-	}
-	var updateOpts dceg.UpdateOpts
-
-	if d.HasChange("name") {
-		newName := d.Get("name")
-		updateOpts.Name = newName.(string)
-	}
-	if d.HasChange("description") {
-		newDescription := d.Get("description")
-		updateOpts.Description = newDescription.(string)
-	}
-	err = dceg.Update(client, d.Id(), updateOpts)
-	if err != nil {
-		return fmterr.Errorf("error updating direct connect: %s", err)
-	}
-	return resourceDCEndpointGroupV2Read(ctx, d, meta)
 }
 
 func GetEndpoints(d *schema.ResourceData) []string {

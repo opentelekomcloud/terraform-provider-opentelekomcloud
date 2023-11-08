@@ -15,13 +15,11 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const dceg = "opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group"
+
 func TestDCEndpointGroupV2Resource_basic(t *testing.T) {
+	var group dcep.DCEndpointGroup
 	DCegName := fmt.Sprintf("dceg-%s", acctest.RandString(5))
-	DCegNameUpdated := fmt.Sprintf("dceg-updated-%s", acctest.RandString(5))
-
-	const dceg = "opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group"
-
-	tenantID := env.OS_PROJECT_ID
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -29,46 +27,50 @@ func TestDCEndpointGroupV2Resource_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckDCegV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDCegV2Resource_basic(DCegName, tenantID),
+				Config: testAccDCegV2Resource_basic(DCegName),
 				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDCegV2Exists(dceg, &group),
 					resource.TestCheckResourceAttr(dceg, "description", "first"),
 					resource.TestCheckResourceAttrSet(dceg, "id"),
 				),
 			},
 			{
-				Config: testAccDCegV2ResourceUpdate_basic(DCegNameUpdated),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(dceg, "description", "second"),
-					resource.TestCheckResourceAttr(dceg, "name", DCegNameUpdated),
-					resource.TestCheckResourceAttrSet(dceg, "id"),
-				),
+				ResourceName:      dceg,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func testAccDCegV2Resource_basic(dcegName string, tenantID string) string {
-	return fmt.Sprintf(`
-resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group" {
-  name        = "%s"
-  type        = "cidr"
-  endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
-  description = "first"
-  tenant_id   = "%s"
-}
-`, dcegName, tenantID)
-}
+func testAccCheckDCegV2Exists(n string, group *dcep.DCEndpointGroup) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("not found: %s", n)
+		}
 
-func testAccDCegV2ResourceUpdate_basic(dcegNameUpdated string) string {
-	return fmt.Sprintf(`
-resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group" {
-  name        = "%s"
-  type        = "cidr"
-  description = "second"
-  tenant_id   = "%s"
-  endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
-}
-`, dcegNameUpdated, env.OS_PROJECT_ID)
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no ID is set")
+		}
+
+		config := common.TestAccProvider.Meta().(*cfg.Config)
+		client, err := config.DCaaSV2Client(env.OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("error creating OpenTelekomCloud DCaasV2 client: %s", err)
+		}
+
+		found, err := dcep.Get(client, rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if found.ID != rs.Primary.ID {
+			return fmt.Errorf("DC endpoint group not found")
+		}
+		group = found
+
+		return nil
+	}
 }
 
 func testAccCheckDCegV2Destroy(s *terraform.State) error {
@@ -93,4 +95,16 @@ func testAccCheckDCegV2Destroy(s *terraform.State) error {
 		}
 	}
 	return nil
+}
+
+func testAccDCegV2Resource_basic(dcegName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group" {
+  name        = "%s"
+  type        = "cidr"
+  endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
+  description = "first"
+  project_id   = "%s"
+}
+`, dcegName, env.OS_PROJECT_ID)
 }
