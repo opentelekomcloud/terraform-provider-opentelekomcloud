@@ -100,10 +100,9 @@ func ResourceVirtualInterfaceV2() *schema.Resource {
 				RequiredWith: []string{"remote_gateway_v4_ip"},
 			},
 			"remote_gateway_v4_ip": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"remote_gateway_v6_ip"},
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"asn": {
 				Type:         schema.TypeInt,
@@ -121,6 +120,7 @@ func ResourceVirtualInterfaceV2() *schema.Resource {
 			"project_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"enable_bfd": {
 				Type:     schema.TypeBool,

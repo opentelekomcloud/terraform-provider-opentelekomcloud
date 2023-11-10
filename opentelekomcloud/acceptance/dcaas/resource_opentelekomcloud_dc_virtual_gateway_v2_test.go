@@ -16,7 +16,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-const vg = "opentelekomcloud_direct_connect_virtual_gateway_v2.wg_1"
+const vg = "opentelekomcloud_dc_virtual_gateway_v2.vgw_1"
 
 func TestDirectConnectVirtualGatewayV2Resource_basic(t *testing.T) {
 	gwName := fmt.Sprintf("dc-%s", acctest.RandString(5))
@@ -30,22 +30,22 @@ func TestDirectConnectVirtualGatewayV2Resource_basic(t *testing.T) {
 				Config: testAccVirtualGatewayV2_basic(gwName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDirectConnectVirtualGatewayV2Exists(vg, &gateway),
-					resource.TestCheckResourceAttr(vg, "local_ep_group.0", ""),
 					resource.TestCheckResourceAttr(vg, "name", gwName),
 					resource.TestCheckResourceAttr(vg, "description", "acc test"),
 					resource.TestCheckResourceAttrSet(vg, "asn"),
 					resource.TestCheckResourceAttrSet(vg, "status"),
+					resource.TestCheckResourceAttrSet(vg, "local_ep_group_id"),
 				),
 			},
 			{
 				Config: testAccVirtualGatewayV2_update(gwName + "updated"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDirectConnectVirtualGatewayV2Exists(vg, &gateway),
-					resource.TestCheckResourceAttr(vg, "local_ep_group.0", ""),
 					resource.TestCheckResourceAttr(vg, "name", gwName+"updated"),
 					resource.TestCheckResourceAttr(vg, "description", "acc test updated"),
 					resource.TestCheckResourceAttrSet(vg, "asn"),
 					resource.TestCheckResourceAttrSet(vg, "status"),
+					resource.TestCheckResourceAttrSet(vg, "local_ep_group_id"),
 				),
 			},
 			{
@@ -117,27 +117,52 @@ func testAccVirtualGatewayV2_basic(name string) string {
 	return fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_direct_connect_virtual_gateway_v2" "test" {
-  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  name        = "%s"
-  description = "acc test"
+%s
 
-  local_ep_group_id = ""
-  ]
+resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group" {
+  name        = "tf_acc_eg_1"
+  type        = "cidr"
+  endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
+  description = "first"
+  project_id  = data.opentelekomcloud_identity_project_v3.project.id
 }
-`, common.DataSourceSubnet, name)
+
+resource "opentelekomcloud_dc_virtual_gateway_v2" "vgw_1" {
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  name              = "%s"
+  description       = "acc test"
+  local_ep_group_id = opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group.id
+}
+`, common.DataSourceSubnet, common.DataSourceProject, name)
 }
 
 func testAccVirtualGatewayV2_update(name string) string {
 	return fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_direct_connect_virtual_gateway_v2" "test" {
-  vpc_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  name   = "%s"
-  description = "acc test updated"
+%s
 
-  local_ep_group_id = ""
+resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group" {
+  name        = "tf_acc_eg_1"
+  type        = "cidr"
+  endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
+  description = "first"
+  project_id  = data.opentelekomcloud_identity_project_v3.project.id
 }
-`, common.DataSourceSubnet, name)
+
+resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group_new" {
+  name        = "tf_acc_eg_1"
+  type        = "cidr"
+  endpoints   = ["10.20.0.0/24", "10.30.0.0/24"]
+  description = "first"
+  project_id  = data.opentelekomcloud_identity_project_v3.project.id
+}
+
+resource "opentelekomcloud_dc_virtual_gateway_v2" "vgw_1" {
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  name              = "%s"
+  description       = "acc test updated"
+  local_ep_group_id = opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group_new.id
+}
+`, common.DataSourceSubnet, common.DataSourceProject, name)
 }

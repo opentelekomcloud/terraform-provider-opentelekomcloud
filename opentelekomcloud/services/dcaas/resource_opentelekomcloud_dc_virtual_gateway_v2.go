@@ -96,6 +96,7 @@ func resourceVirtualGatewayV2Create(ctx context.Context, d *schema.ResourceData,
 		BgpAsn:               d.Get("asn").(int),
 		DeviceId:             d.Get("device_id").(string),
 		RedundantDeviceId:    d.Get("redundant_device_id").(string),
+		Type:                 "default",
 	}
 	vg, err := virtual_gateway.Create(client, opts)
 	if err != nil {
