@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcaas/v2/virtual-interface"
+	virtualinterface "github.com/opentelekomcloud/gophertelekomcloud/openstack/dcaas/v2/virtual-interface"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -24,7 +24,7 @@ func TestDirectConnectVirtualInterfaceV2Resource_basic(t *testing.T) {
 		t.Skip("OS_DIRECT_CONNECT_ID should be set for acceptance tests")
 	}
 	intName := fmt.Sprintf("dc-%s", acctest.RandString(5))
-	var vint virtual_interface.VirtualInterface
+	var vint virtualinterface.VirtualInterface
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -69,7 +69,7 @@ func testAccCheckDirectConnectVirtualInterfaceV2Destroy(s *terraform.State) erro
 			continue
 		}
 
-		_, err := virtual_interface.Get(client, rs.Primary.ID)
+		_, err := virtualinterface.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("virtual interface still exists")
 		}
@@ -81,7 +81,7 @@ func testAccCheckDirectConnectVirtualInterfaceV2Destroy(s *terraform.State) erro
 	return nil
 }
 
-func testAccCheckDirectConnectVirtualInterfaceV2Exists(n string, gateway *virtual_interface.VirtualInterface) resource.TestCheckFunc {
+func testAccCheckDirectConnectVirtualInterfaceV2Exists(n string, gateway *virtualinterface.VirtualInterface) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -98,7 +98,7 @@ func testAccCheckDirectConnectVirtualInterfaceV2Exists(n string, gateway *virtua
 			return fmt.Errorf("error creating DCaaS client: %s", err)
 		}
 
-		found, err := virtual_interface.Get(client, rs.Primary.ID)
+		found, err := virtualinterface.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
