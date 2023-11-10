@@ -1,0 +1,6 @@
+---
+features:
+  |
+  **[DCAAS]** Add new resource ``resource/opentelekomcloud_dc_virtual_gateway_v2`` (`#2364 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2364>`_)
+  |
+  **[DCAAS]** Add new resource ``resource/opentelekomcloud_dc_virtual_interface_v2`` (`#2364 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2364>`_)
