@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	dcaas "github.com/opentelekomcloud/gophertelekomcloud/openstack/dcaas/v2/direct-connect"
 	virtualgateway "github.com/opentelekomcloud/gophertelekomcloud/openstack/dcaas/v2/virtual-gateway"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -65,11 +64,11 @@ func testAccCheckDirectConnectVirtualGatewayV2Destroy(s *terraform.State) error 
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_direct_connect_virtual_gateway_v2" {
+		if rs.Type != "opentelekomcloud_dc_virtual_gateway_v2" {
 			continue
 		}
 
-		_, err := dcaas.Get(client, rs.Primary.ID)
+		_, err := virtualgateway.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("virtual gateway still exists")
 		}
