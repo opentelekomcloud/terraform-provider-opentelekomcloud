@@ -21,6 +21,7 @@ var (
 	OS_BMS_FLAVOR_NAME   = os.Getenv("OS_BMS_FLAVOR_NAME")
 	OS_TO_TENANT_ID      = os.Getenv("OS_TO_TENANT_ID")
 	OS_TENANT_NAME       = GetTenantName()
+	OS_PROJECT_ID        = os.Getenv("OS_PROJECT_ID")
 )
 
 func flavorID() string {

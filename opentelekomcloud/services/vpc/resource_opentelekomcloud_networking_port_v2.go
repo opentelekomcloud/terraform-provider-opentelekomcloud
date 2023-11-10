@@ -101,6 +101,7 @@ func ResourceNetworkingPortV2() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: false,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"subnet_id": {
