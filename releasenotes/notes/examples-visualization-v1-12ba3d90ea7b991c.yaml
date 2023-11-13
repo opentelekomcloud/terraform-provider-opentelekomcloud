@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    Added gate job 'otc-terraform-visualize-main' as part of provider unit testing and for additional graph visualization which are available on `https://tf-viz-pages.obs-website.eu-de.otc.t-systems.com` (`#2348 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2348>`_)
