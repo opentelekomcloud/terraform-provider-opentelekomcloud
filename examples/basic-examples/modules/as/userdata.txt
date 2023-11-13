@@ -1,5 +1,0 @@
-#cloud-config
-chpasswd:
-list: |
-root:tsystems@1!
-expire: False
