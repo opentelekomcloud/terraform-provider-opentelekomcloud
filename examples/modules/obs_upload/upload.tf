@@ -1,6 +1,4 @@
 terraform {
-  required_version = ">= 0.13"
-
   required_providers {
     opentelekomcloud = {
       source  = "opentelekomcloud/opentelekomcloud"
@@ -8,10 +6,14 @@ terraform {
     }
   }
   backend "s3" {
-    endpoint = "https://obs.eu-de.otc.t-systems.com"
+    endpoints = {
+      s3 = "https://obs.eu-de.otc.t-systems.com"
+    }
     skip_region_validation      = true
     skip_credentials_validation = true
     skip_requesting_account_id  = true
+    skip_metadata_api_check     = true
+    skip_s3_checksum            = true
   }
 }
 
@@ -55,5 +57,5 @@ resource "opentelekomcloud_obs_bucket_object" "index" {
   bucket = var.bucket
   key    = split("main_page/", local.main[count.index])[1]
   source = local.main[count.index]
-  etag   = filemd5(local.main[count.index])
+#  etag   = filemd5(local.main[count.index])
 }
