@@ -1,2 +1,0 @@
-variable "bucket_name" {
-}

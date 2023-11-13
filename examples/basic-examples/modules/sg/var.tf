@@ -1,1 +1,0 @@
-variable "secgroup_name" {}
