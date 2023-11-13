@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[DCS]** Fixed documentation password requirements for ``resource/opentelekomcloud_dcs_instance_v1`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[DCS]** Fixed documentation password requirements for ``resource/opentelekomcloud_dcs_instance_v1`` (`#2367 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2367>`_)
