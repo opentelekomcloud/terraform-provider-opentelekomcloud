@@ -57,5 +57,5 @@ resource "opentelekomcloud_obs_bucket_object" "index" {
   bucket = var.bucket
   key    = split("main_page/", local.main[count.index])[1]
   source = local.main[count.index]
-#  etag   = filemd5(local.main[count.index])
+  etag   = filemd5(local.main[count.index])
 }
