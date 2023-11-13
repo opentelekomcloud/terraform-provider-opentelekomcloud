@@ -3,7 +3,7 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer" {
   name           = "${var.project}-loadbalancer"
   vip_subnet_id  = opentelekomcloud_networking_subnet_v2.subnet.id
   admin_state_up = "true"
-  depends_on     = ["opentelekomcloud_networking_router_interface_v2.interface"]
+  depends_on     = [opentelekomcloud_networking_router_interface_v2.interface]
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener" {
