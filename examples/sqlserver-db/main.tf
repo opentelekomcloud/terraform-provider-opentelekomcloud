@@ -31,39 +31,30 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_mssqlrds_
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_mssqlrds.id
 }
 
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "${var.db_name}-instance"
+  availability_zone = [var.availability_zone]
 
-data "opentelekomcloud_rds_flavors_v1" "flavor_mssqlrds" {
-  region            = var.region
-  datastore_name    = var.db_type
-  datastore_version = var.db_version
-  speccode          = var.db_flavor
-}
-
-resource "opentelekomcloud_rds_instance_v1" "instance_mssqlrds" {
-  name = "${var.db_name}-instance"
-  datastore {
-    type    = var.db_type
-    version = var.db_version
+  db {
+    password = var.db_passwd
+    type     = var.db_type
+    version  = var.db_version
+    port     = var.db_port
   }
-  flavorref = data.opentelekomcloud_rds_flavors_v1.flavor_mssqlrds.id
+
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_mssqlrds.id
+  subnet_id         = var.network_id
+  vpc_id            = var.vpc_id
+  flavor            = var.db_flavor
+
   volume {
     type = "COMMON"
     size = 100
   }
-  region           = var.region
-  availabilityzone = var.availability_zone
-  vpc              = var.vpc_id
-  nics {
-    subnetid = var.existing_private_net_id
+
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = 1
   }
-  securitygroup {
-    id = opentelekomcloud_networking_secgroup_v2.secgroup_mssqlrds.id
-  }
-  dbport = var.db_port
-  backupstrategy = {
-    starttime = "00:00:00"
-    keepdays  = 0
-  }
-  dbrtpd     = var.db_passwd
-  depends_on = ["opentelekomcloud_networking_secgroup_v2.secgroup_mssqlrds"]
+  depends_on = [opentelekomcloud_networking_secgroup_v2.secgroup_mssqlrds]
 }

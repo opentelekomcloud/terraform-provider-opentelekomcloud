@@ -3,11 +3,11 @@ variable "region" {
 }
 
 variable "db_flavor" {
-  default = "rds.mysql.s1.medium"
+  default = "rds.mysql.c2.medium"
 }
 
 variable "db_name" {
-  default = "<YOUR_DBNAME>"
+  default = "test-rds"
 }
 
 variable "db_type" {
@@ -15,29 +15,21 @@ variable "db_type" {
 }
 
 variable "db_version" {
-  default = "5.6.33"
-}
-
-variable "vpc_id" {
-  default = "<YOUR_VPC_ID>"
-}
-
-variable "existing_private_net_id" {
-  default = "<YOUR_NETWORK_ID>"
+  default = "5.6"
 }
 
 variable "db_passwd" {
-  default = "<YOUR_DB_PASSWORD>"
+  default = "TestPasswd!#@112"
 }
 
 variable "db_port" {
-  default = "<YOUR_DB_PORT>"
+  default = "8635"
 }
 
 variable "availability_zone" {
-  default = "<YOUR_AZ>"
+  default = "eu-de-01"
 }
 
 variable "secgroup_name" {
-  default = "<YOUR_SG_NAME>"
+  default = "rds-secgroup"
 }

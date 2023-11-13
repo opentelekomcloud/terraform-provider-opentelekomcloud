@@ -2,17 +2,21 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
   bucket = "tf-test-bucket"
   acl    = "public-read"
 }
-resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name         = "topic_check"
-  display_name = "The display name of topic_1"
+
+resource "opentelekomcloud_cts_tracker_v3" "tracker_v3" {
+  bucket_name      = opentelekomcloud_s3_bucket.bucket.bucket
+  file_prefix_name = "prefix"
+  is_lts_enabled   = true
+  status           = "enabled"
 }
 
-resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
-  bucket_name               = opentelekomcloud_s3_bucket.bucket.bucket
-  file_prefix_name          = "yO8Q"
-  is_support_smn            = true
-  topic_id                  = opentelekomcloud_smn_topic_v2.topic_1.id
-  is_send_all_key_operation = false
-  operations                = ["delete", "create", "login"]
-  need_notify_user_list     = ["user1"]
+resource "opentelekomcloud_smn_topic_v2" "topic_1" {
+  name = "topic_1"
+}
+
+resource "opentelekomcloud_cts_event_notification_v3" "notification_v3" {
+  notification_name = "my_notification"
+  operation_type    = "complete"
+  topic_id          = opentelekomcloud_smn_topic_v2.topic_1.id
+  status            = "enabled"
 }

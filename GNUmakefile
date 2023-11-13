@@ -63,7 +63,5 @@ tffmtfix: tools
 	@find ./opentelekomcloud/acceptance -type f -name "*_test.go" | sort | while read f; do terrafmt fmt -f $$f; done
 	@echo "==> Fixing docs terraform blocks code with terrafmt..."
 	@find ./docs -type f -name "*.md" | sort | while read f; do terrafmt fmt $$f; done
-	@echo "==> Fixing example docs terraform blocks code with terrafmt..."
-	@find ./examples -type f -name "*.md" | sort | while read f; do terrafmt fmt $$f; done
 
 .PHONY: build test acceptance vet fmt fmtcheck errcheck test-compile tflint tffmtfix lint

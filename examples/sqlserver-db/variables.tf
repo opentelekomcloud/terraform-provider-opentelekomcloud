@@ -1,7 +1,3 @@
-variable "region" {
-  default = "eu-de"
-}
-
 variable "db_flavor" {
   default = "rds.mssql.s1.2xlarge"
 }
@@ -15,14 +11,14 @@ variable "db_type" {
 }
 
 variable "db_version" {
-  default = "2014 SP2 SE"
+  default = "2019_SE"
 }
 
 variable "vpc_id" {
   default = "<YOUR_VPC_ID>"
 }
 
-variable "existing_private_net_id" {
+variable "network_id" {
   default = "<YOUR_NETWORK_ID>"
 }
 
@@ -31,7 +27,7 @@ variable "db_passwd" {
 }
 
 variable "db_port" {
-  default = "<YOUR_DB_PORT>"
+  default = "3365"
 }
 
 variable "availability_zone" {

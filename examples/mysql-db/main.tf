@@ -31,43 +31,33 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_mysqlrds_
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_mysqlrds.id
 }
 
-
-data "opentelekomcloud_rds_flavors_v1" "flavor_mysqlrds" {
-  region            = var.region
-  datastore_name    = var.db_type
-  datastore_version = var.db_version
-  speccode          = var.db_flavor
+resource "opentelekomcloud_vpc_v1" "this" {
+  name = "test-vpc-1"
+  cidr = "192.168.0.0/16"
 }
 
-resource "opentelekomcloud_rds_instance_v1" "instance_mysqlrds" {
-  name = "${var.db_name}-instance"
-  datastore {
-    type    = var.db_type
-    version = var.db_version
+resource "opentelekomcloud_vpc_subnet_v1" "this" {
+  name       = "${opentelekomcloud_vpc_v1.this.name}-private"
+  cidr       = cidrsubnet(opentelekomcloud_vpc_v1.this.cidr, 8, 0)
+  vpc_id     = opentelekomcloud_vpc_v1.this.id
+  gateway_ip = cidrhost(cidrsubnet(opentelekomcloud_vpc_v1.this.cidr, 8, 0), 1)
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance"
+  availability_zone = [var.availability_zone]
+  db {
+    password = var.db_passwd
+    type     = var.db_type
+    version  = var.db_version
+    port     = var.db_port
   }
-  flavorref = data.opentelekomcloud_rds_flavors_v1.flavor_mysqlrds.id
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_mysqlrds.id
+  subnet_id         = opentelekomcloud_vpc_subnet_v1.this.id
+  vpc_id            = opentelekomcloud_vpc_v1.this.id
   volume {
     type = "COMMON"
-    size = 100
+    size = 40
   }
-  region           = var.region
-  availabilityzone = var.availability_zone
-  vpc              = var.vpc_id
-  nics {
-    subnetid = var.existing_private_net_id
-  }
-  securitygroup {
-    id = opentelekomcloud_networking_secgroup_v2.secgroup_mysqlrds.id
-  }
-  dbport = var.db_port
-  backupstrategy = {
-    starttime = "00:00:00"
-    keepdays  = 0
-  }
-  dbrtpd = var.db_passwd
-  ha = {
-    enable          = true
-    replicationmode = "async"
-  }
-  depends_on = ["opentelekomcloud_networking_secgroup_v2.secgroup_mysqlrds"]
+  flavor = var.db_flavor
 }
