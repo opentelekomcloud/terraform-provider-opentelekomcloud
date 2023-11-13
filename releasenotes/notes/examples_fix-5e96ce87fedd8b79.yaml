@@ -1,4 +1,4 @@
 ---
 other:
   - |
-    **[DOCS]** Fix config examples for ``examples`` folder (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[DOCS]** Fix config examples for ``examples`` folder (`#2368 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2368>`_)
