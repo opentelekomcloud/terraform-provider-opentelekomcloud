@@ -114,7 +114,7 @@ The following arguments are supported:
 * `password` - (Optional, ForceNew, String) Indicates the password of an instance. An instance password
   must meet the following complexity requirements: Must be 8 to 32 characters long.
   Must contain at least 3 of the following character types: lowercase letters, uppercase
-  letters, digits, and special characters (`~!@#$%^&*()-_=+\|[{}]:'",<.>/?).
+  letters, digits, and special characters: `~!@#$^&*()-_=+|{}:,<>./?
   Changing this creates a new instance.
 
 * `vpc_id` - (Required, ForceNew, String) Specifies the VPC ID. Changing this creates a new instance.
