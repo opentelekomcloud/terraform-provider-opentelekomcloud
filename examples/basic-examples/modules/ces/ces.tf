@@ -32,12 +32,6 @@ resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
       "urn:smn:eu-de:b730519ca7064da2a3233e86bee139e4:smn-test"
     ]
   }
-  insufficientdata_actions {
-    type = "notification"
-    notification_list = [
-      "urn:smn:eu-de:b730519ca7064da2a3233e86bee139e4:smn-test"
-    ]
-  }
   ok_actions {
     type = "notification"
     notification_list = [

@@ -59,18 +59,6 @@ module "lb" {
   sg_id    = module.sg.sg_id
   elb_desc = var.elb_desc
 }
-module "elb" {
-  source            = "./modules/elb"
-  elb_name          = var.elb_name
-  bw_size           = var.bw_size
-  elb_desc          = var.elb_desc
-  ecs_id            = module.ecs.ecs_id
-  ecs_ip            = module.ecs.ecs_ip
-  vpc_id            = module.vpc_subnets.vpc_id
-  vip_subnet_id     = module.vpc_subnets.subnetid1
-  security_group_id = module.sg.sg_id
-}
-
 
 module "rds" {
   source            = "./modules/rds"

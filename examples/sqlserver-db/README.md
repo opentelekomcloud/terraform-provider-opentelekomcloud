@@ -50,12 +50,12 @@ data "opentelekomcloud_rds_flavors_v1" "flavor_mssqlrds" {
 }
 
 resource "opentelekomcloud_rds_instance_v1" "instance_mssqlrds" {
-  name             = "${var.db_name}-instance"
+  name = "${var.db_name}-instance"
   datastore {
     type    = var.db_type
     version = var.db_version
   }
-  flavorref        = data.opentelekomcloud_rds_flavors_v1.flavor_mssqlrds.id
+  flavorref = data.opentelekomcloud_rds_flavors_v1.flavor_mssqlrds.id
   volume {
     type = "COMMON"
     size = 100
@@ -69,13 +69,13 @@ resource "opentelekomcloud_rds_instance_v1" "instance_mssqlrds" {
   securitygroup {
     id = opentelekomcloud_networking_secgroup_v2.secgroup_mssqlrds.id
   }
-  dbport           = var.db_port
+  dbport = var.db_port
   backupstrategy {
     starttime = "00:00:00"
     keepdays  = 0
   }
-  dbrtpd           = var.db_passwd
-  depends_on       = [opentelekomcloud_networking_secgroup_v2.secgroup_mssqlrds]
+  dbrtpd     = var.db_passwd
+  depends_on = [opentelekomcloud_networking_secgroup_v2.secgroup_mssqlrds]
 }
 ```
 

@@ -21,24 +21,29 @@ resource "opentelekomcloud_networking_router_interface_v2" "int_01" {
   subnet_id = opentelekomcloud_networking_subnet_v2.subnet.id
 }
 
-resource "opentelekomcloud_compute_secgroup_v2" "secgroup" {
+resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
   name        = "terraform"
   description = "This is a terraform test security group"
-  region      = var.region
+}
 
-  rule {
-    from_port   = 22
-    to_port     = 22
-    ip_protocol = "tcp"
-    cidr        = "0.0.0.0/0"
-  }
+resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 22
+  port_range_max    = 22
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
+}
 
-  rule {
-    from_port   = 80
-    to_port     = 80
-    ip_protocol = "tcp"
-    cidr        = "0.0.0.0/0"
-  }
+resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_2" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 80
+  port_range_max    = 80
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
 }
 
 resource "opentelekomcloud_as_group_v1" "as_group" {
@@ -47,39 +52,46 @@ resource "opentelekomcloud_as_group_v1" "as_group" {
   desire_instance_number   = 2
   min_instance_number      = 0
   max_instance_number      = 3
-  networks = [
-    { id = opentelekomcloud_networking_network_v2.network.id },
-  ]
-  security_groups = [
-    { id = opentelekomcloud_compute_secgroup_v2.secgroup.id },
-  ]
+  networks {
+    id = opentelekomcloud_networking_network_v2.network.id
+  }
+
+  security_groups {
+    id = opentelekomcloud_networking_secgroup_v2.secgroup.id
+  }
   vpc_id           = opentelekomcloud_networking_router_v2.router.id
   delete_publicip  = true
   delete_instances = "yes"
-  depends_on       = ["opentelekomcloud_networking_router_interface_v2.int_01"]
+  depends_on       = [opentelekomcloud_networking_router_interface_v2.int_01]
 }
 
 resource "opentelekomcloud_as_policy_v1" "as_policy" {
   scaling_policy_name = "terraform"
   scaling_group_id    = opentelekomcloud_as_group_v1.as_group.id
   scaling_policy_type = "ALARM"
-  scaling_policy_action = {
+  scaling_policy_action {
     operation       = "ADD"
     instance_number = 1
   }
   alarm_id = opentelekomcloud_ces_alarmrule.alarm_rule.id
 }
 
+data "opentelekomcloud_images_image_v2" "latest_image" {
+  name        = var.image_name
+  most_recent = true
+}
+
 resource "opentelekomcloud_as_configuration_v1" "as_configuration" {
   scaling_configuration_name = "terraform"
-  instance_config = {
+  instance_config  {
     flavor = var.flavor
-    image  = var.image_id
-    disk = [
-      { size        = 40
-        volume_type = "SATA"
-      disk_type = "SYS" }
-    ]
+    image  = data.opentelekomcloud_images_image_v2.latest_image.id
+    disk {
+      size        = 40
+      volume_type = "SATA"
+      disk_type = "SYS"
+    }
+
     key_name  = var.keyname
     user_data = file("userdata.txt")
   }

@@ -40,6 +40,3 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
   floating_ip = opentelekomcloud_vpc_eip_v1.eip_1.publicip.0.ip_address
   instance_id = var.ecs_id
 }
-
-
-

@@ -7,9 +7,6 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_2" {
   #volume_type = var.volume_type
 }
 
-
-
-
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   region            = var.region
   name              = var.volume_name

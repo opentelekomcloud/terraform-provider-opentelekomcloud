@@ -3,7 +3,7 @@ variable "image" {
 }
 
 variable "flavor" {
-  default = "s1.medium"
+  default = "s3.large.1"
 }
 
 variable "region" {
@@ -12,4 +12,8 @@ variable "region" {
 
 variable "keyname" {
   default = "KeyPair-demo"
+}
+
+variable "image_name" {
+  default = "Standard_Ubuntu_22.04_prev"
 }

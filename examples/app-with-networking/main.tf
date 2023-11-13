@@ -19,7 +19,6 @@ resource "opentelekomcloud_networking_subnet_v2" "terraform" {
 resource "opentelekomcloud_networking_router_v2" "terraform" {
   name             = "terraform"
   admin_state_up   = "true"
-  external_gateway = var.external_gateway
 }
 
 resource "opentelekomcloud_networking_router_interface_v2" "terraform" {
@@ -27,58 +26,79 @@ resource "opentelekomcloud_networking_router_interface_v2" "terraform" {
   subnet_id = opentelekomcloud_networking_subnet_v2.terraform.id
 }
 
-resource "opentelekomcloud_compute_secgroup_v2" "terraform" {
+resource "opentelekomcloud_networking_secgroup_v2" "terraform" {
   name        = "terraform"
   description = "Security group for the Terraform example instances"
-
-  rule {
-    from_port   = 22
-    to_port     = 22
-    ip_protocol = "tcp"
-    cidr        = "0.0.0.0/0"
-  }
-
-  rule {
-    from_port   = 80
-    to_port     = 80
-    ip_protocol = "tcp"
-    cidr        = "0.0.0.0/0"
-  }
-
-  rule {
-    from_port   = -1
-    to_port     = -1
-    ip_protocol = "icmp"
-    cidr        = "0.0.0.0/0"
-  }
 }
 
-resource "opentelekomcloud_compute_floatingip_v2" "terraform" {
-  pool       = var.pool
-  depends_on = ["opentelekomcloud_networking_router_interface_v2.terraform"]
+resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 22
+  port_range_max    = 22
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.terraform.id
+}
+
+resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_2" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 80
+  port_range_max    = 80
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.terraform.id
+}
+
+resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_3" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "icmp"
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.terraform.id
+}
+
+resource "opentelekomcloud_networking_floatingip_v2" "terraform" {
+  depends_on = [opentelekomcloud_networking_router_interface_v2.terraform]
+}
+
+resource "opentelekomcloud_networking_floatingip_associate_v2" "myip" {
+  floating_ip = opentelekomcloud_networking_floatingip_v2.terraform.address
+  port_id     = opentelekomcloud_networking_port_v2.port_1.id
+}
+
+resource "opentelekomcloud_networking_port_v2" "port_1" {
+  admin_state_up = true
+  fixed_ip {
+    subnet_id  = opentelekomcloud_networking_subnet_v2.terraform.id
+    ip_address = "10.0.0.5"
+  }
+  network_id = opentelekomcloud_networking_network_v2.terraform.id
 }
 
 resource "opentelekomcloud_compute_instance_v2" "terraform" {
   name            = "terraform"
   image_name      = var.image
-  flavor_name     = var.flavor
+  flavor_id       = "s3.large.1"
   key_pair        = opentelekomcloud_compute_keypair_v2.terraform.name
-  security_groups = [opentelekomcloud_compute_secgroup_v2.terraform.name]
-  floating_ip     = opentelekomcloud_compute_floatingip_v2.terraform.address
+  security_groups = [opentelekomcloud_networking_secgroup_v2.terraform.name]
+  depends_on      = [ opentelekomcloud_networking_floatingip_associate_v2.myip ]
 
   network {
-    uuid = opentelekomcloud_networking_network_v2.terraform.id
+    port = opentelekomcloud_networking_port_v2.port_1.id
+  }
+
+  connection {
+    user        = "ubuntu"
+    host        = opentelekomcloud_networking_floatingip_v2.terraform.address
+    private_key = file(var.ssh_key_file)
   }
 
   provisioner "remote-exec" {
-    connection {
-      user        = var.ssh_user_name
-      private_key = file(var.ssh_key_file)
-    }
-
     inline = [
-      "sudo apt-get -y update",
-      "sudo apt-get -y install nginx",
+      "sudo apt -y update",
+      "sudo apt -y install nginx",
       "sudo service nginx start",
     ]
   }

@@ -16,7 +16,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_configuration" {
   scaling_configuration_name = "terraform"
   instance_config {
     flavor = var.flavor
-    image  = var.image
+    image  = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
       size        = 40
       volume_type = "SATA"
@@ -39,13 +39,14 @@ resource "opentelekomcloud_as_group_v1" "as_group" {
   networks {
     id = opentelekomcloud_networking_network_v2.network.id
   }
+
   security_groups {
-    id = opentelekomcloud_compute_secgroup_v2.secgroup.id
+    id = opentelekomcloud_networking_secgroup_v2.secgroup.id
   }
-  vpc_id                   = opentelekomcloud_networking_router_v2.router.id
-  delete_publicip          = true
-  delete_instances         = "yes"
-  depends_on               = [opentelekomcloud_networking_router_interface_v2.int_01]
+  vpc_id           = opentelekomcloud_networking_router_v2.router.id
+  delete_publicip  = true
+  delete_instances = "yes"
+  depends_on       = [opentelekomcloud_networking_router_interface_v2.int_01]
 }
 ```
 
@@ -87,7 +88,7 @@ resource "opentelekomcloud_as_policy_v1" "as_policy" {
     operation       = "ADD"
     instance_number = 1
   }
-  alarm_id            = opentelekomcloud_ces_alarmrule.alarm_rule.id
+  alarm_id = opentelekomcloud_ces_alarmrule.alarm_rule.id
 }
 ```
 

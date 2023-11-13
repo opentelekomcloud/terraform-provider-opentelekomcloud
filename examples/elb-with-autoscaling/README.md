@@ -58,10 +58,10 @@ resource "opentelekomcloud_as_group_v1" "group_example" {
   security_groups {
     id = var.security_group_id
   }
-  vpc_id                   = var.vpc_id
-  lb_listener_id           = opentelekomcloud_elb_listener.listener_example.id
-  delete_publicip          = true
-  delete_instances         = "yes"
+  vpc_id           = var.vpc_id
+  lb_listener_id   = opentelekomcloud_elb_listener.listener_example.id
+  delete_publicip  = true
+  delete_instances = "yes"
 }
 
 resource "opentelekomcloud_as_policy_v1" "policy_example" {

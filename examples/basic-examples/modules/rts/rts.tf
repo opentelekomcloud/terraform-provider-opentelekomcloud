@@ -66,8 +66,6 @@ resource "opentelekomcloud_rts_stack_v1" "mystack" {
 STACK
 }
 
-
-
 resource "opentelekomcloud_rts_software_config_v1" "myconfig" {
   name = "config_name"
 }

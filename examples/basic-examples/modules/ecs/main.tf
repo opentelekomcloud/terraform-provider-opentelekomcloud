@@ -9,20 +9,11 @@ resource "opentelekomcloud_compute_instance_v2" "ecs_1" {
   name              = "${var.ecs_name}-notags"
   image_id          = var.image_id
   flavor_id         = var.flavor_id
-  #key_pair        = var.key_name
-  # security_groups = [var.security_groups]
 
   network {
     uuid = var.subnet_id
   }
-  #tag = {
-  #   key1 = "value1"
-  #   key2 = "value2"
-  #  }
 }
-
-
-
 
 # create ECS with required and  optional params
 resource "opentelekomcloud_compute_instance_v2" "ecs_2" {
@@ -42,11 +33,8 @@ resource "opentelekomcloud_compute_instance_v2" "ecs_2" {
     uuid = var.subnet_id2
   }
   admin_pass = var.admin_pass
-  personality {
-    file    = "./instance.txt"
-    content = "contents of file"
-  }
-  tag = {
+
+  tags = {
     foo  = "bar1"
     key  = "value"
     key2 = "value2"
@@ -86,7 +74,7 @@ resource "opentelekomcloud_compute_instance_v2" "boot-from-volume" {
   network {
     uuid = var.subnet_id
   }
-  tag = {
+  tags = {
     tag = "test"
   }
 }
@@ -158,34 +146,3 @@ resource "opentelekomcloud_compute_instance_v2" "instance" {
 #    uuid = var.subnet_id
 #  }
 #}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

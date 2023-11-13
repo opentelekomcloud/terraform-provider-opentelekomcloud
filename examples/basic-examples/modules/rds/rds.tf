@@ -28,11 +28,11 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
   }
   dbport = "8635"
   dbrtpd = var.passwd
-  backupstrategy = {
+  backupstrategy {
     starttime = "04:00:00"
     keepdays  = 4
   }
-  ha = {
+  ha {
     enable          = true
     replicationmode = "async"
   }

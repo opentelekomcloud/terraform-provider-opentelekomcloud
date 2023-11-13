@@ -25,19 +25,17 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   iptype            = "5_bgp"
   availability_zone = "eu-de-01"
   key_pair          = var.key_name
-  root_volume = {
+  root_volume {
     size       = 40,
     volumetype = "SATA"
   }
   sharetype      = "PER"
   bandwidth_size = 100
 
-  data_volumes = [
-    {
-      size       = 100,
-      volumetype = "SATA"
-    }
-  ]
+  data_volumes {
+    size       = 100,
+    volumetype = "SATA"
+  }
 
   max_pods = 2
 

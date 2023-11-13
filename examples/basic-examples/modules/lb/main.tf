@@ -15,9 +15,6 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "lb_1" {
   admin_state_up        = true
   description           = var.elb_desc
   loadbalancer_provider = "vlb"
-  security_group_ids = [
-    var.sg_id
-  ]
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -25,7 +22,6 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
   protocol_port   = 80
   loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.lb_1.id
 }
-
 
 resource "opentelekomcloud_lb_listener_v2" "listener_2" {
   protocol        = "HTTP"

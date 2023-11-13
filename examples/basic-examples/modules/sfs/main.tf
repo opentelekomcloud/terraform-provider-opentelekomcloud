@@ -2,8 +2,6 @@
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   size              = var.size
   name              = var.share_name
-  access_to         = var.vpc_id
-  access_level      = "rw"
   description       = var.share_description
   availability_zone = var.availability_zone
   metadata = {
@@ -14,8 +12,14 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   #access_type = "ip"
 
 }
-resource "opentelekomcloud_sfs_file_system_v2" "sfs_2" {
-  size         = var.size
-  access_to    = var.vpc_id
-  access_level = "rw"
+
+resource "opentelekomcloud_sfs_file_system_v2" "share-file" {
+  name        = var.share_name
+  size        = 50
+  description = var.share_description
+  share_proto = "NFS"
+
+  tags = {
+    muh = "kuh"
+  }
 }

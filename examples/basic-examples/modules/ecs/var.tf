@@ -17,7 +17,6 @@ variable "subnet_id" {}
 
 variable "subnet_id2" {}
 
-
 variable "admin_pass" {}
 
 variable "auto_recovery" {}

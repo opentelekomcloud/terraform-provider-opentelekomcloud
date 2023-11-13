@@ -16,4 +16,3 @@ variable key_name_as {}
 #variable public_key_as {}
 variable alarm_id {}
 variable listenerid {}
-  
