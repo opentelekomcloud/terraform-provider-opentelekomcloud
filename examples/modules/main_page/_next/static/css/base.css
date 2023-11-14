@@ -1,0 +1,46 @@
+html
+{
+    font-size:62.5%
+}
+body
+{
+    margin:0;
+    font-size:1.6rem;
+    font-family:Roboto,sans-serif
+}*{box-sizing:border-box}
+.navbar_container_main
+{
+    display:flex;
+    align-items:center;
+    height:5.6rem;
+    background-color:#f8f8f8
+}
+.navbar_brand_main
+{
+    margin:0 0 0 2rem;
+    color:#000;
+    font-size:2rem;
+    font-weight:500
+}
+.navbar_githubContainer_main
+{
+    margin-left:3rem
+}
+.navbar_githubLink_main
+{
+    display:flex;
+    align-items:center;
+    color:#000;
+    text-decoration:none
+}
+.navbar_githubIcon_main
+{
+    margin-right:.5rem
+}
+.navbar_github_main
+{
+    margin:0
+}
+.index_container_main{
+    padding:2rem 6rem
+}
