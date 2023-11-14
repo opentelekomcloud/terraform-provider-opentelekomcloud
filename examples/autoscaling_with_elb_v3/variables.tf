@@ -6,14 +6,10 @@ variable "flavor" {
   default = "s2.large.2"
 }
 
-variable "region" {
-  default = "eu-de-01"
-}
-
 variable "keyname" {
   default = "test_key"
 }
 
-variable "image_name" {
-  default = "Standard_Debian_11_latest"
+variable "az" {
+  default = "eu-de-01"
 }
