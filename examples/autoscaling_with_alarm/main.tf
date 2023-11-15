@@ -68,7 +68,10 @@ resource "opentelekomcloud_as_configuration_v1" "as_configuration" {
     }
 
     key_name  = var.keyname
-    user_data = file("userdata.txt")
+    user_data = <<EOF
+#! /bin/bash
+echo user_test >> /home/user.txt
+EOF
   }
 }
 

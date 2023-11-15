@@ -98,6 +98,11 @@ resource "opentelekomcloud_as_configuration_v1" "as_config_1" {
       disk_type   = "SYS"
     }
     key_name  = var.keyname
-    user_data = file("userdata.txt")
+    user_data = <<EOF
+#!/bin/bash
+echo "Running boot script"
+echo "The four is bar" > /tmp/four
+# ...
+EOF
   }
 }

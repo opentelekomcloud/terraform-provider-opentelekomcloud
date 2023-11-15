@@ -31,7 +31,7 @@ body
     display:flex;
     align-items:center;
     color:#000;
-    text-decoration:none
+    text-decoration:none;
 }
 .navbar_githubIcon_main
 {
@@ -39,8 +39,29 @@ body
 }
 .navbar_github_main
 {
-    margin:0
+    margin:0;
 }
 .index_container_main{
-    padding:2rem 6rem
+    padding:2rem 6rem;
+    float: left;
+    table-layout: fixed;
+    width: 50%;
+    text-align: left;
 }
+.links_main
+{
+    align-items:center;
+    color:#000;
+    text-decoration:none;
+    margin:2rem;
+}
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+summary {
+    display: flex;
+    cursor: pointer;
+}
+
