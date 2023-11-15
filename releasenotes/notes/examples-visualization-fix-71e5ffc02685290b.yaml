@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    Fix for 'otc-terraform-visualize-main' job links (`#2369 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2369>`_)
