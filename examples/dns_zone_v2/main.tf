@@ -1,3 +1,7 @@
+module "network" {
+  source = "../modules/network"
+}
+
 resource "opentelekomcloud_dns_zone_v2" "public_example_com" {
   name        = "public.examplecheck.com."
   email       = "public@examplecheck.com"
@@ -13,7 +17,7 @@ resource "opentelekomcloud_dns_zone_v2" "private_example_com" {
   ttl         = 3000
   type        = "private"
   router {
-    router_id     = var.vpc_id
+    router_id     = module.network.shared_subnet.vpc_id
     router_region = var.region
   }
 }

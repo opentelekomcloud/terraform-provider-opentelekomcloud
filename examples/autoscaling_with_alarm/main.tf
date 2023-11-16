@@ -1,29 +1,5 @@
-resource "opentelekomcloud_networking_router_v2" "router" {
-  name           = "terraform"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_network_v2" "network" {
-  name           = "terraform"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet" {
-  name            = "terraform"
-  network_id      = opentelekomcloud_networking_network_v2.network.id
-  cidr            = "172.16.10.0/24"
-  ip_version      = 4
-  dns_nameservers = ["100.125.1.250", "114.114.115.115"]
-}
-
-resource "opentelekomcloud_networking_router_interface_v2" "int_01" {
-  router_id = opentelekomcloud_networking_router_v2.router.id
-  subnet_id = opentelekomcloud_networking_subnet_v2.subnet.id
-}
-
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
-  name        = "terraform"
-  description = "This is a terraform test security group"
+module "network" {
+  source = "../modules/network"
 }
 
 resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
@@ -33,7 +9,7 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
   port_range_min    = 22
   port_range_max    = 22
   remote_ip_prefix  = "0.0.0.0/0"
-  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
+  security_group_id = module.network.default_security_group_id
 }
 
 resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_2" {
@@ -43,7 +19,7 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_2" {
   port_range_min    = 80
   port_range_max    = 80
   remote_ip_prefix  = "0.0.0.0/0"
-  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
+  security_group_id = module.network.default_security_group_id
 }
 
 resource "opentelekomcloud_as_group_v1" "as_group" {
@@ -53,16 +29,15 @@ resource "opentelekomcloud_as_group_v1" "as_group" {
   min_instance_number      = 0
   max_instance_number      = 3
   networks {
-    id = opentelekomcloud_networking_network_v2.network.id
+    id = module.network.shared_subnet.network_id
   }
 
   security_groups {
-    id = opentelekomcloud_networking_secgroup_v2.secgroup.id
+    id = module.network.default_security_group_id
   }
-  vpc_id           = opentelekomcloud_networking_router_v2.router.id
+  vpc_id           = module.network.shared_subnet.vpc_id
   delete_publicip  = true
   delete_instances = "yes"
-  depends_on       = [opentelekomcloud_networking_router_interface_v2.int_01]
 }
 
 resource "opentelekomcloud_as_policy_v1" "as_policy" {
@@ -93,7 +68,10 @@ resource "opentelekomcloud_as_configuration_v1" "as_configuration" {
     }
 
     key_name  = var.keyname
-    user_data = file("userdata.txt")
+    user_data = <<EOF
+#! /bin/bash
+echo user_test >> /home/user.txt
+EOF
   }
 }
 

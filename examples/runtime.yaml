@@ -2,3 +2,7 @@
 folders:
   - rds_instance_v3
   - elb_v3
+  - autoscaling_with_elb_v3
+  - autoscaling_with_alarm
+  - nginx_app_on_compute_instance_v2
+  - dns_zone_v2

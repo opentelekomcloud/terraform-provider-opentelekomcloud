@@ -1,8 +1,0 @@
-export OS_AUTH_URL=https://iam.eu-de.otc.t-systems.com/v3
-export OS_REGION_NAME=sa-chile-1
-export OS_TENANT_NAME=<YOUR_TENANT_NAME>
-export OS_USERNAME=<YOUR_USERNAME>
-export OS_PASSWORD=<YOUR_PASSWORD>
-export OS_DOMAIN_NAME=<YOUR_DOMAIN_NAME>
-
-## please replace the above <YOUR_XXX> with your own value.

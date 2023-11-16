@@ -1,5 +1,0 @@
-#!/bin/bash
-echo "Running boot script"
-echo "The four is bar" > /tmp/four
-# ...
-
