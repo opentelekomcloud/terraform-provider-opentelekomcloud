@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[OBS]** Update ``resource/opentelekomcloud_obs_bucket`` documentation by adding server side encryption example (`#2371 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2371>`_)

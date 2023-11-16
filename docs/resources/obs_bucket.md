@@ -220,8 +220,8 @@ resource "opentelekomcloud_kms_key_v1" "this" {
 }
 
 resource "opentelekomcloud_obs_bucket" "this" {
-  bucket        = var.bucket_name
-  acl           = "private"
+  bucket = var.bucket_name
+  acl    = "private"
   server_side_encryption {
     algorithm  = "kms"
     kms_key_id = opentelekomcloud_kms_key_v1.this.id
