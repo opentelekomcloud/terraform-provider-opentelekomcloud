@@ -131,6 +131,105 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 }
 ```
 
+### Using server side encryption with the least amount of required KMS privileges
+
+```hcl
+resource "opentelekomcloud_identity_role_v3" "this_kms" {
+  description   = var.role_kms_desc
+  display_name  = var.role_kms_display_name
+  display_layer = "project"
+
+  statement {
+    effect = "Allow"
+    action = [
+      "kms:cmk:list",
+      "kms:cmk:get"
+    ]
+  }
+  statement {
+    effect = "Allow"
+    resource = [
+      "KMS:*:*:KeyId:${opentelekomcloud_kms_key_v1.this.id}"
+    ]
+    action = [
+      "kms:cmk:generate",
+      "kms:dek:create",
+      "kms:cmk:crypto",
+      "kms:dek:crypto"
+    ]
+  }
+
+}
+
+resource "opentelekomcloud_identity_role_v3" "this_obs" {
+  description   = var.role_obs_desc
+  display_name  = var.role_obs_display_name
+  display_layer = "domain"
+  statement {
+    effect = "Allow"
+    resource = [
+      "OBS:*:*:bucket:${opentelekomcloud_obs_bucket.this.id}",
+      "OBS:*:*:object:*"
+    ]
+    action = [
+      "obs:object:DeleteObject",
+      "obs:object:PutObject",
+      "obs:object:GetObject",
+      "obs:bucket:ListBucket",
+      "obs:bucket:GetEncryptionConfiguration"
+    ]
+  }
+}
+
+resource "opentelekomcloud_identity_user_v3" "this" {
+  name        = var.user_name
+  description = var.user_desc
+  access_type = "programmatic"
+
+  lifecycle {
+    ignore_changes = [pwd_reset]
+  }
+}
+
+resource "opentelekomcloud_identity_group_v3" "this" {
+  name        = var.user_group_name
+  description = var.user_group_desc
+}
+
+resource "opentelekomcloud_identity_role_assignment_v3" "this_kms" {
+  group_id     = opentelekomcloud_identity_group_v3.this.id
+  domain_id    = var.domain_id
+  role_id      = opentelekomcloud_identity_role_v3.this_kms.id
+  all_projects = true
+}
+
+resource "opentelekomcloud_identity_role_assignment_v3" "this_obs" {
+  group_id     = opentelekomcloud_identity_group_v3.this.id
+  domain_id    = var.domain_id
+  role_id      = opentelekomcloud_identity_role_v3.this_obs.id
+  all_projects = true
+}
+
+resource "opentelekomcloud_kms_key_v1" "this" {
+  key_alias       = var.kms_alias
+  pending_days    = "7"
+  key_description = var.kms_desc
+  realm           = var.region
+  is_enabled      = true
+
+}
+
+resource "opentelekomcloud_obs_bucket" "this" {
+  bucket        = var.bucket_name
+  acl           = "private"
+  server_side_encryption {
+    algorithm  = "kms"
+    kms_key_id = opentelekomcloud_kms_key_v1.this.id
+  }
+}
+
+```
+
 ### Using object lifecycle
 
 ```hcl
