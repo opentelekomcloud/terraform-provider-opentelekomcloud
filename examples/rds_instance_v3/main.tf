@@ -3,8 +3,8 @@ module "network" {
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  name              = "tf_rds_instance_%s"
-  availability_zone = ["%s"]
+  name              = "tf_rds_instance_1"
+  availability_zone = [var.az]
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
