@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 
@@ -141,6 +142,7 @@ func resourceWafDedicatedInstanceV1Create(ctx context.Context, d *schema.Resourc
 		SubnetId:         d.Get("subnet_id").(string),
 		SecurityGroupsId: groups,
 		Count:            defaultCount,
+		ResTenant:        pointerto.Bool(true),
 	}
 
 	r, err := instances.Create(client, opts)
