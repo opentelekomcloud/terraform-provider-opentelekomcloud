@@ -104,8 +104,8 @@ The following arguments are supported:
 
 * `tls_ciphers_policy` - (Optional, String) Specifies the security policy that will be used by the listener.
   This parameter is available only for `HTTPS` listeners. An error will be returned if the protocol
-  of the listener is not `HTTPS`. Possible values are: `tls-1-0`, `tls-1-1`, `tls-1-2`, `tls-1-2-strict`,
-  `tls-1-2-fs`, `tls-1-0-with-1-3`, `tls-1-2-fs-with-1-3`.
+  of the listener is not `HTTPS`. Possible values are: `tls-1-0`, `tls-1-1`, `tls-1-0-inherit`, `tls-1-2`,
+  `tls-1-2-strict`, `tls-1-2-fs`, `tls-1-0-with-1-3`, `tls-1-2-fs-with-1-3`, `hybrid-policy-1-0`, `tls-1-2-strict-no-cbc`.
 
 * `member_retry_enable` - (Optional, Bool) Specifies whether to enable health check retries for backend servers.
   This parameter is available only for `HTTP` and `HTTPS` listeners. An error will be returned if you configure
