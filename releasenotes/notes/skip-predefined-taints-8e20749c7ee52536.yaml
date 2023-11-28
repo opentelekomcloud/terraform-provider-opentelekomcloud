@@ -1,3 +1,0 @@
----
-fixes:
-  - **[CCE]** skip predefined taints for nodes (`#2380 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2380>`_)
