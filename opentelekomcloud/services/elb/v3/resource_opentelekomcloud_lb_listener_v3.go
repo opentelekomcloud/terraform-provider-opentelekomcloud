@@ -100,8 +100,9 @@ func ResourceListenerV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"tls-1-0", "tls-1-1", "tls-1-2", "tls-1-2-strict",
-					"tls-1-2-fs", "tls-1-0-with-1-3", "tls-1-2-fs-with-1-3",
+					"tls-1-0", "tls-1-1", "tls-1-0-inherit", "tls-1-2",
+					"tls-1-2-strict", "tls-1-2-fs", "tls-1-0-with-1-3",
+					"tls-1-2-fs-with-1-3", "hybrid-policy-1-0", "tls-1-2-strict-no-cbc",
 				}, false),
 			},
 			"member_retry_enable": {
