@@ -43,6 +43,7 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "name", "instance_1"),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "tags.muh", "value-create"),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "tags.emp", ""),
 					resource.TestCheckResourceAttrSet(resourceInstanceV2Name, "network.0.port"),
 				),
 			},
@@ -575,6 +576,7 @@ var testAccComputeV2InstanceBasic = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   availability_zone = "%s"
+  image_name        = "Standard_Debian_10_latest"
   metadata = {
     foo = "bar"
   }
@@ -585,6 +587,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   tags = {
     muh = "value-create"
     kuh = "value-create"
+    emp = ""
   }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
@@ -612,6 +615,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_2"
   security_groups   = ["default"]
   availability_zone = "%s"
+  image_name        = "Standard_Debian_10_latest"
 
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
