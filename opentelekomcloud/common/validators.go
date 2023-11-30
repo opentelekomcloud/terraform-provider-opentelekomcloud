@@ -290,12 +290,6 @@ func ValidateTags(v interface{}, k string) (ws []string, errors []error) {
 		}
 
 		valueString := value.(string)
-		if !tagsPattern.MatchString(valueString) {
-			errors = append(errors, fmt.Errorf("value %q doesn't comply with restrictions (%q): %q", k, tagsPattern, valueString))
-		}
-		if len(valueString) < 1 {
-			errors = append(errors, fmt.Errorf("value %q cannot be shorter than 1 characters: %q", k, value))
-		}
 		if len(valueString) > 43 {
 			errors = append(errors, fmt.Errorf("value %q cannot be longer than 43 characters: %q", k, value))
 		}
