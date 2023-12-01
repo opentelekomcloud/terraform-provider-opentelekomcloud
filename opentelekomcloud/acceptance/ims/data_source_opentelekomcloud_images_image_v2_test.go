@@ -26,7 +26,7 @@ func TestAccImagesV2ImageDataSource_basic(t *testing.T) {
 					testAccCheckImagesV2DataSourceID(dataSourceName),
 					resource.TestCheckResourceAttr(dataSourceName, "name", "CirrOS-tf"),
 					resource.TestCheckResourceAttr(dataSourceName, "container_format", "bare"),
-					resource.TestCheckResourceAttr(dataSourceName, "min_ram_mb", "0"),
+					resource.TestCheckResourceAttr(dataSourceName, "min_ram", "0"),
 					resource.TestCheckResourceAttr(dataSourceName, "protected", "false"),
 					resource.TestCheckResourceAttr(dataSourceName, "visibility", "private"),
 				),

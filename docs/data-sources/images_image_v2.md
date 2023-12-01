@@ -58,33 +58,83 @@ to choose the most recent one.
 
 `id` is set to the ID of the found image. In addition, the following attributes are exported:
 
+* `backup_id` - Specifies the backup ID.
+
 * `checksum` - The checksum of the data associated with the image.
 
 * `created_at` - The date the image was created.
 
-* `container_format`: The format of the image's container.
+* `container_format` - The format of the image's container.
 
-* `disk_format`: The format of the image's disk.
+* `data_origin` - Specifies the image source.
+
+* `description` - Specifies the image description.
+
+* `disk_format` - The format of the image's disk.
 
 * `file` - the trailing path after the glance endpoint that represent the
   location of the image, or the path to retrieve it.
+
+* `image_source_type` - Specifies the image backend storage type. Only `UDS` is currently supported.
+
+* `image_type` - Specifies the image type.
+
+* `is_registered` - Specifies whether the image is available.
+
+* `login_user` - Specifies default image login user.
 
 * `metadata` - The metadata associated with the image.
   Image metadata allow for meaningfully define the image properties
   and tags. See http://docs.openstack.org/developer/glance/metadefs-concepts.html.
 
-* `min_disk_gb`: The minimum amount of disk space required to use the image.
+* `min_disk` - The minimum amount of disk space required to use the image.
 
-* `min_ram_mb`: The minimum amount of ram required to use the image.
+* `min_ram` - The minimum amount of ram required to use the image.
+
+* `original_image_name` - Specifies the parent image ID.
+
+* `os_bit` - Specifies the OS architecture, 32 bit or 64 bit.
+
+* `os_type` - Specifies the OS type. The value can be Linux, Windows, or Other.
+
+* `os_version` - Specifies the OS version.
+
+* `platform` - Specifies the image platform type. The value can be Windows, Ubuntu, Red Hat, SUSE, CentOS,
+  Debian, OpenSUSE, Oracle Linux, Fedora, Other, CoreOS, or EulerOS.
 
 * `properties` - Freeform information about the image.
 
 * `protected` - Whether the image is protected.
 
-* `schema` - The path to the JSON-schema that represent the image or image
+* `schema` - The path to the JSON-schema that represent the image or image.
 
 * `size_bytes` - The size of the image (in bytes).
 
+* `status` - The image status.
+
+* `support_disk_intensive` - Specifies whether the image supports disk-intensive ECSs.
+
+* `support_high_performance` - Specifies whether the image supports high-performance ECSs.
+
+* `support_kvm` - Specifies whether the image supports KVM.
+
+* `support_kvm_gpu_type` - Specifies whether the image supports GPU-accelerated ECSs on the KVM platform.
+
+* `support_kvm_infiniband` - Specifies whether the image supports ECSs with the InfiniBand NIC on the KVM platform.
+
+* `support_large_memory` - Specifies whether the image supports large-memory ECSs.
+
+* `support_xen` - Specifies whether the image supports Xen.
+
+* `support_xen_gpu_type` - Specifies whether the image supports GPU-accelerated ECSs on the Xen platform.
+
+* `support_xen_hana` - Specifies whether the image supports HANA ECSs on the Xen platform.
+
+* `system_cmk_id` - Specifies the ID of the key used to encrypt the image.
+
 * `tags` - See Argument Reference above.
 
-* `update_at` - The date the image was last updated.
+* `virtual_env_type` - Specifies the environment where the image is used.
+  The value can be `FusionCompute`, `Ironic`, `DataImage`, or `IsoImage`.
+
+* `updated_at` - The date the image was modified.

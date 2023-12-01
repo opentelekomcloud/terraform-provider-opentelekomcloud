@@ -1,0 +1,4 @@
+---
+fix:
+  - |
+    **[IMS]** Fixed properties set for ``data_source/opentelekomcloud_images_image_v2`` (`#2387 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2387>`_)
