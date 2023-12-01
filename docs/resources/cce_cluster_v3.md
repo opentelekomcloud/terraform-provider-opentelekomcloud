@@ -135,18 +135,12 @@ The following arguments are supported:
 * `flavor_id` - (Required) Cluster specifications. Changing this parameter will create a new cluster resource.
   * `cce.s1.small` - small-scale single cluster (up to 50 nodes).
   * `cce.s1.medium` - medium-scale single cluster (up to 200 nodes).
-  * `cce.s1.large` - large-scale single cluster (up to 1000 nodes).
   * `cce.s2.small` - small-scale HA cluster (up to 50 nodes).
   * `cce.s2.medium` - medium-scale HA cluster (up to 200 nodes).
   * `cce.s2.large` - large-scale HA cluster (up to 1000 nodes).
-  * `cce.t1.small` - small-scale single physical machine cluster (up to 10 nodes).
-  * `cce.t1.medium` - medium-scale single physical machine cluster (up to 100 nodes).
-  * `cce.t1.large` - large-scale single physical machine cluster (up to 500 nodes).
-  * `cce.t2.small` - small-scale HA physical machine cluster (up to 10 nodes).
-  * `cce.t2.medium` - medium-scale HA physical machine cluster (up to 100 nodes).
-  * `cce.t2.large` - large-scale HA physical machine cluster (up to 500 nodes).
+  * `cce.s2.xlarge` - ultra-large-scale, high availability cluster (<= 2,000 nodes).
 
-* `cluster_version` - (Optional) For the cluster version, possible values are `v1.21`, `v1.23`.
+* `cluster_version` - (Optional) For the cluster version, possible values are `v1.25`, `v1.23`.
   Changing this parameter will create a new cluster resource. [OTC-API](https://docs.otc.t-systems.com/en-us/api2/cce/cce_02_0236.html)
 
 * `cluster_type` - (Required) Cluster Type, possible values are `VirtualMachine` and `BareMetal`. Changing this parameter will create a new cluster resource.

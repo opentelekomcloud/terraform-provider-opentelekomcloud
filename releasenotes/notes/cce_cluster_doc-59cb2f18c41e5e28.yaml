@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[CCE]** Change flavor list for ``resource/opentelekomcloud_cce_cluster_v3`` documentation (`#2386 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2386>`_)
