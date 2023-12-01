@@ -22,12 +22,6 @@ func DataSourceImagesImageV2() *schema.Resource {
 		ReadContext: dataSourceImagesImageV2Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -91,14 +85,6 @@ func DataSourceImagesImageV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"min_disk_gb": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"min_ram_mb": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
 			"protected": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -109,10 +95,6 @@ func DataSourceImagesImageV2() *schema.Resource {
 			},
 			"size_bytes": {
 				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"metadata": {
-				Type:     schema.TypeMap,
 				Computed: true,
 			},
 			"created_at": {
@@ -143,10 +125,6 @@ func DataSourceImagesImageV2() *schema.Resource {
 			},
 			"is_registered": {
 				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"whole_image": {
-				Type:     schema.TypeBool,
 				Computed: true,
 			},
 			"system_cmk_id": {
@@ -205,10 +183,6 @@ func DataSourceImagesImageV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"member_status": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"min_disk": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -222,6 +196,34 @@ func DataSourceImagesImageV2() *schema.Resource {
 				Computed: true,
 			},
 			"virtual_env_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"backup_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"data_origin": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"image_source_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"original_image_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"os_version": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"login_user": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -267,33 +269,6 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 		ims = filteredImages
 	}
 
-	// properties := d.Get("properties").(map[string]interface{})
-	// imageProperties := resourceImagesImageV2ExpandProperties(properties)
-	// if len(filteredImages) > 1 && len(imageProperties) > 0 {
-	// 	for _, image := range filteredImages {
-	// 		if len(image.) > 0 {
-	// 			match := true
-	// 			for searchKey, searchValue := range imageProperties {
-	// 				imageValue, ok := image.Properties[searchKey]
-	// 				if !ok {
-	// 					match = false
-	// 					break
-	// 				}
-	//
-	// 				if searchValue != imageValue {
-	// 					match = false
-	// 					break
-	// 				}
-	// 			}
-	//
-	// 			if match {
-	// 				filteredImages = append(filteredImages, image)
-	// 			}
-	// 		}
-	// 	}
-	// 	allImages = filteredImages
-	// }
-
 	if len(ims) < 1 {
 		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again")
@@ -320,8 +295,8 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 		d.Set("tags", img.Tags),
 		d.Set("container_format", img.ContainerFormat),
 		d.Set("disk_format", img.DiskFormat),
-		d.Set("min_disk_gb", img.MinDisk),
-		d.Set("min_ram_mb", img.MinRam),
+		d.Set("min_disk", img.MinDisk),
+		d.Set("min_ram", img.MinRam),
 		d.Set("owner", img.Owner),
 		d.Set("protected", img.Protected),
 		d.Set("visibility", img.Visibility),
@@ -335,6 +310,27 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 		d.Set("status", img.Status),
 		d.Set("os_type", img.OsType),
 		d.Set("platform", img.Platform),
+		d.Set("backup_id", img.BackupId),
+		d.Set("data_origin", img.DataOrigin),
+		d.Set("description", img.Description),
+		d.Set("image_source_type", img.ImageSourceType),
+		d.Set("is_registered", img.Isregistered),
+		d.Set("original_image_name", img.Originalimagename),
+		d.Set("os_bit", img.OsBit),
+		d.Set("os_version", img.OsVersion),
+		d.Set("virtual_env_type", img.VirtualEnvType),
+		d.Set("login_user", img.ImageLoginUser),
+		d.Set("image_type", img.Imagetype),
+		d.Set("system_cmk_id", img.SystemCmkid),
+		d.Set("support_disk_intensive", img.SupportDiskintensive),
+		d.Set("support_high_performance", img.SupportHighperformance),
+		d.Set("support_kvm", img.SupportKvm),
+		d.Set("support_kvm_gpu_type", img.SupportKvmGpuType),
+		d.Set("support_kvm_infiniband", img.SupportKvmInfiniband),
+		d.Set("support_large_memory", img.SupportLargememory),
+		d.Set("support_xen", img.SupportXen),
+		d.Set("support_xen_gpu_type", img.SupportXenGpuType),
+		d.Set("support_xen_hana", img.SupportXenHana),
 	)
 
 	if mErr.ErrorOrNil() != nil {
