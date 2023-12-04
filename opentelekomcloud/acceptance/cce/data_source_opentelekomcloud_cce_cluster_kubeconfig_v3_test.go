@@ -33,6 +33,13 @@ func TestAccCCEKubeConfigV3DataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(dataSourceName, "kubeconfig"),
 				),
 			},
+			{
+				Config: testAccCCEClusterKubeconfigV3DataSourceExpiryDate(cceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCEClusterKubeconfigV3DataSourceID(dataSourceName),
+					resource.TestCheckResourceAttrSet(dataSourceName, "kubeconfig"),
+				),
+			},
 		},
 	})
 }
@@ -82,6 +89,26 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 
 data "opentelekomcloud_cce_cluster_kubeconfig_v3" "this" {
   cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+}
+`, common.DataSourceSubnet, cceName)
+}
+
+func testAccCCEClusterKubeconfigV3DataSourceExpiryDate(cceName string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name                   = "%s"
+  cluster_type           = "VirtualMachine"
+  flavor_id              = "cce.s1.small"
+  vpc_id                 = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  container_network_type = "overlay_l2"
+}
+
+data "opentelekomcloud_cce_cluster_kubeconfig_v3" "this" {
+  cluster_id  = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  expiry_date = "2024-02-01"
 }
 `, common.DataSourceSubnet, cceName)
 }

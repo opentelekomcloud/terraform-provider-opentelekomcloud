@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 )
@@ -53,17 +52,6 @@ func RemoveNil(data map[string]interface{}) map[string]interface{} {
 
 func BucketDomainName(bucket, region string) string {
 	return fmt.Sprintf("%s.obs.%s.otc.t-systems.com", bucket, region)
-}
-
-func validateS3BucketLifecycleTimestamp(v interface{}, _ string) (ws []string, errors []error) {
-	value := v.(string)
-	_, err := time.Parse(time.RFC3339, fmt.Sprintf("%sT00:00:00Z", value))
-	if err != nil {
-		errors = append(errors, fmt.Errorf(
-			"%q cannot be parsed as RFC3339 Timestamp Format", value))
-	}
-
-	return
 }
 
 func validateS3BucketLifecycleExpirationDays(v interface{}, k string) (ws []string, errors []error) {

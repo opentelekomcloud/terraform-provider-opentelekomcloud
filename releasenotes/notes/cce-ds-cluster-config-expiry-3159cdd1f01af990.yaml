@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[CCE]** New attribute ``expiry_date`` in ``data_source/opentelekomcloud_cce_cluster_kubeconfig_v3``.
+    (`#2388 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2388>`_)

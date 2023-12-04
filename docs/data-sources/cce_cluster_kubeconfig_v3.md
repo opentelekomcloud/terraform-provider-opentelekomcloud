@@ -16,15 +16,29 @@ data "opentelekomcloud_cce_cluster_kubeconfig_v3" "this" {
 }
 ```
 
+## Example with expiration date
+
+```hcl
+variable "cluster_id" {}
+
+data "opentelekomcloud_cce_cluster_kubeconfig_v3" "this" {
+  cluster_id  = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  expiry_date = "2024-02-01"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
-* `cluster_id` -  (Optional) The Name of the cluster resource.
+* `cluster_id` -  (Required, String) The Name of the cluster resource.
 
-* `duration` - (Optional) Period during which a cluster certificate is valid, in days. A cluster certificate can
+* `duration` - (Optional, Int) Period during which a cluster certificate is valid, in days. A cluster certificate can
   be valid for `1` to `1825` days. If this parameter is set to `-1`, the validity period is `1825` days (about 5 years).
   Default vault `-1`.
+
+* `expiry_date` - (Optional, String) Specifies the date until which the certificate will be valid, in RFC3339 format, like `2023-02-01`.
+  Conflicts with `duration` attribute.
 
 ## Attributes Reference
 
