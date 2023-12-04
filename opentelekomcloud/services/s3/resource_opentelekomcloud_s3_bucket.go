@@ -231,7 +231,7 @@ func ResourceS3Bucket() *schema.Resource {
 									"date": {
 										Type:         schema.TypeString,
 										Optional:     true,
-										ValidateFunc: validateS3BucketLifecycleTimestamp,
+										ValidateFunc: common.ValidateRFC3339Timestamp,
 									},
 									"days": {
 										Type:         schema.TypeInt,
