@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[ELB]** add note to `l4_flavor` and `l7_flavor` attributes for ``resource/opentelekomcloud_lb_loadbalancer_v3`` (`#2385 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2385>`_)

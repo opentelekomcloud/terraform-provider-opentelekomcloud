@@ -180,6 +180,8 @@ The following arguments are supported:
 
 * `ip_target_enable` - (Optional) The value can be `true` (enabled) or `false` (disabled).
 
+-> If both `l4_flavor` and `l7_flavor` is empty, both ALB and NLB will be attached to the load balancer with the default flavor. It is advisable to specify one of them, unless your intention is to associate both flavors with the default setting.
+
 * `l4_flavor` - (Optional) The ID of the Layer-4 flavor.
 
 * `l7_flavor` - (Optional) The ID of the Layer-7 flavor.
