@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[ELB]** Update ``tls_ciphers_policy`` values for ``resource/opentelekomcloud_lb_listener_v3``
+    (`#2379 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2379>`_)

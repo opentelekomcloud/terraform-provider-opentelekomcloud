@@ -1,0 +1,4 @@
+---
+fixes:
+  |
+  **[WAF]** Fix ``resource/opentelekomcloud_waf_dedicated_instance_v1`` after API update (`#2376 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2376>`_)

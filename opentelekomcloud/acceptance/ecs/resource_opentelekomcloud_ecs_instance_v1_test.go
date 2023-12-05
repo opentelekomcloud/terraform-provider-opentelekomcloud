@@ -46,6 +46,7 @@ func TestAccEcsV1InstanceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "auto_recovery", "false"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "security_groups.#", "1"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tags.muh", "value-update"),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tags.emp", ""),
 				),
 			},
 		},
@@ -369,6 +370,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
 
   tags = {
     muh = "value-update"
+    emp = ""
   }
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

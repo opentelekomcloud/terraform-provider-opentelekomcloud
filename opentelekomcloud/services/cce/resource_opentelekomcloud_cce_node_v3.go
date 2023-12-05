@@ -47,6 +47,11 @@ var (
 		"topology.kubernetes.io/region",
 		"topology.kubernetes.io/zone",
 	}
+
+	predefinedTaints = []string{
+		"node.kubernetes.io/unreachable",
+		"node.cloudprovider.kubernetes.io/shutdown",
+	}
 )
 
 func ResourceCCENodeV3() *schema.Resource {
@@ -812,13 +817,16 @@ func setK8sNodeFields(d *schema.ResourceData, config *cfg.Config, clusterID, pri
 		log.Printf("[WARN] error retrieving CCE node: %s", err.Error())
 		return nil
 	}
-	taints := make([]interface{}, len(k8Node.Spec.Taints))
-	for i, v := range k8Node.Spec.Taints {
-		taints[i] = map[string]interface{}{
-			"key":    v.Key,
-			"value":  v.Value,
-			"effect": v.Effect,
+	taints := make([]interface{}, 0)
+	for _, value := range k8Node.Spec.Taints {
+		if com.IsSliceContainsStr(predefinedTaints, value.Key) {
+			continue
 		}
+		taints = append(taints, map[string]interface{}{
+			"key":    value.Key,
+			"value":  value.Value,
+			"effect": value.Effect,
+		})
 	}
 	if err := d.Set("taints", taints); err != nil {
 		return fmt.Errorf("error setting taints for CCE Node: %w", err)

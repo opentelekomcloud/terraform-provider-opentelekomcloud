@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    **[ECS]** Now possible to create a tag with empty value in ``resource/opentelekomcloud_ecs_instance_v1``
+    (`#2384 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2384>`_)
+  - |
+    **[ECS]** Now possible to create a tag with empty value in ``resource/opentelekomcloud_compute_instance_v2``
+    (`#2384 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2384>`_)
