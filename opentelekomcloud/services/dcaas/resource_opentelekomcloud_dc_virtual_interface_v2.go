@@ -86,12 +86,8 @@ func ResourceVirtualInterfaceV2() *schema.Resource {
 			},
 			"service_type": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"VPC",
-				}, false),
 			},
 			"local_gateway_v4_ip": {
 				Type:         schema.TypeString,

@@ -31,14 +31,15 @@ resource "opentelekomcloud_dc_virtual_gateway_v2" "vgw_1" {
 }
 
 resource "opentelekomcloud_dc_virtual_interface_v2" "int_1" {
-  direct_connect_id = var.direct_connect_id
-  vgw_id            = opentelekomcloud_dc_virtual_gateway_v2.vgw_1.id
-  name              = "vi_1"
-  description       = "description"
-  type              = "private"
-  route_mode        = "static"
-  vlan              = 100
-  bandwidth         = 5
+  direct_connect_id  = var.direct_connect_id
+  virtual_gateway_id = opentelekomcloud_dc_virtual_gateway_v2.vgw_1.id
+  service_type       = "vpc"
+  name               = "vi_1"
+  description        = "description"
+  type               = "private"
+  route_mode         = "static"
+  vlan               = 100
+  bandwidth          = 5
 
   remote_ep_group_id   = opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group.id
   local_gateway_v4_ip  = "180.1.1.1/24"
@@ -59,7 +60,7 @@ The following arguments are supported:
 * `bandwidth` (Int, Required) - Specifies the virtual interface bandwidth.
 * `remote_ep_group_id` (String, Required) - Specifies the ID of the remote endpoint group that records the CIDR blocks used by the on-premises network.
 * `description` (String, Optional) - Provides supplementary information about the virtual interface.
-* `service_type` (String, Optional, ForceNew) - Specifies what is to be accessed over the connection. The value can only be `vpc`.
+* `service_type` (String, Required, ForceNew) - Specifies what is to be accessed over the connection. The value can only be `vpc`.
 * `local_gateway_v4_ip` (String, Optional, ForceNew) - Specifies the IPv4 address of the local gateway.
 * `remote_gateway_v4_ip` (String, Optional, ForceNew) - Specifies the IPv4 address of the remote gateway.
 * `asn` (Int, Optional, ForceNew) - Specifies the AS number of the BGP peer.
