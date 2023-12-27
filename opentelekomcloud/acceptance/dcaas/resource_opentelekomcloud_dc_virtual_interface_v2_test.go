@@ -135,14 +135,15 @@ resource "opentelekomcloud_dc_virtual_gateway_v2" "vgw_1" {
 }
 
 resource "opentelekomcloud_dc_virtual_interface_v2" "int_1" {
-  direct_connect_id = "%s"
-  vgw_id            = opentelekomcloud_dc_virtual_gateway_v2.vgw_1.id
-  name              = "%s"
-  description       = "description"
-  type              = "private"
-  route_mode        = "static"
-  vlan              = 100
-  bandwidth         = 5
+  direct_connect_id  = "%s"
+  virtual_gateway_id = opentelekomcloud_dc_virtual_gateway_v2.vgw_1.id
+  service_type       = "vpc"
+  name               = "%s"
+  description        = "description"
+  type               = "private"
+  route_mode         = "static"
+  vlan               = 100
+  bandwidth          = 5
 
   remote_ep_group_id   = opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group.id
   local_gateway_v4_ip  = "180.1.1.1/24"
@@ -173,14 +174,15 @@ resource "opentelekomcloud_dc_virtual_gateway_v2" "vgw_1" {
 }
 
 resource "opentelekomcloud_dc_virtual_interface_v2" "int_1" {
-  direct_connect_id = "%s"
-  vgw_id            = opentelekomcloud_dc_virtual_gateway_v2.vgw_1.id
-  name              = "%s"
-  description       = "description updated"
-  type              = "private"
-  route_mode        = "static"
-  vlan              = 100
-  bandwidth         = 10
+  direct_connect_id  = "%s"
+  virtual_gateway_id = opentelekomcloud_dc_virtual_gateway_v2.vgw_1.id
+  service_type       = "vpc"
+  name               = "%s"
+  description        = "description updated"
+  type               = "private"
+  route_mode         = "static"
+  vlan               = 100
+  bandwidth          = 10
 
   remote_ep_group_id   = opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group.id
   local_gateway_v4_ip  = "180.1.1.1/24"

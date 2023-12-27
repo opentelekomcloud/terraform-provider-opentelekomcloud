@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[DCAAS]** Fixes for `service_type` and  `virtual_gateway_id` attributes documentation for ``resource/opentelekomcloud_dc_virtual_interface_v2`` (`#2398 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2398>`_)
+  - |
+    **[DCAAS]** Fix value validation for `service_type` for ``resource/opentelekomcloud_dc_virtual_interface_v2`` (`#2398 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2398>`_)
