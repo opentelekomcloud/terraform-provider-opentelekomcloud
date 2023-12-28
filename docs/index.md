@@ -278,6 +278,10 @@ The following arguments are supported:
 * `max_retries` - (Optional) Maximum number of retries of HTTP requests failed
   due to connection issues.
 
+* `allow_reauth` - (Optional) If set to false, authorization won't be performed automatically if the
+  initial auth token get expired. It can be set using the `OS_ALLOW_REAUTH` environment variable.
+  Default: `true`.
+
 * `max_backoff_retries` - (Optional) Maximum number of retries of HTTP requests failed
   due to reaching the rate limit. It can be set using the `OS_MAX_BACKOFF_RETRIES` environment
   variable. If not set, default value is used.

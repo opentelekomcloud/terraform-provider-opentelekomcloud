@@ -294,3 +294,48 @@ data "opentelekomcloud_networking_network_v2" "ext" {
 		},
 	})
 }
+
+func TestAccProvider_reAuth(t *testing.T) {
+	type allCases struct {
+		Case map[string]interface{}
+	}
+	cases := map[string]allCases{
+		"True": {
+			Case: map[string]interface{}{
+				"allow_reauth": "true",
+			},
+		},
+		"False": {
+			Case: map[string]interface{}{
+				"allow_reauth": "false",
+			},
+		},
+	}
+
+	for name, auth := range cases {
+		p := opentelekomcloud.Provider()
+
+		if p.Configure(context.TODO(), terraform.NewResourceConfigRaw(auth.Case)).HasError() {
+			t.Fatalf("Unexpected err when specifying OpenTelekomCloud")
+		}
+		authOpts := p.Meta()
+
+		config := authOpts.(*cfg.Config)
+
+		switch name {
+		case "False":
+			if config.HwClient.ReauthFunc != nil {
+				t.Fatalf("ReauthFunc was set with disabled reauth")
+			}
+
+		case "True":
+			oldToken := config.HwClient.TokenID
+			if err := config.HwClient.ReauthFunc(); err != nil {
+				t.Fatalf("Error while getting new Token via ReauthFunc")
+			}
+			if oldToken == config.HwClient.TokenID {
+				t.Fatalf("Old token is same as new token")
+			}
+		}
+	}
+}
