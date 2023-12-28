@@ -38,6 +38,7 @@ type Config struct {
 	AccessKey           string
 	SecretKey           string
 	CACertFile          string
+	AllowReauth         bool
 	ClientCertFile      string
 	ClientKeyFile       string
 	Cloud               string
@@ -481,6 +482,7 @@ func buildClientByPassword(c *Config) error {
 		ao.Username = c.Username
 		ao.UserID = c.UserID
 		ao.Passcode = c.Passcode
+		ao.AllowReauth = c.AllowReauth
 	}
 	return c.genClients(pao, dao)
 }

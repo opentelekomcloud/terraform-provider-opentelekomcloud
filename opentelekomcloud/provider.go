@@ -226,6 +226,12 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("OS_CLOUD", ""),
 				Description: common.Descriptions["cloud"],
 			},
+			"allow_reauth": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_ALLOW_REAUTH", true),
+				Description: common.Descriptions["allow_reauth"],
+			},
 			"max_retries": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -561,6 +567,7 @@ func providerConfigure(_ context.Context, d *schema.ResourceData, p *schema.Prov
 		AgencyName:          d.Get("agency_name").(string),
 		AgencyDomainName:    d.Get("agency_domain_name").(string),
 		DelegatedProject:    d.Get("delegated_project").(string),
+		AllowReauth:         d.Get("allow_reauth").(bool),
 		MaxRetries:          d.Get("max_retries").(int),
 		MaxBackoffRetries:   d.Get("max_backoff_retries").(int),
 		BackoffRetryTimeout: d.Get("backoff_retry_timeout").(int),
