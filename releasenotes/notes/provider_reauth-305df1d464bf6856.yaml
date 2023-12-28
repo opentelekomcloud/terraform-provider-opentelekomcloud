@@ -1,4 +1,4 @@
 ---
 other:
   - |
-    **[Provider]** Implement reauth feature for provider (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[Provider]** Implement reauth feature for provider (`#2399 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2399>`_)
