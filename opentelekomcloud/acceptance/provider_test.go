@@ -296,6 +296,9 @@ data "opentelekomcloud_networking_network_v2" "ext" {
 }
 
 func TestAccProvider_reAuth(t *testing.T) {
+	if os.Getenv("TF_ACC") == "" {
+		t.Skip("TF_ACC not set, skipping OpenTelekomCloud ReAuth test.")
+	}
 	type allCases struct {
 		Case map[string]interface{}
 	}
