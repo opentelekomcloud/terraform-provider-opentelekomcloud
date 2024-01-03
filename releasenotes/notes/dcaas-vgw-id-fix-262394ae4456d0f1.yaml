@@ -1,0 +1,5 @@
+---
+fixes:
+  |
+  **[DCAAS]** Fixed setting of `virtual_gateway_id` attribute in resource/opentelekomcloud_dc_virtual_interface_v2`` (`#2400 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2400>`_)
+
