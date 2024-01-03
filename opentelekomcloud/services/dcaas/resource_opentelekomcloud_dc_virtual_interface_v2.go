@@ -198,7 +198,7 @@ func resourceVirtualInterfaceV2Read(ctx context.Context, d *schema.ResourceData,
 	log.Printf("[DEBUG] The virtual interface response is: %#v", vi)
 
 	mErr := multierror.Append(nil,
-		d.Set("vgw_id", vi.VgwID),
+		d.Set("virtual_gateway_id", vi.VgwID),
 		d.Set("type", vi.Type),
 		d.Set("route_mode", vi.RouteMode),
 		d.Set("vlan", vi.VLAN),
