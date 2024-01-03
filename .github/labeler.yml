@@ -1,9 +1,15 @@
 dependencies:
-  - go.mod
-  - go.sum
-  - vendor/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - go.mod
+        - go.sum
+        - vendor/**/*
 documentation:
-  - docs/**/*
-  - README.md
+  - changed-files:
+      - any-glob-to-any-file:
+        - docs/**/*
+        - README.md
 changelog:
-  - CHANGELOG.md
+  - changed-files:
+      - any-glob-to-any-file:
+        - CHANGELOG.md
