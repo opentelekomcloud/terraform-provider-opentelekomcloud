@@ -14,6 +14,7 @@ import (
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
+	VpcV3 "github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v3/vpcs"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -56,6 +57,11 @@ func ResourceVirtualPrivateCloudV1() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.IsCIDR,
 			},
+			"secondary_cidr": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.IsCIDR,
+			},
 			"shared": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -68,6 +74,71 @@ func ResourceVirtualPrivateCloudV1() *schema.Resource {
 			"tags": common.TagsSchema(),
 		},
 	}
+}
+
+func addSecondaryCidr(d *schema.ResourceData, config *cfg.Config) error {
+	vpcV3Client, err := config.NetworkingV3Client(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf(errCreationV3Client, err)
+	}
+	cidr := d.Get("secondary_cidr").(string)
+	cidrOpts := VpcV3.CidrOpts{
+		Vpc: &VpcV3.AddExtendCidrOption{
+			ExtendCidrs: []string{cidr}},
+	}
+	_, err = VpcV3.AddSecondaryCidr(vpcV3Client, d.Id(), cidrOpts)
+	if err != nil {
+		return fmt.Errorf("error setting secondary cidr of VirtualPrivateCloud %s: %s", d.Id(), cidr)
+	}
+	return nil
+}
+
+func updateSecondaryCidr(d *schema.ResourceData, config *cfg.Config) error {
+	vpcV3Client, err := config.NetworkingV3Client(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf(errCreationV3Client, err)
+	}
+	vpcV3Get, err := VpcV3.Get(vpcV3Client, d.Id())
+	if err != nil {
+		return fmt.Errorf("error fetching vpc: %s", err)
+	}
+	cidrOpts := VpcV3.CidrOpts{
+		Vpc: &VpcV3.AddExtendCidrOption{
+			ExtendCidrs: []string{vpcV3Get.SecondaryCidrs[0]}},
+	}
+	_, err = VpcV3.RemoveSecondaryCidr(vpcV3Client, d.Id(), cidrOpts)
+	if err != nil {
+		return fmt.Errorf("error removing old secondary cidr of VirtualPrivateCloud %s: %s", d.Id(), vpcV3Get.SecondaryCidrs[0])
+	}
+	cidr := d.Get("secondary_cidr").(string)
+	cidrAddOpts := VpcV3.CidrOpts{
+		Vpc: &VpcV3.AddExtendCidrOption{
+			ExtendCidrs: []string{cidr}},
+	}
+	_, err = VpcV3.AddSecondaryCidr(vpcV3Client, d.Id(), cidrAddOpts)
+	if err != nil {
+		return fmt.Errorf("error setting new secondary cidr of VirtualPrivateCloud %s: %s", d.Id(), cidr)
+	}
+	return nil
+}
+
+func readSecondaryCidr(d *schema.ResourceData, config *cfg.Config) error {
+	vpcV3Client, err := config.NetworkingV3Client(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf(errCreationV3Client, err)
+	}
+	vpcV3Get, err := VpcV3.Get(vpcV3Client, d.Id())
+	if err != nil {
+		return fmt.Errorf("error fetching vpc: %s", err)
+	}
+
+	if len(vpcV3Get.SecondaryCidrs) > 0 {
+		if err := d.Set("secondary_cidr", vpcV3Get.SecondaryCidrs[0]); err != nil {
+			return fmt.Errorf("error setting secondary cidr: %s", err)
+		}
+	}
+
+	return nil
 }
 
 func addNetworkingTags(d *schema.ResourceData, config *cfg.Config, res string) error {
@@ -157,6 +228,14 @@ func resourceVirtualPrivateCloudV1Create(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
+	if config.GetRegion(d) == "eu-ch2" {
+		if _, ok := d.GetOk("secondary_cidr"); ok {
+			if err := addSecondaryCidr(d, config); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
+
 	d.SetId(n.ID)
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
@@ -191,6 +270,11 @@ func resourceVirtualPrivateCloudV1Read(ctx context.Context, d *schema.ResourceDa
 
 	if err := readNetworkingTags(d, config, "vpcs"); err != nil {
 		return diag.FromErr(err)
+	}
+	if config.GetRegion(d) == "eu-ch2" {
+		if err := readSecondaryCidr(d, config); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	return nil
@@ -237,6 +321,15 @@ func resourceVirtualPrivateCloudV1Update(ctx context.Context, d *schema.Resource
 		tagErr := common.UpdateResourceTags(vpcV2Client, d, "vpcs", d.Id())
 		if tagErr != nil {
 			return fmterr.Errorf("error updating tags of VPC %s: %w", d.Id(), tagErr)
+		}
+	}
+
+	// update secondary cidr
+	if d.HasChange("secondary_cidr") {
+		if config.GetRegion(d) == "eu-ch2" {
+			if err := updateSecondaryCidr(d, config); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 
