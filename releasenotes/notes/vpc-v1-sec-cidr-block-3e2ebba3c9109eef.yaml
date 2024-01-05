@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[VPC]** Add `secondary_cidr` attribute in ``resource/opentelekomcloud_vpc_v1`` (`#2404 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2404>`_)
