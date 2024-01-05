@@ -796,6 +796,13 @@ func (c *Config) NetworkingV2Client(region string) (*golangsdk.ServiceClient, er
 	})
 }
 
+func (c *Config) NetworkingV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewVpcV3(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) SmnV2Client(projectName ProjectName) (*golangsdk.ServiceClient, error) {
 	newConfig, err := reconfigProjectName(*c, projectName)
 	if err != nil {

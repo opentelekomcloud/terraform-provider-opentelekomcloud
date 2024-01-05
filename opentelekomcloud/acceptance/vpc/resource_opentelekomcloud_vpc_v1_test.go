@@ -54,6 +54,45 @@ func TestAccVpcV1_basic(t *testing.T) {
 	})
 }
 
+func TestAccVpcV1_secondaryCidr(t *testing.T) {
+	var vpc vpcs.Vpc
+	t.Parallel()
+	quotas.BookOne(t, quotas.Router)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckVpcV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVpcV3BasicCidr,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckVpcV1Exists(resourceVPCName, &vpc),
+					resource.TestCheckResourceAttr(resourceVPCName, "name", "tf_acc_test_v3"),
+					resource.TestCheckResourceAttr(resourceVPCName, "description", "simple description"),
+					resource.TestCheckResourceAttr(resourceVPCName, "cidr", "192.168.0.0/16"),
+					resource.TestCheckResourceAttr(resourceVPCName, "secondary_cidr", "23.9.0.0/16"),
+					resource.TestCheckResourceAttr(resourceVPCName, "status", "OK"),
+					resource.TestCheckResourceAttr(resourceVPCName, "shared", "true"),
+					resource.TestCheckResourceAttr(resourceVPCName, "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceVPCName, "tags.key", "value"),
+				),
+			},
+			{
+				Config: testAccVpcV3UpdateCidr,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckVpcV1Exists(resourceVPCName, &vpc),
+					resource.TestCheckResourceAttr(resourceVPCName, "name", "tf_acc_test_v3"),
+					resource.TestCheckResourceAttr(resourceVPCName, "description", "simple description updated"),
+					resource.TestCheckResourceAttr(resourceVPCName, "secondary_cidr", "23.8.0.0/16"),
+					resource.TestCheckResourceAttr(resourceVPCName, "shared", "false"),
+					resource.TestCheckResourceAttr(resourceVPCName, "tags.key", "value_update"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccVpcV1_timeout(t *testing.T) {
 	var vpc vpcs.Vpc
 	t.Parallel()
@@ -197,6 +236,36 @@ resource "opentelekomcloud_vpc_v1" "vpc_1" {
   tags = {
     foo = "bar"
     key = "value"
+  }
+}
+`
+
+const testAccVpcV3BasicCidr = `
+resource "opentelekomcloud_vpc_v1" "vpc_1" {
+  name           = "tf_acc_test_v3"
+  description    = "simple description"
+  cidr           = "192.168.0.0/16"
+  secondary_cidr = "23.9.0.0/16"
+  shared         = true
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+`
+
+const testAccVpcV3UpdateCidr = `
+resource "opentelekomcloud_vpc_v1" "vpc_1" {
+  name           = "tf_acc_test_v3"
+  description    = "simple description updated"
+  cidr           = "192.168.0.0/16"
+  secondary_cidr = "23.8.0.0/16"
+  shared         = false
+
+  tags = {
+    foo = "bar"
+    key = "value_update"
   }
 }
 `
