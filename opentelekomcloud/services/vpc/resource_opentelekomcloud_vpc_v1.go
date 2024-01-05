@@ -132,9 +132,12 @@ func readSecondaryCidr(d *schema.ResourceData, config *cfg.Config) error {
 		return fmt.Errorf("error fetching vpc: %s", err)
 	}
 
-	if err := d.Set("secondary_cidr", vpcV3Get.SecondaryCidrs[0]); err != nil {
-		return fmt.Errorf("error setting secondary cidr: %s", err)
+	if len(vpcV3Get.SecondaryCidrs) > 0 {
+		if err := d.Set("secondary_cidr", vpcV3Get.SecondaryCidrs[0]); err != nil {
+			return fmt.Errorf("error setting secondary cidr: %s", err)
+		}
 	}
+
 	return nil
 }
 
@@ -224,11 +227,15 @@ func resourceVirtualPrivateCloudV1Create(ctx context.Context, d *schema.Resource
 	if err := addNetworkingTags(d, config, "vpcs"); err != nil {
 		return diag.FromErr(err)
 	}
-	if _, ok := d.GetOk("secondary_cidr"); ok {
-		if err := addSecondaryCidr(d, config); err != nil {
-			return diag.FromErr(err)
+
+	if config.GetRegion(d) == "eu-ch2" {
+		if _, ok := d.GetOk("secondary_cidr"); ok {
+			if err := addSecondaryCidr(d, config); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
+
 	d.SetId(n.ID)
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
@@ -264,8 +271,7 @@ func resourceVirtualPrivateCloudV1Read(ctx context.Context, d *schema.ResourceDa
 	if err := readNetworkingTags(d, config, "vpcs"); err != nil {
 		return diag.FromErr(err)
 	}
-
-	if _, ok := d.GetOk("secondary_cidr"); ok {
+	if config.GetRegion(d) == "eu-ch2" {
 		if err := readSecondaryCidr(d, config); err != nil {
 			return diag.FromErr(err)
 		}
@@ -320,8 +326,10 @@ func resourceVirtualPrivateCloudV1Update(ctx context.Context, d *schema.Resource
 
 	// update secondary cidr
 	if d.HasChange("secondary_cidr") {
-		if err := updateSecondaryCidr(d, config); err != nil {
-			return diag.FromErr(err)
+		if config.GetRegion(d) == "eu-ch2" {
+			if err := updateSecondaryCidr(d, config); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 
