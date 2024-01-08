@@ -10,9 +10,9 @@ Up-to-date reference of API arguments for Direct Connect Virtual Gateway you can
 
 ```hcl
 resource "opentelekomcloud_dc_virtual_gateway_v2" "vgw_1" {
-  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  name              = "%s"
-  description       = "acc test"
+  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  name        = "%s"
+  description = "acc test"
   local_ep_group {
     name        = "tf_eg_1"
     endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
