@@ -9,23 +9,15 @@ Up-to-date reference of API arguments for Direct Connect Virtual Gateway you can
 ## Example Usage
 
 ```hcl
-data "opentelekomcloud_identity_project_v3" "project" {
-  name = "eu-de_project_1"
-}
-
-resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group" {
-  name        = "tf_acc_eg_1"
-  type        = "cidr"
-  endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
-  description = "first"
-  project_id  = data.opentelekomcloud_identity_project_v3.project.id
-}
-
 resource "opentelekomcloud_dc_virtual_gateway_v2" "vgw_1" {
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  name              = "my_virtual_gateway"
+  name              = "%s"
   description       = "acc test"
-  local_ep_group_id = opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group.id
+  local_ep_group {
+    name        = "tf_eg_1"
+    endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
+    description = "first"
+  }
 }
 ```
 
@@ -34,7 +26,12 @@ resource "opentelekomcloud_dc_virtual_gateway_v2" "vgw_1" {
 The following arguments are supported:
 
 * `vpc_id` (String, Required, ForceNew) - Specifies the ID of the VPC to be accessed.
-* `local_ep_group_id` (String, Required) - Specifies the ID of the local endpoint group that records CIDR blocks of the VPC subnets.
+* `local_ep_group` (String, Required, List) - Specifies the the local endpoint group that records CIDR blocks of the VPC subnets.
+  The `local_ep_group` block supports:
+  * `name` (String, Optional) - Specifies the name of the Direct Connect endpoint group.
+  * `description` (String, Optional) - Provides supplementary information about the Direct Connect endpoint group.
+  * `endpoints` (List, Required) - Specifies the list of the endpoints in a Direct Connect endpoint group.
+  * `type` (String, Required, ForceNew) - Specifies the type of the Direct Connect endpoints. The value can only be `cidr`. Default value: `cidr`.
 * `name` (String, Required) - Specifies the virtual gateway name.
 * `description` (String, Optional) - Provides supplementary information about the virtual gateway.
 * `asn` (Int, Optional, ForceNew) - Specifies the BGP ASN of the virtual gateway.
@@ -48,6 +45,7 @@ The following attributes are exported:
 * `id` -  ID of the virtual gateway.
 * `status` -  Virtual gateway status.
 * `project_id` -  Project id.
+* `local_ep_group_id` - ID of the local endpoint group that records CIDR blocks of the VPC subnets.
 
 ## Import
 

@@ -6,6 +6,10 @@ subcategory: "Direct Connect (DCaaS)"
 Up-to-date reference of API arguments for Direct Connect Endpoint Group you can get at
 [Official Docs Portal](https://docs.otc.t-systems.com/direct-connect/api-ref/apis/direct_connect_endpoint_group/index.html).
 
+~>
+opentelekomcloud_dc_endpoint_group_v2 is no longer provided. Impossible to update assigned endpoint group.
+Please use `opentelekomcloud_dc_virtual_gateway_v2` with `local_ep_group` block instead.
+
 ## Example Usage
 
 ```hcl

@@ -24,6 +24,8 @@ func ResourceDCEndpointGroupV2() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
+		DeprecationMessage: egDeprecated,
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
@@ -79,7 +81,7 @@ func resourceDCEndpointGroupV2Create(ctx context.Context, d *schema.ResourceData
 		Name:        d.Get("name").(string),
 		TenantId:    d.Get("project_id").(string),
 		Description: d.Get("description").(string),
-		Endpoints:   GetEndpoints(d),
+		Endpoints:   GetEndpointsValues(d),
 		Type:        d.Get("type").(string),
 	}
 	log.Printf("[DEBUG] DC endpoint group V2 createOpts: %+v", createOpts)
@@ -139,7 +141,7 @@ func resourceDCEndpointGroupV2Delete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func GetEndpoints(d *schema.ResourceData) []string {
+func GetEndpointsValues(d *schema.ResourceData) []string {
 	endpoints := make([]string, 0)
 	for _, val := range d.Get("endpoints").([]interface{}) {
 		endpoints = append(endpoints, val.(string))

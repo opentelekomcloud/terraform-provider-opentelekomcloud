@@ -34,6 +34,8 @@ func TestDirectConnectVirtualGatewayV2Resource_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(vg, "asn"),
 					resource.TestCheckResourceAttrSet(vg, "status"),
 					resource.TestCheckResourceAttrSet(vg, "local_ep_group_id"),
+					resource.TestCheckResourceAttr(vg, "local_ep_group.0.type", "cidr"),
+					resource.TestCheckResourceAttr(vg, "local_ep_group.0.endpoints.#", "1"),
 				),
 			},
 			{
@@ -45,6 +47,8 @@ func TestDirectConnectVirtualGatewayV2Resource_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(vg, "asn"),
 					resource.TestCheckResourceAttrSet(vg, "status"),
 					resource.TestCheckResourceAttrSet(vg, "local_ep_group_id"),
+					resource.TestCheckResourceAttr(vg, "local_ep_group.0.type", "cidr"),
+					resource.TestCheckResourceAttr(vg, "local_ep_group.0.endpoints.#", "2"),
 				),
 			},
 			{
@@ -118,19 +122,15 @@ func testAccVirtualGatewayV2_basic(name string) string {
 
 %s
 
-resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group" {
-  name        = "tf_acc_eg_1"
-  type        = "cidr"
-  endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
-  description = "first"
-  project_id  = data.opentelekomcloud_identity_project_v3.project.id
-}
-
 resource "opentelekomcloud_dc_virtual_gateway_v2" "vgw_1" {
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   name              = "%s"
   description       = "acc test"
-  local_ep_group_id = opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group.id
+  local_ep_group {
+    name        = "tf_acc_eg_1"
+    endpoints   = ["10.2.0.0/24"]
+    description = "first"
+  }
 }
 `, common.DataSourceSubnet, common.DataSourceProject, name)
 }
@@ -141,27 +141,15 @@ func testAccVirtualGatewayV2_update(name string) string {
 
 %s
 
-resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group" {
-  name        = "tf_acc_eg_1"
-  type        = "cidr"
-  endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
-  description = "first"
-  project_id  = data.opentelekomcloud_identity_project_v3.project.id
-}
-
-resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group_new" {
-  name        = "tf_acc_eg_1"
-  type        = "cidr"
-  endpoints   = ["10.20.0.0/24", "10.30.0.0/24"]
-  description = "first"
-  project_id  = data.opentelekomcloud_identity_project_v3.project.id
-}
-
 resource "opentelekomcloud_dc_virtual_gateway_v2" "vgw_1" {
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   name              = "%s"
   description       = "acc test updated"
-  local_ep_group_id = opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group_new.id
+  local_ep_group {
+    name        = "tf_acc_eg_1"
+    endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
+    description = "first"
+  }
 }
 `, common.DataSourceSubnet, common.DataSourceProject, name)
 }
