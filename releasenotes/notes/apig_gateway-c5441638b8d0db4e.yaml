@@ -1,4 +1,4 @@
 ---
 features:
   |
-  **[APIGW]** Add new resource ``resource/opentelekomcloud_apigw_gateway`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  **[APIGW]** Add new resource ``resource/opentelekomcloud_apigw_gateway`` (`#2407 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2407>`_)
