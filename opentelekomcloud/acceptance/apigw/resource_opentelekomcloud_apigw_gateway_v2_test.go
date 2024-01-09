@@ -14,10 +14,11 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceName = "opentelekomcloud_apigw_gateway_v2.gateway"
+
 func TestAccAPIGWv2Gateway_basic(t *testing.T) {
 	var gatewayConfig gateway.Gateway
 	name := fmt.Sprintf("gateway-%s", acctest.RandString(10))
-	resourceName := "opentelekomcloud_apigw_gateway_v2.gateway"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -102,6 +103,30 @@ func testAccCheckAPIGWv2GatewayExists(n string, configuration *gateway.Gateway) 
 		return nil
 	}
 }
+
+func TestAccAPIGWGatewayV2ImportBasic(t *testing.T) {
+	name := fmt.Sprintf("gateway-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAPIGWv2GatewayDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAPIGWv2GatewayBasic(name),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"ingress_bandwidth_size",
+				},
+			},
+		},
+	})
+}
+
 func testAccAPIGWv2GatewayBasic(gatewayName string) string {
 	return fmt.Sprintf(`
 %s

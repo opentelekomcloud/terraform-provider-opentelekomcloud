@@ -88,3 +88,25 @@ All above argument parameters can be exported as attribute parameters along with
 * `vpcep_service_name` - Name of a VPC endpoint service.
 
 * `private_egress_addresses` - List of private egress addresses.
+*
+## Import
+
+APIG Gateway can be imported using the `gateway_id`, e.g.
+
+```shell
+$ terraform import opentelekomcloud_apigw_gateway_v2.gateway c1881895-cdcb-4d23-96cb-032e6a3ee667
+```
+
+Note that the imported state may not be identical to your resource definition, due to `ingress_bandwidth_size` missing from the
+API response. It is generally recommended running `terraform plan` after importing a gateway.
+
+```
+resource "opentelekomcloud_apigw_gateway_v2" "gateway" {
+    ...
+
+  lifecycle {
+    ignore_changes = [
+      ingress_bandwidth_size
+    ]
+  }
+}

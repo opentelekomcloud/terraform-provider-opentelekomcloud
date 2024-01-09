@@ -48,7 +48,7 @@ func ResourceAPIGWv2() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.All(
-					validation.StringMatch(regexp.MustCompile("^([\u4e00-\u9fa5A-Za-z][\u4e00-\u9fa5A-Za-z-_0-9]*)$"),
+					validation.StringMatch(regexp.MustCompile("^([A-Za-z][A-Za-z-_0-9]*)$"),
 						"The name can only contain letters, digits, hyphens (-) and underscore (_), and must start "+
 							"with a letter."),
 					validation.StringLenBetween(3, 64),
