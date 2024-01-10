@@ -1,0 +1,7 @@
+---
+fixes:
+  |
+  **[DCAAS]** Fixed setting attributes in resource/opentelekomcloud_dc_virtual_interface_v2`` (`#2408 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2408>`_)
+other:
+  - |
+    **[DCAAS]** Refactoring of ``resource/opentelekomcloud_dc_virtual_interface_v2`` added `remote_ep_group` block (`#2408 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2408>`_)

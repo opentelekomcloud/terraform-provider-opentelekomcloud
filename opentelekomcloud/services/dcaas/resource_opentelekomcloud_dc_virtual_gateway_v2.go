@@ -110,7 +110,8 @@ func ResourceVirtualGatewayV2() *schema.Resource {
 		},
 	}
 }
-func resourceEgCreate(client *golangsdk.ServiceClient, d *schema.ResourceData) (*dceg.DCEndpointGroup, error) {
+
+func resourceLocalEgCreate(client *golangsdk.ServiceClient, d *schema.ResourceData) (*dceg.DCEndpointGroup, error) {
 	var createOpts = dceg.CreateOpts{}
 	projectId := d.Get("project_id").(string)
 	if projectId == "" {
@@ -131,14 +132,6 @@ func resourceEgCreate(client *golangsdk.ServiceClient, d *schema.ResourceData) (
 	return eg, err
 }
 
-func GetEndpoints(e []interface{}) []string {
-	endpoints := make([]string, 0)
-	for _, val := range e {
-		endpoints = append(endpoints, val.(string))
-	}
-	return endpoints
-}
-
 func resourceVirtualGatewayV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
@@ -148,7 +141,7 @@ func resourceVirtualGatewayV2Create(ctx context.Context, d *schema.ResourceData,
 		return fmterr.Errorf(errCreateClient, err)
 	}
 
-	eg, err := resourceEgCreate(client, d)
+	eg, err := resourceLocalEgCreate(client, d)
 	if err != nil {
 		return fmterr.Errorf("error creating DC endpoint group: %s", err)
 	}
@@ -162,6 +155,7 @@ func resourceVirtualGatewayV2Create(ctx context.Context, d *schema.ResourceData,
 		DeviceId:             d.Get("device_id").(string),
 		RedundantDeviceId:    d.Get("redundant_device_id").(string),
 		Type:                 "default",
+		ProjectId:            d.Get("project_id").(string),
 	}
 	vg, err := virtual_gateway.Create(client, opts)
 	if err != nil {
@@ -230,9 +224,9 @@ func resourceVirtualGatewayV2Update(ctx context.Context, d *schema.ResourceData,
 	}
 
 	if d.HasChange("local_ep_group") {
-		newEg, err := resourceEgCreate(client, d)
+		newEg, err := resourceLocalEgCreate(client, d)
 		if err != nil {
-			return fmterr.Errorf("error creating new DC endpoint group: %s", err)
+			return fmterr.Errorf("error creating new local DC endpoint group: %s", err)
 		}
 
 		vg, err := virtual_gateway.Get(client, d.Id())
@@ -250,7 +244,7 @@ func resourceVirtualGatewayV2Update(ctx context.Context, d *schema.ResourceData,
 
 		err = dceg.Delete(client, vg.LocalEPGroupID)
 		if err != nil {
-			return fmterr.Errorf("error deleting old DC endpoint group: %s", err)
+			return fmterr.Errorf("error deleting old local DC endpoint group: %s", err)
 		}
 	}
 
