@@ -16,9 +16,9 @@ data "opentelekomcloud_identity_project_v3" "project" {
 }
 
 resource "opentelekomcloud_dc_virtual_gateway_v2" "vgw_1" {
-  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  name              = "my_virtual_gateway"
-  description       = "acc test"
+  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  name        = "my_virtual_gateway"
+  description = "acc test"
   local_ep_group {
     name        = "tf_acc_eg_1"
     endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
