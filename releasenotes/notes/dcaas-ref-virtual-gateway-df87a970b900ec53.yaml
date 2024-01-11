@@ -1,0 +1,8 @@
+other:
+  - |
+    **[DCAAS]** Refactoring of ``resource/opentelekomcloud_dc_virtual_gateway_v2`` added `local_ep_group` block (`#2405 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2405>`_)
+deprecations:
+  - |
+    **[DCAAS]** ``resource/opentelekomcloud_dc_endpoint_group_v2`` is now deprecated in favor of updated
+    ``resource/opentelekomcloud_dc_virtual_gateway_v2``
+    (`#2405 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2405>`_)

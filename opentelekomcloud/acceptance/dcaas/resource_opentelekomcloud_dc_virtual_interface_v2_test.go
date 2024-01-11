@@ -49,9 +49,10 @@ func TestDirectConnectVirtualInterfaceV2Resource_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      vi,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            vi,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"service_type"},
 			},
 		},
 	})
@@ -119,22 +120,18 @@ func testAccVirtualInterfaceV2_basic(name, dcId string) string {
 
 %s
 
-resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group" {
-  name        = "tf_acc_eg_1"
-  type        = "cidr"
-  endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
-  description = "first"
-  project_id  = data.opentelekomcloud_identity_project_v3.project.id
-}
-
 resource "opentelekomcloud_dc_virtual_gateway_v2" "vgw_1" {
-  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  name              = "tf_acc_vgw_1"
-  description       = "acc test"
-  local_ep_group_id = opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group.id
+  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  name        = "tf_acc_vgw_1"
+  description = "acc test"
+  local_ep_group {
+    name        = "tf_acc_eg_1"
+    endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
+    description = "first"
+  }
 }
 
-resource "opentelekomcloud_dc_virtual_interface_v2" "int_1" {
+resource "opentelekomcloud_dc_virtual_interface_v2" "vi_1" {
   direct_connect_id  = "%s"
   virtual_gateway_id = opentelekomcloud_dc_virtual_gateway_v2.vgw_1.id
   service_type       = "vpc"
@@ -145,7 +142,12 @@ resource "opentelekomcloud_dc_virtual_interface_v2" "int_1" {
   vlan               = 100
   bandwidth          = 5
 
-  remote_ep_group_id   = opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group.id
+  remote_ep_group {
+    name        = "tf_acc_reg_1"
+    endpoints   = ["100.20.0.0/24"]
+    description = "first"
+    project_id  = data.opentelekomcloud_identity_project_v3.project.id
+  }
   local_gateway_v4_ip  = "180.1.1.1/24"
   remote_gateway_v4_ip = "180.1.1.2/24"
 }
@@ -158,22 +160,18 @@ func testAccVirtualInterfaceV2_update(name, dcId string) string {
 
 %s
 
-resource "opentelekomcloud_dc_endpoint_group_v2" "dc_endpoint_group" {
-  name        = "tf_acc_eg_1"
-  type        = "cidr"
-  endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
-  description = "first"
-  project_id  = data.opentelekomcloud_identity_project_v3.project.id
-}
-
 resource "opentelekomcloud_dc_virtual_gateway_v2" "vgw_1" {
-  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  name              = "tf_acc_vgw_1"
-  description       = "acc test updated"
-  local_ep_group_id = opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group.id
+  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  name        = "tf_acc_vgw_1"
+  description = "acc test updated"
+  local_ep_group {
+    name        = "tf_acc_eg_1"
+    endpoints   = ["10.2.0.0/24", "10.3.0.0/24"]
+    description = "first"
+  }
 }
 
-resource "opentelekomcloud_dc_virtual_interface_v2" "int_1" {
+resource "opentelekomcloud_dc_virtual_interface_v2" "vi_1" {
   direct_connect_id  = "%s"
   virtual_gateway_id = opentelekomcloud_dc_virtual_gateway_v2.vgw_1.id
   service_type       = "vpc"
@@ -184,7 +182,12 @@ resource "opentelekomcloud_dc_virtual_interface_v2" "int_1" {
   vlan               = 100
   bandwidth          = 10
 
-  remote_ep_group_id   = opentelekomcloud_dc_endpoint_group_v2.dc_endpoint_group.id
+  remote_ep_group {
+    name        = "tf_acc_reg_1"
+    endpoints   = ["100.20.0.0/24", "100.30.0.0/24"]
+    description = "first"
+    project_id  = data.opentelekomcloud_identity_project_v3.project.id
+  }
   local_gateway_v4_ip  = "180.1.1.1/24"
   remote_gateway_v4_ip = "180.1.1.2/24"
 }

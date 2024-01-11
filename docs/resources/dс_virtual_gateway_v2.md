@@ -36,6 +36,7 @@ The following arguments are supported:
 * `description` (String, Optional) - Provides supplementary information about the virtual gateway.
 * `asn` (Int, Optional, ForceNew) - Specifies the BGP ASN of the virtual gateway.
 * `device_id` (String, Optional) - Specifies the ID of the physical device used by the virtual gateway.
+* `project_id` (String, Optional) - Specifies the project ID.
 * `redundant_device_id` (String, Optional) - Specifies the ID of the redundant physical device used by the virtual gateway.
 
 ## Attributes Reference
@@ -44,7 +45,6 @@ The following attributes are exported:
 
 * `id` -  ID of the virtual gateway.
 * `status` -  Virtual gateway status.
-* `project_id` -  Project id.
 * `local_ep_group_id` - ID of the local endpoint group that records CIDR blocks of the VPC subnets.
 
 ## Import
