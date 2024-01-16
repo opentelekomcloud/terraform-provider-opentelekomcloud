@@ -1,0 +1,8 @@
+---
+other:
+  - |
+    **[FW]** Update doc and tests for ``resource/opentelekomcloud_fw_rule_v2`` (`#2413 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2413>`_)
+  - |
+    **[VPC]** Update doc and tests for ``resource/opentelekomcloud_networking_secgroup_rule_v2`` (`#2413 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2413>`_)
+  - |
+    **[VPC]** Update resource doc and tests for ``resource/opentelekomcloud_vpc_subnet_v1`` and ``data-source/opentelekomcloud_vpc_subnet_v1`` added ipv6 attributes (`#2413 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2413>`_)

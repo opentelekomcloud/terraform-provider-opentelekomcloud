@@ -7,10 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
-
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/groups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/rules"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -24,6 +23,9 @@ func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 	var secgroup2 groups.SecGroup
 	var secgroupRule1 rules.SecGroupRule
 	var secgroupRule2 rules.SecGroupRule
+	secgroup2Name := "opentelekomcloud_networking_secgroup_v2.secgroup_2"
+	secgroup2RuleName := "opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_2"
+	secgroup3RuleName := "opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_3"
 	t.Parallel()
 	qts := quotas.MultipleQuotas{
 		{Q: quotas.SecurityGroup, Count: 2},
@@ -39,12 +41,11 @@ func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 				Config: testAccNetworkingV2SecGroupRuleBasic,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SecGroupExists(resourceNwSecGroupName, &secgroup1),
-					TestAccCheckNetworkingV2SecGroupExists(
-						"opentelekomcloud_networking_secgroup_v2.secgroup_2", &secgroup2),
+					TestAccCheckNetworkingV2SecGroupExists(secgroup2Name, &secgroup2),
 					testAccCheckNetworkingV2SecGroupRuleExists(resourceNwSGRuleName, &secgroupRule1),
-					testAccCheckNetworkingV2SecGroupRuleExists(
-						"opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_2", &secgroupRule2),
+					testAccCheckNetworkingV2SecGroupRuleExists(secgroup2RuleName, &secgroupRule2),
 					resource.TestCheckResourceAttr(resourceNwSGRuleName, "description", "test secgroup rule"),
+					resource.TestCheckResourceAttr(secgroup3RuleName, "ethertype", "IPv6"),
 				),
 			},
 		},
@@ -283,6 +284,16 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_2" {
   ethertype         = "IPv4"
   port_range_max    = 80
   port_range_min    = 80
+  protocol          = "tcp"
+  remote_group_id   = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_2.id
+}
+
+resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_3" {
+  direction         = "ingress"
+  ethertype         = "IPv6"
+  port_range_max    = 8080
+  port_range_min    = 8080
   protocol          = "tcp"
   remote_group_id   = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_2.id
