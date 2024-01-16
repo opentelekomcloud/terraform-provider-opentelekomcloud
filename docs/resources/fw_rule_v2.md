@@ -22,6 +22,20 @@ resource "opentelekomcloud_fw_rule_v2" "rule_1" {
 }
 ```
 
+## Example Ipv6 Usage
+```hcl
+resource "opentelekomcloud_fw_rule_v2" "rule_1" {
+  name        = "rule_1"
+  description = "Ipv6 deny"
+  protocol    = "tcp"
+  ip_version  = 6
+  enabled     = true
+  action      = "deny"
+
+  destination_ip_address = "2001:db8::"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:

@@ -47,6 +47,26 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_with_tags" {
 }
 ```
 
+### Enable Ipv6
+
+```hcl
+resource "opentelekomcloud_vpc_subnet_v1" "subnet_v6" {
+  name              = "subnet_test_ipv6"
+  description       = "some description"
+  cidr              = "192.168.0.0/16"
+  gateway_ip        = "192.168.0.1"
+  vpc_id            = opentelekomcloud_vpc_v1.vpc_1.id
+  availability_zone = "eu-de-02"
+  ntp_addresses     = "10.100.0.33,10.100.0.34"
+  ipv6_enable       = true
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -67,6 +87,9 @@ The following arguments are supported:
 
 * `dhcp_enable` - (Optional) Specifies whether the DHCP function is enabled for the subnet. The value can
   be `true` or `false`. If this parameter is left blank, it is set to `true` by default.
+
+* `ipv6_enable` - (Optional) Specifies whether IPv6 is enabled. If IPv6 is enabled, you can use IPv6 CIDR blocks. The value can
+  be `true` or `false`. If this parameter is left blank, it is set to `false` by default.
 
 * `primary_dns` - (Optional) Specifies the IP address of DNS server 1 on the subnet. The value must be a
   valid IP address. Default is `100.125.4.25`, OpenTelekomCloud internal DNS server.
@@ -100,6 +123,10 @@ All the argument attributes are also exported as result attributes:
 * `subnet_id` - Specifies the OpenStack subnet ID.
 
 * `network_id` - Specifies the OpenStack network ID.
+
+* `cidr_v6` - Specifies the IPv6 subnet CIDR block. If the subnet is an IPv4 subnet, this parameter is not returned.
+
+* `gateway_ip_v6` - Specifies the IPv6 subnet gateway. If the subnet is an IPv4 subnet, this parameter is not returned.
 
 ## Import
 
