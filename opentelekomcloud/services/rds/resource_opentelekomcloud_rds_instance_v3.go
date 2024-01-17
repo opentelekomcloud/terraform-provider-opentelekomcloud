@@ -205,9 +205,6 @@ func ResourceRdsInstanceV3() *schema.Resource {
 							Type:         schema.TypeInt,
 							Optional:     true,
 							RequiredWith: []string{"volume.0.limit_size"},
-							ValidateFunc: validation.StringInSlice([]string{
-								"10", "15", "20",
-							}, false),
 						},
 					},
 				},
