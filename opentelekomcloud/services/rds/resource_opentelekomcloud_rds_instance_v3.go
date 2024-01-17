@@ -599,7 +599,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 				Pending:      []string{"PENDING"},
 				Target:       []string{"SUCCESS"},
 				Refresh:      waitForSSLEnable(d, client),
-				Timeout:      120 * time.Second,
+				Timeout:      d.Timeout(schema.TimeoutCreate),
 				PollInterval: 5 * time.Second,
 			}
 
