@@ -205,6 +205,9 @@ func ResourceRdsInstanceV3() *schema.Resource {
 							Type:         schema.TypeInt,
 							Optional:     true,
 							RequiredWith: []string{"volume.0.limit_size"},
+							ValidateFunc: validation.StringInSlice([]string{
+								"10", "15", "20",
+							}, false),
 						},
 					},
 				},
@@ -595,6 +598,18 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			if err != nil {
 				return fmterr.Errorf("error updating instance SSL configuration: %s ", err)
 			}
+			stateConf := &resource.StateChangeConf{
+				Pending:      []string{"PENDING"},
+				Target:       []string{"SUCCESS"},
+				Refresh:      waitForSSLEnable(d, client),
+				Timeout:      120 * time.Second,
+				PollInterval: 5 * time.Second,
+			}
+
+			_, err = stateConf.WaitForStateContext(ctx)
+			if err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 
@@ -670,6 +685,9 @@ func restartInstance(d *schema.ResourceData, client *golangsdk.ServiceClient) er
 	timeout := d.Timeout(schema.TimeoutCreate)
 	if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), *job); err != nil {
 		return fmt.Errorf("error waiting for instance to reboot: %w", err)
+	}
+	if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
+		return fmt.Errorf("error waiting for instance to become available: %w", err)
 	}
 	return nil
 }
@@ -1482,6 +1500,21 @@ func waitForParameterApply(d *schema.ResourceData, client *golangsdk.ServiceClie
 		}
 
 		return r, "SUCCESS", nil
+	}
+}
+
+func waitForSSLEnable(d *schema.ResourceData, client *golangsdk.ServiceClient) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		rdsInstance, err := GetRdsInstance(client, d.Id())
+		if err != nil {
+			return nil, "", fmt.Errorf("error fetching RDS instance SSL status: %s", err)
+		}
+
+		if *rdsInstance.EnableSSL {
+			return rdsInstance, "SUCCESS", nil
+		}
+
+		return nil, "PENDING", nil
 	}
 }
 

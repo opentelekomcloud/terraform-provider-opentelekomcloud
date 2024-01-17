@@ -413,6 +413,17 @@ The `volume` block supports:
   and is case-sensitive: COMMON: indicates the SATA type.
   ULTRAHIGH: indicates the SSD type.  Changing this parameter will create a new resource.
 
+~> **Warning** `limit_size` and `trigger_threshold` are supported only by MySQL with `ULTRAHIGH` disk type.
+
+* `limit_size` - (Optional, Int) Specifies the upper limit of automatic expansion of storage, in GB.
+
+* `trigger_threshold` - (Optional, Int) Specifies the threshold to trigger automatic expansion.
+  If the available storage drops to this threshold or `10` GB, the automatic expansion is triggered.
+  The valid values are as follows:
+    + **10**
+    + **15**
+    + **20**
+
 The `backup_strategy` block supports:
 
 * `keep_days` - (Optional) Specifies the retention days for specific backup files. The value
