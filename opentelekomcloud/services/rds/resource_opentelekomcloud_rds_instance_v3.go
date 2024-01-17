@@ -184,7 +184,6 @@ func ResourceRdsInstanceV3() *schema.Resource {
 						"size": {
 							Type:     schema.TypeInt,
 							Required: true,
-							ForceNew: false,
 						},
 						"type": {
 							Type:     schema.TypeString,
@@ -196,6 +195,16 @@ func ResourceRdsInstanceV3() *schema.Resource {
 							Computed: true,
 							Optional: true,
 							ForceNew: true,
+						},
+						"limit_size": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							RequiredWith: []string{"volume.0.trigger_threshold"},
+						},
+						"trigger_threshold": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							RequiredWith: []string{"volume.0.limit_size"},
 						},
 					},
 				},
@@ -586,6 +595,24 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			if err != nil {
 				return fmterr.Errorf("error updating instance SSL configuration: %s ", err)
 			}
+			stateConf := &resource.StateChangeConf{
+				Pending:      []string{"PENDING"},
+				Target:       []string{"SUCCESS"},
+				Refresh:      waitForSSLEnable(d, client),
+				Timeout:      d.Timeout(schema.TimeoutCreate),
+				PollInterval: 5 * time.Second,
+			}
+
+			_, err = stateConf.WaitForStateContext(ctx)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
+
+	if size := d.Get("volume.0.limit_size").(int); size > 0 {
+		if err = enableVolumeAutoExpand(ctx, d, client, d.Id(), size); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
@@ -655,6 +682,9 @@ func restartInstance(d *schema.ResourceData, client *golangsdk.ServiceClient) er
 	timeout := d.Timeout(schema.TimeoutCreate)
 	if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), *job); err != nil {
 		return fmt.Errorf("error waiting for instance to reboot: %w", err)
+	}
+	if err := instances.WaitForStateAvailable(client, int(timeout.Seconds()), d.Id()); err != nil {
+		return fmt.Errorf("error waiting for instance to become available: %w", err)
 	}
 	return nil
 }
@@ -1084,6 +1114,10 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
+	if err = updateVolumeAutoExpand(ctx, d, client, d.Id()); err != nil {
+		return diag.FromErr(err)
+	}
+
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
 	return resourceRdsInstanceV3Read(clientCtx, d, meta)
 }
@@ -1198,16 +1232,6 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf("error setting backup strategy: %s", err)
 	}
 
-	var volumeList []map[string]interface{}
-	volume := make(map[string]interface{})
-	volume["size"] = rdsInstance.Volume.Size
-	volume["type"] = rdsInstance.Volume.Type
-	volume["disk_encryption_id"] = rdsInstance.DiskEncryptionId
-	volumeList = append(volumeList, volume)
-	if err = d.Set("volume", volumeList); err != nil {
-		return diag.FromErr(err)
-	}
-
 	dbRaw := d.Get("db").([]interface{})
 	dbInfo := make(map[string]interface{})
 	if len(dbRaw) != 0 {
@@ -1219,6 +1243,28 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 	dbInfo["user_name"] = rdsInstance.DbUserName
 	dbList := []interface{}{dbInfo}
 	if err = d.Set("db", dbList); err != nil {
+		return diag.FromErr(err)
+	}
+
+	var volumeList []map[string]interface{}
+	volume := make(map[string]interface{})
+	volume["size"] = rdsInstance.Volume.Size
+	volume["type"] = rdsInstance.Volume.Type
+	volume["disk_encryption_id"] = rdsInstance.DiskEncryptionId
+
+	if dbInfo["type"] == "MySQL" {
+		resp, err := instances.GetAutoScaling(client, d.Id())
+		if err != nil {
+			log.Printf("[ERROR] error query automatic expansion configuration of the instance storage: %s", err)
+		}
+		if resp.SwitchOption {
+			volume["limit_size"] = resp.LimitSize
+			volume["trigger_threshold"] = resp.TriggerThreshold
+		}
+	}
+
+	volumeList = append(volumeList, volume)
+	if err = d.Set("volume", volumeList); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -1372,6 +1418,49 @@ func validateRDSv3Flavor(argName string) schema.CustomizeDiffFunc {
 	}
 }
 
+func updateVolumeAutoExpand(ctx context.Context, d *schema.ResourceData, client *golangsdk.ServiceClient,
+	instanceID string) error {
+	if !d.HasChanges("volume.0.limit_size", "volume.0.trigger_threshold") {
+		return nil
+	}
+
+	limitSize := d.Get("volume.0.limit_size").(int)
+	if limitSize > 0 {
+		if err := enableVolumeAutoExpand(ctx, d, client, instanceID, limitSize); err != nil {
+			return err
+		}
+	} else {
+		if err := disableVolumeAutoExpand(ctx, d.Timeout(schema.TimeoutUpdate), client, instanceID); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func disableVolumeAutoExpand(ctx context.Context, timeout time.Duration, client *golangsdk.ServiceClient,
+	instanceID string) error {
+	retryFunc := func() (interface{}, bool, error) {
+		err := instances.ManageAutoScaling(client, instanceID, instances.ScalingOpts{
+			SwitchOption: false,
+		})
+		retry, err := handleMultiOperationsError(err)
+		return nil, retry, err
+	}
+	_, err := common.RetryContextWithWaitForState(&common.RetryContextWithWaitForStateParam{
+		Ctx:          ctx,
+		RetryFunc:    retryFunc,
+		WaitFunc:     rdsInstanceStateRefreshFunc(client, instanceID),
+		WaitTarget:   []string{"ACTIVE"},
+		Timeout:      timeout,
+		DelayTimeout: 10 * time.Second,
+		PollInterval: 10 * time.Second,
+	})
+	if err != nil {
+		return fmt.Errorf("an error occurred while disable automatic expansion of instance storage: %v", err)
+	}
+	return nil
+}
+
 func updateInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceClient) (bool, error) {
 	opts := configurations.UpdateInstanceConfigurationOpts{
 		Values:     d.Get("parameters").(map[string]interface{}),
@@ -1411,4 +1500,46 @@ func waitForParameterApply(d *schema.ResourceData, client *golangsdk.ServiceClie
 
 		return r, "SUCCESS", nil
 	}
+}
+
+func waitForSSLEnable(d *schema.ResourceData, client *golangsdk.ServiceClient) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		rdsInstance, err := GetRdsInstance(client, d.Id())
+		if err != nil {
+			return nil, "", fmt.Errorf("error fetching RDS instance SSL status: %s", err)
+		}
+
+		if *rdsInstance.EnableSSL {
+			return rdsInstance, "SUCCESS", nil
+		}
+
+		return nil, "PENDING", nil
+	}
+}
+
+func enableVolumeAutoExpand(ctx context.Context, d *schema.ResourceData, client *golangsdk.ServiceClient,
+	instanceID string, limitSize int) error {
+	opts := instances.ScalingOpts{
+		LimitSize:        pointerto.Int(limitSize),
+		TriggerThreshold: pointerto.Int(d.Get("volume.0.trigger_threshold").(int)),
+		SwitchOption:     true,
+	}
+	retryFunc := func() (interface{}, bool, error) {
+		err := instances.ManageAutoScaling(client, d.Id(), opts)
+		retry, err := handleMultiOperationsError(err)
+		return nil, retry, err
+	}
+	_, err := common.RetryContextWithWaitForState(&common.RetryContextWithWaitForStateParam{
+		Ctx:          ctx,
+		RetryFunc:    retryFunc,
+		WaitFunc:     rdsInstanceStateRefreshFunc(client, instanceID),
+		WaitTarget:   []string{"ACTIVE"},
+		Timeout:      d.Timeout(schema.TimeoutUpdate),
+		DelayTimeout: 10 * time.Second,
+		PollInterval: 10 * time.Second,
+	})
+	if err != nil {
+		return fmt.Errorf("an error occurred while enable automatic expansion of instance storage: %v", err)
+	}
+	return nil
 }

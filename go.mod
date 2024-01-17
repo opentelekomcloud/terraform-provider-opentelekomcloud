@@ -13,6 +13,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.1
 	github.com/jen20/awspolicyequivalence v1.1.0
 	github.com/jinzhu/copier v0.3.5
+	github.com/jmespath/go-jmespath v0.4.0
 	github.com/keybase/go-crypto v0.0.0-20200123153347-de78d2cb44f4
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240116111952-46714d6a306e
@@ -44,7 +45,6 @@ require (
 	github.com/hashicorp/terraform-registry-address v0.0.0-20220623143253-7d51757b572c // indirect
 	github.com/hashicorp/terraform-svchost v0.0.0-20200729002733-f050f53b9734 // indirect
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
-	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect

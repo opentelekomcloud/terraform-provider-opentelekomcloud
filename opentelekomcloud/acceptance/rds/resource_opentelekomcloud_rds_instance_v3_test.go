@@ -338,6 +338,35 @@ func TestAccRdsInstanceV3TimeZoneAndSSL(t *testing.T) {
 	})
 }
 
+func TestAccRdsInstanceV3AutoScaling(t *testing.T) {
+	postfix := acctest.RandString(3)
+	var rdsInstance instances.InstanceResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsInstanceV3ConfigurationTimeZone(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.mysql.m1.large"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8635"),
+				),
+			},
+			{
+				Config: testAccRdsInstanceV3AutoScaling(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.mysql.m1.large"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.limit_size", "500"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.trigger_threshold", "10"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccRdsInstanceV3RestoreToPITR(t *testing.T) {
 	postfix := acctest.RandString(3)
 	var rdsInstance instances.InstanceResponse
@@ -439,7 +468,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
   flavor = "rds.pg.c2.large"
@@ -478,7 +507,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 100
   }
   flavor = "rds.pg.c2.large"
@@ -514,7 +543,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
   flavor = "rds.pg.c2.large"
@@ -576,7 +605,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 100
   }
   flavor = "rds.pg.c2.large"
@@ -601,7 +630,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 100
   }
   flavor = "rds.pg.c2.large"
@@ -654,7 +683,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
   flavor         = "rds.pg.c2.large"
@@ -704,7 +733,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
   flavor         = "rds.pg.c2.large"
@@ -731,7 +760,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
   flavor = "rds.pg.c2.large"
@@ -771,7 +800,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   flavor            = "rds.pg.c2.large"
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
 
@@ -799,7 +828,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
   flavor = "bla.bla.rds"
@@ -825,7 +854,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
   flavor = "rds.pg.c2.large"
@@ -864,7 +893,7 @@ resource "opentelekomcloud_rds_instance_v3" "from_backup" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
   flavor = "rds.pg.c2.large"
@@ -899,7 +928,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
   flavor     = "rds.mysql.m1.large"
@@ -951,7 +980,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
   flavor = "rds.pg.c2.large"
@@ -986,7 +1015,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
   flavor = "rds.pg.c2.large"
@@ -1021,7 +1050,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
   flavor = "rds.pg.c2.large"
@@ -1040,7 +1069,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance_2" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
 
@@ -1072,7 +1101,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
   flavor = "rds.pg.c2.large"
@@ -1098,7 +1127,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance_2" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "ULTRAHIGH"
     size = 40
   }
 
@@ -1108,6 +1137,57 @@ resource "opentelekomcloud_rds_instance_v3" "instance_2" {
 resource "opentelekomcloud_rds_backup_v3" "test" {
   instance_id = opentelekomcloud_rds_instance_v3.instance_2.id
   name        = "tf_rds_backup_%[3]s"
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccRdsInstanceV3AutoScaling(postfix string) string {
+	return fmt.Sprintf(`
+%s
+%s
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s"]
+  db {
+    password = "MySql!112822"
+    type     = "MySQL"
+    version  = "8.0"
+    port     = "8635"
+  }
+  param_group_id    = opentelekomcloud_rds_parametergroup_v3.pg_1.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  volume {
+    type              = "ULTRAHIGH"
+    size              = 100
+    limit_size        = 500
+    trigger_threshold = 10
+  }
+  flavor     = "rds.mysql.m1.large"
+  ssl_enable = true
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = 1
+  }
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+
+resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
+  name        = "pg_tmz"
+  description = "time zone template"
+
+  values = {
+    time_zone = "Africa/Casablanca"
+  }
+
+  datastore {
+    type    = "mysql"
+    version = "8.0"
+  }
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
