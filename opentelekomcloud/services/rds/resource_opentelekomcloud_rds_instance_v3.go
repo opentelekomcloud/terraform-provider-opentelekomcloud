@@ -1232,26 +1232,6 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf("error setting backup strategy: %s", err)
 	}
 
-	var volumeList []map[string]interface{}
-	volume := make(map[string]interface{})
-	volume["size"] = rdsInstance.Volume.Size
-	volume["type"] = rdsInstance.Volume.Type
-	volume["disk_encryption_id"] = rdsInstance.DiskEncryptionId
-
-	resp, err := instances.GetAutoScaling(client, d.Id())
-	if err != nil {
-		log.Printf("[ERROR] error query automatic expansion configuration of the instance storage: %s", err)
-	}
-	if resp.SwitchOption {
-		volume["limit_size"] = resp.LimitSize
-		volume["trigger_threshold"] = resp.TriggerThreshold
-	}
-
-	volumeList = append(volumeList, volume)
-	if err = d.Set("volume", volumeList); err != nil {
-		return diag.FromErr(err)
-	}
-
 	dbRaw := d.Get("db").([]interface{})
 	dbInfo := make(map[string]interface{})
 	if len(dbRaw) != 0 {
@@ -1263,6 +1243,28 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 	dbInfo["user_name"] = rdsInstance.DbUserName
 	dbList := []interface{}{dbInfo}
 	if err = d.Set("db", dbList); err != nil {
+		return diag.FromErr(err)
+	}
+
+	var volumeList []map[string]interface{}
+	volume := make(map[string]interface{})
+	volume["size"] = rdsInstance.Volume.Size
+	volume["type"] = rdsInstance.Volume.Type
+	volume["disk_encryption_id"] = rdsInstance.DiskEncryptionId
+
+	if dbInfo["type"] == "MySQL" {
+		resp, err := instances.GetAutoScaling(client, d.Id())
+		if err != nil {
+			log.Printf("[ERROR] error query automatic expansion configuration of the instance storage: %s", err)
+		}
+		if resp.SwitchOption {
+			volume["limit_size"] = resp.LimitSize
+			volume["trigger_threshold"] = resp.TriggerThreshold
+		}
+	}
+
+	volumeList = append(volumeList, volume)
+	if err = d.Set("volume", volumeList); err != nil {
 		return diag.FromErr(err)
 	}
 
