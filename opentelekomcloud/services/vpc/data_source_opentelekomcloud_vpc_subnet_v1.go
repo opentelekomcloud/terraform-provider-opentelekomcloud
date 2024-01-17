@@ -72,6 +72,18 @@ func DataSourceVpcSubnetV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"cidr_ipv6": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"ipv6_enable": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"gateway_ipv6": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"subnet_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -134,6 +146,9 @@ func dataSourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("vpc_id", subnet.VpcID),
 		d.Set("subnet_id", subnet.SubnetID),
 		d.Set("network_id", subnet.NetworkID),
+		d.Set("ipv6_enable", subnet.EnableIpv6),
+		d.Set("cidr_ipv6", subnet.CidrV6),
+		d.Set("gateway_ipv6", subnet.GatewayIpV6),
 		d.Set("region", config.GetRegion(d)),
 	)
 	if mErr.ErrorOrNil() != nil {

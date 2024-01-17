@@ -75,6 +75,11 @@ func ResourceVpcSubnetV1() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"ipv6_enable": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
 			"primary_dns": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -112,6 +117,14 @@ func ResourceVpcSubnetV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"cidr_ipv6": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"gateway_ipv6": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"network_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -138,6 +151,7 @@ func resourceVpcSubnetV1Create(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	enableDHCP := d.Get("dhcp_enable").(bool)
+	enableIpv6 := d.Get("ipv6_enable").(bool)
 	createOpts := subnets.CreateOpts{
 		Name:             d.Get("name").(string),
 		Description:      d.Get("description").(string),
@@ -149,6 +163,7 @@ func resourceVpcSubnetV1Create(ctx context.Context, d *schema.ResourceData, meta
 		PrimaryDNS:       primaryDNS,
 		SecondaryDNS:     secondaryDNS,
 		DNSList:          dnsList,
+		EnableIpv6:       &enableIpv6,
 	}
 
 	if common.HasFilledOpt(d, "ntp_addresses") {
@@ -211,6 +226,9 @@ func resourceVpcSubnetV1Read(ctx context.Context, d *schema.ResourceData, meta i
 		d.Set("dns_list", subnet.DNSList),
 		d.Set("gateway_ip", subnet.GatewayIP),
 		d.Set("dhcp_enable", subnet.EnableDHCP),
+		d.Set("ipv6_enable", subnet.EnableIpv6),
+		d.Set("cidr_ipv6", subnet.CidrV6),
+		d.Set("gateway_ipv6", subnet.GatewayIpV6),
 		d.Set("primary_dns", subnet.PrimaryDNS),
 		d.Set("secondary_dns", subnet.SecondaryDNS),
 		d.Set("availability_zone", subnet.AvailabilityZone),

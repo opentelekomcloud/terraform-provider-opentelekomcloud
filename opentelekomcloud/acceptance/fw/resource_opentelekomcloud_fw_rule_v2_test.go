@@ -125,6 +125,14 @@ func TestAccFWRuleV2_TCPtoICMP(t *testing.T) {
 					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "source_port", ""),
 				),
 			},
+			{
+				Config: testAccFWRuleV2_IPv6,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_2", "protocol", "tcp"),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_2", "destination_ip_address", "2001:db8::"),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_2", "source_port", ""),
+				),
+			},
 		},
 	})
 }
@@ -266,5 +274,18 @@ resource "opentelekomcloud_fw_rule_v2" "rule_1" {
   ip_version  = 4
   enabled     = true
   action      = "allow"
+}
+`
+
+const testAccFWRuleV2_IPv6 = `
+resource "opentelekomcloud_fw_rule_v2" "rule_2" {
+  name        = "rule_1"
+  description = "Ipv6 deny"
+  protocol    = "tcp"
+  ip_version  = 6
+  enabled     = true
+  action      = "deny"
+
+  destination_ip_address = "2001:db8::"
 }
 `
