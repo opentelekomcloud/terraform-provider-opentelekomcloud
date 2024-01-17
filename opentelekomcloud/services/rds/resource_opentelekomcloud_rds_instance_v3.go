@@ -683,7 +683,7 @@ func restartInstance(d *schema.ResourceData, client *golangsdk.ServiceClient) er
 	if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), *job); err != nil {
 		return fmt.Errorf("error waiting for instance to reboot: %w", err)
 	}
-	if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
+	if err := instances.WaitForStateAvailable(client, int(timeout.Seconds()), d.Id()); err != nil {
 		return fmt.Errorf("error waiting for instance to become available: %w", err)
 	}
 	return nil
