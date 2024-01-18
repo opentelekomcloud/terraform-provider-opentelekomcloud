@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[WAF]** Fix ``expires`` type for unmarshalling big integer values``resource/opentelekomcloud_waf_certificate_v1`` (`#2417 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2417>`_)

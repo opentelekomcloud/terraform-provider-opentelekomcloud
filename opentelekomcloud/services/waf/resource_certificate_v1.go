@@ -108,8 +108,7 @@ func resourceWafCertificateV1Read(_ context.Context, d *schema.ResourceData, met
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Waf Certificate: %w", err)
 	}
 
-	expires := time.Unix(int64(n.ExpireTime/1000), 0).UTC().Format("2006-01-02 15:04:05 MST")
-
+	expires := time.Unix(n.ExpireTime/1000, 0).UTC().Format("2006-01-02 15:04:05 MST")
 	mErr := multierror.Append(
 		d.Set("name", n.Name),
 		d.Set("expires", expires),
