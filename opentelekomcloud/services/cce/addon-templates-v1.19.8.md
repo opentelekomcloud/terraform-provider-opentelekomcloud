@@ -183,6 +183,8 @@ See the [OTC Cloud Container Engine Addon Documentation](https://docs.otc.t-syst
 
 ##### `custom`
 
+-> If you are using OBS to host the nvidia driver set `is_driver_from_nvidia` to `false`. If you are downloading it from a public URL you have to set `is_driver_from_nvidia` to `true`.
+
 ```json
 {
   "is_driver_from_nvidia": true,
