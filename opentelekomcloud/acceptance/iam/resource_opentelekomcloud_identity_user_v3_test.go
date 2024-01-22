@@ -109,6 +109,45 @@ func TestAccCheckIAMV3SendEmailValidation(t *testing.T) {
 	})
 }
 
+func TestAccIdentityV3User_protection(t *testing.T) {
+	var user users.User
+	userName := acctest.RandomWithPrefix("tf-user")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityV3UserDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIdentityV3UserProtectionConfig(userName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3UserExists(resourceName, &user),
+					resource.TestCheckResourceAttrPtr(resourceName, "name", &user.Name),
+					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "email", "test@acme.org"),
+					resource.TestCheckResourceAttr(resourceName, "login_protection.0.enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "login_protection.0.verification_method", "email"),
+					resource.TestCheckResourceAttrSet(resourceName, "domain_id"),
+				),
+			},
+			{
+				Config: testAccIdentityV3UserProtectionConfigUpdate(userName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3UserExists(resourceName, &user),
+					resource.TestCheckResourceAttrPtr(resourceName, "name", &user.Name),
+					resource.TestCheckResourceAttr(resourceName, "enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "email", "test2@acme.org"),
+					resource.TestCheckResourceAttr(resourceName, "login_protection.0.enabled", "false"),
+					resource.TestCheckResourceAttrSet(resourceName, "domain_id"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckIdentityV3UserDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.IdentityV3Client(env.OS_REGION_NAME)
@@ -214,6 +253,39 @@ resource "opentelekomcloud_identity_user_v3" "user_1" {
   enabled            = false
   password           = "password123@!"
   send_welcome_email = true
+}
+  `, userName)
+}
+
+func testAccIdentityV3UserProtectionConfig(userName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  name               = "%s"
+  password           = "password123@!"
+  enabled            = true
+  email              = "test@acme.org"
+  send_welcome_email = true
+
+  login_protection {
+    enabled             = true
+    verification_method = "email"
+  }
+}
+  `, userName)
+}
+
+func testAccIdentityV3UserProtectionConfigUpdate(userName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  name     = "%s"
+  enabled  = false
+  password = "password123@!"
+  email    = "tEst2@acme.org"
+
+  login_protection {
+    enabled             = false
+    verification_method = "email"
+  }
 }
   `, userName)
 }
