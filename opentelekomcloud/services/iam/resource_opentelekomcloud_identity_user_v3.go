@@ -174,11 +174,10 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	protectionOpts := security.LoginProtectionUpdateOpts{}
 	if pConfig, ok := d.GetOk("login_protection"); ok {
 		configMap := pConfig.([]interface{})
 		c := configMap[0].(map[string]interface{})
-		protectionOpts = security.LoginProtectionUpdateOpts{
+		protectionOpts := security.LoginProtectionUpdateOpts{
 			Enabled:            pointerto.Bool(c["enabled"].(bool)),
 			VerificationMethod: c["verification_method"].(string),
 		}
@@ -304,10 +303,9 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if d.HasChange("login_protection") {
-		protectionOpts := security.LoginProtectionUpdateOpts{}
 		configMap := d.Get("login_protection").([]interface{})
 		c := configMap[0].(map[string]interface{})
-		protectionOpts = security.LoginProtectionUpdateOpts{
+		protectionOpts := security.LoginProtectionUpdateOpts{
 			Enabled:            pointerto.Bool(c["enabled"].(bool)),
 			VerificationMethod: c["verification_method"].(string),
 		}
