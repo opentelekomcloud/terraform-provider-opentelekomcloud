@@ -2,3 +2,6 @@
 enhancements:
   - |
     **[DCS]** `private_ip` feature implemented for ``resource/opentelekomcloud_dcs_instance_v1`` (`#2421 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2421>`_)
+fixes:
+  - |
+    **[DCS]** Remove invalid test and check for ``resource/opentelekomcloud_dcs_instance_v1`` (`#2421 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2421>`_)
