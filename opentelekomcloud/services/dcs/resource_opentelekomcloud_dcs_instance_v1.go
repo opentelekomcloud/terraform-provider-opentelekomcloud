@@ -755,13 +755,6 @@ func validateEngine(_ context.Context, d *schema.ResourceDiff, _ interface{}) er
 		return fmt.Errorf("DCS Redis 3.0 instance does not support whitelisting")
 	}
 
-	resourceSpecCode, ok := d.GetOk("resource_spec_code")
-	if ok {
-		if resourceSpecCode.(string) == "dcs.cluster" && engineVersion == "6.0" {
-			return fmt.Errorf("DCS Redis 6.0 instance does not support cluster mode")
-		}
-	}
-
 	return nil
 }
 
