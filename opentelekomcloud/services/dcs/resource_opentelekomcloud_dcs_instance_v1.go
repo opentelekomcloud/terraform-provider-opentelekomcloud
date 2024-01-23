@@ -95,6 +95,11 @@ func ResourceDcsInstanceV1() *schema.Resource {
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"private_ip": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -416,6 +421,11 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 		InstanceBackupPolicy: getInstanceBackupPolicy(d),
 		MaintainBegin:        d.Get("maintain_begin").(string),
 		MaintainEnd:          d.Get("maintain_end").(string),
+	}
+
+	if ip, ok := d.GetOk("private_ip"); ok {
+		createOpts.PrivateIps = []string{ip.(string)}
+		log.Printf("[DEBUG] private ip: %#v", createOpts.PrivateIps[0])
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -743,13 +753,6 @@ func validateEngine(_ context.Context, d *schema.ResourceDiff, _ interface{}) er
 
 	if _, ok := d.GetOk("whitelist"); ok && engineVersion == "3.0" {
 		return fmt.Errorf("DCS Redis 3.0 instance does not support whitelisting")
-	}
-
-	resourceSpecCode, ok := d.GetOk("resource_spec_code")
-	if ok {
-		if resourceSpecCode.(string) == "dcs.cluster" && engineVersion == "6.0" {
-			return fmt.Errorf("DCS Redis 6.0 instance does not support cluster mode")
-		}
 	}
 
 	return nil
