@@ -95,6 +95,11 @@ func ResourceDcsInstanceV1() *schema.Resource {
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"private_ip": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -416,6 +421,11 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 		InstanceBackupPolicy: getInstanceBackupPolicy(d),
 		MaintainBegin:        d.Get("maintain_begin").(string),
 		MaintainEnd:          d.Get("maintain_end").(string),
+	}
+
+	if ip, ok := d.GetOk("private_ip"); ok {
+		createOpts.PrivateIps = []string{ip.(string)}
+		log.Printf("[DEBUG] private ip: %#v", createOpts.PrivateIps[0])
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)

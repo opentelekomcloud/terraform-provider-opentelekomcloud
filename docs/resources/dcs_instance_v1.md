@@ -96,6 +96,8 @@ The following arguments are supported:
 * `description` - (Optional, String) Indicates the description of an instance. It is a character
   string containing not more than `1024` characters.
 
+* `private_ip` - (Optional, String) IP address that is manually specified for a DCS instance.
+
 * `engine` - (Required, ForceNew, String) Indicates a cache engine. Only `Redis` is supported. Changing this
   creates a new instance.
 
