@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3.0/security"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/users"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -95,7 +96,7 @@ func dataSourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, met
 		d.Set("password_expires_at", user.PasswordExpiresAt.Format(time.RFC3339)),
 	)
 
-	mfa, err := users.ShowUserMfaDevice(client, user.ID)
+	mfa, err := security.GetUserMfaDevice(client, user.ID)
 	switch err.(type) {
 	case golangsdk.ErrDefault403:
 		log.Printf("[DEBUG] Security administrator permissions needed to set MFA")

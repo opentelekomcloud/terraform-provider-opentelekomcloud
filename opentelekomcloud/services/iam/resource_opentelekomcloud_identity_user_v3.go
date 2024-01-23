@@ -2,6 +2,7 @@ package iam
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"regexp"
 	"strings"
@@ -11,6 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3.0/security"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3.0/users"
 	oldusers "github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/users"
 
@@ -86,6 +89,26 @@ func ResourceIdentityUserV3() *schema.Resource {
 				Optional:     true,
 				RequiredWith: []string{"email"},
 			},
+			"login_protection": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"verification_method": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"sms", "email", "vmfa",
+							}, false),
+						},
+						"enabled": {
+							Type:     schema.TypeBool,
+							Required: true,
+						},
+					},
+				},
+			},
 			"password_strength": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -135,7 +158,7 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	// Add password here so it wouldn't go in the above log entry
+	// Add password here, so it wouldn't go in the above log entry
 	createOpts.Password = d.Get("password").(string)
 
 	user, err := users.CreateUser(client, createOpts)
@@ -148,6 +171,19 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 	if d.Get("send_welcome_email").(bool) {
 		if err := oldusers.SendWelcomeEmail(client, d.Id()).ExtractErr(); err != nil {
 			return fmterr.Errorf("error sending a welcome email: %w", err)
+		}
+	}
+
+	if pConfig, ok := d.GetOk("login_protection"); ok {
+		configMap := pConfig.([]interface{})
+		c := configMap[0].(map[string]interface{})
+		protectionOpts := security.LoginProtectionUpdateOpts{
+			Enabled:            pointerto.Bool(c["enabled"].(bool)),
+			VerificationMethod: c["verification_method"].(string),
+		}
+		_, err = security.UpdateLoginProtectionConfiguration(client, user.ID, protectionOpts)
+		if err != nil {
+			return diag.Errorf("error updating protection configuration for IAM user: %s", err)
 		}
 	}
 
@@ -185,10 +221,35 @@ func resourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, met
 		d.Set("domain_id", user.DomainID),
 	)
 
+	userProtectionConfig, _ := getLoginProtection(client, d)
+	if userProtectionConfig != nil {
+		verMethod := userProtectionConfig.VerificationMethod
+		if verMethod == "none" {
+			verMethod = d.Get("login_protection.0.verification_method").(string)
+		}
+		protection := []map[string]interface{}{
+			{
+				"enabled":             userProtectionConfig.Enabled,
+				"verification_method": verMethod,
+			},
+		}
+		mErr = multierror.Append(mErr,
+			d.Set("login_protection", protection),
+		)
+	}
+
 	if err = mErr.ErrorOrNil(); err != nil {
 		return diag.Errorf("error setting IAM user fields: %s", err)
 	}
 	return nil
+}
+
+func getLoginProtection(client *golangsdk.ServiceClient, d *schema.ResourceData) (*security.LoginProtectionConfig, error) {
+	userProtectionConfig, err := security.GetLoginProtectionConfiguration(client, d.Id())
+	if err != nil {
+		return nil, fmt.Errorf("error obtaining user security config %s", err)
+	}
+	return userProtectionConfig, nil
 }
 
 func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -239,6 +300,19 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 	// Add password here so it wouldn't go in the above log entry
 	if d.HasChange("password") {
 		updateOpts.Password = d.Get("password").(string)
+	}
+
+	if d.HasChange("login_protection") {
+		configMap := d.Get("login_protection").([]interface{})
+		c := configMap[0].(map[string]interface{})
+		protectionOpts := security.LoginProtectionUpdateOpts{
+			Enabled:            pointerto.Bool(c["enabled"].(bool)),
+			VerificationMethod: c["verification_method"].(string),
+		}
+		_, err = security.UpdateLoginProtectionConfiguration(client, d.Id(), protectionOpts)
+		if err != nil {
+			return diag.Errorf("error updating login protection configuration for IAM user: %s", err)
+		}
 	}
 
 	_, err = users.ModifyUser(client, d.Id(), updateOpts)

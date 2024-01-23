@@ -21,40 +21,62 @@ resource "opentelekomcloud_identity_user_v3" "user_1" {
 }
 ```
 
+## Example with login protection
+
+```hcl
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  name               = "user_protected"
+  password           = "password123@!"
+  enabled            = true
+  email              = "test@acme.org"
+  send_welcome_email = true
+
+  login_protection {
+    enabled             = true
+    verification_method = "email"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
-* `name` - (Required) Specifies the name of the user. The user name consists of 5 to 32 characters. It can
+* `name` - (Required, String) Specifies the name of the user. The user name consists of 5 to 32 characters. It can
   contain only uppercase letters, lowercase letters, digits, spaces, and special characters (-_) and cannot start with a
   digit.
 
-* `description` - (Optional) Specifies the description of the user.
+* `description` - (Optional, String) Specifies the description of the user.
 
-* `email` - (Optional) Specifies the email address with a maximum of 255 characters.
+* `email` - (Optional, String) Specifies the email address with a maximum of 255 characters.
 
-* `phone` - (Optional) Specifies the mobile number with a maximum of 32 digits. This parameter must be used
+* `phone` - (Optional, String) Specifies the mobile number with a maximum of 32 digits. This parameter must be used
   together with `country_code`.
 
-* `country_code` - (Optional) Specifies the country code. This parameter must be used together with `phone`.
+* `country_code` - (Optional, String) Specifies the country code. This parameter must be used together with `phone`.
 
-* `password` - (Optional) Specifies the password for the user with 6 to 32 characters. It must contain at least
+* `password` - (Optional, String) Specifies the password for the user with 6 to 32 characters. It must contain at least
   two of the following character types: uppercase letters, lowercase letters, digits, and special characters.
 
-* `pwd_reset` - (Optional) Specifies whether the password should be reset. By default, the password is asked
+* `pwd_reset` - (Optional, Bool) Specifies whether the password should be reset. By default, the password is asked
   to reset at the first login.
 
-* `enabled` - (Optional) Specifies whether the user is enabled or disabled. Valid values are `true` and `false`.
+* `enabled` - (Optional, Bool) Specifies whether the user is enabled or disabled. Valid values are `true` and `false`.
 
-* `access_type` - (Optional) Specifies the access type of the user. Available values are:
+* `access_type` - (Optional, String) Specifies the access type of the user. Available values are:
   + **default**: support both programmatic and management console access.
   + **programmatic**: only support programmatic access.
   + **console**: only support management console access.
 
-* `send_welcome_email` - (Optional) Whether to send a `Welcome Email` or not.
+* `send_welcome_email` - (Optional, Bool) Whether to send a `Welcome Email` or not.
   Possible values are `true` and `false`.
 
 -> Welcome Email will be sent when email is set/changed and `send_welcome_email` is set to `true`.
+
+* `login_protection` - (Optional, List) Login protection configuration.
+  The `login_protection` block supports:
+  + `enabled` - (Required, Bool) Indicates whether login protection has been enabled for the user. The value can be `true` or `false`.
+  + `verification_method` - (Required, String) Login authentication method of the user. Options: `sms`, `email`, and `vmfa`.
 
 ## Attributes Reference
 

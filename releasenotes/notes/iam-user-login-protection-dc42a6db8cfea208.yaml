@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[IAM]** Add ``login_protection`` argument to ``resource/opentelekomcloud_identity_user_v3`` (`#2419 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2419>`_)
