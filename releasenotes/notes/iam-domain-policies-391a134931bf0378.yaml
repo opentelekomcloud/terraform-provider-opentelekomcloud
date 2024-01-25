@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    **New Resource:** ``opentelekomcloud_identity_password_policy_v3`` (`#2424 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2424>`_)
+  - |
+    **New Resource:** ``opentelekomcloud_identity_login_policy_v3`` (`#2424 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2424>`_)
+  - |
+    **New Resource:** ``opentelekomcloud_identity_protection_policy_v3`` (`#2424 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2424>`_)
