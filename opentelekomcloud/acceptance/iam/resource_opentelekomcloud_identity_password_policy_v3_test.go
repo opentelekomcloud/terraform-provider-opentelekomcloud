@@ -27,6 +27,11 @@ func TestAccIdentityV3Password_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3PasswordPolicyExists(resourcePasswordPolicyName),
 					resource.TestCheckResourceAttr(resourcePasswordPolicyName, "password_validity_period", "179"),
+					resource.TestCheckResourceAttr(resourcePasswordPolicyName, "maximum_consecutive_identical_chars", "0"),
+					resource.TestCheckResourceAttr(resourcePasswordPolicyName, "minimum_password_length", "6"),
+					resource.TestCheckResourceAttr(resourcePasswordPolicyName, "minimum_password_age", "0"),
+					resource.TestCheckResourceAttr(resourcePasswordPolicyName, "number_of_recent_passwords_disallowed", "0"),
+					resource.TestCheckResourceAttr(resourcePasswordPolicyName, "password_not_username_or_invert", "true"),
 				),
 			},
 			{
@@ -34,6 +39,11 @@ func TestAccIdentityV3Password_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3PasswordPolicyExists(resourcePasswordPolicyName),
 					resource.TestCheckResourceAttr(resourcePasswordPolicyName, "password_validity_period", "180"),
+					resource.TestCheckResourceAttr(resourcePasswordPolicyName, "maximum_consecutive_identical_chars", "0"),
+					resource.TestCheckResourceAttr(resourcePasswordPolicyName, "minimum_password_length", "6"),
+					resource.TestCheckResourceAttr(resourcePasswordPolicyName, "minimum_password_age", "0"),
+					resource.TestCheckResourceAttr(resourcePasswordPolicyName, "number_of_recent_passwords_disallowed", "0"),
+					resource.TestCheckResourceAttr(resourcePasswordPolicyName, "password_not_username_or_invert", "true"),
 				),
 			},
 			{
@@ -58,8 +68,8 @@ func testAccCheckIdentityV3PasswordPolicyDestroy(s *terraform.State) error {
 		}
 
 		_, err := security.GetPasswordPolicy(client, rs.Primary.ID)
-		if err == nil {
-			return fmt.Errorf("policy still exists")
+		if err != nil {
+			return fmt.Errorf("error fetching the IAM account password policy")
 		}
 	}
 
@@ -84,32 +94,28 @@ func testAccCheckIdentityV3PasswordPolicyExists(n string) resource.TestCheckFunc
 		}
 
 		_, err = security.GetPasswordPolicy(client, rs.Primary.ID)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return err
 	}
 }
 
 const testAccIdentityV3PasswordPolicyBasic = `
 resource "opentelekomcloud_identity_password_policy_v3" "pol_1" {
-    maximum_consecutive_identical_chars = 0
-    minimum_password_length = 6
-    minimum_password_age = 0
-    number_of_recent_passwords_disallowed = 0
-    password_not_username_or_invert = true
-    password_validity_period = 179
+  maximum_consecutive_identical_chars   = 0
+  minimum_password_length               = 6
+  minimum_password_age                  = 0
+  number_of_recent_passwords_disallowed = 0
+  password_not_username_or_invert       = true
+  password_validity_period              = 179
 }
 `
 
 const testAccIdentityV3PasswordPolicyUpdate = `
 resource "opentelekomcloud_identity_password_policy_v3" "pol_1" {
-    maximum_consecutive_identical_chars = 0
-    minimum_password_length = 6
-    minimum_password_age = 0
-    number_of_recent_passwords_disallowed = 0
-    password_not_username_or_invert = true
-    password_validity_period = 180
+  maximum_consecutive_identical_chars   = 0
+  minimum_password_length               = 6
+  minimum_password_age                  = 0
+  number_of_recent_passwords_disallowed = 0
+  password_not_username_or_invert       = true
+  password_validity_period              = 180
 }
 `

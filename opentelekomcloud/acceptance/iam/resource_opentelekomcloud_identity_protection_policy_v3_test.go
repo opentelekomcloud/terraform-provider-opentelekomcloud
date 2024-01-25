@@ -53,13 +53,13 @@ func testAccCheckIdentityV3ProtectionPolicyDestroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_identity_password_policy_v3" {
+		if rs.Type != "opentelekomcloud_identity_protection_policy_v3" {
 			continue
 		}
 
 		_, err := security.GetOperationProtectionPolicy(client, rs.Primary.ID)
-		if err == nil {
-			return fmt.Errorf("policy still exists")
+		if err != nil {
+			return fmt.Errorf("error fetching the IAM protection policy")
 		}
 	}
 
@@ -84,22 +84,18 @@ func testAccCheckIdentityV3ProtectionPolicyExists(n string) resource.TestCheckFu
 		}
 
 		_, err = security.GetOperationProtectionPolicy(client, rs.Primary.ID)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return err
 	}
 }
 
 const testAccIdentityV3ProtectionPolicyBasic = `
-resource "opentelekomcloud_identity_password_policy_v3" "pol_1" {
+resource "opentelekomcloud_identity_protection_policy_v3" "pol_1" {
   enable_operation_protection_policy = true
 }
 `
 
 const testAccIdentityV3ProtectionPolicyUpdate = `
-resource "opentelekomcloud_identity_password_policy_v3" "pol_1" {
+resource "opentelekomcloud_identity_protection_policy_v3" "pol_1" {
   enable_operation_protection_policy = false
 }
 `

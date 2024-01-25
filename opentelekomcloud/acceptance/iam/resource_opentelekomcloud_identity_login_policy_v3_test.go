@@ -54,13 +54,13 @@ func testAccCheckIdentityV3LoginPolicyDestroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_identity_password_policy_v3" {
+		if rs.Type != "opentelekomcloud_identity_login_policy_v3" {
 			continue
 		}
 
 		_, err := security.GetLoginAuthPolicy(client, rs.Primary.ID)
-		if err == nil {
-			return fmt.Errorf("policy still exists")
+		if err != nil {
+			return fmt.Errorf("error fetching the IAM account login policy")
 		}
 	}
 
@@ -85,34 +85,30 @@ func testAccCheckIdentityV3LoginPolicyExists(n string) resource.TestCheckFunc {
 		}
 
 		_, err = security.GetLoginAuthPolicy(client, rs.Primary.ID)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return err
 	}
 }
 
 const testAccIdentityV3LoginPolicyBasic = `
 resource "opentelekomcloud_identity_login_policy_v3" "pol_1" {
-    custom_info_for_login = ""
-    period_with_login_failures = 60
-    lockout_duration = 15
-    account_validity_period = 0
-    login_failed_times = 3
-    session_timeout = 1396
-    show_recent_login_info = false
+  custom_info_for_login      = ""
+  period_with_login_failures = 60
+  lockout_duration           = 15
+  account_validity_period    = 0
+  login_failed_times         = 3
+  session_timeout            = 1396
+  show_recent_login_info     = false
 }
 `
 
 const testAccIdentityV3LoginPolicyUpdate = `
 resource "opentelekomcloud_identity_login_policy_v3" "pol_1" {
-    custom_info_for_login = ""
-    period_with_login_failures = 60
-    lockout_duration = 15
-    account_validity_period = 0
-    login_failed_times = 3
-    session_timeout = 1395
-    show_recent_login_info = false
+  custom_info_for_login      = ""
+  period_with_login_failures = 60
+  lockout_duration           = 15
+  account_validity_period    = 0
+  login_failed_times         = 3
+  session_timeout            = 1395
+  show_recent_login_info     = false
 }
 `
