@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -258,6 +259,22 @@ func TestAccObsBucket_WormPolicy(t *testing.T) {
 					testAccCheckObsBucketExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "worm_policy.0.years", "1"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccOBSBucket_VersioningObjectLockValidation(t *testing.T) {
+	rInt := acctest.RandInt()
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccObsBucketWormPolicyValidation(rInt),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`OBS requires versioning to be enabled.+`),
 			},
 		},
 	})
@@ -666,10 +683,11 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 func testAccObsBucketWormPolicyBasic(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
-  bucket      = "tf-test-bucket-%d"
+  bucket     = "tf-test-bucket-%d"
+  versioning = true
   worm_policy {
-	days = 15
-	}
+    days = 15
+  }
 }
 `, randInt)
 }
@@ -677,10 +695,22 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 func testAccObsBucketWormPolicyUpdate(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
-  bucket      = "tf-test-bucket-%d"
+  bucket     = "tf-test-bucket-%d"
+  versioning = true
   worm_policy {
-	years = 1
-	}
+    years = 1
+  }
+}
+`, randInt)
+}
+
+func testAccObsBucketWormPolicyValidation(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket = "tf-test-bucket-%d"
+  worm_policy {
+    years = 1
+  }
 }
 `, randInt)
 }
