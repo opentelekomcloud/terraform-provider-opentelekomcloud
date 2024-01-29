@@ -155,7 +155,7 @@ func createRuleWithRetry(ctx context.Context, client *golangsdk.ServiceClient, o
 	var rule *dnatrules.DnatRule
 	err := resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		var err error
-		rule, err = dnatrules.Create(client, opts).Extract()
+		rule, err = dnatrules.Create(client, opts)
 		if err != nil {
 			// we are retrying DnatRuleInValidPortID which is HTTP 400
 			if _, ok := err.(golangsdk.ErrDefault400); ok {
@@ -179,22 +179,22 @@ func resourceNatDnatRuleRead(_ context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		return fmterr.Errorf(ErrCreationClient, err)
 	}
-	dnatRule, err := dnatrules.Get(client, d.Id()).Extract()
+	dnatRule, err := dnatrules.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "dnat rule")
 	}
 
 	mErr := multierror.Append(
-		d.Set("floating_ip_id", dnatRule.FloatingIpID),
+		d.Set("floating_ip_id", dnatRule.FloatingIpId),
 		d.Set("internal_service_port", dnatRule.InternalServicePort),
-		d.Set("nat_gateway_id", dnatRule.NatGatewayID),
-		d.Set("port_id", dnatRule.PortID),
+		d.Set("nat_gateway_id", dnatRule.NatGatewayId),
+		d.Set("port_id", dnatRule.PortId),
 		d.Set("private_ip", dnatRule.PrivateIp),
 		d.Set("protocol", dnatRule.Protocol),
 		d.Set("external_service_port", dnatRule.ExternalServicePort),
 		d.Set("floating_ip_address", dnatRule.FloatingIpAddress),
 		d.Set("status", dnatRule.Status),
-		d.Set("tenant_id", dnatRule.TenantID),
+		d.Set("tenant_id", dnatRule.ProjectId),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -232,7 +232,7 @@ func resourceNatDnatRuleDelete(ctx context.Context, d *schema.ResourceData, meta
 
 func waitForDnatRuleActive(client *golangsdk.ServiceClient, dnatRuleID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := dnatrules.Get(client, dnatRuleID).Extract()
+		n, err := dnatrules.Get(client, dnatRuleID)
 		if err != nil {
 			return nil, "", err
 		}
@@ -250,7 +250,7 @@ func waitForDnatRuleDelete(client *golangsdk.ServiceClient, dnatRuleID string) r
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete OpenTelekomCloud DNAT Rule %s.\n", dnatRuleID)
 
-		n, err := dnatrules.Get(client, dnatRuleID).Extract()
+		n, err := dnatrules.Get(client, dnatRuleID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud DNAT Rule %s", dnatRuleID)
@@ -259,7 +259,7 @@ func waitForDnatRuleDelete(client *golangsdk.ServiceClient, dnatRuleID string) r
 			return n, "ACTIVE", err
 		}
 
-		if err := dnatrules.Delete(client, dnatRuleID).ExtractErr(); err != nil {
+		if err := dnatrules.Delete(client, dnatRuleID); err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud DNAT Rule %s", dnatRuleID)
 				return n, "DELETED", nil

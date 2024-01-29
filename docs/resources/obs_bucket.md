@@ -55,6 +55,18 @@ resource "opentelekomcloud_obs_bucket" "b" {
 }
 ```
 
+### WORM policy with versioning enabled
+
+```hcl
+resource "opentelekomcloud_obs_bucket" "b" {
+  bucket     = "my-tf-test-bucket"
+  versioning = true
+  worm_policy {
+    years = 1
+  }
+}
+```
+
 ### Enable Logging
 
 ```hcl
@@ -367,6 +379,9 @@ The following arguments are supported:
 
 * `logging` - (Optional) A settings of bucket logging (documented below).
 
+* `worm_policy` - (Optional) A settings of bucket default WORM policy and a retention period (documented below).
+  `worm_policy` requires `versioning` to be enabled.
+
 * `website` - (Optional) A website object (documented below).
 
 * `cors_rule` - (Optional) A rule of Cross-Origin Resource Sharing (documented below).
@@ -389,6 +404,14 @@ The `logging` object supports the following:
   The acl policy of the target bucket should be `log-delivery-write`.
 
 * `target_prefix` - (Optional) To specify a key prefix for log objects.
+
+The `worm_policy` object supports the following:
+
+* `days` - (Optional) Default protection period, in `days`.
+  The value is from `1` to `36500`.
+
+* `years` - (Optional) Default protection period, in years. In a leap year, only 365 days are calculated.
+  The value is from `1` to `100`.
 
 The `website` object supports the following:
 

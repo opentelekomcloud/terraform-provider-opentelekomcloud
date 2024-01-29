@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -232,6 +233,48 @@ func TestAccObsBucket_pfs(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "parallel_fs", "true"),
 					resource.TestCheckResourceAttr(resourceName, "bucket_version", "3.0"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccObsBucket_WormPolicy(t *testing.T) {
+	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_obs_bucket.bucket"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObsBucketWormPolicyBasic(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "worm_policy.0.days", "15"),
+				),
+			},
+			{
+				Config: testAccObsBucketWormPolicyUpdate(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "worm_policy.0.years", "1"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccOBSBucket_VersioningObjectLockValidation(t *testing.T) {
+	rInt := acctest.RandInt()
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccObsBucketWormPolicyValidation(rInt),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`OBS requires versioning to be enabled.+`),
 			},
 		},
 	})
@@ -633,6 +676,41 @@ func testAccObsBucketPfs(randInt int) string {
 resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket      = "tf-test-bucket-%d"
   parallel_fs = true
+}
+`, randInt)
+}
+
+func testAccObsBucketWormPolicyBasic(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket     = "tf-test-bucket-%d"
+  versioning = true
+  worm_policy {
+    days = 15
+  }
+}
+`, randInt)
+}
+
+func testAccObsBucketWormPolicyUpdate(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket     = "tf-test-bucket-%d"
+  versioning = true
+  worm_policy {
+    years = 1
+  }
+}
+`, randInt)
+}
+
+func testAccObsBucketWormPolicyValidation(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket = "tf-test-bucket-%d"
+  worm_policy {
+    years = 1
+  }
 }
 `, randInt)
 }

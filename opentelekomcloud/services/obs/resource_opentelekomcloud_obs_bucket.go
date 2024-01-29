@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strconv"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -29,6 +30,7 @@ func ResourceObsBucket() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		CustomizeDiff: validateVersionObjLock,
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -76,6 +78,36 @@ func ResourceObsBucket() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							Default:  "logs/",
+						},
+					},
+				},
+			},
+			"worm_policy": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"days": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							ConflictsWith: []string{
+								"worm_policy.0.years",
+							},
+							AtLeastOneOf: []string{
+								"worm_policy.0.years", "worm_policy.0.days",
+							},
+						},
+						"years": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							ConflictsWith: []string{
+								"worm_policy.0.days",
+							},
+							AtLeastOneOf: []string{
+								"worm_policy.0.years", "worm_policy.0.days",
+							},
 						},
 					},
 				},
@@ -348,6 +380,10 @@ func resourceObsBucketCreate(ctx context.Context, d *schema.ResourceData, meta i
 	opts.Location = config.GetRegion(d)
 	log.Printf("[DEBUG] OBS bucket create opts: %#v", opts)
 
+	if d.Get("worm_policy.#") != 0 {
+		opts.ObjectLockEnabled = true
+	}
+
 	_, err = client.CreateBucket(opts)
 	if err != nil {
 		return diag.FromErr(GetObsError("error creating bucket", bucket, err))
@@ -425,6 +461,12 @@ func resourceObsBucketUpdate(ctx context.Context, d *schema.ResourceData, meta i
 
 	if d.HasChange("event_notifications") {
 		if err := resourceObsBucketNotificationUpdate(client, d); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	if d.HasChange("worm_policy") {
+		if err := resourceObsBucketObjLockUpdate(client, d); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -519,6 +561,12 @@ func resourceObsBucketRead(_ context.Context, d *schema.ResourceData, meta inter
 		return diag.FromErr(err)
 	}
 
+	// Read object lock
+	if d.Get("worm_policy.#") != 0 {
+		if err := setObsBucketObjLock(client, d); err != nil {
+			return diag.FromErr(err)
+		}
+	}
 	return nil
 }
 
@@ -606,6 +654,36 @@ func resourceObsBucketClassUpdate(client *obs.ObsClient, d *schema.ResourceData)
 	_, err := client.SetBucketStoragePolicy(input)
 	if err != nil {
 		return GetObsError("error updating storage class of OBS bucket", bucket, err)
+	}
+
+	return nil
+}
+
+func resourceObsBucketObjLockUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
+	bucket := d.Get("bucket").(string)
+	days := d.Get("worm_policy.0.days").(int)
+	years := d.Get("worm_policy.0.years").(int)
+
+	input := obs.SetWORMPolicyInput{
+		Bucket: bucket,
+		BucketWormPolicy: obs.BucketWormPolicy{
+			ObjectLockEnabled: "Enabled",
+			Mode:              "COMPLIANCE",
+		},
+	}
+
+	if days != 0 {
+		input.Days = strconv.Itoa(days)
+	} else {
+		input.Years = strconv.Itoa(years)
+	}
+
+	log.Printf("[DEBUG] set object lock of OBS bucket %s: %#v", bucket, input)
+
+	_, err := client.SetWORMPolicy(&input)
+
+	if err != nil {
+		return GetObsError("error updating object lock of OBS bucket", bucket, err)
 	}
 
 	return nil
@@ -1437,6 +1515,36 @@ func setObsBucketMetadata(obsClient *obs.ObsClient, d *schema.ResourceData) erro
 	return nil
 }
 
+func setObsBucketObjLock(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+	bucket := d.Id()
+	output, err := obsClient.GetWORMPolicy(bucket)
+
+	if err != nil {
+		return fmt.Errorf("error getting object lock of OBS bucket '%s': %w", bucket, err)
+	}
+	log.Printf("[DEBUG] getting object lock info of OBS bucket %s: %#v", bucket, output)
+
+	var objLock []map[string]interface{}
+	theLock := make(map[string]interface{}, 1)
+
+	if output.Days != "" && output.Days != "0" {
+		days, _ := strconv.Atoi(output.Days)
+		theLock["days"] = days
+	} else {
+		years, _ := strconv.Atoi(output.Years)
+		theLock["years"] = years
+	}
+	objLock = append(objLock, theLock)
+
+	log.Printf("[DEBUG] saving lobject lock info of OBS bucket: %s: %#v", bucket, objLock)
+
+	if err := d.Set("worm_policy", objLock); err != nil {
+		return fmt.Errorf("error saving worm policy of OBS bucket %s: %s", bucket, err)
+	}
+
+	return nil
+}
+
 func filterRulesToMapSlice(src []obs.FilterRule) []interface{} {
 	res := make([]interface{}, len(src))
 	for i, v := range src {
@@ -1476,4 +1584,15 @@ func toEventSlice(src interface{}) []obs.EventType {
 		res[i] = obs.EventType(v.(string))
 	}
 	return res
+}
+
+func validateVersionObjLock(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if d.Get("worm_policy.#") != 0 {
+		versioning := d.Get("versioning").(bool)
+		if !versioning {
+			return fmt.Errorf("OBS requires versioning to be enabled in order to use WORM policies")
+		}
+	}
+
+	return nil
 }

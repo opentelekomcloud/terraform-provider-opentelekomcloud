@@ -85,7 +85,7 @@ func testAccCheckNatDnatDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := dnatrules.Get(client, rs.Primary.ID).Extract()
+		_, err := dnatrules.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("dnat rule still exists")
 		}
@@ -111,7 +111,7 @@ func testAccCheckNatDnatExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("error creating OpenTelekomCloud NATv2 client: %w", err)
 		}
 
-		found, err := dnatrules.Get(client, rs.Primary.ID).Extract()
+		found, err := dnatrules.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
