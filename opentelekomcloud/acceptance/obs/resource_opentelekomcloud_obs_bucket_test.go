@@ -237,6 +237,32 @@ func TestAccObsBucket_pfs(t *testing.T) {
 	})
 }
 
+func TestAccObsBucket_WormPolicy(t *testing.T) {
+	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_obs_bucket.bucket"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObsBucketWormPolicyBasic(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "worm_policy.0.days", "15"),
+				),
+			},
+			{
+				Config: testAccObsBucketWormPolicyUpdate(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "worm_policy.0.years", "1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckObsBucketDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
@@ -633,6 +659,28 @@ func testAccObsBucketPfs(randInt int) string {
 resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket      = "tf-test-bucket-%d"
   parallel_fs = true
+}
+`, randInt)
+}
+
+func testAccObsBucketWormPolicyBasic(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket      = "tf-test-bucket-%d"
+  worm_policy {
+	days = 15
+	}
+}
+`, randInt)
+}
+
+func testAccObsBucketWormPolicyUpdate(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket      = "tf-test-bucket-%d"
+  worm_policy {
+	years = 1
+	}
 }
 `, randInt)
 }
