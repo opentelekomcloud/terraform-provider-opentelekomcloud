@@ -74,8 +74,90 @@ resource "opentelekomcloud_networking_vip_v2" "vip_1" {
 
 resource "opentelekomcloud_networking_vip_associate_v2" "vip_associate_1" {
   vip_id = opentelekomcloud_networking_vip_v2.vip_1.id
-  port_ids = [opentelekomcloud_networking_port_v2.port_1.id,
-  opentelekomcloud_networking_port_v2.port_2.id]
+  port_ids = [
+    opentelekomcloud_networking_port_v2.port_1.id,
+    opentelekomcloud_networking_port_v2.port_2.id
+  ]
+}
+```
+
+## Example VIP-EIP association
+
+```hcl
+data "opentelekomcloud_vpc_subnet_v1" "shared_subnet" {
+  name = "my-shared-subnet"
+}
+
+data "opentelekomcloud_images_image_v2" "latest_image" {
+  name        = "Standard_Debian_11_latest"
+  most_recent = true
+}
+
+resource "opentelekomcloud_networking_port_v2" "port_1" {
+  name           = "port_1"
+  admin_state_up = "true"
+  network_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  fixed_ip {
+    subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+  }
+}
+
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name            = "instance_vip_ass_1"
+  security_groups = ["default"]
+  image_id        = data.opentelekomcloud_images_image_v2.latest_image.id
+  network {
+    port = opentelekomcloud_networking_port_v2.port_1.id
+  }
+}
+
+resource "opentelekomcloud_networking_port_v2" "port_2" {
+  name           = "port_2"
+  admin_state_up = "true"
+  network_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  fixed_ip {
+    subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+  }
+}
+
+resource "opentelekomcloud_compute_instance_v2" "instance_2" {
+  name            = "instance_vip_ass_2"
+  security_groups = ["default"]
+  image_id        = data.opentelekomcloud_images_image_v2.latest_image.id
+  network {
+    port = opentelekomcloud_networking_port_v2.port_2.id
+  }
+}
+
+resource "opentelekomcloud_vpc_eip_v1" "vip_eip_1" {
+  publicip {
+    type = "5_bgp"
+    name = "eip-vip"
+  }
+  bandwidth {
+    name        = "eip-bandwidth-vip"
+    size        = 10
+    share_type  = "PER"
+    charge_mode = "traffic"
+  }
+}
+
+resource "opentelekomcloud_networking_vip_v2" "vip_1" {
+  network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+}
+
+resource "opentelekomcloud_networking_vip_associate_v2" "vip_associate_1" {
+  vip_id = opentelekomcloud_networking_vip_v2.vip_1.id
+  port_ids = [
+    opentelekomcloud_networking_port_v2.port_1.id,
+    opentelekomcloud_networking_port_v2.port_2.id,
+  ]
+}
+
+resource "opentelekomcloud_networking_floatingip_associate_v2" "vip_eip_associate_1" {
+  floating_ip = opentelekomcloud_vpc_eip_v1.vip_eip_1.publicip.0.ip_address
+  port_id     = opentelekomcloud_networking_vip_v2.vip_1.id
 }
 ```
 

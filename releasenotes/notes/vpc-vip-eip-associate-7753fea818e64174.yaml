@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[VPC]** Additional example and test for ``vip<->eip`` association in documentation for ``resource/opentelekomcloud_networking_vip_associate_v2`` (`#2427 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2427>`_)
