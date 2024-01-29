@@ -16,7 +16,6 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vpc"
 )
 
-// TestAccNetworkingV2VIPAssociate_basic is basic acc test.
 func TestAccNetworkingV2VIPAssociate_basic(t *testing.T) {
 	t.Skip("this test produces dangling resources")
 	var vip ports.Port
@@ -41,6 +40,37 @@ func TestAccNetworkingV2VIPAssociate_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					// testAccCheckNetworkingV2PortExists("opentelekomcloud_networking_port_v2.port_1", &port1),
 					// testAccCheckNetworkingV2PortExists("opentelekomcloud_networking_port_v2.port_2", &port2),
+					testAccCheckNetworkingV2VIPExists("opentelekomcloud_networking_vip_v2.vip_1", &vip),
+					testAccCheckNetworkingV2VIPAssociateAssociated(&port1, &vip),
+					testAccCheckNetworkingV2VIPAssociateAssociated(&port2, &vip),
+				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2VIPAssociate_eip(t *testing.T) {
+	t.Skip("this test produces dangling resources")
+	var vip ports.Port
+	var port1 ports.Port
+	var port2 ports.Port
+	t.Parallel()
+	qts := vpcSubnetQuotas()
+	qts = append(qts,
+		&quotas.ExpectedQuota{Q: quotas.Volume, Count: 2},
+		&quotas.ExpectedQuota{Q: quotas.VolumeSize, Count: 4 + 4},
+		&quotas.ExpectedQuota{Q: quotas.Server, Count: 2},
+	)
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2VIPAssociateDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: TestAccNetworkingV2VIPAssociateConfigEIP,
+				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2VIPExists("opentelekomcloud_networking_vip_v2.vip_1", &vip),
 					testAccCheckNetworkingV2VIPAssociateAssociated(&port1, &vip),
 					testAccCheckNetworkingV2VIPAssociateAssociated(&port2, &vip),
@@ -146,45 +176,24 @@ func testAccCheckNetworkingV2VIPAssociateAssociated(p *ports.Port, vip *ports.Po
 	}
 }
 
-// TestAccNetworkingV2VIPAssociateConfigBasic is used to create.
 var TestAccNetworkingV2VIPAssociateConfigBasic = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name           = "network_vip_ass_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name       = "subnet_vip_ass_1"
-  cidr       = "192.168.199.0/24"
-  ip_version = 4
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-}
-
-resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" {
-  router_id = opentelekomcloud_networking_router_v2.router_1.id
-  subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
-}
-
-resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name             = "router_vip_ass_1"
-  external_gateway = data.opentelekomcloud_networking_network_v2.ext_network.id
-}
+%s
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
   name           = "port_1"
   admin_state_up = "true"
-  network_id     = opentelekomcloud_networking_network_v2.network_1.id
+  network_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   fixed_ip {
-    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
+    subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
   }
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_vip_ass_1"
   security_groups = ["default"]
-
+  image_id        = data.opentelekomcloud_images_image_v2.latest_image.id
   network {
     port = opentelekomcloud_networking_port_v2.port_1.id
   }
@@ -193,28 +202,101 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 resource "opentelekomcloud_networking_port_v2" "port_2" {
   name           = "port_2"
   admin_state_up = "true"
-  network_id     = opentelekomcloud_networking_network_v2.network_1.id
+  network_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   fixed_ip {
-    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
+    subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
   }
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_2" {
   name            = "instance_vip_ass_2"
   security_groups = ["default"]
-
+  image_id        = data.opentelekomcloud_images_image_v2.latest_image.id
   network {
     port = opentelekomcloud_networking_port_v2.port_2.id
   }
 }
 
 resource "opentelekomcloud_networking_vip_v2" "vip_1" {
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-  subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
+  network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_networking_vip_associate_v2" "vip_associate_1" {
   vip_id   = opentelekomcloud_networking_vip_v2.vip_1.id
   port_ids = [opentelekomcloud_networking_port_v2.port_1.id, opentelekomcloud_networking_port_v2.port_2.id]
 }
-`, common.DataSourceExtNetwork)
+`, common.DataSourceSubnet, common.DataSourceImage)
+
+var TestAccNetworkingV2VIPAssociateConfigEIP = fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_networking_port_v2" "port_1" {
+  name           = "port_1"
+  admin_state_up = "true"
+  network_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  fixed_ip {
+    subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+  }
+}
+
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name            = "instance_vip_ass_1"
+  security_groups = ["default"]
+  image_id        = data.opentelekomcloud_images_image_v2.latest_image.id
+  network {
+    port = opentelekomcloud_networking_port_v2.port_1.id
+  }
+}
+
+resource "opentelekomcloud_networking_port_v2" "port_2" {
+  name           = "port_2"
+  admin_state_up = "true"
+  network_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  fixed_ip {
+    subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+  }
+}
+
+resource "opentelekomcloud_compute_instance_v2" "instance_2" {
+  name            = "instance_vip_ass_2"
+  security_groups = ["default"]
+  image_id        = data.opentelekomcloud_images_image_v2.latest_image.id
+  network {
+    port = opentelekomcloud_networking_port_v2.port_2.id
+  }
+}
+
+resource "opentelekomcloud_vpc_eip_v1" "vip_eip_1" {
+  publicip {
+    type = "5_bgp"
+    name = "eip-vip"
+  }
+  bandwidth {
+    name        = "eip-bandwidth-vip"
+    size        = 10
+    share_type  = "PER"
+    charge_mode = "traffic"
+  }
+}
+
+resource "opentelekomcloud_networking_vip_v2" "vip_1" {
+  network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+}
+
+resource "opentelekomcloud_networking_vip_associate_v2" "vip_associate_1" {
+  vip_id = opentelekomcloud_networking_vip_v2.vip_1.id
+  port_ids = [
+    opentelekomcloud_networking_port_v2.port_1.id,
+    opentelekomcloud_networking_port_v2.port_2.id,
+  ]
+}
+
+resource "opentelekomcloud_networking_floatingip_associate_v2" "vip_eip_associate_1" {
+  floating_ip = opentelekomcloud_vpc_eip_v1.vip_eip_1.publicip.0.ip_address
+  port_id     = opentelekomcloud_networking_vip_v2.vip_1.id
+}
+`, common.DataSourceSubnet, common.DataSourceImage)
