@@ -49,6 +49,7 @@ resource "opentelekomcloud_obs_bucket_replication" "test" {
     storage_class   = "COLD"
     enabled         = true
     history_enabled = false
+    delete_data     = true
   }
 }
 ```
@@ -94,6 +95,9 @@ The `rule` block supports:
 
 * `history_enabled` - (Optional) Specifies cross-region replication history rule status. Defaults to `false`.
   If the value is `true`, historical objects meeting this rule are copied.
+
+* `delete_data` - (Optional) Specifies cross-region replication object deletion operations status. Defaults to `false`.
+  If the value is `true`, object deletion for the source bucket will be replicated to the destination bucket.
 
 ## Attribute Reference
 

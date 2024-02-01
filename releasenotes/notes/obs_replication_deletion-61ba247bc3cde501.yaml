@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[OBS]** Add option to synchronize object deletion for ``opentelekomcloud_obs_bucket_replication`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
