@@ -71,6 +71,11 @@ func ResourceObsBucketReplication() *schema.Resource {
 							Optional: true,
 							Default:  false,
 						},
+						"delete_data": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
 						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -98,6 +103,12 @@ func buildReplicationRuleFromRawMap(rawMap map[string]interface{}, destBucket, p
 		replicationRule.HistoricalObjectReplication = "Enabled"
 	} else {
 		replicationRule.HistoricalObjectReplication = "Disabled"
+	}
+
+	if deletionEnabled, ok := rawMap["delete_data"].(bool); ok && deletionEnabled {
+		replicationRule.DeleteData = "Enabled"
+	} else {
+		replicationRule.DeleteData = "Disabled"
 	}
 
 	if val, ok := rawMap["storage_class"].(string); ok {
@@ -180,6 +191,7 @@ func flattenDestinationRules(output *obs.GetBucketReplicationOutput) []map[strin
 			"storage_class":   rule.StorageClass,
 			"enabled":         rule.Status == obs.RuleStatusEnabled,
 			"history_enabled": rule.HistoricalObjectReplication == "Enabled",
+			"delete_data":     rule.DeleteData == "Enabled",
 			"id":              rule.ID,
 		}
 	}

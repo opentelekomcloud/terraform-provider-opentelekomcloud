@@ -41,6 +41,7 @@ func TestAccObsBucketReplication_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceReplication, "id", testAccObsBucketName(rInt)),
 					resource.TestCheckResourceAttr(resourceReplication, "agency", "test-obs-agency"),
 					resource.TestCheckResourceAttr(resourceReplication, "destination_bucket", destBucket),
+					resource.TestCheckResourceAttr(resourceReplication, "rule.0.delete_data", "true"),
 				),
 			},
 		},
@@ -133,6 +134,10 @@ resource "opentelekomcloud_obs_bucket_replication" "test" {
   destination_bucket = "%s"
   agency             = opentelekomcloud_identity_agency_v3.agency_obs.name
 
+  rule {
+    prefix      = "test"
+    delete_data = true
+  }
 }
 `, randInt, env.OS_TENANT_NAME, destBucket)
 }
