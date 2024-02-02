@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/members"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -96,10 +97,12 @@ func resourceLBMemberV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		ProjectID:    d.Get("project_id").(string),
 		SubnetID:     d.Get("subnet_id").(string),
 	}
-	if w, ok := d.GetOk("weight"); ok {
-		weight := w.(int)
-		opts.Weight = &weight
+
+	weight := common.CheckNull("weight", d)
+	if !weight {
+		opts.Weight = pointerto.Int(d.Get("weight").(int))
 	}
+
 	member, err := members.Create(client, poolID(d), opts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating LB pool member v3: %w", err)

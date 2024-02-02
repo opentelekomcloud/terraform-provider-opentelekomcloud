@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ELB]** Fix zero ``weight`` assignment of ``resource/opentelekomcloud_lb_member_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
