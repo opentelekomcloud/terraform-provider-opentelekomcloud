@@ -1,0 +1,4 @@
+---
+fixes:
+  |
+  **[WAF]** Fix ``resource/opentelekomcloud_waf_dedicated_precise_protection_rule_v1`` validation (`#2435 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2435>`_)

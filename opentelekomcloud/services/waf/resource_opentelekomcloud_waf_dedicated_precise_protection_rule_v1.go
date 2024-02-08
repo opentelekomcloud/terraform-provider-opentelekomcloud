@@ -78,16 +78,6 @@ func ResourceWafDedicatedPreciseProtectionRuleV1() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"contain", "not_contain", "equal",
-								"not_equal", "prefix", "not_prefix",
-								"suffix", "not_suffix", "contain_any",
-								"not_contain_all", "equal_any", "not_equal_all",
-								"prefix_any", "not_prefix_all", "suffix_any",
-								"not_suffix_all", "num_greater", "num_less",
-								"num_equal", "num_not_equal", "exist",
-								"not_exist",
-							}, false),
 						},
 						"contents": {
 							Type:     schema.TypeList,
