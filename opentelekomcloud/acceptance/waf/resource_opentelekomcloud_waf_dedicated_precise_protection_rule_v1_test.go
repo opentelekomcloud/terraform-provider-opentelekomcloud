@@ -45,6 +45,29 @@ func TestAccWafDedicatedPreciseProtectionRuleV1_basic(t *testing.T) {
 	})
 }
 
+func TestAccWafDedicatedPreciseProtectionRuleV1_Issue2434(t *testing.T) {
+	var rule rules.CustomRule
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafDedicatedPreciseProtectionRuleV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWafDedicatedPreciseProtectionRuleV1Issue2434,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckWafDedicatedPreciseProtectionRuleV1Exists(wafdPreciseProtectionRuleName, &rule),
+					resource.TestCheckResourceAttr(wafdPreciseProtectionRuleName, "time", "false"),
+					resource.TestCheckResourceAttr(wafdPreciseProtectionRuleName, "priority", "50"),
+					resource.TestCheckResourceAttr(wafdPreciseProtectionRuleName, "action.0.category", "pass"),
+					resource.TestCheckResourceAttr(wafdPreciseProtectionRuleName, "conditions.0.category", "url"),
+					resource.TestCheckResourceAttr(wafdPreciseProtectionRuleName, "conditions.0.logic_operation", "contain"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckWafDedicatedPreciseProtectionRuleV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.WafDedicatedV1Client(env.OS_REGION_NAME)
@@ -116,6 +139,52 @@ resource "opentelekomcloud_waf_dedicated_precise_protection_rule_v1" "rule_1" {
   }
   action {
     category = "block"
+  }
+}
+`
+
+const testAccWafDedicatedPreciseProtectionRuleV1Issue2434 = `
+resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
+  name = "policy_pp"
+}
+
+resource "opentelekomcloud_waf_dedicated_precise_protection_rule_v1" "rule_1" {
+  policy_id = opentelekomcloud_waf_dedicated_policy_v1.policy_1.id
+  priority  = 50
+  time      = false
+  action {
+    category = "pass"
+  }
+  conditions {
+    category = "url"
+    contents = [
+      "/xxx-yyyy-zzz.html"
+    ]
+    logic_operation = "contain"
+  }
+  conditions {
+    category = "params"
+    contents = [
+      "32"
+    ]
+    index           = "u"
+    logic_operation = "len_equal"
+  }
+  conditions {
+    category = "params"
+    contents = [
+      "3"
+    ]
+    index           = "t"
+    logic_operation = "len_greater"
+  }
+  conditions {
+    category = "params"
+    contents = [
+      "13"
+    ]
+    index           = "t"
+    logic_operation = "len_less"
   }
 }
 `
