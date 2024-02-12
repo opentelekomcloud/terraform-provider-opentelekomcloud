@@ -120,7 +120,7 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
           }
         ]
       }
-      EOF
+    EOF
   }
 }
 
