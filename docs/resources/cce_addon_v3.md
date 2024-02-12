@@ -45,12 +45,19 @@ resource "opentelekomcloud_cce_addon_v3" "addon" {
 }
 ```
 
-### CCE addon setting with flavor in json format
+### CCE addon management with data sources
 
 ```hcl
-variable "flavor_id" {}
 variable "vpc_id" {}
 variable "subnet_id" {}
+variable "region_name" {}
+
+data "opentelekomcloud_identity_project_v3" "this" {}
+
+data "opentelekomcloud_cce_addon_template_v3" "autoscaler" {
+  addon_version = var.autoscaler_version
+  addon_name = "autoscaler"
+}
 
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   name                    = "%s"
@@ -64,40 +71,39 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
 }
 
 resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
-  template_name    = "autoscaler"
-  template_version = "1.25.7"
+  template_name    = data.opentelekomcloud_cce_addon_template_v3.autoscaler.addon_name
+  template_version = data.opentelekomcloud_cce_addon_template_v3.autoscaler.addon_version
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
     basic = {
-      "cceEndpoint" : "https://cce.eu-de.otc.t-systems.com",
-      "ecsEndpoint" : "https://ecs.eu-de.otc.t-systems.com",
-      "image_version" : "1.25.7",
-      "region" : "eu-de",
-      "swr_addr" : "100.125.7.25:20202",
-      "swr_user" : "cce-addons"
+      "cceEndpoint" = "https://cce.${var.region_name}.otc.t-systems.com"
+      "ecsEndpoint" = "https://ecs.${var.region_name}.otc.t-systems.com"
+      "region"      = var.region_name
+      "swr_addr"    = data.opentelekomcloud_cce_addon_template_v3.autoscaler.swr_addr
+      "swr_user"    = data.opentelekomcloud_cce_addon_template_v3.autoscaler.swr_user
     }
     custom = {
-      "cluster_id" : opentelekomcloud_cce_cluster_v3.cluster_1.id,
-      "coresTotal" : 32000,
-      "expander" : "priority",
-      "logLevel" : 4,
-      "maxEmptyBulkDeleteFlag" : 10,
-      "maxNodeProvisionTime" : 15,
-      "maxNodesTotal" : 1000,
-      "memoryTotal" : 128000,
-      "scaleDownDelayAfterAdd" : 10,
-      "scaleDownDelayAfterDelete" : 11,
-      "scaleDownDelayAfterFailure" : 3,
-      "scaleDownEnabled" : true,
-      "scaleDownUnneededTime" : 10,
-      "scaleDownUtilizationThreshold" : 0.5,
-      "scaleUpCpuUtilizationThreshold" : 1,
-      "scaleUpMemUtilizationThreshold" : 1,
-      "scaleUpUnscheduledPodEnabled" : true,
-      "scaleUpUtilizationEnabled" : true,
-      "tenant_id" : data.opentelekomcloud_identity_project_v3.project.id,
-      "unremovableNodeRecheckTimeout" : 5
+      "cluster_id"                     = opentelekomcloud_cce_cluster_v3.cluster_1.id
+      "coresTotal"                     = 32000
+      "expander"                       = "priority"
+      "logLevel"                       = 4
+      "maxEmptyBulkDeleteFlag"         = 10
+      "maxNodeProvisionTime"           = 15
+      "maxNodesTotal"                  = 1000
+      "memoryTotal"                    = 128000
+      "scaleDownDelayAfterAdd"         = 10
+      "scaleDownDelayAfterDelete"      = 11
+      "scaleDownDelayAfterFailure"     = 3
+      "scaleDownEnabled"               = true
+      "scaleDownUnneededTime"          = 10
+      "scaleDownUtilizationThreshold"  = 0.5
+      "scaleUpCpuUtilizationThreshold" = 1
+      "scaleUpMemUtilizationThreshold" = 1
+      "scaleUpUnscheduledPodEnabled"   = true
+      "scaleUpUtilizationEnabled"      = true
+      "tenant_id"                      = data.opentelekomcloud_identity_project_v3.this.id
+      "unremovableNodeRecheckTimeout"  = 5
     }
     flavor = <<EOF
       {
@@ -114,9 +120,10 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
           }
         ]
       }
-	EOF
+        EOF
   }
 }
+
 ```
 
 ## Argument Reference
