@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[CCE]** Change example in ``resource/opentelekomcloud_cce_addon_v3`` documentation (`#2436 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2436>`_)

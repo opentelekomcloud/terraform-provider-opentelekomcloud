@@ -56,7 +56,7 @@ data "opentelekomcloud_identity_project_v3" "this" {}
 
 data "opentelekomcloud_cce_addon_template_v3" "autoscaler" {
   addon_version = var.autoscaler_version
-  addon_name = "autoscaler"
+  addon_name    = "autoscaler"
 }
 
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
