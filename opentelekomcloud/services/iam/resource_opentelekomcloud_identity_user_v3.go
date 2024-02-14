@@ -224,18 +224,19 @@ func resourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, met
 	userProtectionConfig, _ := getLoginProtection(client, d)
 	if userProtectionConfig != nil {
 		verMethod := userProtectionConfig.VerificationMethod
-		if verMethod == "none" {
-			verMethod = d.Get("login_protection.0.verification_method").(string)
+		stateVerMethod := d.Get("login_protection.0.verification_method").(string)
+		if verMethod == "none" && stateVerMethod != "" {
+			verMethod = stateVerMethod
+			protection := []map[string]interface{}{
+				{
+					"enabled":             userProtectionConfig.Enabled,
+					"verification_method": verMethod,
+				},
+			}
+			mErr = multierror.Append(mErr,
+				d.Set("login_protection", protection),
+			)
 		}
-		protection := []map[string]interface{}{
-			{
-				"enabled":             userProtectionConfig.Enabled,
-				"verification_method": verMethod,
-			},
-		}
-		mErr = multierror.Append(mErr,
-			d.Set("login_protection", protection),
-		)
 	}
 
 	if err = mErr.ErrorOrNil(); err != nil {
@@ -304,14 +305,26 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 
 	if d.HasChange("login_protection") {
 		configMap := d.Get("login_protection").([]interface{})
-		c := configMap[0].(map[string]interface{})
-		protectionOpts := security.LoginProtectionUpdateOpts{
-			Enabled:            pointerto.Bool(c["enabled"].(bool)),
-			VerificationMethod: c["verification_method"].(string),
-		}
-		_, err = security.UpdateLoginProtectionConfiguration(client, d.Id(), protectionOpts)
-		if err != nil {
-			return diag.Errorf("error updating login protection configuration for IAM user: %s", err)
+		if len(configMap) > 0 {
+			c := configMap[0].(map[string]interface{})
+			protectionOpts := security.LoginProtectionUpdateOpts{
+				Enabled:            pointerto.Bool(c["enabled"].(bool)),
+				VerificationMethod: c["verification_method"].(string),
+			}
+			_, err = security.UpdateLoginProtectionConfiguration(client, d.Id(), protectionOpts)
+			if err != nil {
+				return diag.Errorf("error updating login protection configuration for IAM user: %s", err)
+			}
+		} else {
+			oldMethod, _ := d.GetChange("login_protection.0.verification_method")
+			_, err = security.UpdateLoginProtectionConfiguration(client, d.Id(),
+				security.LoginProtectionUpdateOpts{
+					Enabled:            pointerto.Bool(false),
+					VerificationMethod: oldMethod.(string),
+				})
+			if err != nil {
+				return diag.Errorf("error updating login protection configuration for IAM user: %s", err)
+			}
 		}
 	}
 

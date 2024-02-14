@@ -144,6 +144,28 @@ func TestAccIdentityV3User_protection(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "domain_id"),
 				),
 			},
+			{
+				Config: testAccIdentityV3UserProtectionConfigRemove(userName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3UserExists(resourceName, &user),
+					resource.TestCheckResourceAttrPtr(resourceName, "name", &user.Name),
+					resource.TestCheckResourceAttr(resourceName, "enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "email", "test2@acme.org"),
+					resource.TestCheckResourceAttrSet(resourceName, "domain_id"),
+				),
+			},
+			{
+				Config: testAccIdentityV3UserProtectionConfigReturn(userName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3UserExists(resourceName, &user),
+					resource.TestCheckResourceAttrPtr(resourceName, "name", &user.Name),
+					resource.TestCheckResourceAttr(resourceName, "enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "email", "test2@acme.org"),
+					resource.TestCheckResourceAttr(resourceName, "login_protection.0.enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "login_protection.0.verification_method", "vmfa"),
+					resource.TestCheckResourceAttrSet(resourceName, "domain_id"),
+				),
+			},
 		},
 	})
 }
@@ -285,6 +307,33 @@ resource "opentelekomcloud_identity_user_v3" "user_1" {
   login_protection {
     enabled             = false
     verification_method = "email"
+  }
+}
+  `, userName)
+}
+
+func testAccIdentityV3UserProtectionConfigRemove(userName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  name     = "%s"
+  enabled  = false
+  password = "password123@!"
+  email    = "tEst2@acme.org"
+}
+  `, userName)
+}
+
+func testAccIdentityV3UserProtectionConfigReturn(userName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  name     = "%s"
+  enabled  = false
+  password = "password123@!"
+  email    = "tEst2@acme.org"
+
+  login_protection {
+    enabled             = true
+    verification_method = "vmfa"
   }
 }
   `, userName)

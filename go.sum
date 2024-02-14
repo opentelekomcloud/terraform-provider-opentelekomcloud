@@ -156,16 +156,6 @@ github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLA
 github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce h1:RPclfga2SEJmgMmz2k+Mg7cowZ8yv4Trqw9UsJby758=
 github.com/oklog/run v1.0.0 h1:Ru7dDtJNOyC66gQ5dQmaCa0qIsAUFY3sFpK1Xk8igrw=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
-github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240116111952-46714d6a306e h1:XDviCtsB5eQPiZSrWbow9n7LDxBEhEZFpVRSl/9BZyM=
-github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240116111952-46714d6a306e/go.mod h1:52hmT1BkuU3niQC6fgHOHdNkYOTh9ry4HYbmuSOjDkw=
-github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240118113117-e9d616499f22 h1:q5sjyUxI5bD1JIYnxP/muFdB8SXR1gNqKJRWDLqGwg4=
-github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240118113117-e9d616499f22/go.mod h1:M1F6OfSRZRzAmAFKQqSLClX952at5hx5rHe4UTEykgg=
-github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240122110039-091711fef789 h1:suTtN0M3BeEBpHfg7Jf9lZs9018mTnNCzDcsFniapCE=
-github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240122110039-091711fef789/go.mod h1:M1F6OfSRZRzAmAFKQqSLClX952at5hx5rHe4UTEykgg=
-github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240123131144-f4f7943050ea h1:ckn+dXw9X/qrsZ7im5Ql7c+b4SmARB0tVjx5P+bN7zo=
-github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240123131144-f4f7943050ea/go.mod h1:M1F6OfSRZRzAmAFKQqSLClX952at5hx5rHe4UTEykgg=
-github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240126173501-8fc2727ee549 h1:ulxXLQUQ70R12sG1OOmWBaXD7GYnrHTu9VlzKUu2wjM=
-github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240126173501-8fc2727ee549/go.mod h1:M1F6OfSRZRzAmAFKQqSLClX952at5hx5rHe4UTEykgg=
 github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240131123828-bbf049e73593 h1:QYlZMMkOYo4zy69bBBRWEYQEPii++LjjNzHL81JadAg=
 github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240131123828-bbf049e73593/go.mod h1:M1F6OfSRZRzAmAFKQqSLClX952at5hx5rHe4UTEykgg=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
