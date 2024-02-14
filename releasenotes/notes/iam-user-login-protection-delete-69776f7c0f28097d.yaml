@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IAM]** Fix ``login_protection`` deletion in ``resource/opentelekomcloud_identity_user_v3`` (`#2441 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2441>`_)
