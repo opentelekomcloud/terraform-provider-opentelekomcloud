@@ -71,6 +71,7 @@ func TestAccEcsV1InstanceIp(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "auto_recovery", "false"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "security_groups.#", "1"),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "data_disks.0.type", "ESSD"),
 					resource.TestCheckResourceAttrSet(resourceInstanceV1Name, "nics.0.port_id"),
 				),
 			},
@@ -582,7 +583,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
 
   data_disks {
     size = 10
-    type = "SAS"
+    type = "ESSD"
   }
 
   password                    = "Password@123"
