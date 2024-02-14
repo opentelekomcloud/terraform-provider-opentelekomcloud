@@ -225,6 +225,17 @@ func resourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, met
 	if userProtectionConfig != nil {
 		verMethod := userProtectionConfig.VerificationMethod
 		stateVerMethod := d.Get("login_protection.0.verification_method").(string)
+		if verMethod != "none" {
+			protection := []map[string]interface{}{
+				{
+					"enabled":             userProtectionConfig.Enabled,
+					"verification_method": verMethod,
+				},
+			}
+			mErr = multierror.Append(mErr,
+				d.Set("login_protection", protection),
+			)
+		}
 		if verMethod == "none" && stateVerMethod != "" {
 			verMethod = stateVerMethod
 			protection := []map[string]interface{}{
