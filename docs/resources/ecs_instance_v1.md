@@ -235,6 +235,7 @@ The following arguments are supported:
   * `SSD`: ultra-high I/O disk type. Available for all AZs.
   * `co-p1`: high I/O(performance-optimized) disk type.
   * `uh-l1`: ultra-high I/O(latency-optimized) disk type.
+  * `ESSD`: extreme SSD disk type.
 
 * `system_disk_size` - (Optional) The system disk size in GB, The value range is 1 to 1024.
   Changing this creates a new server.
@@ -276,6 +277,7 @@ The `data_disks` block supports:
   * `SSD`: ultra-high I/O disk type. Available for all AZs.
   * `co-p1`: high I/O(performance-optimized) disk type.
   * `uh-l1`: ultra-high I/O(latency-optimized) disk type.
+  * `ESSD`: extreme SSD disk type.
 
 * `size` - (Required) The size of the data disk in GB. The value range is 10 to 32768.
   Changing this creates a new server.
