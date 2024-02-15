@@ -1,4 +1,4 @@
 ---
 enhancements:
   - |
-    **[RDS]** Fix ssl for mysql instances for ``resource/opentelekomcloud_rds_instance_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[RDS]** Fix ssl for mysql instances for ``resource/opentelekomcloud_rds_instance_v3`` (`#2443 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2443>`_)
