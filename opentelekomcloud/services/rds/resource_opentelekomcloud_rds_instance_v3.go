@@ -533,12 +533,11 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
-
 	ip := getPublicIP(d)
 	if ip != "" {
-		if err := resourceRdsInstanceV3Read(clientCtx, d, meta); err != nil {
-			return err
+		rdsInstance, err := GetRdsInstance(client, d.Id())
+		if err != nil {
+			return fmterr.Errorf("error fetching RDS instance to set EIP: %s", err)
 		}
 		nw, err := config.NetworkingV2Client(config.GetRegion(d))
 		if err != nil {
@@ -548,7 +547,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		if err := assignEipToInstance(nw, ip, getPrivateIP(d), subnetID); err != nil {
+		if err := assignEipToInstance(nw, ip, rdsInstance.PrivateIps[0], subnetID); err != nil {
 			log.Printf("[WARN] failed to assign public IP: %s", err)
 		}
 	}
@@ -616,7 +615,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	return resourceRdsInstanceV3Read(clientCtx, d, meta)
+	return resourceRdsInstanceV3Read(ctx, d, meta)
 }
 
 func resourceRestorePoint(d *schema.ResourceData) backups.RestorePoint {
