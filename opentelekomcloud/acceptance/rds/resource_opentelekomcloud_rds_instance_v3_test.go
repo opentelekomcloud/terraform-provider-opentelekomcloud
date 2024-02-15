@@ -400,6 +400,26 @@ func TestAccRdsInstanceV3RestoreToPITR(t *testing.T) {
 	})
 }
 
+func TestAccRdsInstanceV3_SSLEnable(t *testing.T) {
+	postfix := acctest.RandString(3)
+	var rdsInstance instances.InstanceResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsInstanceV3EnableSSL(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "ssl_enable", "true"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.RdsV3Client(env.OS_REGION_NAME)
@@ -1187,6 +1207,45 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
   datastore {
     type    = "mysql"
     version = "8.0"
+  }
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccRdsInstanceV3EnableSSL(postfix string) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s"]
+  db {
+    password = "Postgres!120521"
+    type     = "MySQL"
+    version  = "5.7"
+    port     = "3306"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  volume {
+    type = "ULTRAHIGH"
+    size = 40
+  }
+  flavor     = "rds.mysql.c2.medium"
+  ssl_enable = true
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = 1
+  }
+
+  public_ips = [opentelekomcloud_networking_floatingip_v2.fip_1.address]
+
+  parameters = {
+    require_secure_transport = "ON"
   }
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
