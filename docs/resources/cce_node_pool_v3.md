@@ -79,7 +79,8 @@ the AZ based on the AZ sequence. For more details see
   Supported OS depends on kubernetes version of the cluster.
   * Clusters of Kubernetes `v1.13` or later support `EulerOS 2.5`.
   * Clusters of Kubernetes `v1.17` or later support `EulerOS 2.5` and `CentOS 7.7`.
-  * Clusters of Kubernetes `v1.21` or later support `EulerOS 2.5`, `EulerOS 2.9` and `CentOS 7.7`.
+  * Clusters of Kubernetes `v1.21` or later support `EulerOS 2.5`, `EulerOS 2.9`, and `CentOS 7.7`.
+  * Clusters of Kubernetes `v1.25` or later support `EulerOS 2.5`, `EulerOS 2.9`, `CentOS 7.7` and `Ubuntu 22.04`.
 
 * `name` - (Required) Node Pool Name.
 

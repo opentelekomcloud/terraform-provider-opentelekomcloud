@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    [CCE] Omit additional ``os`` validation in ``resource/opentelekomcloud_cce_node_v3`` (`#2452 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2452>`_)
