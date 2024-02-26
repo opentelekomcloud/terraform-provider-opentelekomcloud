@@ -37,7 +37,7 @@ func ResourceWafReferenceTableV1() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateFunc: validation.StringMatch(regexp.MustCompile("^([\\w]{1,64})$"),
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^(\w{1,64})$`),
 					"The name can contains of 1 to 64 characters."+
 						"Only letters, digits and underscores (_) are allowed."),
 			},
