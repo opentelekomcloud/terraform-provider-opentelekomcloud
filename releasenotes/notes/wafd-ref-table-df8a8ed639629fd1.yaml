@@ -1,0 +1,6 @@
+---
+features:
+  |
+  **[WAF]** Add new resource ``resource/opentelekomcloud_waf_dedicated_reference_table_v1`` (`#2453 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2453>`_)
+  |
+  **[WAF]** Add new data-source ``data-source/opentelekomcloud_waf_dedicated_reference_tables_v1`` (`#2453 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2453>`_)
