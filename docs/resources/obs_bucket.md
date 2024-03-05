@@ -349,6 +349,19 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 }
 ```
 
+### Bucket with set user domain names
+
+```hcl
+resource "opentelekomcloud_obs_bucket" "b" {
+  bucket = "my-tf-test-bucket"
+  user_domain_names = [
+    var.domain_1,
+    var.domain_2,
+    var.domain_3
+  ]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -397,6 +410,14 @@ The following arguments are supported:
 
 * `region` - (Optional) If specified, the region this bucket should reside in. Otherwise,
   the region used by the provider.
+
+* `user_domain_names` - (Optional) Specifies the user domain names. The restriction requirements for this field
+  are as follows:
+    + Each value must meet the domain name rules.
+    + The maximum length of a domain name is 256 characters.
+    + A custom domain name can only be used by one bucket.
+
+  -> When creating or updating the OBS bucket user domain names, the original user domain names will be overwritten.
 
 The `logging` object supports the following:
 
