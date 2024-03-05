@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[OBS]** Added custom user-defined domain names support for ``resource/opentelekomcloud_obs_bucket`` (`#2458 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2458>`_)

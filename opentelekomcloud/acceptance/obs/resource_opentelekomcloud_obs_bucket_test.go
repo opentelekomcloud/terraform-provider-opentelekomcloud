@@ -264,6 +264,32 @@ func TestAccObsBucket_WormPolicy(t *testing.T) {
 	})
 }
 
+func TestAccObsBucket_UserDomainNames(t *testing.T) {
+	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_obs_bucket.bucket"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObsBucketUserDomainNamesBasic(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "user_domain_names.0", "www.test-check.com"),
+				),
+			},
+			{
+				Config: testAccObsBucketUserDomainNamesUpdate(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "user_domain_names.0", "www.test.com"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccOBSBucket_VersioningObjectLockValidation(t *testing.T) {
 	rInt := acctest.RandInt()
 	resource.ParallelTest(t, resource.TestCase{
@@ -711,6 +737,30 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
   worm_policy {
     years = 1
   }
+}
+`, randInt)
+}
+
+func testAccObsBucketUserDomainNamesBasic(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket = "tf-test-bucket-%d"
+  user_domain_names = [
+    "www.test-check.com",
+    "www.test.com",
+    "www.tf.com"
+  ]
+}
+`, randInt)
+}
+
+func testAccObsBucketUserDomainNamesUpdate(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket = "tf-test-bucket-%d"
+  user_domain_names = [
+    "www.test.com"
+  ]
 }
 `, randInt)
 }
