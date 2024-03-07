@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[DCS]** `tags` feature implemented for ``resource/opentelekomcloud_dcs_instance_v1`` (`#2459 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2459>`_)

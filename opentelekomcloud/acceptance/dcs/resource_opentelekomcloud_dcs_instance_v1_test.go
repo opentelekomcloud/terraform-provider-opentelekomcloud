@@ -32,6 +32,8 @@ func TestAccDcsInstancesV1_basic(t *testing.T) {
 					testAccCheckDcsV1InstanceExists(resourceInstanceName, instance),
 					resource.TestCheckResourceAttr(resourceInstanceName, "name", instanceName),
 					resource.TestCheckResourceAttr(resourceInstanceName, "engine", "Redis"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "tags.environment", "basic"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "tags.managed_by", "terraform"),
 				),
 			},
 			{
@@ -40,6 +42,9 @@ func TestAccDcsInstancesV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceName, "backup_policy.0.begin_at", "01:00-02:00"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "backup_policy.0.save_days", "2"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "backup_policy.0.backup_at.#", "3"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "tags.environment", "update"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "tags.managed_by", "terraform"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "tags.user", "admin"),
 				),
 			},
 		},
@@ -327,6 +332,11 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
     parameter_name  = "timeout"
     parameter_value = "100"
   }
+
+  tags = {
+    environment = "basic"
+    managed_by  = "terraform"
+  }
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)
 }
@@ -367,6 +377,12 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
     parameter_id    = "1"
     parameter_name  = "timeout"
     parameter_value = "200"
+  }
+
+  tags = {
+    environment = "update"
+    managed_by  = "terraform"
+    user        = "admin"
   }
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)

@@ -49,6 +49,10 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
     period_type = "weekly"
     backup_at   = [1, 2, 4, 6]
   }
+  tags = {
+    environment = "basic"
+    managed_by  = "terraform"
+  }
 }
 ```
 
@@ -182,6 +186,8 @@ the default start time `02:00` and the default end time `06:00`.
   * `ip_list` - (Required, List) List of IP addresses in the whitelist group. A maximum of 20 IP addresses or IP address
   ranges can be added to an instance. Separate multiple IP addresses or IP address ranges with commas (,).
   IP address 0.0.0.0 and IP address range 0.0.0/0 are not supported.
+
+* `tags` - (Optional, Map) The key/value pairs to associate with the dcs instance.
 
 ## Attributes Reference
 
