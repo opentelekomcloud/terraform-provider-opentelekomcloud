@@ -49,6 +49,10 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
     period_type = "weekly"
     backup_at   = [1, 2, 4, 6]
   }
+  tags = {
+    environment = "basic"
+    managed_by  = "terraform"
+  }
 }
 ```
 
