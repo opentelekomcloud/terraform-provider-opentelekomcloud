@@ -13,9 +13,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/configs"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/lifecycle"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/others"
+	dcsTags "github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v2/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v2/whitelists"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -282,8 +284,21 @@ func ResourceDcsInstanceV1() *schema.Resource {
 					},
 				},
 			},
+			"tags": common.TagsSchema(),
 		},
 	}
+}
+
+func buildDcsTags(tagsMap map[string]interface{}) []tags.ResourceTag {
+	tagsList := make([]tags.ResourceTag, 0, len(tagsMap))
+	for k, v := range tagsMap {
+		tag := tags.ResourceTag{
+			Key:   k,
+			Value: v.(string),
+		}
+		tagsList = append(tagsList, tag)
+	}
+	return tagsList
 }
 
 func formatAts(src []interface{}) []int {
@@ -421,6 +436,7 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 		InstanceBackupPolicy: getInstanceBackupPolicy(d),
 		MaintainBegin:        d.Get("maintain_begin").(string),
 		MaintainEnd:          d.Get("maintain_end").(string),
+		Tags:                 buildDcsTags(d.Get("tags").(map[string]interface{})),
 	}
 
 	if ip, ok := d.GetOk("private_ip"); ok {
@@ -581,6 +597,15 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
+	if resourceTags, err := tags.Get(client, "instances", d.Id()).Extract(); err == nil {
+		tagMap := common.TagsToMap(resourceTags)
+		if err := d.Set("tags", tagMap); err != nil {
+			return diag.Errorf("[DEBUG] error saving tags for OpenTelekomCloud DCS instance (%s): %s", d.Id(), err)
+		}
+	} else {
+		log.Printf("[WARN] fetching tags of OpenTelekomCloud DCS instance failed: %s", err)
+	}
+
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
 	}
@@ -659,6 +684,14 @@ func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf("error waiting for instance (%s) to update whitelist: %w", d.Id(), err)
+		}
+	}
+
+	if d.HasChange("tags") {
+		oldVal, newVal := d.GetChange("tags")
+		err = updateDcsTags(client, d.Id(), oldVal.(map[string]interface{}), newVal.(map[string]interface{}))
+		if err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
@@ -798,4 +831,22 @@ func resourceDcsInstanceV1ImportState(ctx context.Context, d *schema.ResourceDat
 	results[0] = d
 
 	return results, nil
+}
+
+func updateDcsTags(c *golangsdk.ServiceClient, id string, oldVal, newVal map[string]interface{}) error {
+	if len(oldVal) > 0 {
+		tagList := buildDcsTags(oldVal)
+		err := dcsTags.Delete(c, id, tagList)
+		if err != nil {
+			return err
+		}
+	}
+	if len(newVal) > 0 {
+		tagList := buildDcsTags(newVal)
+		err := dcsTags.Create(c, id, tagList)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

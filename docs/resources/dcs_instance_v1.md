@@ -183,6 +183,8 @@ the default start time `02:00` and the default end time `06:00`.
   ranges can be added to an instance. Separate multiple IP addresses or IP address ranges with commas (,).
   IP address 0.0.0.0 and IP address range 0.0.0/0 are not supported.
 
+* `tags` - (Optional, Map) The key/value pairs to associate with the dcs instance.
+
 ## Attributes Reference
 
 The following attributes are exported:
