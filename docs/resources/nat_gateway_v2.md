@@ -18,7 +18,7 @@ variable "internal_network_id" {}
 resource "opentelekomcloud_nat_gateway_v2" "this" {
   name                = "tf_nat"
   description         = "NAT GW created by terraform"
-  spec                = "1"
+  spec                = "0"
   router_id           = var.router_id
   internal_network_id = var.internal_network_id
 
@@ -36,7 +36,7 @@ The following arguments are supported:
 
 * `description` - (Optional) The description of the NAT Gateway.
 
-* `spec` - (Required) The specification of the NAT Gateway, valid values are `"1"`, `"2"`, `"3"`, `"4"`.
+* `spec` - (Required) The specification of the NAT Gateway, valid values are `"0"`,`"1"`, `"2"`, `"3"`, `"4"`.
 
 * `tenant_id` - (Optional) The target tenant ID in which to allocate the NAT
   Gateway. Changing this creates a new NAT Gateway.
