@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/apigw/v2/gateway"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/configurations"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -54,9 +53,9 @@ func TestAccAPIGWv2Gateway_basic(t *testing.T) {
 
 func testAccCheckAPIGWv2GatewayDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
+	client, err := config.APIGWV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV1 client: %w", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ApiGateway v2 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -64,9 +63,9 @@ func testAccCheckAPIGWv2GatewayDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := configurations.Get(client, rs.Primary.ID)
+		_, err := gateway.Get(client, rs.Primary.ID)
 		if err == nil {
-			return fmt.Errorf("AS configuration still exists")
+			return fmt.Errorf("API Gateway configuration still exists")
 		}
 	}
 
@@ -87,7 +86,7 @@ func testAccCheckAPIGWv2GatewayExists(n string, configuration *gateway.Gateway) 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.APIGWV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV1 client: %w", err)
+			return fmt.Errorf("error creating OpenTelekomCloud APIGateway v2 client: %w", err)
 		}
 
 		found, err := gateway.Get(client, rs.Primary.ID)
@@ -96,7 +95,7 @@ func testAccCheckAPIGWv2GatewayExists(n string, configuration *gateway.Gateway) 
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("autoscaling Configuration not found")
+			return fmt.Errorf("ApiGateway Configuration not found")
 		}
 		configuration = found
 
