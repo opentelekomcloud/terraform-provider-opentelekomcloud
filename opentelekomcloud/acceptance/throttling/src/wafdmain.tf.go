@@ -24,6 +24,24 @@ data "opentelekomcloud_networking_secgroup_v2" "default_secgroup" {
   name = "default"
 }
 
+####################
+# WAFD INSTANCE part
+####################
+
+resource "opentelekomcloud_waf_dedicated_instance_v1" "wafd_1" {
+  name              = "wafd_throttling_test"
+  availability_zone = var.wafd_az
+  specification     = "waf.instance.professional"
+  flavor            = var.wafd_flavor
+  architecture      = var.wafd_arch
+  vpc_id            = opentelekomcloud_vpc_subnet_v1.subnet.vpc_id
+  subnet_id         = opentelekomcloud_vpc_subnet_v1.subnet.network_id
+
+  security_group = [
+    data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  ]
+}
+
 ##################
 # WAFD DOMAIN part
 ##################
