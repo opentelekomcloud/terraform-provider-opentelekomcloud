@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[DOC]** Added `backends` documentations with s3 example ``docs/backends.md`` (`#2463 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2463>`_)
