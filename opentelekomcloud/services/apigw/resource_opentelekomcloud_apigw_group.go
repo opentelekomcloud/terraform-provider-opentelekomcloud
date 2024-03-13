@@ -98,8 +98,8 @@ func createEnvironmentVariables(client *golangsdk.ServiceClient, instanceId, gro
 		for _, v := range envMap["variable"].(*schema.Set).List() {
 			variable := v.(map[string]interface{})
 			opt := env_vars.CreateOpts{
-				Name:          variable["name"].(string),
 				VariableValue: variable["value"].(string),
+				VariableName:  variable["name"].(string),
 				GroupID:       groupId,
 				EnvID:         envId,
 				GatewayID:     instanceId,
@@ -168,13 +168,11 @@ func queryEnvironmentVariables(client *golangsdk.ServiceClient, instanceId, grou
 	return pages, nil
 }
 
-// Classify all environment variables belonging to the API group according to the APIG environment.
 func flattenEnvironmentVariables(variables []env_vars.EnvVarsResp) []map[string]interface{} {
 	if len(variables) < 1 {
 		return nil
 	}
-	// Store all variables of the same environment in the corresponding list,
-	// and generate a map with the environment ID as the key name.
+
 	environmentMap := make(map[string]interface{})
 	for _, variable := range variables {
 		varMap := map[string]interface{}{
@@ -190,7 +188,7 @@ func flattenEnvironmentVariables(variables []env_vars.EnvVarsResp) []map[string]
 			environmentMap[variable.EnvID] = append(val.([]map[string]interface{}), varMap)
 		}
 	}
-	// Generate a schema set according to the key value of the map.
+
 	result := make([]map[string]interface{}, 0, len(environmentMap))
 	for k, v := range environmentMap {
 		envMap := map[string]interface{}{
@@ -225,7 +223,7 @@ func resourceGroupRead(_ context.Context, d *schema.ResourceData, meta interface
 		d.Set("name", resp.Name),
 		d.Set("description", resp.Description),
 		d.Set("registration_time", resp.RegisterTime),
-		d.Set("update_time", resp.UpdateTime),
+		d.Set("updated_at", resp.UpdateTime),
 	)
 	var variables []env_vars.EnvVarsResp
 	if variables, err = queryEnvironmentVariables(client, instanceId, groupId); err != nil {

@@ -7,71 +7,48 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/apigw/v2/gateway"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/apigw/v2/group"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/configurations"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-const resourceGroupName = "opentelekomcloud_apigw_group_v2.gateway"
+const resourceGroupName = "opentelekomcloud_apigw_group_v2.group"
 
 func TestAccAPIGWv2Group_basic(t *testing.T) {
 	var groupConfig group.GroupResp
-	name := fmt.Sprintf("group-%s", acctest.RandString(10))
+	name := acctest.RandString(10)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAPIGWv2GroupDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAPIGWv2GroupBasic(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAPIGWv2GroupExists(resourceGroupName, &groupConfig),
-					resource.TestCheckResourceAttr(resourceGroupName, "name", name),
-					resource.TestCheckResourceAttr(resourceGroupName, "spec_id", "BASIC"),
-					resource.TestCheckResourceAttr(resourceGroupName, "description", "test gateway"),
-					resource.TestCheckResourceAttr(resourceGroupName, "bandwidth_size", "5"),
-					resource.TestCheckResourceAttr(resourceGroupName, "maintain_begin", "22:00:00"),
+					resource.TestCheckResourceAttr(resourceGroupName, "name", "group_"+name),
+					resource.TestCheckResourceAttr(resourceGroupName, "description", "test description"),
+					resource.TestCheckResourceAttr(resourceGroupName, "environment.0.variable.0.name", "test-name"),
+					resource.TestCheckResourceAttr(resourceGroupName, "environment.0.variable.0.value", "test-value"),
 				),
 			},
 			{
 				Config: testAccAPIGWv2GroupUpdated(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAPIGWv2GroupExists(resourceGroupName, &groupConfig),
-					resource.TestCheckResourceAttr(resourceGroupName, "name", name+"-updated"),
-					resource.TestCheckResourceAttr(resourceGroupName, "description", "test gateway 2"),
-					resource.TestCheckResourceAttr(resourceGroupName, "bandwidth_size", "0"),
-					resource.TestCheckResourceAttr(resourceGroupName, "maintain_begin", "02:00:00"),
+					resource.TestCheckResourceAttr(resourceGroupName, "name", "group_"+name+"_updated"),
+					resource.TestCheckResourceAttr(resourceGroupName, "description", "test description updated"),
+					resource.TestCheckResourceAttr(resourceGroupName, "environment.0.variable.1.name", "test-name-2"),
+					resource.TestCheckResourceAttr(resourceGroupName, "environment.0.variable.1.value", "test-value-2"),
+					resource.TestCheckResourceAttr(resourceGroupName, "environment.0.variable.0.name", "test-name"),
+					resource.TestCheckResourceAttr(resourceGroupName, "environment.0.variable.0.value", "test-value"),
 				),
 			},
 		},
 	})
-}
-
-func testAccCheckAPIGWv2GroupDestroy(s *terraform.State) error {
-	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
-	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV1 client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_apigw_gateway_v2" {
-			continue
-		}
-
-		_, err := configurations.Get(client, rs.Primary.ID)
-		if err == nil {
-			return fmt.Errorf("AS configuration still exists")
-		}
-	}
-
-	return nil
 }
 
 func testAccCheckAPIGWv2GroupExists(n string, configuration *group.GroupResp) resource.TestCheckFunc {
@@ -85,19 +62,28 @@ func testAccCheckAPIGWv2GroupExists(n string, configuration *group.GroupResp) re
 			return fmt.Errorf("no ID is set")
 		}
 
+		rsgw, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("not found: %s", n)
+		}
+
+		if rsgw.Primary.ID == "" {
+			return fmt.Errorf("no ID is set")
+		}
+
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.APIGWV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV1 client: %w", err)
+			return fmt.Errorf("error creating OpenTelekomCloud APIGWv2 client: %w", err)
 		}
 
-		found, err := gateway.Get(client, rs.Primary.ID)
+		found, err := group.Get(client, rsgw.Primary.ID, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("autoscaling Configuration not found")
+			return fmt.Errorf("APIGW group not found")
 		}
 		configuration = found
 
@@ -106,7 +92,7 @@ func testAccCheckAPIGWv2GroupExists(n string, configuration *group.GroupResp) re
 }
 
 func TestAccAPIGWGroupV2ImportBasic(t *testing.T) {
-	name := fmt.Sprintf("gateway-%s", acctest.RandString(10))
+	name := acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -114,58 +100,76 @@ func TestAccAPIGWGroupV2ImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckAPIGWv2GatewayDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAPIGWv2GatewayBasic(name),
+				Config: testAccAPIGWv2GroupBasic(name),
 			},
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourceGroupName,
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"ingress_bandwidth_size",
-				},
+				ImportStateIdFunc: testAccAPIGWv2GroupImportStateIdFunc(),
 			},
 		},
 	})
 }
 
-func testAccAPIGWv2GroupBasic(gatewayName string) string {
+func testAccAPIGWv2GroupImportStateIdFunc() resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		var gatewayID string
+		var groupID string
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type == "opentelekomcloud_apigw_gateway_v2" {
+				gatewayID = rs.Primary.ID
+			} else if rs.Type == "opentelekomcloud_apigw_group_v2" && rs.Primary.ID != "" {
+				groupID = rs.Primary.ID
+			}
+		}
+		if gatewayID == "" || groupID == "" {
+			return "", fmt.Errorf("resource not found: %s/%s", gatewayID, groupID)
+		}
+		return fmt.Sprintf("%s/%s", gatewayID, groupID), nil
+	}
+}
+
+func testAccAPIGWv2GroupBasic(name string) string {
 	return fmt.Sprintf(`
 %s
 
-%s
+resource "opentelekomcloud_apigw_group_v2" "group"{
+  instance_id = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name        = "%s"
+  description = "test description"
 
-resource "opentelekomcloud_apigw_gateway_v2" "gateway"{
-  name                    = "%s"
-  spec_id                 = "BASIC"
-  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  security_group_id       = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-  availability_zones      = ["eu-de-01", "eu-de-02"]
-  description             = "test gateway"
-  bandwidth_size          = 5
-  maintain_begin          =  "22:00:00"
-  ingress_bandwidth_size  = 5
+  environment {
+    variable {
+      name  = "test-name"
+      value = "test-value"
+    }
+    environment_id = opentelekomcloud_apigw_environment_v2.env.id
+  }
 }
-`, common.DataSourceSubnet, common.DataSourceSecGroupDefault, gatewayName)
+`, testAccAPIGWv2EnvironmentBasic("gateway-"+name, "env_"+name), "group_"+name)
 }
 
-func testAccAPIGWv2GroupUpdated(gatewayName string) string {
+func testAccAPIGWv2GroupUpdated(name string) string {
 	return fmt.Sprintf(`
 %s
 
-%s
+resource "opentelekomcloud_apigw_group_v2" "group"{
+  instance_id = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name        = "%s"
+  description = "test description updated"
 
-resource "opentelekomcloud_apigw_gateway_v2" "gateway"{
-  name 					  = "%s-updated"
-  spec_id 				  = "BASIC"
-  vpc_id 				  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  security_group_id       = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-  availability_zones      = ["eu-de-01", "eu-de-02"]
-  description             = "test gateway 2"
-  bandwidth_size          = 0
-  maintain_begin          = "02:00:00"
-  ingress_bandwidth_size  = 5
+  environment {
+    variable {
+      name  = "test-name"
+      value = "test-value"
+    }
+    variable {
+      name  = "test-name-2"
+      value = "test-value-2"
+    }
+    environment_id = opentelekomcloud_apigw_environment_v2.env.id
+  }
 }
-`, common.DataSourceSubnet, common.DataSourceSecGroupDefault, gatewayName)
+`, testAccAPIGWv2EnvironmentBasic("gateway-"+name, "env_"+name), "group_"+name+"_updated")
 }
