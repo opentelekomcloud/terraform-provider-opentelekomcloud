@@ -390,7 +390,7 @@ func resourceGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		}
 
 		stateConf := &resource.StateChangeConf{
-			Pending:      []string{"Updating"},
+			Pending:      []string{"PENDING"},
 			Target:       []string{"Running"},
 			Refresh:      InstanceStateRefreshFunc(client, d.Id()),
 			Timeout:      d.Timeout(schema.TimeoutUpdate),
@@ -406,7 +406,7 @@ func resourceGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	return resourceGatewayRead(ctx, d, meta)
 }
 
-func resourceGatewayDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.APIGWV2Client(config.GetRegion(d))
 	if err != nil {
@@ -415,6 +415,19 @@ func resourceGatewayDelete(_ context.Context, d *schema.ResourceData, meta inter
 	if err = gateway.Delete(client, d.Id()); err != nil {
 		return diag.Errorf("error deleting the dedicated instance (%s): %s", d.Id(), err)
 	}
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	stateConf := &resource.StateChangeConf{
+		Pending:      []string{"PENDING"},
+		Target:       []string{"COMPLETED"},
+		Refresh:      InstanceStateRefreshFunc(client, d.Id()),
+		Timeout:      d.Timeout(schema.TimeoutDelete),
+		Delay:        20 * time.Second,
+		PollInterval: 20 * time.Second,
+	}
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -444,6 +457,9 @@ func InstanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceId string
 	return func() (interface{}, string, error) {
 		resp, err := gateway.Get(client, instanceId)
 		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
+				return resp, "COMPLETED", nil
+			}
 			return resp, "", err
 		}
 
@@ -455,6 +471,7 @@ func InstanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceId string
 		if resp.Status == "Running" {
 			return resp, resp.Status, nil
 		}
-		return resp, "Updating", nil
+
+		return resp, "PENDING", nil
 	}
 }

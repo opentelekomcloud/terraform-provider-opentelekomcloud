@@ -11,7 +11,6 @@ API Gateway (APIG) is a high-performance, high-availability, and high-security A
 manage, and deploy APIs at any scale.
 With just a few clicks, you can integrate internal systems, and selectively expose capabilities with minimal costs and risks.
 
-
 ## Example Usage
 
 ```hcl

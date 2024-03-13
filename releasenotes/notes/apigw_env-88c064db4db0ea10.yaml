@@ -1,0 +1,7 @@
+---
+features:
+  |
+  **[APIGW]** Add new resource ``resource/opentelekomcloud_apigw_environment_v2`` (`#2464 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2464>`_)
+enhancements:
+  |
+  **[APIGW]** Improve deletion for ``resource/opentelekomcloud_apigw_gateway_v2`` (`#2464 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2464>`_)
