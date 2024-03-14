@@ -100,13 +100,13 @@ func TestAccAPIGWEnvironmentV2ImportBasic(t *testing.T) {
 				ResourceName:      resourceNameEnvironment,
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateIdFunc: testAccCCENodePoolV3ImportStateIdFunc(),
+				ImportStateIdFunc: testAccAPIGWv2EnvironmentImportStateIdFunc(),
 			},
 		},
 	})
 }
 
-func testAccCCENodePoolV3ImportStateIdFunc() resource.ImportStateIdFunc {
+func testAccAPIGWv2EnvironmentImportStateIdFunc() resource.ImportStateIdFunc {
 	return func(s *terraform.State) (string, error) {
 		var gatewayID string
 		var envName string
