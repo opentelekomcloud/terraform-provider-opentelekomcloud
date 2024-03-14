@@ -18,7 +18,7 @@ const wafdRefTableResourceName = "opentelekomcloud_waf_dedicated_reference_table
 
 func TestAccWafDedicatedReferenceTableV1_basic(t *testing.T) {
 	var refTable rules.ReferenceTable
-	var name = fmt.Sprintf("wafd_rt_%s", acctest.RandString(5))
+	var name = fmt.Sprintf("wafd_rt.v1-%s", acctest.RandString(5))
 	updateName := name + "_update"
 
 	resource.Test(t, resource.TestCase{

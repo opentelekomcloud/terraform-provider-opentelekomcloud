@@ -1,0 +1,4 @@
+---
+fixes:
+  |
+  **[WAF]** Fix ``resource/opentelekomcloud_waf_dedicated_reference_table_v1`` name validation (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
