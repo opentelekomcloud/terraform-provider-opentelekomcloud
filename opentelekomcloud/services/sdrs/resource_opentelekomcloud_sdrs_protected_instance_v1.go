@@ -95,9 +95,11 @@ func ResourceSdrsProtectedInstanceV1() *schema.Resource {
 
 func resourceSdrsProtectedInstanceV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SdrsV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, sdrsClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.SdrsV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomcomCloud SDRS Client: %w", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	createOpts := protectedinstances.CreateOpts{
@@ -137,11 +139,13 @@ func resourceSdrsProtectedInstanceV1Create(ctx context.Context, d *schema.Resour
 	return resourceSdrsProtectedInstanceV1Read(ctx, d, meta)
 }
 
-func resourceSdrsProtectedInstanceV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSdrsProtectedInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SdrsV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, sdrsClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.SdrsV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	instance, err := protectedinstances.Get(client, d.Id()).Extract()
@@ -184,9 +188,11 @@ func resourceSdrsProtectedInstanceV1Read(_ context.Context, d *schema.ResourceDa
 
 func resourceSdrsProtectedInstanceV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SdrsV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, sdrsClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.SdrsV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud SDRS Client: %w", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 	var updateOpts protectedinstances.UpdateOpts
 
@@ -208,11 +214,13 @@ func resourceSdrsProtectedInstanceV1Update(ctx context.Context, d *schema.Resour
 	return resourceSdrsProtectedInstanceV1Read(ctx, d, meta)
 }
 
-func resourceSdrsProtectedInstanceV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSdrsProtectedInstanceV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SdrsV1Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, sdrsClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.SdrsV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud SDRS client: %w", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	deleteTargetServer := d.Get("delete_target_server").(bool)

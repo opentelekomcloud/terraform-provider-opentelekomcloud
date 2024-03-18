@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sdrs/v1/protectiongroups"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -72,8 +73,12 @@ func ResourceSdrsProtectiongroupV1() *schema.Resource {
 
 func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-
-	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
+	sdrsClient, err := common.ClientFromCtx(ctx, sdrsClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.SdrsV1Client(config.GetRegion(d))
+	})
+	if err != nil {
+		return fmterr.Errorf(errCreationV1Client, err)
+	}
 
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomcomCloud SDRS Client: %s", err)
@@ -112,11 +117,13 @@ func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.Resource
 	return fmterr.Errorf("unexpected conversion error in resourceSdrsProtectiongroupV1Create.")
 }
 
-func resourceSdrsProtectiongroupV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSdrsProtectiongroupV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
+	sdrsClient, err := common.ClientFromCtx(ctx, sdrsClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.SdrsV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 	n, err := protectiongroups.Get(sdrsClient, d.Id()).Extract()
 
@@ -147,9 +154,11 @@ func resourceSdrsProtectiongroupV1Read(_ context.Context, d *schema.ResourceData
 
 func resourceSdrsProtectiongroupV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
+	sdrsClient, err := common.ClientFromCtx(ctx, sdrsClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.SdrsV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud SDRS Client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 	var updateOpts protectiongroups.UpdateOpts
 
@@ -165,11 +174,13 @@ func resourceSdrsProtectiongroupV1Update(ctx context.Context, d *schema.Resource
 	return resourceSdrsProtectiongroupV1Read(ctx, d, meta)
 }
 
-func resourceSdrsProtectiongroupV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSdrsProtectiongroupV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
+	sdrsClient, err := common.ClientFromCtx(ctx, sdrsClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.SdrsV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	n, err := protectiongroups.Delete(sdrsClient, d.Id()).ExtractJobResponse()

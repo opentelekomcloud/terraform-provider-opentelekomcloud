@@ -6,7 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sdrs/v1/domains"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -30,11 +32,13 @@ func DataSourceSdrsDomainV1() *schema.Resource {
 	}
 }
 
-func dataSourceSdrsDomainV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSdrsDomainV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	sdrsV1Client, err := config.SdrsV1Client(config.GetRegion(d))
+	sdrsV1Client, err := common.ClientFromCtx(ctx, sdrsClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.SdrsV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating SDRS client: %s", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	v, err := domains.Get(sdrsV1Client).Extract()
