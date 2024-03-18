@@ -1,0 +1,6 @@
+features:
+  - |
+    **[SDRS]** Add new resource ``resource/opentelekomcloud_sdrs_replication_pair_v1`` (`#2471 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2471>`_)
+enhancements:
+  - |
+    **[SDRS]** Added context support for all SDRS resources / data sources (`#2471 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2471>`_)
