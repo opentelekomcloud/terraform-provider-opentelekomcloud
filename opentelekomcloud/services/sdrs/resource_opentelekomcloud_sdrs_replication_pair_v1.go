@@ -110,7 +110,9 @@ func resourceSDRSReplicationPairV1Create(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 	d.SetId(replicationPairID.(string))
-	return resourceSDRSReplicationPairV1Read(ctx, d, meta)
+
+	clientCtx := common.CtxWithClient(ctx, client, sdrsClientV1)
+	return resourceSDRSReplicationPairV1Read(clientCtx, d, meta)
 }
 
 func resourceSDRSReplicationPairV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -166,7 +168,9 @@ func resourceSDRSReplicationPairV1Update(ctx context.Context, d *schema.Resource
 			return diag.Errorf("error updating SDRS replication pair, %s", err)
 		}
 	}
-	return resourceSDRSReplicationPairV1Read(ctx, d, meta)
+
+	clientCtx := common.CtxWithClient(ctx, client, sdrsClientV1)
+	return resourceSDRSReplicationPairV1Read(clientCtx, d, meta)
 }
 
 func resourceSDRSReplicationPairV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

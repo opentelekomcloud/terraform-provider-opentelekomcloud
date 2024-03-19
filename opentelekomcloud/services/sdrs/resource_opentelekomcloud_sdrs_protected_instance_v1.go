@@ -136,7 +136,9 @@ func resourceSdrsProtectedInstanceV1Create(ctx context.Context, d *schema.Resour
 			return fmterr.Errorf("error setting tags of SDRS Protected Instance: %s", err)
 		}
 	}
-	return resourceSdrsProtectedInstanceV1Read(ctx, d, meta)
+
+	clientCtx := common.CtxWithClient(ctx, client, sdrsClientV1)
+	return resourceSdrsProtectedInstanceV1Read(clientCtx, d, meta)
 }
 
 func resourceSdrsProtectedInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -211,7 +213,9 @@ func resourceSdrsProtectedInstanceV1Update(ctx context.Context, d *schema.Resour
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud SDRS Protected Instance: %w", err)
 	}
-	return resourceSdrsProtectedInstanceV1Read(ctx, d, meta)
+
+	clientCtx := common.CtxWithClient(ctx, client, sdrsClientV1)
+	return resourceSdrsProtectedInstanceV1Read(clientCtx, d, meta)
 }
 
 func resourceSdrsProtectedInstanceV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

@@ -86,7 +86,9 @@ func resourceSDRSReplicationAttachV1Create(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 	d.SetId(formatAttachId(instanceID, replicationID))
-	return resourceSDRSReplicationAttachV1Read(ctx, d, meta)
+
+	clientCtx := common.CtxWithClient(ctx, client, sdrsClientV1)
+	return resourceSDRSReplicationAttachV1Read(clientCtx, d, meta)
 }
 
 func resourceSDRSReplicationAttachV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

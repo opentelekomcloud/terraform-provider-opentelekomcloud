@@ -111,7 +111,8 @@ func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.Resource
 
 	if id, ok := entity.(string); ok {
 		d.SetId(id)
-		return resourceSdrsProtectiongroupV1Read(ctx, d, meta)
+		clientCtx := common.CtxWithClient(ctx, sdrsClient, sdrsClientV1)
+		return resourceSdrsProtectiongroupV1Read(clientCtx, d, meta)
 	}
 
 	return fmterr.Errorf("unexpected conversion error in resourceSdrsProtectiongroupV1Create.")
@@ -171,7 +172,9 @@ func resourceSdrsProtectiongroupV1Update(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud SDRS Protectiongroup: %s", err)
 	}
-	return resourceSdrsProtectiongroupV1Read(ctx, d, meta)
+
+	clientCtx := common.CtxWithClient(ctx, sdrsClient, sdrsClientV1)
+	return resourceSdrsProtectiongroupV1Read(clientCtx, d, meta)
 }
 
 func resourceSdrsProtectiongroupV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
