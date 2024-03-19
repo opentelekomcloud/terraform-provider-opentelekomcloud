@@ -511,6 +511,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_sdrs_protected_instance_v1":                sdrs.ResourceSdrsProtectedInstanceV1(),
 			"opentelekomcloud_sdrs_protectiongroup_v1":                   sdrs.ResourceSdrsProtectiongroupV1(),
 			"opentelekomcloud_sdrs_replication_pair_v1":                  sdrs.ResourceSDRSReplicationPairV1(),
+			"opentelekomcloud_sdrs_replication_attach_v1":                sdrs.ResourceSDRSReplicationAttachV1(),
 			"opentelekomcloud_vpnaas_ipsec_policy_v2":                    vpn.ResourceVpnIPSecPolicyV2(),
 			"opentelekomcloud_vpnaas_service_v2":                         vpn.ResourceVpnServiceV2(),
 			"opentelekomcloud_vpnaas_ike_policy_v2":                      vpn.ResourceVpnIKEPolicyV2(),

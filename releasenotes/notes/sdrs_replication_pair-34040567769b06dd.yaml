@@ -1,3 +1,4 @@
+---
 features:
   - |
     **[SDRS]** Add new resource ``resource/opentelekomcloud_sdrs_replication_pair_v1`` (`#2471 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2471>`_)
