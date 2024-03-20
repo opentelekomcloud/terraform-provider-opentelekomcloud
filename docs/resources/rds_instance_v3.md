@@ -340,6 +340,7 @@ The following arguments are supported:
 
 * `ha_replication_mode` - (Optional, ForceNew) Specifies the replication mode for the standby DB instance. For MySQL, the value
   is async or semisync. For PostgreSQL, the value is async or sync. For Microsoft SQL Server, the value is sync.
+  Parameter is required for HA clusters.
 
 -> Async indicates the asynchronous replication mode. `semisync` indicates the
   semi-synchronous replication mode. sync indicates the synchronous

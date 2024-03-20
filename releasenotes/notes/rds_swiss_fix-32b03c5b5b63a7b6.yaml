@@ -1,5 +1,5 @@
 ---
 fixes:
   - |
-    **[RDS]** Fix ``resource/opentelekomcloud_rds_instance_v3`` Read and version check (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[RDS]** Fix ``resource/opentelekomcloud_rds_instance_v3`` Read and version check (`#2474 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2474>`_)
 
