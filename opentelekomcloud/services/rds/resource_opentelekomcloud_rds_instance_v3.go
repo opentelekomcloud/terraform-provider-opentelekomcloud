@@ -48,7 +48,6 @@ func ResourceRdsInstanceV3() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-			validateRDSv3Version("db"),
 			validateRDSv3Flavor("flavor"),
 			common.ValidateSubnet("subnet_id"),
 			common.ValidateVPC("vpc_id"),
@@ -1132,8 +1131,9 @@ func getMasterID(nodes []instances.Nodes) (nodeID string) {
 
 func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
+	region := config.GetRegion(d)
 	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
-		return config.RdsV3Client(config.GetRegion(d))
+		return config.RdsV3Client(region)
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreateClient, err)
@@ -1237,7 +1237,10 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		dbInfo = dbRaw[0].(map[string]interface{})
 	}
 	dbInfo["type"] = rdsInstance.DataStore.Type
-	dbInfo["version"] = rdsInstance.DataStore.Version
+	// backwards compatibility for minor versions on Swiss
+	if region != "eu-ch2" || (region == "eu-ch2" && checkMinorVersion(dbInfo)) {
+		dbInfo["version"] = rdsInstance.DataStore.Version
+	}
 	dbInfo["port"] = rdsInstance.Port
 	dbInfo["user_name"] = rdsInstance.DbUserName
 	dbList := []interface{}{dbInfo}
@@ -1251,12 +1254,11 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 	volume["type"] = rdsInstance.Volume.Type
 	volume["disk_encryption_id"] = rdsInstance.DiskEncryptionId
 
-	if dbInfo["type"] == "MySQL" {
+	if dbInfo["type"] == "MySQL" && region != "eu-ch2" {
 		resp, err := instances.GetAutoScaling(client, d.Id())
 		if err != nil {
 			log.Printf("[ERROR] error query automatic expansion configuration of the instance storage: %s", err)
-		}
-		if resp.SwitchOption {
+		} else if resp.SwitchOption {
 			volume["limit_size"] = resp.LimitSize
 			volume["trigger_threshold"] = resp.TriggerThreshold
 		}
@@ -1343,39 +1345,6 @@ func resourceRdsInstanceV3Delete(ctx context.Context, d *schema.ResourceData, me
 
 	d.SetId("")
 	return nil
-}
-
-func validateRDSv3Version(argumentName string) schema.CustomizeDiffFunc {
-	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-		config, ok := meta.(*cfg.Config)
-		if !ok {
-			return fmt.Errorf("error retreiving configuration: can't convert %v to Config", meta)
-		}
-
-		client, err := config.RdsV3Client(config.GetRegion(d))
-		if err != nil {
-			return fmt.Errorf(errCreateClient, err)
-		}
-
-		dataStoreInfo := d.Get(argumentName).([]interface{})[0].(map[string]interface{})
-		datastoreVersions, err := getRdsV3VersionList(client, dataStoreInfo["type"].(string))
-		if err != nil {
-			return fmt.Errorf("unable to get datastore versions: %s", err)
-		}
-
-		var matches = false
-		for _, datastore := range datastoreVersions {
-			if datastore == dataStoreInfo["version"] {
-				matches = true
-				break
-			}
-		}
-		if !matches {
-			return fmt.Errorf("can't find version `%s`", dataStoreInfo["version"])
-		}
-
-		return nil
-	}
 }
 
 func validateRDSv3Flavor(argName string) schema.CustomizeDiffFunc {

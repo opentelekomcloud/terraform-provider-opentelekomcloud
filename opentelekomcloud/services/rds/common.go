@@ -3,6 +3,7 @@ package rds
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/jmespath/go-jmespath"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -73,4 +74,15 @@ func handleMultiOperationsError(err error) (bool, error) {
 	}
 	// Operation execution failed due to some resource or server issues, no need to try again.
 	return false, err
+}
+
+func checkMinorVersion(dbInfo map[string]interface{}) bool {
+	// returns true if version is not minor
+	version, ok := dbInfo["version"].(string)
+	if !ok {
+		return true
+	}
+	parts := strings.SplitN(version, ".", 3)
+
+	return len(parts) <= 2
 }
