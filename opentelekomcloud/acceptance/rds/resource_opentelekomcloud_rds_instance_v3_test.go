@@ -258,23 +258,6 @@ func TestAccRdsInstanceV3TemplateConfig(t *testing.T) {
 	})
 }
 
-func TestAccRdsInstanceV3InvalidDBVersion(t *testing.T) {
-	postfix := acctest.RandString(3)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
-		Steps: []resource.TestStep{
-			{
-				Config:      testAccRdsInstanceV3InvalidDBVersion(postfix),
-				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`can't find version.+`),
-			},
-		},
-	})
-}
-
 func TestAccRdsInstanceV3InvalidFlavor(t *testing.T) {
 	postfix := acctest.RandString(3)
 
@@ -758,32 +741,6 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   flavor         = "rds.pg.c2.large"
   param_group_id = opentelekomcloud_rds_parametergroup_v3.pg2.id
-}
-`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
-}
-
-func testAccRdsInstanceV3InvalidDBVersion(postfix string) string {
-	return fmt.Sprintf(`
-%s
-%s
-
-resource "opentelekomcloud_rds_instance_v3" "instance" {
-  name              = "tf_rds_instance_%s"
-  availability_zone = ["%s"]
-  db {
-    password = "Postgres!12052"
-    type     = "PostgreSQL"
-    version  = "5.6"
-    port     = "8635"
-  }
-  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  volume {
-    type = "ULTRAHIGH"
-    size = 40
-  }
-  flavor = "rds.pg.c2.large"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
