@@ -2,6 +2,7 @@ package rds
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/go-multierror"
@@ -253,4 +254,38 @@ func resourceRdsConfigurationV3Delete(_ context.Context, d *schema.ResourceData,
 
 	d.SetId("")
 	return nil
+}
+
+func validateRDSv3Version(argumentName string) schema.CustomizeDiffFunc {
+	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+		config, ok := meta.(*cfg.Config)
+		if !ok {
+			return fmt.Errorf("error retreiving configuration: can't convert %v to Config", meta)
+		}
+
+		client, err := config.RdsV3Client(config.GetRegion(d))
+		if err != nil {
+			return fmt.Errorf(errCreateClient, err)
+		}
+
+		dataStoreInfo := d.Get(argumentName).([]interface{})[0].(map[string]interface{})
+		datastoreVersions, err := getRdsV3VersionList(client, dataStoreInfo["type"].(string))
+		if err != nil {
+			return fmt.Errorf("unable to get datastore versions: %s", err)
+		}
+
+		var matches = false
+		for _, datastore := range datastoreVersions {
+			// removeMinorVersion is required for SWISS
+			if datastore == dataStoreInfo["version"] {
+				matches = true
+				break
+			}
+		}
+		if !matches {
+			return fmt.Errorf("can't find version `%s`", dataStoreInfo["version"])
+		}
+
+		return nil
+	}
 }
