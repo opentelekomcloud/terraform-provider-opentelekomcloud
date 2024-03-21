@@ -9,6 +9,11 @@ Up-to-date reference of API arguments for RDS parameter group rule you can get a
 
 Manages a RDSv3 parametergroup resource within OpenTelekomCloud.
 
+-> **NOTE:** When you create a PostgreSQL parameter template, some specification parameters do not take effect and are
+invisible after the parameter template is created. For more information see [Parameter Template Constraints](https://docs.otc.t-systems.com/relational-database-service/api-ref/api_v3_recommended/parameter_configuration/creating_a_parameter_template.html#constraints).
+
+These parameters can be directly applied in `opentelekomcloud_rds_instance_v3` resource by providing a `parameters` argument.
+
 ## Example Usage
 
 ```hcl
