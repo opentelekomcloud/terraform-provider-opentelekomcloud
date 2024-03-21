@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[RDS]** Added constraints information for PostgreSQL templates for ``resource/opentelekomcloud_rds_parametergroup_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
