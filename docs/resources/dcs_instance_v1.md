@@ -269,7 +269,7 @@ The following attributes are exported:
 
 ## Import
 
-DCS instance can be imported using  `instance_name`, e.g.
+DCS instance can be imported using  `id`, e.g.
 ```shell
-$ terraform import opentelekomcloud_dcs_instance_v1.instance instance_name
+$ terraform import opentelekomcloud_dcs_instance_v1.instance instance_id
 ```
