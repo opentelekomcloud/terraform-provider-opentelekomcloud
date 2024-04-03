@@ -140,7 +140,8 @@ The following arguments are supported:
   * `cce.s2.large` - large-scale HA cluster (up to 1000 nodes).
   * `cce.s2.xlarge` - ultra-large-scale, high availability cluster (<= 2,000 nodes).
 
-* `cluster_version` - (Optional) For the cluster version, possible values are `v1.25`, `v1.23`.
+* `cluster_version` - (Optional) For the cluster version, possible values are `v1.27`, `v1.25`, `v1.23`, `v1.21`.
+  If this parameter is not set, the cluster of the latest version is created by default.
   Changing this parameter will create a new cluster resource. [OTC-API](https://docs.otc.t-systems.com/en-us/api2/cce/cce_02_0236.html)
 
 * `cluster_type` - (Required) Cluster Type, possible values are `VirtualMachine` and `BareMetal`. Changing this parameter will create a new cluster resource.
