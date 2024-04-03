@@ -1,4 +1,4 @@
 ---
 other:
   - |
-    **[CCE]** Update cluster version info for ``resource/opentelekomcloud_cce_cluster_v3`` documentation (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[CCE]** Update cluster version info for ``resource/opentelekomcloud_cce_cluster_v3`` documentation (`#2479 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2479>`_)
