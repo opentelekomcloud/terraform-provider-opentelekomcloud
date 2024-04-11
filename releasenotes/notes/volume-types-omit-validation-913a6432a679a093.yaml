@@ -1,0 +1,6 @@
+---
+other:
+  - |
+    **[AS]** ``volume_type`` validation now removed from ``resource/opentelekomcloud_as_configuration_v1.go`` (`#2482 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2482>`_)
+  - |
+    **[MRS]** ``volume_type`` and ``master_data_volume_type`` validation now removed from ``resource/opentelekomcloud_mrs_cluster_v1.go`` (`#2482 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2482>`_)
