@@ -98,9 +98,6 @@ func ResourceASConfiguration() *schema.Resource {
 										Type:     schema.TypeString,
 										Required: true,
 										ForceNew: true,
-										ValidateFunc: validation.StringInSlice([]string{
-											"SATA", "SAS", "SSD", "co-p1", "uh-l1",
-										}, false),
 									},
 									"disk_type": {
 										Type:     schema.TypeString,
