@@ -109,9 +109,6 @@ func ResourceMRSClusterV1() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"SATA", "SAS", "SSD",
-				}, false),
 			},
 			"volume_size": {
 				Type:     schema.TypeInt,
@@ -124,9 +121,6 @@ func ResourceMRSClusterV1() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"SATA", "SAS", "SSD",
-				}, false),
 			},
 			"master_data_volume_size": {
 				Type:     schema.TypeInt,
@@ -145,9 +139,6 @@ func ResourceMRSClusterV1() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"SATA", "SAS", "SSD",
-				}, false),
 			},
 			"core_data_volume_size": {
 				Type:     schema.TypeInt,
