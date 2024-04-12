@@ -39,6 +39,7 @@ func TestAccWafDedicatedDomainV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(wafdDomainResourceName, "server.0.port", "8080"),
 					resource.TestCheckResourceAttr(wafdDomainResourceName, "server.0.address", "192.168.0.10"),
 					resource.TestCheckResourceAttr(wafdDomainResourceName, "server.0.type", "ipv4"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "timeout_config.0.connect_timeout", "20"),
 				),
 			},
 			{
@@ -103,6 +104,55 @@ func TestAccWafDedicatedDomainV1_basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"keep_policy"},
+			},
+		},
+	})
+}
+
+func TestAccWafDedicatedDomainV1_timeoutConfig(t *testing.T) {
+	var domain domains.Host
+	var hostName = fmt.Sprintf("wafd%s", acctest.RandString(5))
+	log.Printf("[DEBUG] The opentelekomcloud Waf dedicated instance test running in '%s' region.", env.OS_REGION_NAME)
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafDedicateDomainV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWafDedicatedDomainV1_basicUpdate(hostName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckWafDedicatedDomainV1Exists(
+						wafdDomainResourceName, &domain),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "domain", fmt.Sprintf("www.%s.com", hostName)),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "proxy", "false"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "server.#", "2"),
+				),
+			},
+			{
+				Config: testAccWafDedicatedDomainV1_timeoutConfig(hostName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckWafDedicatedDomainV1Exists(
+						wafdDomainResourceName, &domain),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "domain", fmt.Sprintf("www.%s.com", hostName)),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "proxy", "false"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "server.#", "2"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "timeout_config.0.connect_timeout", "200"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "timeout_config.0.read_timeout", "100"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "timeout_config.0.send_timeout", "50"),
+				),
+			},
+			{
+				Config: testAccWafDedicatedDomainV1_timeoutConfigUpdate(hostName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckWafDedicatedDomainV1Exists(
+						wafdDomainResourceName, &domain),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "domain", fmt.Sprintf("www.%s.com", hostName)),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "proxy", "false"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "server.#", "2"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "timeout_config.0.connect_timeout", "150"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "timeout_config.0.read_timeout", "200"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "timeout_config.0.send_timeout", "100"),
+				),
 			},
 		},
 	})
@@ -188,6 +238,9 @@ resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
     port            = 8080
     type            = "ipv4"
     vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  }
+  timeout_config {
+    connect_timeout = 20
   }
 }
 `, common.DataSourceSubnet, name)
@@ -303,4 +356,96 @@ resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
 
 %s
 `, common.DataSourceSubnet, name, testAccWafDedicatedCertificateV1Basic)
+}
+
+func testAccWafDedicatedDomainV1_timeoutConfig(name string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
+  name            = "domain_policy_1"
+  protection_mode = "log"
+  full_detection  = false
+  level           = 2
+
+  options {
+    crawler    = true
+    web_attack = true
+  }
+}
+
+resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
+  domain      = "www.%s.com"
+  keep_policy = false
+  proxy       = false
+
+  server {
+    client_protocol = "HTTP"
+    server_protocol = "HTTP"
+    address         = "192.168.0.10"
+    port            = 8080
+    type            = "ipv4"
+    vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  }
+  server {
+    client_protocol = "HTTP"
+    server_protocol = "HTTP"
+    address         = "192.168.0.11"
+    port            = 80
+    type            = "ipv4"
+    vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  }
+  timeout_config {
+    connect_timeout = 200
+    read_timeout    = 100
+    send_timeout    = 50
+  }
+}
+`, common.DataSourceSubnet, name)
+}
+
+func testAccWafDedicatedDomainV1_timeoutConfigUpdate(name string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
+  name            = "domain_policy_1"
+  protection_mode = "log"
+  full_detection  = false
+  level           = 2
+
+  options {
+    crawler    = true
+    web_attack = true
+  }
+}
+
+resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
+  domain      = "www.%s.com"
+  keep_policy = false
+  proxy       = false
+
+  server {
+    client_protocol = "HTTP"
+    server_protocol = "HTTP"
+    address         = "192.168.0.10"
+    port            = 8080
+    type            = "ipv4"
+    vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  }
+  server {
+    client_protocol = "HTTP"
+    server_protocol = "HTTP"
+    address         = "192.168.0.11"
+    port            = 80
+    type            = "ipv4"
+    vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  }
+  timeout_config {
+    connect_timeout = 150
+    read_timeout    = 200
+    send_timeout    = 100
+  }
+}
+`, common.DataSourceSubnet, name)
 }

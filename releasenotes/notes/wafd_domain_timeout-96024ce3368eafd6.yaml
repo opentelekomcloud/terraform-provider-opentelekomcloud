@@ -1,0 +1,4 @@
+---
+enhancements:
+  |
+  **[WAF]** Add `timeout_config` setting for ``resource/opentelekomcloud_waf_dedicated_domain_v1`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
