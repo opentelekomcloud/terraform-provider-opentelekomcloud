@@ -32,6 +32,12 @@ resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
     type            = "ipv4"
     vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   }
+
+  timeout_config {
+    connect_timeout = 150
+    read_timeout    = 200
+    send_timeout    = 100
+  }
 }
 ```
 
@@ -160,6 +166,16 @@ The following arguments are supported:
 
   -> **NOTE:** Tls must be set to `TLS v1.2`, and cipher must be set to `cipher_2`.
 
+* `timeout_config` - (Optional, List) Specifies the timeout configuration.
+  The `timeout_config` structure is documented below.
+
+The `timeout_config` block supports:
+
+* `connect_timeout` - (Optional, Int) Specifies the timeout in seconds for WAF to connect to the origin server.
+
+* `read_timeout` - (Optional, Int) Specifies the timeout in seconds for WAF to receive responses from the origin server.
+
+* `write_timeout` - (Optional, Int) Specifies the timeout in seconds for WAF to send requests to the origin server.
 
 ## Attributes Reference
 

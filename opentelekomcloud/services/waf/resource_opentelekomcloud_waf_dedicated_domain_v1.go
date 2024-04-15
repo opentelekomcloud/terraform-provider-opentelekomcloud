@@ -150,6 +150,29 @@ func ResourceWafDedicatedDomain() *schema.Resource {
 				Computed:     true,
 				RequiredWith: []string{"tls", "cipher"},
 			},
+			"timeout_config": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"connect_timeout": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"send_timeout": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"read_timeout": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+					},
+				},
+			},
 			"access_status": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -245,7 +268,12 @@ func resourceWafDedicatedDomainV1Create(ctx context.Context, d *schema.ResourceD
 		}
 	}
 
-	if d.HasChanges("tls", "cipher", "pci_3ds", "pci_dss") {
+	var timeout bool
+	if v, ok := d.GetOk("timeout_config"); ok && len(v.([]interface{})) > 0 {
+		timeout = true
+	}
+
+	if d.HasChanges("tls", "cipher", "pci_3ds", "pci_dss") || timeout {
 		if err := updateWafDedicatedDomain(client, d); err != nil {
 			return diag.FromErr(err)
 		}
@@ -332,6 +360,19 @@ func resourceWafDedicatedDomainV1Read(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
+	var timeoutConfig []map[string]interface{}
+
+	if domain.TimeoutConfig != nil {
+		timeoutRaw := map[string]interface{}{}
+		timeoutRaw["read_timeout"] = domain.TimeoutConfig.ReadTimeout
+		timeoutRaw["send_timeout"] = domain.TimeoutConfig.SendTimeout
+		timeoutRaw["connect_timeout"] = domain.TimeoutConfig.ConnectionTimeout
+		timeoutConfig = append(timeoutConfig, timeoutRaw)
+	}
+	if err := d.Set("timeout_config", timeoutConfig); err != nil {
+		return diag.FromErr(err)
+	}
+
 	return nil
 }
 
@@ -344,7 +385,7 @@ func resourceWafDedicatedDomainV1Update(ctx context.Context, d *schema.ResourceD
 		return fmterr.Errorf(errCreationV1DedicatedClient, err)
 	}
 
-	if d.HasChanges("tls", "cipher", "proxy", "certificate_id", "pci_3ds", "pci_dss") {
+	if d.HasChanges("tls", "cipher", "proxy", "certificate_id", "pci_3ds", "pci_dss", "timeout_config") {
 		if err := updateWafDedicatedDomain(client, d); err != nil {
 			return fmterr.Errorf("error updating OpenTelekomCloud WAF dedicated domain: %s", err)
 		}
@@ -429,6 +470,17 @@ func updateWafDedicatedDomain(client *golangsdk.ServiceClient, d *schema.Resourc
 			}
 			updateOpts.CertificateName = certificate.Name
 			updateOpts.CertificateId = certificate.ID
+		}
+	}
+
+	if v, ok := d.GetOk("timeout_config"); ok && len(v.([]interface{})) > 0 {
+		rawArray := v.([]interface{})[0].(map[string]interface{})
+		updateOpts = domains.UpdateOpts{
+			TimeoutConfig: &domains.TimeoutConfigObject{
+				ConnectionTimeout: rawArray["connect_timeout"].(int),
+				SendTimeout:       rawArray["send_timeout"].(int),
+				ReadTimeout:       rawArray["read_timeout"].(int),
+			},
 		}
 	}
 
