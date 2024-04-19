@@ -106,6 +106,9 @@ const (
 
 	NetworkTypeV1 NetworkType = "NON-VPC"
 	NetworkTypeV2 NetworkType = "VPC"
+
+	ChargingModeBandwidth = "bandwidth"
+	ChargingModeTraffic   = "traffic"
 )
 
 var (

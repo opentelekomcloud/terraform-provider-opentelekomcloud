@@ -27,8 +27,7 @@ func getApiFunc(conf *cfg.Config, state *terraform.ResourceState) (interface{}, 
 
 func TestAccApi_basic(t *testing.T) {
 	var (
-		api apis.ApiResp
-
+		api         apis.ApiResp
 		rName       = resourceApigwApiName
 		name        = fmt.Sprintf("apigw_acc_api%s", acctest.RandString(5))
 		updateName  = fmt.Sprintf("apigw_acc_api_update%s", acctest.RandString(5))
@@ -137,15 +136,28 @@ func testAccApigwApi_base(name string) string {
 
 %s
 
-resource "opentelekomcloud_apigw_environment_v2" "env"{
+resource "opentelekomcloud_apigw_gateway_v2" "gateway" {
+  name                            = "%s"
+  spec_id                         = "BASIC"
+  vpc_id                          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id                       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  security_group_id               = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  availability_zones              = ["eu-de-01", "eu-de-02"]
+  description                     = "test gateway 2"
+  ingress_bandwidth_size          = 5
+  ingress_bandwidth_charging_mode = "bandwidth"
+  maintain_begin                  = "02:00:00"
+}
+
+resource "opentelekomcloud_apigw_environment_v2" "env" {
   name        = "%[3]s"
-  instance_id = "39d31a0b18c04838b1ea95ed0b4ec71a"
+  instance_id = opentelekomcloud_apigw_gateway_v2.gateway.id
   description = "test description"
 }
 
 resource "opentelekomcloud_apigw_group_v2" "group" {
   name        = "%[3]s"
-  instance_id = "39d31a0b18c04838b1ea95ed0b4ec71a"
+  instance_id = opentelekomcloud_apigw_gateway_v2.gateway.id
   description = "test description"
 
   environment {
@@ -164,18 +176,18 @@ func testAccApigwApi_basic(relatedConfig, name string) string {
 %[1]s
 
 resource "opentelekomcloud_apigw_api_v2" "api" {
-  gateway_id              = "39d31a0b18c04838b1ea95ed0b4ec71a"
-  group_id                = opentelekomcloud_apigw_group_v2.group.id
-  name                    = "%[2]s"
-  type                    = "Public"
-  request_protocol        = "HTTP"
-  request_method          = "GET"
-  request_uri            = "/user_info/{user_age}"
+  gateway_id                   = opentelekomcloud_apigw_gateway_v2.gateway.id
+  group_id                     = opentelekomcloud_apigw_group_v2.group.id
+  name                         = "%[2]s"
+  type                         = "Public"
+  request_protocol             = "HTTP"
+  request_method               = "GET"
+  request_uri                  = "/user_info/{user_age}"
   security_authentication_type = "APP"
-  match_mode                = "EXACT"
-  success_response        = "Success response"
-  failure_response        = "Failed response"
-  description             = "Created by script"
+  match_mode                   = "EXACT"
+  success_response             = "Success response"
+  failure_response             = "Failed response"
+  description                  = "Created by script"
 
   request_params {
     name     = "user_age"
@@ -191,7 +203,7 @@ resource "opentelekomcloud_apigw_api_v2" "api" {
     location    = "HEADER"
     maximum     = 20
     minimum     = 10
-    sample     = "ACC_TEST_XXX"
+    sample      = "ACC_TEST_XXX"
     passthrough = true
     enumeration = "ACC_TEST_A,ACC_TEST_B"
   }
@@ -205,7 +217,7 @@ resource "opentelekomcloud_apigw_api_v2" "api" {
 
   http {
     url_domain       = "opentelekomcloud.my.com"
-    request_uri  = "/getUserAge/{userAge}"
+    request_uri      = "/getUserAge/{userAge}"
     request_method   = "GET"
     request_protocol = "HTTP"
     timeout          = 30000
@@ -252,18 +264,18 @@ func testAccApigwApi_update(relatedConfig, name string) string {
 %[1]s
 
 resource "opentelekomcloud_apigw_api_v2" "api" {
-  gateway_id              = "39d31a0b18c04838b1ea95ed0b4ec71a"
-  group_id                = opentelekomcloud_apigw_group_v2.group.id
-  name                    = "%[2]s"
-  type                    = "Public"
-  request_protocol        = "HTTP"
-  request_method          = "GET"
-  request_uri             = "/user_info/{user_name}"
+  gateway_id                   = opentelekomcloud_apigw_gateway_v2.gateway.id
+  group_id                     = opentelekomcloud_apigw_group_v2.group.id
+  name                         = "%[2]s"
+  type                         = "Public"
+  request_protocol             = "HTTP"
+  request_method               = "GET"
+  request_uri                  = "/user_info/{user_name}"
   security_authentication_type = "APP"
-  match_mode                = "EXACT"
-  success_response        = "Updated Success response"
-  failure_response        = "Updated Failed response"
-  description             = "Updated by script"
+  match_mode                   = "EXACT"
+  success_response             = "Updated Success response"
+  failure_response             = "Updated Failed response"
+  description                  = "Updated by script"
 
   request_params {
     name     = "user_name"
@@ -279,7 +291,7 @@ resource "opentelekomcloud_apigw_api_v2" "api" {
     location    = "HEADER"
     maximum     = 20
     minimum     = 10
-    sample     = "ACC_TEST_XXXX"
+    sample      = "ACC_TEST_XXXX"
     passthrough = false
     enumeration = "ACC_TEST_A,ACC_TEST_B,ACC_TEST_C"
   }
@@ -300,7 +312,7 @@ resource "opentelekomcloud_apigw_api_v2" "api" {
 
   http {
     url_domain       = "opentelekomcloud.my.com"
-    request_uri  = "/getUserName/{userName}"
+    request_uri      = "/getUserName/{userName}"
     request_method   = "GET"
     request_protocol = "HTTP"
     timeout          = 60000
@@ -336,10 +348,10 @@ resource "opentelekomcloud_apigw_api_v2" "api" {
       value      = "Administrator"
     }
     conditions {
-      origin      = "param"
-      param_name  = "user_name"
-      type        = "EXACT"
-      value       = "value_test"
+      origin     = "param"
+      param_name = "user_name"
+      type       = "EXACT"
+      value      = "value_test"
     }
   }
 }

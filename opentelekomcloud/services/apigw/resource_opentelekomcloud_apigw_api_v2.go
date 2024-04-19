@@ -169,14 +169,14 @@ func ResourceAPIApiV2() *schema.Resource {
 				Optional: true,
 				MaxItems: 50,
 				Elem:     requestParamsSchemaResource(),
-				Set:      resourceBackendParametersHash,
+				Set:      resourceParametersHash,
 			},
 			"backend_params": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				MaxItems: 50,
 				Elem:     backendParamSchemaResource(),
-				Set:      resourceBackendParametersHash,
+				Set:      resourceParametersHash,
 			},
 			"mock_policy": {
 				Type:          schema.TypeSet,

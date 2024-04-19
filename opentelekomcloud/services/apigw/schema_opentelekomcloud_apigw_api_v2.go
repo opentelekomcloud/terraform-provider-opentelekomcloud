@@ -290,7 +290,7 @@ func mockPolicySchemaResource() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     backendParamSchemaResource(),
-				Set:      resourceBackendParametersHash,
+				Set:      resourceParametersHash,
 			},
 			"conditions": {
 				Type:     schema.TypeSet,
@@ -363,7 +363,7 @@ func functionPolicySchemaResource() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     backendParamSchemaResource(),
-				Set:      resourceBackendParametersHash,
+				Set:      resourceParametersHash,
 			},
 			"conditions": {
 				Type:     schema.TypeSet,
@@ -519,7 +519,7 @@ func httpPolicySchemaResource() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     backendParamSchemaResource(),
-				Set:      resourceBackendParametersHash,
+				Set:      resourceParametersHash,
 			},
 			"conditions": {
 				Type:     schema.TypeSet,
@@ -543,7 +543,7 @@ func httpPolicySchemaResource() *schema.Resource {
 	}
 }
 
-func resourceBackendParametersHash(v interface{}) int {
+func resourceParametersHash(v interface{}) int {
 	var buf bytes.Buffer
 	m := v.(map[string]interface{})
 

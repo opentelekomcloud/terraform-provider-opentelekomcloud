@@ -15,15 +15,17 @@ With just a few clicks, you can integrate internal systems, and selectively expo
 
 ```hcl
 resource "opentelekomcloud_apigw_gateway_v2" "gateway" {
-  name               = "test-gateway"
-  spec_id            = "BASIC"
-  vpc_id             = var.vpc_id
-  subnet_id          = var.network_id
-  security_group_id  = var.default_secgroup.id
-  availability_zones = ["eu-de-01", "eu-de-02"]
-  description        = "test gateway"
-  bandwidth_size     = 5
-  maintain_begin     = "22:00:00"
+  name                            = "test-gateway"
+  spec_id                         = "BASIC"
+  vpc_id                          = var.vpc_id
+  subnet_id                       = var.network_id
+  security_group_id               = var.default_secgroup.id
+  availability_zones              = ["eu-de-01", "eu-de-02"]
+  description                     = "test gateway"
+  bandwidth_size                  = 5
+  ingress_bandwidth_size          = 5
+  ingress_bandwidth_charging_mode = "bandwidth"
+  maintain_begin                  = "22:00:00"
 }
 ```
 
@@ -54,9 +56,19 @@ The following arguments are supported:
   access is enabled for the gateway. After you configure the bandwidth for the gateway,
   users can access resources on public networks.
 
-* `ingress_bandwidth_size` - (Optional, String) Specifies public inbound access bandwidth. This parameter is required if public
+* `bandwidth_charging_mode` - (Optional, String, ForceNew) Billing type of the public outbound access bandwidth.
+  The valid values are as follows:
+  + **bandwidth**: Billed by bandwidth.
+  + **traffic**: Billed by traffic.
+
+* `ingress_bandwidth_size` - (Optional, String, ForceNew) Specifies public inbound access bandwidth. This parameter is required if public
   inbound access is enabled for the gateway and loadbalancer_provider is set to elb.
   After you bind an EIP to the gateway, users can access APIs in the gateway from public networks using the EIP.
+
+* `ingress_bandwidth_charging_mode` - (Optional, String, ForceNew) Specifies the ingress bandwidth billing type of the dedicated instance.
+  The valid values are as follows:
+  + **bandwidth**: Billed by bandwidth.
+  + **traffic**: Billed by traffic.
 
 * `loadbalancer_provider` - (Optional, String) Specifies type of the load balancer used by the gateway.
   This resource provides the following timeouts configuration options:
@@ -105,7 +117,9 @@ resource "opentelekomcloud_apigw_gateway_v2" "gateway" {
 
   lifecycle {
     ignore_changes = [
-      ingress_bandwidth_size
+      ingress_bandwidth_size,
+      ingress_bandwidth_charging_mode,
+      bandwidth_charging_mode
     ]
   }
 }
