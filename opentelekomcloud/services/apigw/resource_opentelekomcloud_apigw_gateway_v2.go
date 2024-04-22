@@ -97,11 +97,28 @@ func ResourceAPIGWv2() *schema.Resource {
 				Computed:     true,
 				ValidateFunc: validation.IntBetween(0, 2000),
 			},
+			"bandwidth_charging_mode": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					ChargingModeTraffic, ChargingModeBandwidth,
+				}, false),
+			},
 			"ingress_bandwidth_size": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
+				RequiredWith: []string{"ingress_bandwidth_charging_mode"},
 				ValidateFunc: validation.IntBetween(0, 2000),
+			},
+			"ingress_bandwidth_charging_mode": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				RequiredWith: []string{"ingress_bandwidth_size"},
+				ValidateFunc: validation.StringInSlice([]string{
+					ChargingModeBandwidth, ChargingModeTraffic,
+				}, false),
 			},
 			"loadbalancer_provider": {
 				Type:     schema.TypeString,
@@ -171,20 +188,22 @@ func buildInstanceAvailabilityZones(d *schema.ResourceData) ([]string, error) {
 	if v, ok := d.GetOk("availability_zones"); ok {
 		return common.ExpandToStringSlice(v.([]interface{})), nil
 	}
-	return nil, fmt.Errorf("The parameter 'availability_zones' must be specified")
+	return nil, fmt.Errorf("the parameter 'availability_zones' must be specified")
 }
 
 func buildInstanceCreateOpts(d *schema.ResourceData) (gateway.CreateOpts, error) {
 	result := gateway.CreateOpts{
-		InstanceName:         d.Get("name").(string),
-		SpecID:               d.Get("spec_id").(string),
-		VpcID:                d.Get("vpc_id").(string),
-		SubnetID:             d.Get("subnet_id").(string),
-		SecGroupID:           d.Get("security_group_id").(string),
-		Description:          d.Get("description").(string),
-		BandwidthSize:        pointerto.Int(d.Get("bandwidth_size").(int)),
-		LoadbalancerProvider: d.Get("loadbalancer_provider").(string),
-		IngressBandwidthSize: pointerto.Int(d.Get("ingress_bandwidth_size").(int)),
+		InstanceName:                 d.Get("name").(string),
+		SpecID:                       d.Get("spec_id").(string),
+		VpcID:                        d.Get("vpc_id").(string),
+		SubnetID:                     d.Get("subnet_id").(string),
+		SecGroupID:                   d.Get("security_group_id").(string),
+		Description:                  d.Get("description").(string),
+		BandwidthSize:                pointerto.Int(d.Get("bandwidth_size").(int)),
+		BandwidthChargingMode:        d.Get("bandwidth_charging_mode").(string),
+		LoadBalancerProvider:         d.Get("loadbalancer_provider").(string),
+		IngressBandwidthSize:         pointerto.Int(d.Get("ingress_bandwidth_size").(int)),
+		IngressBandwidthChargingMode: d.Get("ingress_bandwidth_charging_mode").(string),
 	}
 
 	azList, err := buildInstanceAvailabilityZones(d)
@@ -287,6 +306,8 @@ func resourceGatewayRead(_ context.Context, d *schema.ResourceData, meta interfa
 		d.Set("vpc_ingress_address", resp.IngressIp),
 		d.Set("public_egress_address", resp.NatEipAddress),
 		d.Set("vpcep_service_name", resp.EndpointService.ServiceName),
+		// d.Set("bandwidth_charging_mode", resp.BandwidthChargingMode),
+		// d.Set("ingress_bandwidth_charging_mode", resp.IngressBandwidthChargingMode),
 	)
 
 	if len(resp.PublicIps) > 0 {
