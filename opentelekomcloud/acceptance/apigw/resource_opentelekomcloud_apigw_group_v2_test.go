@@ -15,20 +15,35 @@ import (
 
 const resourceGroupName = "opentelekomcloud_apigw_group_v2.group"
 
+func getGroupFunc(cfg *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
+	client, err := cfg.APIGWV2Client(env.OS_REGION_NAME)
+	if err != nil {
+		return nil, fmt.Errorf("error creating APIG v2 client: %s", err)
+	}
+	return group.Get(client, state.Primary.Attributes["instance_id"], state.Primary.ID)
+}
+
 func TestAccAPIGWv2Group_basic(t *testing.T) {
 	var groupConfig group.GroupResp
 	name := acctest.RandString(10)
+
+	rc := common.InitResourceCheck(
+		resourceGroupName,
+		&groupConfig,
+		getGroupFunc,
+	)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAPIGWv2GroupBasic(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAPIGWv2GroupExists(resourceGroupName, &groupConfig),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceGroupName, "name", "group_"+name),
 					resource.TestCheckResourceAttr(resourceGroupName, "description", "test description"),
 					resource.TestCheckResourceAttr(resourceGroupName, "environment.0.variable.0.name", "test-name"),
@@ -38,7 +53,7 @@ func TestAccAPIGWv2Group_basic(t *testing.T) {
 			{
 				Config: testAccAPIGWv2GroupUpdated(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAPIGWv2GroupExists(resourceGroupName, &groupConfig),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceGroupName, "name", "group_"+name+"_updated"),
 					resource.TestCheckResourceAttr(resourceGroupName, "description", "test description updated"),
 					resource.TestCheckResourceAttr(resourceGroupName, "environment.0.variable.1.name", "test-name-2"),
@@ -46,61 +61,6 @@ func TestAccAPIGWv2Group_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceGroupName, "environment.0.variable.0.name", "test-name"),
 					resource.TestCheckResourceAttr(resourceGroupName, "environment.0.variable.0.value", "test-value"),
 				),
-			},
-		},
-	})
-}
-
-func testAccCheckAPIGWv2GroupExists(n string, configuration *group.GroupResp) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no ID is set")
-		}
-
-		rsgw, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("not found: %s", n)
-		}
-
-		if rsgw.Primary.ID == "" {
-			return fmt.Errorf("no ID is set")
-		}
-
-		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.APIGWV2Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud APIGWv2 client: %w", err)
-		}
-
-		found, err := group.Get(client, rsgw.Primary.ID, rs.Primary.ID)
-		if err != nil {
-			return err
-		}
-
-		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("APIGW group not found")
-		}
-		configuration = found
-
-		return nil
-	}
-}
-
-func TestAccAPIGWGroupV2ImportBasic(t *testing.T) {
-	name := acctest.RandString(10)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAPIGWv2GatewayDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAPIGWv2GroupBasic(name),
 			},
 			{
 				ResourceName:      resourceGroupName,

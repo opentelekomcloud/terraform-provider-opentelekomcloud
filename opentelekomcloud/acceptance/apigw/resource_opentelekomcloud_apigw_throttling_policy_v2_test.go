@@ -15,20 +15,35 @@ import (
 
 const resourcePolicyName = "opentelekomcloud_apigw_throttling_policy_v2.policy"
 
+func getThrottlingPolicyFunc(cfg *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
+	client, err := cfg.APIGWV2Client(env.OS_REGION_NAME)
+	if err != nil {
+		return nil, fmt.Errorf("error creating APIG v2 client: %s", err)
+	}
+	return throttlingpolicy.Get(client, state.Primary.Attributes["instance_id"], state.Primary.ID)
+}
+
 func TestAccAPIGWv2Policy_basic(t *testing.T) {
 	var policyConfig throttlingpolicy.ThrottlingResp
 	name := acctest.RandString(10)
+
+	rc := common.InitResourceCheck(
+		resourcePolicyName,
+		&policyConfig,
+		getThrottlingPolicyFunc,
+	)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAPIGWv2PolicyBasic(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAPIGWv2PolicyExists(resourcePolicyName, &policyConfig),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourcePolicyName, "name", "policy_"+name),
 					resource.TestCheckResourceAttr(resourcePolicyName, "description", "created by tf"),
 					resource.TestCheckResourceAttr(resourcePolicyName, "type", "API-based"),
@@ -43,7 +58,7 @@ func TestAccAPIGWv2Policy_basic(t *testing.T) {
 			{
 				Config: testAccAPIGWv2PolicyUpdated(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAPIGWv2PolicyExists(resourcePolicyName, &policyConfig),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourcePolicyName, "name", "policy_"+name+"_updated"),
 					resource.TestCheckResourceAttr(resourcePolicyName, "description", "Updated by tf"),
 					resource.TestCheckResourceAttr(resourcePolicyName, "type", "API-shared"),
@@ -64,88 +79,39 @@ func TestAccAPIGWv2Policy_special(t *testing.T) {
 	var policyConfig throttlingpolicy.ThrottlingResp
 	name := acctest.RandString(10)
 
+	rc := common.InitResourceCheck(
+		resourcePolicyName,
+		&policyConfig,
+		getThrottlingPolicyFunc,
+	)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAPIGWv2PolicyBasic(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAPIGWv2PolicyExists(resourcePolicyName, &policyConfig),
-				),
+					rc.CheckResourceExists()),
 			},
 			{
 				Config: testAccAPIGWv2PolicySpecial(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAPIGWv2PolicyExists(resourcePolicyName, &policyConfig),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourcePolicyName, "app_throttles.#", "1"),
 				),
 			},
 			{
 				Config: testAccAPIGWv2PolicySpecialUpdated(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAPIGWv2PolicyExists(resourcePolicyName, &policyConfig),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourcePolicyName, "name", "policy_"+name+"_updated"),
 					resource.TestCheckResourceAttr(resourcePolicyName, "description", "Updated by script"),
 					resource.TestCheckResourceAttr(resourcePolicyName, "type", "API-shared"),
 				),
-			},
-		},
-	})
-}
-
-func testAccCheckAPIGWv2PolicyExists(n string, configuration *throttlingpolicy.ThrottlingResp) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no ID is set")
-		}
-
-		rsgw, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("not found: %s", n)
-		}
-
-		if rsgw.Primary.ID == "" {
-			return fmt.Errorf("no ID is set")
-		}
-
-		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.APIGWV2Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud APIGWv2 client: %w", err)
-		}
-
-		found, err := throttlingpolicy.Get(client, rsgw.Primary.ID, rs.Primary.ID)
-		if err != nil {
-			return err
-		}
-
-		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("APIGW group not found")
-		}
-		configuration = found
-
-		return nil
-	}
-}
-
-func TestAccAPIGWPolicyV2ImportBasic(t *testing.T) {
-	name := acctest.RandString(10)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAPIGWv2GatewayDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAPIGWv2GroupBasic(name),
 			},
 			{
 				ResourceName:      resourceGroupName,

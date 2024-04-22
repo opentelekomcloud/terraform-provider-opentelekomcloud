@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -364,4 +365,29 @@ func getStructFieldRaw(v reflect.Value, field string) (interface{}, error) {
 		return nil, fmt.Errorf("reflect: can not find the field %s", field)
 	}
 	return nil, fmt.Errorf("reflect: Value is not a struct")
+}
+
+// StringToInt convert the string to int, and return the pointer of int value
+func StringToInt(i *string) *int {
+	if i == nil || len(*i) == 0 {
+		return nil
+	}
+
+	r, err := strconv.Atoi(*i)
+	if err != nil {
+		log.Printf("[ERROR] convert the string %q to int failed.", *i)
+	}
+	return &r
+}
+
+// ExpandToStringListBySet takes the result for a set of strings and returns a []string
+func ExpandToStringListBySet(v *schema.Set) []string {
+	s := make([]string, 0, v.Len())
+	for _, val := range v.List() {
+		if strVal, ok := val.(string); ok && strVal != "" {
+			s = append(s, strVal)
+		}
+	}
+
+	return s
 }
