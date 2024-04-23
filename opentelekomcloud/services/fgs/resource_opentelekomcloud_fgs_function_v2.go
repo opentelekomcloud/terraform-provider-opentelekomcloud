@@ -6,7 +6,6 @@ import (
 	"log"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -21,6 +20,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/fgs/v2/tags"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 )
 
@@ -40,12 +40,6 @@ func ResourceFgsFunctionV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -70,10 +64,9 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Computed: true,
 			},
 			"handler": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: `schema: Required; The entry point of the function.`,
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 			},
 			"functiongraph_version": {
 				Type:     schema.TypeString,
@@ -249,22 +242,18 @@ func ResourceFgsFunctionV2() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "The name of the version alias.",
+										Type:     schema.TypeString,
+										Required: true,
 									},
 									"description": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "The description of the version alias.",
+										Type:     schema.TypeString,
+										Optional: true,
 									},
 								},
 							},
-							Description: "The aliases management for specified version.",
 						},
 					},
 				},
-				Description: "The versions management of the function.",
 			},
 			"tags": common.TagsSchema(),
 			"reserved_instances": {
@@ -319,6 +308,10 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Computed: true,
 			},
 			"urn": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"region": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -427,9 +420,11 @@ func buildFgsFunctionParameters(d *schema.ResourceData) (function.CreateOpts, er
 
 func resourceFgsFunctionV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	fgsClient, err := config.FuncGraphV2Client(config.GetRegion(d))
+	fgsClient, err := common.ClientFromCtx(ctx, fgsClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.FuncGraphV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return diag.Errorf("error creating FunctionGraph v2 client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	createOpts, err := buildFgsFunctionParameters(d)
@@ -491,7 +486,8 @@ func resourceFgsFunctionV2Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	return resourceFgsFunctionV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, fgsClient, fgsClientV2)
+	return resourceFgsFunctionV2Read(clientCtx, d, meta)
 }
 
 func createFunctionVersions(client *golangsdk.ServiceClient, functionUrn string, versionSet *schema.Set) error {
@@ -678,11 +674,13 @@ func getConcurrencyNum(concurrencyNum *int) int {
 	return *concurrencyNum
 }
 
-func resourceFgsFunctionV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceFgsFunctionV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	fgsClient, err := config.FuncGraphV2Client(config.GetRegion(d))
+	fgsClient, err := common.ClientFromCtx(ctx, fgsClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.FuncGraphV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return diag.Errorf("error creating FunctionGraph client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	functionUrn := resourceFgsFunctionUrn(d.Id())
@@ -959,9 +957,11 @@ func updateReservedInstanceConfig(client *golangsdk.ServiceClient, d *schema.Res
 
 func resourceFgsFunctionV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	fgsClient, err := config.FuncGraphV2Client(config.GetRegion(d))
+	fgsClient, err := common.ClientFromCtx(ctx, fgsClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.FuncGraphV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return diag.Errorf("error creating FunctionGraph v2 client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	urn := resourceFgsFunctionUrn(d.Id())
@@ -1014,14 +1014,17 @@ func resourceFgsFunctionV2Update(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	return resourceFgsFunctionV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, fgsClient, fgsClientV2)
+	return resourceFgsFunctionV2Read(clientCtx, d, meta)
 }
 
-func resourceFgsFunctionV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceFgsFunctionV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	fgsClient, err := config.FuncGraphV2Client(config.GetRegion(d))
+	fgsClient, err := common.ClientFromCtx(ctx, fgsClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.FuncGraphV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return diag.Errorf("error creating FunctionGraph v2 client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	urn := resourceFgsFunctionUrn(d.Id())
@@ -1178,16 +1181,4 @@ func resourceFgsFunctionMountConfig(d *schema.ResourceData) *function.MountConfi
 		mountConfig.MountUser = mountUser
 	}
 	return &mountConfig
-}
-
-/*
- * Parse urn according from fun_urn.
- * If the separator is not ":" then return to the original value.
- */
-func resourceFgsFunctionUrn(urn string) string {
-	index := strings.LastIndex(urn, ":")
-	if index != -1 {
-		urn = urn[0:index]
-	}
-	return urn
 }
