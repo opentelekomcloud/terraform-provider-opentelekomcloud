@@ -150,12 +150,6 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Optional:     true,
 				RequiredWith: []string{"vpc_id"},
 			},
-			"dns_list": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				RequiredWith: []string{"vpc_id"},
-			},
 			"mount_user_id": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -171,9 +165,9 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				RequiredWith: []string{
-					"log_stream_id", "log_group_name", "log_stream_name"},
+					"log_topic_id", "log_group_name", "log_topic_name"},
 			},
-			"log_stream_id": {
+			"log_topic_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
@@ -185,7 +179,7 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Computed:     true,
 				RequiredWith: []string{"log_group_id"},
 			},
-			"log_stream_name": {
+			"log_topic_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
@@ -228,9 +222,6 @@ func ResourceFgsFunctionV2() *schema.Resource {
 							Required: true,
 						},
 					},
-				},
-				ConflictsWith: []string{
-					"code_type",
 				},
 			},
 			"max_instance_num": {
@@ -323,6 +314,10 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"dns_list": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"urn": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -379,17 +374,14 @@ func buildCustomImage(imageConfig []interface{}) *function.CustomImage {
 }
 
 func buildFgsFunctionParameters(d *schema.ResourceData) (function.CreateOpts, error) {
-	// check app and package
+	// check app
 	app, appOk := d.GetOk("app")
-	pkg, pkgOk := d.GetOk("package")
-	if !appOk && !pkgOk {
-		return function.CreateOpts{}, fmt.Errorf("one of app or package must be configured")
+	if !appOk {
+		return function.CreateOpts{}, fmt.Errorf("app must be configured")
 	}
 	packV := ""
 	if appOk {
 		packV = app.(string)
-	} else {
-		packV = pkg.(string)
 	}
 
 	agencyV := ""
@@ -424,9 +416,9 @@ func buildFgsFunctionParameters(d *schema.ResourceData) (function.CreateOpts, er
 	if v, ok := d.GetOk("log_group_id"); ok {
 		logConfig := function.FuncLogConfig{
 			GroupID:    v.(string),
-			StreamID:   d.Get("log_stream_id").(string),
+			StreamID:   d.Get("log_topic_id").(string),
 			GroupName:  d.Get("log_group_name").(string),
-			StreamName: d.Get("log_stream_name").(string),
+			StreamName: d.Get("log_topic_name").(string),
 		}
 		result.LogConfig = &logConfig
 	}
@@ -529,7 +521,7 @@ func setFgsFunctionApp(d *schema.ResourceData, app string) error {
 	if _, ok := d.GetOk("app"); ok {
 		return d.Set("app", app)
 	}
-	return d.Set("package", app)
+	return nil
 }
 
 func setFgsFunctionVpcAccess(d *schema.ResourceData, funcVpc function.FuncVpc) error {
@@ -728,8 +720,7 @@ func resourceFgsFunctionV2Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("max_instance_num", strconv.Itoa(f.StrategyConfig.Concurrency)),
 		d.Set("dns_list", f.DomainNames),
 		d.Set("log_group_id", f.LogGroupID),
-		d.Set("log_stream_id", f.LogStreamID),
-		d.Set("log_stream_id", f.LogStreamID),
+		d.Set("log_topic_id", f.LogStreamID),
 		d.Set("agency", f.Xrole),
 		setFgsFunctionApp(d, f.Package),
 		setFgsFunctionVpcAccess(d, f.FuncVpc),
@@ -836,7 +827,7 @@ func buildCronConfigs(cronConfigs []interface{}) []reserved.CronConfig {
 		result[i] = reserved.CronConfig{
 			Name:        cronConfig["name"].(string),
 			Cron:        cronConfig["cron"].(string),
-			Count:       cronConfig["count"].(string),
+			Count:       cronConfig["count"].(int),
 			StartTime:   cronConfig["start_time"].(int),
 			ExpiredTime: cronConfig["expired_time"].(int),
 		}
@@ -910,7 +901,7 @@ func removeReservedInstances(client *golangsdk.ServiceClient, functionUrn string
 		}
 		opts := reserved.UpdateOpts{
 			FuncUrn:  urn,
-			Count:    0,
+			Count:    pointerto.Int(0),
 			IdleMode: pointerto.Bool(false),
 		}
 		_, err = reserved.Update(client, opts)
@@ -933,7 +924,7 @@ func addReservedInstances(client *golangsdk.ServiceClient, functionUrn string, a
 
 		opts := reserved.UpdateOpts{
 			FuncUrn:       urn,
-			Count:         addPolicy["count"].(int),
+			Count:         pointerto.Int(addPolicy["count"].(int)),
 			IdleMode:      pointerto.Bool(addPolicy["idle_mode"].(bool)),
 			TacticsConfig: buildTacticsConfigs(addPolicy["tactics_config"].([]interface{})),
 		}
@@ -985,8 +976,8 @@ func resourceFgsFunctionV2Update(ctx context.Context, d *schema.ResourceData, me
 	// lintignore:R019
 	if d.HasChanges("app", "handler", "memory_size", "timeout", "encrypted_user_data",
 		"user_data", "agency", "app_agency", "description", "initializer_handler", "initializer_timeout",
-		"vpc_id", "network_id", "dns_list", "mount_user_id", "mount_user_group_id", "func_mounts", "custom_image",
-		"log_group_id", "log_stream_id", "log_group_name", "log_stream_name", "concurrency_num", "gpu_memory", "gpu_type") {
+		"vpc_id", "network_id", "mount_user_id", "mount_user_group_id", "func_mounts", "custom_image",
+		"log_group_id", "log_topic_id", "log_group_name", "log_topic_name", "concurrency_num", "gpu_memory", "gpu_type") {
 		err := resourceFgsFunctionMetadataUpdate(fgsClient, urn, d)
 		if err != nil {
 			return diag.FromErr(err)
@@ -1043,17 +1034,14 @@ func resourceFgsFunctionV2Delete(_ context.Context, d *schema.ResourceData, meta
 }
 
 func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn string, d *schema.ResourceData) error {
-	// check app and package
+	// check app
 	app, appOk := d.GetOk("app")
-	pkg, pkgOk := d.GetOk("package")
-	if !appOk && !pkgOk {
-		return fmt.Errorf("one of app or package must be configured")
+	if !appOk {
+		return fmt.Errorf("app must be configured")
 	}
 	packV := ""
 	if appOk {
 		packV = app.(string)
-	} else {
-		packV = pkg.(string)
 	}
 
 	agencyV := ""
@@ -1062,6 +1050,7 @@ func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn s
 	}
 
 	updateMetadateOpts := function.UpdateFuncMetadataOpts{
+		Name:              d.Get("name").(string),
 		Handler:           d.Get("handler").(string),
 		MemorySize:        d.Get("memory_size").(int),
 		Timeout:           d.Get("timeout").(int),
@@ -1075,7 +1064,6 @@ func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn s
 		InitHandler:       d.Get("initializer_handler").(string),
 		InitTimeout:       pointerto.Int(d.Get("initializer_timeout").(int)),
 		CustomImage:       buildCustomImage(d.Get("custom_image").([]interface{})),
-		DomainNames:       d.Get("dns_list").(string),
 		GpuMemory:         pointerto.Int(d.Get("gpu_memory").(int)),
 	}
 
@@ -1091,9 +1079,9 @@ func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn s
 	if v, ok := d.GetOk("log_group_name"); ok {
 		logConfig := function.FuncLogConfig{
 			GroupID:    d.Get("log_group_id").(string),
-			StreamID:   d.Get("log_stream_id").(string),
+			StreamID:   d.Get("log_topic_id").(string),
 			GroupName:  v.(string),
-			StreamName: d.Get("log_stream_name").(string),
+			StreamName: d.Get("log_topic_name").(string),
 		}
 		updateMetadateOpts.LogConfig = &logConfig
 	}
@@ -1136,7 +1124,7 @@ func resourceFgsFunctionCodeUpdate(fgsClient *golangsdk.ServiceClient, urn strin
 		funcCode := function.FuncCode{
 			File: hashcode.TryBase64EncodeString(v.(string)),
 		}
-		updateCodeOpts.FuncCode = funcCode
+		updateCodeOpts.FuncCode = &funcCode
 	}
 
 	updateCodeOpts.FuncUrn = urn
