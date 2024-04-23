@@ -401,8 +401,8 @@ resource "opentelekomcloud_fgs_function_v2" "create_with_vpc_access" {
     url = "%[3]s"
   }
 
-  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  network_id  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 }
 
 resource "opentelekomcloud_fgs_function_v2" "create_without_vpc_access" {
@@ -457,8 +457,8 @@ resource "opentelekomcloud_fgs_function_v2" "create_without_vpc_access" {
     url = "%[3]s"
   }
 
-  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  network_id  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 }
 `, common.DataSourceSubnet, rName, common.OTC_BUILD_IMAGE_URL_UPDATED)
 }
@@ -701,7 +701,7 @@ resource "opentelekomcloud_logtank_group_v2" "test" {
 }
 
 resource "opentelekomcloud_logtank_topic_v2" "test" {
-  group_id    = opentelekomcloud_logtank_group_v2.test.id
+  group_id   = opentelekomcloud_logtank_group_v2.test.id
   topic_name = "%[1]s"
 }
 
@@ -716,9 +716,9 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
   code_type   = "inline"
   func_code   = "dCA9ICdIZWxsbyBtZXNzYWdlOiAnICsganN="
 
-  log_group_id    = opentelekomcloud_logtank_group_v2.test.id
+  log_group_id   = opentelekomcloud_logtank_group_v2.test.id
   log_topic_id   = opentelekomcloud_logtank_topic_v2.test.id
-  log_group_name  = opentelekomcloud_logtank_group_v2.test.group_name
+  log_group_name = opentelekomcloud_logtank_group_v2.test.group_name
   log_topic_name = opentelekomcloud_logtank_topic_v2.test.topic_name
 }
 `, rName)
@@ -732,7 +732,7 @@ resource "opentelekomcloud_logtank_group_v2" "test" {
 }
 
 resource "opentelekomcloud_logtank_topic_v2" "test" {
-  group_id    = opentelekomcloud_logtank_group_v2.test.id
+  group_id   = opentelekomcloud_logtank_group_v2.test.id
   topic_name = "%[1]s"
 }
 
@@ -742,7 +742,7 @@ resource "opentelekomcloud_logtank_group_v2" "test1" {
 }
 
 resource "opentelekomcloud_logtank_topic_v2" "test1" {
-  group_id    = opentelekomcloud_logtank_group_v2.test1.id
+  group_id   = opentelekomcloud_logtank_group_v2.test1.id
   topic_name = "%[1]s-new"
 }
 
@@ -757,9 +757,9 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
   code_type   = "inline"
   func_code   = "dCA9ICdIZWxsbyBtZXNzYWdlOiAnICsganN="
 
-  log_group_id    = opentelekomcloud_logtank_group_v2.test1.id
+  log_group_id   = opentelekomcloud_logtank_group_v2.test1.id
   log_topic_id   = opentelekomcloud_logtank_topic_v2.test1.id
-  log_group_name  = opentelekomcloud_logtank_group_v2.test1.group_name
+  log_group_name = opentelekomcloud_logtank_group_v2.test1.group_name
   log_topic_name = opentelekomcloud_logtank_topic_v2.test1.topic_name
 }
 `, rName)
