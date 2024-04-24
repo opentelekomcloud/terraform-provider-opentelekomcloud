@@ -1,0 +1,6 @@
+---
+features:
+  |
+  **[APIGW]** Add new resource ``resource/opentelekomcloud_apigw_api_publishment_v2`` (`#2489 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2489>`_)
+  |
+  **[APIGW]** Add new data-resource ``data-source/opentelekomcloud_apigw_api_history_v2`` (`#2489 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2489>`_)
