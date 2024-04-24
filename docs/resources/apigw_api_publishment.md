@@ -45,10 +45,6 @@ resource "opentelekomcloud_apigw_api_publishment_v2" "default" {
 
 The following arguments are supported:
 
-* `region` - (Optional, String, ForceNew) Specifies the region in which to publish APIs.
-  If omitted, the provider-level region will be used.
-  Changing this will create a new resource.
-
 * `instance_id` - (Required, String, ForceNew) Specifies an ID of the APIGW dedicated instance to which the API belongs
   to. Changing this will create a new resource.
 
@@ -78,8 +74,10 @@ In addition to all arguments above, the following attributes are exported:
 * `history` - All publish history of the API.
   The [object](#publishment_history) structure is documented below.
 
+* `region` - The region in which to APIs was published.
+
 <a name="publishment_history"></a>
-The `histories` block supports:
+The `history` block supports:
 
 * `version_id` - The version ID of the API publish.
 

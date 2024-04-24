@@ -33,9 +33,6 @@ data "opentelekomcloud_apigw_api_history_v2" "hist" {
 
 The following arguments are supported:
 
-* `region` - (Optional, String) Specifies the region in which to query the APIG environment list.
-  If omitted, the provider-level region will be used.
-
 * `gateway_id` - (Required, String) Specifies an ID of the APIGW dedicated instance to which the API
   environment belongs.
 
@@ -51,8 +48,12 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - Data source ID.
 
-* `history` - List of APIG history details. The structure is documented below.
+* `history` - List of APIGW history details.
+  The [object](#history) structure is documented below.
 
+* `region` - The region in which to APIs was published.
+
+<a name="publishment_history"></a>
 The `history` block supports:
 
 * `id` - API version ID.
@@ -61,7 +62,7 @@ The `history` block supports:
 
 * `description` - The description about the API publication.
 
-* `publish_time` - Time when the APIG publication was created, in RFC-3339 format.
+* `publish_time` - Time when the APIGW publication was created, in RFC-3339 format.
 
 * `status` - Version status.
   Values:

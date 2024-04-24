@@ -19,10 +19,6 @@ func DataSourceApigwApiHistory() *schema.Resource {
 		ReadContext: dataSourceEnvironmentsRead,
 
 		Schema: map[string]*schema.Schema{
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"gateway_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -38,6 +34,10 @@ func DataSourceApigwApiHistory() *schema.Resource {
 			"environment_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"region": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"history": {
 				Type:     schema.TypeList,

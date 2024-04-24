@@ -28,12 +28,6 @@ func ResourceAPIApiPublishmentV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
 			"gateway_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -90,6 +84,10 @@ func ResourceAPIApiPublishmentV2() *schema.Resource {
 						},
 					},
 				},
+			},
+			"region": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -171,6 +169,7 @@ func ResourceApiPublishmentV2Read(ctx context.Context, d *schema.ResourceData, m
 		d.Set("description", publishInfo.Description),
 		d.Set("published_at", publishInfo.PublishTime),
 		d.Set("environment_name", publishInfo.EnvName),
+		d.Set("region", config.GetRegion(d)),
 		setApiPublishHistory(d, resp),
 	)
 
