@@ -1132,6 +1132,13 @@ func (c *Config) APIGWV2Client(region string) (*golangsdk.ServiceClient, error) 
 	})
 }
 
+func (c *Config) FuncGraphV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewFuncGraph(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) DwsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	service, err := openstack.NewDWSV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
