@@ -30,6 +30,7 @@ import (
 	elbv2 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v2"
 	elbv3 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v3"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/evs"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/fgs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/fw"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/gaussdb"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/iam"
@@ -405,6 +406,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_dws_cluster_v1":                            dws.ResourceDcsInstanceV1(),
 			"opentelekomcloud_ecs_instance_v1":                           ecs.ResourceEcsInstanceV1(),
 			"opentelekomcloud_evs_volume_v3":                             evs.ResourceEvsStorageVolumeV3(),
+			"opentelekomcloud_fgs_function_v2":                           fgs.ResourceFgsFunctionV2(),
 			"opentelekomcloud_fw_firewall_group_v2":                      fw.ResourceFWFirewallGroupV2(),
 			"opentelekomcloud_fw_policy_v2":                              fw.ResourceFWPolicyV2(),
 			"opentelekomcloud_fw_rule_v2":                                fw.ResourceFWRuleV2(),

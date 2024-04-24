@@ -38,6 +38,8 @@ provider opentelekomcloud {
 }
 `, altCloud, altProjectID, altProjectName)
 	AlternativeProviderWithRegionConfig string
+	OTC_BUILD_IMAGE_URL                 = os.Getenv("OTC_BUILD_IMAGE_URL")
+	OTC_BUILD_IMAGE_URL_UPDATED         = os.Getenv("OTC_BUILD_IMAGE_URL_UPDATED")
 )
 
 func init() {
@@ -145,4 +147,16 @@ func TestAccPreCheckServiceAvailability(t *testing.T, service string, regions []
 
 	t.Skipf("Service %s not available or configuration differs in %s", service, env.OS_REGION_NAME)
 	return nil
+}
+
+func TestAccPreCheckComponentDeployment(t *testing.T) {
+	if OTC_BUILD_IMAGE_URL == "" {
+		t.Skip("SWR image URL configuration is not completed for acceptance test of component deployment.")
+	}
+}
+
+func TestAccPreCheckImageUrlUpdated(t *testing.T) {
+	if OTC_BUILD_IMAGE_URL_UPDATED == "" {
+		t.Skip("SWR image update URL configuration is not completed for acceptance test of component deployment.")
+	}
 }
