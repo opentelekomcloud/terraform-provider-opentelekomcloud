@@ -38,7 +38,7 @@
         - golang-make-vet
         - tflint
         - goreleaser-build
-        - otc-terraform-visualize-main
+#        - otc-terraform-visualize-main
     tag:
       jobs:
         - release-goreleaser
