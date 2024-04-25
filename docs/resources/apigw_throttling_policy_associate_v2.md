@@ -18,7 +18,7 @@ variable "publish_ids" {
 }
 
 resource "opentelekomcloud_apigw_throttling_policy_associate_v2" "tpa" {
-  gateway_id = var.gateway_id
+  gateway_id  = var.gateway_id
   policy_id   = var.policy_id
   publish_ids = var.publish_ids
 }
