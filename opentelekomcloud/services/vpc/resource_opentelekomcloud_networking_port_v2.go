@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/extradhcpopts"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 
@@ -136,6 +137,23 @@ func ResourceNetworkingPortV2() *schema.Resource {
 					},
 				},
 			},
+			"extra_dhcp_option": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: false,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
 			"value_specs": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -209,6 +227,14 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 		PortSecurityEnabled: &portSecurityEnabled,
 	}
 
+	dhcpOpts := d.Get("extra_dhcp_option").(*schema.Set)
+	if dhcpOpts.Len() > 0 {
+		extendedCreateOpts = extradhcpopts.CreateOptsExt{
+			CreateOptsBuilder: createOpts,
+			ExtraDHCPOpts:     expandNetworkingPortDHCPOptsV2Create(dhcpOpts),
+		}
+	}
+
 	log.Printf("[DEBUG] Create Options: %#v", extendedCreateOpts)
 	p, err := ports.Create(client, extendedCreateOpts).Extract()
 	if err != nil {
@@ -269,6 +295,7 @@ func resourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData, m
 		d.Set("device_id", port.DeviceID),
 		d.Set("port_security_enabled", port.PortSecurityEnabled),
 		d.Set("region", config.GetRegion(d)),
+		d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt)),
 	)
 
 	// Create a slice of all returned Fixed IPs.
@@ -378,6 +405,24 @@ func resourceNetworkingPortV2Update(ctx context.Context, d *schema.ResourceData,
 		finalUpdateOpts = portsecurity.PortUpdateOptsExt{
 			UpdateOptsBuilder:   finalUpdateOpts,
 			PortSecurityEnabled: &portSecurityEnabled,
+		}
+	}
+
+	// Next, perform any dhcp option changes.
+	if d.HasChange("extra_dhcp_option") {
+		hasChange = true
+
+		o, n := d.GetChange("extra_dhcp_option")
+		oldDHCPOpts := o.(*schema.Set)
+		newDHCPOpts := n.(*schema.Set)
+
+		deleteDHCPOpts := oldDHCPOpts.Difference(newDHCPOpts)
+		addDHCPOpts := newDHCPOpts.Difference(oldDHCPOpts)
+
+		updateExtraDHCPOpts := expandNetworkingPortDHCPOptsV2Update(deleteDHCPOpts, addDHCPOpts)
+		finalUpdateOpts = extradhcpopts.UpdateOptsExt{
+			UpdateOptsBuilder: finalUpdateOpts,
+			ExtraDHCPOpts:     updateExtraDHCPOpts,
 		}
 	}
 
@@ -526,4 +571,76 @@ func waitForNetworkPortDelete(client *golangsdk.ServiceClient, portID string) re
 type portWithPortSecurityExtensions struct {
 	ports.Port
 	portsecurity.PortSecurityExt
+	extradhcpopts.ExtraDHCPOptsExt
+}
+
+func expandNetworkingPortDHCPOptsV2Create(dhcpOpts *schema.Set) []extradhcpopts.CreateExtraDHCPOpt {
+	var extraDHCPOpts []extradhcpopts.CreateExtraDHCPOpt
+
+	if dhcpOpts != nil {
+		for _, raw := range dhcpOpts.List() {
+			rawMap := raw.(map[string]interface{})
+			optName := rawMap["name"].(string)
+			optValue := rawMap["value"].(string)
+
+			extraDHCPOpts = append(extraDHCPOpts, extradhcpopts.CreateExtraDHCPOpt{
+				OptName:  optName,
+				OptValue: optValue,
+			})
+		}
+	}
+
+	return extraDHCPOpts
+}
+
+func flattenNetworkingPortDHCPOptsV2(dhcpOpts extradhcpopts.ExtraDHCPOptsExt) []map[string]interface{} {
+	dhcpOptsSet := make([]map[string]interface{}, len(dhcpOpts.ExtraDHCPOpts))
+
+	for i, dhcpOpt := range dhcpOpts.ExtraDHCPOpts {
+		dhcpOptsSet[i] = map[string]interface{}{
+			"name":  dhcpOpt.OptName,
+			"value": dhcpOpt.OptValue,
+		}
+	}
+
+	return dhcpOptsSet
+}
+
+func expandNetworkingPortDHCPOptsV2Update(oldDHCPopts, newDHCPopts *schema.Set) []extradhcpopts.UpdateExtraDHCPOpt {
+	var extraDHCPOpts []extradhcpopts.UpdateExtraDHCPOpt
+	var newOptNames []string
+
+	if newDHCPopts != nil {
+		for _, raw := range newDHCPopts.List() {
+			rawMap := raw.(map[string]interface{})
+
+			optName := rawMap["name"].(string)
+			optValue := rawMap["value"].(string)
+			// DHCP option name is the primary key, we will check this key below
+			newOptNames = append(newOptNames, optName)
+
+			extraDHCPOpts = append(extraDHCPOpts, extradhcpopts.UpdateExtraDHCPOpt{
+				OptName:  optName,
+				OptValue: &optValue,
+			})
+		}
+	}
+
+	if oldDHCPopts != nil {
+		for _, raw := range oldDHCPopts.List() {
+			rawMap := raw.(map[string]interface{})
+
+			optName := rawMap["name"].(string)
+
+			// if we already add a new option with the same name, it means that we update it, no need to delete
+			if !common.StrSliceContains(newOptNames, optName) {
+				extraDHCPOpts = append(extraDHCPOpts, extradhcpopts.UpdateExtraDHCPOpt{
+					OptName:  optName,
+					OptValue: nil,
+				})
+			}
+		}
+	}
+
+	return extraDHCPOpts
 }

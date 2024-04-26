@@ -40,66 +40,65 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 
 The following arguments are supported:
 
-* `name` - (Optional) A unique name for the port. Changing this
+* `name` - (Optional, String) A unique name for the port. Changing this
   updates the `name` of an existing port.
 
-* `network_id` - (Required) The ID of the network to attach the port to. Changing
+* `network_id` - (Required, String, ForceNew) The ID of the network to attach the port to. Changing
   this creates a new port.
 
-* `admin_state_up` - (Optional) Administrative up/down status for the port
+* `admin_state_up` - (Optional, Bool) Administrative up/down status for the port
   (must be "true" or "false" if provided). Changing this updates the
   `admin_state_up` of an existing port.
 
-* `mac_address` - (Optional) Specify a specific MAC address for the port. Changing
+* `mac_address` - (Optional, String, ForceNew) Specify a specific MAC address for the port. Changing
   this creates a new port.
 
-* `tenant_id` - (Optional) The owner of the Port. Required if admin wants
+* `tenant_id` - (Optional, String, ForceNew) The owner of the Port. Required if admin wants
   to create a port for another tenant. Changing this creates a new port.
 
-* `device_owner` - (Optional) The device owner of the Port. Changing this creates
+* `device_owner` - (Optional. String, ForceNew) The device owner of the Port. Changing this creates
   a new port.
 
-* `security_group_ids` - (Optional) A list of security group IDs to apply to the
+* `security_group_ids` - (Optional, List) A list of security group IDs to apply to the
   port. The security groups must be specified by ID and not name (as opposed
   to how they are configured with the Compute Instance).
 
-* `no_security_groups` - (Optional) If set to `true`, then no security groups
+* `no_security_groups` - (Optional, Bool) If set to `true`, then no security groups
   are applied to the port. If set to `false` and no `security_group_ids` are specified,
   then the port will yield to the default behavior of the Networking service,
   which is to usually apply the `"default"` security group.
 
-* `port_security_enabled` - (Optional) Whether to explicitly enable or disable
+* `port_security_enabled` - (Optional, Bool) Whether to explicitly enable or disable
   port security on the port. Port Security is usually enabled by default, so
   omitting argument will usually result in a value of `true`. Setting this
   explicitly to `false` will disable port security. In order to disable port
   security, the port must not have any security groups. Valid values are `true`
   and `false`.
 
-* `device_id` - (Optional) The ID of the device attached to the port. Changing this
+* `device_id` - (Optional, String, ForceNew) The ID of the device attached to the port. Changing this
   creates a new port.
 
-* `fixed_ip` - (Optional) An array of desired IPs for this port. The structure is
+* `fixed_ip` - (Optional, List) An array of desired IPs for this port. The structure is
   described below. A single `fixed_ip` entry is allowed for a port.
+  The `fixed_ip` block supports:
+  * `subnet_id` - (Required, String) Subnet in which to allocate IP address for
+    this port.
+  * `ip_address` - (Optional, String) IP address desired in the subnet for this port. If
+    you don't specify `ip_address`, an available IP address from the specified
+    subnet will be allocated to this port.
 
-* `allowed_address_pairs` - (Optional) An IP/MAC Address pair of additional IP
+* `allowed_address_pairs` - (Optional, Map) An IP/MAC Address pair of additional IP
   addresses that can be active on this port. The structure is described below.
+  The `allowed_address_pairs` block supports:
+  * `ip_address` - (Required, String) The additional IP address.
+  * `mac_address` - (Optional, String) The additional MAC address.
 
-* `value_specs` - (Optional) Map of additional options.
+* `extra_dhcp_option` - (Optional, Map) Specifies the extended DHCP option. This is an extended attribute.
+  The `extra_dhcp_option` block supports:
+  * `name` - (Required, String) Specifies the option name.
+  * `value` - (Required, String) Specifies the option value.
 
-The `fixed_ip` block supports:
-
-* `subnet_id` - (Required) Subnet in which to allocate IP address for
-this port.
-
-* `ip_address` - (Optional) IP address desired in the subnet for this port. If
-you don't specify `ip_address`, an available IP address from the specified
-subnet will be allocated to this port.
-
-The `allowed_address_pairs` block supports:
-
-* `ip_address` - (Required) The additional IP address.
-
-* `mac_address` - (Optional) The additional MAC address.
+* `value_specs` - (Optional, Map) Map of additional options.
 
 
 ## Attributes Reference
