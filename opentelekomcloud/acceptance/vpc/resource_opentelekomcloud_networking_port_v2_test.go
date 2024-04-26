@@ -561,8 +561,8 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name                  = "port_1"
-  network_id            = opentelekomcloud_networking_network_v2.network_1.id
+  name       = "port_1"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
   fixed_ip {
     subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
@@ -586,8 +586,8 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name                  = "port_1"
-  network_id            = opentelekomcloud_networking_network_v2.network_1.id
+  name       = "port_1"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
   fixed_ip {
     subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
