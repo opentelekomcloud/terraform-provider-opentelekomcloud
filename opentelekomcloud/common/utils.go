@@ -391,3 +391,20 @@ func ExpandToStringListBySet(v *schema.Set) []string {
 
 	return s
 }
+
+// SliceUnion returns a new slice containing the union of elements from both slices,
+// without any duplicates.
+func SliceUnion(a, b []string) []string {
+	var res []string
+	for _, i := range a {
+		if !StrSliceContains(res, i) {
+			res = append(res, i)
+		}
+	}
+	for _, k := range b {
+		if !StrSliceContains(res, k) {
+			res = append(res, k)
+		}
+	}
+	return res
+}
