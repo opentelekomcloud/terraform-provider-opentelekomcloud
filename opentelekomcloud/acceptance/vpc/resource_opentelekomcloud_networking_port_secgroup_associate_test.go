@@ -22,7 +22,7 @@ func getPortResourceFunc(cfg *cfg.Config, state *terraform.ResourceState) (inter
 	return ports.Get(client, state.Primary.Attributes["port_id"]).Extract()
 }
 
-func TestAccApiPublishment_basic(t *testing.T) {
+func TestAccNetworkingV2PortAssociate_basic(t *testing.T) {
 	var port ports.Port
 	rc := common.InitResourceCheck(
 		resourcePortAssociateName,
