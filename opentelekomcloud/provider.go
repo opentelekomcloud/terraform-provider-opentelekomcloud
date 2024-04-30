@@ -313,6 +313,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_nat_gateway_v2":                    nat.DataSourceNatGatewayV2(),
 			"opentelekomcloud_networking_network_v2":             vpc.DataSourceNetworkingNetworkV2(),
 			"opentelekomcloud_networking_port_v2":                vpc.DataSourceNetworkingPortV2(),
+			"opentelekomcloud_networking_port_ids_v2":            vpc.DataSourceNetworkingPortIDsV2(),
 			"opentelekomcloud_networking_secgroup_v2":            vpc.DataSourceNetworkingSecGroupV2(),
 			"opentelekomcloud_networking_secgroup_rule_ids_v2":   vpc.DataSourceNetworkingSecGroupRuleIdsV2(),
 			"opentelekomcloud_obs_bucket":                        obs.DataSourceObsBucket(),
@@ -348,7 +349,8 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"opentelekomcloud_antiddos_v1":                               antiddos.ResourceAntiDdosV1(),
+			"opentelekomcloud_antiddos_v1": antiddos.ResourceAntiDdosV1(),
+			// "opentelekomcloud_apigw_acl_policy_v2":                       apigw.ResourceAPIAclPolicyV2(),
 			"opentelekomcloud_apigw_api_v2":                              apigw.ResourceAPIApiV2(),
 			"opentelekomcloud_apigw_api_publishment_v2":                  apigw.ResourceAPIApiPublishmentV2(),
 			"opentelekomcloud_apigw_environment_v2":                      apigw.ResourceAPIEnvironmentv2(),
@@ -466,6 +468,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_networking_floatingip_associate_v2":        vpc.ResourceNetworkingFloatingIPAssociateV2(),
 			"opentelekomcloud_networking_network_v2":                     vpc.ResourceNetworkingNetworkV2(),
 			"opentelekomcloud_networking_port_v2":                        vpc.ResourceNetworkingPortV2(),
+			"opentelekomcloud_networking_port_secgroup_associate_v2":     vpc.ResourceNetworkingPortSecGroupAssociateV2(),
 			"opentelekomcloud_networking_router_v2":                      vpc.ResourceNetworkingRouterV2(),
 			"opentelekomcloud_networking_router_interface_v2":            vpc.ResourceNetworkingRouterInterfaceV2(),
 			"opentelekomcloud_networking_router_route_v2":                vpc.ResourceNetworkingRouterRouteV2(),
