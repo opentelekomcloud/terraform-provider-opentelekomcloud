@@ -1,5 +1,5 @@
 ---
-subcategory: "APIG"
+subcategory: "APIGW"
 ---
 
 Up-to-date reference of API arguments for API Gateway service you can get at

@@ -349,8 +349,8 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"opentelekomcloud_antiddos_v1": antiddos.ResourceAntiDdosV1(),
-			// "opentelekomcloud_apigw_acl_policy_v2":                       apigw.ResourceAPIAclPolicyV2(),
+			"opentelekomcloud_antiddos_v1":                               antiddos.ResourceAntiDdosV1(),
+			"opentelekomcloud_apigw_acl_policy_v2":                       apigw.ResourceAPIAclPolicyV2(),
 			"opentelekomcloud_apigw_api_v2":                              apigw.ResourceAPIApiV2(),
 			"opentelekomcloud_apigw_api_publishment_v2":                  apigw.ResourceAPIApiPublishmentV2(),
 			"opentelekomcloud_apigw_environment_v2":                      apigw.ResourceAPIEnvironmentv2(),

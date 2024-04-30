@@ -1,5 +1,5 @@
 ---
-subcategory: "APIG"
+subcategory: "APIGW"
 ---
 
 # opentelekomcloud_apigw_api_publishment_v2
