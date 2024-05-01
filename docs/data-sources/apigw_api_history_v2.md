@@ -1,5 +1,5 @@
 ---
-subcategory: "APIG"
+subcategory: "APIGW"
 ---
 
 # opentelekomcloud_apigw_api_history_v2
@@ -49,7 +49,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - Data source ID.
 
 * `history` - List of APIGW history details.
-  The [object](#history) structure is documented below.
+  The [object](#publishment_history) structure is documented below.
 
 * `region` - The region in which to APIs was published.
 

@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[APIGW]** Add new resource ``resource/opentelekomcloud_apigw_acl_policy_v2`` (`#2495 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2495>`_)

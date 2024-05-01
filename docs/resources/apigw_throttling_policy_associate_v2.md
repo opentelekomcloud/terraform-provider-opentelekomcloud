@@ -1,5 +1,5 @@
 ---
-subcategory: "APIG"
+subcategory: "APIGW"
 ---
 
 # opentelekomcloud_apigw_throttling_policy_associate_v2

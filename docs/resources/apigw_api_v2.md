@@ -1,5 +1,5 @@
 ---
-subcategory: "APIG"
+subcategory: "APIGW"
 ---
 
 Up-to-date reference of API arguments for API Gateway API service you can get at
@@ -214,19 +214,19 @@ The following arguments are supported:
   Changing this will create a new API resource.
 
 * `http` - (Optional, List, ForceNew) Specifies the web backend details.
-  The [object](#apig_api_http) structure is documented below. Changing this will create a new API resource.
+  The [object](#apigw_api_http) structure is documented below. Changing this will create a new API resource.
 
 * `mock_policy` - (Optional, List) Specifies the Mock policy backends.
   The maximum blocks of the policy is 5.
-  The [object](#apig_api_mock_policy) structure is documented below.
+  The [object](#apigw_api_mock_policy) structure is documented below.
 
 * `func_graph_policy` - (Optional, List) Specifies the Mock policy backends.
   The maximum blocks of the policy is 5.
-  The [object](#apig_api_func_graph_policy) structure is documented below.
+  The [object](#apigw_api_func_graph_policy) structure is documented below.
 
 * `http_policy` - (Optional, List) Specifies the example response for a failed request.
   The maximum blocks of the policy is 5.
-  The [object](#apig_api_http_policy) structure is documented below.
+  The [object](#apigw_api_http_policy) structure is documented below.
 
 <a name="apigw_api_request_params"></a>
 The `request_params` block supports:
