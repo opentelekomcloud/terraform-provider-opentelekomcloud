@@ -82,6 +82,12 @@ func ResourceWafDedicatedInstance() *schema.Resource {
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"res_tenant": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  true,
+			},
 			"server_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -142,7 +148,7 @@ func resourceWafDedicatedInstanceV1Create(ctx context.Context, d *schema.Resourc
 		SubnetId:         d.Get("subnet_id").(string),
 		SecurityGroupsId: groups,
 		Count:            defaultCount,
-		ResTenant:        pointerto.Bool(true),
+		ResTenant:        pointerto.Bool(d.Get("res_tenant").(bool)),
 	}
 
 	r, err := instances.Create(client, opts)
