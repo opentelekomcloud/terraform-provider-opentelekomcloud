@@ -1,0 +1,4 @@
+---
+fixes:
+  |
+  **[WAF]** Fix setting `res_tenant` attribute in ``resource/opentelekomcloud_waf_dedicated_instance_v1`` (`#2497 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2497>`_)

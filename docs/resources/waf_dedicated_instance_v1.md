@@ -69,6 +69,9 @@ The following arguments are supported:
 * `architecture` - (Optional, String, ForceNew) Dedicated engine CPU architecture. Default value is `x86`.
   Changing this will create a new instance.
 
+* `res_tenant` - (Optional, String, ForceNew) Whether the dedicated WAF instance is network interface type.
+  Default value is `true`. Changing this will create a new instance.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -117,4 +120,10 @@ WAF dedicated instance can be imported using the `id`, e.g.
 
 ```bash
 $ terraform import opentelekomcloud_waf_dedicated_instance_v1.wafd <id>
+  lifecycle {
+    ignore_changes = [
+      res_tenant,
+      specification,
+    ]
+  }
 ```
