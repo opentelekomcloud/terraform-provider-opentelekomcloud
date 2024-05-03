@@ -40,7 +40,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - Resource ID. The format is `<instance_id>/<policy_id>`.
+* `id` - Resource ID. The format is `<gateway_id>/<policy_id>`.
 
 * `region` - Specifies the region where the dedicated instance and the throttling policy are located.
 
@@ -50,5 +50,5 @@ Resources can be imported using their `policy_id` and the APIGW dedicated gatewa
 belongs, separated by a slash, e.g.
 
 ```shell
-$ terraform import opentelekomcloud_apigw_throttling_policy_associate_v2.tpa <instance_id>/<policy_id>
+$ terraform import opentelekomcloud_apigw_throttling_policy_associate_v2.tpa <gateway_id>/<policy_id>
 ```
