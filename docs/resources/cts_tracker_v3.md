@@ -9,7 +9,7 @@ Up-to-date reference of API arguments for CTS tracker you can get at
 
 Allows you to collect, store, and query cloud resource operation records.
 
-~> **Warning** `opentelekomcloud_cts_tracker_v3` not available for `eu-nl` region.
+~> **Warning** `opentelekomcloud_cts_tracker_v3` is not available for `eu-nl` region.
 
 -> A single tracker can be created for current CTS version.
 
