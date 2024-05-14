@@ -49,5 +49,5 @@ Associate resources can be imported using their `policy_id` and the APIG gateway
 belongs, separated by a slash, e.g.
 
 ```bash
-$ terraform import huaweicloud_apig_acl_policy_associate.test <gateway_id>/<policy_id>
+$ terraform import opentelekomcloud_apigw_acl_policy_associate_v2.test <gateway_id>/<policy_id>
 ```
