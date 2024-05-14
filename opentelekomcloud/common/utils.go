@@ -5,9 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"reflect"
 	"regexp"
 	"sort"
@@ -441,27 +439,4 @@ func RemoveNil(data map[string]interface{}) map[string]interface{} {
 	}
 
 	return withoutNil
-}
-
-func FlattenResponse(resp *http.Response) (interface{}, error) {
-	var respBody interface{}
-	defer resp.Body.Close()
-	// Don't decode JSON when there is no content
-	if resp.StatusCode == http.StatusNoContent {
-		_, err := io.Copy(io.Discard, resp.Body)
-		return resp, err
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		return nil, err
-	}
-	return respBody, nil
-}
-
-func PathSearch(expression string, obj interface{}, defaultValue interface{}) interface{} {
-	v, err := jmespath.Search(expression, obj)
-	if err != nil || v == nil {
-		return defaultValue
-	}
-	return v
 }

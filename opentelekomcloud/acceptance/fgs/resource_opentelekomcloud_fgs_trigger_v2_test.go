@@ -12,7 +12,6 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/fgs"
 )
 
 func getFunctionTriggerFunc(conf *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
@@ -21,7 +20,7 @@ func getFunctionTriggerFunc(conf *cfg.Config, state *terraform.ResourceState) (i
 		return nil, fmt.Errorf("error creating FunctionGraph client: %s", err)
 	}
 
-	return fgs.GetTriggerById(client, state.Primary.Attributes["function_urn"], state.Primary.Attributes["type"],
+	return trigger.Get(client, state.Primary.Attributes["function_urn"], state.Primary.Attributes["type"],
 		state.Primary.ID)
 }
 
@@ -118,22 +117,22 @@ func testAccFunctionTimingTrigger_basic_step1(name string) string {
 resource "opentelekomcloud_fgs_trigger_v2" "timer_rate" {
   function_urn = opentelekomcloud_fgs_function_v2.test.urn
   type         = "TIMER"
-  event_data   = jsonencode({
-    "name": "%[2]s_rate",
-    "schedule_type": "Rate",
-    "user_event": "Created by acc test",
-    "schedule": "3m"
+  event_data = jsonencode({
+    "name" : "%[2]s_rate",
+    "schedule_type" : "Rate",
+    "user_event" : "Created by acc test",
+    "schedule" : "3m"
   })
 }
 
 resource "opentelekomcloud_fgs_trigger_v2" "timer_cron" {
   function_urn = opentelekomcloud_fgs_function_v2.test.urn
   type         = "TIMER"
-  event_data   = jsonencode({
-    "name": "%[2]s_cron",
-    "schedule_type": "Cron",
-    "user_event": "Created by acc test",
-    "schedule": "@every 1h30m"
+  event_data = jsonencode({
+    "name" : "%[2]s_cron",
+    "schedule_type" : "Cron",
+    "user_event" : "Created by acc test",
+    "schedule" : "@every 1h30m"
   })
 }
 `, testAccFunctionTrigger_base(name), name)
@@ -147,11 +146,11 @@ resource "opentelekomcloud_fgs_trigger_v2" "timer_rate" {
   function_urn = opentelekomcloud_fgs_function_v2.test.urn
   type         = "TIMER"
   status       = "DISABLED"
-  event_data   = jsonencode({
-    "name": "%[2]s_rate",
-    "schedule_type": "Rate",
-    "user_event": "Created by acc test",
-    "schedule": "3m"
+  event_data = jsonencode({
+    "name" : "%[2]s_rate",
+    "schedule_type" : "Rate",
+    "user_event" : "Created by acc test",
+    "schedule" : "3m"
   })
 }
 
@@ -159,11 +158,11 @@ resource "opentelekomcloud_fgs_trigger_v2" "timer_cron" {
   function_urn = opentelekomcloud_fgs_function_v2.test.urn
   type         = "TIMER"
   status       = "DISABLED"
-  event_data   = jsonencode({
-    "name": "%[2]s_cron",
-    "schedule_type": "Cron",
-    "user_event": "Created by acc test",
-    "schedule": "@every 1h30m"
+  event_data = jsonencode({
+    "name" : "%[2]s_cron",
+    "schedule_type" : "Cron",
+    "user_event" : "Created by acc test",
+    "schedule" : "@every 1h30m"
   })
 }
 `, testAccFunctionTrigger_base(name), name)
