@@ -207,47 +207,47 @@ func testAccSignature_basic(name, signKey, signSecret string) string {
 %[1]s
 
 resource "opentelekomcloud_apigw_signature_v2" "with_key" {
-  gateway_id  = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name        = "%[2]s_with_key"
-  type        = "basic"
-  key         = "%[3]s"
-  secret      = "%[4]s"
+  gateway_id = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name       = "%[2]s_with_key"
+  type       = "basic"
+  key        = "%[3]s"
+  secret     = "%[4]s"
 }
 
 resource "opentelekomcloud_apigw_signature_v2" "without_key" {
-  gateway_id  = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name        = "%[2]s_without_key"
-  type        = "basic"
+  gateway_id = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name       = "%[2]s_without_key"
+  type       = "basic"
 }
 
 resource "opentelekomcloud_apigw_signature_v2" "hmac_with_key" {
-  gateway_id  = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name        = "%[2]s_hmac_with_key"
-  type        = "hmac"
-  key         = "%[3]s"
-  secret      = "%[4]s"
+  gateway_id = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name       = "%[2]s_hmac_with_key"
+  type       = "hmac"
+  key        = "%[3]s"
+  secret     = "%[4]s"
 }
 
 resource "opentelekomcloud_apigw_signature_v2" "hmac_without_key" {
-  gateway_id  = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name        = "%[2]s_hmac_without_key"
-  type        = "hmac"
+  gateway_id = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name       = "%[2]s_hmac_without_key"
+  type       = "hmac"
 }
 
 resource "opentelekomcloud_apigw_signature_v2" "aes_with_key" {
-  gateway_id  = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name        = "%[2]s_aes_with_key"
-  type        = "aes"
-  algorithm   = "aes-128-cfb"
-  key         = "%[3]s"
-  secret      = "%[4]s"
+  gateway_id = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name       = "%[2]s_aes_with_key"
+  type       = "aes"
+  algorithm  = "aes-128-cfb"
+  key        = "%[3]s"
+  secret     = "%[4]s"
 }
 
 resource "opentelekomcloud_apigw_signature_v2" "aes_without_key" {
-  gateway_id  = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name        = "%[2]s_aes_without_key"
-  type        = "aes"
-  algorithm   = "aes-256-cfb"
+  gateway_id = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name       = "%[2]s_aes_without_key"
+  type       = "aes"
+  algorithm  = "aes-256-cfb"
 }
 `, testAccSignature_base(name), name, signKey, signSecret)
 }
@@ -257,53 +257,53 @@ func testAccSignature_basic_update(name, signKey, signSecret string) string {
 %[1]s
 
 resource "opentelekomcloud_apigw_signature_v2" "with_key" {
-  gateway_id  = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name        = "%[2]s_with_key_update"
-  type        = "basic"
-  key         = "%[3]s"
-  secret      = "%[4]s"
+  gateway_id = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name       = "%[2]s_with_key_update"
+  type       = "basic"
+  key        = "%[3]s"
+  secret     = "%[4]s"
 }
 
 resource "opentelekomcloud_apigw_signature_v2" "without_key" {
-  gateway_id  = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name        = "%[2]s_without_key_update"
-  type        = "basic"
-  key         = "%[3]s"
-  secret      = "%[4]s"
+  gateway_id = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name       = "%[2]s_without_key_update"
+  type       = "basic"
+  key        = "%[3]s"
+  secret     = "%[4]s"
 }
 
 resource "opentelekomcloud_apigw_signature_v2" "hmac_with_key" {
-  gateway_id  = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name        = "%[2]s_hmac_with_key_update"
-  type        = "hmac"
-  key         = "%[3]s"
-  secret      = "%[4]s"
+  gateway_id = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name       = "%[2]s_hmac_with_key_update"
+  type       = "hmac"
+  key        = "%[3]s"
+  secret     = "%[4]s"
 }
 
 resource "opentelekomcloud_apigw_signature_v2" "hmac_without_key" {
-  gateway_id  = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name        = "%[2]s_hmac_without_key_update"
-  type        = "hmac"
-  key         = "%[3]s"
-  secret      = "%[4]s"
+  gateway_id = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name       = "%[2]s_hmac_without_key_update"
+  type       = "hmac"
+  key        = "%[3]s"
+  secret     = "%[4]s"
 }
 
 resource "opentelekomcloud_apigw_signature_v2" "aes_with_key" {
-  gateway_id  = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name        = "%[2]s_aes_with_key_update"
-  type        = "aes"
-  algorithm   = "aes-128-cfb"
-  key         = "%[3]s"
-  secret      = "%[4]s"
+  gateway_id = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name       = "%[2]s_aes_with_key_update"
+  type       = "aes"
+  algorithm  = "aes-128-cfb"
+  key        = "%[3]s"
+  secret     = "%[4]s"
 }
 
 resource "opentelekomcloud_apigw_signature_v2" "aes_without_key" {
-  gateway_id  = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name        = "%[2]s_aes_without_key_update"
-  type        = "aes"
-  algorithm   = "aes-256-cfb"
-  key         = format("%%s%%s", "%[3]s", strrev("%[3]s")) # the length of the 256 signature key is 32.
-  secret      = "%[4]s"
+  gateway_id = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name       = "%[2]s_aes_without_key_update"
+  type       = "aes"
+  algorithm  = "aes-256-cfb"
+  key        = format("%%s%%s", "%[3]s", strrev("%[3]s")) # the length of the 256 signature key is 32.
+  secret     = "%[4]s"
 }
 `, testAccSignature_base(name), name, signKey, signSecret)
 }
