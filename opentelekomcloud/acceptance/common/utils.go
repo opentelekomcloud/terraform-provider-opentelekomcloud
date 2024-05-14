@@ -14,3 +14,13 @@ func GenerateRandomDomain(count, strLen int) []string {
 	}
 	return result
 }
+
+// Reverse is a function that used to reverse the order of the characters in the given string.
+func Reverse(s string) string {
+	bs := []byte(s)
+	for left, right := 0, len(s)-1; left < right; left++ {
+		bs[left], bs[right] = bs[right], bs[left]
+		right--
+	}
+	return string(bs)
+}
