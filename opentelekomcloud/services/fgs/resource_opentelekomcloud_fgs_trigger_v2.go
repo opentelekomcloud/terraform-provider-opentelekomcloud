@@ -92,7 +92,7 @@ func resourceFunctionTriggerV2Create(ctx context.Context, d *schema.ResourceData
 
 	createOpt, err := buildCreateFunctionTriggerBodyParams(d)
 	if err != nil {
-		return fmterr.Errorf("invalid type of event_data provided (has to be in json): ", err)
+		return fmterr.Errorf("invalid type of event_data provided (has to be in json): %s", err)
 	}
 
 	triggerResp, err := trigger.Create(client, *createOpt)
@@ -226,12 +226,12 @@ func resourceFunctionTriggerV2Update(ctx context.Context, d *schema.ResourceData
 
 	updateOpts, err := buildUpdateFunctionTriggerBodyParams(d)
 	if err != nil {
-		return fmterr.Errorf("invalid type of event_data provided (has to be in json): ", err)
+		return fmterr.Errorf("invalid type of event_data provided (has to be in json): %s", err)
 	}
 
 	_, err = trigger.Update(client, *updateOpts)
 	if err != nil {
-		return fmterr.Errorf("error updating trigger event: ", err)
+		return fmterr.Errorf("error updating trigger event: %s", err)
 	}
 
 	err = waitForFunctionTriggerStatusCompleted(ctx, client, d)
