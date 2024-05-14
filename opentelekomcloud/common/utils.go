@@ -19,7 +19,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/jmespath/go-jmespath"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -393,6 +392,23 @@ func ExpandToStringListBySet(v *schema.Set) []string {
 	}
 
 	return s
+}
+
+// SliceUnion returns a new slice containing the union of elements from both slices,
+// without any duplicates.
+func SliceUnion(a, b []string) []string {
+	var res []string
+	for _, i := range a {
+		if !StrSliceContains(res, i) {
+			res = append(res, i)
+		}
+	}
+	for _, k := range b {
+		if !StrSliceContains(res, k) {
+			res = append(res, k)
+		}
+	}
+	return res
 }
 
 func RemoveNil(data map[string]interface{}) map[string]interface{} {

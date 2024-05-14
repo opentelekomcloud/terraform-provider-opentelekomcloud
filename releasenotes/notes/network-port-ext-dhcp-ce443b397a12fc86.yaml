@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[NETWORK]** Add `extra_dhcp_opts` support in ``resource/opentelekomcloud_networking_port_v2`` (`#2491 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2491>`_)

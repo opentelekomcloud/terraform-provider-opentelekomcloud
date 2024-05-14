@@ -256,6 +256,7 @@ func Provider() *schema.Provider {
 
 		DataSourcesMap: map[string]*schema.Resource{
 			"opentelekomcloud_antiddos_v1":                       antiddos.DataSourceAntiDdosV1(),
+			"opentelekomcloud_apigw_api_history_v2":              apigw.DataSourceApigwApiHistory(),
 			"opentelekomcloud_cbr_backup_v3":                     cbr.DataSourceCBRBackupsV3(),
 			"opentelekomcloud_cbr_backup_ids_v3":                 cbr.DataSourceCBRBackupsIdsV3(),
 			"opentelekomcloud_cce_cluster_v3":                    cce.DataSourceCCEClusterV3(),
@@ -312,6 +313,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_nat_gateway_v2":                    nat.DataSourceNatGatewayV2(),
 			"opentelekomcloud_networking_network_v2":             vpc.DataSourceNetworkingNetworkV2(),
 			"opentelekomcloud_networking_port_v2":                vpc.DataSourceNetworkingPortV2(),
+			"opentelekomcloud_networking_port_ids_v2":            vpc.DataSourceNetworkingPortIDsV2(),
 			"opentelekomcloud_networking_secgroup_v2":            vpc.DataSourceNetworkingSecGroupV2(),
 			"opentelekomcloud_networking_secgroup_rule_ids_v2":   vpc.DataSourceNetworkingSecGroupRuleIdsV2(),
 			"opentelekomcloud_obs_bucket":                        obs.DataSourceObsBucket(),
@@ -348,11 +350,15 @@ func Provider() *schema.Provider {
 
 		ResourcesMap: map[string]*schema.Resource{
 			"opentelekomcloud_antiddos_v1":                               antiddos.ResourceAntiDdosV1(),
+			"opentelekomcloud_apigw_acl_policy_v2":                       apigw.ResourceAPIAclPolicyV2(),
+			"opentelekomcloud_apigw_acl_policy_associate_v2":             apigw.ResourceAclPolicyAssociateV2(),
 			"opentelekomcloud_apigw_api_v2":                              apigw.ResourceAPIApiV2(),
+			"opentelekomcloud_apigw_api_publishment_v2":                  apigw.ResourceAPIApiPublishmentV2(),
 			"opentelekomcloud_apigw_environment_v2":                      apigw.ResourceAPIEnvironmentv2(),
 			"opentelekomcloud_apigw_gateway_v2":                          apigw.ResourceAPIGWv2(),
 			"opentelekomcloud_apigw_group_v2":                            apigw.ResourceAPIGroupV2(),
 			"opentelekomcloud_apigw_throttling_policy_v2":                apigw.ResourceAPIThrottlingPolicyV2(),
+			"opentelekomcloud_apigw_throttling_policy_associate_v2":      apigw.ResourceAPIThrottlingPolicyAssociateV2(),
 			"opentelekomcloud_as_configuration_v1":                       as.ResourceASConfiguration(),
 			"opentelekomcloud_as_group_v1":                               as.ResourceASGroup(),
 			"opentelekomcloud_as_policy_v1":                              as.ResourceASPolicy(),
@@ -464,6 +470,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_networking_floatingip_associate_v2":        vpc.ResourceNetworkingFloatingIPAssociateV2(),
 			"opentelekomcloud_networking_network_v2":                     vpc.ResourceNetworkingNetworkV2(),
 			"opentelekomcloud_networking_port_v2":                        vpc.ResourceNetworkingPortV2(),
+			"opentelekomcloud_networking_port_secgroup_associate_v2":     vpc.ResourceNetworkingPortSecGroupAssociateV2(),
 			"opentelekomcloud_networking_router_v2":                      vpc.ResourceNetworkingRouterV2(),
 			"opentelekomcloud_networking_router_interface_v2":            vpc.ResourceNetworkingRouterInterfaceV2(),
 			"opentelekomcloud_networking_router_route_v2":                vpc.ResourceNetworkingRouterRouteV2(),

@@ -161,6 +161,40 @@ func TestAccNetworkingV2Port_portSecurity_enabled(t *testing.T) {
 	})
 }
 
+func TestAccNetworkingV2Port_extendedDhcpOpts(t *testing.T) {
+	var port testPortWithExtensions
+	resourceName := "opentelekomcloud_networking_port_v2.port_1"
+	t.Parallel()
+	qts := subnetQuotas()
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2PortExtendedDHCPOpts,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortWithExtensionsExists(resourceName, &port),
+					resource.TestCheckResourceAttr(resourceName, "extra_dhcp_option.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "extra_dhcp_option.0.name", "A"),
+					resource.TestCheckResourceAttr(resourceName, "extra_dhcp_option.0.value", "MY_VAL"),
+				),
+			},
+			{
+				Config: testAccNetworkingV2PortExtendedDHCPOptsUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkingV2PortWithExtensionsExists(resourceName, &port),
+					resource.TestCheckResourceAttr(resourceName, "extra_dhcp_option.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "extra_dhcp_option.0.name", "B"),
+					resource.TestCheckResourceAttr(resourceName, "extra_dhcp_option.0.value", "MY_VAL_UPDATED"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccNetworkingV2Port_noPortSecurityNoSecurityGroups(t *testing.T) {
 	var port testPortWithExtensions
 	resourceName := "opentelekomcloud_networking_port_v2.port_1"
@@ -511,6 +545,56 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
   timeouts {
     create = "5m"
     delete = "5m"
+  }
+}
+`
+
+const testAccNetworkingV2PortExtendedDHCPOpts = `
+resource "opentelekomcloud_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
+  name       = "subnet_1"
+  cidr       = "192.168.199.0/24"
+  ip_version = 4
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
+}
+
+resource "opentelekomcloud_networking_port_v2" "port_1" {
+  name       = "port_1"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  fixed_ip {
+    subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
+    ip_address = "192.168.199.23"
+  }
+  extra_dhcp_option {
+    name  = "A"
+    value = "MY_VAL"
+  }
+}
+`
+
+const testAccNetworkingV2PortExtendedDHCPOptsUpdate = `
+resource "opentelekomcloud_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
+  name       = "subnet_1"
+  cidr       = "192.168.199.0/24"
+  ip_version = 4
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
+}
+
+resource "opentelekomcloud_networking_port_v2" "port_1" {
+  name       = "port_1"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  fixed_ip {
+    subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
+    ip_address = "192.168.199.23"
+  }
+  extra_dhcp_option {
+    name  = "B"
+    value = "MY_VAL_UPDATED"
   }
 }
 `

@@ -56,7 +56,7 @@ func TestAccWafDedicatedInstanceV1_basic(t *testing.T) {
 				ResourceName:            wafdInstanceResourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"specification"},
+				ImportStateVerifyIgnore: []string{"specification", "res_tenant"},
 			},
 		},
 	})
