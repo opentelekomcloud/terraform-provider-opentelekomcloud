@@ -5,7 +5,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"reflect"
 	"regexp"
 	"sort"
@@ -17,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/jmespath/go-jmespath"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -390,4 +393,59 @@ func ExpandToStringListBySet(v *schema.Set) []string {
 	}
 
 	return s
+}
+
+func RemoveNil(data map[string]interface{}) map[string]interface{} {
+	withoutNil := make(map[string]interface{})
+
+	for k, v := range data {
+		if v == nil {
+			continue
+		}
+
+		switch v := v.(type) {
+		case map[string]interface{}:
+			if len(v) > 0 {
+				withoutNil[k] = RemoveNil(v)
+			}
+		case []map[string]interface{}:
+			rv := make([]map[string]interface{}, 0, len(v))
+			for _, vv := range v {
+				rst := RemoveNil(vv)
+				if len(rst) > 0 {
+					rv = append(rv, rst)
+				}
+			}
+			if len(rv) > 0 {
+				withoutNil[k] = rv
+			}
+		default:
+			withoutNil[k] = v
+		}
+	}
+
+	return withoutNil
+}
+
+func FlattenResponse(resp *http.Response) (interface{}, error) {
+	var respBody interface{}
+	defer resp.Body.Close()
+	// Don't decode JSON when there is no content
+	if resp.StatusCode == http.StatusNoContent {
+		_, err := io.Copy(io.Discard, resp.Body)
+		return resp, err
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
+		return nil, err
+	}
+	return respBody, nil
+}
+
+func PathSearch(expression string, obj interface{}, defaultValue interface{}) interface{} {
+	v, err := jmespath.Search(expression, obj)
+	if err != nil || v == nil {
+		return defaultValue
+	}
+	return v
 }
