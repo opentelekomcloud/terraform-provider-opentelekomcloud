@@ -351,7 +351,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The resource ID, consist of `urn` and current `version`, the format is `<urn>:<version>`.
 
-* `region` - (Optional, String, ForceNew) The region in which Function resource is create.
+* `region` - The region in which function graph resource is created.
 
 * `func_mounts/status` - The status of file system.
 
