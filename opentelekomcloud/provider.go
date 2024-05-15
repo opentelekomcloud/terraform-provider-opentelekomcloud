@@ -412,6 +412,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_ecs_instance_v1":                           ecs.ResourceEcsInstanceV1(),
 			"opentelekomcloud_evs_volume_v3":                             evs.ResourceEvsStorageVolumeV3(),
 			"opentelekomcloud_fgs_function_v2":                           fgs.ResourceFgsFunctionV2(),
+			"opentelekomcloud_fgs_trigger_v2":                            fgs.ResourceFgsTriggerV2(),
 			"opentelekomcloud_fw_firewall_group_v2":                      fw.ResourceFWFirewallGroupV2(),
 			"opentelekomcloud_fw_policy_v2":                              fw.ResourceFWPolicyV2(),
 			"opentelekomcloud_fw_rule_v2":                                fw.ResourceFWRuleV2(),
