@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[VPC]** Enable `secondary_cidr` attribute in each region for ``resource/opentelekomcloud_vpc_v1`` (`#2505 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2505>`_)
