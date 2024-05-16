@@ -440,3 +440,50 @@ func RemoveNil(data map[string]interface{}) map[string]interface{} {
 
 	return withoutNil
 }
+
+// IsSliceContainsAnyAnotherSliceElement is a method that used to determine whether a list contains any element of
+// another list (including its fragments belonging to the current string), returns true if it contains.
+// sl: The slice body used to determine the inclusion relationship.
+// another: The included slice object used to determine the inclusion relationship.
+// ignoreCase: Whether to ignore case.
+// isExcat: Whether the inclusion relationship of string objects applies exact matching rules.
+func IsSliceContainsAnyAnotherSliceElement(sl, another []string, ignoreCase, isExcat bool) bool {
+	for _, elem := range sl {
+		if IsStrContainsSliceElement(elem, another, ignoreCase, isExcat) {
+			return true
+		}
+	}
+	return false
+}
+
+// IsStrContainsSliceElement returns true if the string exists in given slice or contains in one of slice elements when
+// open exact flag. Also, you can ignore case for this check.
+func IsStrContainsSliceElement(str string, sl []string, ignoreCase, isExcat bool) bool {
+	if ignoreCase {
+		str = strings.ToLower(str)
+	}
+	for _, s := range sl {
+		if ignoreCase {
+			s = strings.ToLower(s)
+		}
+		if isExcat && s == str {
+			return true
+		}
+		if !isExcat && strings.Contains(str, s) {
+			return true
+		}
+	}
+	return false
+}
+
+// ExpandToStringList takes the result for an array of strings and returns a []string
+func ExpandToStringList(v []interface{}) []string {
+	s := make([]string, 0, len(v))
+	for _, val := range v {
+		if strVal, ok := val.(string); ok && strVal != "" {
+			s = append(s, strVal)
+		}
+	}
+
+	return s
+}
