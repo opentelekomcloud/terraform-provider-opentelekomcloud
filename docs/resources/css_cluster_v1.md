@@ -49,7 +49,8 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   name            = "terraform_test_cluster"
   expect_node_num = 1
   datastore {
-    version = "Opensearch_1.3.6"
+    version = "1.3.6"
+    type    = "opensearch"
   }
   enable_https     = true
   enable_authority = true
@@ -161,9 +162,9 @@ The `volume` block supports:
 
 The `datastore` block contains:
 
-* `type` - Engine type. The default value is `elasticsearch`. Currently, the value can only be `elasticsearch`.
+* `type` - Engine type. The default value is `elasticsearch`. Currently, the value can be `elasticsearch` or `opensearch`.
 
-* `version` - Engine version. The value can be `7.6.2`, `7.9.3`, `7.10.2` or `Opensearch_1.3.6`.
+* `version` - Engine version. The value can be `7.6.2`, `7.9.3`, `7.10.2` or `1.3.6` for `opensearch`.
   The default value is `7.6.2`.
 
 ## Attributes Reference
