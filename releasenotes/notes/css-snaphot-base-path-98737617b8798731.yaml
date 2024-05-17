@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    **[CSS]** Datastore doc update ``resource/opentelekomcloud_css_cluster_v1``
+    (`#2512 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2512>`_)
+  - |
+    **[CSS]** Added required `base_path` attribute for `configuration` in ``resource/opentelekomcloud_css_snapshot_configuration_v1``
+    (`#2512 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2512>`_)
