@@ -63,9 +63,10 @@ func ResourceVirtualPrivateCloudV1() *schema.Resource {
 				ValidateFunc: validation.IsCIDR,
 			},
 			"shared": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeBool,
+				Optional:   true,
+				Computed:   true,
+				Deprecated: "VPC Shared SNAT End of Life from 01.03.2024",
 			},
 			"status": {
 				Type:     schema.TypeString,
