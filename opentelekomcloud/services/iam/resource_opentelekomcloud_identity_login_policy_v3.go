@@ -81,7 +81,10 @@ func resourceIdentityLoginPolicyV3Create(ctx context.Context, d *schema.Resource
 		return fmterr.Errorf(clientCreationFail, err)
 	}
 
-	domainID := client.DomainID
+	domainID, err := getDomainID(config, client)
+	if err != nil {
+		return fmterr.Errorf("error getting the domain id, err=%s", err)
+	}
 
 	loginPolicyOpts := security.UpdateLoginPolicyOpts{
 		AccountValidityPeriod:   pointerto.Int(d.Get("account_validity_period").(int)),

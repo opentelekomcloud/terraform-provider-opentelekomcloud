@@ -45,7 +45,10 @@ func resourceIdentityProtectionPolicyV3Create(ctx context.Context, d *schema.Res
 		return fmterr.Errorf(clientCreationFail, err)
 	}
 
-	domainID := client.DomainID
+	domainID, err := getDomainID(config, client)
+	if err != nil {
+		return fmterr.Errorf("error getting the domain id, err=%s", err)
+	}
 
 	enable := d.Get("enable_operation_protection_policy").(bool)
 	opPolicyOpts := security.UpdateProtectionPolicyOpts{

@@ -84,7 +84,10 @@ func resourceIdentityPasswordPolicyV3Create(ctx context.Context, d *schema.Resou
 		return fmterr.Errorf(clientCreationFail, err)
 	}
 
-	domainID := client.DomainID
+	domainID, err := getDomainID(config, client)
+	if err != nil {
+		return fmterr.Errorf("error getting the domain id, err=%s", err)
+	}
 
 	passPolicyOpts := security.UpdatePasswordPolicyOpts{
 		MaximumConsecutiveIdenticalChars:  pointerto.Int(d.Get("maximum_consecutive_identical_chars").(int)),
