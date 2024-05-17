@@ -3,6 +3,7 @@ package iam
 import (
 	"context"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -95,6 +96,8 @@ func dataSourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, met
 		d.Set("name", user.Name),
 		d.Set("password_expires_at", user.PasswordExpiresAt.Format(time.RFC3339)),
 	)
+
+	client.Endpoint = strings.Replace(client.Endpoint, "v3", "v3.0", 1)
 
 	mfa, err := security.GetUserMfaDevice(client, user.ID)
 	switch err.(type) {

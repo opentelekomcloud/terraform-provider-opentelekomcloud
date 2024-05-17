@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IAM]** Fix MFA API endpoints for ``data_source/opentelekomcloud_identity_user_v3`` (`#2508 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2508>`_)
