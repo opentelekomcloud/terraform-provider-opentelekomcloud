@@ -1,0 +1,4 @@
+---
+deprecations:
+  - |
+    **[VPC]** ``resource/opentelekomcloud_vpc_v1`` `shared` are marked as discarded in `release-notes <https://www.open-telekom-cloud.com/en/support/release-notes/vpc-shared-snat-end-of-life>`_ (`#2509 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2509>`_)

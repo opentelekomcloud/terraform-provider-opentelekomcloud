@@ -50,7 +50,6 @@ resource "opentelekomcloud_vpc_v1" "vpc_sec_cidr" {
   description    = "description"
   cidr           = "192.168.0.0/16"
   secondary_cidr = "23.9.0.0/16"
-  shared         = true
 
   tags = {
     foo = "bar"
@@ -79,6 +78,7 @@ The following arguments are supported:
 
 * `shared` - (Optional) Specifies whether the shared SNAT should be used or not. Is also
   required for cross-tenant sharing. Shared SNAT only avadilable in eu-de region.
+  Deprecated, VPC Shared SNAT End of Life from `01.03.2024`, please do not use.
 
 * `tags` - (Optional) The key/value pairs to associate with the VPC.
 
