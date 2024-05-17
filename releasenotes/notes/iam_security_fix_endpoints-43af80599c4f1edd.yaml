@@ -1,0 +1,11 @@
+---
+fixes:
+  - |
+    **[IAM]** Fix ``resource/opentelekomcloud_identity_login_policy_v3`` ak/sk auth
+    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  - |
+    **[IAM]** Fix ``resource/opentelekomcloud_identity_password_policy_v3`` ak/sk auth
+    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  - |
+    **[IAM]** Fix ``resource/opentelekomcloud_identity_protection_policy_v3`` ak/sk auth
+    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
