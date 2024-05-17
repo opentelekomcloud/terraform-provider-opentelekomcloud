@@ -10,8 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
+
+const bucketBasePath = "acc_css/css-snapshot"
 
 func TestResourceCSSSnapshotConfigurationV1_basic(t *testing.T) {
 	name := fmt.Sprintf("css-%s", acctest.RandString(10))
@@ -26,14 +27,14 @@ func TestResourceCSSSnapshotConfigurationV1_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckCssClusterV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testResourceCSSSnapshotConfigurationV1Basic(name),
+				Config: testResourceCSSSnapshotConfigurationV1Basic(name, bucketBasePath),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "creation_policy.0.prefix", "snap"),
-					resource.TestCheckResourceAttrSet(resourceName, "base_path"),
+					resource.TestCheckResourceAttr(resourceName, "configuration.0.base_path", bucketBasePath),
 				),
 			},
 			{
-				Config: testResourceCSSSnapshotConfigurationV1Updated(name),
+				Config: testResourceCSSSnapshotConfigurationV1Updated(name, bucketBasePath),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "creation_policy.0.prefix", "snapshot"),
 					resource.TestCheckResourceAttr(resourceName, "creation_policy.0.keepday", "2"),
@@ -50,7 +51,7 @@ func TestAccCheckCSSV1Validation(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config:      testResourceCSSSnapshotConfigurationV1Validation(name),
+				Config:      testResourceCSSSnapshotConfigurationV1Validation(name, bucketBasePath),
 				ExpectError: regexp.MustCompile(`Conflicting configuration.+`),
 			},
 		},
@@ -67,37 +68,10 @@ func getOsAgency() string {
 
 var osAgency = getOsAgency()
 
-func testResourceCSSSnapshotConfigurationV1Basic(name string) string {
+func testResourceCSSSnapshotConfigurationV1Basic(name, bucketBasePath string) string {
+	relatedConfig := testAccCssClusterV1Basic(name)
 	return fmt.Sprintf(`
 %s
-
-%s
-
-resource "opentelekomcloud_css_cluster_v1" "cluster" {
-  expect_node_num = 1
-  name            = "%s"
-  node_config {
-    flavor = "css.medium.8"
-    network_info {
-      security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-      network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-      vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-    }
-    volume {
-      volume_type = "COMMON"
-      size        = 100
-    }
-
-    availability_zone = "%s"
-  }
-  datastore {
-    version = "7.6.2"
-  }
-
-  enable_https     = true
-  enable_authority = true
-  admin_pass       = "QwertyUI!"
-}
 
 resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket        = "tf-snap-testing"
@@ -107,8 +81,9 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
   cluster_id = opentelekomcloud_css_cluster_v1.cluster.id
   configuration {
-    bucket = opentelekomcloud_obs_bucket.bucket.bucket
-    agency = "%s"
+    bucket    = opentelekomcloud_obs_bucket.bucket.bucket
+    agency    = "%s"
+    base_path = "%s"
   }
   creation_policy {
     prefix      = "snap"
@@ -118,39 +93,13 @@ resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
     delete_auto = true
   }
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE, osAgency)
+`, relatedConfig, osAgency, bucketBasePath)
 }
 
-func testResourceCSSSnapshotConfigurationV1Updated(name string) string {
+func testResourceCSSSnapshotConfigurationV1Updated(name, bucketBasePath string) string {
+	relatedConfig := testAccCssClusterV1Basic(name)
 	return fmt.Sprintf(`
 %s
-%s
-
-resource "opentelekomcloud_css_cluster_v1" "cluster" {
-  expect_node_num = 1
-  name            = "%s"
-  node_config {
-    flavor = "css.medium.8"
-    network_info {
-      security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-      network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-      vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-    }
-    volume {
-      volume_type = "COMMON"
-      size        = 100
-    }
-
-    availability_zone = "%s"
-  }
-  datastore {
-    version = "7.6.2"
-  }
-
-  enable_https     = true
-  enable_authority = true
-  admin_pass       = "QwertyUI!"
-}
 
 resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket        = "tf-snap-testing"
@@ -160,8 +109,9 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
   cluster_id = opentelekomcloud_css_cluster_v1.cluster.id
   configuration {
-    bucket = opentelekomcloud_obs_bucket.bucket.bucket
-    agency = "%s"
+    bucket    = opentelekomcloud_obs_bucket.bucket.bucket
+    agency    = "%s"
+    base_path = "%s"
   }
   creation_policy {
     prefix      = "snapshot"
@@ -171,40 +121,13 @@ resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
     delete_auto = true
   }
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE, osAgency)
+`, relatedConfig, osAgency, bucketBasePath)
 }
 
-func testResourceCSSSnapshotConfigurationV1Validation(name string) string {
+func testResourceCSSSnapshotConfigurationV1Validation(name, bucketBasePath string) string {
+	relatedConfig := testAccCssClusterV1Basic(name)
 	return fmt.Sprintf(`
 %s
-
-%s
-
-resource "opentelekomcloud_css_cluster_v1" "cluster" {
-  expect_node_num = 1
-  name            = "%s"
-  node_config {
-    flavor = "css.medium.8"
-    network_info {
-      security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-      network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-      vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-    }
-    volume {
-      volume_type = "COMMON"
-      size        = 100
-    }
-
-    availability_zone = "%s"
-  }
-  datastore {
-    version = "7.6.2"
-  }
-
-  enable_https     = true
-  enable_authority = true
-  admin_pass       = "QwertyUI!"
-}
 
 resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket        = "tf-snap-testing"
@@ -215,9 +138,10 @@ resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
   cluster_id = opentelekomcloud_css_cluster_v1.cluster.id
   automatic  = true
   configuration {
-    bucket = opentelekomcloud_obs_bucket.bucket.bucket
-    agency = "%s"
+    bucket    = opentelekomcloud_obs_bucket.bucket.bucket
+    agency    = "%s"
+    base_path = "%s"
   }
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE, osAgency)
+`, relatedConfig, osAgency, bucketBasePath)
 }

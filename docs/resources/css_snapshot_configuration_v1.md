@@ -43,8 +43,9 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
   cluster_id = opentelekomcloud_css_cluster_v1.cluster.id
   configuration {
-    bucket = opentelekomcloud_obs_bucket.bucket.bucket
-    agency = "css_obs_agency"
+    bucket    = opentelekomcloud_obs_bucket.bucket.bucket
+    agency    = "css_obs_agency"
+    base_path = "css/snapshot"
   }
   creation_policy {
     prefix      = "snapshot"
@@ -77,6 +78,8 @@ The `configuration` block supports:
 
 * `agency` - (Required) The agency used by CSS to access OBS.
 
+* `base_path` - (Required) Storage path of the snapshot in the OBS bucket.
+
 * `kms_id` - (Options) Key ID used for snapshot encryption.
 
 ~>
@@ -107,9 +110,3 @@ The `creation_policy` block supports:
   automatically created are not deleted when the automatic snapshot creation function is disabled.
   If this parameter is set to `true`, all automatically created snapshots are deleted when the automatic snapshot
   creation policy is disabled.
-
-## Attributes Reference
-
-In addition to the arguments listed above, the following computed attributes are exported:
-
-* `base_path` - Storage path of the snapshot in the OBS bucket.

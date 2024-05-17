@@ -57,6 +57,10 @@ func ResourceCssSnapshotConfigurationV1() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"base_path": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
 					},
 				},
 				ConflictsWith: []string{"automatic"},
@@ -92,10 +96,6 @@ func ResourceCssSnapshotConfigurationV1() *schema.Resource {
 					},
 				},
 			},
-			"base_path": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -122,9 +122,10 @@ func readResourceCssSnapshotConfigurationV1(_ context.Context, d *schema.Resourc
 		return fmterr.Errorf("error retrieving CSS cluster automatic snapshot configuration")
 	}
 	configuration := []map[string]interface{}{{
-		"bucket": info.Bucket,
-		"agency": info.Agency,
-		"kms_id": info.SnapshotCmkID,
+		"bucket":    info.Bucket,
+		"agency":    info.Agency,
+		"kms_id":    info.SnapshotCmkID,
+		"base_path": info.BasePath,
 	}}
 	creation := []map[string]interface{}{{
 		"prefix":      info.Prefix,
@@ -136,7 +137,6 @@ func readResourceCssSnapshotConfigurationV1(_ context.Context, d *schema.Resourc
 	mErr := multierror.Append(
 		d.Set("configuration", configuration),
 		d.Set("creation_policy", creation),
-		d.Set("base_path", info.BasePath),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		fmterr.Errorf("error setting snapshot configuration fields: %w", err)
@@ -188,6 +188,7 @@ func updateSnapshotConfiguration(client *golangsdk.ServiceClient, d *schema.Reso
 	opts := snapshots.UpdateConfigurationOpts{
 		Bucket:        d.Get("configuration.0.bucket").(string),
 		Agency:        d.Get("configuration.0.agency").(string),
+		BasePath:      d.Get("configuration.0.base_path").(string),
 		SnapshotCmkID: d.Get("configuration.0.kms_id").(string),
 	}
 	err := snapshots.UpdateConfiguration(client, d.Id(), opts)
