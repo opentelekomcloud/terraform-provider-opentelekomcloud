@@ -56,7 +56,20 @@ func ResourceCTSTrackerV3() *schema.Resource {
 				Computed:     true,
 				ValidateFunc: common.ValidateName,
 			},
+			"compress_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"gzip", "json",
+				}, false),
+			},
 			"is_obs_created": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"is_sort_by_service": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
@@ -93,10 +106,6 @@ func ResourceCTSTrackerV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"bucket_lifecycle": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -113,9 +122,11 @@ func resourceCTSTrackerV3Create(ctx context.Context, d *schema.ResourceData, met
 		TrackerName:  trackerName,
 		TrackerType:  trackerName,
 		ObsInfo: tracker.ObsInfo{
-			BucketName:     d.Get("bucket_name").(string),
-			FilePrefixName: d.Get("file_prefix_name").(string),
-			IsObsCreated:   pointerto.Bool(d.Get("is_obs_created").(bool)),
+			BucketName:      d.Get("bucket_name").(string),
+			FilePrefixName:  d.Get("file_prefix_name").(string),
+			IsObsCreated:    pointerto.Bool(d.Get("is_obs_created").(bool)),
+			CompressType:    d.Get("compress_type").(string),
+			IsSortByService: pointerto.Bool(d.Get("is_sort_by_service").(bool)),
 		},
 	}
 
@@ -170,7 +181,8 @@ func resourceCTSTrackerV3Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("bucket_name", ctsTracker[0].ObsInfo.BucketName),
 		d.Set("file_prefix_name", ctsTracker[0].ObsInfo.FilePrefixName),
 		d.Set("is_obs_created", ctsTracker[0].ObsInfo.IsObsCreated),
-		d.Set("bucket_lifecycle", ctsTracker[0].ObsInfo.BucketLifecycle),
+		d.Set("is_sort_by_service", ctsTracker[0].ObsInfo.IsSortByService),
+		d.Set("compress_type", ctsTracker[0].ObsInfo.CompressType),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting CTS tracker fields: %w", err)
@@ -218,6 +230,14 @@ func resourceCTSTrackerV3Update(ctx context.Context, d *schema.ResourceData, met
 	}
 	if d.HasChange("is_obs_created") {
 		updateOpts.ObsInfo.IsObsCreated = pointerto.Bool(d.Get("is_obs_created").(bool))
+	}
+
+	if d.HasChange("is_sort_by_service") {
+		updateOpts.ObsInfo.IsSortByService = pointerto.Bool(d.Get("is_sort_by_service").(bool))
+	}
+
+	if d.HasChange("compress_type") {
+		updateOpts.ObsInfo.CompressType = d.Get("compress_type").(string)
 	}
 
 	_, err = tracker.Update(client, updateOpts)
