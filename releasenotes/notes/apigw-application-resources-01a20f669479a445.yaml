@@ -1,0 +1,8 @@
+---
+features:
+  |
+  **[APIGW]** Add new resource ``resource/opentelekomcloud_apigw_application_v2`` (`#2517 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2517>`_)
+  |
+  **[APIGW]** Add new resource ``resource/opentelekomcloud_apigw_appcode_v2`` (`#2517 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2517>`_)
+  |
+  **[APIGW]** Add new resource ``resource/opentelekomcloud_apigw_application_authorization_v2`` (`#2517 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2517>`_)
