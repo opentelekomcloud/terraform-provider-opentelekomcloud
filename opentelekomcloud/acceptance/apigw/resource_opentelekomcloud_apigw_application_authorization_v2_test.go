@@ -90,7 +90,7 @@ func testAccAppAuthImportIdFunc(rsName string) resource.ImportStateIdFunc {
 func testAccAppAuth_basic(name string) string {
 	relatedConfig := testAccApigwApi_base(name)
 	return fmt.Sprintf(`
-%[1]s
+%s
 
 resource "opentelekomcloud_apigw_api_v2" "api" {
   count = 3
@@ -101,7 +101,7 @@ resource "opentelekomcloud_apigw_api_v2" "api" {
   type                         = "Public"
   request_protocol             = "HTTP"
   request_method               = "GET"
-  request_uri                  = "/user_info/{user_age}"
+  request_uri                  = "/user_info/${count.index}"
   security_authentication_type = "APP"
   match_mode                   = "EXACT"
   success_response             = "Success response"
@@ -119,9 +119,11 @@ resource "opentelekomcloud_apigw_api_v2" "api" {
 }
 
 resource "opentelekomcloud_apigw_api_publishment_v2" "pub" {
+  count = 3
+
   gateway_id     = opentelekomcloud_apigw_gateway_v2.gateway.id
   environment_id = opentelekomcloud_apigw_environment_v2.env.id
-  api_id         = opentelekomcloud_apigw_api_v2.api.id
+  api_id         = opentelekomcloud_apigw_api_v2.api[count.index].id
 }
 
 resource "opentelekomcloud_apigw_application_v2" "app" {
@@ -133,7 +135,7 @@ resource "opentelekomcloud_apigw_application_v2" "app" {
 resource "opentelekomcloud_apigw_application_authorization_v2" "auth" {
   depends_on = [opentelekomcloud_apigw_api_publishment_v2.pub]
 
-  gateway_id    = opentelekomcloud_apigw_gateway_v2.gateway.id
+  gateway_id     = opentelekomcloud_apigw_gateway_v2.gateway.id
   application_id = opentelekomcloud_apigw_application_v2.app.id
   env_id         = opentelekomcloud_apigw_environment_v2.env.id
   api_ids        = slice(opentelekomcloud_apigw_api_v2.api[*].id, 0, 2)
@@ -144,7 +146,7 @@ resource "opentelekomcloud_apigw_application_authorization_v2" "auth" {
 func testAccAppAuth_update(name string) string {
 	relatedConfig := testAccApigwApi_base(name)
 	return fmt.Sprintf(`
-%[1]s
+%s
 
 resource "opentelekomcloud_apigw_api_v2" "api" {
   count = 3
@@ -155,7 +157,7 @@ resource "opentelekomcloud_apigw_api_v2" "api" {
   type                         = "Public"
   request_protocol             = "HTTP"
   request_method               = "GET"
-  request_uri                  = "/user_info/{user_age}"
+  request_uri                  = "/user_info/${count.index}"
   security_authentication_type = "APP"
   match_mode                   = "EXACT"
   success_response             = "Success response"
@@ -173,9 +175,11 @@ resource "opentelekomcloud_apigw_api_v2" "api" {
 }
 
 resource "opentelekomcloud_apigw_api_publishment_v2" "pub" {
+  count = 3
+
   gateway_id     = opentelekomcloud_apigw_gateway_v2.gateway.id
   environment_id = opentelekomcloud_apigw_environment_v2.env.id
-  api_id         = opentelekomcloud_apigw_api_v2.api.id
+  api_id         = opentelekomcloud_apigw_api_v2.api[count.index].id
 }
 
 resource "opentelekomcloud_apigw_application_v2" "app" {
@@ -187,7 +191,7 @@ resource "opentelekomcloud_apigw_application_v2" "app" {
 resource "opentelekomcloud_apigw_application_authorization_v2" "auth" {
   depends_on = [opentelekomcloud_apigw_api_publishment_v2.pub]
 
-  gateway_id    = opentelekomcloud_apigw_gateway_v2.gateway.id
+  gateway_id     = opentelekomcloud_apigw_gateway_v2.gateway.id
   application_id = opentelekomcloud_apigw_application_v2.app.id
   env_id         = opentelekomcloud_apigw_environment_v2.env.id
   api_ids        = slice(opentelekomcloud_apigw_api_v2.api[*].id, 1, 3)

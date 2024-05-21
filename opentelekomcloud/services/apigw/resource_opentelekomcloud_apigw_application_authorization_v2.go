@@ -209,7 +209,7 @@ func createAppAuthForApis(ctx context.Context, client *golangsdk.ServiceClient, 
 }
 
 func deleteAppAuthFromApis(ctx context.Context, client *golangsdk.ServiceClient, d *schema.ResourceData, apiIds []string) error {
-	gatewayId := d.Get("instance_id").(string)
+	gatewayId := d.Get("gateway_id").(string)
 	appId := d.Get("application_id").(string)
 	envId := d.Get("env_id").(string)
 	opts := appauth.ListBoundOpts{
