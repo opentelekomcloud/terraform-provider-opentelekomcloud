@@ -40,6 +40,14 @@ The following arguments are supported:
 
 * `is_obs_created` - (Optional) Specifies whether the OBS bucket is automatically created by the tracker.
 
+* `is_sort_by_service` - (Optional) Specifies whether to sort the path by cloud service. If this option is enabled,
+  the cloud service name is added to the transfer file path. Default: `true`.
+
+* `compress_type` - (Optional) Specifies the compression type. Default value is `gzip`.
+  The valid values are as follows:
+    + **gzip**: compression.
+    + **json**: no compression.
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
@@ -59,8 +67,6 @@ In addition to all arguments above, the following attributes are exported:
 * `log_topic_name` - Specifies LTS log stream.
 
 * `detail` - Specifies the cause of the abnormal status, and its value in case of errors.
-
-* `bucket_lifecycle` - Specifies the duration that traces are stored in the OBS bucket.
 
 ## Import
 
