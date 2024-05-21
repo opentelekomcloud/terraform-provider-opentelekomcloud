@@ -20,6 +20,8 @@ type (
 	AppCodeAuthType string
 	ProtocolType    string
 	NetworkType     string
+
+	SecretAction string
 )
 
 const (
@@ -109,6 +111,8 @@ const (
 
 	ChargingModeBandwidth = "bandwidth"
 	ChargingModeTraffic   = "traffic"
+
+	SecretActionReset SecretAction = "RESET"
 )
 
 var (
