@@ -2,7 +2,7 @@
 subcategory: "APIGW"
 ---
 
-Up-to-date reference of API arguments for API Gateway service you can get at
+Up-to-date reference of API arguments for API Gateway environment service you can get at
 `https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/index.html`.
 
 # opentelekomcloud_apigw_environment_v2

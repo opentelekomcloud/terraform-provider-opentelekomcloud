@@ -2,6 +2,9 @@
 subcategory: "APIGW"
 ---
 
+Up-to-date reference of API arguments for API Gateway Acl associate service you can get at
+`https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/binding_unbinding_access_control_policies/index.html`.
+
 # opentelekomcloud_apigw_acl_policy_associate_v2
 
 Use this resource to bind the APIs to the ACL policy within OpenTelekomCloud.

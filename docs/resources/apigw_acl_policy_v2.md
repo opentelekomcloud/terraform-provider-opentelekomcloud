@@ -2,6 +2,9 @@
 subcategory: "APIGW"
 ---
 
+Up-to-date reference of API arguments for API Gateway Acl service you can get at
+`https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/access_control_policy_management/index.html`.
+
 # opentelekomcloud_apigw_acl_policy_v2
 
 Manages an ACL policy resource within OpenTelekomCloud.
