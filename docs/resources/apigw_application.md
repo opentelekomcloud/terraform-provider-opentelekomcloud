@@ -2,6 +2,9 @@
 subcategory: "APIGW"
 ---
 
+Up-to-date reference of API arguments for API Gateway App service you can get at
+`https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/credential_management/index.html`.
+
 # opentelekomcloud_apigw_application_v2
 
 Manages an APIGW application resource within OpenTelekomCloud.

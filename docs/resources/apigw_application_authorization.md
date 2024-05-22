@@ -2,6 +2,9 @@
 subcategory: "APIGW"
 ---
 
+Up-to-date reference of API arguments for API Gateway App authorization service you can get at
+`https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/app_authorization_management/index.html`.
+
 # opentelekomcloud_apigw_application_authorization_v2
 
 Using this resource to authorize APIs for application, allowing it to access the published APIs within OpenTelekomCloud.

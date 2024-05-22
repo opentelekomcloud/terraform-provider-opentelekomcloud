@@ -2,6 +2,9 @@
 subcategory: "APIGW"
 ---
 
+Up-to-date reference of API arguments for API Gateway AppCode service you can get at
+`https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/credential_management/index.html`.
+
 # opentelekomcloud_apigw_appcode_v2
 
 Manages an AppCode in application resource within OpenTelekomCloud.

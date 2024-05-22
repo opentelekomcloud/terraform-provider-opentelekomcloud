@@ -2,6 +2,9 @@
 subcategory: "APIGW"
 ---
 
+Up-to-date reference of API arguments for API Gateway Api publishment you can get at
+`https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/api_management/publishing_an_api_or_taking_an_api_offline.html#createordeletepublishrecordforapiv2-1`.
+
 # opentelekomcloud_apigw_api_publishment_v2
 
 Using this resource to publish an API to the environment or manage a historical publishing version within OpenTelekomCloud.
