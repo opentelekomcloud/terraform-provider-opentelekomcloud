@@ -1,0 +1,4 @@
+---
+enhancements:
+  |
+  **[DCAAS]** Add support for IPv6 endpoints for ``resource/opentelekomcloud_dc_virtual_gateway_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)

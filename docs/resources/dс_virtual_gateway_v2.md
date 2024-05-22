@@ -31,6 +31,8 @@ The following arguments are supported:
   * `name` (String, Optional) - Specifies the name of the Direct Connect endpoint group.
   * `description` (String, Optional) - Provides supplementary information about the Direct Connect endpoint group.
   * `endpoints` (List, Required) - Specifies the list of the endpoints in a Direct Connect endpoint group.
+    `IPv4` and `IPv6` CIDRs endpoints should be assigned in separate resources.
+     Changing endpoint type (from `IPv4` to `IPv6` or back) is not supported.
   * `type` (String, Required, ForceNew) - Specifies the type of the Direct Connect endpoints. The value can only be `cidr`. Default value: `cidr`.
 * `name` (String, Required) - Specifies the virtual gateway name.
 * `description` (String, Optional) - Provides supplementary information about the virtual gateway.
