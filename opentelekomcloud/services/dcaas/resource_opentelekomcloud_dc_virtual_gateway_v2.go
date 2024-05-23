@@ -103,6 +103,10 @@ func ResourceVirtualGatewayV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"local_ep_group_ipv6_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -147,16 +151,22 @@ func resourceVirtualGatewayV2Create(ctx context.Context, d *schema.ResourceData,
 	}
 
 	opts := virtual_gateway.CreateOpts{
-		VpcId:                d.Get("vpc_id").(string),
-		LocalEndpointGroupId: eg.ID,
-		Name:                 d.Get("name").(string),
-		Description:          d.Get("description").(string),
-		BgpAsn:               d.Get("asn").(int),
-		DeviceId:             d.Get("device_id").(string),
-		RedundantDeviceId:    d.Get("redundant_device_id").(string),
-		Type:                 "default",
-		ProjectId:            d.Get("project_id").(string),
+		VpcId:             d.Get("vpc_id").(string),
+		Name:              d.Get("name").(string),
+		Description:       d.Get("description").(string),
+		BgpAsn:            d.Get("asn").(int),
+		DeviceId:          d.Get("device_id").(string),
+		RedundantDeviceId: d.Get("redundant_device_id").(string),
+		Type:              "default",
+		ProjectId:         d.Get("project_id").(string),
 	}
+
+	if isIpv6Block(eg.Endpoints) {
+		opts.LocalEndpointGroupIpv6Id = eg.ID
+	} else {
+		opts.LocalEndpointGroupId = eg.ID
+	}
+
 	vg, err := virtual_gateway.Create(client, opts)
 	if err != nil {
 		return diag.Errorf("error creating opentelekomcloud virtual gateway: %s", err)
@@ -181,7 +191,7 @@ func resourceVirtualGatewayV2Read(ctx context.Context, d *schema.ResourceData, m
 		return common.CheckDeletedDiag(d, err, "virtual gateway")
 	}
 
-	eg, err := dceg.Get(client, vg.LocalEPGroupID)
+	eg, err := dceg.Get(client, getGroupId(*vg))
 	if err != nil {
 		return fmterr.Errorf("error reading DC endpoint group: %s", err)
 	}
@@ -198,6 +208,7 @@ func resourceVirtualGatewayV2Read(ctx context.Context, d *schema.ResourceData, m
 	mErr := multierror.Append(nil,
 		d.Set("vpc_id", vg.VPCID),
 		d.Set("local_ep_group_id", vg.LocalEPGroupID),
+		d.Set("local_ep_group_ipv6_id", vg.LocalEPGroupIPv6ID),
 		d.Set("name", vg.Name),
 		d.Set("description", vg.Description),
 		d.Set("asn", vg.BGPASN),
@@ -234,15 +245,20 @@ func resourceVirtualGatewayV2Update(ctx context.Context, d *schema.ResourceData,
 			return common.CheckDeletedDiag(d, err, "virtual gateway")
 		}
 
-		opts := virtual_gateway.UpdateOpts{
-			LocalEndpointGroupId: newEg.ID,
+		var opts virtual_gateway.UpdateOpts
+
+		if isIpv6Block(newEg.Endpoints) {
+			opts.LocalEndpointGroupIpv6Id = newEg.ID
+		} else {
+			opts.LocalEndpointGroupId = newEg.ID
 		}
+
 		err = virtual_gateway.Update(client, d.Id(), opts)
 		if err != nil {
 			return diag.Errorf("error updating opentelekomcloud virtual gateway (%s): %s", d.Id(), err)
 		}
 
-		err = dceg.Delete(client, vg.LocalEPGroupID)
+		err = dceg.Delete(client, getGroupId(*vg))
 		if err != nil {
 			return fmterr.Errorf("error deleting old local DC endpoint group: %s", err)
 		}
@@ -280,10 +296,17 @@ func resourceVirtualGatewayV2Delete(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("error deleting opentelekomcloud virtual gateway (%s): %s", d.Id(), err)
 	}
 
-	err = dceg.Delete(client, vg.LocalEPGroupID)
+	err = dceg.Delete(client, getGroupId(*vg))
 	if err != nil {
 		return fmterr.Errorf("error deleting DC endpoint group: %s", err)
 	}
 
 	return nil
+}
+
+func getGroupId(gateway virtual_gateway.VirtualGateway) string {
+	if gateway.LocalEPGroupID != "" {
+		return gateway.LocalEPGroupID
+	}
+	return gateway.LocalEPGroupIPv6ID
 }
