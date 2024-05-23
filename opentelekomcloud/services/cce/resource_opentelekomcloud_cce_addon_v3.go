@@ -109,7 +109,6 @@ func resourceCCEAddonV3Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	basic = unStringMap(basic)
 	custom = unStringMap(custom)
-
 	templateName := d.Get("template_name").(string)
 	addon, err := addons.Create(client, addons.CreateOpts{
 		Kind:       "Addon",
@@ -206,7 +205,6 @@ func getAddonValues(d *schema.ResourceData) (basic, custom, flavor map[string]in
 	custom = d.Get("values.0.custom").(map[string]interface{})
 	values := d.Get("values").([]interface{})
 	valuesMap := values[0].(map[string]interface{})
-
 	if flavorJsonRaw := valuesMap["flavor"].(string); flavorJsonRaw != "" {
 		err = json.Unmarshal([]byte(flavorJsonRaw), &flavor)
 		if err != nil {
@@ -266,10 +264,9 @@ func logHttpError(err error) error {
 	return err
 }
 
-// Make map values to be not a string, if possible
 func unStringMap(src map[string]interface{}) map[string]interface{} {
 	out := make(map[string]interface{}, len(src))
-	var jsonStr map[string]interface{}
+	var jsonStr interface{}
 	for key, v := range src {
 		val := v.(string)
 		if intVal, err := strconv.Atoi(val); err == nil {
@@ -284,10 +281,16 @@ func unStringMap(src map[string]interface{}) map[string]interface{} {
 			out[key] = floatVal
 			continue
 		}
-		err := json.Unmarshal([]byte(val), &jsonStr)
-		if err == nil {
-			out[key] = jsonStr
-			continue
+		// Check if the value is a JSON array
+		if err := json.Unmarshal([]byte(val), &jsonStr); err == nil {
+			switch jsonStr.(type) {
+			case []interface{}:
+				out[key] = jsonStr
+				continue
+			case map[string]interface{}:
+				out[key] = jsonStr
+				continue
+			}
 		}
 		out[key] = val
 	}

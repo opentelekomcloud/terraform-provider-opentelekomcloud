@@ -6,7 +6,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Takes list of pointers to strings. Expand to an array
+// FlattenStringList Takes list of pointers to strings. Expand to an array
 // of raw strings and returns a []interface{}
 // to keep compatibility w/ schema.NewSetschema.NewSet
 func FlattenStringList(list []*string) []interface{} {
@@ -17,7 +17,7 @@ func FlattenStringList(list []*string) []interface{} {
 	return vs
 }
 
-// Takes a value containing JSON string and passes it through
+// NormalizeJsonString Takes a value containing JSON string and passes it through
 // the JSON parser to normalize it, returns either a parsing
 // error or normalized JSON string.
 func NormalizeJsonString(jsonString interface{}) (string, error) {
@@ -41,7 +41,7 @@ func NormalizeJsonString(jsonString interface{}) (string, error) {
 	return string(bytes), nil
 }
 
-// Takes a value containing YAML string and passes it through
+// CheckYamlString Takes a value containing YAML string and passes it through
 // the YAML parser. Returns either a parsing
 // error or original YAML string.
 func CheckYamlString(yamlString interface{}) (string, error) {

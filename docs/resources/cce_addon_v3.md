@@ -49,7 +49,7 @@ resource "opentelekomcloud_cce_addon_v3" "addon" {
 
 ```hcl
 variable "vpc_id" {}
-variable "subnet_id" {}
+variable "network_id" {}
 variable "region_name" {}
 
 data "opentelekomcloud_identity_project_v3" "this" {}
@@ -60,11 +60,11 @@ data "opentelekomcloud_cce_addon_template_v3" "autoscaler" {
 }
 
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
-  name                    = "%s"
+  name                    = "my_cluster"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id                  = var.vpc_id
+  subnet_id               = var.network_id
   cluster_version         = "v1.25"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
@@ -124,6 +124,41 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
   }
 }
 
+```
+
+### CCE coredns addon with data sources with stub_domains and upstream_nameservers
+```hcl
+variable "vpc_id" {}
+variable "network_id" {}
+
+resource opentelekomcloud_cce_cluster_v3 cluster_1 {
+  name                    = "my_cluster"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.medium"
+  vpc_id                  = var.vpc_id
+  subnet_id               = var.network_id
+  cluster_version         = "v1.27"
+  container_network_type  = "overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+  no_addons               = true
+}
+
+resource "opentelekomcloud_cce_addon_v3" "coredns" {
+  template_name    = "coredns"
+  template_version = "1.28.4"
+  cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
+
+  values {
+    basic = {
+      "swr_addr" : "100.125.7.25:20202",
+      "swr_user" : "hwofficial"
+    }
+    custom = {
+      "stub_domains" : "{\"test\":[\"10.10.40.10\"], \"test2\":[\"10.10.40.20\"]}"
+      "upstream_nameservers": "[\"8.8.8.8\",\"8.8.4.4\"]"
+    }
+  }
+}
 ```
 
 ## Argument Reference
