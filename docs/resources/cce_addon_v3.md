@@ -155,7 +155,7 @@ resource "opentelekomcloud_cce_addon_v3" "coredns" {
     }
     custom = {
       "stub_domains" : "{\"test\":[\"10.10.40.10\"], \"test2\":[\"10.10.40.20\"]}"
-      "upstream_nameservers": "[\"8.8.8.8\",\"8.8.4.4\"]"
+      "upstream_nameservers" : "[\"8.8.8.8\",\"8.8.4.4\"]"
     }
   }
 }
