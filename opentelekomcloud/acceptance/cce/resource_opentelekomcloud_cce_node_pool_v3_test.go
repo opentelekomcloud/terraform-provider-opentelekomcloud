@@ -18,8 +18,21 @@ import (
 
 const nodePoolResourceName = "opentelekomcloud_cce_node_pool_v3.node_pool"
 
+func getNodePoolFunc(conf *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
+	client, err := conf.CceV3Client(env.OS_REGION_NAME)
+	if err != nil {
+		return nil, fmt.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
+	}
+	return nodepools.Get(client, state.Primary.Attributes["cluster_id"], state.Primary.ID).Extract()
+}
+
 func TestAccCCENodePoolsV3_basic(t *testing.T) {
 	var nodePool nodepools.NodePool
+	rc := common.InitResourceCheck(
+		nodePoolResourceName,
+		&nodePool,
+		getNodePoolFunc,
+	)
 
 	t.Parallel()
 	qts := []*quotas.ExpectedQuota{
@@ -34,17 +47,20 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckCCENodePoolV3Destroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodePoolV3Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodePoolV3Exists(nodePoolResourceName, shared.DataSourceClusterName, &nodePool),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "name", "opentelekomcloud-cce-node-pool"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "flavor", "s2.large.2"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "os", "EulerOS 2.9"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "muh"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "data_volumes.0.extend_params.useType", "docker"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "taints.0.key", "example.com/node"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "taints.0.value", "infra"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "taints.0.effect", "NoSchedule"),
 				),
 			},
 			{
@@ -53,56 +69,10 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(nodePoolResourceName, "initial_node_count", "2"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "kuh"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "data_volumes.0.extend_params.useType", "docker"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "taints.0.key", "example-updated.com/node"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "taints.0.value", "infra"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "taints.0.effect", "NoExecute"),
 				),
-			},
-		},
-	})
-}
-
-func TestAccCCENodePoolsV3_agency(t *testing.T) {
-	var nodePool nodepools.NodePool
-
-	t.Parallel()
-	qts := []*quotas.ExpectedQuota{
-		{Q: quotas.Server, Count: 2},
-		{Q: quotas.Volume, Count: 2},
-		{Q: quotas.VolumeSize, Count: 40 + 100},
-	}
-	qts = append(qts, ecs.QuotasForFlavor("s2.large.2")...)
-	quotas.BookMany(t, qts)
-	shared.BookCluster(t)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckCCENodePoolV3Destroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCCENodePoolV3Agency,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodePoolV3Exists(nodePoolResourceName, shared.DataSourceClusterName, &nodePool),
-					resource.TestCheckResourceAttr(nodePoolResourceName, "name", "opentelekomcloud-cce-node-pool"),
-					resource.TestCheckResourceAttr(nodePoolResourceName, "flavor", "s2.large.2"),
-					resource.TestCheckResourceAttr(nodePoolResourceName, "os", "EulerOS 2.9"),
-					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "muh"),
-					resource.TestCheckResourceAttr(nodePoolResourceName, "data_volumes.0.extend_params.useType", "docker"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccCCENodePoolV3ImportBasic(t *testing.T) {
-	t.Parallel()
-	shared.BookCluster(t)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckCCENodePoolV3Destroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCCENodePoolV3Basic,
 			},
 			{
 				ResourceName:      nodePoolResourceName,
@@ -114,6 +84,43 @@ func TestAccCCENodePoolV3ImportBasic(t *testing.T) {
 					"scale_down_cooldown_time", "initial_node_count",
 					"root_volume",
 				},
+			},
+		},
+	})
+}
+
+func TestAccCCENodePoolsV3_agency(t *testing.T) {
+	var nodePool nodepools.NodePool
+	rc := common.InitResourceCheck(
+		nodePoolResourceName,
+		&nodePool,
+		getNodePoolFunc,
+	)
+	t.Parallel()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.Server, Count: 2},
+		{Q: quotas.Volume, Count: 2},
+		{Q: quotas.VolumeSize, Count: 40 + 100},
+	}
+	qts = append(qts, ecs.QuotasForFlavor("s2.large.2")...)
+	quotas.BookMany(t, qts)
+	shared.BookCluster(t)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodePoolV3Agency,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "name", "opentelekomcloud-cce-node-pool"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "flavor", "s2.large.2"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "os", "EulerOS 2.9"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "muh"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "data_volumes.0.extend_params.useType", "docker"),
+				),
 			},
 		},
 	})
@@ -139,19 +146,23 @@ func testAccCCENodePoolV3ImportStateIdFunc() resource.ImportStateIdFunc {
 
 func TestAccCCENodePoolsV3_randomAZ(t *testing.T) {
 	var nodePool nodepools.NodePool
-
+	rc := common.InitResourceCheck(
+		nodePoolResourceName,
+		&nodePool,
+		getNodePoolFunc,
+	)
 	t.Parallel()
 	shared.BookCluster(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckCCENodePoolV3Destroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodePoolV3RandomAZ,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodePoolV3Exists(nodePoolResourceName, shared.DataSourceClusterName, &nodePool),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "availability_zone", "random"),
 				),
 			},
@@ -161,19 +172,23 @@ func TestAccCCENodePoolsV3_randomAZ(t *testing.T) {
 
 func TestAccCCENodePoolsV3EncryptedVolume(t *testing.T) {
 	var nodePool nodepools.NodePool
-
+	rc := common.InitResourceCheck(
+		nodePoolResourceName,
+		&nodePool,
+		getNodePoolFunc,
+	)
 	t.Parallel()
 	shared.BookCluster(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckCCENodeV3Destroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodePoolV3Encrypted,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodePoolV3Exists(nodePoolResourceName, shared.DataSourceClusterName, &nodePool),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "data_volumes.0.kms_id", env.OS_KMS_ID),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "root_volume.0.kms_id", env.OS_KMS_ID),
 				),
@@ -184,89 +199,27 @@ func TestAccCCENodePoolsV3EncryptedVolume(t *testing.T) {
 
 func TestAccCCENodePoolsV3ExtendParams(t *testing.T) {
 	var nodePool nodepools.NodePool
-
+	rc := common.InitResourceCheck(
+		nodePoolResourceName,
+		&nodePool,
+		getNodePoolFunc,
+	)
 	t.Parallel()
 	shared.BookCluster(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckCCENodeV3Destroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodePoolV3ExtendParams,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodePoolV3Exists(nodePoolResourceName, shared.DataSourceClusterName, &nodePool),
+					rc.CheckResourceExists(),
 				),
 			},
 		},
 	})
-}
-
-func testAccCheckCCENodePoolV3Destroy(s *terraform.State) error {
-	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.CceV3Client(env.OS_REGION_NAME)
-	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
-	}
-
-	var clusterID string
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type == "opentelekomcloud_cce_cluster_v3" {
-			clusterID = rs.Primary.ID
-		}
-
-		if rs.Type != "opentelekomcloud_cce_node_pool_v3" {
-			continue
-		}
-
-		_, err := nodepools.Get(client, clusterID, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("node pool still exists")
-		}
-	}
-
-	return nil
-}
-
-func testAccCheckCCENodePoolV3Exists(n string, cluster string, nodePool *nodepools.NodePool) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("not found: %s", n)
-		}
-		c, ok := s.RootModule().Resources[cluster]
-		if !ok {
-			return fmt.Errorf("cluster not found: %s", c)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no ID is set")
-		}
-		if c.Primary.ID == "" {
-			return fmt.Errorf("cluster ID is not set")
-		}
-
-		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.CceV3Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
-		}
-
-		found, err := nodepools.Get(client, c.Primary.ID, rs.Primary.ID).Extract()
-		if err != nil {
-			return err
-		}
-
-		if found.Metadata.Id != rs.Primary.ID {
-			return fmt.Errorf("node pool not found")
-		}
-
-		*nodePool = *found
-
-		return nil
-	}
 }
 
 var testAccCCENodePoolV3Basic = fmt.Sprintf(`
@@ -292,6 +245,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     size       = 40
     volumetype = "SSD"
   }
+
   data_volumes {
     size       = 100
     volumetype = "SSD"
@@ -303,6 +257,12 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   k8s_tags = {
     "kubelet.kubernetes.io/namespace" = "muh"
   }
+
+  taints {
+    key    = "example.com/node"
+    value  = "infra"
+    effect = "NoSchedule"
+  }
 }`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
 var testAccCCENodePoolV3Update = fmt.Sprintf(`
@@ -311,7 +271,7 @@ var testAccCCENodePoolV3Update = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
-  os                 = "EulerOS 2.5"
+  os                 = "EulerOS 2.9"
   flavor             = "s2.large.2"
   initial_node_count = 2
   availability_zone  = "%s"
@@ -337,6 +297,12 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
 
   k8s_tags = {
     "kubelet.kubernetes.io/namespace" = "kuh"
+  }
+
+  taints {
+    key    = "example-updated.com/node"
+    value  = "infra"
+    effect = "NoExecute"
   }
 }`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
