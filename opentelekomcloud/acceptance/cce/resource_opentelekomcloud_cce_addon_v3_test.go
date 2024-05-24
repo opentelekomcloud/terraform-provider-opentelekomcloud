@@ -202,21 +202,21 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   flavor_id               = "cce.s1.small"
   vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  cluster_version         = "v1.25"
+  cluster_version         = "v1.27"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
 
 resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
   template_name    = "autoscaler"
-  template_version = "1.25.7"
+  template_version = "1.27.53"
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
     basic = {
       "cceEndpoint" : "https://cce.eu-de.otc.t-systems.com",
       "ecsEndpoint" : "https://ecs.eu-de.otc.t-systems.com",
-      "image_version" : "1.25.7",
+      "image_version" : "1.27.53",
       "region" : "eu-de",
       "swr_addr" : "100.125.7.25:20202",
       "swr_user" : "cce-addons"
@@ -275,21 +275,21 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   flavor_id               = "cce.s1.small"
   vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  cluster_version         = "v1.25"
+  cluster_version         = "v1.27"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
 
 resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
   template_name    = "autoscaler"
-  template_version = "1.25.7"
+  template_version = "1.27.53"
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
     basic = {
       "cceEndpoint" : "https://cce.eu-de.otc.t-systems.com",
       "ecsEndpoint" : "https://ecs.eu-de.otc.t-systems.com",
-      "image_version" : "1.25.7",
+      "image_version" : "1.27.53",
       "region" : "eu-de",
       "swr_addr" : "100.125.7.25:20202",
       "swr_user" : "cce-addons"
@@ -425,7 +425,7 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
 
 resource "opentelekomcloud_cce_addon_v3" "coredns" {
   template_name    = "coredns"
-  template_version = "1.23.3"
+  template_version = "1.28.4"
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
@@ -435,6 +435,7 @@ resource "opentelekomcloud_cce_addon_v3" "coredns" {
     }
     custom = {
       "stub_domains" : "{\"test\":[\"10.10.40.10\"], \"test2\":[\"10.10.40.20\"]}"
+      "upstream_nameservers" : "[\"8.8.8.8\",\"8.8.4.4\"]"
     }
   }
 }

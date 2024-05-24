@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Fixed conversion to map for ``upstream_nameservers`` in ``coredns`` ``resource/opentelekomcloud_cce_addon_v3`` (`#2523 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2523>`_)
