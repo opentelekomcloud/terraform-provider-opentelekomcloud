@@ -82,7 +82,7 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{
 					"max_node_count", "min_node_count", "priority",
 					"scale_down_cooldown_time", "initial_node_count",
-					"root_volume",
+					"root_volume", "taints",
 				},
 			},
 		},
