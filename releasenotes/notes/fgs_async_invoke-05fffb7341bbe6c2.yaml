@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[FGS]** Added new resource ``resource/opentelekomcloud_fgs_async_invoke_config_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)

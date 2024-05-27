@@ -40,6 +40,7 @@ provider opentelekomcloud {
 	AlternativeProviderWithRegionConfig string
 	OTC_BUILD_IMAGE_URL                 = os.Getenv("OTC_BUILD_IMAGE_URL")
 	OTC_BUILD_IMAGE_URL_UPDATED         = os.Getenv("OTC_BUILD_IMAGE_URL_UPDATED")
+	OS_FGS_AGENCY_NAME                  = os.Getenv("OS_FGS_AGENCY_NAME")
 )
 
 func init() {
@@ -158,5 +159,19 @@ func TestAccPreCheckComponentDeployment(t *testing.T) {
 func TestAccPreCheckImageUrlUpdated(t *testing.T) {
 	if OTC_BUILD_IMAGE_URL_UPDATED == "" {
 		t.Skip("SWR image update URL configuration is not completed for acceptance test of component deployment.")
+	}
+}
+
+func TestAccPreCheckFgsAgency(t *testing.T) {
+	// The agency should be FunctionGraph and authorize these roles:
+	// For the acceptance tests of the async invoke configuration:
+	// + FunctionGraph FullAccess
+	// + DIS Operator
+	// + OBS Administrator
+	// + SMN Administrator
+	// For the acceptance tests of the function trigger and the application:
+	// + LTS Administrator
+	if OS_FGS_AGENCY_NAME == "" {
+		t.Skip("OS_FGS_AGENCY_NAME must be set for FGS acceptance tests")
 	}
 }
