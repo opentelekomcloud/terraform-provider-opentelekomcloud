@@ -1,0 +1,7 @@
+---
+features:
+  |
+  **[APIGW]** Add new resource ``resource/opentelekomcloud_apigw_environment_variable_v2`` (`#2529 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2529>`_)
+fixes:
+  |
+  **[APIGW]** Make ``environment`` attribute ``computed`` in ``resource/opentelekomcloud_apigw_group_v2`` (`#2529 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2529>`_)
