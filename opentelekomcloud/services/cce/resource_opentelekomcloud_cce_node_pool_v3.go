@@ -3,7 +3,6 @@ package cce
 import (
 	"context"
 	"log"
-	"regexp"
 	"strings"
 	"time"
 
@@ -24,12 +23,6 @@ import (
 const (
 	createError = "error creating Open Telekom Cloud CCE Node Pool: %w"
 	setError    = "error setting %s for CCE Node Pool: %w"
-)
-
-var (
-	// Cluster pool taint key and value is 1 to 63 characters starting with a letter or digit.
-	// Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed.
-	clusterPoolTaintRegex = regexp.MustCompile("^[a-zA-Z0-9_.-]{1,63}$")
 )
 
 func ResourceCCENodePoolV3() *schema.Resource {
@@ -186,16 +179,10 @@ func ResourceCCENodePoolV3() *schema.Resource {
 						"key": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateFunc: validation.StringMatch(clusterPoolTaintRegex, "Invalid key. "+
-								"Cluster pool taint key is 1 to 63 characters starting with a letter or digit. "+
-								"Only lowercase letters, digits, and hyphens (-) are allowed."),
 						},
 						"value": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateFunc: validation.StringMatch(clusterPoolTaintRegex, "Invalid value. "+
-								"Cluster pool taint value is 1 to 63 characters starting with a letter or digit. "+
-								"Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed."),
 						},
 						"effect": {
 							Type:     schema.TypeString,

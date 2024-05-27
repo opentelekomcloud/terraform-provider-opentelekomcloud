@@ -366,16 +366,10 @@ func ResourceCCENodeV3() *schema.Resource {
 						"key": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateFunc: validation.StringMatch(clusterPoolTaintRegex, "Invalid key. "+
-								"Cluster pool taint key is 1 to 63 characters starting with a letter or digit. "+
-								"Only lowercase letters, digits, and hyphens (-) are allowed."),
 						},
 						"value": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateFunc: validation.StringMatch(clusterPoolTaintRegex, "Invalid value. "+
-								"Cluster pool taint value is 1 to 63 characters starting with a letter or digit. "+
-								"Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed."),
 						},
 						"effect": {
 							Type:     schema.TypeString,

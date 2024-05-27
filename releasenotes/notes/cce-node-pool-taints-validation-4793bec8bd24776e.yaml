@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[CCE]** Remove ``taints`` extra validation in ``resource/opentelekomcloud_cce_node_pool_v3`` (`#2525 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2525>`_)
+  - |
+    **[CCE]** Remove ``taints`` extra validation in ``resource/opentelekomcloud_cce_node_v3`` (`#2525 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2525>`_)
