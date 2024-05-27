@@ -144,8 +144,8 @@ The following arguments are supported:
     If `ip_list` in `opentelekomcloud_lb_ipgroup_v3` is set to an empty array `[]` and type to `whitelist`, no IP addresses are allowed to access the listener.
     If `ip_list` in `opentelekomcloud_lb_ipgroup_v3` is set to an empty array `[]` and type to `blacklist`, any IP address is allowed to access the listener.
   * `enable` - (Optional, Bool) Specifies whether to enable access control.
-    `true` (default): Access control will be enabled.
-    `false`: Access control will be disabled.
+    `true`: Access control will be enabled.
+    `false` (default): Access control will be disabled.
   * `type` - (Optional, String) Specifies how access to the listener is controlled.
     `white` (default): A whitelist will be configured. Only IP addresses in the whitelist can access the listener.
     `black`: A blacklist will be configured. IP addresses in the blacklist are not allowed to access the listener.
