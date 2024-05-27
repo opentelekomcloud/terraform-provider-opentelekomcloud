@@ -1,0 +1,11 @@
+---
+fixes:
+  - |
+    **[ELB]** MaxItems equal to ``1`` for ``ip_group`` in ``resource/opentelekomcloud_lb_listener_v3`` (`#2527 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2527>`_)
+  - |
+    **[ELB]** MaxItems equal to ``1`` for ``ip_group`` in ``resource/opentelekomcloud_lb_listener_v2`` (`#2527 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2527>`_)
+other:
+  - |
+    **[ELB]** fixed default value for ``ip_group`` `` enable`` in ``docs/resources/lb_listener_v2.md`` (`#2527 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2527>`_)
+  - |
+    **[ELB]** fixed default value for ``ip_group`` `` enable`` in ``docs/resources/lb_listener_v3.md`` (`#2527 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2527>`_)
