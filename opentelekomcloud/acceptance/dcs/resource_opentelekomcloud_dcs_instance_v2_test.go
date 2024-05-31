@@ -15,14 +15,31 @@ import (
 
 const dcsV2InstanceName = "opentelekomcloud_dcs_instance_v2.instance_1"
 
+func getFunctionTriggerFunc(conf *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
+	client, err := conf.DcsV2Client(env.OS_REGION_NAME)
+	if err != nil {
+		return nil, fmt.Errorf("error creating FunctionGraph client: %s", err)
+	}
+
+	return instance.Get(client, state.Primary.ID)
+}
+
 func TestAccDcsInstancesV2_basic(t *testing.T) {
-	var dcsInstance instance.DcsInstance
-	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+	var (
+		dcsInstance  instance.DcsInstance
+		instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+
+		rc = common.InitResourceCheck(
+			dcsV2InstanceName,
+			&dcsInstance,
+			getFunctionTriggerFunc,
+		)
+	)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckDcsV2InstanceDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDcsV2InstanceBasic(instanceName),
@@ -51,13 +68,21 @@ func TestAccDcsInstancesV2_basic(t *testing.T) {
 }
 
 func TestAccDcsInstancesV2_privateIPs(t *testing.T) {
-	var dcsInstance instance.DcsInstance
-	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+	var (
+		dcsInstance  instance.DcsInstance
+		instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+
+		rc = common.InitResourceCheck(
+			dcsV2InstanceName,
+			&dcsInstance,
+			getFunctionTriggerFunc,
+		)
+	)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckDcsV2InstanceDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDcsV2InstancePrivateIPs(instanceName),
@@ -73,13 +98,21 @@ func TestAccDcsInstancesV2_privateIPs(t *testing.T) {
 }
 
 func TestAccDcsInstancesV2_basicSingleInstance(t *testing.T) {
-	var dcsInstance instance.DcsInstance
-	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+	var (
+		dcsInstance  instance.DcsInstance
+		instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+
+		rc = common.InitResourceCheck(
+			dcsV2InstanceName,
+			&dcsInstance,
+			getFunctionTriggerFunc,
+		)
+	)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckDcsV2InstanceDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDcsV2InstanceSingle(instanceName),
@@ -94,13 +127,21 @@ func TestAccDcsInstancesV2_basicSingleInstance(t *testing.T) {
 }
 
 func TestAccDcsInstancesV2_basicEngineV3Instance(t *testing.T) {
-	var dcsInstance instance.DcsInstance
-	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+	var (
+		dcsInstance  instance.DcsInstance
+		instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+
+		rc = common.InitResourceCheck(
+			dcsV2InstanceName,
+			&dcsInstance,
+			getFunctionTriggerFunc,
+		)
+	)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckDcsV2InstanceDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDcsV2InstanceEngineV3(instanceName),
@@ -116,13 +157,21 @@ func TestAccDcsInstancesV2_basicEngineV3Instance(t *testing.T) {
 }
 
 func TestAccDcsInstancesV2_Whitelist(t *testing.T) {
-	var dcsInstance instance.DcsInstance
-	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+	var (
+		dcsInstance  instance.DcsInstance
+		instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+
+		rc = common.InitResourceCheck(
+			dcsV2InstanceName,
+			&dcsInstance,
+			getFunctionTriggerFunc,
+		)
+	)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckDcsV2InstanceDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDcsV2InstanceWhitelist(instanceName),
@@ -165,13 +214,21 @@ func TestAccDcsInstancesV2_Whitelist(t *testing.T) {
 }
 
 func TestAccDcsInstancesV2_SSL(t *testing.T) {
-	var dcsInstance instance.DcsInstance
-	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+	var (
+		dcsInstance  instance.DcsInstance
+		instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+
+		rc = common.InitResourceCheck(
+			dcsV2InstanceName,
+			&dcsInstance,
+			getFunctionTriggerFunc,
+		)
+	)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckDcsV2InstanceDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDcsV2InstanceSSL(instanceName),
@@ -204,11 +261,21 @@ func TestAccDcsInstancesV2_SSL(t *testing.T) {
 }
 
 func TestAccDCSInstanceV2_importBasic(t *testing.T) {
-	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+	var (
+		dcsInstance  instance.DcsInstance
+		instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+
+		rc = common.InitResourceCheck(
+			dcsV2InstanceName,
+			&dcsInstance,
+			getFunctionTriggerFunc,
+		)
+	)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckDcsV2InstanceDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDcsV2InstanceBasic(instanceName),
@@ -225,26 +292,6 @@ func TestAccDCSInstanceV2_importBasic(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccCheckDcsV2InstanceDestroy(s *terraform.State) error {
-	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.DcsV2Client(env.OS_REGION_NAME)
-	if err != nil {
-		return fmt.Errorf("error creating DCSv2 client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_dcs_instance_v2" {
-			continue
-		}
-
-		_, err := instance.Get(client, rs.Primary.ID)
-		if err == nil {
-			return fmt.Errorf("DCS instance still exists")
-		}
-	}
-	return nil
 }
 
 func testAccCheckDcsV2InstanceExists(n string, dcsInstance instance.DcsInstance) resource.TestCheckFunc {
@@ -390,7 +437,7 @@ resource "opentelekomcloud_dcs_instance_v2" "instance_1" {
   capacity           = 2
   vpc_id             = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  security_group_id  = opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  security_group_id  = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   availability_zones = [data.opentelekomcloud_compute_availability_zones_v2.zones.names[0]]
   flavor             = "dcs.master_standby"
 }
