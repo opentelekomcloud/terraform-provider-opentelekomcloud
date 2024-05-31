@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[DCS]** Add new resource ``resource/opentelekomcloud_dcs_instance_v2`` (`#2533 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2533>`_)

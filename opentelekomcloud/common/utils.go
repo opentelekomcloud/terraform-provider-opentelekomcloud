@@ -487,3 +487,13 @@ func ExpandToStringList(v []interface{}) []string {
 
 	return s
 }
+
+func ExpandToIntList(v []interface{}) []int {
+	s := make([]int, 0, len(v))
+	for _, val := range v {
+		if intVal, ok := val.(int); ok {
+			s = append(s, intVal)
+		}
+	}
+	return s
+}
