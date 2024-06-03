@@ -17,9 +17,9 @@ variable "group_id" {}
 variable "response_name" {}
 
 resource "opentelekomcloud_apigw_response_v2" "test" {
-  gateway_id  = var.gateway_id
-  group_id    = var.group_id
-  name        = var.response_name
+  gateway_id = var.gateway_id
+  group_id   = var.group_id
+  name       = var.response_name
 
   rule {
     error_type  = "AUTHORIZER_FAILURE"
