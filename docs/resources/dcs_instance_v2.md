@@ -5,7 +5,7 @@ subcategory: "Distributed Cache Service (DCS)"
 Up-to-date reference of API arguments for DCS V2 instance you can get at
 `https://docs.otc.t-systems.com/distributed-cache-service/api-ref/apis_v2_recommended/index.html`.
 
-# opentelekomcloud_dcs_instance_v1
+# opentelekomcloud_dcs_instance_v2
 
 Manages a DCSv2 instance in the OpenTelekomCloud DCS Service.
 
@@ -26,7 +26,7 @@ data "opentelekomcloud_dcs_az_v1" "az_1" {
   name = "eu-de-01"
 }
 
-resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
+resource "opentelekomcloud_dcs_instance_v2" "instance_1" {
   name               = "test_dcs_instance"
   engine_version     = "3.0"
   password           = "0TCTestP@ssw0rd"
@@ -57,7 +57,7 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
 ```hcl
 data "opentelekomcloud_compute_availability_zones_v2" "zones" {}
 
-resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
+resource "opentelekomcloud_dcs_instance_v2" "instance_1" {
   name               = "test_dcs_instance_5.0"
   engine_version     = "5.0"
   password           = "0TCTestP@ssw0rd"
