@@ -490,6 +490,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_networking_vip_v2":                         vpc.ResourceNetworkingVIPV2(),
 			"opentelekomcloud_networking_vip_associate_v2":               vpc.ResourceNetworkingVIPAssociateV2(),
 			"opentelekomcloud_obs_bucket":                                obs.ResourceObsBucket(),
+			"opentelekomcloud_obs_bucket_inventory":                      obs.ResourceObsBucketInventory(),
 			"opentelekomcloud_obs_bucket_object":                         obs.ResourceObsBucketObject(),
 			"opentelekomcloud_obs_bucket_policy":                         obs.ResourceObsBucketPolicy(),
 			"opentelekomcloud_obs_bucket_replication":                    obs.ResourceObsBucketReplication(),
