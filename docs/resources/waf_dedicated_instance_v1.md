@@ -71,6 +71,7 @@ The following arguments are supported:
 
 * `res_tenant` - (Optional, String, ForceNew) Whether the dedicated WAF instance is network interface type.
   Default value is `true`. Changing this will create a new instance.
+  -> **Note:** This type of instance is not available in `eu-ch2` region, must set `res_tenant` value to `false` there.
 
 ## Attributes Reference
 
