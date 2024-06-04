@@ -361,6 +361,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_apigw_environment_variable_v2":             apigw.ResourceAPIEnvironment2Variable(),
 			"opentelekomcloud_apigw_gateway_v2":                          apigw.ResourceAPIGWv2(),
 			"opentelekomcloud_apigw_group_v2":                            apigw.ResourceAPIGroupV2(),
+			"opentelekomcloud_apigw_response_v2":                         apigw.ResourceAPIResponseV2(),
 			"opentelekomcloud_apigw_signature_v2":                        apigw.ResourceAPISignatureV2(),
 			"opentelekomcloud_apigw_signature_associate_v2":              apigw.ResourceAPISignatureAssociateV2(),
 			"opentelekomcloud_apigw_throttling_policy_v2":                apigw.ResourceAPIThrottlingPolicyV2(),
