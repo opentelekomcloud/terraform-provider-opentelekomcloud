@@ -2,7 +2,7 @@
 subcategory: "APIGW"
 ---
 
-Up-to-date reference of API arguments for API Gateway App authorization service you can get at
+Up-to-date reference of API arguments for API Gateway Custom Authorizer service you can get at
 `https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/custom_authorizer_management/index.html`.
 
 # opentelekomcloud_apigw_custom_authorizer_v2
