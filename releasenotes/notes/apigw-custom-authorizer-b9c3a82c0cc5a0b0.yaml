@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[APIGW]** Add new resource ``resource/opentelekomcloud_apigw_custom_authorizer_v2`` (`#2539 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2539>`_)
