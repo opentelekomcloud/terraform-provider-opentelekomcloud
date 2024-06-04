@@ -1048,6 +1048,13 @@ func (c *Config) DcsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) DcsV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewDCSServiceV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) RdsTagV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewRdsTagV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,

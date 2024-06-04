@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Resource:** ``opentelekomcloud_obs_bucket_inventory`` (`#2536 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2536>`_)

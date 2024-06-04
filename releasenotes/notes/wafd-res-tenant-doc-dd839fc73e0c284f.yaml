@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[WAF]** Add note for ``eu-ch2``` region to ``res_tenant`` attribute in documentation for ``resource/opentelekomcloud_waf_dedicated_instance_v1`` (`#2534 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2534>`_)
