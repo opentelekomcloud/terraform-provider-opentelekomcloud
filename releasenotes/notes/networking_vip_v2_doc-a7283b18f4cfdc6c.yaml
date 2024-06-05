@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Additional info for data source to be used for ``resource/opentelekomcloud_networking_vip_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)

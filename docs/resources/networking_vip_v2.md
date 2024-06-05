@@ -6,6 +6,9 @@ subcategory: "Virtual Private Cloud (VPC)"
 
 Manages a V2 vip resource within OpenTelekomCloud.
 
+-> **Note:** Corresponding data source for V2 vip resource is `data_source/networking_port_v2` where
+`vip_id` can be provided to `port_id` along with other arguments.
+
 ## Example Usage
 
 ```hcl
