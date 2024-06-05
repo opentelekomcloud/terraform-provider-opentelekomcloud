@@ -14,7 +14,7 @@ release:
 	goreleaser release
 
 snapshot:
-	goreleaser release --snapshot --parallelism 2 --rm-dist
+	goreleaser release --snapshot --parallelism 2 --clean
 
 test: fmtcheck
 	go test -v ./...

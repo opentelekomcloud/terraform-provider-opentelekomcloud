@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[APIGW]** Add new resource ``resource/opentelekomcloud_apigw_vpc_channel_v2`` (`#2540 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2540>`_)
