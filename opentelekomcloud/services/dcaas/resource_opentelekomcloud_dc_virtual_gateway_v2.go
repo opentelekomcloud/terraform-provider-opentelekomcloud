@@ -2,6 +2,7 @@ package dcaas
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"regexp"
 
@@ -34,36 +35,8 @@ func ResourceVirtualGatewayV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"local_ep_group": {
-				Type:     schema.TypeList,
-				Required: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"endpoints": {
-							Type:     schema.TypeList,
-							Required: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-						},
-						"type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-							Default:  "cidr",
-						},
-					},
-				},
-			},
+			"local_ep_group":    localGroupSchema(),
+			"local_ep_group_v6": localGroupSchema(),
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -115,25 +88,79 @@ func ResourceVirtualGatewayV2() *schema.Resource {
 	}
 }
 
-func resourceLocalEgCreate(client *golangsdk.ServiceClient, d *schema.ResourceData) (*dceg.DCEndpointGroup, error) {
-	var createOpts = dceg.CreateOpts{}
+func localGroupSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:         schema.TypeList,
+		AtLeastOneOf: []string{"local_ep_group_v6", "local_ep_group"},
+		Optional:     true,
+		Computed:     true,
+		MaxItems:     1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"name": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"description": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"endpoints": {
+					Type:     schema.TypeList,
+					Required: true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"type": {
+					Type:     schema.TypeString,
+					Optional: true,
+					ForceNew: true,
+					Default:  "cidr",
+				},
+			},
+		},
+	}
+}
+
+func createGroup(client *golangsdk.ServiceClient, d *schema.ResourceData, group string) (*dceg.DCEndpointGroup, error) {
 	projectId := d.Get("project_id").(string)
 	if projectId == "" {
 		projectId = client.ProjectID
 	}
-	egRaw := d.Get("local_ep_group").([]interface{})
+	egRaw := d.Get(group).([]interface{})
 	if len(egRaw) == 1 {
 		rawMap := egRaw[0].(map[string]interface{})
-		createOpts = dceg.CreateOpts{
+		createOpts := dceg.CreateOpts{
 			Name:        rawMap["name"].(string),
 			TenantId:    projectId,
 			Description: rawMap["description"].(string),
 			Endpoints:   GetEndpoints(rawMap["endpoints"].([]interface{})),
 			Type:        rawMap["type"].(string),
 		}
+		egResp, err := dceg.Create(client, createOpts)
+		if err != nil {
+			return nil, err
+		}
+		return egResp, nil
 	}
-	eg, err := dceg.Create(client, createOpts)
-	return eg, err
+	return nil, nil
+}
+
+func resourceLocalEgCreate(client *golangsdk.ServiceClient, d *schema.ResourceData) (eg, egV6 *dceg.DCEndpointGroup, err error) {
+	egRaw, err := createGroup(client, d, "local_ep_group")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	egV6Raw, err := createGroup(client, d, "local_ep_group_v6")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	eg, egV6 = egRaw, egV6Raw
+
+	return eg, egV6, err
 }
 
 func resourceVirtualGatewayV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -145,7 +172,7 @@ func resourceVirtualGatewayV2Create(ctx context.Context, d *schema.ResourceData,
 		return fmterr.Errorf(errCreateClient, err)
 	}
 
-	eg, err := resourceLocalEgCreate(client, d)
+	eg, egV6, err := resourceLocalEgCreate(client, d)
 	if err != nil {
 		return fmterr.Errorf("error creating DC endpoint group: %s", err)
 	}
@@ -161,10 +188,12 @@ func resourceVirtualGatewayV2Create(ctx context.Context, d *schema.ResourceData,
 		ProjectId:         d.Get("project_id").(string),
 	}
 
-	if isIpv6Block(eg.Endpoints) {
-		opts.LocalEndpointGroupIpv6Id = eg.ID
-	} else {
+	if eg != nil {
 		opts.LocalEndpointGroupId = eg.ID
+	}
+
+	if egV6 != nil {
+		opts.LocalEndpointGroupIpv6Id = egV6.ID
 	}
 
 	vg, err := virtual_gateway.Create(client, opts)
@@ -191,18 +220,9 @@ func resourceVirtualGatewayV2Read(ctx context.Context, d *schema.ResourceData, m
 		return common.CheckDeletedDiag(d, err, "virtual gateway")
 	}
 
-	eg, err := dceg.Get(client, getGroupId(*vg))
+	eg, egV6, err := getLocalGroups(client, *vg)
 	if err != nil {
-		return fmterr.Errorf("error reading DC endpoint group: %s", err)
-	}
-	log.Printf("[DEBUG] DC endpoint group V2 read: %+v", eg)
-	group := []map[string]interface{}{
-		{
-			"name":        eg.Name,
-			"description": eg.Description,
-			"endpoints":   eg.Endpoints,
-			"type":        eg.Type,
-		},
+		return diag.Errorf("error querying local groups: %s", err)
 	}
 
 	mErr := multierror.Append(nil,
@@ -215,7 +235,8 @@ func resourceVirtualGatewayV2Read(ctx context.Context, d *schema.ResourceData, m
 		d.Set("device_id", vg.DeviceID),
 		d.Set("redundant_device_id", vg.RedundantDeviceID),
 		d.Set("project_id", vg.TenantID),
-		d.Set("local_ep_group", group),
+		d.Set("local_ep_group", eg),
+		d.Set("local_ep_group_v6", egV6),
 		d.Set("status", vg.Status),
 	)
 
@@ -235,32 +256,16 @@ func resourceVirtualGatewayV2Update(ctx context.Context, d *schema.ResourceData,
 	}
 
 	if d.HasChange("local_ep_group") {
-		newEg, err := resourceLocalEgCreate(client, d)
+		err := updateLocalGroup(client, d, "local_ep_group")
 		if err != nil {
-			return fmterr.Errorf("error creating new local DC endpoint group: %s", err)
+			return nil
 		}
+	}
 
-		vg, err := virtual_gateway.Get(client, d.Id())
+	if d.HasChange("local_ep_group_v6") {
+		err := updateLocalGroup(client, d, "local_ep_group_v6")
 		if err != nil {
-			return common.CheckDeletedDiag(d, err, "virtual gateway")
-		}
-
-		var opts virtual_gateway.UpdateOpts
-
-		if isIpv6Block(newEg.Endpoints) {
-			opts.LocalEndpointGroupIpv6Id = newEg.ID
-		} else {
-			opts.LocalEndpointGroupId = newEg.ID
-		}
-
-		err = virtual_gateway.Update(client, d.Id(), opts)
-		if err != nil {
-			return diag.Errorf("error updating opentelekomcloud virtual gateway (%s): %s", d.Id(), err)
-		}
-
-		err = dceg.Delete(client, getGroupId(*vg))
-		if err != nil {
-			return fmterr.Errorf("error deleting old local DC endpoint group: %s", err)
+			return nil
 		}
 	}
 
@@ -291,22 +296,97 @@ func resourceVirtualGatewayV2Delete(ctx context.Context, d *schema.ResourceData,
 		return common.CheckDeletedDiag(d, err, "virtual gateway")
 	}
 
+	eg, egV6 := vg.LocalEPGroupID, vg.LocalEPGroupIPv6ID
+
 	err = virtual_gateway.Delete(client, d.Id())
 	if err != nil {
 		return diag.Errorf("error deleting opentelekomcloud virtual gateway (%s): %s", d.Id(), err)
 	}
 
-	err = dceg.Delete(client, getGroupId(*vg))
-	if err != nil {
-		return fmterr.Errorf("error deleting DC endpoint group: %s", err)
+	if eg != "" {
+		err = dceg.Delete(client, eg)
+		if err != nil {
+			return fmterr.Errorf("error deleting DC endpoint group: %s", err)
+		}
+	}
+
+	if egV6 != "" {
+		err = dceg.Delete(client, egV6)
+		if err != nil {
+			return fmterr.Errorf("error deleting DC endpoint group: %s", err)
+		}
 	}
 
 	return nil
 }
 
-func getGroupId(gateway virtual_gateway.VirtualGateway) string {
-	if gateway.LocalEPGroupID != "" {
-		return gateway.LocalEPGroupID
+func flattenGroup(client *golangsdk.ServiceClient, groupId string) (group []map[string]interface{}, err error) {
+	eg, err := dceg.Get(client, groupId)
+	if err != nil {
+		return nil, fmt.Errorf("error reading DC endpoint group: %s", err)
 	}
-	return gateway.LocalEPGroupIPv6ID
+	log.Printf("[DEBUG] DC endpoint group V2 read: %+v", eg)
+	group = []map[string]interface{}{
+		{
+			"name":        eg.Name,
+			"description": eg.Description,
+			"endpoints":   eg.Endpoints,
+			"type":        eg.Type,
+		},
+	}
+	return
+}
+
+func getLocalGroups(client *golangsdk.ServiceClient, gateway virtual_gateway.VirtualGateway) (eg, egV6 []map[string]interface{}, err error) {
+	if gateway.LocalEPGroupID != "" {
+		egResp, err := flattenGroup(client, gateway.LocalEPGroupID)
+		if err != nil {
+			return nil, nil, err
+		}
+		eg = egResp
+	}
+	if gateway.LocalEPGroupIPv6ID != "" {
+		egV6Resp, err := flattenGroup(client, gateway.LocalEPGroupIPv6ID)
+		if err != nil {
+			return nil, nil, err
+		}
+		egV6 = egV6Resp
+	}
+	return
+}
+
+func updateLocalGroup(client *golangsdk.ServiceClient, d *schema.ResourceData, group string) diag.Diagnostics {
+	newEg, err := createGroup(client, d, group)
+	if err != nil {
+		return fmterr.Errorf("error creating new local DC endpoint group: %s", err)
+	}
+
+	vg, err := virtual_gateway.Get(client, d.Id())
+	if err != nil {
+		return common.CheckDeletedDiag(d, err, "virtual gateway")
+	}
+
+	var (
+		opts       virtual_gateway.UpdateOpts
+		oldGroupId string
+	)
+
+	if group == "local_ep_group" {
+		opts.LocalEndpointGroupId = newEg.ID
+		oldGroupId = vg.LocalEPGroupID
+	} else {
+		opts.LocalEndpointGroupIpv6Id = newEg.ID
+		oldGroupId = vg.LocalEPGroupIPv6ID
+	}
+
+	err = virtual_gateway.Update(client, d.Id(), opts)
+	if err != nil {
+		return diag.Errorf("error updating opentelekomcloud virtual gateway (%s): %s", d.Id(), err)
+	}
+
+	err = dceg.Delete(client, oldGroupId)
+	if err != nil {
+		return fmterr.Errorf("error deleting old local DC endpoint group: %s", err)
+	}
+	return nil
 }
