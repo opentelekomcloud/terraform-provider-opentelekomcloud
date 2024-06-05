@@ -1,7 +1,5 @@
 package dcaas
 
-import "strings"
-
 const (
 	errCreateClient = "error creating OpenTelekomCloud DCaaSv2 client: %w"
 	keyClientV2     = "dcaas-v2-client"
@@ -15,8 +13,4 @@ func GetEndpoints(e []interface{}) []string {
 		endpoints = append(endpoints, val.(string))
 	}
 	return endpoints
-}
-
-func isIpv6Block(endpoint []string) bool {
-	return strings.Contains(endpoint[0], ":")
 }
