@@ -1,4 +1,4 @@
 ---
 features:
   |
-  **[DCAAS]** Feature to provide both IPV4 and IPV6 addresses for ``resource/opentelekomcloud_dc_virtual_gateway_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  **[DCAAS]** Feature to provide both IPV4 and IPV6 addresses for ``resource/opentelekomcloud_dc_virtual_gateway_v2`` (`#2542 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2542>`_)
