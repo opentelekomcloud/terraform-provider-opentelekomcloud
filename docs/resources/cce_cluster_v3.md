@@ -151,6 +151,9 @@ The following arguments are supported:
 * `billing_mode` - (Optional) Charging mode of the cluster, which is 0 (on demand). Changing this parameter will create a new cluster resource.
 
 * `extend_param` - (Optional) Extended parameter. Changing this parameter will create a new cluster resource.
+  [List of cluster extended params.](https://docs.otc.t-systems.com/cloud-container-engine/api-ref/apis/cluster_management/creating_a_cluster.html#cce-02-0236-table17575013586)
+
+* `enable_volume_encryption` - (Optional) System and data disks encryption of master nodes. Changing this parameter will create a new cluster resource.
 
 * `vpc_id` - (Required) The ID of the VPC used to create the node. Changing this parameter will create a new cluster resource.
 
