@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CCE]** Add master nodes encryption for ``resource/opentelekomcloud_cce_cluster_v3`` (`#2543 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2543>`_)

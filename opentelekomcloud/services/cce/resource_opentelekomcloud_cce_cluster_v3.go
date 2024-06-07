@@ -19,6 +19,7 @@ import (
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
@@ -126,6 +127,12 @@ func ResourceCCEClusterV3() *schema.Resource {
 			},
 			"extend_param": {
 				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: true,
+			},
+			"enable_volume_encryption": {
+				Type:     schema.TypeBool,
+				Computed: true,
 				Optional: true,
 				ForceNew: true,
 			},
@@ -418,10 +425,11 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 				Mode:                d.Get("authentication_mode").(string),
 				AuthenticatingProxy: authProxy,
 			},
-			BillingMode:          d.Get("billing_mode").(int),
-			ExtendParam:          resourceClusterExtendParamV3(d),
-			KubernetesSvcIpRange: d.Get("kubernetes_svc_ip_range").(string),
-			KubeProxyMode:        d.Get("kube_proxy_mode").(string),
+			BillingMode:                  d.Get("billing_mode").(int),
+			ExtendParam:                  resourceClusterExtendParamV3(d),
+			KubernetesSvcIpRange:         d.Get("kubernetes_svc_ip_range").(string),
+			KubeProxyMode:                d.Get("kube_proxy_mode").(string),
+			EnableMasterVolumeEncryption: pointerto.Bool(d.Get("enable_volume_encryption").(bool)),
 		},
 	}
 
@@ -524,6 +532,7 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("external_otc", cluster.Status.Endpoints[0].ExternalOTC),
 		d.Set("region", config.GetRegion(d)),
 		d.Set("eip", eip),
+		d.Set("enable_volume_encryption", *cluster.Spec.EnableMasterVolumeEncryption),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting cce cluster fields: %w", err)
