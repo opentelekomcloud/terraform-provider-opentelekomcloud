@@ -1,0 +1,4 @@
+---
+fix:
+  - |
+    **[IMS]** Fix validation & documentation for ``resource/opentelekomcloud_ims_image_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
