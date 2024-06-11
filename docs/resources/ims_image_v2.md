@@ -105,7 +105,7 @@ The following arguments are supported:
   Changing this creates a new image.
 
 * `type` - (Optional) The image type. Must be one of `ECS`, `FusionCompute`, `BMS`,
-  or `Ironic`. Changing this creates a new image.
+  `Ironic` or `IsoImage`. Changing this creates a new image.
 
 ## Attributes Reference
 

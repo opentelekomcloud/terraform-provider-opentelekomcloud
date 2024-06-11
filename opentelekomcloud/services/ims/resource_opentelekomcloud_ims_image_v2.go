@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v1/others"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
@@ -110,9 +109,6 @@ func ResourceImsImageV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"ECS", "FusionCompute", "BMS", "Ironic",
-				}, true),
 			},
 			// following are additional attributus
 			"visibility": {
