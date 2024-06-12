@@ -29,6 +29,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ecs"
 	elbv2 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v2"
 	elbv3 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v3"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/er"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/evs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/fgs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/fw"
@@ -419,6 +420,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_drs_task_v3":                               drs.ResourceDrsTaskV3(),
 			"opentelekomcloud_dws_cluster_v1":                            dws.ResourceDcsInstanceV1(),
 			"opentelekomcloud_ecs_instance_v1":                           ecs.ResourceEcsInstanceV1(),
+			"opentelekomcloud_er_instance_v3":                            er.ResourceErInstanceV3(),
 			"opentelekomcloud_evs_volume_v3":                             evs.ResourceEvsStorageVolumeV3(),
 			"opentelekomcloud_fgs_async_invoke_config_v2":                fgs.ResourceAsyncInvokeConfigurationV2(),
 			"opentelekomcloud_fgs_event_v2":                              fgs.ResourceFgsEventV2(),

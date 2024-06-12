@@ -1146,6 +1146,13 @@ func (c *Config) FuncGraphV2Client(region string) (*golangsdk.ServiceClient, err
 	})
 }
 
+func (c *Config) ErV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewERServiceV3(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) DwsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	service, err := openstack.NewDWSV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
