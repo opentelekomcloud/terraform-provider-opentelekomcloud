@@ -1,4 +1,4 @@
 ---
 features:
   |
-  **[ER]** Add new resource ``resource/opentelekomcloud_er_instance_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  **[ER]** Add new resource ``resource/opentelekomcloud_er_instance_v3`` (`#2515 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2515>`_)
