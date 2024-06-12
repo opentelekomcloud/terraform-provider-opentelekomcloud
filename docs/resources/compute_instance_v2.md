@@ -196,7 +196,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 ```hcl
 variable image_id {}
 
-data "opentelekomcloud_vpc_subnet_v1" "second_subnet"  {
+data "opentelekomcloud_vpc_subnet_v1" "second_subnet" {
   name = "my-subnet"
 }
 
