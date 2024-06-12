@@ -196,6 +196,10 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 ```hcl
 variable image_id {}
 
+data "opentelekomcloud_vpc_subnet_v1" "second_subnet"  {
+  name = "my-subnet"
+}
+
 resource "opentelekomcloud_networking_floatingip_v2" "myip" {
   pool = "admin_external_net"
 }
@@ -212,7 +216,7 @@ resource "opentelekomcloud_compute_instance_v2" "multi-net" {
   }
 
   network {
-    name = "my_second_network"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.second_subnet.network_id
   }
 }
 
