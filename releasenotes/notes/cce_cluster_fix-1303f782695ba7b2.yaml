@@ -1,0 +1,4 @@
+---
+fix:
+  - |
+    **[CCE]** Fix pointer in resource READER for ``resource/opentelekomcloud_cce_cluster_v3`` (`#2554 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2554>`_)

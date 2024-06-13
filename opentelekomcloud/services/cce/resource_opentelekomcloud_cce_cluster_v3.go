@@ -532,7 +532,7 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("external_otc", cluster.Status.Endpoints[0].ExternalOTC),
 		d.Set("region", config.GetRegion(d)),
 		d.Set("eip", eip),
-		d.Set("enable_volume_encryption", *cluster.Spec.EnableMasterVolumeEncryption),
+		d.Set("enable_volume_encryption", cluster.Spec.EnableMasterVolumeEncryption),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting cce cluster fields: %w", err)
