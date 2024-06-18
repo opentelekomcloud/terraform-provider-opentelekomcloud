@@ -35,7 +35,7 @@ resource "opentelekomcloud_obs_bucket_inventory" "inventory" {
 
 The following arguments are supported:
 
-* `bucket` - (Required, ForceNew, String) Name of the bucket for saving inventories..
+* `bucket` - (Required, ForceNew, String) Name of the bucket for saving inventories.
 
 * `configuration_id` - (Required, ForceNew, String) ID of the inventory configuration. Valid characters: letters, digits, hyphens (-),
   periods (.) and underscores (_).
