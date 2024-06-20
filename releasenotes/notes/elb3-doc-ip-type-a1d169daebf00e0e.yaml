@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    **[ELB]** Remove ``5_gray`` type from ``docs/resources/lb_loadbalancer_v3.md`` documentation and examples
+    (`#2559 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2559>`_)

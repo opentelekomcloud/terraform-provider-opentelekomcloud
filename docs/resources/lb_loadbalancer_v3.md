@@ -67,7 +67,7 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
 
   public_ip {
     bandwidth_name       = "lb-bandwidth"
-    ip_type              = "5_gray"
+    ip_type              = "5_bgp"
     bandwidth_size       = 10
     bandwidth_share_type = "PER"
   }
@@ -132,7 +132,7 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   availability_zones = ["eu-de-01"]
 
   public_ip {
-    ip_type              = "5_gray"
+    ip_type              = "5_bgp"
     bandwidth_name       = "lb_band"
     bandwidth_size       = 10
     bandwidth_share_type = "PER"
@@ -198,11 +198,11 @@ The `public_ip` block supports:
 
 * `id` - (Optional) ID of an existing elastic IP. Required when using existing EIP.
 
-* `ip_type` - (Optional) Elastic IP type. The value can be `5_gray`, `5_bgp` and `5_mailbgp`.
+* `ip_type` - (Optional) Elastic IP type. The value can be `5_bgp` or `5_mailbgp`.
   Required when creating a new EIP.
 
 ->
-  In `eu-de` region the value can be `5_gray`, `5_bgp` or `5_mailbgp`.
+  In `eu-de` region the value can be `5_bgp` or `5_mailbgp`.
   In `eu-nl` region the value can only be `5_bgp` and `5_mailbgp`.
   In `eu-ch2` region the value can only be `5_bgp`.
 
