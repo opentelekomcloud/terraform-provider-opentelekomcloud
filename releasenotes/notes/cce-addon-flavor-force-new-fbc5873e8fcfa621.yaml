@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Add ``ForceNew`` in ``flavor`` for ``resource/opentelekomcloud_cce_addon_v3`` (`#2561 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2561>`_)
