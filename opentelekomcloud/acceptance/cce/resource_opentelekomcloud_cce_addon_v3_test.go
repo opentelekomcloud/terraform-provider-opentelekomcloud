@@ -136,6 +136,37 @@ func TestAccCCEAddonV3CoreDNS(t *testing.T) {
 	})
 }
 
+const flavorRef = "      {\n        \"description\": \"Has only one instance\",\n        \"name\": \"Single\",\n        \"replicas\": 1,\n        \"resources\": [\n          {\n            \"limitsCpu\": \"1000m\",\n            \"limitsMem\": \"1000Mi\",\n            \"name\": \"autoscaler\",\n            \"requestsCpu\": \"500m\",\n            \"requestsMem\": \"500Mi\"\n          }\n        ]\n      }\n"
+const flavorRefUpdate = "      {\n        \"description\": \"Has only one instance\",\n        \"name\": \"Single\",\n        \"replicas\": 1,\n        \"resources\": [\n          {\n            \"limitsCpu\": \"8000m\",\n            \"limitsMem\": \"4Gi\",\n            \"name\": \"autoscaler\",\n            \"requestsCpu\": \"4000m\",\n            \"requestsMem\": \"2Gi\"\n          }\n        ]\n      }\n"
+
+func TestAccCCEAddonV3Flavor(t *testing.T) {
+	clusterName := randClusterName()
+	t.Parallel()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCEAddonV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCEAddonV3Flavor(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					checkScaleDownForAutoscaler(resourceAddonName, true),
+					resource.TestCheckResourceAttr(resourceAddonName, "values.0.flavor", flavorRef),
+				),
+			},
+			{
+				Config: testAccCCEAddonV3FlavorUpdate(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					checkScaleDownForAutoscaler(resourceAddonName, true),
+					resource.TestCheckResourceAttr(resourceAddonName, "values.0.flavor", flavorRefUpdate),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckCCEAddonV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.CceV3Client(env.OS_REGION_NAME)
@@ -440,4 +471,150 @@ resource "opentelekomcloud_cce_addon_v3" "coredns" {
   }
 }
 `, common.DataSourceSubnet, common.DataSourceProject, name)
+}
+
+func testAccCCEAddonV3Flavor(cName string) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource opentelekomcloud_cce_cluster_v3 cluster_1 {
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  cluster_version         = "v1.27"
+  container_network_type  = "overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+}
+
+resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
+  template_name    = "autoscaler"
+  template_version = "1.27.53"
+  cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
+
+  values {
+    basic = {
+      "cceEndpoint" : "https://cce.eu-de.otc.t-systems.com",
+      "ecsEndpoint" : "https://ecs.eu-de.otc.t-systems.com",
+      "image_version" : "1.27.53",
+      "region" : "eu-de",
+      "swr_addr" : "100.125.7.25:20202",
+      "swr_user" : "cce-addons"
+    }
+    custom = {
+      "cluster_id" : opentelekomcloud_cce_cluster_v3.cluster_1.id,
+      "coresTotal" : 32000,
+      "expander" : "priority",
+      "logLevel" : 4,
+      "maxEmptyBulkDeleteFlag" : 10,
+      "maxNodeProvisionTime" : 15,
+      "maxNodesTotal" : 1000,
+      "memoryTotal" : 128000,
+      "scaleDownDelayAfterAdd" : 10,
+      "scaleDownDelayAfterDelete" : 11,
+      "scaleDownDelayAfterFailure" : 3,
+      "scaleDownEnabled" : true,
+      "scaleDownUnneededTime" : 10,
+      "scaleDownUtilizationThreshold" : 0.5,
+      "scaleUpCpuUtilizationThreshold" : 1,
+      "scaleUpMemUtilizationThreshold" : 1,
+      "scaleUpUnscheduledPodEnabled" : true,
+      "scaleUpUtilizationEnabled" : true,
+      "tenant_id" : data.opentelekomcloud_identity_project_v3.project.id,
+      "unremovableNodeRecheckTimeout" : 5
+    }
+    flavor = <<EOF
+      {
+        "description": "Has only one instance",
+        "name": "Single",
+        "replicas": 1,
+        "resources": [
+          {
+            "limitsCpu": "1000m",
+            "limitsMem": "1000Mi",
+            "name": "autoscaler",
+            "requestsCpu": "500m",
+            "requestsMem": "500Mi"
+          }
+        ]
+      }
+	EOF
+  }
+}
+`, common.DataSourceSubnet, common.DataSourceProject, cName)
+}
+
+func testAccCCEAddonV3FlavorUpdate(cName string) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource opentelekomcloud_cce_cluster_v3 cluster_1 {
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  cluster_version         = "v1.27"
+  container_network_type  = "overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+}
+
+resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
+  template_name    = "autoscaler"
+  template_version = "1.27.53"
+  cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
+
+  values {
+    basic = {
+      "cceEndpoint" : "https://cce.eu-de.otc.t-systems.com",
+      "ecsEndpoint" : "https://ecs.eu-de.otc.t-systems.com",
+      "image_version" : "1.27.53",
+      "region" : "eu-de",
+      "swr_addr" : "100.125.7.25:20202",
+      "swr_user" : "cce-addons"
+    }
+    custom = {
+      "cluster_id" : opentelekomcloud_cce_cluster_v3.cluster_1.id,
+      "coresTotal" : 32000,
+      "expander" : "priority",
+      "logLevel" : 4,
+      "maxEmptyBulkDeleteFlag" : 10,
+      "maxNodeProvisionTime" : 15,
+      "maxNodesTotal" : 1000,
+      "memoryTotal" : 128000,
+      "scaleDownDelayAfterAdd" : 10,
+      "scaleDownDelayAfterDelete" : 11,
+      "scaleDownDelayAfterFailure" : 3,
+      "scaleDownEnabled" : true,
+      "scaleDownUnneededTime" : 10,
+      "scaleDownUtilizationThreshold" : 0.5,
+      "scaleUpCpuUtilizationThreshold" : 1,
+      "scaleUpMemUtilizationThreshold" : 1,
+      "scaleUpUnscheduledPodEnabled" : true,
+      "scaleUpUtilizationEnabled" : true,
+      "tenant_id" : data.opentelekomcloud_identity_project_v3.project.id,
+      "unremovableNodeRecheckTimeout" : 5
+    }
+    flavor = <<EOF
+      {
+        "description": "Has only one instance",
+        "name": "Single",
+        "replicas": 1,
+        "resources": [
+          {
+            "limitsCpu": "8000m",
+            "limitsMem": "4Gi",
+            "name": "autoscaler",
+            "requestsCpu": "4000m",
+            "requestsMem": "2Gi"
+          }
+        ]
+      }
+	EOF
+  }
+}
+`, common.DataSourceSubnet, common.DataSourceProject, cName)
 }
