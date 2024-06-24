@@ -79,6 +79,7 @@ func ResourceCCEAddonV3() *schema.Resource {
 						"flavor": {
 							Type:         schema.TypeString,
 							Optional:     true,
+							ForceNew:     true,
 							ValidateFunc: common.ValidateJsonString,
 							StateFunc: func(v interface{}) string {
 								jsonString, _ := common.NormalizeJsonString(v)
