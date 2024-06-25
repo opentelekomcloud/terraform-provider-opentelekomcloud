@@ -96,12 +96,12 @@ func dataSourceVpcRouteTableV1Read(_ context.Context, d *schema.ResourceData, me
 			"Please change your search criteria and try again.")
 	}
 
-	var rtbID string
+	var routeTable *routetables.RouteTable
 	if v, ok := d.GetOk("name"); ok {
 		filterName := v.(string)
 		for _, rtb := range allRouteTables {
 			if filterName == rtb.Name {
-				rtbID = rtb.ID
+				routeTable = &rtb
 				break
 			}
 		}
@@ -109,25 +109,19 @@ func dataSourceVpcRouteTableV1Read(_ context.Context, d *schema.ResourceData, me
 		// find the default route table if name was not specified
 		for _, rtb := range allRouteTables {
 			if rtb.Default {
-				rtbID = rtb.ID
+				routeTable = &rtb
 				break
 			}
 		}
 	}
 
-	if rtbID == "" {
+	if routeTable == nil {
 		return diag.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
-	// call Get API to retrieve more details about the route table
-	routeTable, err := routetables.Get(client, rtbID)
-	if err != nil {
-		return diag.Errorf("unable to retrieve OpenTelekomCloud route VPC table %s: %s", rtbID, err)
-	}
-
-	log.Printf("[DEBUG] Retrieved VPC route table %s: %+v", rtbID, routeTable)
-	d.SetId(rtbID)
+	log.Printf("[DEBUG] Retrieved VPC route table %s: %+v", routeTable.ID, routeTable)
+	d.SetId(routeTable.ID)
 
 	mErr := multierror.Append(nil,
 		d.Set("region", config.GetRegion(d)),
