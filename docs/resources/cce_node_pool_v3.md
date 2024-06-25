@@ -58,7 +58,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool_1" {
 ```hcl
 variable "cluster_id" {}
 variable "ssh_key" {}
-variable "ssh_key_id" {}
+variable "kms_key_id" {}
 variable "availability_zone" {}
 
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
@@ -79,42 +79,41 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     volumetype = "SSD"
   }
 
-  storage = <<EOF
+  storage = jsonencode(
+    {
+      "storageSelectors" : [
         {
-    "storageSelectors": [
+          "name" : "cceUse",
+          "storageType" : "evs",
+          "matchLabels" : {
+            "size" : "100",
+            "volumeType" : "SSD",
+            "count" : "1",
+            "metadataEncrypted" : "1",
+            "metadataCmkid" : var.kms_key_id
+          }
+        }
+      ],
+      "storageGroups" : [
         {
-            "name": "cceUse",
-            "storageType": "evs",
-            "matchLabels": {
-                "size": "100",
-                "volumeType": "SSD",
-                "count": "1",
-				"metadataEncrypted": "1",
-				"metadataCmkid": "${var.ssh_key_id}"
+          "name" : "vgpaas",
+          "selectorNames" : [
+            "cceUse"
+          ],
+          "cceManaged" : true,
+          "virtualSpaces" : [
+            {
+              "name" : "runtime",
+              "size" : "90%"
+            },
+            {
+              "name" : "kubernetes",
+              "size" : "10%"
             }
+          ]
         }
-    ],
-    "storageGroups": [
-        {
-            "name": "vgpaas",
-            "selectorNames": [
-                "cceUse"
-            ],
-            "cceManaged": true,
-            "virtualSpaces": [
-                {
-                    "name": "runtime",
-                    "size": "90%"
-                },
-                {
-                    "name": "kubernetes",
-                    "size": "10%"
-                }
-            ]
-        }
-    ]
-}
-EOF
+      ]
+  })
 
   max_pods         = 16
   docker_base_size = 32

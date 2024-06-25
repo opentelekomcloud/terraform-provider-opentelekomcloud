@@ -247,6 +247,31 @@ func TestAccCCENodePoolsV3Storage(t *testing.T) {
 	})
 }
 
+func TestAccCCENodePoolsV3StorageJsonEncode(t *testing.T) {
+	var nodePool nodepools.NodePool
+	rc := common.InitResourceCheck(
+		nodePoolResourceName,
+		&nodePool,
+		getNodePoolFunc,
+	)
+	t.Parallel()
+	shared.BookCluster(t)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodePoolV3StorageJsonEncode,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+				),
+			},
+		},
+	})
+}
+
 var testAccCCENodePoolV3Basic = fmt.Sprintf(`
 %s
 
@@ -519,6 +544,67 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     ]
 }
 EOF
+
+  max_pods         = 16
+  docker_base_size = 32
+}`, shared.DataSourceCluster, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
+
+var testAccCCENodePoolV3StorageJsonEncode = fmt.Sprintf(`
+%[1]s
+
+resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
+  cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
+  name               = "opentelekomcloud-cce-node-pool"
+  os                 = "EulerOS 2.9"
+  flavor             = "s2.large.2"
+  initial_node_count = 1
+  key_pair           = "%[2]s"
+  availability_zone  = "random"
+
+  root_volume {
+    size       = 40
+    volumetype = "SSD"
+  }
+  data_volumes {
+    size       = 100
+    volumetype = "SSD"
+  }
+
+  storage = jsonencode(
+    {
+      "storageSelectors" : [
+        {
+          "name" : "cceUse",
+          "storageType" : "evs",
+          "matchLabels" : {
+            "size" : "100",
+            "volumeType" : "SSD",
+            "count" : "1",
+            "metadataEncrypted" : "1",
+            "metadataCmkid" : "%[3]s"
+          }
+        }
+      ],
+      "storageGroups" : [
+        {
+          "name" : "vgpaas",
+          "selectorNames" : [
+            "cceUse"
+          ],
+          "cceManaged" : true,
+          "virtualSpaces" : [
+            {
+              "name" : "runtime",
+              "size" : "90%%"
+            },
+            {
+              "name" : "kubernetes",
+              "size" : "10%%"
+            }
+          ]
+        }
+      ]
+  })
 
   max_pods         = 16
   docker_base_size = 32
