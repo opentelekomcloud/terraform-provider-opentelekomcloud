@@ -2,6 +2,7 @@ package cce
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"strings"
 	"time"
@@ -152,6 +153,16 @@ func ResourceCCENodePoolV3() *schema.Resource {
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					}},
+			},
+			"storage": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: common.ValidateJsonString,
+				StateFunc: func(v interface{}) string {
+					jsonString, _ := common.NormalizeJsonString(v)
+					return jsonString
+				},
 			},
 			"initial_node_count": {
 				Type:     schema.TypeInt,
@@ -366,6 +377,15 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 				UserTags: resourceCCENodePoolUserTags(d),
 			},
 		},
+	}
+
+	if storageJsonRaw, ok := d.GetOk("storage"); ok {
+		var storage nodes.Storage
+		err = json.Unmarshal([]byte(storageJsonRaw.(string)), &storage)
+		if err != nil {
+			return fmterr.Errorf("error unmarshalling flavor json %s", err)
+		}
+		createOpts.Spec.NodeTemplate.Storage = &storage
 	}
 
 	if v, ok := d.GetOk("runtime"); ok {

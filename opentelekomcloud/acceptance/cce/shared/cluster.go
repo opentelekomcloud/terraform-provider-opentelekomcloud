@@ -10,7 +10,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
@@ -46,41 +48,19 @@ func createSharedCluster(t *testing.T) string {
 
 		th.AssertNoErr(t, quotas.CCEClusterQuota.Acquire())
 
-		t.Log("starting creating shared cluster")
-		job, err := clusters.Create(client, clusters.CreateOpts{
-			Kind:       "Cluster",
-			ApiVersion: "v3",
-			Metadata: clusters.CreateMetaData{
-				Name: sharedClusterName,
-			},
-			Spec: clusters.Spec{
-				Type:        "VirtualMachine",
-				Flavor:      "cce.s2.small",
-				Description: "Shared cluster for CCE acceptance tests",
-				ContainerNetwork: clusters.ContainerNetworkSpec{
-					Mode: "vpc-router",
-				},
-				HostNetwork: clusters.HostNetworkSpec{
-					VpcId:    subnet.VpcID,
-					SubnetId: subnet.ID,
-				},
-			},
-		}).Extract()
-		th.AssertNoErr(t, err)
-		sharedClusterID = job.Metadata.Id
+		// check if cluster already exist
 
-		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"Creating"},
-			Target:     []string{"Available"},
-			Refresh:    cce.WaitForCCEClusterActive(client, sharedClusterID),
-			Timeout:    10 * time.Minute,
-			Delay:      5 * time.Second,
-			MinTimeout: 3 * time.Second,
+		getCluster, err := clusters.List(client, clusters.ListOpts{
+			Name: sharedClusterName,
+		})
+		th.AssertNoErr(t, err)
+		if len(getCluster) > 0 {
+			sharedClusterID = getCluster[0].Metadata.Id
+		} else {
+			sharedClusterID = CreateSharedCluster(t, client, subnet)
 		}
-
-		_, err = stateConf.WaitForStateContext(context.Background())
-		th.AssertNoErr(t, err)
 	})
+
 	if sharedClusterID == "" {
 		t.Fatal("no shared cluster ID is available, cluster creation failed")
 	}
@@ -135,4 +115,43 @@ func BookCluster(t *testing.T) {
 	t.Helper()
 	createSharedCluster(t)
 	t.Cleanup(func() { deleteSharedCluster(t) })
+}
+
+func CreateSharedCluster(t *testing.T, client *golangsdk.ServiceClient, subnet *subnets.Subnet) string {
+	t.Log("starting creating shared cluster")
+	job, err := clusters.Create(client, clusters.CreateOpts{
+		Kind:       "Cluster",
+		ApiVersion: "v3",
+		Metadata: clusters.CreateMetaData{
+			Name: sharedClusterName,
+		},
+		Spec: clusters.Spec{
+			Type:        "VirtualMachine",
+			Flavor:      "cce.s2.small",
+			Description: "Shared cluster for CCE acceptance tests",
+			ContainerNetwork: clusters.ContainerNetworkSpec{
+				Mode: "vpc-router",
+			},
+			HostNetwork: clusters.HostNetworkSpec{
+				VpcId:    subnet.VpcID,
+				SubnetId: subnet.ID,
+			},
+		},
+	}).Extract()
+	th.AssertNoErr(t, err)
+	sharedClusterID = job.Metadata.Id
+
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"Creating"},
+		Target:     []string{"Available"},
+		Refresh:    cce.WaitForCCEClusterActive(client, sharedClusterID),
+		Timeout:    10 * time.Minute,
+		Delay:      5 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+
+	_, err = stateConf.WaitForStateContext(context.Background())
+	th.AssertNoErr(t, err)
+
+	return sharedClusterID
 }

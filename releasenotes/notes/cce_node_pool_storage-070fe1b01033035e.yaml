@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CCE]** Add storage support for ``resource/opentelekomcloud_cce_node_pool_v3`` (`#2564 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2564>`_)
