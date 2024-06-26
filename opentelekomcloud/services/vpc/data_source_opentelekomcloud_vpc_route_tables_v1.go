@@ -17,7 +17,7 @@ import (
 
 // API reference:
 // https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/route_table/querying_route_tables.html
-func DataSourceRouteTablesV1() *schema.Resource {
+func DataSourceVpcRouteTablesV1() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceRouteTablesV1Read,
 
