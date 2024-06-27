@@ -42,6 +42,7 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "all_metadata.foo", "bar"),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "name", "instance_1"),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "description", "my_desc"),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "tags.muh", "value-create"),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "tags.emp", ""),
 					resource.TestCheckResourceAttrSet(resourceInstanceV2Name, "network.0.port"),
@@ -52,8 +53,19 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "name", "instance_2"),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "description", "my_desc_updated"),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "tags.muh", "value-update"),
 				),
+			},
+			{
+				ResourceName:      resourceInstanceV2Name,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"stop_before_destroy",
+					"force_delete",
+					"image_name",
+				},
 			},
 		},
 	})
@@ -83,32 +95,6 @@ func TestAccComputeV2Instance_imageByName(t *testing.T) {
 					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
 				),
-			},
-		},
-	})
-}
-
-func TestAccComputeV2Instance_importBasic(t *testing.T) {
-	t.Parallel()
-	qts := serverQuotas(4, env.OsFlavorID)
-	quotas.BookMany(t, qts)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeV2InstanceBasic,
-			},
-			{
-				ResourceName:      resourceInstanceV2Name,
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"stop_before_destroy",
-					"force_delete",
-				},
 			},
 		},
 	})
@@ -254,27 +240,6 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 					testAccCheckComputeV2InstanceBootVolumeAttachment(&instance),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeV2Instance_stopBeforeDestroy(t *testing.T) {
-	var instance servers.Server
-	qts := serverQuotas(4, env.OsFlavorID)
-	t.Parallel()
-	quotas.BookMany(t, qts)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeV2InstanceStopBeforeDestroy,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 				),
 			},
 		},
@@ -575,8 +540,12 @@ var testAccComputeV2InstanceBasic = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
+  description       = "my_desc"
   availability_zone = "%s"
-  image_name        = "Standard_Debian_10_latest"
+
+  image_name      = "Standard_Debian_10_latest"
+  flavor_id       = "s2.medium.1"
+
   metadata = {
     foo = "bar"
   }
@@ -589,6 +558,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     kuh = "value-create"
     emp = ""
   }
+
+  stop_before_destroy = true
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
@@ -596,15 +567,21 @@ var testAccComputeV2InstanceImageByName = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name              = "instance_1_ibn"
-  image_name        = "Standard_Debian_10_latest"
+  name              = "instance_1"
+  description       = "my_desc"
   availability_zone = "%s"
+
+  image_name      = "Standard_Debian_10_latest"
+  flavor_id       = "s2.medium.1"
+
   metadata = {
     foo = "bar"
   }
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
+
+  stop_before_destroy = true
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
@@ -615,7 +592,10 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_2"
   security_groups   = ["default"]
   availability_zone = "%s"
-  image_name        = "Standard_Debian_10_latest"
+  description       = "my_desc_updated"
+
+  image_name      = "Standard_Debian_10_latest"
+  flavor_id       = "s2.medium.1"
 
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -624,6 +604,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   tags = {
     muh = "value-update"
   }
+
+  stop_before_destroy = true
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
@@ -655,9 +637,12 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgroup_2" {
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
+  image_name      = "Standard_Debian_10_latest"
+  flavor_id       = "s2.medium.1"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
+  stop_before_destroy = true
 }
 `, common.DataSourceSubnet)
 
@@ -688,6 +673,10 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgroup_2" {
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
+
+  image_name = "Standard_Debian_10_latest"
+  flavor_id  = "s2.medium.1"
+
   security_groups = [
     "default",
     opentelekomcloud_compute_secgroup_v2.secgroup_1.name,
@@ -696,6 +685,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
+  stop_before_destroy = true
 }
 `, common.DataSourceSubnet)
 
@@ -706,6 +696,7 @@ var testAccComputeV2InstanceBootFromVolumeImage = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
+  flavor_id         = "s2.medium.1"
   security_groups   = ["default"]
   availability_zone = "%s"
   network {
@@ -719,6 +710,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     destination_type      = "volume"
     delete_on_termination = true
   }
+  stop_before_destroy = true
 }
 `, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
@@ -735,6 +727,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "vol_1" {
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
+  flavor_id       = "s2.medium.1"
   security_groups = ["default"]
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -756,6 +749,7 @@ var testAccComputeV2InstanceBootFromVolume = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
+  flavor_id       = "s2.medium.1"
   security_groups = ["default"]
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -768,6 +762,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     destination_type      = "volume"
     delete_on_termination = true
   }
+  stop_before_destroy = true
 }
 `, common.DataSourceImage, common.DataSourceSubnet)
 
@@ -776,22 +771,12 @@ var testAccComputeV2InstanceFixedIP = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
+  image_name      = "Standard_Debian_10_latest"
+  flavor_id       = "s2.medium.1"
   security_groups = ["default"]
   network {
     uuid        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-    fixed_ip_v4 = "192.168.0.24"
-  }
-}
-`, common.DataSourceSubnet)
-
-var testAccComputeV2InstanceStopBeforeDestroy = fmt.Sprintf(`
-%s
-
-resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name            = "instance_1"
-  security_groups = ["default"]
-  network {
-    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+    fixed_ip_v4 = "10.0.0.24"
   }
   stop_before_destroy = true
 }
@@ -802,6 +787,8 @@ var testAccComputeV2InstanceMetadata = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
+  image_name      = "Standard_Debian_10_latest"
+  flavor_id       = "s2.medium.1"
   security_groups = ["default"]
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -810,6 +797,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
     abc = "def"
   }
+  stop_before_destroy = true
 }
 `, common.DataSourceSubnet)
 
@@ -818,6 +806,8 @@ var testAccComputeV2InstanceMetadataUpdate = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
+  image_name      = "Standard_Debian_10_latest"
+  flavor_id       = "s2.medium.1"
   security_groups = ["default"]
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -826,6 +816,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
     ghi = "jkl"
   }
+  stop_before_destroy = true
 }
 `, common.DataSourceSubnet)
 
@@ -834,6 +825,8 @@ var testAccComputeV2InstanceTimeout = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
+  image_name      = "Standard_Debian_10_latest"
+  flavor_id       = "s2.medium.1"
   security_groups = ["default"]
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -842,6 +835,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   timeouts {
     create = "10m"
   }
+  stop_before_destroy = true
 }
 `, common.DataSourceSubnet)
 
@@ -850,6 +844,8 @@ var testAccComputeV2InstanceAutoRecovery = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
+  image_name        = "Standard_Debian_10_latest"
+  flavor_id         = "s2.medium.1"
   security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
@@ -858,35 +854,40 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
-  auto_recovery = false
+  auto_recovery       = false
+  stop_before_destroy = true
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
 var testAccComputeV2InstanceCrazyNICs = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+resource "opentelekomcloud_vpc_v1" "vpc" {
+  cidr = "192.168.0.0/16"
+  name = "vpc-crz-1"
 }
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name        = "subnet_1"
-  network_id  = opentelekomcloud_networking_network_v2.network_1.id
-  cidr        = "192.168.1.0/24"
-  ip_version  = 4
-  enable_dhcp = true
-  no_gateway  = true
+
+resource "opentelekomcloud_vpc_subnet_v1" "subnet" {
+  cidr       = cidrsubnet(opentelekomcloud_vpc_v1.vpc.cidr, 8, 0)
+  gateway_ip = cidrhost(opentelekomcloud_vpc_v1.vpc.cidr, 1)
+  name       = "subnet-crz-1"
+  vpc_id     = opentelekomcloud_vpc_v1.vpc.id
 }
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
+  image_name      = "Standard_Debian_10_latest"
+  flavor_id       = "s2.medium.1"
   security_groups = ["default"]
 
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   network {
-    uuid        = opentelekomcloud_networking_network_v2.network_1.id
-    fixed_ip_v4 = "192.168.1.100"
+    uuid        = opentelekomcloud_vpc_subnet_v1.subnet.network_id
+    fixed_ip_v4 = "192.168.0.100"
   }
+  stop_before_destroy = true
 }
 `, common.DataSourceSubnet)
 
@@ -895,6 +896,8 @@ var testAccComputeV2InstanceActive = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
+  image_name      = "Standard_Debian_10_latest"
+  flavor_id       = "s2.medium.1"
   security_groups = ["default"]
   power_state     = "active"
   network {
@@ -908,6 +911,8 @@ var testAccComputeV2InstanceShutoff = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
+  image_name      = "Standard_Debian_10_latest"
+  flavor_id       = "s2.medium.1"
   security_groups = ["default"]
   power_state     = "shutoff"
   network {

@@ -76,6 +76,10 @@ func DataSourceComputeInstancesV2() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"description": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 						"image_id": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -173,7 +177,7 @@ func dataSourceComputeInstancesV2Read(_ context.Context, d *schema.ResourceData,
 	if err != nil {
 		return fmterr.Errorf(errCreateV2Client, err)
 	}
-
+	client.Microversion = microversion
 	opts := servers.ListOpts{
 		Limit:    d.Get("limit").(int),
 		Name:     d.Get("name").(string),
@@ -261,16 +265,17 @@ func dataSourceComputeInstancesV2Read(_ context.Context, d *schema.ResourceData,
 		server := map[string]interface{}{
 			"id":                  item.ID,
 			"name":                item.Name,
+			"description":         item.Description,
 			"image_id":            item.Image["id"],
 			"image_name":          imageName,
-			"flavor_id":           item.Flavor["id"],
+			"flavor_id":           item.Flavor["original_name"],
 			"status":              item.Status,
 			"key_pair":            item.KeyName,
 			"security_groups_ids": secGrpIds,
 			"project_id":          item.TenantID,
 			"availability_zone":   item.AvailabilityZone,
 			"public_ip":           floatingIp,
-			"system_disk_id":      item.VolumesAttached[0]["id"],
+			"system_disk_id":      item.VolumesAttached[0].ID,
 			"network":             networks,
 		}
 
