@@ -41,6 +41,10 @@ func DataSourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"image_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -158,7 +162,7 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return fmterr.Errorf(errCreateV2Client, err)
 	}
-
+	client.Microversion = microversion
 	var allServers []servers.Server
 	if serverId := d.Get("id").(string); serverId != "" {
 		server, err := servers.Get(client, serverId).Extract()
@@ -233,7 +237,7 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 
 	log.Printf("[DEBUG] Setting security groups: %+v", secGrpNames)
 
-	flavorID, ok := server.Flavor["id"].(string)
+	flavorID, ok := server.Flavor["original_name"].(string)
 	if !ok {
 		return diag.Errorf("Error setting server's flavor: %v", server.Flavor)
 	}
@@ -297,6 +301,7 @@ func dataSourceComputeInstanceV2Read(_ context.Context, d *schema.ResourceData, 
 
 	mErr = multierror.Append(mErr,
 		d.Set("network", networks),
+		d.Set("description", server.Description),
 		d.Set("access_ip_v4", hostv4),
 		d.Set("access_ip_v6", hostv6),
 		d.Set("metadata", server.Metadata),

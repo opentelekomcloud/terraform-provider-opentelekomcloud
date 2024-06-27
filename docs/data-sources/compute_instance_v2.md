@@ -34,6 +34,8 @@ In addition to the above, the following attributes are exported:
 
 * `name` - The name of the server.
 
+* `description` - Server description.
+
 * `image_id` - The image ID used to create the server.
 
 * `image_name` - The image name used to create the server.

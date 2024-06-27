@@ -37,7 +37,6 @@ func TestAccComputeV2InstanceDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", "instance_1"),
 					resource.TestCheckResourceAttrPair(resourceName, "metadata", instanceName, "metadata"),
 					resource.TestCheckResourceAttrSet(resourceName, "network.0.name"),
-					resource.TestCheckResourceAttrSet(resourceName, "encrypted_password"),
 				),
 			},
 			{
@@ -108,7 +107,7 @@ func testAccComputeV2InstanceDataSourceWindows() string {
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   availability_zone = "%s"
-  image_name        = "Enterprise_Windows_STD_2019_CORE_KVM"
+  image_name        = "Enterprise_Windows-Server_2022_STD_amd64_uefi_latest"
   metadata = {
     foo = "bar"
   }

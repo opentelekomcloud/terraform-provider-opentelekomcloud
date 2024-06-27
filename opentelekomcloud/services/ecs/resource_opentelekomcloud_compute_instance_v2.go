@@ -65,6 +65,11 @@ func ResourceComputeInstanceV2() *schema.Resource {
 				Required: true,
 				ForceNew: false,
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"image_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -373,6 +378,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return fmterr.Errorf(errCreateV2Client, err)
 	}
+	client.Microversion = microversion
 
 	var createOpts servers.CreateOptsBuilder
 
@@ -419,6 +425,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		ConfigDrive:      &configDrive,
 		AdminPass:        d.Get("admin_pass").(string),
 		UserData:         []byte(d.Get("user_data").(string)),
+		Description:      d.Get("description").(string),
 	}
 
 	if keyName, ok := d.Get("key_pair").(string); ok && keyName != "" {
@@ -544,7 +551,7 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return fmterr.Errorf(errCreateV2Client, err)
 	}
-
+	client.Microversion = microversion
 	server, err := servers.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "server")
@@ -610,24 +617,31 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 		return fmterr.Errorf("[DEBUG] Error saving security_groups to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
 	}
 
-	flavorId, ok := server.Flavor["id"].(string)
+	flavorId, ok := server.Flavor["original_name"].(string)
 	if !ok {
 		return fmterr.Errorf("error setting OpenTelekomCloud server's flavor: %v", server.Flavor)
 	}
 	mErr = multierror.Append(mErr,
 		d.Set("flavor_id", flavorId),
 		d.Set("key_pair", server.KeyName),
+		d.Set("description", server.Description),
 	)
 
 	flavor, err := flavors.Get(client, flavorId).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	mErr = multierror.Append(mErr,
-		d.Set("flavor_name", flavor.Name),
-		// Set instance volume attached information
-		d.Set("volume_attached", server.VolumesAttached),
-	)
+	mErr = multierror.Append(mErr, d.Set("flavor_name", flavor.Name))
+
+	// Create a slice of maps to match the Terraform schema
+	var volumesAttached []map[string]interface{}
+	for _, volume := range server.VolumesAttached {
+		volumesAttached = append(volumesAttached, map[string]interface{}{
+			"id": volume.ID,
+		})
+	}
+	// Set instance volume attached information
+	mErr = multierror.Append(mErr, d.Set("volume_attached", volumesAttached))
 
 	// Set the instance's image information appropriately
 	if err := setImageInformation(client, server, d); err != nil {
@@ -727,12 +741,15 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return fmterr.Errorf(errCreateV2Client, err)
 	}
+	client.Microversion = microversion
 
 	var updateOpts servers.UpdateOpts
-	if d.HasChange("name") {
+	if d.HasChanges("name") {
 		updateOpts.Name = d.Get("name").(string)
 	}
-
+	if d.HasChanges("description") {
+		updateOpts.Description = d.Get("description").(string)
+	}
 	if updateOpts != (servers.UpdateOpts{}) {
 		_, err := servers.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
@@ -959,7 +976,7 @@ func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return fmterr.Errorf(errCreateV2Client, err)
 	}
-
+	client.Microversion = microversion
 	if d.Get("stop_before_destroy").(bool) {
 		if err := startstop.Stop(client, d.Id()).ExtractErr(); err != nil {
 			log.Printf("[WARN] Error stopping OpenTelekomCloud instance: %s", err)
@@ -1241,17 +1258,17 @@ func suppressPowerStateDiffs(_, old, _ string, _ *schema.ResourceData) bool {
 
 func resourceComputeInstanceV2ImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
 		return nil, fmt.Errorf("error creating ComputeV2 client: %w", err)
 	}
-
+	client.Microversion = microversion
 	results := make([]*schema.ResourceData, 1)
 	if diagRead := resourceComputeInstanceV2Read(ctx, d, meta); diagRead.HasError() {
 		return nil, fmt.Errorf("error reading opentelekomcloud_compute_instance_v2 %s: %s", d.Id(), diagRead[0].Summary)
 	}
 
-	metadata, err := servers.Metadata(computeClient, d.Id()).Extract()
+	metadata, err := servers.Metadata(client, d.Id()).Extract()
 	if err != nil {
 		return nil, fmt.Errorf("unable to read metadata for opentelekomcloud_compute_instance_v2 %s: %s", d.Id(), err)
 	}
@@ -1267,12 +1284,12 @@ func resourceComputeInstanceV2ImportState(ctx context.Context, d *schema.Resourc
 
 func setBlockDevice(d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
 		return fmterr.Errorf("error creating compute v2 client: %w", err)
 	}
-
-	raw := servers.Get(computeClient, d.Id())
+	client.Microversion = microversion
+	raw := servers.Get(client, d.Id())
 	if raw.Err != nil {
 		return common.CheckDeletedDiag(d, raw.Err, "opentelekomcloud_compute_instance_v2")
 	}

@@ -54,6 +54,8 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The data source ID.
 
+* `description` - Server description.
+
 * `instances` - List of ECS instance details. The object structure of each ECS instance is documented below.
 
 The `instances` block supports:
