@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[ECS]** Update ``microversion`` to support additional parameters like ``description`` in ``opentelekomcloud_compute_instance_v2`` (`#2568 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2568>`_)
+

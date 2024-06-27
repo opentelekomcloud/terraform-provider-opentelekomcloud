@@ -543,8 +543,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   description       = "my_desc"
   availability_zone = "%s"
 
-  image_name      = "Standard_Debian_10_latest"
-  flavor_id       = "s2.medium.1"
+  image_name = "Standard_Debian_10_latest"
+  flavor_id  = "s2.medium.1"
 
   metadata = {
     foo = "bar"
@@ -571,8 +571,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   description       = "my_desc"
   availability_zone = "%s"
 
-  image_name      = "Standard_Debian_10_latest"
-  flavor_id       = "s2.medium.1"
+  image_name = "Standard_Debian_10_latest"
+  flavor_id  = "s2.medium.1"
 
   metadata = {
     foo = "bar"
@@ -594,8 +594,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   availability_zone = "%s"
   description       = "my_desc_updated"
 
-  image_name      = "Standard_Debian_10_latest"
-  flavor_id       = "s2.medium.1"
+  image_name = "Standard_Debian_10_latest"
+  flavor_id  = "s2.medium.1"
 
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
