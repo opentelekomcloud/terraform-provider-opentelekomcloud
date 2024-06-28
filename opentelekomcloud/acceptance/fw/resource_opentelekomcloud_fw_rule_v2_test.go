@@ -137,6 +137,39 @@ func TestAccFWRuleV2_TCPtoICMP(t *testing.T) {
 	})
 }
 
+func TestAccFWRuleV2_TCPUpdate(t *testing.T) {
+	var description = "allow ssh from world"
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWRuleV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFWRuleV2_TCPDescription,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "protocol", "tcp"),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "description", description),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "destination_port", "22"),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "source_port", "22"),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "action", "allow"),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "source_ip_address", "0.0.0.0/0"),
+				),
+			},
+			{
+				Config: testAccFWRuleV2_TCPDescriptionUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "protocol", "tcp"),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "description", description+" updated"),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "destination_port", "22"),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "source_port", "22"),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "action", "allow"),
+					resource.TestCheckResourceAttr("opentelekomcloud_fw_rule_v2.rule_1", "source_ip_address", "0.0.0.0/0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckFWRuleV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
@@ -287,5 +320,33 @@ resource "opentelekomcloud_fw_rule_v2" "rule_2" {
   action      = "deny"
 
   destination_ip_address = "2001:db8::"
+}
+`
+
+const testAccFWRuleV2_TCPDescription = `
+resource "opentelekomcloud_fw_rule_v2" "rule_1" {
+  description            = "allow ssh from world"
+  action                 = "allow"
+  protocol               = "tcp"
+  source_ip_address      = "0.0.0.0/0"
+  destination_ip_address = "192.168.100.0/29"
+  source_port            = "22"
+  destination_port       = "22"
+
+  enabled = "true"
+}
+`
+
+const testAccFWRuleV2_TCPDescriptionUpdate = `
+resource "opentelekomcloud_fw_rule_v2" "rule_1" {
+  description            = "allow ssh from world updated"
+  action                 = "allow"
+  protocol               = "tcp"
+  source_ip_address      = "0.0.0.0/0"
+  destination_ip_address = "192.168.100.0/29"
+  source_port            = "22"
+  destination_port       = "22"
+
+  enabled = "true"
 }
 `

@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/fwaas_v2/policies"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/fwaas_v2/rules"
 	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
@@ -235,6 +236,12 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		enabled := d.Get("enabled").(bool)
 		updateOpts.Enabled = &enabled
 	}
+
+	if d.Get("protocol").(string) != "icmp" && (updateOpts.DestinationPort == nil && updateOpts.SourcePort == nil) {
+		updateOpts.DestinationPort = pointerto.String(d.Get("destination_port").(string))
+		updateOpts.SourcePort = pointerto.String(d.Get("source_port").(string))
+	}
+
 	log.Printf("[DEBUG] Updating firewall rules: %#v", updateOpts)
 	err = rules.Update(networkingClient, d.Id(), updateOpts).Err
 	if err != nil {
