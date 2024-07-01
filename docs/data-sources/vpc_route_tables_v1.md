@@ -2,8 +2,6 @@
 subcategory: "Virtual Private Cloud (VPC)"
 ---
 
-#
-
 [API Reference](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/route_table/querying_route_tables.html)
 
 # opentelekomcloud_vpc_route_tables_v1
@@ -41,32 +39,34 @@ data "opentelekomcloud_vpc_route_table_v1" "subnet_route_table" {
 
 The following arguments are supported:
 
-- `vpc_id` - (Optional, String) Specifies the VPC ID where the route tables reside.
+* `vpc_id` - (Optional, String) Specifies the VPC ID where the route tables reside.
 
-- `subnet_id` - (Optional, String) Specifies the id of the subnet. **Note**: the corresponding subnet resource attribute is `network_id`.
+* `subnet_id` - (Optional, String) Specifies the id of the subnet. **Note**: the corresponding subnet resource attribute is `network_id`.
 
-- `id` - (Optional, String) Specifies the ID of the route table.
+* `id` - (Optional, String) Specifies the ID of the route table.
 
 ## Attribute Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-- `routetables` - list of [routetable object](#routtable_object) (documented belos)
+* `routetables` - list of [routetable object](#routetable_object) (documented below)
 
 <a name="routetable_object"></a>
 The `routetable` object has the following attributes:
 
-- `default` - Whether the route table is default or not.
+* `default` - Whether the route table is default or not.
 
-- `description` - Route table description.
+* `description` - Route table description.
 
-- `subnets` - An array of subnets associating with the route table.
+* `subnets` - An array of subnets associating with the route table.
 
-- `tenant_id` - Project id to which route table belongs.
+* `tenant_id` - Project id to which route table belongs.
 
-- `vpc_id` - VPC Id to which route table belongs.
+* `vpc_id` - VPC Id to which route table belongs.
 
-- `routes` - List of non-local routes in the route table (`local` routes are considered system internal and can't be managed via API, though are visible in web UI). Structure of the [route object](#route_object) is documented below.
+* `routes` - List of non-local routes in the route table
+  (`local` routes are considered system internal and can't be managed via API, though are visible in web UI).
+  Structure of the [route object](#route_object) is documented below.
 
 <a name="route_object"></a>
 The `route` object has the following attributes:

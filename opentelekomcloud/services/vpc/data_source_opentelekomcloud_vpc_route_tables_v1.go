@@ -15,8 +15,6 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 )
 
-// API reference:
-// https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/route_table/querying_route_tables.html
 func DataSourceVpcRouteTablesV1() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceRouteTablesV1Read,
@@ -103,7 +101,6 @@ func DataSourceVpcRouteTablesV1() *schema.Resource {
 
 func dataSourceRouteTablesV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-
 	client, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
 		return diag.FromErr(err)
