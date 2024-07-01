@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[WAF]** Fix update of ``timeout_config`` in ``resource/opentelekomcloud_waf_dedicated_domain_v1``
+    (`#2572 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2572>`_)
