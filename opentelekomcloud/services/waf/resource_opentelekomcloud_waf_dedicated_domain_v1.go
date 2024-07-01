@@ -155,20 +155,22 @@ func ResourceWafDedicatedDomain() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				MaxItems: 1,
-				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"connect_timeout": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Computed: true,
 						},
 						"send_timeout": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Computed: true,
 						},
 						"read_timeout": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
@@ -475,12 +477,10 @@ func updateWafDedicatedDomain(client *golangsdk.ServiceClient, d *schema.Resourc
 
 	if v, ok := d.GetOk("timeout_config"); ok && len(v.([]interface{})) > 0 {
 		rawArray := v.([]interface{})[0].(map[string]interface{})
-		updateOpts = domains.UpdateOpts{
-			TimeoutConfig: &domains.TimeoutConfigObject{
-				ConnectionTimeout: rawArray["connect_timeout"].(int),
-				SendTimeout:       rawArray["send_timeout"].(int),
-				ReadTimeout:       rawArray["read_timeout"].(int),
-			},
+		updateOpts.TimeoutConfig = &domains.TimeoutConfigObject{
+			ConnectionTimeout: rawArray["connect_timeout"].(int),
+			SendTimeout:       rawArray["send_timeout"].(int),
+			ReadTimeout:       rawArray["read_timeout"].(int),
 		}
 	}
 

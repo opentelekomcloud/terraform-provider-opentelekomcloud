@@ -158,6 +158,46 @@ func TestAccWafDedicatedDomainV1_timeoutConfig(t *testing.T) {
 	})
 }
 
+func TestAccWafDedicatedDomainV1_httpsConfig(t *testing.T) {
+	var domain domains.Host
+	var hostName = fmt.Sprintf("wafd%s", acctest.RandString(5))
+	log.Printf("[DEBUG] The opentelekomcloud Waf dedicated instance test running in '%s' region.", env.OS_REGION_NAME)
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafDedicateDomainV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWafDedicatedDomainV1_httpsConfig(hostName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckWafDedicatedDomainV1Exists(
+						wafdDomainResourceName, &domain),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "domain", fmt.Sprintf("www.%s.com", hostName)),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "proxy", "false"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "server.#", "1"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "tls", "TLS v1.1"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "cipher", "cipher_1"),
+				),
+			},
+			{
+				Config: testAccWafDedicatedDomainV1_httpsConfigUpdate(hostName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckWafDedicatedDomainV1Exists(
+						wafdDomainResourceName, &domain),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "domain", fmt.Sprintf("www.%s.com", hostName)),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "proxy", "false"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "server.#", "1"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "tls", "TLS v1.2"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "cipher", "cipher_2"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "timeout_config.0.connect_timeout", "150"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "timeout_config.0.read_timeout", "200"),
+					resource.TestCheckResourceAttr(wafdDomainResourceName, "timeout_config.0.send_timeout", "100"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckWafDedicateDomainV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.WafDedicatedV1Client(env.OS_REGION_NAME)
@@ -448,4 +488,88 @@ resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
   }
 }
 `, common.DataSourceSubnet, name)
+}
+
+func testAccWafDedicatedDomainV1_httpsConfig(name string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
+  name            = "domain_policy_1"
+  protection_mode = "log"
+  full_detection  = false
+  level           = 2
+
+  options {
+    crawler    = true
+    web_attack = true
+  }
+}
+
+resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
+  domain      = "www.%s.com"
+  keep_policy = false
+  proxy       = false
+  tls         = "TLS v1.1"
+  cipher      = "cipher_1"
+
+  certificate_id = opentelekomcloud_waf_dedicated_certificate_v1.cert_1.id
+
+  server {
+    client_protocol = "HTTPS"
+    server_protocol = "HTTPS"
+    address         = "192.168.0.10"
+    port            = 443
+    type            = "ipv4"
+    vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  }
+
+}
+`, common.DataSourceSubnet, testAccWafDedicatedCertificateV1Basic, name)
+}
+
+func testAccWafDedicatedDomainV1_httpsConfigUpdate(name string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
+  name            = "domain_policy_1"
+  protection_mode = "log"
+  full_detection  = false
+  level           = 2
+
+  options {
+    crawler    = true
+    web_attack = true
+  }
+}
+
+resource "opentelekomcloud_waf_dedicated_domain_v1" "domain_1" {
+  domain      = "www.%s.com"
+  keep_policy = false
+  proxy       = false
+  tls         = "TLS v1.2"
+  cipher      = "cipher_2"
+
+  certificate_id = opentelekomcloud_waf_dedicated_certificate_v1.cert_1.id
+
+  server {
+    client_protocol = "HTTPS"
+    server_protocol = "HTTPS"
+    address         = "192.168.0.11"
+    port            = 443
+    type            = "ipv4"
+    vpc_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  }
+  timeout_config {
+    connect_timeout = 150
+    read_timeout    = 200
+    send_timeout    = 100
+  }
+}
+`, common.DataSourceSubnet, testAccWafDedicatedCertificateV1Basic, name)
 }
