@@ -281,6 +281,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cts_tracker_v1":                    cts.DataSourceCTSTrackerV1(),
 			"opentelekomcloud_direct_connect_v2":                 dcaas.DataSourceDirectConnectV2(),
 			"opentelekomcloud_dcs_az_v1":                         dcs.DataSourceDcsAZV1(),
+			"opentelekomcloud_dcs_certificate_v2":                dcs.DataSourceDcsCertificateV2(),
 			"opentelekomcloud_dcs_maintainwindow_v1":             dcs.DataSourceDcsMaintainWindowV1(),
 			"opentelekomcloud_dcs_product_v1":                    dcs.DataSourceDcsProductV1(),
 			"opentelekomcloud_deh_host_v1":                       deh.DataSourceDEHHostV1(),
