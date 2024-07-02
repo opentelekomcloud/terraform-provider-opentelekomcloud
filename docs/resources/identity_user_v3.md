@@ -92,6 +92,10 @@ In addition to all arguments above, the following attributes are exported:
 
 * `domain_id` - The domain user belongs to.
 
+* `xuser_type` - Type of the user in the external system.
+
+* `xuser_id` - ID of the user in the external system.
+
 ## Import
 
 Users can be imported using the `id`, e.g.

@@ -125,6 +125,14 @@ func ResourceIdentityUserV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"xuser_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"xuser_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -219,6 +227,8 @@ func resourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, met
 		d.Set("create_time", user.CreateAt),
 		d.Set("last_login", user.LastLogin),
 		d.Set("domain_id", user.DomainID),
+		d.Set("xuser_type", user.XuserType),
+		d.Set("xuser_id", user.XuserID),
 	)
 
 	userProtectionConfig, _ := getLoginProtection(client, d)
@@ -364,6 +374,10 @@ func resourceIdentityUserV3Delete(ctx context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return fmterr.Errorf(clientCreationFail, err)
 	}
+	err = checkAndModifyXuser(ctx, d, meta)
+	if err != nil {
+		diag.FromErr(err)
+	}
 
 	err = oldusers.Delete(client, d.Id()).ExtractErr()
 	if err != nil {
@@ -382,4 +396,26 @@ func normalizePhoneNumber(raw string) string {
 	}
 
 	return phone
+}
+
+func checkAndModifyXuser(ctx context.Context, d *schema.ResourceData, meta interface{}) error {
+	if d.Get("xuser_type").(string) != "" || d.Get("xuser_id").(string) != "" {
+		config := meta.(*cfg.Config)
+		client, err := common.ClientFromCtx(ctx, keyClientV30, func() (*golangsdk.ServiceClient, error) {
+			return config.IdentityV30Client()
+		})
+		if err != nil {
+			return fmt.Errorf(clientV30CreationFail, err)
+		}
+		_, err = users.ModifyUserAdmin(client, users.UpdateAdminOpts{
+			XuserType: "",
+			XuserId:   "",
+			Id:        d.Id(),
+		})
+		if err != nil {
+			return fmt.Errorf("error removing xuser_type and xuser_id: %s", err)
+		}
+		return nil
+	}
+	return nil
 }
