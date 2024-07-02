@@ -44,7 +44,7 @@ In addition to all arguments above, the following attributes are exported:
 * `subnets` - An array of one or more subnets associating with the route table.
 
 * `region` - The region in which belongs the vpc route table.
-*
+
 * `route` - The route object list. The [route object](#route_object) is documented below.
 
 <a name="route_object"></a>
