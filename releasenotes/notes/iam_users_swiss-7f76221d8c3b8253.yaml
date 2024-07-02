@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IAM]** User deletion fix for ``resource/opentelekomcloud_identity_user_v3`` for SwissCloud (`#2577 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2577>`_)
