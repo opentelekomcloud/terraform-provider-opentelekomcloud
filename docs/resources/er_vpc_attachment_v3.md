@@ -1,9 +1,14 @@
 ---
 subcategory: "Enterprise Router (ER)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_er_vpc_attachment_v3"
+sidebar_current: "docs-opentelekomcloud-resource-er-vpc-attachment-v3"
+description: |-
+Manages an Enterprise Router VPC Attachment resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for Enterprise Router you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/enterprise-router/api-ref/apis/vpc_attachments/index.html).
+[documentation portal](https://docs.otc.t-systems.com/enterprise-router/api-ref/apis/vpc_attachments/index.html).
 
 # opentelekomcloud_er_vpc_attachment_v3
 

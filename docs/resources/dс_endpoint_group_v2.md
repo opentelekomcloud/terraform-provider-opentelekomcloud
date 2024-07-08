@@ -1,10 +1,16 @@
 ---
 subcategory: "Direct Connect (DCaaS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dc_endpoint_group_v2"
+sidebar_current: "docs-opentelekomcloud-resource-dc-endpoint-group-v2"
+description: |-
+Manages a Direct Connect Endpoint Group resource within OpenTelekomCloud.
 ---
+
 # opentelekomcloud_dc_endpoint_group_v2 (Resource)
 
 Up-to-date reference of API arguments for Direct Connect Endpoint Group you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/direct-connect/api-ref/apis/direct_connect_endpoint_group/index.html).
+[documentation portal](https://docs.otc.t-systems.com/direct-connect/api-ref/apis/direct_connect_endpoint_group/index.html)
 
 ~>
 opentelekomcloud_dc_endpoint_group_v2 is no longer provided. Impossible to update assigned endpoint group.

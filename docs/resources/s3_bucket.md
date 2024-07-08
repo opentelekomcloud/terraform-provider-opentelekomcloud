@@ -1,5 +1,10 @@
 ---
 subcategory: "Object Storage Service (S3)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_s3_bucket"
+sidebar_current: "docs-opentelekomcloud-resource-s3-bucket"
+description: |-
+Manages an S3 Bucket resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud_s3_bucket

@@ -1,9 +1,14 @@
 ---
 subcategory: "Web Application Firewall (WAF)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_alarm_notification_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-alarm-notification-v1"
+description: |-
+Manages a WAF Alarm Notification resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF alarm notification you can get at
-`https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/alarm_notification`.
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/alarm_notification)
 
 # opentelekomcloud_waf_alarm_notification_v1
 

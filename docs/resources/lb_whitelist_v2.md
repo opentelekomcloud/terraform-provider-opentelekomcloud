@@ -1,9 +1,14 @@
 ---
 subcategory: "Elastic Load Balancer (ELB)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_lb_whitelist_v2"
+sidebar_current: "docs-opentelekomcloud-resource-lb-whitelist-v2"
+description: |-
+Manages a ELB Whitelist resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ELB whitelist you can get at
-`https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v2.0/whitelist`.
+[documentation portal](https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v2.0/whitelist)
 
 # opentelekomcloud_lb_whitelist_v2
 

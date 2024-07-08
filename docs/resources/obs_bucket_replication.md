@@ -1,9 +1,14 @@
 ---
 subcategory: "Object Storage Service (OBS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_obs_bucket_replication"
+sidebar_current: "docs-opentelekomcloud-resource-obs-bucket-replication"
+description: |-
+Manages a OBS Bucket Replication resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for OBS bucket cross-region replication you can get at
-`https://docs.otc.t-systems.com/object-storage-service/api-ref/apis/advanced_bucket_settings/configuring_cross-region_replication_for_a_bucket.html`.
+[documentation portal](https://docs.otc.t-systems.com/object-storage-service/api-ref/apis/advanced_bucket_settings/configuring_cross-region_replication_for_a_bucket.html)
 
 # opentelekomcloud_obs_bucket_replication
 

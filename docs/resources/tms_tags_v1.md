@@ -1,11 +1,16 @@
 ---
 subcategory: "Tag Management Service (TMS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_tms_tags_v1"
+sidebar_current: "docs-opentelekomcloud-resource-tms-tags-v1"
+description: |-
+Manages an TMS Tags resource within OpenTelekomCloud.
 ---
 
-Up-to-date reference of API arguments for SWR repository you can get at
-`https://docs.otc.t-systems.com/tag-management-service/api-ref/`.
+Up-to-date reference of API arguments for TMS Tags you can get at
+[documentation portal](https://docs.otc.t-systems.com/tag-management-service/api-ref/)
 
-# opentelekomcloud_tms_tags
+# opentelekomcloud_tms_tags_v1
 
 Manages TMS tags resource within OpenTelekomCloud.
 

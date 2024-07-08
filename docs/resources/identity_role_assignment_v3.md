@@ -1,9 +1,14 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_identity_role_assignment_v3"
+sidebar_current: "docs-opentelekomcloud-resource-identity-role-assignment-v3"
+description: |-
+Manages a IAM Role Assignment resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for IAM role assignment you can get at
-`https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/permission_management`.
+[documentation portal](https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/permission_management)
 
 # opentelekomcloud_identity_role_assignment_v3
 

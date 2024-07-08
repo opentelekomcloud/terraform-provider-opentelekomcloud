@@ -1,10 +1,16 @@
 ---
 subcategory: "Direct Connect (DCaaS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dc_virtual_interface_v2"
+sidebar_current: "docs-opentelekomcloud-resource-dc-virtual-interface-v2"
+description: |-
+Manages a Direct Connect Virtual Interface resource within OpenTelekomCloud.
 ---
+
 # opentelekomcloud_dc_virtual_interface_v2 (Resource)
 
 Up-to-date reference of API arguments for Direct Connect Virtual Interface you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/direct-connect/api-ref/apis/virtual_interface/index.html).
+[documentation portal](https://docs.otc.t-systems.com/direct-connect/api-ref/apis/virtual_interface/index.html).
 
 ## Example Usage
 

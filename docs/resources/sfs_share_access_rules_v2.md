@@ -1,9 +1,14 @@
 ---
 subcategory: "Scalable File Service (SFS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_sfs_share_access_rules_v2"
+sidebar_current: "docs-opentelekomcloud-resource-sfs-share-access-rules-v2"
+description: |-
+Manages an SFS Access Rules resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for SFS access rules you can get at
-`https://docs.otc.t-systems.com/scalable-file-service/api-ref/sfs_capacity-oriented_apis/file_system_access_rules`.
+[documentation portal](https://docs.otc.t-systems.com/scalable-file-service/api-ref/sfs_capacity-oriented_apis/file_system_access_rules)
 
 # opentelekomcloud_sfs_share_access_rules_v2
 

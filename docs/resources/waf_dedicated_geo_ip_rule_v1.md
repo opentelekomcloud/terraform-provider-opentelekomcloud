@@ -1,9 +1,14 @@
 ---
 subcategory: "Dedicated Web Application Firewall (WAFD)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_dedicated_geo_ip_rule_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-dedicated-geo-ip-rule-v1"
+description: |-
+Manages a WAF Dedicated Geolocation Access Control Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF dedicated Geolocation Access Control rule you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_a_geolocation_access_control_rule.html).
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_a_geolocation_access_control_rule.html).
 
 # opentelekomcloud_waf_dedicated_geo_ip_rule_v1
 

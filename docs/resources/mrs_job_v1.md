@@ -1,9 +1,14 @@
 ---
 subcategory: "MapReduce Service (MRS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_mrs_job_v1"
+sidebar_current: "docs-opentelekomcloud-resource-mrs-job-v1"
+description: |-
+Manages a MRS Job resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for MRS job you can get at
-`https://docs.otc.t-systems.com/mapreduce-service/api-ref/apis/job_object_apis_v1_not_recommended`.
+[documentation portal](https://docs.otc.t-systems.com/mapreduce-service/api-ref/apis/job_object_apis_v1_not_recommended)
 
 # opentelekomcloud_mrs_job_v1
 

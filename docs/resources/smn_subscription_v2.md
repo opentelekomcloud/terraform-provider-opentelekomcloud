@@ -1,9 +1,14 @@
 ---
 subcategory: "Simple Message Notification (SMN)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_smn_subscription_v2"
+sidebar_current: "docs-opentelekomcloud-resource-smn-subscription-v2"
+description: |-
+Manages an SMN Subscription resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for SMN subscription you can get at
-`https://docs.otc.t-systems.com/simple-message-notification/api-ref/apis/subscription_operations`.
+[documentation portal](https://docs.otc.t-systems.com/simple-message-notification/api-ref/apis/subscription_operations)
 
 # opentelekomcloud_smn_subscription_v2
 

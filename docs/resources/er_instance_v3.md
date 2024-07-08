@@ -1,9 +1,14 @@
 ---
 subcategory: "Enterprise Router (ER)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_er_instance_v3"
+sidebar_current: "docs-opentelekomcloud-resource-er-instance-v3"
+description: |-
+Manages an Enterprise Router Instance resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for Enterprise Router you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/enterprise-router/api-ref/apis/enterprise_routers/index.html#enterpriserouterinstance).
+[documentation portal](https://docs.otc.t-systems.com/enterprise-router/api-ref/apis/enterprise_routers/index.html#enterpriserouterinstance)
 
 # opentelekomcloud_er_instance_v3
 

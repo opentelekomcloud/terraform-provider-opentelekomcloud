@@ -1,9 +1,14 @@
 ---
 subcategory: "Dedicated Web Application Firewall (WAFD)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_dedicated_instance_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-dedicated-instance-v1"
+description: |-
+Manages a WAF Dedicated Instance resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF dedicated instance you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/dedicated_instance_management/index.html).
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/dedicated_instance_management/index.html).
 
 # opentelekomcloud_waf_dedicated_instance_v1
 

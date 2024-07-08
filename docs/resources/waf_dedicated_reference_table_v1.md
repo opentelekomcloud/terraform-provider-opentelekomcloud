@@ -1,9 +1,14 @@
 ---
 subcategory: "Dedicated Web Application Firewall (WAFD)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_dedicated_reference_table_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-dedicated-reference-table-v1"
+description: |-
+Manages a WAF Dedicated Reference Table resource within OpenTelekomCloud.
 ---
 
-Up-to-date reference of API arguments for WAF dedicated Precise Protection rule you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_a_reference_table.html).
+Up-to-date reference of API arguments for WAF dedicated reference table you can get at
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_a_reference_table.html).
 
 
 # opentelekomcloud_waf_dedicated_reference_table_v1

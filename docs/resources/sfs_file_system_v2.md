@@ -1,9 +1,14 @@
 ---
 subcategory: "Scalable File Service (SFS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_sfs_file_system_v2"
+sidebar_current: "docs-opentelekomcloud-resource-sfs-file-system-v2"
+description: |-
+Manages an SFS File System resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for SFS file system you can get at
-`https://docs.otc.t-systems.com/scalable-file-service/api-ref/sfs_capacity-oriented_apis/file_systems`.
+[documentation portal](https://docs.otc.t-systems.com/scalable-file-service/api-ref/sfs_capacity-oriented_apis/file_systems)
 
 # opentelekomcloud_sfs_file_system_v2
 

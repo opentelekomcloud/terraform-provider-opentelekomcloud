@@ -1,9 +1,14 @@
 ---
 subcategory: "Cloud Trace Service (CTS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_cts_event_notification_v3"
+sidebar_current: "docs-opentelekomcloud-resource-cts-event-notification-v3"
+description: |-
+Manages a CTS Event Notification resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for CTS event notification you can get at
-`https://docs.otc.t-systems.com/cloud-trace-service/api-ref/api_description/key_event_notification_management`.
+[documentation portal](https://docs.otc.t-systems.com/cloud-trace-service/api-ref/api_description/key_event_notification_management)
 
 # opentelekomcloud_cts_event_notification_v3
 

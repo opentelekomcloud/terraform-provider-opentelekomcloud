@@ -1,9 +1,14 @@
 ---
 subcategory: "Elastic Load Balancer (ELB)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_lb_certificate_v2"
+sidebar_current: "docs-opentelekomcloud-resource-lb-certificate-v2"
+description: |-
+Manages a ELB Certificate resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ELB certificate you can get at
-`https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v2.0/certificate`.
+[documentation portal](https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v2.0/certificate)
 
 # opentelekomcloud_lb_certificate_v2
 

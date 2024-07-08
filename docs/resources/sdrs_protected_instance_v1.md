@@ -1,9 +1,14 @@
 ---
 subcategory: "Storage Disaster Recovery Service (SDRS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_sdrs_protected_instance_v1"
+sidebar_current: "docs-opentelekomcloud-resource-sdrs-protected-instance-v1"
+description: |-
+Manages an SDRS Protected Instance resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for SDRS protected instance you can get at
-`https://docs.otc.t-systems.com/storage-disaster-recovery-service/api-ref/sdrs_apis/protected_instance`.
+[documentation portal](https://docs.otc.t-systems.com/storage-disaster-recovery-service/api-ref/sdrs_apis/protected_instance)
 
 # opentelekomcloud_sdrs_protected_instance_v1
 

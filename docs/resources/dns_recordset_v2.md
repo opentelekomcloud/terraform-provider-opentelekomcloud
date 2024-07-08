@@ -1,9 +1,14 @@
 ---
 subcategory: "Domain Name Service (DNS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dns_recordset_v2"
+sidebar_current: "docs-opentelekomcloud-resource-dns-recordset-v2"
+description: |-
+Manages a DNS Recordset resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DNS recordset you can get at
-`https://docs.otc.t-systems.com/domain-name-service/api-ref/apis/record_set_management`.
+[documentation portal](https://docs.otc.t-systems.com/domain-name-service/api-ref/apis/record_set_management`)
 
 # opentelekomcloud_dns_recordset_v2
 

@@ -1,9 +1,14 @@
 ---
 subcategory: "Web Application Firewall (WAF)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_certificate_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-certificate-v1"
+description: |-
+Manages a WAF Certificate resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF certificate you can get at
-`https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/certificate_management`.
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/certificate_management)
 
 # opentelekomcloud_waf_certificate_v1
 

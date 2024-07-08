@@ -1,9 +1,14 @@
 ---
 subcategory: "APIGW"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_apigw_throttling_policy_associate_v2"
+sidebar_current: "docs-opentelekomcloud-resource-apigw-throttling-policy-associate-v2"
+description: |-
+Manages a APIGW Throttling Policy Associate resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for API Gateway throttling policy associate service you can get at
-`https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/binding_unbinding_request_throttling_policies/index.html`.
+[documentation portal](https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/binding_unbinding_request_throttling_policies/index.html)
 
 # opentelekomcloud_apigw_throttling_policy_associate_v2
 

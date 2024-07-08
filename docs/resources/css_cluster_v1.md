@@ -1,9 +1,14 @@
 ---
 subcategory: "Cloud Search Service (CSS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_css_cluster_v1"
+sidebar_current: "docs-opentelekomcloud-resource-css-cluster-v1"
+description: |-
+Manages a CSS Cluster resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for CSS cluster you can get at
-`https://docs.otc.t-systems.com/cloud-search-service/api-ref/cluster_management_apis`.
+[documentation portal](https://docs.otc.t-systems.com/cloud-search-service/api-ref/cluster_management_apis)
 
 # opentelekomcloud_css_cluster_v1
 

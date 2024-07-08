@@ -1,9 +1,14 @@
 ---
 subcategory: "Dedicated Web Application Firewall (WAFD)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_dedicated_domain_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-dedicated-domain-v1"
+description: |-
+Manages a WAF Dedicated Domain resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF dedicated domain you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/managing_websites_protected_in_dedicated_mode/index.html).
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/managing_websites_protected_in_dedicated_mode/index.html).
 
 # opentelekomcloud_waf_dedicated_domain_v1
 

@@ -1,10 +1,15 @@
 ---
 subcategory: "Domain Name Service (DNS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dns_zone_v2"
+sidebar_current: "docs-opentelekomcloud-resource-dns-zone-v2"
+description: |-
+Manages a DNS Zones resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DNS zones you can get at
-`https://docs.otc.t-systems.com/domain-name-service/api-ref/apis/private_zone_management` and
-`https://docs.otc.t-systems.com/domain-name-service/api-ref/apis/public_zone_management`.
+[documentation portal (private zone)](https://docs.otc.t-systems.com/domain-name-service/api-ref/apis/private_zone_management) and
+[documentation portal (public zone)](https://docs.otc.t-systems.com/domain-name-service/api-ref/apis/public_zone_management)
 
 # opentelekomcloud_dns_zone_v2
 

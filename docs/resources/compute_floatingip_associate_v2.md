@@ -1,9 +1,14 @@
 ---
 subcategory: "Elastic Cloud Server (ECS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_floatingip_associate_v2"
+sidebar_current: "docs-opentelekomcloud-resource-compute-floatingip-associate-v2"
+description: |-
+Manages an EIP Associate resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for EIP you can get at
-`https://docs.otc.t-systems.com/elastic-ip/api-ref/native_openstack_neutron_apis_v2.0/floating_ip_address`.
+[documentation portal](https://docs.otc.t-systems.com/elastic-ip/api-ref/native_openstack_neutron_apis_v2.0/floating_ip_address)
 
 # opentelekomcloud_compute_floatingip_associate_v2
 

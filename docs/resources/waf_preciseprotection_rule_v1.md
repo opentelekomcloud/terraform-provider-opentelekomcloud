@@ -1,9 +1,14 @@
 ---
 subcategory: "Web Application Firewall (WAF)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_preciseprotection_rule_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-preciseprotection-rule-v1"
+description: |-
+Manages a WAF Precise Protection Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF precise protection rule you can get at
-`https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/precise_protection_rules`.
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/precise_protection_rules)
 
 # opentelekomcloud_waf_preciseprotection_rule_v1
 

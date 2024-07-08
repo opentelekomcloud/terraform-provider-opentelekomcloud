@@ -1,9 +1,14 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_fw_rule_v2"
+sidebar_current: "docs-opentelekomcloud-resource-fw-firewall-rule-v2"
+description: |-
+Manages a VPC Firewall Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC firewall rule you can get at
-`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/native_openstack_neutron_apis_v2.0/firewall`.
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/native_openstack_neutron_apis_v2.0/firewall)
 
 # opentelekomcloud_fw_rule_v2
 

@@ -1,9 +1,14 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpc_eip_v1"
+sidebar_current: "docs-opentelekomcloud-resource-vpc-eip-v1"
+description: |-
+Manages a VPC EIP resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC eip you can get at
-`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/elastic_ip`.
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/elastic_ip)
 
 # opentelekomcloud_vpc_eip_v1
 

@@ -1,9 +1,14 @@
 ---
 subcategory: "Dedicated Host (DEH)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_deh_host_v1"
+sidebar_current: "docs-opentelekomcloud-resource-deh-host-v1"
+description: |-
+Manages a DEH Host resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DEH host you can get at
-`https://docs.otc.t-systems.com/dedicated-host/api-ref/api`.
+[documentation portal](https://docs.otc.t-systems.com/dedicated-host/api-ref/api)
 
 # opentelekomcloud_deh_host_v1
 

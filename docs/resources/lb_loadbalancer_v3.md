@@ -1,9 +1,14 @@
 ---
 subcategory: "Dedicated Load Balancer (DLB)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_lb_loadbalancer_v3"
+sidebar_current: "docs-opentelekomcloud-resource-lb-loadbalancer-v3"
+description: |-
+Manages a LB Loadbalancer resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DLB load balancer you can get at
-`https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v3/load_balancer`.
+[documentation portal](https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v3/load_balancer)
 
 # opentelekomcloud_lb_loadbalancer_v3
 

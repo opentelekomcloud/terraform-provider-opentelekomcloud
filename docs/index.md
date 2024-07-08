@@ -1,3 +1,11 @@
+---
+layout: "opentelekomcloud"
+page_title: "Provider: OpenTelekomCloud"
+sidebar_current: "docs-opentelekomcloud-index"
+description: |-
+The OpenTelekomCloud provider is used to interact with the many resources supported by OpenTelekomCloud. The provider needs to be configured with the proper credentials before it can be used.
+---
+
 # Open Telekom Cloud Provider
 
 The Open Telekom Cloud provider is used to interact with the

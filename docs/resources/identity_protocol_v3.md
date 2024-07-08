@@ -1,9 +1,14 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_identity_protocol_v3"
+sidebar_current: "docs-opentelekomcloud-resource-identity-protocol-v3"
+description: |-
+Manages a IAM Protocol resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for IAM protocol you can get at
-`https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/federated_identity_authentication_management/protocol`.
+[documentation portal](https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/federated_identity_authentication_management/protocol)
 
 # opentelekomcloud_identity_protocol_v3
 

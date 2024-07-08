@@ -1,9 +1,14 @@
 ---
 subcategory: "Web Application Firewall (WAF)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_whiteblackip_rule_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-whiteblackip-rule-v1"
+description: |-
+Manages a WAF White and Black IP Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF white and black ip rule you can get at
-`https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/blacklist_and_whitelist_rules`.
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/blacklist_and_whitelist_rules)
 
 # opentelekomcloud_waf_whiteblackip_rule_v1
 

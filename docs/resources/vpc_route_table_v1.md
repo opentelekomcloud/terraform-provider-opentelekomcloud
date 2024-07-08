@@ -1,6 +1,14 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpc_route_table_v1"
+sidebar_current: "docs-opentelekomcloud-resource-vpc-route-table-v1"
+description: |-
+Manages a VPC Route Table resource within OpenTelekomCloud.
 ---
+
+Up-to-date reference of API arguments for VPC route table you can get at
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/route_table/index.html)
 
 # opentelekomcloud_vpc_route_table_v1
 

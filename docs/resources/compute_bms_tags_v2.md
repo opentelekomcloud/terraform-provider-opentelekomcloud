@@ -1,5 +1,10 @@
 ---
 subcategory: "Bare Metal Server (BMS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_bms_tags_v2"
+sidebar_current: "docs-opentelekomcloud-resource-compute-bms-tags-v2"
+description: |-
+Manages a BMS Tags resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud_compute_bms_tags_v2

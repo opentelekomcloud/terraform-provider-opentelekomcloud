@@ -1,9 +1,14 @@
 ---
 subcategory: "Cloud Backup and Recovery (CBR)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_cbr_vault_v3"
+sidebar_current: "docs-opentelekomcloud-resource-cbr-vault-v3"
+description: |-
+Manages a CBR Vault resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for CBR vault you can get at
-`https://docs.otc.t-systems.com/cloud-backup-recovery/api-ref/cbr_apis/vaults`.
+[documentation portal](https://docs.otc.t-systems.com/cloud-backup-recovery/api-ref/cbr_apis/vaults)
 
 # opentelekomcloud_cbr_vault_v3
 

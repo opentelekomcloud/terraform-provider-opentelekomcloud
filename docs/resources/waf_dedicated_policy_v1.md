@@ -1,9 +1,14 @@
 ---
 subcategory: "Dedicated Web Application Firewall (WAFD)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_dedicated_policy_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-dedicated-policy-v1"
+description: |-
+Manages a WAF Dedicated Policy resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF policy you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/policy_management/index.html).
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/policy_management/index.html).
 
 # opentelekomcloud_waf_dedicated_policy_v1
 

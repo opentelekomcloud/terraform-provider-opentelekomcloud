@@ -1,9 +1,14 @@
 ---
 subcategory: "Web Application Firewall (WAF)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_policy_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-policy-v1"
+description: |-
+Manages a WAF Policy resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF policy you can get at
-`https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/policies`.
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/policies)
 
 # opentelekomcloud_waf_policy_v1
 

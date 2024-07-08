@@ -1,5 +1,9 @@
 ---
-subcategory: "Backends"
+subcategory: ""
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: S3 Backends Guide"
+description: |-
+Additional documentation about s3 backend configuration within OpenTelekomCloud.
 ---
 
 A `backend` defines where Terraform stores its [state](https://developer.hashicorp.com/terraform/language/state) data files.

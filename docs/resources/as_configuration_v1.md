@@ -1,9 +1,14 @@
 ---
 subcategory: "Autoscaling"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_as_configuration_v1"
+sidebar_current: "docs-opentelekomcloud-resource-as-configuration-v1"
+description: |-
+Manages a AS Configuration resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for AS configuration you can get at
-`https://docs.otc.t-systems.com/auto-scaling/api-ref/apis/as_configurations`.
+[documentation portal](https://docs.otc.t-systems.com/auto-scaling/api-ref/apis/as_configurations)
 
 # opentelekomcloud_as_configuration_v1
 

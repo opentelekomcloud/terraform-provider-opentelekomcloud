@@ -1,9 +1,14 @@
 ---
 subcategory: "Virtual Private Network (VPN)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpnaas_service_v2"
+sidebar_current: "docs-opentelekomcloud-resource-vpnaas-service-v2"
+description: |-
+Manages a VPNAAS Service resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPNAAS service you can get at
-`https://docs.otc.t-systems.com/virtual-private-network/api-ref/native_openstack_apis/vpn_service_managemen`.
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-network/api-ref/native_openstack_apis/vpn_service_managemen)
 
 # opentelekomcloud_vpnaas_service_v2
 

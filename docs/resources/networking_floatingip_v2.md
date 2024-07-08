@@ -1,9 +1,14 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_networking_floatingip_v2"
+sidebar_current: "docs-opentelekomcloud-resource-networking-floatingip-v2"
+description: |-
+Manages a VPC Floating IP resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC floating ip you can get at
-`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/native_openstack_neutron_apis_v2.0/floating_ip_address`.
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/native_openstack_neutron_apis_v2.0/floating_ip_address)
 
 # opentelekomcloud_networking_floatingip_v2
 
