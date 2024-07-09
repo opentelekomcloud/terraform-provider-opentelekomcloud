@@ -2,7 +2,7 @@
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_fw_rule_v2"
-sidebar_current: "docs-opentelekomcloud-resource-fw-firewall-rule-v2"
+sidebar_current: "docs-opentelekomcloud-resource-fw-rule-v2"
 description: |-
 Manages a VPC Firewall Rule resource within OpenTelekomCloud.
 ---

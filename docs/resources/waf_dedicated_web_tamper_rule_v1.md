@@ -2,7 +2,7 @@
 subcategory: "Dedicated Web Application Firewall (WAFD)"
 layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_waf_dedicated_web_tamper_rule_v1"
-sidebar_current: "docs-opentelekomcloud-resource-waf-dedicated-web_tamper_rule-v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-dedicated-web-tamper-rule-v1"
 description: |-
 Manages a WAF Dedicated Web Tamper Rule resource within OpenTelekomCloud.
 ---

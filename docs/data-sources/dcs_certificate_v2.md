@@ -2,7 +2,7 @@
 subcategory: "Distributed Cache Service (DCS)"
 layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dcs_certificate_v2"
-sidebar_current: "docs-opentelekomcloud-datasource-dcs-certificate-v1"
+sidebar_current: "docs-opentelekomcloud-datasource-dcs-certificate-v2"
 description: |-
 Get DCS certificate from OpenTelekomCloud
 ---
