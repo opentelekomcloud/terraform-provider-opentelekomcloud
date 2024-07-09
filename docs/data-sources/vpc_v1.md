@@ -1,6 +1,14 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpc_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-vpc-v1"
+description: |-
+Get details about a specific VPC from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for VPC you can get at
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/virtual_private_cloud/querying_vpcs.html#vpc-api01-0003)
 
 # opentelekomcloud_vpc_v1
 

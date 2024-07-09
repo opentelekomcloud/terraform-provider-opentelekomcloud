@@ -1,6 +1,14 @@
 ---
 subcategory: "Relational Database Service (RDS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_rds_versions_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-rds-versions-v3"
+description: |-
+Get available RDSv3 versions from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for RDSv3 versions you can get at
+[documentation portal](https://docs.otc.t-systems.com/relational-database-service/api-ref/api_v3_recommended/querying_version_information_about_a_db_engine.html)
 
 # opentelekomcloud_rds_versions_v3
 

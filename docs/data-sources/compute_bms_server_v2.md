@@ -1,6 +1,14 @@
 ---
 subcategory: "Bare Metal Server (BMS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_bms_server_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-compute-bms-server-v2"
+description: |-
+Get details about BMS from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for BMS you can get at
+[documentation portal](https://docs.otc.t-systems.com/bare-metal-server/api-ref/native_openstack_nova_v2.1_apis/bms_lifecycle_management/querying_details_about_bmss_native_openstack_api.html#en-us-topic-0053158679)
 
 # opentelekomcloud_compute_bms_server_v2
 

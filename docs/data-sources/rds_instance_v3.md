@@ -1,6 +1,14 @@
 ---
 subcategory: "Relational Database Service (RDS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_rds_instance_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-rds-instance-v3"
+description: |-
+Get available RDSv3 instance from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for RDSv3 instance you can get at
+[documentation portal](https://docs.otc.t-systems.com/relational-database-service/api-ref/api_v3_recommended/db_instance_management/querying_details_about_db_instances.html#rds-01-0004)
 
 # opentelekomcloud_rds_instance_v3
 

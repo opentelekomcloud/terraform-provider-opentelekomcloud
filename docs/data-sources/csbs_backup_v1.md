@@ -1,6 +1,14 @@
 ---
 subcategory: "Cloud Server Backup Service (CSBS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_csbs_backup_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-csbs-backup-v1"
+description: |-
+Get details about CSBS backup resources from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for CSBS backup you can get at
+[documentation portal](https://docs.otc.t-systems.com/cloud-server-backup-service/api-ref/api_description/backup_management/querying_all_backups.html#en-us-topic-0059304235)
 
 # opentelekomcloud_csbs_backup_v1
 

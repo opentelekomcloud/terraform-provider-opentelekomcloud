@@ -1,6 +1,14 @@
 ---
 subcategory: "Elastic Cloud Server (ECS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_keypair_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-compute-keypair-v2"
+description: |-
+Get ECS keypair details from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for ECS keypair you can get at
+[documentation portal](https://docs.otc.t-systems.com/elastic-cloud-server/api-ref/native_openstack_nova_apis/key_and_password_management/querying_ssh_key_pairs.html#en-us-topic-0020212676)
 
 # opentelekomcloud_compute_keypair_v2
 

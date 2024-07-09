@@ -1,5 +1,10 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpc_bandwidth_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-vpc-bandwidth-v2"
+description: |-
+Get details about a specific shared bandwidth from OpenTelekomCloud
 ---
 
 # opentelekomcloud_vpc_bandwidth_v2

@@ -1,10 +1,19 @@
 ---
 subcategory: "Domain Name Service (DNS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dns_zone_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-dns-zone-v2"
+description: |-
+Get available DNS zone from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for DNS zone you can get at
+[documentation portal (private zone)](https://docs.otc.t-systems.com/domain-name-service/api-ref/apis/private_zone_management/querying_private_zones.html#dns-api-63006) and
+[documentation portal (public zone)](https://docs.otc.t-systems.com/domain-name-service/api-ref/apis/public_zone_management/querying_public_zones.html#dns-api-62003)
 
 # opentelekomcloud_dns_zone_v2
 
-Use this data source to get the ID of an available OpenStack DNS zone.
+Use this data source to get the ID of an available OpenTelekomCloud DNS zone.
 
 ## Example Usage
 

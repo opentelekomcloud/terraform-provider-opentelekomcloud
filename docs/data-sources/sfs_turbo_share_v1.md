@@ -1,6 +1,14 @@
 ---
 subcategory: "Scalable File Service (SFS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_sfs_turbo_share_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-sfs-turbo-share-v1"
+description: |-
+Get details about a SFS Turbo from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for SFS you can get at
+[documentation portal](https://docs.otc.t-systems.com/scalable-file-service/api-ref/sfs_turbo_apis/lifecycle_management/querying_details_about_all_file_systems.html#sfs-02-0053)
 
 # opentelekomcloud_sfs_turbo_share_v1
 

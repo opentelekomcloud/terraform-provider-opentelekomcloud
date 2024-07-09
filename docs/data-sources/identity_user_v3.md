@@ -1,6 +1,14 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_identity_user_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-identity-user-v3"
+description: |-
+Get a IAM user information from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for IAM user you can get at
+[documentation portal](https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/user_management/querying_a_user_list.html#en-us-topic-0057845638)
 
 # opentelekomcloud_identity_user_v3
 

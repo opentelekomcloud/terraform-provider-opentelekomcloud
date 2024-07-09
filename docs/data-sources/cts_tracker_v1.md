@@ -1,6 +1,14 @@
 ---
 subcategory: "Cloud Trace Service (CTS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_cts_tracker_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-cts-tracker-v1"
+description: |-
+Get details about CTS tracker from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for CTS tracker you can get at
+[documentation portal](https://docs.otc.t-systems.com/cloud-trace-service/api-ref/out-of-date_apis/tracker_management/querying_a_tracker.html#cts-api-0016)
 
 # opentelekomcloud_cts_tracker_v1
 

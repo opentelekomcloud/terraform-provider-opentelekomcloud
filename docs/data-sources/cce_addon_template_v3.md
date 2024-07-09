@@ -1,6 +1,14 @@
 ---
 subcategory: "Cloud Container Engine (CCE)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_cce_addon_template_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-cce-addon-template-v3"
+description: |-
+Get CCE Addon template info from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for CCE Addon template you can get at
+[documentation portal](https://docs.otc.t-systems.com/cloud-container-engine/api-ref/apis/add-on_management/reading_add-on_templates.html#cce-02-0321)
 
 # opentelekomcloud_cce_addon_template_v3
 

@@ -1,6 +1,14 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpc_subnet_ids_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-vpc-subnet-ids-v1"
+description: |-
+Get a list of VPC subnet ids from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for VPC subnet you can get at
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/subnet/querying_subnets.html#vpc-subnet01-0003)
 
 # opentelekomcloud_vpc_subnet_ids_v1
 

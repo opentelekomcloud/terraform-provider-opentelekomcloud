@@ -1,9 +1,14 @@
 ---
 subcategory: "Distributed Cache Service (DCS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dcs_az_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-dcs-az-v1"
+description: |-
+Get DCS AZ information from OpenTelekomCloud
 ---
 
-Up-to-date reference of API arguments for DCS AZ information you can get at
-`https://docs.otc.t-systems.com/distributed-cache-service/api-ref/other_apis/querying_az_information.html#dcs-api-0312039`.
+Up-to-date reference of API arguments for DCS AZ you can get at
+[documentation portal](https://docs.otc.t-systems.com/distributed-cache-service/api-ref/apis_v2_recommended/other_apis/querying_azs.html#listavailablezones)
 
 # opentelekomcloud_dcs_az_v1
 

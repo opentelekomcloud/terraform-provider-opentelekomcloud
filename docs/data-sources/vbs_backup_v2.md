@@ -1,6 +1,14 @@
 ---
 subcategory: "Volume Backup Service (VBS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vbs_backup_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-vbs-backup-v2"
+description: |-
+Get details about a specific VBS backup from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for VBS backup you can get at
+[documentation portal](https://docs.otc.t-systems.com/volume-backup-service/api-ref/api_description/vbs_backups/querying_details_about_vbs_backups_native_openstack_api.html#en-us-topic-0020237259)
 
 # opentelekomcloud_vbs_backup_v2
 

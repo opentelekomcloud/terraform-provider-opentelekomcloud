@@ -1,6 +1,14 @@
 ---
 subcategory: "APIGW"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_apigw_api_history_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-apigw-api-history-v2"
+description: |-
+Get the historical versions of an API from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for APIGW API history you can get at
+[documentation portal](https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/api_management/querying_historical_versions_of_an_api.html)
 
 # opentelekomcloud_apigw_api_history_v2
 

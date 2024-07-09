@@ -1,5 +1,10 @@
 ---
 subcategory: "Object Storage Service (S3)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_s3_bucket_object"
+sidebar_current: "docs-opentelekomcloud-datasource-s3-bucket-object"
+description: |-
+Get details about S3 object metadata and content from OpenTelekomCloud
 ---
 
 # opentelekomcloud_s3_bucket_object

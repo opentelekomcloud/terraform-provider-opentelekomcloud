@@ -1,6 +1,14 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpc_route_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-vpc-route-v2"
+description: |-
+Get details about a specific VPC route from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for VPC route you can get at
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/vpc_route/querying_vpc_routes.html#vpc-route-0001)
 
 # opentelekomcloud_vpc_route_v2
 

@@ -1,6 +1,14 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_networking_network_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-networking-network-v2"
+description: |-
+Get the ID of an available network resource from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for Network you can get at
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/native_openstack_neutron_apis_v2.0/network/querying_networks.html#vpc-network-0001)
 
 # opentelekomcloud_networking_network_v2
 

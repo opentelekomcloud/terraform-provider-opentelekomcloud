@@ -1,6 +1,14 @@
 ---
 subcategory: "Distributed Cache Service (DCS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dcs_product_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-dcs-product-v1"
+description: |-
+Get DCS product from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for DCS product you can get at
+[documentation portal](https://docs.otc.t-systems.com/distributed-cache-service/api-ref/outdated_apis_v1/other_apis/querying_service_specifications.html#dcs-api-0312040)
 
 # opentelekomcloud_dcs_product_v1
 

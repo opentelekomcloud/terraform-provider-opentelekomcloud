@@ -1,6 +1,14 @@
 ---
 subcategory: "Cloud Container Engine (CCE)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_cce_node_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-cce-node-v3"
+description: |-
+Get a list of node ids for a CCE cluster from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for CCE nodes you can get at
+[documentation portal](https://docs.otc.t-systems.com/cloud-container-engine/api-ref/apis/cluster_management/listing_all_nodes_in_a_cluster.html)
 
 # opentelekomcloud_cce_node_v3
 

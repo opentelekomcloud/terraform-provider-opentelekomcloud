@@ -1,6 +1,14 @@
 ---
 subcategory: "Cloud Container Engine (CCE)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_cce_cluster_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-cce-cluster-v3"
+description: |-
+Get CCE cluster details from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for CCE cluster you can get at
+[documentation portal](https://docs.otc.t-systems.com/cloud-container-engine/api-ref/apis/cluster_management/listing_clusters_in_a_specified_project.html#cce-02-0239)
 
 # opentelekomcloud_cce_cluster_v3
 

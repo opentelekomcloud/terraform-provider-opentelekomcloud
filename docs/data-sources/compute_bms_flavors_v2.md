@@ -1,6 +1,14 @@
 ---
 subcategory: "Bare Metal Server (BMS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_bms_flavors_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-compute-bms-flavors-v2"
+description: |-
+Get details about flavors of BMSs from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for BMSs flavors you can get at
+[documentation portal](https://docs.otc.t-systems.com/bare-metal-server/api-ref/native_openstack_nova_v2.1_apis/bms_flavor_query/querying_bms_flavors_native_openstack_api.html#en-us-topic-0053158684)
 
 # opentelekomcloud_compute_bms_flavors_v2
 

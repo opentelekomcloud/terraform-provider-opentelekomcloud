@@ -1,6 +1,14 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_networking_secgroup_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-networking-secgroup-v2"
+description: |-
+Get the ID of an available security group from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for Network security group you can get at
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/native_openstack_neutron_apis_v2.0/security_group/querying_security_groups.html#vpc-sg02-0001)
 
 # opentelekomcloud_networking_secgroup_v2
 

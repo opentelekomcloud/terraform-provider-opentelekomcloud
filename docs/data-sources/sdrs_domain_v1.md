@@ -1,6 +1,14 @@
 ---
 subcategory: "Storage Disaster Recovery Service (SDRS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_sdrs_domain_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-sdrs-domain-v1"
+description: |-
+Get the ID of an available SDRS domain from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for SDRS domain you can get at
+[documentation portal](https://docs.otc.t-systems.com/storage-disaster-recovery-service/api-ref/sdrs_apis/active-active_domain/querying_an_active-active_domain.html#sdrs-05-0301)
 
 # opentelekomcloud_sdrs_domain_v1
 

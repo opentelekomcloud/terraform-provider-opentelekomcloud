@@ -1,10 +1,18 @@
 ---
 subcategory: "Distributed Cache Service (DCS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dcs_maintainwindow_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-dcs-maintainwindow-v1"
+description: |-
+Get the ID of an available DCS maintain window from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for DCS certificate you can get at
+[documentation portal](https://docs.otc.t-systems.com/distributed-cache-service/api-ref/apis_v2_recommended/other_apis/listing_maintenance_time_windows.html)
 
 # opentelekomcloud_dcs_maintainwindow_v1
 
-Use this data source to get the ID of an available OpenTelekomCloud DCS maintainwindow.
+Use this data source to get the ID of an available OpenTelekomCloud DCS maintain window.
 
 ## Example Usage
 

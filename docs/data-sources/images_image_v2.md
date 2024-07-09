@@ -1,6 +1,14 @@
 ---
 subcategory: "Image Management Service (IMS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_images_image_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-images-image-v2"
+description: |-
+Get the ID of an available image from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for Image you can get at
+[documentation portal](https://docs.otc.t-systems.com/image-management-service/api-ref/native_openstack_apis/image_native_openstack_apis/querying_images_native_openstack_api.html#en-us-topic-0060804959)
 
 # opentelekomcloud_images_image_v2
 

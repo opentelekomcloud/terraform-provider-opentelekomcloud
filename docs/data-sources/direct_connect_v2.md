@@ -1,6 +1,15 @@
 ---
 subcategory: "Direct Connect (DCaaS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_direct_connect_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-direct-connect-v2"
+description: |-
+Get about a specific Direct Connect (DCaaS) connection from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for DCaaS connection you can get at
+[documentation portal](https://docs.otc.t-systems.com/direct-connect/api-ref/apis/connection/querying_the_connection_list.html)
+
 # opentelekomcloud_direct_connect_v2 (Data Source)
 
 Use this data source to get details about a specific Direct Connect (DCaaS) connection.

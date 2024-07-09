@@ -1,6 +1,14 @@
 ---
 subcategory: "Key Management Service (KMS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_kms_key_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-kms-key-v1"
+description: |-
+Get the ID of an available KMS key from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for KMS key you can get at
+[documentation portal](https://docs.otc.t-systems.com/key-management-service/api-ref/apis/cmk_management/querying_the_list_of_cmks.html#kms-02-0017)
 
 # opentelekomcloud_kms_key_v1
 

@@ -1,6 +1,14 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_identity_agency_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-identity-agency-v3"
+description: |-
+Get an agency information from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for IAM agency you can get at
+[documentation portal](https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/agency_management/querying_an_agency_list_based_on_the_specified_conditions.html#en-us-topic-0079467614)
 
 # opentelekomcloud_identity_agency_v3
 

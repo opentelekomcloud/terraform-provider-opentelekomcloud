@@ -1,10 +1,18 @@
 ---
 subcategory: "VPC Endpoint (VPCEP)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpcep_service_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-vpcep-service-v1"
+description: |-
+Get details about a specific VPCEP service from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for VPCEP service you can get at
+[documentation portal](https://docs.otc.t-systems.com/vpc-endpoint/api-ref/apis/apis_for_managing_vpc_endpoint_services/querying_details_about_a_vpc_endpoint_service.html#vpcep-06-0202)
 
 # opentelekomcloud_vpcep_service_v1
 
-Use this data source to get details about a specific VPCEP public service.
+Use this data source to get details about a specific VPCEP service.
 
 ## Example Usage
 

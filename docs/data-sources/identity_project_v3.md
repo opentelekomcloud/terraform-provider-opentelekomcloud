@@ -1,6 +1,14 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_identity_project_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-identity-project-v3"
+description: |-
+Get a IAM project information from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for IAM project you can get at
+[documentation portal](https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/project_management/querying_project_information_based_on_the_specified_criteria.html#en-us-topic-0057845625)
 
 # opentelekomcloud_identity_project_v3
 

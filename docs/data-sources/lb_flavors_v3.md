@@ -1,6 +1,14 @@
 ---
 subcategory: "Dedicated Load Balancer (DLB)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_lb_flavors_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-lb-flavors-v3"
+description: |-
+Get ELBv3 flavors names from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for ELBv3 flavor you can get at
+[documentation portal](https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v3/load_balancer_flavor/querying_flavors.html#listflavors)
 
 # opentelekomcloud_lb_flavors_v3
 
