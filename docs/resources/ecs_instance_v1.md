@@ -1,9 +1,14 @@
 ---
 subcategory: "Elastic Cloud Server (ECS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_ecs_instance_v1"
+sidebar_current: "docs-opentelekomcloud-resource-ecs-instance-v1"
+description: |-
+Manages a ECS Instance resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ECS instance you can get at
-`https://docs.otc.t-systems.com/elastic-cloud-server/api-ref/apis_recommended/lifecycle_management`.
+[documentation portal]https://docs.otc.t-systems.com/elastic-cloud-server/api-ref/apis_recommended/lifecycle_management)
 
 # opentelekomcloud_ecs_instance_v1
 

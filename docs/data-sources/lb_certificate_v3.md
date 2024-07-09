@@ -1,6 +1,14 @@
 ---
 subcategory: "Dedicated Load Balancer (DLB)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_lb_certificate_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-lb-certificate-v3"
+description: |-
+Get ELBv3 certificate from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for ELBv3 certificate you can get at
+[documentation portal](https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v3/certificate/querying_certificates.html#listcertificates)
 
 # opentelekomcloud_lb_certificate_v3
 

@@ -1,9 +1,14 @@
 ---
 subcategory: "NAT"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_nat_dnat_rule_v2"
+sidebar_current: "docs-opentelekomcloud-resource-nat-dnat-rule-v2"
+description: |-
+Manages a NAT DNAT Rule resource within OpenTelekomCloud.
 ---
 
-Up-to-date reference of API arguments for NAT dnat you can get at
-`https://docs.otc.t-systems.com/nat-gateway/api-ref/api_v2.0/dnat_rules`.
+Up-to-date reference of API arguments for NAT DNAT you can get at
+[documentation portal](https://docs.otc.t-systems.com/nat-gateway/api-ref/api_v2.0/dnat_rules)
 
 # opentelekomcloud_nat_dnat_rule_v2
 

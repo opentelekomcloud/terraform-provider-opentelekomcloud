@@ -1,13 +1,18 @@
 ---
 subcategory: "APIGW"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_apigw_environment_variable_v2"
+sidebar_current: "docs-opentelekomcloud-resource-apigw-environment-variable-v2"
+description: |-
+Manages a APIGW Environment variable resource within OpenTelekomCloud.
 ---
 
-Up-to-date reference of API arguments for API Gateway environment service you can get at
-`https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/environment_variable_management/index.html`.
+Up-to-date reference of API arguments for API Gateway environment variable service you can get at
+[documentation portal](https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/environment_variable_management/index.html)
 
 # opentelekomcloud_apigw_environment_variable_v2
 
-Manages an APIG environment variable resource within OpenTelekomCloud.
+Manages an APIGW environment variable resource within OpenTelekomCloud.
 
 -> A maximum of `50` variables can be created on the same environment.
 

@@ -1,9 +1,14 @@
 ---
 subcategory: "Distributed Cache Service (DCS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dcs_certificate_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-dcs-certificate-v2"
+description: |-
+Get DCS certificate from OpenTelekomCloud
 ---
 
-Up-to-date reference of API arguments for DCS AZ information you can get at
-[https://docs.otc.t-systems.com/distributed-cache-service/api-ref](https://docs.otc.t-systems.com/distributed-cache-service/api-ref/apis_v2_recommended/network_security/downloading_the_ssl_certificate_of_an_instance.html#downloadsslcert).
+Up-to-date reference of API arguments for DCS certificate you can get at
+[documentation portal](https://docs.otc.t-systems.com/distributed-cache-service/api-ref/apis_v2_recommended/network_security/downloading_the_ssl_certificate_of_an_instance.html#downloadsslcert)
 
 # opentelekomcloud_dcs_certificate_v2
 

@@ -1,9 +1,14 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpc_subnet_v1"
+sidebar_current: "docs-opentelekomcloud-resource-vpc-subnet-v1"
+description: |-
+Manages a VPC Subnet resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC subnet you can get at
-`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/subnet`.
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/subnet)
 
 # opentelekomcloud_vpc_subnet_v1
 

@@ -1,6 +1,14 @@
 ---
 subcategory: "Document Database Service (DDS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dds_instance_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-dds-instance-v3"
+description: |-
+Get DDS instance from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for DDS instance you can get at
+[documentation portal](https://docs.otc.t-systems.com/document-database-service/api-ref/apis_v3.0_recommended/db_instance_management/querying_instances_and_details.html)
 
 # opentelekomcloud_dds_instance_v3
 

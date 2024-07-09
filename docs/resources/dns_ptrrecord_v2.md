@@ -1,9 +1,14 @@
 ---
 subcategory: "Domain Name Service (DNS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dns_ptrrecord_v2"
+sidebar_current: "docs-opentelekomcloud-resource-dns-ptrrecord-v2"
+description: |-
+Manages a DNS PTR Record resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DNS ptr record you can get at
-`https://docs.otc.t-systems.com/domain-name-service/api-ref/apis/ptr_record_management`.
+[documentation portal](https://docs.otc.t-systems.com/domain-name-service/api-ref/apis/ptr_record_management)
 
 # opentelekomcloud_dns_ptrrecord_v2
 

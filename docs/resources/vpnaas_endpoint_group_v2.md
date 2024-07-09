@@ -1,9 +1,14 @@
 ---
 subcategory: "Virtual Private Network (VPN)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpnaas_endpoint_group_v2"
+sidebar_current: "docs-opentelekomcloud-resource-vpnaas-endpoint-group-v2"
+description: |-
+Manages a VPNAAS Endpoint Group resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPNAAS endpoint group you can get at
-`https://docs.otc.t-systems.com/virtual-private-network/api-ref/native_openstack_apis/vpn_endpoint_group_management`.
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-network/api-ref/native_openstack_apis/vpn_endpoint_group_management)
 
 # opentelekomcloud_vpnaas_endpoint_group_v2
 

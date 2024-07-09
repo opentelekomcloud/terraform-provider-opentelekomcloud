@@ -1,9 +1,14 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpc_bandwidth_associate_v2"
+sidebar_current: "docs-opentelekomcloud-resource-vpc-bandwidth-associate-v2"
+description: |-
+Manages a VPC Bandwidth Association resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC bandwidth association you can get at
-`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/bandwidth_v2.0`.
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/bandwidth_v2.0)
 
 # opentelekomcloud_vpc_bandwidth_associate_v2
 

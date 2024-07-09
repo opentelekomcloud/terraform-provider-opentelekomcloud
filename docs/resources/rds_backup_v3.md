@@ -1,9 +1,14 @@
 ---
 subcategory: "Relational Database Service (RDS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_rds_backup_v3"
+sidebar_current: "docs-opentelekomcloud-resource-rds-backup-v3"
+description: |-
+Manages an RDS Backup resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for RDS backup rule you can get at
-`https://docs.otc.t-systems.com/relational-database-service/api-ref/api_v3_recommended/backup_and_restoration`.
+[documentation portal](https://docs.otc.t-systems.com/relational-database-service/api-ref/api_v3_recommended/backup_and_restoration)
 
 # opentelekomcloud_rds_backup_v3
 

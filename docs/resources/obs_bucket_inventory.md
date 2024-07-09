@@ -1,9 +1,14 @@
 ---
 subcategory: "Object Storage Service (OBS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_obs_bucket_inventory"
+sidebar_current: "docs-opentelekomcloud-resource-obs-bucket-inventory"
+description: |-
+Manages a OBS Bucket Inventory resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for OBS bucket inventory you can get at
-`https://docs.otc.t-systems.com/object-storage-service/api-ref/apis/advanced_bucket_settings/configuring_bucket_inventories.html`.
+[documentation portal](https://docs.otc.t-systems.com/object-storage-service/api-ref/apis/advanced_bucket_settings/configuring_bucket_inventories.html)
 
 # opentelekomcloud_obs_bucket_inventory
 

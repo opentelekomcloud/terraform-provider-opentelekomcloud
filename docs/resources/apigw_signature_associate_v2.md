@@ -1,9 +1,14 @@
 ---
 subcategory: "APIGW"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_apigw_signature_associate_v2"
+sidebar_current: "docs-opentelekomcloud-resource-apigw-signature-associate-v2"
+description: |-
+Manages a APIGW Signature Associate resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for API Gateway signature associate service you can get at
-`https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/binding_unbinding_signature_keys/index.html`.
+[documentation portal](https://docs.otc.t-systems.com/api-gateway/api-ref/dedicated_gateway_apis_v2/binding_unbinding_signature_keys/index.html)
 
 # opentelekomcloud_apigw_signature_associate_v2
 

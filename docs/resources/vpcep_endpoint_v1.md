@@ -1,9 +1,14 @@
 ---
 subcategory: "VPC Endpoint (VPCEP)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpcep_endpoint_v1"
+sidebar_current: "docs-opentelekomcloud-resource-vpcep-endpoint-v1"
+description: |-
+Manages a VPCEP Endpoint resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPCEP you can get at
-`https://docs.otc.t-systems.com/vpc-endpoint/api-ref/apis/apis_for_managing_vpc_endpoints`.
+[documentation portal](https://docs.otc.t-systems.com/vpc-endpoint/api-ref/apis/apis_for_managing_vpc_endpoints)
 
 # opentelekomcloud_vpcep_endpoint_v1
 

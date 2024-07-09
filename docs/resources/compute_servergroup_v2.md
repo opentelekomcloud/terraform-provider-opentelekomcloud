@@ -1,9 +1,14 @@
 ---
 subcategory: "Elastic Cloud Server (ECS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_servergroup_v2"
+sidebar_current: "docs-opentelekomcloud-resource-compute-servergroup-v2"
+description: |-
+Manages an ECS Server Group Management resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ECS server group management you can get at
-`https://docs.otc.t-systems.com/elastic-cloud-server/api-ref/openstack_nova_apis/ecs_group_management`.
+[documentation portal](https://docs.otc.t-systems.com/elastic-cloud-server/api-ref/openstack_nova_apis/ecs_group_management)
 
 # opentelekomcloud_compute_servergroup_v2
 

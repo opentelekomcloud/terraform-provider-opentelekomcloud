@@ -1,9 +1,14 @@
 ---
 subcategory: "Volume Backup Service (VBS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vbs_backup_policy_v2"
+sidebar_current: "docs-opentelekomcloud-resource-vbs-backup-policy-v2"
+description: |-
+Manages an VBS Backup Policy resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VBS backup policy you can get at
-`https://docs.otc.t-systems.com/volume-backup-service/api-ref/api_description/backup_policies`.
+[documentation portal](https://docs.otc.t-systems.com/volume-backup-service/api-ref/api_description/backup_policies)
 
 # opentelekomcloud_vbs_backup_policy_v2
 

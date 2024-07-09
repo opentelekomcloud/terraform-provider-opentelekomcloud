@@ -1,9 +1,14 @@
 ---
 subcategory: "FunctionGraph"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_fgs_function_v2"
+sidebar_current: "docs-opentelekomcloud-resource-fgs-function-v2"
+description: |-
+Manages an FGS Function resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for FGS you can get at
-`https://docs.otc.t-systems.com/function-graph/api-ref/apis/index.html`.
+[documentation portal](https://docs.otc.t-systems.com/function-graph/api-ref/apis/index.html)
 
 # opentelekomcloud_fgs_function_v2
 

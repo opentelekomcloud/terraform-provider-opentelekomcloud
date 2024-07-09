@@ -1,10 +1,16 @@
 ---
 subcategory: "Direct Connect (DCaaS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_direct_connect_v2"
+sidebar_current: "docs-opentelekomcloud-resource-direct-connect-v2"
+description: |-
+Manages a Direct Connect resource within OpenTelekomCloud.
 ---
+
 # opentelekomcloud_direct_connect_v2 (Resource)
 
 Up-to-date reference of API arguments for Direct Connect (DCaaS) you can get at
-`https://docs.otc.t-systems.com/direct-connect/api-ref/apis/connection/creating_a_connection.html`.
+[documentation portal](https://docs.otc.t-systems.com/direct-connect/api-ref/apis/connection/creating_a_connection.html)
 
 Example usage
 -----------------

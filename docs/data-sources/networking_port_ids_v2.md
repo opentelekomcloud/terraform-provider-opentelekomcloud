@@ -1,6 +1,14 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_networking_port_ids_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-networking-port-ids-v2"
+description: |-
+Get network port IDs from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for Network port you can get at
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/native_openstack_neutron_apis_v2.0/port/querying_ports.html#vpc-port02-0001)
 
 # opentelekomcloud_networking_port_ids_v2
 

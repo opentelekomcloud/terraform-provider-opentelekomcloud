@@ -1,9 +1,14 @@
 ---
 subcategory: "Relational Database Service (RDS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_rds_instance_v1"
+sidebar_current: "docs-opentelekomcloud-resource-rds-instance-v1"
+description: |-
+Manages an RDS Instance v1 resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for RDS instance you can get at
-`https://docs.otc.t-systems.com/relational-database-service/api-ref/api_v1_to_be_discarded/db_instance_management`.
+[documentation portal](https://docs.otc.t-systems.com/relational-database-service/api-ref/api_v1_to_be_discarded/db_instance_management)
 
 **DEPRECATED**
 # opentelekomcloud_rds_instance_v1

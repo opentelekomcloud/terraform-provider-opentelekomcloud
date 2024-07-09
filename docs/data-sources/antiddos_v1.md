@@ -1,6 +1,14 @@
 ---
 subcategory: "Anti-DDoS"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_antiddos_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-antiddos-v1"
+description: |-
+Get a status of EIP from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for EIP status you can get at
+[documentation portal](https://docs.otc.t-systems.com/anti-ddos/api-ref/api/anti-ddos_apis/querying_the_list_of_defense_statuses_of_eips.html#antiddos-02-0023)
 
 # opentelekomcloud_antiddos_v1
 

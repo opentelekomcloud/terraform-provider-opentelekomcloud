@@ -1,6 +1,14 @@
 ---
 subcategory: "VPC Endpoint (VPCEP)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpcep_public_service_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-vpcep-public-service-v1"
+description: |-
+Get details about a specific VPCEP public service from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for VPCEP public service you can get at
+[documentation portal](https://docs.otc.t-systems.com/vpc-endpoint/api-ref/apis/apis_for_managing_vpc_endpoint_services/querying_public_vpc_endpoint_services.html)
 
 # opentelekomcloud_vpcep_public_service_v1
 

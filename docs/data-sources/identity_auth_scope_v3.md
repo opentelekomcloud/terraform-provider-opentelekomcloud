@@ -1,5 +1,10 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_identity_auth_scope_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-identity-auth-scope-v3"
+description: |-
+Get authentication information about the current auth scope in use within OpenTelekomCloud
 ---
 
 # opentelekomcloud_identity_auth_scope_v3

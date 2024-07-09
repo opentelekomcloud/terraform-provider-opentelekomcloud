@@ -1,9 +1,14 @@
 ---
 subcategory: "Log Tank Service (LTS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_logtank_transfer_v2"
+sidebar_current: "docs-opentelekomcloud-resource-logtank-transfer-v2"
+description: |-
+Manages a LTS Log Transfer resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for LTS log transfer you can get at
-`https://docs.otc.t-systems.com/log-tank-service/api-ref/log_transfer/index.html`.
+[documentation portal](https://docs.otc.t-systems.com/log-tank-service/api-ref/log_transfer/index.html)
 
 # opentelekomcloud_logtank_transfer_v2
 

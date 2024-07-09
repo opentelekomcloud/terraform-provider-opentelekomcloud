@@ -1,6 +1,14 @@
 ---
 subcategory: "Distributed Message Service (DMS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dms_product_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-dms-product-v1"
+description: |-
+Get available DMS product from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for DMS product you can get at
+[documentation portal](https://docs.otc.t-systems.com/distributed-message-service/api-ref/apis_v2_recommended/other_apis/querying_product_specifications_list.html)
 
 # opentelekomcloud_dms_product_v1
 

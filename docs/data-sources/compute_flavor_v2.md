@@ -1,6 +1,14 @@
 ---
 subcategory: "Elastic Cloud Server (ECS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_flavor_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-compute-flavor-v2"
+description: |-
+Get the ID of an available ECS flavor from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for ECS flavor you can get at
+[documentation portal](https://docs.otc.t-systems.com/elastic-cloud-server/api-ref/native_openstack_nova_apis/flavor_management/querying_ecs_flavors.html#en-us-topic-0065817705)
 
 # opentelekomcloud_compute_flavor_v2
 

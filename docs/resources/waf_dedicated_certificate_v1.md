@@ -1,9 +1,14 @@
 ---
 subcategory: "Dedicated Web Application Firewall (WAFD)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_dedicated_certificate_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-dedicated-certificate-v1"
+description: |-
+Manages a WAF Dedicated Certificate resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF dedicated certificate you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/certificate_management/index.html).
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/certificate_management/index.html).
 
 # opentelekomcloud_waf_dedicated_certificate_v1
 

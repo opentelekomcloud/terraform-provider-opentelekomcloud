@@ -1,9 +1,14 @@
 ---
 subcategory: "Image Management Service (IMS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_images_image_v2"
+sidebar_current: "docs-opentelekomcloud-resource-images-image-v2"
+description: |-
+Manages an Image Management resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for Image management you can get at
-`https://docs.otc.t-systems.com/image-management-service/api-ref/native_openstack_apis/image_native_openstack_apis`.
+[documentation portal](https://docs.otc.t-systems.com/image-management-service/api-ref/native_openstack_apis/image_native_openstack_apis)
 
 # opentelekomcloud_images_image_v2
 

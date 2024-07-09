@@ -1,9 +1,14 @@
 ---
 subcategory: "Distributed Cache Service (DCS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dcs_instance_v1"
+sidebar_current: "docs-opentelekomcloud-resource-dcs-instance-v1"
+description: |-
+Manages a DCS Instance v1 resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DCS instance you can get at
-`https://docs.otc.t-systems.com/distributed-cache-service/api-ref/lifecycle_management_apis`.
+[documentation portal](https://docs.otc.t-systems.com/distributed-cache-service/api-ref/lifecycle_management_apis)
 
 # opentelekomcloud_dcs_instance_v1
 

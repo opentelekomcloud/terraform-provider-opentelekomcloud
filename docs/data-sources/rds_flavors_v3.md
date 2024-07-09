@@ -1,6 +1,14 @@
 ---
 subcategory: "Relational Database Service (RDS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_rds_flavors_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-rds-flavors-v3"
+description: |-
+Get available RDSv3 flavors from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for RDSv3 flavor you can get at
+[documentation portal](https://docs.otc.t-systems.com/relational-database-service/api-ref/api_v3_recommended/querying_database_specifications.html)
 
 # opentelekomcloud_rds_flavors_v3
 

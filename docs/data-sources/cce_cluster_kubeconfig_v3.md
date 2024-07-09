@@ -1,5 +1,10 @@
 ---
 subcategory: "Cloud Container Engine (CCE)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_cce_cluster_kubeconfig_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-cce-cluster-kubeconfig-v3"
+description: |-
+Get CCE a cluster's kubeconfig file from OpenTelekomCloud
 ---
 
 # opentelekomcloud_cce_cluster_kubeconfig_v3

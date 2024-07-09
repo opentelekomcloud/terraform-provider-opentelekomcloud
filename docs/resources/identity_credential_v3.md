@@ -1,9 +1,14 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_identity_credential_v3"
+sidebar_current: "docs-opentelekomcloud-resource-identity-credential-v3"
+description: |-
+Manages a IAM Credential resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for IAM credential you can get at
-`https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/access_key_management`.
+[documentation portal](https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/access_key_management)
 
 # opentelekomcloud_identity_credential_v3
 

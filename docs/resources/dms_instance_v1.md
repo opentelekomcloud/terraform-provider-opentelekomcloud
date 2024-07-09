@@ -1,9 +1,14 @@
 ---
 subcategory: "Distributed Message Service (DMS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dms_instance_v1"
+sidebar_current: "docs-opentelekomcloud-resource-dms-instance-v1"
+description: |-
+Manages a DMS Instance v1 resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DMS instance you can get at
-`https://docs.otc.t-systems.com/distributed-message-service/api-ref/out-of-date_apis/api_v1/apis_for_managing_instances`.
+[documentation portal](https://docs.otc.t-systems.com/distributed-message-service/api-ref/out-of-date_apis/api_v1/apis_for_managing_instances)
 
 # opentelekomcloud_dms_instance_v1
 

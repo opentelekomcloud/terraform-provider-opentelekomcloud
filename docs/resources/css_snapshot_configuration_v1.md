@@ -1,9 +1,14 @@
 ---
 subcategory: "Cloud Search Service (CSS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_css_snapshot_configuration_v1"
+sidebar_current: "docs-opentelekomcloud-resource-css-snapshot-configuration-v1"
+description: |-
+Manages a CSS Snapshot resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for CSS snapshot you can get at
-`https://docs.otc.t-systems.com/cloud-search-service/api-ref/snapshot_management_apis`.
+[documentation portal](https://docs.otc.t-systems.com/cloud-search-service/api-ref/snapshot_management_apis)
 
 # opentelekomcloud_css_snapshot_configuration_v1
 

@@ -1,9 +1,14 @@
 ---
 subcategory: "Log Tank Service (LTS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_logtank_group_v2"
+sidebar_current: "docs-opentelekomcloud-resource-logtank-group-v2"
+description: |-
+Manages a LTS Log Group resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for LTS log group you can get at
-`https://docs.otc.t-systems.com/log-tank-service/api-ref/log_group_management_new_version`.
+[documentation portal](https://docs.otc.t-systems.com/log-tank-service/api-ref/log_group_management_new_version)
 
 # opentelekomcloud_logtank_group_v2
 

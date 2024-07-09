@@ -1,9 +1,14 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpc_bandwidth_v2"
+sidebar_current: "docs-opentelekomcloud-resource-vpc-bandwidth-v2"
+description: |-
+Manages a VPC Bandwidth resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC bandwidth you can get at
-`https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/bandwidth_v2.0`.
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/bandwidth_v2.0)
 
 # opentelekomcloud_vpc_bandwidth_v2
 

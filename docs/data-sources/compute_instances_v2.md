@@ -1,6 +1,14 @@
 ---
 subcategory: "Elastic Cloud Server (ECS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_instances_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-compute-instances-v2"
+description: |-
+Get ECS instances details from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for ECS instances you can get at
+[documentation portal](https://docs.otc.t-systems.com/elastic-cloud-server/api-ref/native_openstack_nova_apis/lifecycle_management/querying_ecss.html#en-us-topic-0020212688)
 
 # opentelekomcloud_compute_instances_v2
 

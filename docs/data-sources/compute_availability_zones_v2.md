@@ -1,6 +1,14 @@
 ---
 subcategory: "Elastic Cloud Server (ECS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_availability_zones_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-compute-availability-zones-v2"
+description: |-
+Get a list of availability zones from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for Compute AZs you can get at
+[documentation portal](https://docs.otc.t-systems.com/elastic-cloud-server/api-ref/native_openstack_nova_apis/az/querying_azs.html#en-us-topic-0065817728)
 
 # opentelekomcloud_compute_availability_zones_v2
 

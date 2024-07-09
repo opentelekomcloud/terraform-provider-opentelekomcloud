@@ -1,5 +1,10 @@
 ---
 subcategory: "Elastic Volume Service (EVS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_blockstorage_volume_v2"
+sidebar_current: "docs-opentelekomcloud-resource-blockstorage-volume-v2"
+description: |-
+Manages a BlockStorage volume resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud_blockstorage_volume_v2

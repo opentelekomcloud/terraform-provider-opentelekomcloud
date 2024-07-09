@@ -1,9 +1,14 @@
 ---
 subcategory: "Dedicated Web Application Firewall (WAFD)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_dedicated_cc_rule_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-dedicated-cc-rule-v1"
+description: |-
+Manages a WAF Dedicated CC Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF dedicated CC rule you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_a_cc_attack_protection_rule.html).
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_a_cc_attack_protection_rule.html).
 
 # opentelekomcloud_waf_dedicated_cc_rule_v1
 

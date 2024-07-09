@@ -1,9 +1,14 @@
 ---
 subcategory: "Distributed Message Service (DMS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dms_user_v2"
+sidebar_current: "docs-opentelekomcloud-resource-dms-user-v2"
+description: |-
+Manages a DMS User resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DMS user you can get at
-`https://docs.otc.t-systems.com/distributed-message-service/api-ref/apis_v2_recommended/user_management/index.html`.
+[documentation portal](https://docs.otc.t-systems.com/distributed-message-service/api-ref/apis_v2_recommended/user_management/index.html)
 
 # opentelekomcloud_dms_user_v2
 

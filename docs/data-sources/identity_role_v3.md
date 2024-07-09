@@ -1,6 +1,14 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_identity_role_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-identity-role-v3"
+description: |-
+Get a IAM role information from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for IAM role you can get at
+[documentation portal](https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/permission_management/querying_a_role_list.html#en-us-topic-0057845591)
 
 # opentelekomcloud_identity_role_v3
 

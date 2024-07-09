@@ -1,6 +1,14 @@
 ---
 subcategory: "Distributed Message Service (DMS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dms_maintainwindow_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-dms-maintainwindow-v1"
+description: |-
+Get available DMS maintain window from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for DMS maintain window you can get at
+[documentation portal](https://docs.otc.t-systems.com/distributed-message-service/api-ref/apis_v2_recommended/other_apis/listing_maintenance_time_windows.html)
 
 # opentelekomcloud_dms_maintainwindow_v1
 

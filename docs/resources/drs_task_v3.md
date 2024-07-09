@@ -1,9 +1,14 @@
 ---
 subcategory: "Data Replication Service (DRS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_drs_task_v3"
+sidebar_current: "docs-opentelekomcloud-resource-drs-task-v3"
+description: |-
+Manages a DRS Task resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DRS task you can get at
-`https://docs.otc.t-systems.com/data-replication-service/api-ref/api/public_api_management/index.html#drs-03-0101`.
+[documentation portal](https://docs.otc.t-systems.com/data-replication-service/api-ref/api/public_api_management/index.html#drs-03-0101)
 
 # opentelekomcloud_drs_task_v3
 

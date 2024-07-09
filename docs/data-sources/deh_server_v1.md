@@ -1,6 +1,14 @@
 ---
 subcategory: "Dedicated Host (DEH)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_deh_server_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-deh-server-v1"
+description: |-
+Get details about the server on a specified Dedicated Host from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for DEH ECSs you can get at
+[documentation portal](https://docs.otc.t-systems.com/dedicated-host/api-ref/api/querying_ecss_on_a_deh.html)
 
 # opentelekomcloud_deh_server_v1
 

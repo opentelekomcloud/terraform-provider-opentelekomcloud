@@ -1,9 +1,14 @@
 ---
 subcategory: "Elastic Cloud Server (ECS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_keypair_v2"
+sidebar_current: "docs-opentelekomcloud-resource-compute-keypair-v2"
+description: |-
+Manages an ECS Key Management resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ECS key management you can get at
-`https://docs.otc.t-systems.com/elastic-cloud-server/api-ref/openstack_nova_apis/key_and_password_management`.
+[documentation portal](https://docs.otc.t-systems.com/elastic-cloud-server/api-ref/openstack_nova_apis/key_and_password_management)
 
 # opentelekomcloud_compute_keypair_v2
 

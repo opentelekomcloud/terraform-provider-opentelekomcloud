@@ -1,9 +1,14 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_identity_login_policy_v3"
+sidebar_current: "docs-opentelekomcloud-resource-identity-login-policy-v3"
+description: |-
+Manages a IAM Login Policy resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for IAM provider you can get at
-`https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/security_settings/modifying_the_password_policy.html`.
+[documentation portal](https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/security_settings/modifying_the_password_policy.html)
 
 # opentelekomcloud_identity_login_policy_v3
 

@@ -1,9 +1,14 @@
 ---
 subcategory: "Resource Template Service (RTS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_rts_software_config_v1"
+sidebar_current: "docs-opentelekomcloud-resource-rts-software-config-v1"
+description: |-
+Manages an RTS Config resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for RTS config you can get at
-`https://docs.otc.t-systems.com/resource-template-service/api-ref/apis/software_configuration_management`.
+[documentation portal](https://docs.otc.t-systems.com/resource-template-service/api-ref/apis/software_configuration_management)
 
 # opentelekomcloud_rts_software_config_v1
 

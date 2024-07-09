@@ -1,9 +1,14 @@
 ---
 subcategory: "Dedicated Load Balancer (DLB)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_lb_security_policy_v3"
+sidebar_current: "docs-opentelekomcloud-resource-lb-security-policy-v3"
+description: |-
+Manages a LB Security Policy resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DLB security policy you can get at
-`https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v3/security_policy`.
+[documentation portal](https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v3/security_policy)
 
 # opentelekomcloud_lb_security_policy_v3
 

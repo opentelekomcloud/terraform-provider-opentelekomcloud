@@ -1,9 +1,14 @@
 ---
 subcategory: "Elastic Load Balancer (ELB)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_lb_l7rule_v2"
+sidebar_current: "docs-opentelekomcloud-resource-lb-l7rule-v2"
+description: |-
+Manages a ELB L7 Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ELB l7 rule you can get at
-`https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v2.0/forwarding_rule`.
+[documentation portal](https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v2.0/forwarding_rule)
 
 # opentelekomcloud_lb_l7rule_v2
 

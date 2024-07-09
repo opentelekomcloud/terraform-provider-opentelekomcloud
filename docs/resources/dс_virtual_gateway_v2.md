@@ -1,10 +1,16 @@
 ---
 subcategory: "Direct Connect (DCaaS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dc_virtual_gateway_v2"
+sidebar_current: "docs-opentelekomcloud-resource-dc-virtual-gateway-v2"
+description: |-
+Manages a Direct Connect Virtual Gateway resource within OpenTelekomCloud.
 ---
+
 # opentelekomcloud_dc_virtual_gateway_v2 (Resource)
 
 Up-to-date reference of API arguments for Direct Connect Virtual Gateway you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/direct-connect/api-ref/apis/virtual_gateway/index.html).
+[documentation portal](https://docs.otc.t-systems.com/direct-connect/api-ref/apis/virtual_gateway/index.html).
 
 ## Example Usage
 

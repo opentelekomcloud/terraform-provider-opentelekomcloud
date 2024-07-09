@@ -1,9 +1,14 @@
 ---
 subcategory: "Dedicated Web Application Firewall (WAFD)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_dedicated_data_masking_rule_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-dedicated-data-masking-rule-v1"
+description: |-
+Manages a WAF Dedicated Data Masking Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF dedicated Data Masking rule you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_a_data_masking_rule.html).
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_a_data_masking_rule.html).
 
 # opentelekomcloud_waf_dedicated_data_masking_rule_v1
 

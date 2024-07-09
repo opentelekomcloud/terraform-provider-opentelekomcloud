@@ -1,6 +1,14 @@
 ---
 subcategory: "Document Database Service (DDS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dds_flavors_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-dds-flavors-v3"
+description: |-
+Get DDS flavors from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for DDS flavors you can get at
+[documentation portal](https://docs.otc.t-systems.com/document-database-service/api-ref/apis_v3.0_recommended/querying_database_specifications.html)
 
 # opentelekomcloud_dds_flavors_v3
 

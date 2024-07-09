@@ -1,10 +1,18 @@
 ---
 subcategory: "Scalable File Service (SFS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_sfs_file_system_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-sfs-file-system-v2"
+description: |-
+Get details about a Scalable File Service from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for SFS you can get at
+[documentation portal](https://docs.otc.t-systems.com/scalable-file-service/api-ref/sfs_capacity-oriented_apis/file_systems/querying_all_shared_file_systems.html#sfs-02-0022)
 
 # opentelekomcloud_sfs_file_system_v2
 
-Use this data source to get details about an Scalabe File Service.
+Use this data source to get details about a Scalable File Service.
 
 ## Example Usage
 

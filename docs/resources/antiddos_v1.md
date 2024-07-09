@@ -1,9 +1,14 @@
 ---
 subcategory: "Anti-DDoS"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_antiddos_v1"
+sidebar_current: "docs-opentelekomcloud-resource-antiddos-v1"
+description: |-
+Manages a Anti-DDoS resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for Anti-DDoS service you can get at
-`https://docs.otc.t-systems.com/anti-ddos/api-ref/api/anti-ddos_apis`.
+[documentation portal](https://docs.otc.t-systems.com/anti-ddos/api-ref/api/anti-ddos_apis).
 
 # opentelekomcloud_antiddos_v1
 

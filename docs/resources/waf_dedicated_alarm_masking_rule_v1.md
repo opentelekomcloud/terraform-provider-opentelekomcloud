@@ -1,11 +1,16 @@
 ---
 subcategory: "Dedicated Web Application Firewall (WAFD)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_dedicated_alarm_masking_rule_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-dedicated-alarm-masking-rule-v1"
+description: |-
+Manages a WAF Dedicated False Alarm Masking Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF dedicated Global Protection Whitelist (formerly False Alarm Masking) rule you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_an_information_leakage_protection_rule.html).
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_a_global_protection_whitelist_formerly_false_alarm_masking_rule.html).
 
-# opentelekomcloud_waf_dedicated_anti_leakage_rule_v1
+# opentelekomcloud_waf_dedicated_alarm_masking_rule_v1
 
 Manages a WAF Dedicated Global Protection Whitelist (formerly False Alarm Masking) Rule resource within OpenTelekomCloud.
 

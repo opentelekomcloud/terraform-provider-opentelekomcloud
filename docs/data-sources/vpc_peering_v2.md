@@ -1,6 +1,14 @@
 ---
 subcategory: "Virtual Private Cloud (VPC)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpc_peering_connection_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-vpc-peering-connection-v2"
+description: |-
+Get details about a specific VPC peering connection from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for VPC EIP you can get at
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/vpc_peering_connection/querying_vpc_peering_connections.html#vpc-peering-0001)
 
 # opentelekomcloud_vpc_peering_connection_v2
 

@@ -1,9 +1,14 @@
 ---
 subcategory: "Dedicated Web Application Firewall (WAFD)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_dedicated_anti_crawler_rule_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-dedicated-anti-crawler-rule-v1"
+description: |-
+Manages a WAF Dedicated Anti Crawler Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF dedicated Anti Crawler rule you can get at
-[Official Docs Portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_a_javascript_anti-crawler_rule.html).
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall-dedicated/api-ref/apis/rule_management/creating_a_javascript_anti-crawler_rule.html).
 
 # opentelekomcloud_waf_dedicated_anti_crawler_rule_v1
 

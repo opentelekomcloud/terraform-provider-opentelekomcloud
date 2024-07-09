@@ -1,6 +1,14 @@
 ---
 subcategory: "Bare Metal Server (BMS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_bms_nic_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-compute-bms-nic-v2"
+description: |-
+Get details about BMS NIC from OpenTelekomCloud
 ---
+
+Up-to-date reference of API arguments for BMS NIC you can get at
+[documentation portal](https://docs.otc.t-systems.com/bare-metal-server/api-ref/native_openstack_nova_v2.1_apis/bms_nic_management/querying_information_about_bms_nics_native_openstack_api.html#en-us-topic-0053158678)
 
 # opentelekomcloud_compute_bms_nic_v2
 

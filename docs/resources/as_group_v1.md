@@ -1,9 +1,14 @@
 ---
 subcategory: "Autoscaling"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_as_group_v1"
+sidebar_current: "docs-opentelekomcloud-resource-as-group-v1"
+description: |-
+Manages a AS Group resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for AS group you can get at
-`https://docs.otc.t-systems.com/auto-scaling/api-ref/apis/as_groups`.
+[documentation portal](https://docs.otc.t-systems.com/auto-scaling/api-ref/apis/as_groups)
 
 # opentelekomcloud_as_group_v1
 

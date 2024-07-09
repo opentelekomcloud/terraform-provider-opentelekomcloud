@@ -1,9 +1,14 @@
 ---
 subcategory: "Key Management Service (KMS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_kms_grant_v1"
+sidebar_current: "docs-opentelekomcloud-resource-kms-grant-v1"
+description: |-
+Manages a KMS Grant resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for KMS grant you can get at
-`https://docs.otc.t-systems.com/key-management-service/api-ref/apis`.
+[documentation portal](https://docs.otc.t-systems.com/key-management-service/api-ref/apis)
 
 # opentelekomcloud_kms_grant_v1
 

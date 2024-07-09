@@ -1,9 +1,14 @@
 ---
 subcategory: "Dedicated Load Balancer (DLB)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_lb_monitor_v3"
+sidebar_current: "docs-opentelekomcloud-resource-lb-monitor-v3"
+description: |-
+Manages a LB Monitor resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DLB monitor you can get at
-`https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v3/health_check`.
+[documentation portal](https://docs.otc.t-systems.com/elastic-load-balancing/api-ref/apis_v3/health_check)
 
 # opentelekomcloud_lb_monitor_v3
 

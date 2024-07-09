@@ -1,9 +1,14 @@
 ---
 subcategory: "Storage Disaster Recovery Service (SDRS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_sdrs_replication_pair_v1"
+sidebar_current: "docs-opentelekomcloud-resource-sdrs-replication-pair-v1"
+description: |-
+Manages an SDRS Replication Pair resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for SDRS replication pair you can get at
-`https://docs.otc.t-systems.com/storage-disaster-recovery-service/api-ref/sdrs_apis/replication_pair/`.
+[documentation portal](https://docs.otc.t-systems.com/storage-disaster-recovery-service/api-ref/sdrs_apis/replication_pair/)
 
 # opentelekomcloud_sdrs_replication_pair_v1
 

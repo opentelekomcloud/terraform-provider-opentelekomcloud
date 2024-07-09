@@ -1,9 +1,14 @@
 ---
 subcategory: "Relational Database Service (RDS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_rds_parametergroup_v3"
+sidebar_current: "docs-opentelekomcloud-resource-rds-parametergroup-v3"
+description: |-
+Manages an RDS Parameter Group resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for RDS parameter group rule you can get at
-`https://docs.otc.t-systems.com/relational-database-service/api-ref/api_v3_recommended/parameter_configuration`.
+[documentation portal](https://docs.otc.t-systems.com/relational-database-service/api-ref/api_v3_recommended/parameter_configuration)
 
 # opentelekomcloud_rds_parametergroup_v3
 

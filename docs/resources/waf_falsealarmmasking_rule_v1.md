@@ -1,9 +1,14 @@
 ---
 subcategory: "Web Application Firewall (WAF)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_waf_falsealarmmasking_rule_v1"
+sidebar_current: "docs-opentelekomcloud-resource-waf-falsealarmmasking-rule-v1"
+description: |-
+Manages a WAF False Alarm Masking Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF false alarm masking rules you can get at
-`https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/false_alarm_masking_rules`.
+[documentation portal](https://docs.otc.t-systems.com/web-application-firewall/api-ref/apis/false_alarm_masking_rules)
 
 # opentelekomcloud_waf_falsealarmmasking_rule_v1
 

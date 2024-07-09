@@ -1,9 +1,14 @@
 ---
 subcategory: "Data Ingestion Service (DIS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dis_checkpoint_v2"
+sidebar_current: "docs-opentelekomcloud-resource-dis-checkpoint-v2"
+description: |-
+Manages a DIS Checkpoint resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DIS checkpoint you can get at
-`https://docs.otc.t-systems.com/data-ingestion-service/api-ref/api_description/checkpoint_management/index.html`.
+[documentation portal](https://docs.otc.t-systems.com/data-ingestion-service/api-ref/api_description/checkpoint_management/index.html)
 
 # opentelekomcloud_dis_checkpoint_v2
 

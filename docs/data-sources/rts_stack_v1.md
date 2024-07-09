@@ -1,5 +1,10 @@
 ---
 subcategory: "Resource Template Service (RTS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_rts_stack_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-rts-stack-v1"
+description: |-
+Get details about a specific RTS resource from OpenTelekomCloud
 ---
 
 # opentelekomcloud_rts_stack_v1
