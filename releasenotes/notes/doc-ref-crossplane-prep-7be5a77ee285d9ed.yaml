@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[DOCS]** Changing headers in all docs for parsing purposes (`#2581 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2581>`_)
