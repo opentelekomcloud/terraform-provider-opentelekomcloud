@@ -86,6 +86,7 @@ func ResourceWafDedicatedAlarmMaskingRuleV1() *schema.Resource {
 			"advanced_settings": {
 				Type:     schema.TypeList,
 				Optional: true,
+				MaxItems: 1,
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -159,25 +160,27 @@ func getAmConditions(d *schema.ResourceData) []rules.IgnoreCondition {
 	return conditionList
 }
 
-func getAmAdvancedSettings(d *schema.ResourceData) []rules.AdvancedIgnoreObject {
-	var advancedList []rules.AdvancedIgnoreObject
+func getAmAdvancedSettings(d *schema.ResourceData) rules.AdvancedIgnoreObject {
+	var advancedObj rules.AdvancedIgnoreObject
 	advanced := d.Get("advanced_settings").([]interface{})
 	for _, a := range advanced {
 		adv := a.(map[string]interface{})
 		contentsRaw := adv["contents"].([]interface{})
-		contents := make([]string, len(contentsRaw))
-
-		for i, content := range contentsRaw {
-			contents[i] = content.(string)
+		var contents []string
+		if len(contentsRaw) == 0 {
+			contents = append(contents, "all")
 		}
-
-		advancedObj := rules.AdvancedIgnoreObject{
+		for _, content := range contentsRaw {
+			if content := common.ValueIgnoreEmpty(content.(string)); content != nil {
+				contents = append(contents, content.(string))
+			}
+		}
+		advancedObj = rules.AdvancedIgnoreObject{
 			Index:    adv["index"].(string),
 			Contents: contents,
 		}
-		advancedList = append(advancedList, advancedObj)
 	}
-	return advancedList
+	return advancedObj
 }
 
 func resourceWafDedicatedAlarmMaskingRuleV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -235,7 +238,6 @@ func resourceWafDedicatedAlarmMaskingRuleV1Read(ctx context.Context, d *schema.R
 	mErr := multierror.Append(
 		d.Set("policy_id", rule.PolicyId),
 		d.Set("rule", rule.Rule),
-		d.Set("advanced_settings", rule.Advanced),
 		d.Set("domains", rule.Domains),
 		d.Set("description", rule.Description),
 		d.Set("status", rule.Status),
@@ -253,14 +255,21 @@ func resourceWafDedicatedAlarmMaskingRuleV1Read(ctx context.Context, d *schema.R
 		conditions = append(conditions, condition)
 	}
 
-	var advanced []map[string]interface{}
-	for _, advancedObj := range rule.Advanced {
-		adv := map[string]interface{}{
-			"index":    advancedObj.Index,
-			"contents": advancedObj.Contents,
-		}
-		advanced = append(advanced, adv)
+	var advanced = []map[string]interface{}{
+		{
+			"index":    rule.Advanced.Index,
+			"contents": rule.Advanced.Contents,
+		},
 	}
+	adv := d.Get("advanced_settings").([]interface{})
+	for _, a := range adv {
+		adv := a.(map[string]interface{})
+		contentsRaw := adv["contents"].([]interface{})
+		if len(contentsRaw) == 0 {
+			advanced[0]["contents"] = nil
+		}
+	}
+
 	mErr = multierror.Append(mErr,
 		d.Set("conditions", conditions),
 		d.Set("advanced_settings", advanced),
