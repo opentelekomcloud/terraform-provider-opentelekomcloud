@@ -497,3 +497,17 @@ func ExpandToIntList(v []interface{}) []int {
 	}
 	return s
 }
+
+// ValueIgnoreEmpty returns to the string value. if v is empty, return nil
+func ValueIgnoreEmpty(v interface{}) interface{} {
+	vl := reflect.ValueOf(v)
+	if (vl.Kind() != reflect.Bool) && vl.IsZero() {
+		return nil
+	}
+
+	if (vl.Kind() == reflect.Array || vl.Kind() == reflect.Slice) && vl.Len() == 0 {
+		return nil
+	}
+
+	return v
+}
