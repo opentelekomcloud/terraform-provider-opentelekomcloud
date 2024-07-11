@@ -1,3 +1,4 @@
+---
 subcategory: "NAT"
 layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_nat_snat_rule_v2"
