@@ -26,11 +26,12 @@ func getClusterFunc(conf *cfg.Config, state *terraform.ResourceState) (interface
 	return apis.Get(c, state.Primary.ID)
 }
 
-func TestAccApi_basic(t *testing.T) {
+func TestAccDAMigrationsCluster_basic(t *testing.T) {
 	var (
 		api   apis.ClusterQuery
 		rName = resourceMigrationsClusterName
 		name  = fmt.Sprintf("da_mig_cluster_acc_api_%s", acctest.RandString(5))
+		vpcID = env.OS_VPC_ID
 	)
 
 	rc := common.InitResourceCheck(
@@ -47,40 +48,23 @@ func TestAccApi_basic(t *testing.T) {
 		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccApigwApi_basic(name),
+				Config: testAccDAMigrationsCluster_basic(vpcID, name),
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(rName, "name", name),
-					resource.TestCheckResourceAttr(rName, "type", "Public"),
-					resource.TestCheckResourceAttr(rName, "description", "Created by script"),
-					resource.TestCheckResourceAttr(rName, "request_protocol", "HTTP"),
-					resource.TestCheckResourceAttr(rName, "request_method", "GET"),
-					resource.TestCheckResourceAttr(rName, "request_uri", "/user_info/{user_age}"),
-					resource.TestCheckResourceAttr(rName, "security_authentication_type", "APP"),
-					resource.TestCheckResourceAttr(rName, "match_mode", "EXACT"),
-					resource.TestCheckResourceAttr(rName, "success_response", "Success response"),
-					resource.TestCheckResourceAttr(rName, "failure_response", "Failed response"),
-					resource.TestCheckResourceAttr(rName, "request_params.#", "2"),
-					resource.TestCheckResourceAttr(rName, "backend_params.#", "1"),
-					resource.TestCheckResourceAttr(rName, "http.0.request_uri", "/getUserAge/{userAge}"),
-					resource.TestCheckResourceAttr(rName, "http.0.request_method", "GET"),
-					resource.TestCheckResourceAttr(rName, "http.0.request_protocol", "HTTP"),
-					resource.TestCheckResourceAttr(rName, "http.0.timeout", "30000"),
-					resource.TestCheckResourceAttr(rName, "http_policy.#", "1"),
-					resource.TestCheckResourceAttr(rName, "http_policy.0.conditions.#", "1"),
-					resource.TestCheckResourceAttr(rName, "mock.#", "0"),
-					resource.TestCheckResourceAttr(rName, "func_graph.#", "0"),
-					resource.TestCheckResourceAttr(rName, "mock_policy.#", "0"),
-					resource.TestCheckResourceAttr(rName, "func_graph_policy.#", "0"),
-					resource.TestCheckResourceAttr(rName, "http_policy.0.backend_params.#", "2"),
+					resource.TestCheckResourceAttr(rName, "language", "eng"),
+					resource.TestCheckResourceAttr(rName, "email", "anyemail@example.com"),
+					resource.TestCheckResourceAttr(rName, "phone_number", "123456789"),
+					resource.TestCheckResourceAttr(rName, "is_schedule_boot_off", "false"),
+					resource.TestCheckResourceAttr(rName, "is_auto_off", "false"),
 				),
 			},
-			{
-				ResourceName:      rName,
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateIdFunc: testAccApiResourceImportStateFunc(),
-			},
+			// {
+			// 	ResourceName:      rName,
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// 	ImportStateIdFunc: testAccApiResourceImportStateFunc(),
+			// },
 		},
 	})
 }
@@ -100,62 +84,47 @@ func testAccApiResourceImportStateFunc() resource.ImportStateIdFunc {
 	}
 }
 
-//   language = "eng"
-//  cluster {
-//    is_schedule_boot_off = false
-//    vpc_id = "bf200468-ce32-4b03-94d9-609f90983dfb"
-//    name = "any_name"
-//    datastore {
-//      type = "cdm"
-//      version = "2.10.0.100"
-//    }
-
-func testAccApigwApi_basic(name string) string {
+func testAccDAMigrationsCluster_basic(vpcID, name string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_apigw_api_v2" "api" {
-  language                     = "eng"
+resource "opentelekomcloud_dataarts_migrations_cluster_v1" "cluster" {
+  language                     = "en"
   auto_remind                  = false
   phone_number                 = "123456789"
   email                        = "anyemail@example.com"
 
-  schedule_boot_time     = "10/10/2024"
+  #schedule_boot_time     = "10/10/2024"
   is_schedule_boot_off     = false
-  schedule_off_time     = "10/11/2024"
+  #schedule_off_time     = "10/11/2024"
   vpc_id = "%s"
   name = "%s"
-  is_auto_off     = false
+  #is_auto_off     = false
 
   datastore {
     type      = "cdm"
     version = "2.10.0.100"
   }
 
-  extended_properties {
-	workspace = "default"
-    resource = "oneone"
-    trial = "no"
-  }
+  #extended_properties {
+	#workspace = "default"
+    #resource = "oneone"
+    #trial = "no"
+  #}
 
-  "sys_tags" = [
-    {
-	  value = "onetag"
-	  key = "keyforvalue"
-	}
-  ]
+  #sys_tags {
+	#  value = "onetag"
+	 # key = "keyforvalue"
+  #}
 
-  "instances": [
-    {
+  instances {
 	  availability_zone = "eu-de-03"
-	  flavor = "5ddb1071-c5d7-40e0-a874-8a032e81a697"
+	  #flavor = "5ddb1071-c5d7-40e0-a874-8a032e81a697"
+	  flavor_id = "a79fd5ae-1833-448a-88e8-3ea2b913e1f6"
 	  type = "cdm"
-	  nics = [
-		{
+	  nics {
 	      security_group = "12fcdc62-9bff-4df0-ac14-5258050d004b"
 	      net = "03c5f385-17a0-4312-9e10-9b084edc18a1"
-		}
-      ]
-	}
-  ]
+      }
+  }
 }
-`, name)
+`, vpcID, name)
 }

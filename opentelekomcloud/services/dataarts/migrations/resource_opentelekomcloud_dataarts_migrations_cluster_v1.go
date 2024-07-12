@@ -19,6 +19,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
+// TODO: add to the documentation a warning: "All changes in parameters will cause the cluster recreation."
 func ResourceClusterV1() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceClusterV1Create,
@@ -26,8 +27,6 @@ func ResourceClusterV1() *schema.Resource {
 		DeleteContext: resourceClusterV1Delete,
 
 		Importer: &schema.ResourceImporter{
-			//
-			// StateContext: resourceClusterV1ImportState,
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
@@ -37,20 +36,8 @@ func ResourceClusterV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"language": {
-				Type: schema.TypeString,
-				// TODO: add to the documentation a warning: "All changes in parameters will cause the cluster recreation."
-				ForceNew: true,
-				Required: true,
-			},
 			"auto_remind": {
 				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
-			},
-			"phone_number": {
-				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
@@ -61,6 +48,18 @@ func ResourceClusterV1() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
+			"phone_number": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
+			"language": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Required: true,
+			},
+			// The API's cluster part
 			"schedule_boot_time": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -74,7 +73,7 @@ func ResourceClusterV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"instances": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
@@ -265,7 +264,7 @@ func instanceSchema() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"flavor": {
+			"flavor_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.StringInSlice([]string{
@@ -274,6 +273,44 @@ func instanceSchema() *schema.Resource {
 					string(FlavorTypeLarge),
 					string(FlavorTypeXLarge),
 				}, false),
+			},
+			"flavor": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+							Optional: true,
+							ForceNew: true,
+						},
+						"links": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Optional: true,
+							ForceNew: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"rel": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
+										ForceNew: true,
+									},
+									"href": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
+										ForceNew: true,
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 			"type": {
 				Type:     schema.TypeString,
@@ -392,76 +429,87 @@ func instanceSchema() *schema.Resource {
 
 }
 
-func buildCluster(cluster *schema.Set) apis.Cluster {
-	c := cluster.List()[0].(map[string]interface{})
-	i := c["instances"].([]interface{})
-	ds := c["datastore"].(map[string]interface{})
-	ep := c["extended_properties"].(map[string]interface{})
-	st := c["sys_tags"].([]interface{})
+func buildCluster(d *schema.ResourceData) apis.Cluster {
+
+	i := d.Get("instances").(*schema.Set)
+	ds := d.Get("datastore").(*schema.Set)
+	ep := d.Get("extended_properties").(*schema.Set)
+	st := d.Get("sys_tags").([]interface{})
 
 	return apis.Cluster{
-		ScheduleBootTime:   c["schedule_boot_time"].(string),
-		IsScheduleBootOff:  pointerto.Bool(c["is_schedule_boot_off"].(bool)),
+		ScheduleBootTime:   d.Get("schedule_boot_time").(string),
+		IsScheduleBootOff:  pointerto.Bool(d.Get("is_schedule_boot_off").(bool)),
 		Instances:          buildInstances(i),
 		DataStore:          buildDatastore(ds),
 		ExtendedProperties: buildExtendedProperties(ep),
-		ScheduleOffTime:    c["schedule_off_time"].(string),
-		VpcId:              c["vpc_id"].(string),
-		Name:               c["name"].(string),
+		ScheduleOffTime:    d.Get("schedule_off_time").(string),
+		VpcId:              d.Get("vpc_id").(string),
+		Name:               d.Get("name").(string),
 		SysTags:            buildSysTags(st),
-		IsAutoOff:          c["is_auto_off"].(bool),
+		IsAutoOff:          d.Get("is_auto_off").(bool),
 	}
 }
 
-func buildInstances(instances []interface{}) []apis.Instance {
-	if len(instances) == 0 {
+func buildInstances(instances *schema.Set) []apis.Instance {
+	if instances.Len() == 0 {
 		return nil
 	}
-	insSlice := make([]apis.Instance, len(instances))
-	for _, i := range instances {
-		ins := i.(map[string]interface{})
-		insSlice = append(insSlice, apis.Instance{
-			AZ:        ins["availability_zone"].(string),
-			Nics:      buildNics(ins["nics"].([]interface{})),
-			FlavorRef: ins["flavor"].(string),
-			Type:      ins["type"].(string),
-		})
+	insSlice := make([]apis.Instance, instances.Len())
+	for index, instance := range instances.List() {
+		i := instance.(map[string]interface{})
+		insSlice[index] = apis.Instance{
+			AZ:        i["availability_zone"].(string),
+			Nics:      buildNics(i["nics"].(*schema.Set)),
+			FlavorRef: i["flavor_id"].(string),
+			Type:      i["type"].(string),
+		}
 	}
 	return insSlice
 }
 
-func buildNics(nics []interface{}) []apis.Nic {
-	if len(nics) == 0 {
+func buildNics(nics *schema.Set) []apis.Nic {
+	if nics.Len() == 0 {
 		return nil
 	}
-	nicSlice := make([]apis.Nic, len(nics))
-	for _, nic := range nics {
+	nicSlice := make([]apis.Nic, nics.Len())
+
+	for index, nic := range nics.List() {
 		n := nic.(map[string]interface{})
-		nicSlice = append(nicSlice, apis.Nic{
+		nicSlice[index] = apis.Nic{
 			SecurityGroupId: n["security_group"].(string),
 			NetId:           n["net"].(string),
-		})
+		}
 	}
 
 	return nicSlice
 }
 
-func buildDatastore(ds map[string]interface{}) *apis.Datastore {
+func buildDatastore(ds *schema.Set) *apis.Datastore {
+	if ds.Len() == 1 {
+		return nil
+	}
 
+	d := ds.List()[0].(map[string]interface{})
 	return &apis.Datastore{
-		Type:    ds["type"].(string),
-		Version: ds["version"].(string),
+		Type:    d["type"].(string),
+		Version: d["version"].(string),
 	}
 }
 
-func buildExtendedProperties(ep map[string]interface{}) *apis.ExtendedProp {
+func buildExtendedProperties(ep *schema.Set) *apis.ExtendedProp {
+	if ep.Len() < 1 {
+		return nil
+	}
+
+	p := ep.List()[0].(map[string]interface{})
 
 	return &apis.ExtendedProp{
-		WorkSpaceId: ep["workspace"].(string),
-		ResourceId:  ep["resource"].(string),
-		Trial:       ep["trial"].(string),
+		WorkSpaceId: p["workspace"].(string),
+		ResourceId:  p["resource"].(string),
+		Trial:       p["trial"].(string),
 	}
 }
+
 func buildSysTags(st []interface{}) []tags.ResourceTag {
 	if len(st) < 1 {
 		return nil
@@ -483,11 +531,11 @@ func buildSysTags(st []interface{}) []tags.ResourceTag {
 func buildApiCreateOpts(d *schema.ResourceData) (apis.CreateOpts, error) {
 
 	opts := apis.CreateOpts{
-		Cluster:    buildCluster(d.Get("cluster").(*schema.Set)),
 		AutoRemind: d.Get("auto_remind").(bool),
-		PhoneNum:   d.Get("phone_number").(string),
 		Email:      d.Get("email").(string),
+		PhoneNum:   d.Get("phone_number").(string),
 		XLang:      d.Get("language").(string),
+		Cluster:    buildCluster(d),
 	}
 
 	log.Printf("[DEBUG] The Migration Cluster Creation Opts are : %+v", opts)
@@ -534,11 +582,11 @@ func resourceClusterV1Read(ctx context.Context, d *schema.ResourceData, meta int
 	mErr := multierror.Append(nil,
 		d.Set("region", config.GetRegion(d)),
 		d.Set("public_endpoint", resp.PublicEndpoint),
+		d.Set("datastore", flattenDatastore(resp.Datastore)),
 		d.Set("instances", flattenInstances(resp.Instances)),
 		d.Set("security_group_id", resp.SecurityGroupId),
 		d.Set("vpc_id", resp.VpcId),
 		d.Set("subnet_id", resp.SubnetId),
-		d.Set("datastore", flattenDatastore(resp.Datastore)),
 		d.Set("is_auto_off", resp.IsAutoOff),
 		d.Set("public_endpoint_domain_name", resp.PublicEndpointDomainName),
 		d.Set("flavor_name", resp.FlavorName),
@@ -593,41 +641,33 @@ func resourceClusterV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func flattenInstances(reqParams []apis.DetailedInstances) []map[string]interface{} {
-	if len(reqParams) < 1 {
+	if len(reqParams) == 0 {
 		return nil
 	}
 
 	result := make([]map[string]interface{}, len(reqParams))
 	for i, v := range reqParams {
 		param := map[string]interface{}{
-			"flavor":          flattenFlavor(v.Flavor),
-			"volume":          flattenVolume(v.Volume),
-			"status":          analyseStatus(v.Status),
-			"actions":         v.Actions,
-			"type":            v.Type,
-			"id":              v.Id,
-			"name":            v.Name,
-			"is_frozen":       v.IsFrozen,
-			"components":      v.Components,
-			"config_status":   v.ConfigStatus,
-			"role":            v.Role,
-			"group":           v.Group,
-			"links":           flattenLinks(v.Links),
-			"params_group_id": v.ParamsGroupId,
-			"public_ip":       v.PublicIp,
-			"manage_ip":       v.ManageIp,
-			"traffic_ip":      v.TrafficIp,
-			"shard_id":        v.ShardId,
-			"manage_fix_ip":   v.ManageFixIp,
-			"private_ip":      v.PrivateIp,
-			"internal_ip":     v.InternalIp,
-			"resource":        flattenResource(v.Resource),
+			"flavor":        flattenFlavor(v.Flavor),
+			"type":          v.Type,
+			"volume":        flattenVolume(v.Volume),
+			"status":        analyseStatus(v.Status),
+			"vm_id":         v.Id,
+			"name":          v.Name,
+			"role":          v.Role,
+			"group":         v.Group,
+			"public_ip":     v.PublicIp,
+			"manage_ip":     v.ManageIp,
+			"traffic_ip":    v.TrafficIp,
+			"shard_id":      v.ShardId,
+			"manage_fix_ip": v.ManageFixIp,
+			"private_ip":    v.PrivateIp,
+			"internal_ip":   v.InternalIp,
 		}
 
 		result[i] = param
 	}
 	return result
-
 }
 
 func flattenFlavor(f apis.Flavor) map[string]interface{} {
@@ -640,7 +680,7 @@ func flattenFlavor(f apis.Flavor) map[string]interface{} {
 }
 
 func flattenLinks(links []apis.ClusterLinks) []map[string]interface{} {
-	if len(links) < 1 {
+	if len(links) == 0 {
 		return nil
 	}
 
