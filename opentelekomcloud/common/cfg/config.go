@@ -27,6 +27,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
+
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/pathorcontents"
 )
 
@@ -1166,6 +1167,28 @@ func (c *Config) TmsV1Client() (*golangsdk.ServiceClient, error) {
 	service.Endpoint = strings.Replace(service.Endpoint, "v3/", "v1.0/", 1)
 	service.Endpoint = strings.Replace(service.Endpoint, "iam", "tms", 1)
 	return service, nil
+}
+
+func (c *Config) DataArtsMigrationsV1Client(projectName ProjectName) (*golangsdk.ServiceClient, error) {
+	newConfig, err := reconfigProjectName(*c, projectName)
+	if err != nil {
+		return nil, err
+	}
+	return openstack.NewDataArtsV11(newConfig.HwClient, golangsdk.EndpointOpts{
+		Region:       c.GetRegion(nil),
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) DataArtsFactoryV1Client(projectName ProjectName) (*golangsdk.ServiceClient, error) {
+	newConfig, err := reconfigProjectName(*c, projectName)
+	if err != nil {
+		return nil, err
+	}
+	return openstack.NewDataArtsV11(newConfig.HwClient, golangsdk.EndpointOpts{
+		Region:       c.GetRegion(nil),
+		Availability: c.getEndpointType(),
+	})
 }
 
 func reconfigProjectName(src Config, projectName ProjectName) (*Config, error) {

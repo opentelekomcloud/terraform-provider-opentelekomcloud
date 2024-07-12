@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/antiddos"
@@ -17,6 +18,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/csbs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/css"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/cts"
+	dataartsMigrations "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dataarts/migrations"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dcaas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dcs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dds"
@@ -396,6 +398,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cts_tracker_v3":                            cts.ResourceCTSTrackerV3(),
 			"opentelekomcloud_css_cluster_v1":                            css.ResourceCssClusterV1(),
 			"opentelekomcloud_css_snapshot_configuration_v1":             css.ResourceCssSnapshotConfigurationV1(),
+			"opentelekomcloud_dataarts_migrations_cluster_v1":            dataartsMigrations.ResourceClusterV1(),
 			"opentelekomcloud_direct_connect_v2":                         dcaas.ResourceDirectConnectV2(),
 			"opentelekomcloud_dc_endpoint_group_v2":                      dcaas.ResourceDCEndpointGroupV2(),
 			"opentelekomcloud_dc_virtual_interface_v2":                   dcaas.ResourceVirtualInterfaceV2(),
