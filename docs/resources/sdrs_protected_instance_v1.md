@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_sdrs_protected_instance_v1"
 sidebar_current: "docs-opentelekomcloud-resource-sdrs-protected-instance-v1"
 description: |-
-Manages an SDRS Protected Instance resource within OpenTelekomCloud.
+  Manages an SDRS Protected Instance resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for SDRS protected instance you can get at

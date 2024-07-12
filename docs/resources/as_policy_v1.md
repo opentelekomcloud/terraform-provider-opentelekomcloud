@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_as_policy_v1"
 sidebar_current: "docs-opentelekomcloud-resource-as-policy-v1"
 description: |-
-Manages a AS Policy v1 resource within OpenTelekomCloud.
+  Manages a AS Policy v1 resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for AS policy you can get at

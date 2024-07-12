@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_apigw_signature_v2"
 sidebar_current: "docs-opentelekomcloud-resource-apigw-signature-v2"
 description: |-
-Manages a APIGW Signature resource within OpenTelekomCloud.
+  Manages a APIGW Signature resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for API Gateway signature service you can get at

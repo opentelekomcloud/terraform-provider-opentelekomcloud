@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dis_dump_task_v2"
 sidebar_current: "docs-opentelekomcloud-resource-dis-dump-task-v2"
 description: |-
-Manages a DIS Dump Task resource within OpenTelekomCloud.
+  Manages a DIS Dump Task resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DIS dump task you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_waf_datamasking_rule_v1"
 sidebar_current: "docs-opentelekomcloud-resource-waf-datamasking-rule-v1"
 description: |-
-Manages a WAF Datamasking rule resource within OpenTelekomCloud.
+  Manages a WAF Datamasking rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF datamasking rule you can get at

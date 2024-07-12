@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_flavor_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-lb-flavor-v3"
 description: |-
-Get ELBv3 flavor from OpenTelekomCloud
+  Get ELBv3 flavor from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for ELBv3 flavor you can get at

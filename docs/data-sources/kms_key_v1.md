@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_kms_key_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-kms-key-v1"
 description: |-
-Get the ID of an available KMS key from OpenTelekomCloud
+  Get the ID of an available KMS key from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for KMS key you can get at

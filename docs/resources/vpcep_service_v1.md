@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpcep_service_v1"
 sidebar_current: "docs-opentelekomcloud-resource-vpcep-service-v1"
 description: |-
-Manages a VPCEP Service resource within OpenTelekomCloud.
+  Manages a VPCEP Service resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPCEP service you can get at

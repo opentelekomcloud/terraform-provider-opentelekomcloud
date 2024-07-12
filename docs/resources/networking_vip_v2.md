@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_networking_vip_v2"
 sidebar_current: "docs-opentelekomcloud-resource-networking-vip-v2"
 description: |-
-Manages a VPC VIP resource within OpenTelekomCloud.
+  Manages a VPC VIP resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud_networking_vip_v2

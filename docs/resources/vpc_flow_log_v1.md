@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpc_flow_log_v1"
 sidebar_current: "docs-opentelekomcloud-resource-vpc-flow-log-v1"
 description: |-
-Manages a VPC Flow Log resource within OpenTelekomCloud.
+  Manages a VPC Flow Log resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC flow log you can get at

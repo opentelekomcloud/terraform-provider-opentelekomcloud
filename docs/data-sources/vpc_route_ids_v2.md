@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpc_route_ids_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-vpc-route-ids-v2"
 description: |-
-Get a list of route ids from OpenTelekomCloud
+  Get a list of route ids from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for VPC route you can get at

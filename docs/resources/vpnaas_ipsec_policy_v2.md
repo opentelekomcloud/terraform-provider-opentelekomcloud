@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpnaas_ipsec_policy_v2"
 sidebar_current: "docs-opentelekomcloud-resource-vpnaas-ipsec-policy-v2"
 description: |-
-Manages a VPNAAS IPSEC Policy resource within OpenTelekomCloud.
+  Manages a VPNAAS IPSEC Policy resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPNAAS ipsec policy you can get at

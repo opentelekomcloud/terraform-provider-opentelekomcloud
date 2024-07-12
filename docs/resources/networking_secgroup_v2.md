@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_networking_secgroup_v2"
 sidebar_current: "docs-opentelekomcloud-resource-networking-secgroup-v2"
 description: |-
-Manages a VPC Security Group resource within OpenTelekomCloud.
+  Manages a VPC Security Group resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC security group you can get at

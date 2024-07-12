@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_logtank_topic_v2"
 sidebar_current: "docs-opentelekomcloud-resource-logtank-topic-v2"
 description: |-
-Manages a LTS Log Topic resource within OpenTelekomCloud.
+  Manages a LTS Log Topic resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for LTS log topic you can get at

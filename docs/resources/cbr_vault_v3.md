@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_cbr_vault_v3"
 sidebar_current: "docs-opentelekomcloud-resource-cbr-vault-v3"
 description: |-
-Manages a CBR Vault resource within OpenTelekomCloud.
+  Manages a CBR Vault resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for CBR vault you can get at

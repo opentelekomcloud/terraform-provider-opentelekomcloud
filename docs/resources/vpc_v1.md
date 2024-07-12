@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpc_v1"
 sidebar_current: "docs-opentelekomcloud-resource-vpc-v1"
 description: |-
-Manages a VPC resource within OpenTelekomCloud.
+  Manages a VPC resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC service you can get at

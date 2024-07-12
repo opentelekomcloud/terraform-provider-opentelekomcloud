@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dcs_certificate_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-dcs-certificate-v2"
 description: |-
-Get DCS certificate from OpenTelekomCloud
+  Get DCS certificate from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for DCS certificate you can get at

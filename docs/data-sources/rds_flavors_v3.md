@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_rds_flavors_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-rds-flavors-v3"
 description: |-
-Get available RDSv3 flavors from OpenTelekomCloud
+  Get available RDSv3 flavors from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for RDSv3 flavor you can get at

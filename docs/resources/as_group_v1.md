@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_as_group_v1"
 sidebar_current: "docs-opentelekomcloud-resource-as-group-v1"
 description: |-
-Manages a AS Group resource within OpenTelekomCloud.
+  Manages a AS Group resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for AS group you can get at

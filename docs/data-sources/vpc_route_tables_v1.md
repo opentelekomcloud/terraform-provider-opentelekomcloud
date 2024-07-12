@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpc_route_tables_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-vpc-route-tables-v1"
 description: |-
-Get details about a specific VPC route tables from OpenTelekomCloud
+  Get details about a specific VPC route tables from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for VPC route table you can get at

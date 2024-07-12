@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_networking_port_secgroup_associate_v2"
 sidebar_current: "docs-opentelekomcloud-resource-networking-port-secgroup-associate-v2"
 description: |-
-Manages a VPC Port's Security Groups resource within OpenTelekomCloud.
+  Manages a VPC Port's Security Groups resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud_networking_port_secgroup_associate_v2

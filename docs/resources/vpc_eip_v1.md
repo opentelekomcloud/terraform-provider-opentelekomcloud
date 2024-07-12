@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpc_eip_v1"
 sidebar_current: "docs-opentelekomcloud-resource-vpc-eip-v1"
 description: |-
-Manages a VPC EIP resource within OpenTelekomCloud.
+  Manages a VPC EIP resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC eip you can get at

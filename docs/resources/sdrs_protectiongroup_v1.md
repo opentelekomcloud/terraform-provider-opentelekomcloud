@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_sdrs_protectiongroup_v1"
 sidebar_current: "docs-opentelekomcloud-resource-sdrs-protectiongroup-v1"
 description: |-
-Manages an SDRS Protection Group resource within OpenTelekomCloud.
+  Manages an SDRS Protection Group resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for SDRS protection group you can get at

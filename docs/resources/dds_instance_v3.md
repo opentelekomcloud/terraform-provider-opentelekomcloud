@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dds_instance_v3"
 sidebar_current: "docs-opentelekomcloud-resource-dds-instance-v3"
 description: |-
-Manages a DDS Instance resource within OpenTelekomCloud.
+  Manages a DDS Instance resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DDS instance you can get at

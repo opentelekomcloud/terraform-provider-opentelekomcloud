@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dms_user_v2"
 sidebar_current: "docs-opentelekomcloud-resource-dms-user-v2"
 description: |-
-Manages a DMS User resource within OpenTelekomCloud.
+  Manages a DMS User resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DMS user you can get at

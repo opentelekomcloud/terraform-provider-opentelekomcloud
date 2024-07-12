@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_images_image_v2"
 sidebar_current: "docs-opentelekomcloud-resource-images-image-v2"
 description: |-
-Manages an Image Management resource within OpenTelekomCloud.
+  Manages an Image Management resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for Image management you can get at

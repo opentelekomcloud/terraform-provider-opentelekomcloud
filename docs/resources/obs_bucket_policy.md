@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_obs_bucket_policy"
 sidebar_current: "docs-opentelekomcloud-resource-obs-bucket-policy"
 description: |-
-Manages a OBS Bucket Policy resource within OpenTelekomCloud.
+  Manages a OBS Bucket Policy resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for OBS bucket policy you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_waf_webtamperprotection_rule_v1"
 sidebar_current: "docs-opentelekomcloud-resource-waf-webtamperprotection-rule-v1"
 description: |-
-Manages a WAF Web Tamper Protection Rule resource within OpenTelekomCloud.
+  Manages a WAF Web Tamper Protection Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF web tamper protection rule you can get at

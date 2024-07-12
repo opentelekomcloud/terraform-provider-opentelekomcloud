@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_networking_network_v2"
 sidebar_current: "docs-opentelekomcloud-resource-networking-network-v2"
 description: |-
-Manages a VPC Network resource within OpenTelekomCloud.
+  Manages a VPC Network resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC network you can get at

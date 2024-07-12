@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_identity_protocol_v3"
 sidebar_current: "docs-opentelekomcloud-resource-identity-protocol-v3"
 description: |-
-Manages a IAM Protocol resource within OpenTelekomCloud.
+  Manages a IAM Protocol resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for IAM protocol you can get at

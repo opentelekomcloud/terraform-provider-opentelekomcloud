@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_waf_falsealarmmasking_rule_v1"
 sidebar_current: "docs-opentelekomcloud-resource-waf-falsealarmmasking-rule-v1"
 description: |-
-Manages a WAF False Alarm Masking Rule resource within OpenTelekomCloud.
+  Manages a WAF False Alarm Masking Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF false alarm masking rules you can get at

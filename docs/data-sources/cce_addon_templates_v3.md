@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_cce_addon_templates_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-cce-addon-templates-v3"
 description: |-
-Get CCE Addon template versions and additional info based on cluster version from OpenTelekomCloud
+  Get CCE Addon template versions and additional info based on cluster version from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for CCE Addon template you can get at

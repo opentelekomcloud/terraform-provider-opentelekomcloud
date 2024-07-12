@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpc_bandwidth_associate_v2"
 sidebar_current: "docs-opentelekomcloud-resource-vpc-bandwidth-associate-v2"
 description: |-
-Manages a VPC Bandwidth Association resource within OpenTelekomCloud.
+  Manages a VPC Bandwidth Association resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC bandwidth association you can get at

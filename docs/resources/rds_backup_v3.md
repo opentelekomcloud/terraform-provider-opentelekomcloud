@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_rds_backup_v3"
 sidebar_current: "docs-opentelekomcloud-resource-rds-backup-v3"
 description: |-
-Manages an RDS Backup resource within OpenTelekomCloud.
+  Manages an RDS Backup resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for RDS backup rule you can get at

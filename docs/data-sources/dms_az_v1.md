@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dms_az_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-dms-az-v1"
 description: |-
-Get available DMS AZ from OpenTelekomCloud
+  Get available DMS AZ from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for DMS AZ you can get at

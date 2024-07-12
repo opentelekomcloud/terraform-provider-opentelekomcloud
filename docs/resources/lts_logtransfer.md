@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_logtank_transfer_v2"
 sidebar_current: "docs-opentelekomcloud-resource-logtank-transfer-v2"
 description: |-
-Manages a LTS Log Transfer resource within OpenTelekomCloud.
+  Manages a LTS Log Transfer resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for LTS log transfer you can get at

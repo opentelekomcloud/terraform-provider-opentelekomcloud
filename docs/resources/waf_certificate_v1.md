@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_waf_certificate_v1"
 sidebar_current: "docs-opentelekomcloud-resource-waf-certificate-v1"
 description: |-
-Manages a WAF Certificate resource within OpenTelekomCloud.
+  Manages a WAF Certificate resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF certificate you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dms_user_permission_v1"
 sidebar_current: "docs-opentelekomcloud-resource-dms-user-permission-v1"
 description: |-
-Manages a DMS User Permissions resource within OpenTelekomCloud.
+  Manages a DMS User Permissions resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DMS user permissions you can get at

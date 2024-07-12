@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_cts_tracker_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-cts-tracker-v1"
 description: |-
-Get details about CTS tracker from OpenTelekomCloud
+  Get details about CTS tracker from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for CTS tracker you can get at

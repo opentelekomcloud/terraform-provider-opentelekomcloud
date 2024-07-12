@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_swr_repository_v2"
 sidebar_current: "docs-opentelekomcloud-resource-swr-repository-v2"
 description: |-
-Manages an SWR Repository resource within OpenTelekomCloud.
+  Manages an SWR Repository resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for SWR repository you can get at

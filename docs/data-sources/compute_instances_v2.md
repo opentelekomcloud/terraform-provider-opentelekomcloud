@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_compute_instances_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-compute-instances-v2"
 description: |-
-Get ECS instances details from OpenTelekomCloud
+  Get ECS instances details from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for ECS instances you can get at

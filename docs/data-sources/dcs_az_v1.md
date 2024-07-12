@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dcs_az_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-dcs-az-v1"
 description: |-
-Get DCS AZ information from OpenTelekomCloud
+  Get DCS AZ information from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for DCS AZ you can get at

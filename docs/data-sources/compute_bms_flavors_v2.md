@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_compute_bms_flavors_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-compute-bms-flavors-v2"
 description: |-
-Get details about flavors of BMSs from OpenTelekomCloud
+  Get details about flavors of BMSs from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for BMSs flavors you can get at

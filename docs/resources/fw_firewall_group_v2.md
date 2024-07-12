@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_fw_firewall_group_v2"
 sidebar_current: "docs-opentelekomcloud-resource-fw-firewall-group-v2"
 description: |-
-Manages a VPC Firewall Group resource within OpenTelekomCloud.
+  Manages a VPC Firewall Group resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC firewall group you can get at

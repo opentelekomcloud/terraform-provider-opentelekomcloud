@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpc_route_v2"
 sidebar_current: "docs-opentelekomcloud-resource-vpc-route-v2"
 description: |-
-Manages a VPC Route Table resource within OpenTelekomCloud.
+  Manages a VPC Route Table resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC route you can get at

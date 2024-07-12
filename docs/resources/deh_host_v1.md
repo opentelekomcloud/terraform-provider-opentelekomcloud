@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_deh_host_v1"
 sidebar_current: "docs-opentelekomcloud-resource-deh-host-v1"
 description: |-
-Manages a DEH Host resource within OpenTelekomCloud.
+  Manages a DEH Host resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DEH host you can get at

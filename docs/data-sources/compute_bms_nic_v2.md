@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_compute_bms_nic_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-compute-bms-nic-v2"
 description: |-
-Get details about BMS NIC from OpenTelekomCloud
+  Get details about BMS NIC from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for BMS NIC you can get at

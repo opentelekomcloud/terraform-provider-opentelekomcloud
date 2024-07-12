@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpc_bandwidth"
 sidebar_current: "docs-opentelekomcloud-datasource-vpc-bandwidth"
 description: |-
-Get details about a specific shared bandwidth from OpenTelekomCloud
+  Get details about a specific shared bandwidth from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for VPC shared bandwidth you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_sfs_share_access_rules_v2"
 sidebar_current: "docs-opentelekomcloud-resource-sfs-share-access-rules-v2"
 description: |-
-Manages an SFS Access Rules resource within OpenTelekomCloud.
+  Manages an SFS Access Rules resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for SFS access rules you can get at

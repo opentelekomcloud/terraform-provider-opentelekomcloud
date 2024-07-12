@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_identity_provider_v3"
 sidebar_current: "docs-opentelekomcloud-resource-identity-provider-v3"
 description: |-
-Manages a IAM Provider v3 resource within OpenTelekomCloud.
+  Manages a IAM Provider v3 resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for IAM provider you can get at

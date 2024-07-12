@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_certificate_v3"
 sidebar_current: "docs-opentelekomcloud-resource-lb-certificate-v3"
 description: |-
-Manages a LB Certificate resource within OpenTelekomCloud.
+  Manages a LB Certificate resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DLB certificate you can get at

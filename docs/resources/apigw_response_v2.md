@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_apigw_response_v2"
 sidebar_current: "docs-opentelekomcloud-resource-apigw-response-v2"
 description: |-
-Manages a APIGW Custom Response resource within OpenTelekomCloud.
+  Manages a APIGW Custom Response resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for API Gateway group service you can get at

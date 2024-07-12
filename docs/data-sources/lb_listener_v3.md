@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_listener_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-lb-listener-v3"
 description: |-
-Get details about ELBv3 listener from OpenTelekomCloud
+  Get details about ELBv3 listener from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for ELBv3 listener you can get at

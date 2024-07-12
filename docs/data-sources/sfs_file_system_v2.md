@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_sfs_file_system_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-sfs-file-system-v2"
 description: |-
-Get details about a Scalable File Service from OpenTelekomCloud
+  Get details about a Scalable File Service from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for SFS you can get at

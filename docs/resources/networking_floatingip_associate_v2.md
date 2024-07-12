@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_networking_floatingip_associate_v2"
 sidebar_current: "docs-opentelekomcloud-resource-networking-floatingip-associate-v2"
 description: |-
-Manages a VPC Floating IP Association resource within OpenTelekomCloud.
+  Manages a VPC Floating IP Association resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC floating ip association you can get at

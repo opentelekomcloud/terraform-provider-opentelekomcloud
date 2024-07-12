@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dws_flavors_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-dws-flavors-v2"
 description: |-
-Get details about DWS flavors from OpenTelekomCloud
+  Get details about DWS flavors from OpenTelekomCloud
 ---
 
 # opentelekomcloud_dws_flavors_v2

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_rds_versions_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-rds-versions-v3"
 description: |-
-Get available RDSv3 versions from OpenTelekomCloud
+  Get available RDSv3 versions from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for RDSv3 versions you can get at

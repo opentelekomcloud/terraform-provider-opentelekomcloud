@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_rds_parametergroup_v3"
 sidebar_current: "docs-opentelekomcloud-resource-rds-parametergroup-v3"
 description: |-
-Manages an RDS Parameter Group resource within OpenTelekomCloud.
+  Manages an RDS Parameter Group resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for RDS parameter group rule you can get at

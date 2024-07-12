@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_pool_v3"
 sidebar_current: "docs-opentelekomcloud-resource-lb-pool-v3"
 description: |-
-Manages a LB Pool resource within OpenTelekomCloud.
+  Manages a LB Pool resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DLB pool you can get at

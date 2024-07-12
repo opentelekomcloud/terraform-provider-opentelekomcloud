@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dns_recordset_v2"
 sidebar_current: "docs-opentelekomcloud-resource-dns-recordset-v2"
 description: |-
-Manages a DNS Recordset resource within OpenTelekomCloud.
+  Manages a DNS Recordset resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DNS recordset you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dis_checkpoint_v2"
 sidebar_current: "docs-opentelekomcloud-resource-dis-checkpoint-v2"
 description: |-
-Manages a DIS Checkpoint resource within OpenTelekomCloud.
+  Manages a DIS Checkpoint resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DIS checkpoint you can get at

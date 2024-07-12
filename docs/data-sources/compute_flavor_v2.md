@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_compute_flavor_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-compute-flavor-v2"
 description: |-
-Get the ID of an available ECS flavor from OpenTelekomCloud
+  Get the ID of an available ECS flavor from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for ECS flavor you can get at

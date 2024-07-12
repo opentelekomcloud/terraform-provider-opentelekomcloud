@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_rts_software_deployment_v1"
 sidebar_current: "docs-opentelekomcloud-resource-rts-software-deployment-v1"
 description: |-
-Manages an RTS Deployment resource within OpenTelekomCloud.
+  Manages an RTS Deployment resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for RTS deployment you can get at

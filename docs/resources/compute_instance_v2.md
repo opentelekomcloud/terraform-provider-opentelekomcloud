@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_compute_instance_v2"
 sidebar_current: "docs-opentelekomcloud-resource-compute-instance-v2"
 description: |-
-Manages an ECS Instance resource within OpenTelekomCloud.
+  Manages an ECS Instance resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ECS management you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_rts_stack_resource_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-rts-stack-resource-v1"
 description: |-
-Get details about a specific RTS resource metadata from OpenTelekomCloud
+  Get details about a specific RTS resource metadata from OpenTelekomCloud
 ---
 
 # opentelekomcloud_rts_stack_resource_v1

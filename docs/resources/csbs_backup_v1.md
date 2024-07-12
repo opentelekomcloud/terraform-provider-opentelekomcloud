@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_csbs_backup_v1"
 sidebar_current: "docs-opentelekomcloud-resource-csbs-backup-v1"
 description: |-
-Manages a CSBS Backup resource within OpenTelekomCloud.
+  Manages a CSBS Backup resource within OpenTelekomCloud.
 ---
 
 

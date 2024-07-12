@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_rds_instance_v3"
 sidebar_current: "docs-opentelekomcloud-resource-rds-instance-v3"
 description: |-
-Manages an RDS Instance v3 resource within OpenTelekomCloud.
+  Manages an RDS Instance v3 resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for RDS instance rule you can get at

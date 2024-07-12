@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dis_stream_v2"
 sidebar_current: "docs-opentelekomcloud-resource-dis-stream-v2"
 description: |-
-Manages a DIS Stream resource within OpenTelekomCloud.
+  Manages a DIS Stream resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DIS stream you can get at

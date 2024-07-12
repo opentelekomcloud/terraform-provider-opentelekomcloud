@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_identity_role_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-identity-role-v3"
 description: |-
-Get a IAM role information from OpenTelekomCloud
+  Get a IAM role information from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for IAM role you can get at

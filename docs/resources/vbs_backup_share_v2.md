@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vbs_backup_share_v2"
 sidebar_current: "docs-opentelekomcloud-resource-vbs-backup-share-v2"
 description: |-
-Manages an VBS Backup Share resource within OpenTelekomCloud.
+  Manages an VBS Backup Share resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VBS backup share you can get at

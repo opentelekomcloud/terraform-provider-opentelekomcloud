@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_identity_password_policy_v3"
 sidebar_current: "docs-opentelekomcloud-resource-identity-password-policy-v3"
 description: |-
-Manages a IAM Password Policy resource within OpenTelekomCloud.
+  Manages a IAM Password Policy resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for IAM provider you can get at

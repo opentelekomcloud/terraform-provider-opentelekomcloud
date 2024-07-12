@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpnaas_service_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-vpnaas-service-v2"
 description: |-
-Get details about a specific VPN from OpenTelekomCloud
+  Get details about a specific VPN from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for VPN service you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dms_maintainwindow_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-dms-maintainwindow-v1"
 description: |-
-Get available DMS maintain window from OpenTelekomCloud
+  Get available DMS maintain window from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for DMS maintain window you can get at

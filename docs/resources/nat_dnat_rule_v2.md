@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_nat_dnat_rule_v2"
 sidebar_current: "docs-opentelekomcloud-resource-nat-dnat-rule-v2"
 description: |-
-Manages a NAT DNAT Rule resource within OpenTelekomCloud.
+  Manages a NAT DNAT Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for NAT DNAT you can get at

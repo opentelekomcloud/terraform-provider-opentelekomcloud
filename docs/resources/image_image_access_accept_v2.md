@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_images_image_access_accept_v2"
 sidebar_current: "docs-opentelekomcloud-resource-images-image-access-accept-v2"
 description: |-
-Manages an Image Sharing Accept resource within OpenTelekomCloud.
+  Manages an Image Sharing Accept resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for Image sharing accept you can get at

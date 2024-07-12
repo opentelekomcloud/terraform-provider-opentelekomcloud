@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_certificate_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-lb-certificate-v3"
 description: |-
-Get ELBv3 certificate from OpenTelekomCloud
+  Get ELBv3 certificate from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for ELBv3 certificate you can get at

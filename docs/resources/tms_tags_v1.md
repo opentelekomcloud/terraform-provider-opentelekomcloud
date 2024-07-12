@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_tms_tags_v1"
 sidebar_current: "docs-opentelekomcloud-resource-tms-tags-v1"
 description: |-
-Manages an TMS Tags resource within OpenTelekomCloud.
+  Manages an TMS Tags resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for TMS Tags you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dms_topic_v1"
 sidebar_current: "docs-opentelekomcloud-resource-dms-topic-v1"
 description: |-
-Manages a DMS Topic resource within OpenTelekomCloud.
+  Manages a DMS Topic resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DMS topic you can get at

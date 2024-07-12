@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_networking_secgroup_rule_ids_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-networking-secgroup-rule-ids-v2"
 description: |-
-Get a list of security group rules ids from OpenTelekomCloud
+  Get a list of security group rules ids from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for Network security group you can get at

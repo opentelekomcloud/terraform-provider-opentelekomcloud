@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_csbs_backup_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-csbs-backup-v1"
 description: |-
-Get details about CSBS backup resources from OpenTelekomCloud
+  Get details about CSBS backup resources from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for CSBS backup you can get at

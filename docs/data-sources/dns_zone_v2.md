@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dns_zone_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-dns-zone-v2"
 description: |-
-Get available DNS zone from OpenTelekomCloud
+  Get available DNS zone from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for DNS zone you can get at

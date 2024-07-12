@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_loadbalancer_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-lb-loadbalancer-v3"
 description: |-
-Get details about ELBv3 loadbalancer from OpenTelekomCloud
+  Get details about ELBv3 loadbalancer from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for ELBv3 loadbalancer you can get at

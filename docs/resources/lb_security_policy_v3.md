@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_security_policy_v3"
 sidebar_current: "docs-opentelekomcloud-resource-lb-security-policy-v3"
 description: |-
-Manages a LB Security Policy resource within OpenTelekomCloud.
+  Manages a LB Security Policy resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DLB security policy you can get at

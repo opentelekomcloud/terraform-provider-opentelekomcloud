@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_apigw_appcode_v2"
 sidebar_current: "docs-opentelekomcloud-resource-apigw-appcode-v2"
 description: |-
-Manages a APIGW AppCode resource within OpenTelekomCloud.
+  Manages a APIGW AppCode resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for API Gateway AppCode service you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_obs_bucket"
 sidebar_current: "docs-opentelekomcloud-datasource-obs-bucket"
 description: |-
-Get details about OBS bucket from OpenTelekomCloud
+  Get details about OBS bucket from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for OBS bucket you can get at

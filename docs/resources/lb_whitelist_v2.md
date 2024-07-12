@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_whitelist_v2"
 sidebar_current: "docs-opentelekomcloud-resource-lb-whitelist-v2"
 description: |-
-Manages a ELB Whitelist resource within OpenTelekomCloud.
+  Manages a ELB Whitelist resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ELB whitelist you can get at

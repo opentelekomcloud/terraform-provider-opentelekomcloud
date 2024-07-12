@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_apigw_acl_policy_associate_v2"
 sidebar_current: "docs-opentelekomcloud-resource-apigw-acl-policy-associate-v2"
 description: |-
-Manages a APIGW ACL policy association resource within OpenTelekomCloud.
+  Manages a APIGW ACL policy association resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for API Gateway Acl associate service you can get at
