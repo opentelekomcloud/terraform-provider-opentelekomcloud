@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_images_image_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-images-image-v2"
 description: |-
-Get the ID of an available image from OpenTelekomCloud
+  Get the ID of an available image from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for Image you can get at

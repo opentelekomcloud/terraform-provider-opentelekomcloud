@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_listener_v2"
 sidebar_current: "docs-opentelekomcloud-resource-lb-listener-v2"
 description: |-
-Manages a ELB Listener resource within OpenTelekomCloud.
+  Manages a ELB Listener resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ELB listener you can get at

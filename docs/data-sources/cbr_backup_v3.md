@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_cbr_backup_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-cbr-backup-v3"
 description: |-
-Get details about CBR backup resources from OpenTelekomCloud
+  Get details about CBR backup resources from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for CBR backups you can get at

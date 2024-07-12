@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_csbs_backup_policy_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-csbs-backup-policy-v1"
 description: |-
-Get details about backup Policy resources from OpenTelekomCloud
+  Get details about backup Policy resources from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for CSBS backup policy you can get at

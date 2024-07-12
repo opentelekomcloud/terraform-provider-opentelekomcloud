@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_as_configuration_v1"
 sidebar_current: "docs-opentelekomcloud-resource-as-configuration-v1"
 description: |-
-Manages a AS Configuration resource within OpenTelekomCloud.
+  Manages a AS Configuration resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for AS configuration you can get at

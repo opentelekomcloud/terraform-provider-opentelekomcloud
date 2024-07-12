@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dms_product_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-dms-product-v1"
 description: |-
-Get available DMS product from OpenTelekomCloud
+  Get available DMS product from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for DMS product you can get at

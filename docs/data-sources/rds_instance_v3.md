@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_rds_instance_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-rds-instance-v3"
 description: |-
-Get available RDSv3 instance from OpenTelekomCloud
+  Get available RDSv3 instance from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for RDSv3 instance you can get at

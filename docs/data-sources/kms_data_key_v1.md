@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_kms_data_key_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-kms-data-key-v1"
 description: |-
-Get an available KMS DEK from OpenTelekomCloud
+  Get an available KMS DEK from OpenTelekomCloud
 ---
 
 # opentelekomcloud_kms_data_key_v1

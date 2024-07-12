@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_monitor_v2"
 sidebar_current: "docs-opentelekomcloud-resource-lb-monitor-v2"
 description: |-
-Manages a ELB Monitor resource within OpenTelekomCloud.
+  Manages a ELB Monitor resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ELB monitor you can get at

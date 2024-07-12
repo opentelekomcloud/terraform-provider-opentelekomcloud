@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_waf_dedicated_precise_protection_rule_v1"
 sidebar_current: "docs-opentelekomcloud-resource-waf-dedicated-precise-protection-rule-v1"
 description: |-
-Manages a WAF Dedicated Precise Protection Rule resource within OpenTelekomCloud.
+  Manages a WAF Dedicated Precise Protection Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF dedicated Precise Protection rule you can get at

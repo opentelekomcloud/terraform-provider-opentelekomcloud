@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_apigw_environment_variable_v2"
 sidebar_current: "docs-opentelekomcloud-resource-apigw-environment-variable-v2"
 description: |-
-Manages a APIGW Environment variable resource within OpenTelekomCloud.
+  Manages a APIGW Environment variable resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for API Gateway environment variable service you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_css_cluster_v1"
 sidebar_current: "docs-opentelekomcloud-resource-css-cluster-v1"
 description: |-
-Manages a CSS Cluster resource within OpenTelekomCloud.
+  Manages a CSS Cluster resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for CSS cluster you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_sdrs_domain_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-sdrs-domain-v1"
 description: |-
-Get the ID of an available SDRS domain from OpenTelekomCloud
+  Get the ID of an available SDRS domain from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for SDRS domain you can get at

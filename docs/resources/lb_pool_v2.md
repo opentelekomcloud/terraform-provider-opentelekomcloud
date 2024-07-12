@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_pool_v2"
 sidebar_current: "docs-opentelekomcloud-resource-lb-pool-v2"
 description: |-
-Manages a ELB Pool resource within OpenTelekomCloud.
+  Manages a ELB Pool resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ELB pool you can get at

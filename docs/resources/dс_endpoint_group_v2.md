@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dc_endpoint_group_v2"
 sidebar_current: "docs-opentelekomcloud-resource-dc-endpoint-group-v2"
 description: |-
-Manages a Direct Connect Endpoint Group resource within OpenTelekomCloud.
+  Manages a Direct Connect Endpoint Group resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud_dc_endpoint_group_v2 (Resource)

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_direct_connect_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-direct-connect-v2"
 description: |-
-Get about a specific Direct Connect (DCaaS) connection from OpenTelekomCloud
+  Get about a specific Direct Connect (DCaaS) connection from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for DCaaS connection you can get at

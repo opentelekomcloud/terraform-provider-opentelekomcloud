@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_identity_project_v3"
 sidebar_current: "docs-opentelekomcloud-resource-identity-project-v3"
 description: |-
-Manages a IAM Project resource within OpenTelekomCloud.
+  Manages a IAM Project resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for IAM project you can get at

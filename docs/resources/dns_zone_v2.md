@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dns_zone_v2"
 sidebar_current: "docs-opentelekomcloud-resource-dns-zone-v2"
 description: |-
-Manages a DNS Zones resource within OpenTelekomCloud.
+  Manages a DNS Zones resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DNS zones you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_networking_secgroup_rule_v2"
 sidebar_current: "docs-opentelekomcloud-resource-networking-secgroup-rule-v2"
 description: |-
-Manages a VPC Security Group Rule resource within OpenTelekomCloud.
+  Manages a VPC Security Group Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC security group rule you can get at

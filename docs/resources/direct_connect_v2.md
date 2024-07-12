@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_direct_connect_v2"
 sidebar_current: "docs-opentelekomcloud-resource-direct-connect-v2"
 description: |-
-Manages a Direct Connect resource within OpenTelekomCloud.
+  Manages a Direct Connect resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud_direct_connect_v2 (Resource)

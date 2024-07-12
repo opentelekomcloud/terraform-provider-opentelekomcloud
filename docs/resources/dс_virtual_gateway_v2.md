@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dc_virtual_gateway_v2"
 sidebar_current: "docs-opentelekomcloud-resource-dc-virtual-gateway-v2"
 description: |-
-Manages a Direct Connect Virtual Gateway resource within OpenTelekomCloud.
+  Manages a Direct Connect Virtual Gateway resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud_dc_virtual_gateway_v2 (Resource)

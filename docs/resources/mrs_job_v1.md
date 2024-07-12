@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_mrs_job_v1"
 sidebar_current: "docs-opentelekomcloud-resource-mrs-job-v1"
 description: |-
-Manages a MRS Job resource within OpenTelekomCloud.
+  Manages a MRS Job resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for MRS job you can get at

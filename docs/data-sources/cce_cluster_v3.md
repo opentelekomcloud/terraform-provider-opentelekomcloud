@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_cce_cluster_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-cce-cluster-v3"
 description: |-
-Get CCE cluster details from OpenTelekomCloud
+  Get CCE cluster details from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for CCE cluster you can get at

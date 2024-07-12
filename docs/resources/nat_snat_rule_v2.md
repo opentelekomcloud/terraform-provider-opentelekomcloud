@@ -1,9 +1,10 @@
+---
 subcategory: "NAT"
 layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_nat_snat_rule_v2"
 sidebar_current: "docs-opentelekomcloud-resource-nat-snat-rule-v2"
 description: |-
-Manages a NAT SNAT Rule resource within OpenTelekomCloud.
+  Manages a NAT SNAT Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for NAT SNAT you can get at

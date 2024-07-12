@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_member_ids_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-lb-member-ids-v2"
 description: |-
-Get details about ELBv2 pool members from OpenTelekomCloud
+  Get details about ELBv2 pool members from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for ELBv3 pool members you can get at

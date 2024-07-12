@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_compute_floatingip_associate_v2"
 sidebar_current: "docs-opentelekomcloud-resource-compute-floatingip-associate-v2"
 description: |-
-Manages an EIP Associate resource within OpenTelekomCloud.
+  Manages an EIP Associate resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for EIP you can get at

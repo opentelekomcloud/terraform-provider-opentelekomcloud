@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_compute_bms_server_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-compute-bms-server-v2"
 description: |-
-Get details about BMS from OpenTelekomCloud
+  Get details about BMS from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for BMS you can get at

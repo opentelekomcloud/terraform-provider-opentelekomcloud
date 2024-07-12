@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_waf_dedicated_reference_tables_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-waf-dedicated-reference-tables-v1"
 description: |-
-Get a list of WAF reference tables from OpenTelekomCloud
+  Get a list of WAF reference tables from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for WAF reference table you can get at

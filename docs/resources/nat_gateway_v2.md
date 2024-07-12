@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_nat_gateway_v2"
 sidebar_current: "docs-opentelekomcloud-resource-nat-gateway-v2"
 description: |-
-Manages a NAT Gateway resource within OpenTelekomCloud.
+  Manages a NAT Gateway resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for NAT gateway you can get at

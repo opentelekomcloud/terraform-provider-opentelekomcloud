@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_networking_port_v2"
 sidebar_current: "docs-opentelekomcloud-resource-networking-port-v2"
 description: |-
-Manages a VPC Port resource within OpenTelekomCloud.
+  Manages a VPC Port resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC port you can get at

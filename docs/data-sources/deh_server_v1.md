@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_deh_server_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-deh-server-v1"
 description: |-
-Get details about the server on a specified Dedicated Host from OpenTelekomCloud
+  Get details about the server on a specified Dedicated Host from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for DEH ECSs you can get at

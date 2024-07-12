@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_l7policy_v2"
 sidebar_current: "docs-opentelekomcloud-resource-lb-l7policy-v2"
 description: |-
-Manages a ELB L7 Policy resource within OpenTelekomCloud.
+  Manages a ELB L7 Policy resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ELB l7 policy you can get at

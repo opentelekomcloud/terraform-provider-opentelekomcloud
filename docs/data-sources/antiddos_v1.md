@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_antiddos_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-antiddos-v1"
 description: |-
-Get a status of EIP from OpenTelekomCloud
+  Get a status of EIP from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for EIP status you can get at

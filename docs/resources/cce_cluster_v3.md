@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_cce_cluster_v3"
 sidebar_current: "docs-opentelekomcloud-resource-cce-cluster-v3"
 description: |-
-Manages a CCE Cluster resource within OpenTelekomCloud.
+  Manages a CCE Cluster resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for CCE cluster you can get at

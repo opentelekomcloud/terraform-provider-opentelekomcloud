@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_rts_software_config_v1"
 sidebar_current: "docs-opentelekomcloud-resource-rts-software-config-v1"
 description: |-
-Manages an RTS Config resource within OpenTelekomCloud.
+  Manages an RTS Config resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for RTS config you can get at

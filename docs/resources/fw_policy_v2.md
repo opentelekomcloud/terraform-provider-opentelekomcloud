@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_fw_policy_v2"
 sidebar_current: "docs-opentelekomcloud-resource-fw-policy-v2"
 description: |-
-Manages a VPC Firewall Policy resource within OpenTelekomCloud.
+  Manages a VPC Firewall Policy resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC firewall policy you can get at

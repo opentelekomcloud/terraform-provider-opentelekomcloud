@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_networking_subnet_v2"
 sidebar_current: "docs-opentelekomcloud-resource-networking-subnet-v2"
 description: |-
-Manages a VPC Subnet resource within OpenTelekomCloud.
+  Manages a VPC Subnet resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC subnet you can get at

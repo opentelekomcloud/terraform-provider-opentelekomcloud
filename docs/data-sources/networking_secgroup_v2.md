@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_networking_secgroup_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-networking-secgroup-v2"
 description: |-
-Get the ID of an available security group from OpenTelekomCloud
+  Get the ID of an available security group from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for Network security group you can get at

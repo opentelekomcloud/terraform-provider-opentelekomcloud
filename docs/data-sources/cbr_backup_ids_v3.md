@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_cbr_backup_ids_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-cbr-backup-ids-v3"
 description: |-
-Get ids of CBR backup resources from OpenTelekomCloud
+  Get ids of CBR backup resources from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for CBR backups you can get at

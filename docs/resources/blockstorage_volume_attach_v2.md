@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_blockstorage_volume_attach_v2"
 sidebar_current: "docs-opentelekomcloud-resource-blockstorage-volume-attach-v2"
 description: |-
-Manages a BlockStorage volume attach resource within OpenTelekomCloud.
+  Manages a BlockStorage volume attach resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud_blockstorage_volume_attach_v2

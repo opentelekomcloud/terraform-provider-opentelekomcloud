@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_fgs_trigger_v2"
 sidebar_current: "docs-opentelekomcloud-resource-fgs-trigger-v2"
 description: |-
-Manages an FGS Trigger resource within OpenTelekomCloud.
+  Manages an FGS Trigger resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for FGS you can get at

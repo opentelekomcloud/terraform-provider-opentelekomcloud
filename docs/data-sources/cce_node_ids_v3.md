@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_cce_node_ids_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-cce-node-ids-v3"
 description: |-
-Get a list of node ids for a CCE cluster from OpenTelekomCloud
+  Get a list of node ids for a CCE cluster from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for CCE nodes you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vbs_backup_v2"
 sidebar_current: "docs-opentelekomcloud-resource-vbs-backup-v2"
 description: |-
-Manages an VBS Backup resource within OpenTelekomCloud.
+  Manages an VBS Backup resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VBS backup you can get at

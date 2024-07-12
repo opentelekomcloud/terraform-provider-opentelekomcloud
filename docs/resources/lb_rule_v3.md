@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_rule_v3"
 sidebar_current: "docs-opentelekomcloud-resource-lb-rule-v3"
 description: |-
-Manages a LB Rule resource within OpenTelekomCloud.
+  Manages a LB Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DLB l7 rule you can get at

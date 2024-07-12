@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_ipgroup_v3"
 sidebar_current: "docs-opentelekomcloud-resource-lb-ipgroup-v3"
 description: |-
-Manages a LB IpGroup resource within OpenTelekomCloud.
+  Manages a LB IpGroup resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DLB ip group you can get at

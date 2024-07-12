@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_obs_bucket_object"
 sidebar_current: "docs-opentelekomcloud-resource-obs-bucket-object"
 description: |-
-Manages a OBS Bucket Object resource within OpenTelekomCloud.
+  Manages a OBS Bucket Object resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for OBS bucket object you can get at

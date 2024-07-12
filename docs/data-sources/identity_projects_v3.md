@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_identity_projects_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-identity-projects-v3"
 description: |-
-Get a IAM projects information from OpenTelekomCloud
+  Get a IAM projects information from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for IAM projects you can get at

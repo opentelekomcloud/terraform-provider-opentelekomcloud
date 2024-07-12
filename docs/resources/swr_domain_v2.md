@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_swr_domain_v2"
 sidebar_current: "docs-opentelekomcloud-resource-swr-domain-v2"
 description: |-
-Manages an SWR Domain resource within OpenTelekomCloud.
+  Manages an SWR Domain resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for SWR domain you can get at

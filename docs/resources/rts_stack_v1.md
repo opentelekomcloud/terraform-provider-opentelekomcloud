@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_rts_stack_v1"
 sidebar_current: "docs-opentelekomcloud-resource-rts-stack-v1"
 description: |-
-Manages an RTS Stack resource within OpenTelekomCloud.
+  Manages an RTS Stack resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for RTS stack you can get at

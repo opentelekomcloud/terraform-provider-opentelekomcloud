@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_rds_read_replica_v3"
 sidebar_current: "docs-opentelekomcloud-resource-rds-read-replica-v3"
 description: |-
-Manages an RDS Read Replica resource within OpenTelekomCloud.
+  Manages an RDS Read Replica resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for RDS replica you can get at

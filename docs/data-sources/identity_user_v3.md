@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_identity_user_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-identity-user-v3"
 description: |-
-Get a IAM user information from OpenTelekomCloud
+  Get a IAM user information from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for IAM user you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_networking_network_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-networking-network-v2"
 description: |-
-Get the ID of an available network resource from OpenTelekomCloud
+  Get the ID of an available network resource from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for Network you can get at

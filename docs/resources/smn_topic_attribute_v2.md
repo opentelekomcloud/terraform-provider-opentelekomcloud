@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_smn_topic_attribute_v2"
 sidebar_current: "docs-opentelekomcloud-resource-smn-topic-attribute-v2"
 description: |-
-Manages an SMN Topic Attribute resource within OpenTelekomCloud.
+  Manages an SMN Topic Attribute resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for SMN topic attribute you can get at

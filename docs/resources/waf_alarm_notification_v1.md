@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_waf_alarm_notification_v1"
 sidebar_current: "docs-opentelekomcloud-resource-waf-alarm-notification-v1"
 description: |-
-Manages a WAF Alarm Notification resource within OpenTelekomCloud.
+  Manages a WAF Alarm Notification resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF alarm notification you can get at

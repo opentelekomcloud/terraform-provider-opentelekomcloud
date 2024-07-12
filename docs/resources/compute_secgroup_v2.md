@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_compute_secgroup_v2"
 sidebar_current: "docs-opentelekomcloud-resource-compute-secgroup-v2"
 description: |-
-Manages an ECS Security Group Management resource within OpenTelekomCloud.
+  Manages an ECS Security Group Management resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ECS security group management you can get at

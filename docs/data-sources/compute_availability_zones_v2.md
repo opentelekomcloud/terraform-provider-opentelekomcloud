@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_compute_availability_zones_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-compute-availability-zones-v2"
 description: |-
-Get a list of availability zones from OpenTelekomCloud
+  Get a list of availability zones from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for Compute AZs you can get at

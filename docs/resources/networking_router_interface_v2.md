@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_networking_router_interface_v2"
 sidebar_current: "docs-opentelekomcloud-resource-networking-router-interface-v2"
 description: |-
-Manages a VPC Router Interface resource within OpenTelekomCloud.
+  Manages a VPC Router Interface resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC router interface you can get at

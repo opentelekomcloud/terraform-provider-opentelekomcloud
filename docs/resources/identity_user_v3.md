@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_identity_user_v3"
 sidebar_current: "docs-opentelekomcloud-resource-identity-user-v3"
 description: |-
-Manages a IAM User resource within OpenTelekomCloud.
+  Manages a IAM User resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for IAM user you can get at

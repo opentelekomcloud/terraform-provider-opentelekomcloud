@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_apigw_api_publishment_v2"
 sidebar_current: "docs-opentelekomcloud-resource-apigw-api-publishment-v2"
 description: |-
-Manages a APIGW API publishment resource within OpenTelekomCloud.
+  Manages a APIGW API publishment resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for API Gateway Api publishment you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_css_flavor_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-css-flavor-v1"
 description: |-
-Get details about CSS flavor from OpenTelekomCloud
+  Get details about CSS flavor from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for CSS flavor you can get at

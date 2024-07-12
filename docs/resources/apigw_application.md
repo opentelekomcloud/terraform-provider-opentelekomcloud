@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_apigw_application_v2"
 sidebar_current: "docs-opentelekomcloud-resource-apigw-application-v2"
 description: |-
-Manages a APIGW Application resource within OpenTelekomCloud.
+  Manages a APIGW Application resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for API Gateway App service you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_rts_software_config_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-rts-software-config-v1"
 description: |-
-Get details about a specific RTS Software Config from OpenTelekomCloud
+  Get details about a specific RTS Software Config from OpenTelekomCloud
 ---
 
 # opentelekomcloud_rts_software_config_v1

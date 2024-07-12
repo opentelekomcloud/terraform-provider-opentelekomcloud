@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_identity_agency_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-identity-agency-v3"
 description: |-
-Get an agency information from OpenTelekomCloud
+  Get an agency information from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for IAM agency you can get at

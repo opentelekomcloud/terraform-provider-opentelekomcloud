@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_identity_group_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-identity-group-v3"
 description: |-
-Get a IAM group information from OpenTelekomCloud
+  Get a IAM group information from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for IAM group you can get at

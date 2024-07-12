@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_certificate_v2"
 sidebar_current: "docs-opentelekomcloud-resource-lb-certificate-v2"
 description: |-
-Manages a ELB Certificate resource within OpenTelekomCloud.
+  Manages a ELB Certificate resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ELB certificate you can get at

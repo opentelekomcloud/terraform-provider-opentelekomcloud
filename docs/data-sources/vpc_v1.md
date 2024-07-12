@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpc_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-vpc-v1"
 description: |-
-Get details about a specific VPC from OpenTelekomCloud
+  Get details about a specific VPC from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for VPC you can get at

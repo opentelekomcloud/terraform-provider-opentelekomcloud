@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpc_peering_connection_accepter_v2"
 sidebar_current: "docs-opentelekomcloud-resource-vpc-peering-connection-accepter-v2"
 description: |-
-Manages a VPC Peering Accepter resource within OpenTelekomCloud.
+  Manages a VPC Peering Accepter resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPC peering accepter you can get at

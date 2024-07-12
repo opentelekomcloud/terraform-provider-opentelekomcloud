@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpnaas_service_v2"
 sidebar_current: "docs-opentelekomcloud-resource-vpnaas-service-v2"
 description: |-
-Manages a VPNAAS Service resource within OpenTelekomCloud.
+  Manages a VPNAAS Service resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPNAAS service you can get at

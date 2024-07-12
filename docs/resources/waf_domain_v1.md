@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_waf_domain_v1"
 sidebar_current: "docs-opentelekomcloud-resource-waf-domain-v1"
 description: |-
-Manages a WAF Domain resource within OpenTelekomCloud.
+  Manages a WAF Domain resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF domain you can get at

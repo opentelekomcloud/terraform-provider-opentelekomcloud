@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_s3_bucket_object"
 sidebar_current: "docs-opentelekomcloud-resource-s3-bucket-object"
 description: |-
-Manages an S3 Bucket Object resource within OpenTelekomCloud.
+  Manages an S3 Bucket Object resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud_s3_bucket_object

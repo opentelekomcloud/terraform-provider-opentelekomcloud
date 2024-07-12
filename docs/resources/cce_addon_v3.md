@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_cce_addon_v3"
 sidebar_current: "docs-opentelekomcloud-resource-cce-addon-v3"
 description: |-
-Manages a CCE Addon resource within OpenTelekomCloud.
+  Manages a CCE Addon resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for CCE addons you can get at

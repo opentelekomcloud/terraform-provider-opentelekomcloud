@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpnaas_site_connection_v2"
 sidebar_current: "docs-opentelekomcloud-resource-vpnaas-site-connection-v2"
 description: |-
-Manages a VPNAAS Site Connection resource within OpenTelekomCloud.
+  Manages a VPNAAS Site Connection resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for VPNAAS site connection you can get at

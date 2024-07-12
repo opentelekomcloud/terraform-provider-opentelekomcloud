@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpcep_service_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-vpcep-service-v1"
 description: |-
-Get details about a specific VPCEP service from OpenTelekomCloud
+  Get details about a specific VPCEP service from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for VPCEP service you can get at

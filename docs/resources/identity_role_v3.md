@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_identity_role_v3"
 sidebar_current: "docs-opentelekomcloud-resource-identity-role-v3"
 description: |-
-Manages a IAM Role resource within OpenTelekomCloud.
+  Manages a IAM Role resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for IAM role you can get at

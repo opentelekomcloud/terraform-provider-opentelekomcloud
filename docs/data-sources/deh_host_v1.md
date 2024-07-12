@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_deh_host_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-deh-host-v1"
 description: |-
-Get details about the allocated dedicated hosts from OpenTelekomCloud
+  Get details about the allocated dedicated hosts from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for DEH host you can get at

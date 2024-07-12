@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_gaussdb_mysql_instance_v3"
 sidebar_current: "docs-opentelekomcloud-resource-gaussdb-mysql-instance-v3"
 description: |-
-Manages a GaussDB for MySql resource within OpenTelekomCloud.
+  Manages a GaussDB for MySql resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for GaussDB for MySql you can get at

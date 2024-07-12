@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpc_subnet_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-vpc-subnet-v1"
 description: |-
-Get details about a specific VPC subnet from OpenTelekomCloud
+  Get details about a specific VPC subnet from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for VPC subnet you can get at

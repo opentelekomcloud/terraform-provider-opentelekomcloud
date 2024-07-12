@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_compute_bms_keypairs_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-compute-bms-keypairs-v2"
 description: |-
-Get details about SSH key pairs of BMSs from OpenTelekomCloud
+  Get details about SSH key pairs of BMSs from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for BMSs SSH key pairs you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_member_v2"
 sidebar_current: "docs-opentelekomcloud-resource-lb-member-v2"
 description: |-
-Manages a ELB Member resource within OpenTelekomCloud.
+  Manages a ELB Member resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for ELB member you can get at

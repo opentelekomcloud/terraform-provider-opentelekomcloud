@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_sdrs_replication_pair_v1"
 sidebar_current: "docs-opentelekomcloud-resource-sdrs-replication-pair-v1"
 description: |-
-Manages an SDRS Replication Pair resource within OpenTelekomCloud.
+  Manages an SDRS Replication Pair resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for SDRS replication pair you can get at

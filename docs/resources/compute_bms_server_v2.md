@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_compute_bms_server_v2"
 sidebar_current: "docs-opentelekomcloud-resource-compute-bms-server-v2"
 description: |-
-Manages a BMS Server resource within OpenTelekomCloud.
+  Manages a BMS Server resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud_compute_bms_server_v2

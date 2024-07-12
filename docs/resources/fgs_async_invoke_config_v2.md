@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_fgs_async_invoke_config_v2"
 sidebar_current: "docs-opentelekomcloud-resource-fgs-async-invoke-config-v2"
 description: |-
-Manages an FGS Async Invoke Config resource within OpenTelekomCloud.
+  Manages an FGS Async Invoke Config resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for FGS you can get at

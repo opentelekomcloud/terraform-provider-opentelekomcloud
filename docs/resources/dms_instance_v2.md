@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dms_instance_v2"
 sidebar_current: "docs-opentelekomcloud-resource-dms-instance-v2"
 description: |-
-Manages a DMS Instance v2 resource within OpenTelekomCloud.
+  Manages a DMS Instance v2 resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DMS instance you can get at

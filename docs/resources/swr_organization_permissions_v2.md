@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_swr_organization_permissions_v2"
 sidebar_current: "docs-opentelekomcloud-resource-swr-organization-permissions-v2"
 description: |-
-Manages an SWR Organization Permissions resource within OpenTelekomCloud.
+  Manages an SWR Organization Permissions resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for SWR permission you can get at

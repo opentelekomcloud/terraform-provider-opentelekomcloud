@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_compute_floatingip_v2"
 sidebar_current: "docs-opentelekomcloud-resource-compute-floatingip-v2"
 description: |-
-Manages an EIP resource within OpenTelekomCloud.
+  Manages an EIP resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for EIP you can get at

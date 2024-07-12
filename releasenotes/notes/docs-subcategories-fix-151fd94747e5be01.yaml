@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DOCS]** fixes for subcategories template in ``docs/*`` (`#2584 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2584>`_)

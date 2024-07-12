@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_css_snapshot_configuration_v1"
 sidebar_current: "docs-opentelekomcloud-resource-css-snapshot-configuration-v1"
 description: |-
-Manages a CSS Snapshot resource within OpenTelekomCloud.
+  Manages a CSS Snapshot resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for CSS snapshot you can get at

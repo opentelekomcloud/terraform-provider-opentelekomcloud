@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dds_flavors_v3"
 sidebar_current: "docs-opentelekomcloud-datasource-dds-flavors-v3"
 description: |-
-Get DDS flavors from OpenTelekomCloud
+  Get DDS flavors from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for DDS flavors you can get at

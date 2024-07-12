@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_obs_bucket_inventory"
 sidebar_current: "docs-opentelekomcloud-resource-obs-bucket-inventory"
 description: |-
-Manages a OBS Bucket Inventory resource within OpenTelekomCloud.
+  Manages a OBS Bucket Inventory resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for OBS bucket inventory you can get at

@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_ims_data_image_v2"
 sidebar_current: "docs-opentelekomcloud-resource-ims-data-image-v2"
 description: |-
-Manages a IMS Data Image resource within OpenTelekomCloud.
+  Manages a IMS Data Image resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for IMS data image you can get at

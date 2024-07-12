@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_identity_protection_policy_v3"
 sidebar_current: "docs-opentelekomcloud-resource-identity-protection-policy-v3"
 description: |-
-Manages a IAM Protection Policy resource within OpenTelekomCloud.
+  Manages a IAM Protection Policy resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for IAM provider you can get at

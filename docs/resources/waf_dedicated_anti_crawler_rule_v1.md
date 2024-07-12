@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_waf_dedicated_anti_crawler_rule_v1"
 sidebar_current: "docs-opentelekomcloud-resource-waf-dedicated-anti-crawler-rule-v1"
 description: |-
-Manages a WAF Dedicated Anti Crawler Rule resource within OpenTelekomCloud.
+  Manages a WAF Dedicated Anti Crawler Rule resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for WAF dedicated Anti Crawler rule you can get at

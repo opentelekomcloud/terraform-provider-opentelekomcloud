@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_networking_port_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-networking-port-v2"
 description: |-
-Get network port ID from OpenTelekomCloud
+  Get network port ID from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for Network port you can get at

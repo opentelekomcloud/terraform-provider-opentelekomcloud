@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_loadbalancer_v3"
 sidebar_current: "docs-opentelekomcloud-resource-lb-loadbalancer-v3"
 description: |-
-Manages a LB Loadbalancer resource within OpenTelekomCloud.
+  Manages a LB Loadbalancer resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DLB load balancer you can get at

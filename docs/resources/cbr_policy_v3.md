@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_cbr_policy_v3"
 sidebar_current: "docs-opentelekomcloud-resource-cbr-policy-v3"
 description: |-
-Manages a CBR Policy resource within OpenTelekomCloud.
+  Manages a CBR Policy resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for CBR policy you can get at

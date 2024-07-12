@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_listener_v3"
 sidebar_current: "docs-opentelekomcloud-resource-lb-listener-v3"
 description: |-
-Manages a LB Listener resource within OpenTelekomCloud.
+  Manages a LB Listener resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for DLB listener you can get at

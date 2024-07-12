@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_apigw_vpc_channel_v2"
 sidebar_current: "docs-opentelekomcloud-resource-apigw-vpc-channel-v2"
 description: |-
-Manages a APIGW VPC Channel resource within OpenTelekomCloud.
+  Manages a APIGW VPC Channel resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for API Gateway VPC Channel service you can get at

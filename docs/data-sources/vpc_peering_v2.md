@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpc_peering_connection_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-vpc-peering-connection-v2"
 description: |-
-Get details about a specific VPC peering connection from OpenTelekomCloud
+  Get details about a specific VPC peering connection from OpenTelekomCloud
 ---
 
 Up-to-date reference of API arguments for VPC EIP you can get at
