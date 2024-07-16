@@ -166,7 +166,6 @@ func ResourceLoadBalancerV3() *schema.Resource {
 			"tags": {
 				Type:         schema.TypeMap,
 				Optional:     true,
-				ForceNew:     true,
 				ValidateFunc: common.ValidateTags,
 			},
 			"vip_port_id": {
@@ -328,6 +327,18 @@ func resourceLoadBalancerV3Update(ctx context.Context, d *schema.ResourceData, m
 	_, err = loadbalancers.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("unable to update LoadBalancerV3 %s: %s", d.Id(), err)
+	}
+
+	// update tags by calling v2 api
+	if d.HasChange("tags") {
+		elbV2Client, err := config.ElbV2Client(config.GetRegion(d))
+		if err != nil {
+			return diag.Errorf("error creating ELB 2.0 client: %s", err)
+		}
+		tagErr := common.UpdateResourceTags(elbV2Client, d, "loadbalancers", d.Id())
+		if tagErr != nil {
+			return diag.Errorf("unable to update tags for LoadBalancerV3:%s, err:%s", d.Id(), tagErr)
+		}
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)
