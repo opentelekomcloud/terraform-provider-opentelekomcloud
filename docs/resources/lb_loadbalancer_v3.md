@@ -224,6 +224,8 @@ The `public_ip` block supports:
   `true`: Enable deletion protection.
   `false` (default): Disable deletion protection.
 
+* `tags` - (Optional, Map) Tags key/value pairs to associate with the load balancer.
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:

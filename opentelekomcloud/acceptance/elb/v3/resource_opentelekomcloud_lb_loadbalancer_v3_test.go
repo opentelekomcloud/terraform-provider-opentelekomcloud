@@ -34,6 +34,8 @@ func TestAccLBV3LoadBalancer_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV3LoadBalancerExists(resourceLBName, &lb),
 					resource.TestCheckResourceAttr(resourceLBName, "deletion_protection", "true"),
+					resource.TestCheckResourceAttr(resourceLBName, "tags.muh", "value-create"),
+					resource.TestCheckResourceAttr(resourceLBName, "tags.kuh", "value-create"),
 				),
 			},
 			{
@@ -41,6 +43,8 @@ func TestAccLBV3LoadBalancer_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceLBName, "name", "loadbalancer_1_updated"),
 					resource.TestCheckResourceAttr(resourceLBName, "deletion_protection", "false"),
+					resource.TestCheckResourceAttr(resourceLBName, "tags.muh", "value-update"),
+					resource.TestCheckResourceAttr(resourceLBName, "tags.kuh", "value-update"),
 				),
 			},
 		},
@@ -217,8 +221,8 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   deletion_protection = false
 
   tags = {
-    muh = "value-create"
-    kuh = "value-create"
+    muh = "value-update"
+    kuh = "value-update"
   }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
