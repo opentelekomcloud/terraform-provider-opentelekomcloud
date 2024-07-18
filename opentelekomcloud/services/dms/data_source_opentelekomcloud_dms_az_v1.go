@@ -51,28 +51,26 @@ func dataSourceDmsAZV1Read(_ context.Context, d *schema.ResourceData, meta inter
 
 	log.Printf("[DEBUG] Dms az : %+v", v)
 	var filteredAZs []availablezones.AvailableZone
-	if v.RegionID == config.GetRegion(d) {
-		AZs := v.AvailableZones
-		for _, newAZ := range AZs {
-			if newAZ.ResourceAvailability != "true" {
-				continue
-			}
-
-			name := d.Get("name").(string)
-			if name != "" && newAZ.Name != name {
-				continue
-			}
-			code := d.Get("code").(string)
-			if code != "" && newAZ.Code != code {
-				continue
-			}
-			port := d.Get("port").(string)
-			if port != "" && newAZ.Port != port {
-				continue
-			}
-
-			filteredAZs = append(filteredAZs, newAZ)
+	AZs := v.AvailableZones
+	for _, newAZ := range AZs {
+		if newAZ.ResourceAvailability != "true" {
+			continue
 		}
+
+		name := d.Get("name").(string)
+		if name != "" && newAZ.Name != name {
+			continue
+		}
+		code := d.Get("code").(string)
+		if code != "" && newAZ.Code != code {
+			continue
+		}
+		port := d.Get("port").(string)
+		if port != "" && newAZ.Port != port {
+			continue
+		}
+
+		filteredAZs = append(filteredAZs, newAZ)
 	}
 
 	if len(filteredAZs) < 1 {
