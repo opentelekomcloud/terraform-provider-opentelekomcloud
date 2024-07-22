@@ -2,11 +2,13 @@ package migrations
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -24,6 +26,7 @@ func ResourceClusterV1() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceClusterV1Create,
 		ReadContext:   resourceClusterV1Read,
+		UpdateContext: resourceClusterV1Update,
 		DeleteContext: resourceClusterV1Delete,
 
 		Importer: &schema.ResourceImporter{
@@ -36,55 +39,92 @@ func ResourceClusterV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"availability_zone": {
+				Type: schema.TypeString,
+				// Optional: true,
+				Computed: true,
+				// ForceNew: true,
+			},
+			"cluster_id": {
+				Type: schema.TypeString,
+				// Optional: true,
+				Computed: true,
+				// ForceNew: true,
+			},
+			"db_user": {
+				Type: schema.TypeString,
+				// Optional: true,
+				Computed: true,
+				// ForceNew: true,
+			},
+			"eip_id": {
+				Type: schema.TypeString,
+				// Optional: true,
+				Computed: true,
+				// ForceNew: true,
+			},
+			"endpoint_domain_name": {
+				Type: schema.TypeString,
+				// Optional: true,
+				Computed: true,
+				// ForceNew: true,
+			},
+			"flavor_name": {
+				Type: schema.TypeString,
+				// Optional: true,
+				Computed: true,
+				// ForceNew: true,
+			},
 			"auto_remind": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
-				Computed: true,
+				// Computed: true,
 			},
 			"email": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Computed: true,
+				// Computed: true,
 			},
 			"phone_number": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Computed: true,
+				// Computed: true,
 			},
 			"language": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Required: true,
 			},
-			// The API's cluster part
 			"schedule_boot_time": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Computed: true,
+				// Computed: true,
 			},
 			"is_schedule_boot_off": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 				ForceNew: true,
 			},
 			"instances": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				// Computed: true,
+				// ForceNew: true,
+				// Required: true,
 				MinItems: 1,
 				Elem:     instanceSchema(),
 			},
 			"datastore": {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
-				Optional: true,
-				Computed: true,
+				Required: true,
+				// Optional: true,
+				// Computed: true,
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -92,11 +132,13 @@ func ResourceClusterV1() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							Default:  string(ClusterTypeCDM),
+							// Required: true,
 						},
 						"version": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type: schema.TypeString,
+							// Optional: true,
+							// Computed: true,
+							Required: true,
 						},
 					},
 				},
@@ -104,7 +146,7 @@ func ResourceClusterV1() *schema.Resource {
 			"extended_properties": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 				ForceNew: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
@@ -131,36 +173,33 @@ func ResourceClusterV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
+				// ForceNew: true,
 			},
 			"vpc_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 				ForceNew: true,
 			},
 			"subnet_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type: schema.TypeString,
+				// Optional: true,
 				Computed: true,
-				ForceNew: true,
+				// ForceNew: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				ForceNew: true,
+				// Optional: true,
+				// Computed: true,
+				// ForceNew: true,
 			},
-			"cluster_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
+
 			"sys_tags": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -178,80 +217,74 @@ func ResourceClusterV1() *schema.Resource {
 			"is_auto_off": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 				ForceNew: true,
 			},
 			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type: schema.TypeString,
+				// Optional: true,
 				Computed: true,
-				ForceNew: true,
+				// ForceNew: true,
 			},
 			"public_endpoint": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type: schema.TypeString,
+				// Optional: true,
 				Computed: true,
-				ForceNew: true,
+				// ForceNew: true,
 			},
 			"security_group_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type: schema.TypeString,
+				// Optional: true,
 				Computed: true,
-				ForceNew: true,
+				// ForceNew: true,
 			},
 			"public_endpoint_domain_name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type: schema.TypeString,
+				// Optional: true,
 				Computed: true,
-				ForceNew: true,
-			},
-			"flavor_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
-			"availability_zone": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
-			"endpoint_domain_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				// ForceNew: true,
 			},
 			"namespace": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type: schema.TypeString,
+				// Optional: true,
 				Computed: true,
-				ForceNew: true,
+				// ForceNew: true,
 			},
-			"eip_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+
+			"links": {
+				Type:     schema.TypeList,
 				Computed: true,
-				ForceNew: true,
+				// Optional: true,
+				// ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"rel": {
+							Type:     schema.TypeString,
+							Computed: true,
+							Optional: true,
+							ForceNew: true,
+						},
+						"href": {
+							Type:     schema.TypeString,
+							Computed: true,
+							Optional: true,
+							ForceNew: true,
+						},
+					},
+				},
 			},
-			"db_user": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
+
 			"cluster_mode": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type: schema.TypeString,
+				// Optional: true,
 				Computed: true,
-				ForceNew: true,
+				// ForceNew: true,
 			},
 			"status": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type: schema.TypeString,
+				// Optional: true,
 				Computed: true,
-				ForceNew: true,
+				// ForceNew: true,
 			},
 		},
 	}
@@ -263,10 +296,12 @@ func instanceSchema() *schema.Resource {
 			"availability_zone": {
 				Type:     schema.TypeString,
 				Required: true,
+				// ForceNew: true,
 			},
 			"flavor_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				// ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					string(FlavorTypeSmall),
 					string(FlavorTypeMedium),
@@ -277,34 +312,34 @@ func instanceSchema() *schema.Resource {
 			"flavor": {
 				Type:     schema.TypeSet,
 				Computed: true,
-				Optional: true,
-				ForceNew: true,
+				// Optional: true,
+				// ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
-							Optional: true,
-							ForceNew: true,
+							// Optional: true,
+							// ForceNew: true,
 						},
 						"links": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Optional: true,
-							ForceNew: true,
+							// Optional: true,
+							// ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"rel": {
 										Type:     schema.TypeString,
 										Computed: true,
-										Optional: true,
-										ForceNew: true,
+										// Optional: true,
+										// ForceNew: true,
 									},
 									"href": {
 										Type:     schema.TypeString,
 										Computed: true,
-										Optional: true,
-										ForceNew: true,
+										// Optional: true,
+										// ForceNew: true,
 									},
 								},
 							},
@@ -315,6 +350,7 @@ func instanceSchema() *schema.Resource {
 			"type": {
 				Type:     schema.TypeString,
 				Required: true,
+				// ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					string(ClusterTypeCDM),
 				}, false),
@@ -322,16 +358,19 @@ func instanceSchema() *schema.Resource {
 			"nics": {
 				Type:     schema.TypeSet,
 				Required: true,
+				// ForceNew: true,
 				MaxItems: 2,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"security_group": {
 							Type:     schema.TypeString,
 							Required: true,
+							// ForceNew: true,
 						},
 						"net": {
 							Type:     schema.TypeString,
 							Required: true,
+							// ForceNew: true,
 						},
 					},
 				},
@@ -343,11 +382,13 @@ func instanceSchema() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"type": {
 							Type:     schema.TypeString,
-							Required: true,
+							Computed: true,
+							// Required: true,
 						},
 						"size": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:     schema.TypeInt,
+							Computed: true,
+							// Required: true,
 						},
 					},
 				},
@@ -355,74 +396,73 @@ func instanceSchema() *schema.Resource {
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
-				ForceNew: true,
+				// Optional: true,
 			},
 			"vm_id": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
-				ForceNew: true,
+				// Optional: true,
+				// ForceNew: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
-				ForceNew: true,
+				// Optional: true,
+				// ForceNew: true,
 			},
 			"role": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
-				ForceNew: true,
+				// Optional: true,
+				// ForceNew: true,
 			},
 			"group": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
-				ForceNew: true,
+				// Optional: true,
+				// ForceNew: true,
 			},
 			"public_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
-				ForceNew: true,
+				// Optional: true,
+				// ForceNew: true,
 			},
 			"manage_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
-				ForceNew: true,
+				// Optional: true,
+				// ForceNew: true,
 			},
 			"traffic_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
-				ForceNew: true,
+				// Optional: true,
+				// ForceNew: true,
 			},
 			"shard_id": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
-				ForceNew: true,
+				// Optional: true,
+				// ForceNew: true,
 			},
 			"manage_fix_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
-				ForceNew: true,
+				// Optional: true,
+				// ForceNew: true,
 			},
 			"private_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
-				ForceNew: true,
+				// Optional: true,
+				// ForceNew: true,
 			},
 			"internal_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
-				ForceNew: true,
+				// Optional: true,
+				// ForceNew: true,
 			},
 		},
 	}
@@ -555,11 +595,27 @@ func resourceClusterV1Create(ctx context.Context, d *schema.ResourceData, meta i
 	if err != nil {
 		return diag.Errorf("unable to build the OpenTelekomCloud DataArts Migrations Cluster API create opts: %s", err)
 	}
-	api, err := apis.Create(client, opts)
+	resp, err := apis.Create(client, opts)
 	if err != nil {
 		return diag.Errorf("error creating OpenTelekomCloud DataArts Migrations Cluster API: %s", err)
 	}
-	d.SetId(api.Id)
+	d.SetId(resp.Id)
+
+	log.Printf("[DEBUG] Waiting for OpenTelekomCloud DataArts Migrations Cluster (%s) to become available", resp.Id)
+
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"100"},
+		Target:     []string{"200"},
+		Refresh:    WaitForDAMigrationClusterActive(client, resp.Id),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      10 * time.Second,
+		MinTimeout: 5 * time.Second,
+	}
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error creating OpenTelekomCloud DataArts Migrations Cluster: %s", err)
+	}
+	d.SetId(resp.Id)
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
 	return resourceClusterV1Read(clientCtx, d, meta)
@@ -595,24 +651,45 @@ func resourceClusterV1Read(ctx context.Context, d *schema.ResourceData, meta int
 		d.Set("is_schedule_boot_off", resp.IsScheduleBootOff),
 		d.Set("namespace", resp.Namespace),
 		d.Set("eip_id", resp.EipId),
-		d.Set("db_user", resp.DbUser),
 		d.Set("links", flattenLinks(resp.Links)),
+		d.Set("db_user", resp.DbUser),
 		d.Set("cluster_mode", resp.ClusterMode),
-		d.Set("task", flattenTask(resp.Task)),
-		d.Set("created", resp.Created),
-		d.Set("status_detail", resp.StatusDetail),
-		d.Set("config_status", resp.ConfigStatus),
-		d.Set("actionProgress", flattenActionProgress(resp.ActionProgress)),
-		d.Set("name", resp.Name),
-		d.Set("cluster_id", resp.Id),
-		d.Set("is_frozen", resp.IsFrozen),
-		d.Set("actions", resp.Actions),
-		d.Set("updated", resp.Updated),
 		d.Set("status", analyseClusterStatus(resp.Status)),
 	)
 	if err = mErr.ErrorOrNil(); err != nil {
 		return diag.Errorf("error saving  OpenTelekomCloud DataArts Migrations Cluster API fields: %s", err)
 	}
+	return nil
+}
+
+func resourceClusterV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+
+	// if d.HasChange("instances") {
+	// 	result := make([]map[string]interface{}, len(reqParams))
+	// 	for i, v := range reqParams {
+	// 		param := map[string]interface{}{
+	// 			"flavor":        flattenFlavor(v.Flavor),
+	// 			"type":          v.Type,
+	// 			"volume":        flattenVolume(v.Volume),
+	// 			"status":        analyseStatus(v.Status),
+	// 			"vm_id":         v.Id,
+	// 			"name":          v.Name,
+	// 			"role":          v.Role,
+	// 			"group":         v.Group,
+	// 			"public_ip":     v.PublicIp,
+	// 			"manage_ip":     v.ManageIp,
+	// 			"traffic_ip":    v.TrafficIp,
+	// 			"shard_id":      v.ShardId,
+	// 			"manage_fix_ip": v.ManageFixIp,
+	// 			"private_ip":    v.PrivateIp,
+	// 			"internal_ip":   v.InternalIp,
+	// 		}
+	//
+	// 		result[i] = param
+	// 	}
+	// 	return result
+	// }
+
 	return nil
 }
 
@@ -640,6 +717,17 @@ func resourceClusterV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 	return nil
 }
 
+func WaitForDAMigrationClusterActive(cceClient *golangsdk.ServiceClient, clusterId string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		resp, err := apis.Get(cceClient, clusterId)
+		if err != nil {
+			return nil, "", fmt.Errorf("error waiting for OpenTelekomCloud DataArts Migrations Cluster to become active: %w", err)
+		}
+
+		return resp, resp.Status, nil
+	}
+}
+
 func flattenInstances(reqParams []apis.DetailedInstances) []map[string]interface{} {
 	if len(reqParams) == 0 {
 		return nil
@@ -648,10 +736,10 @@ func flattenInstances(reqParams []apis.DetailedInstances) []map[string]interface
 	result := make([]map[string]interface{}, len(reqParams))
 	for i, v := range reqParams {
 		param := map[string]interface{}{
-			"flavor":        flattenFlavor(v.Flavor),
-			"type":          v.Type,
-			"volume":        flattenVolume(v.Volume),
-			"status":        analyseStatus(v.Status),
+			// "flavor":        flattenFlavor(v.Flavor),
+			// "type":          v.Type,
+			// "volume":        flattenVolume(v.Volume),
+			// "status":        analyseStatus(v.Status),
 			"vm_id":         v.Id,
 			"name":          v.Name,
 			"role":          v.Role,
@@ -670,11 +758,14 @@ func flattenInstances(reqParams []apis.DetailedInstances) []map[string]interface
 	return result
 }
 
-func flattenFlavor(f apis.Flavor) map[string]interface{} {
-	fs := map[string]interface{}{
+func flattenFlavor(f apis.Flavor) []map[string]interface{} {
+
+	fs := make([]map[string]interface{}, 1)
+
+	fs[0] = map[string]interface{}{
 		"id": f.Id,
 	}
-	fs["links"] = flattenLinks(f.Links)
+	fs[0]["links"] = flattenLinks(f.Links)
 
 	return fs
 }
@@ -696,11 +787,13 @@ func flattenLinks(links []apis.ClusterLinks) []map[string]interface{} {
 	return ls
 }
 
-func flattenVolume(v apis.Volume) map[string]interface{} {
-	return map[string]interface{}{
+func flattenVolume(v apis.Volume) []map[string]interface{} {
+	fv := make([]map[string]interface{}, 1)
+	fv[0] = map[string]interface{}{
 		"type": v.Type,
 		"size": v.Size,
 	}
+	return fv
 }
 
 func analyseStatus(s string) string {
@@ -748,11 +841,14 @@ func flattenCustomerConfig(cConfig apis.CustomerConfig) map[string]interface{} {
 	}
 }
 
-func flattenDatastore(d apis.Datastore) map[string]interface{} {
-	return map[string]interface{}{
+func flattenDatastore(d apis.Datastore) []map[string]interface{} {
+	ds := make([]map[string]interface{}, 1)
+	ds[0] = map[string]interface{}{
 		"type":    d.Type,
 		"version": d.Version,
 	}
+
+	return ds
 }
 
 func flattenEndpointStatus(pStatus apis.PublicEndpointStatus) map[string]interface{} {

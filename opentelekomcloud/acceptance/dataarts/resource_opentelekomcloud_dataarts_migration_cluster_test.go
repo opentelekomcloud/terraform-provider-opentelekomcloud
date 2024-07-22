@@ -7,6 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dataarts/v1.1/cluster"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -18,15 +21,11 @@ import (
 
 const resourceMigrationsClusterName = "opentelekomcloud_dataarts_migrations_cluster_v1.cluster"
 
-func getClusterFunc(conf *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
-	c, err := conf.DataArtsMigrationsV1Client(cfg.ProjectName(env.OS_PROJECT_ID))
-	if err != nil {
-		return nil, fmt.Errorf("error creating OpenTelekomCloud Dataarts Migrations client: %s", err)
-	}
-	return apis.Get(c, state.Primary.ID)
-}
-
 func TestAccDAMigrationsCluster_basic(t *testing.T) {
+	// if os.Getenv("RUN_DATAART_LIFECYCLE") == "" {
+	// 	t.Skip("too slow to run in zuul")
+	// }
+
 	var (
 		api   apis.ClusterQuery
 		rName = resourceMigrationsClusterName
@@ -52,7 +51,7 @@ func TestAccDAMigrationsCluster_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(rName, "name", name),
-					resource.TestCheckResourceAttr(rName, "language", "eng"),
+					resource.TestCheckResourceAttr(rName, "language", "en"),
 					resource.TestCheckResourceAttr(rName, "email", "anyemail@example.com"),
 					resource.TestCheckResourceAttr(rName, "phone_number", "123456789"),
 					resource.TestCheckResourceAttr(rName, "is_schedule_boot_off", "false"),
@@ -127,4 +126,33 @@ resource "opentelekomcloud_dataarts_migrations_cluster_v1" "cluster" {
   }
 }
 `, vpcID, name)
+}
+
+func getClusterFunc(conf *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
+	c, err := conf.DataArtsMigrationsV1Client(cfg.ProjectName(env.OS_PROJECT_ID))
+	if err != nil {
+		return nil, fmt.Errorf("error creating OpenTelekomCloud Dataarts Migrations client: %s", err)
+	}
+
+	err = waitForState(c, 1200, state.Primary.ID, "200")
+
+	return nil, err
+}
+
+func waitForState(client *golangsdk.ServiceClient, secs int, instanceID string, status string) error {
+	jobClient := *client
+	jobClient.ResourceBase = jobClient.Endpoint
+
+	return golangsdk.WaitFor(secs, func() (bool, error) {
+		resp, err := cluster.Get(client, instanceID)
+		if err != nil {
+			return false, err
+		}
+
+		if resp.Status == status {
+			return true, nil
+		}
+
+		return false, nil
+	})
 }
