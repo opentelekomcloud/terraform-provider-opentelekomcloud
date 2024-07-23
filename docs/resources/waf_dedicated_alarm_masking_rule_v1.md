@@ -16,6 +16,8 @@ Manages a WAF Dedicated Global Protection Whitelist (formerly False Alarm Maskin
 
 ## Example Usage
 
+### Basic example
+
 ```hcl
 resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
   name = "policy_am"
@@ -31,6 +33,30 @@ resource "opentelekomcloud_waf_dedicated_alarm_masking_rule_v1" "rule_1" {
     category        = "url"
     contents        = ["/login"]
     logic_operation = "equal"
+  }
+}
+```
+
+### Advanced settings with empty contents
+
+```hcl
+resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
+  name = "policy_am"
+}
+
+resource "opentelekomcloud_waf_dedicated_alarm_masking_rule_v1" "rule_1" {
+  policy_id   = opentelekomcloud_waf_dedicated_policy_v1.policy_1.id
+  domains     = ["www.example.com"]
+  rule        = "all"
+  description = "description"
+
+  conditions {
+    category        = "url"
+    contents        = ["/login"]
+    logic_operation = "equal"
+  }
+  advanced_settings {
+    index = "cookie"
   }
 }
 ```

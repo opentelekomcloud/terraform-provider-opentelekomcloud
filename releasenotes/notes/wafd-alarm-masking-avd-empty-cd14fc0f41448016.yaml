@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[WAF]** Fix setting of `advanced_settings` `contents` in ``resource/opentelekomcloud_waf_dedicated_alarm_masking_rule_v1``
+    (`#2592 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2592>`_)

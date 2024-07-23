@@ -38,7 +38,7 @@ func TestAccWafDedicatedAlarmMaskingRuleV1_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccWafDedicatedAlarmMaskingRuleV1AdvIndex,
+				Config: testAccWafDedicatedAlarmMaskingRuleV1AdvEmptyContents,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckWafDedicatedAlarmMaskingRuleV1Exists(wafdAlarmMaskingRuleName, &rule),
 					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "domains.#", "1"),
@@ -48,6 +48,32 @@ func TestAccWafDedicatedAlarmMaskingRuleV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "conditions.#", "1"),
 					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "conditions.0.category", "url"),
 					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "advanced_settings.0.index", "header"),
+				),
+			},
+			{
+				Config: testAccWafDedicatedAlarmMaskingRuleV1AdvEmptyBodyContents,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckWafDedicatedAlarmMaskingRuleV1Exists(wafdAlarmMaskingRuleName, &rule),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "domains.#", "1"),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "domains.0", "www.example.com"),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "rule", "all"),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "description", "description"),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "conditions.#", "1"),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "conditions.0.category", "url"),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "advanced_settings.0.index", "body"),
+				),
+			},
+			{
+				Config: testAccWafDedicatedAlarmMaskingRuleV1AdvEmptyBodyCookie,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckWafDedicatedAlarmMaskingRuleV1Exists(wafdAlarmMaskingRuleName, &rule),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "domains.#", "1"),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "domains.0", "www.example.com"),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "rule", "all"),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "description", "description"),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "conditions.#", "1"),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "conditions.0.category", "url"),
+					resource.TestCheckResourceAttr(wafdAlarmMaskingRuleName, "advanced_settings.0.index", "cookie"),
 				),
 			},
 			{
@@ -137,7 +163,7 @@ resource "opentelekomcloud_waf_dedicated_alarm_masking_rule_v1" "rule_1" {
 }
 `
 
-const testAccWafDedicatedAlarmMaskingRuleV1AdvIndex = `
+const testAccWafDedicatedAlarmMaskingRuleV1AdvEmptyContents = `
 resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
   name = "policy_am"
 }
@@ -154,7 +180,53 @@ resource "opentelekomcloud_waf_dedicated_alarm_masking_rule_v1" "rule_1" {
     logic_operation = "equal"
   }
   advanced_settings {
-    index = "header"
+    index    = "header"
+    contents = ["all"]
+  }
+}
+`
+
+const testAccWafDedicatedAlarmMaskingRuleV1AdvEmptyBodyContents = `
+resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
+  name = "policy_am"
+}
+
+resource "opentelekomcloud_waf_dedicated_alarm_masking_rule_v1" "rule_1" {
+  policy_id   = opentelekomcloud_waf_dedicated_policy_v1.policy_1.id
+  domains     = ["www.example.com"]
+  rule        = "all"
+  description = "description"
+
+  conditions {
+    category        = "url"
+    contents        = ["/login"]
+    logic_operation = "equal"
+  }
+  advanced_settings {
+    index = "body"
+  }
+}
+`
+
+const testAccWafDedicatedAlarmMaskingRuleV1AdvEmptyBodyCookie = `
+resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
+  name = "policy_am"
+}
+
+resource "opentelekomcloud_waf_dedicated_alarm_masking_rule_v1" "rule_1" {
+  policy_id   = opentelekomcloud_waf_dedicated_policy_v1.policy_1.id
+  domains     = ["www.example.com"]
+  rule        = "all"
+  description = "description"
+
+  conditions {
+    category        = "url"
+    contents        = ["/login"]
+    logic_operation = "equal"
+  }
+  advanced_settings {
+    index    = "cookie"
+    contents = []
   }
 }
 `

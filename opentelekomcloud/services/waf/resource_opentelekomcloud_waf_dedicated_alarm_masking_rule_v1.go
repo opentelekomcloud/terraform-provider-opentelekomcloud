@@ -160,19 +160,16 @@ func getAmConditions(d *schema.ResourceData) []rules.IgnoreCondition {
 	return conditionList
 }
 
-func getAmAdvancedSettings(d *schema.ResourceData) rules.AdvancedIgnoreObject {
+func getAmAdvancedSettings(d *schema.ResourceData) *rules.AdvancedIgnoreObject {
 	var advancedObj rules.AdvancedIgnoreObject
 	advanced := d.Get("advanced_settings").([]interface{})
 	for _, a := range advanced {
 		adv := a.(map[string]interface{})
 		contentsRaw := adv["contents"].([]interface{})
-		var contents []string
-		if len(contentsRaw) == 0 {
-			contents = append(contents, "all")
-		}
+		contents := &[]string{}
 		for _, content := range contentsRaw {
 			if content := common.ValueIgnoreEmpty(content.(string)); content != nil {
-				contents = append(contents, content.(string))
+				*contents = append(*contents, content.(string))
 			}
 		}
 		advancedObj = rules.AdvancedIgnoreObject{
@@ -180,7 +177,7 @@ func getAmAdvancedSettings(d *schema.ResourceData) rules.AdvancedIgnoreObject {
 			Contents: contents,
 		}
 	}
-	return advancedObj
+	return &advancedObj
 }
 
 func resourceWafDedicatedAlarmMaskingRuleV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -260,14 +257,6 @@ func resourceWafDedicatedAlarmMaskingRuleV1Read(ctx context.Context, d *schema.R
 			"index":    rule.Advanced.Index,
 			"contents": rule.Advanced.Contents,
 		},
-	}
-	adv := d.Get("advanced_settings").([]interface{})
-	for _, a := range adv {
-		adv := a.(map[string]interface{})
-		contentsRaw := adv["contents"].([]interface{})
-		if len(contentsRaw) == 0 {
-			advanced[0]["contents"] = nil
-		}
 	}
 
 	mErr = multierror.Append(mErr,
