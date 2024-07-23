@@ -180,7 +180,7 @@ resource "opentelekomcloud_waf_dedicated_alarm_masking_rule_v1" "rule_1" {
     logic_operation = "equal"
   }
   advanced_settings {
-    index = "header"
+    index    = "header"
     contents = ["all"]
   }
 }
@@ -225,7 +225,7 @@ resource "opentelekomcloud_waf_dedicated_alarm_masking_rule_v1" "rule_1" {
     logic_operation = "equal"
   }
   advanced_settings {
-    index = "cookie"
+    index    = "cookie"
     contents = []
   }
 }
