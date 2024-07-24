@@ -117,21 +117,18 @@ func ResourceCssClusterV1() *schema.Resource {
 			},
 			"enable_https": {
 				Type:     schema.TypeBool,
-				Computed: true,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"enable_authority": {
 				Type:     schema.TypeBool,
-				Computed: true,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"admin_pass": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				RequiredWith: []string{"enable_authority"},
-				ForceNew:     true,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"expect_node_num": {
 				Type:     schema.TypeInt,
