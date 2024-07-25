@@ -3,6 +3,7 @@ package acceptance
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -25,7 +26,8 @@ func TestAccDAMigrationsCluster_basic(t *testing.T) {
 	// if os.Getenv("RUN_DATAART_LIFECYCLE") == "" {
 	// 	t.Skip("too slow to run in zuul")
 	// }
-
+	start := time.Now()
+	fmt.Println(start.String())
 	var (
 		api   apis.ClusterQuery
 		rName = resourceMigrationsClusterName
@@ -58,28 +60,28 @@ func TestAccDAMigrationsCluster_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(rName, "is_auto_off", "false"),
 				),
 			},
-			// {
-			// 	ResourceName:      rName,
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// 	ImportStateIdFunc: testAccApiResourceImportStateFunc(),
-			// },
+			{
+				ResourceName:      rName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				// ImportStateIdFunc: testAccDAMigrationsClusterImportStateFunc(),
+			},
 		},
 	})
 }
 
-func testAccApiResourceImportStateFunc() resource.ImportStateIdFunc {
+func testAccDAMigrationsClusterImportStateFunc() resource.ImportStateIdFunc {
 	return func(s *terraform.State) (string, error) {
-		rName := "opentelekomcloud_apigw_api_v2.api"
+		rName := resourceMigrationsClusterName
 		rs, ok := s.RootModule().Resources[rName]
 		if !ok {
 			return "", fmt.Errorf("resource (%s) not found: %s", rName, rs)
 		}
-		if rs.Primary.Attributes["gateway_id"] == "" || rs.Primary.Attributes["name"] == "" {
-			return "", fmt.Errorf("missing some attributes, want '{gateway_id}/{name}', but '%s/%s'",
-				rs.Primary.Attributes["gateway_id"], rs.Primary.Attributes["name"])
+		if rs.Primary.Attributes["cluster_id"] == "" || rs.Primary.Attributes["name"] == "" {
+			return "", fmt.Errorf("missing some attributes, want '{cluster_id} or {name}', but '%s' '%s'",
+				rs.Primary.Attributes["cluster_id"], rs.Primary.Attributes["name"])
 		}
-		return fmt.Sprintf("%s/%s", rs.Primary.Attributes["gateway_id"], rs.Primary.Attributes["name"]), nil
+		return fmt.Sprintf("%s/%s", rs.Primary.Attributes["cluster_id"], rs.Primary.Attributes["name"]), nil
 	}
 }
 
