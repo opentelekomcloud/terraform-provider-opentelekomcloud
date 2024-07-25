@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[CSS]** Fix `enable_https` doc regarding default value in ``resource/opentelekomcloud_css_cluster_v1``
+    (`#2595 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2595>`_)
