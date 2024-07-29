@@ -49,6 +49,24 @@ func TestAccWafDedicatedPolicyV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(wafdPolicyResourceName, "options.0.web_attack", "false"),
 					resource.TestCheckResourceAttr(wafdPolicyResourceName, "options.0.cc", "true"),
 					resource.TestCheckResourceAttr(wafdPolicyResourceName, "options.0.web_shell", "true"),
+					resource.TestCheckResourceAttr(wafdPolicyResourceName, "deep_inspection", "true"),
+					resource.TestCheckResourceAttr(wafdPolicyResourceName, "shiro_decryption_check", "true"),
+				),
+			},
+			{
+				Config: testAccWafDedicatedPolicyV1_updateNext(policyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckWafDedicatedPolicyV1Exists(wafdPolicyResourceName, &policy),
+					resource.TestCheckResourceAttr(wafdPolicyResourceName, "name", policyName+"-updatedNext"),
+					resource.TestCheckResourceAttr(wafdPolicyResourceName, "level", "3"),
+					resource.TestCheckResourceAttr(wafdPolicyResourceName, "full_detection", "true"),
+					resource.TestCheckResourceAttr(wafdPolicyResourceName, "protection_mode", "block"),
+					resource.TestCheckResourceAttr(wafdPolicyResourceName, "options.0.web_attack", "false"),
+					resource.TestCheckResourceAttr(wafdPolicyResourceName, "options.0.cc", "true"),
+					resource.TestCheckResourceAttr(wafdPolicyResourceName, "options.0.web_shell", "true"),
+					resource.TestCheckResourceAttr(wafdPolicyResourceName, "deep_inspection", "false"),
+					resource.TestCheckResourceAttr(wafdPolicyResourceName, "shiro_decryption_check", "true"),
+					resource.TestCheckResourceAttr(wafdPolicyResourceName, "header_inspection", "true"),
 				),
 			},
 			{
@@ -141,6 +159,31 @@ resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
     cc         = true
     web_shell  = true
   }
+
+  deep_inspection        = true
+  shiro_decryption_check = true
+}
+`, policyName)
+}
+
+func testAccWafDedicatedPolicyV1_updateNext(policyName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
+  name            = "%s-updatedNext"
+  level           = 3
+  protection_mode = "block"
+  full_detection  = true
+
+  options {
+    crawler    = false
+    web_attack = false
+    cc         = true
+    web_shell  = true
+  }
+
+  deep_inspection        = false
+  shiro_decryption_check = true
+  header_inspection      = true
 }
 `, policyName)
 }

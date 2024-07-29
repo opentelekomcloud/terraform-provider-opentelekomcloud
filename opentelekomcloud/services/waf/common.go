@@ -34,3 +34,9 @@ func wafRuleImporter() *schema.ResourceImporter {
 		StateContext: common.ImportByPath("policy_id", "id"),
 	}
 }
+
+type ExtendOptions struct {
+	DeepDecode            *bool `json:"deep_decode,omitempty"`
+	CheckAllHeaders       *bool `json:"check_all_headers,omitempty"`
+	ShiroRememberMeEnable *bool `json:"shiro_rememberMe_enable,omitempty"`
+}
