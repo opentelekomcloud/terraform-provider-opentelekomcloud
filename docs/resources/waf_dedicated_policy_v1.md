@@ -39,44 +39,50 @@ resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
 
 The following arguments are supported:
 
-* `name` - (Required) The policy name.
+* `name` - (Required, String) The policy name.
 
-* `protection_mode` - (Optional) Specifies the protective action after a rule is matched.
+* `protection_mode` - (Optional, String) Specifies the protective action after a rule is matched.
   Values are:
   + `block`: WAF blocks and logs detected attacks.
   + `log`: WAF logs detected attacks only.
 
-* `level` - (Optional) Specifies the protection level.
+* `level` - (Optional, Int) Specifies the protection level.
   Values are:
   + `1`: low
   + `2`: medium
   + `3`: high
 
-* `options` - (Optional) Specifies the protection switches.
+* `options` - (Optional, List)  Specifies the protection switches.
   The `options` block supports:
-  + `web_attack` - (Optional) Specifies whether Basic Web Protection is enabled.
-  + `common` - (Optional) Specifies whether General Check in Basic Web Protection is enabled.
-  + `crawler` - (Optional) Specifies whether the master crawler detection switch in Basic Web Protection is enabled.
-  + `anti_crawler` - (Optional) JavaScript anti-crawler function.
-  + `crawler_engine` - (Optional) Specifies whether the Search Engine switch in Basic Web Protection is enabled.
-  + `crawler_scanner` - (Optional) Specifies whether the Scanner switch in Basic Web Protection is enabled.
-  + `crawler_script` - (Optional) Specifies whether the Script Tool switch in Basic Web Protection is enabled.
-  + `crawler_other` - (Optional) Specifies whether detection of other crawlers in Basic Web Protection is enabled.
-  + `web_shell` - (Optional) Specifies whether webshell detection in Basic Web Protection is enabled.
-  + `cc` - (Optional) Specifies whether CC Attack Protection is enabled.
-  + `custom` - (Optional) Specifies whether Precise Protection is enabled.
-  + `blacklist` - (Optional) Specifies whether Blacklist and Whitelist is enabled.
-  + `geolocation_access_control` - (Optional) Whether geolocation access control is enabled.
-  + `ignore` - (Optional) Whether false alarm masking is enabled.
-  + `privacy` - (Optional) Specifies whether Data Masking is enabled.
-  + `ignore` - (Optional) Specifies whether False Alarm Masking is enabled.
-  + `anti_tamper` - (Optional) Specifies whether Web Tamper Protection is enabled.
-  + `anti_leakage` - (Optional) Whether the information leakage prevention is enabled.
-  + `followed_action` - (Optional) Whether the Known Attack Source protection is enabled.
+  + `web_attack` - (Optional, Bool) Specifies whether Basic Web Protection is enabled.
+  + `common` - (Optional, Bool) Specifies whether General Check in Basic Web Protection is enabled.
+  + `crawler` - (Optional, Bool) Specifies whether the master crawler detection switch in Basic Web Protection is enabled.
+  + `anti_crawler` - (Optional, Bool) JavaScript anti-crawler function.
+  + `crawler_engine` - (Optional, Bool) Specifies whether the Search Engine switch in Basic Web Protection is enabled.
+  + `crawler_scanner` - (Optional, Bool) Specifies whether the Scanner switch in Basic Web Protection is enabled.
+  + `crawler_script` - (Optional, Bool) Specifies whether the Script Tool switch in Basic Web Protection is enabled.
+  + `crawler_other` - (Optional, Bool) Specifies whether detection of other crawlers in Basic Web Protection is enabled.
+  + `web_shell` - (Optional, Bool) Specifies whether webshell detection in Basic Web Protection is enabled.
+  + `cc` - (Optional, Bool) Specifies whether CC Attack Protection is enabled.
+  + `custom` - (Optional, Bool) Specifies whether Precise Protection is enabled.
+  + `blacklist` - (Optional, Bool) Specifies whether Blacklist and Whitelist is enabled.
+  + `geolocation_access_control` - (Optional, Bool) Whether geolocation access control is enabled.
+  + `ignore` - (Optional, Bool) Whether false alarm masking is enabled.
+  + `privacy` - (Optional, Bool) Specifies whether Data Masking is enabled.
+  + `ignore` - (Optional, Bool) Specifies whether False Alarm Masking is enabled.
+  + `anti_tamper` - (Optional, Bool) Specifies whether Web Tamper Protection is enabled.
+  + `anti_leakage` - (Optional, Bool) Whether the information leakage prevention is enabled.
+  + `followed_action` - (Optional, Bool) Whether the Known Attack Source protection is enabled.
 
-* `full_detection` - (Optional) Specifies the detection mode in Precise Protection.
+* `full_detection` - (Optional, Bool) Specifies the detection mode in Precise Protection.
   * `true`: full detection, Full detection finishes all threat detections before blocking requests that meet Precise Protection specified conditions.
   * `false`: instant detection. Instant detection immediately ends threat detection after blocking a request that meets Precise Protection specified conditions.
+
+* `deep_inspection` - (Optional, Bool) The deep inspection in basic web protection.
+
+* `header_inspection` - (Optional, Bool) The header inspection in basic web protection.
+
+* `shiro_decryption_check` - (Optional, Bool) The shiro decryption check in basic web protection.
 
 ## Attributes Reference
 

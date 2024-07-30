@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/jmespath/go-jmespath"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -509,5 +510,14 @@ func ValueIgnoreEmpty(v interface{}) interface{} {
 		return nil
 	}
 
+	return v
+}
+
+// PathSearch evaluates a JMESPath expression against input data and returns the result.
+func PathSearch(expression string, obj interface{}, defaultValue interface{}) interface{} {
+	v, err := jmespath.Search(expression, obj)
+	if err != nil || v == nil {
+		return defaultValue
+	}
 	return v
 }

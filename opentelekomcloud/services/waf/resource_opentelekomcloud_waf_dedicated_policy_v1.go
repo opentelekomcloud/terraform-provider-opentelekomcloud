@@ -2,6 +2,7 @@ package waf
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"time"
 
@@ -171,6 +172,18 @@ func ResourceWafDedicatedPolicy() *schema.Resource {
 				Computed: true,
 				Optional: true,
 			},
+			"deep_inspection": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"header_inspection": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"shiro_decryption_check": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"domains": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -225,6 +238,12 @@ func resourceWafDedicatedPolicyV1Read(ctx context.Context, d *schema.ResourceDat
 		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud WAF dedicated policy.")
 	}
 
+	// the extend struct value example is: "extend": "{\"deep_decode\":true}"
+	var extendRespBody interface{}
+	if err := json.Unmarshal([]byte(policy.Extend.Extend), &extendRespBody); err != nil {
+		log.Printf("[WARN] error flatten extend map: %s", err)
+	}
+
 	options := []map[string]interface{}{
 		{
 			"web_attack":                 policy.Options.WebAttack,
@@ -259,6 +278,9 @@ func resourceWafDedicatedPolicyV1Read(ctx context.Context, d *schema.ResourceDat
 		d.Set("options", options),
 		d.Set("domains", policy.Hosts),
 		d.Set("created_at", policy.CreatedAt),
+		d.Set("deep_inspection", common.PathSearch("deep_decode", extendRespBody, false)),
+		d.Set("header_inspection", common.PathSearch("check_all_headers", extendRespBody, false)),
+		d.Set("shiro_decryption_check", common.PathSearch("shiro_rememberMe_enable", extendRespBody, false)),
 	)
 
 	if mErr.ErrorOrNil() != nil {
@@ -313,27 +335,33 @@ func updateWafPolicy(ctx context.Context, d *schema.ResourceData, meta interface
 		return fmterr.Errorf(errCreationV1DedicatedClient, err)
 	}
 
-	var updateOpts policies.UpdateOpts
-
-	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
-	}
-
-	if d.HasChange("level") {
-		updateOpts.Level = d.Get("level").(int)
-	}
-
-	if d.HasChange("full_detection") {
-		updateOpts.FullDetection = pointerto.Bool(d.Get("full_detection").(bool))
-	}
-
-	if d.HasChange("options") {
-		updateOpts.Options = buildOptions(d)
+	updateOpts := policies.UpdateOpts{
+		Name:          d.Get("name").(string),
+		Level:         d.Get("level").(int),
+		FullDetection: pointerto.Bool(d.Get("full_detection").(bool)),
+		Options:       buildOptions(d),
 	}
 
 	if d.HasChange("protection_mode") {
 		updateOpts.Action = &policies.PolicyAction{
 			Category: d.Get("protection_mode").(string),
+		}
+	}
+
+	if d.HasChanges("deep_inspection", "header_inspection", "shiro_decryption_check") {
+		ext := ExtendOptions{}
+		_, deep := d.GetChange("deep_inspection")
+		ext.DeepDecode = pointerto.Bool(deep.(bool))
+		_, header := d.GetChange("header_inspection")
+		ext.CheckAllHeaders = pointerto.Bool(header.(bool))
+		_, shiro := d.GetChange("shiro_decryption_check")
+		ext.ShiroRememberMeEnable = pointerto.Bool(shiro.(bool))
+		extendJson, err := json.Marshal(ext)
+		if err != nil {
+			return fmterr.Errorf("error marshaling extended options JSON: %s", err)
+		}
+		updateOpts.Extend = &policies.ExtendParams{
+			Extend: string(extendJson),
 		}
 	}
 
