@@ -606,6 +606,22 @@ func resourceClusterV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 	return nil
 }
 
+// func resourceClusterV1ImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+// 	config := meta.(*cfg.Config)
+// 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+// 		return config.DataArtsMigrationsV1Client(config.GetProjectName(d))
+// 	})
+// 	if err != nil {
+// 		return []*schema.ResourceData{d}, fmt.Errorf(errCreationV1Client, err)
+// 	}
+//
+// 	mErr := multierror.Append(nil,
+// 		d.Set("gateway_id", parts[0]),
+// 		d.Set("policy_id", parts[1]),
+// 	)
+// 	return []*schema.ResourceData{d}, mErr.ErrorOrNil()
+// }
+
 func WaitForDAMigrationClusterActive(cceClient *golangsdk.ServiceClient, clusterId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		resp, err := apis.Get(cceClient, clusterId)
@@ -623,15 +639,18 @@ func flattenInstances(d *schema.ResourceData, reqParams []apis.DetailedInstances
 	}
 
 	var az, flavorID string
+	var nics *schema.Set
 
 	// That's a dirty hack, because we can't get these 3 fields from an API and we should reuse them.
 	// If you don't set up them, terraform will recalculate a state and try to apply it again with all null fields.
-	z := d.Get("instances").(*schema.Set).List()[0]
+	instances := d.Get("instances").(*schema.Set).List()
 
-	inst := z.(map[string]interface{})
-	az = inst["availability_zone"].(string)
-	flavorID = inst["flavor_id"].(string)
-	nics := inst["nics"].(*schema.Set)
+	if len(instances) > 0 {
+		inst := instances[0].(map[string]interface{})
+		az = inst["availability_zone"].(string)
+		flavorID = inst["flavor_id"].(string)
+		nics = inst["nics"].(*schema.Set)
+	}
 
 	result := make([]map[string]interface{}, len(reqParams))
 	for i, v := range reqParams {
@@ -700,7 +719,7 @@ func flattenVolume(v apis.Volume) []map[string]interface{} {
 }
 
 func flattenNics(nics *schema.Set) []map[string]interface{} {
-	if nics.Len() == 0 {
+	if nics == nil || len(nics.List()) == 0 {
 		return nil
 	}
 

@@ -64,7 +64,8 @@ func TestAccDAMigrationsCluster_basic(t *testing.T) {
 				ResourceName:      rName,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// ImportStateIdFunc: testAccDAMigrationsClusterImportStateFunc(),
+				ImportStateIdFunc: testAccDAMigrationsClusterImportStateFunc(),
+				// ImportStateVerifyIgnore: []string{"email", "language", "phone_number", "nics"},
 			},
 		},
 	})
