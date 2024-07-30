@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[WAF]** Add ``deep_inspection``, ``header_inspection``, ``shiro_decryption_check`` options for ``resource/opentelekomcloud_waf_dedicated_policy_v1`` (`#2598 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2598>`_)

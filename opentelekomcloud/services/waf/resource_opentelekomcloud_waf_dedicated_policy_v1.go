@@ -350,18 +350,12 @@ func updateWafPolicy(ctx context.Context, d *schema.ResourceData, meta interface
 
 	if d.HasChanges("deep_inspection", "header_inspection", "shiro_decryption_check") {
 		ext := ExtendOptions{}
-		if d.HasChange("deep_inspection") {
-			_, v := d.GetChange("deep_inspection")
-			ext.DeepDecode = pointerto.Bool(v.(bool))
-		}
-		if d.HasChange("header_inspection") {
-			_, v := d.GetChange("header_inspection")
-			ext.CheckAllHeaders = pointerto.Bool(v.(bool))
-		}
-		if d.HasChange("shiro_decryption_check") {
-			_, v := d.GetChange("shiro_decryption_check")
-			ext.ShiroRememberMeEnable = pointerto.Bool(v.(bool))
-		}
+		_, deep := d.GetChange("deep_inspection")
+		ext.DeepDecode = pointerto.Bool(deep.(bool))
+		_, header := d.GetChange("header_inspection")
+		ext.CheckAllHeaders = pointerto.Bool(header.(bool))
+		_, shiro := d.GetChange("shiro_decryption_check")
+		ext.ShiroRememberMeEnable = pointerto.Bool(shiro.(bool))
 		extendJson, err := json.Marshal(ext)
 		if err != nil {
 			return fmterr.Errorf("error marshaling extended options JSON: %s", err)
