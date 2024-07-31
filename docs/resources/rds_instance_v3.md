@@ -415,9 +415,16 @@ The `volume` block supports:
 * `size` - (Required) Specifies the volume size. Its value range is from 40 GB to 4000
   GB. The value must be a multiple of 10. Changing this resize the volume.
 
-* `type` - (Required, ForceNew) Specifies the volume type. Its value can be any of the following
-  and is case-sensitive: COMMON: indicates the SATA type.
-  ULTRAHIGH: indicates the SSD type.  Changing this parameter will create a new resource.
+* `type` - (Required, ForceNew) Specifies the volume type. Changing this resize the volume. Its value can be any of the following
+  and is case-sensitive:
+  * COMMON: SATA storage.
+  * ULTRAHIGH: ultra-high I/O storage.
+  * CLOUDSSD: cloud SSD storage.
+  * ESSD: extreme SSD storage.
+
+-> Note
+  The MySQL and PostgreSQL DB engines support the following volume types: CLOUDSSD and ESSD. ESSD is not supported for Single instance types for MySQL and PostgreSQL.
+  The SQL Server engine supports the following volume types: COMMON, ULTRAHIGH, and ESSD.
 
 ~> **Warning** `limit_size` and `trigger_threshold` are supported only by MySQL with `ULTRAHIGH` disk type.
 
