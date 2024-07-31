@@ -41,7 +41,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   flavor            = "rds.pg.c2.medium"
 
   volume {
-    type = "COMMON"
+    type = "CLOUDSSD"
     size = 100
   }
 
@@ -82,7 +82,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   ha_replication_mode = "async"
 
   volume {
-    type = "COMMON"
+    type = "CLOUDSSD"
     size = 100
   }
 
@@ -124,7 +124,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = var.subnet_id
   vpc_id            = var.vpc_id
   volume {
-    type = "COMMON"
+    type = "CLOUDSSD"
     size = 100
   }
   flavor              = "rds.pg.s1.medium.ha"
@@ -175,7 +175,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 
   volume {
     disk_encryption_id = opentelekomcloud_kms_key_v1.key.id
-    type               = "COMMON"
+    type               = "CLOUDSSD"
     size               = 100
   }
   backup_strategy {
@@ -219,7 +219,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   vpc_id            = var.vpc_id
   flavor            = "rds.pg.c2.medium"
   volume {
-    type = "COMMON"
+    type = "CLOUDSSD"
     size = 40
   }
 
@@ -257,7 +257,7 @@ resource "opentelekomcloud_rds_instance_v3" "from_backup" {
   subnet_id         = var.os_network_id
   vpc_id            = var.os_router_id
   volume {
-    type = "COMMON"
+    type = "CLOUDSSD"
     size = 40
   }
   backup_strategy {
@@ -284,7 +284,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "CLOUDSSD"
     size = 40
   }
   flavor = "rds.mysql.c2.medium"
@@ -415,9 +415,16 @@ The `volume` block supports:
 * `size` - (Required) Specifies the volume size. Its value range is from 40 GB to 4000
   GB. The value must be a multiple of 10. Changing this resize the volume.
 
-* `type` - (Required, ForceNew) Specifies the volume type. Its value can be any of the following
-  and is case-sensitive: COMMON: indicates the SATA type.
-  ULTRAHIGH: indicates the SSD type.  Changing this parameter will create a new resource.
+* `type` - (Required, ForceNew) Specifies the volume type. Changing this resize the volume. Its value can be any of the following
+  and is case-sensitive:
+  * COMMON: SATA storage (not more available for RDS deployment of new instances).
+  * ULTRAHIGH: ultra-high I/O storage.
+  * CLOUDSSD: cloud SSD storage.
+  * ESSD: extreme SSD storage.
+
+-> Note
+  The MySQL and PostgreSQL DB engines support the following volume types: CLOUDSSD and ESSD. ESSD is not supported for Single instance types for MySQL and PostgreSQL.
+  The SQL Server engine supports the following volume types: COMMON, ULTRAHIGH, and ESSD.
 
 ~> **Warning** `limit_size` and `trigger_threshold` are supported only by MySQL with `ULTRAHIGH` disk type.
 
