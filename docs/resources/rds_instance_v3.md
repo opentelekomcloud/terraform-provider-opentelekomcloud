@@ -41,7 +41,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   flavor            = "rds.pg.c2.medium"
 
   volume {
-    type = "COMMON"
+    type = "CLOUDSSD"
     size = 100
   }
 
@@ -82,7 +82,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   ha_replication_mode = "async"
 
   volume {
-    type = "COMMON"
+    type = "CLOUDSSD"
     size = 100
   }
 
@@ -124,7 +124,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = var.subnet_id
   vpc_id            = var.vpc_id
   volume {
-    type = "COMMON"
+    type = "CLOUDSSD"
     size = 100
   }
   flavor              = "rds.pg.s1.medium.ha"
@@ -175,7 +175,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 
   volume {
     disk_encryption_id = opentelekomcloud_kms_key_v1.key.id
-    type               = "COMMON"
+    type               = "CLOUDSSD"
     size               = 100
   }
   backup_strategy {
@@ -219,7 +219,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   vpc_id            = var.vpc_id
   flavor            = "rds.pg.c2.medium"
   volume {
-    type = "COMMON"
+    type = "CLOUDSSD"
     size = 40
   }
 
@@ -257,7 +257,7 @@ resource "opentelekomcloud_rds_instance_v3" "from_backup" {
   subnet_id         = var.os_network_id
   vpc_id            = var.os_router_id
   volume {
-    type = "COMMON"
+    type = "CLOUDSSD"
     size = 40
   }
   backup_strategy {
@@ -284,7 +284,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "COMMON"
+    type = "CLOUDSSD"
     size = 40
   }
   flavor = "rds.mysql.c2.medium"
@@ -417,7 +417,7 @@ The `volume` block supports:
 
 * `type` - (Required, ForceNew) Specifies the volume type. Changing this resize the volume. Its value can be any of the following
   and is case-sensitive:
-  * COMMON: SATA storage.
+  * COMMON: SATA storage (not more available for RDS deployment of new instances).
   * ULTRAHIGH: ultra-high I/O storage.
   * CLOUDSSD: cloud SSD storage.
   * ESSD: extreme SSD storage.
