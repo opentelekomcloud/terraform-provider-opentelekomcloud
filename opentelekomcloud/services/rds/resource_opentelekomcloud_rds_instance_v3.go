@@ -48,7 +48,7 @@ func ResourceRdsInstanceV3() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-			validateRDSv3Flavor("flavor"),
+			// validateRDSv3Flavor("flavor"),
 			common.ValidateSubnet("subnet_id"),
 			common.ValidateVPC("vpc_id"),
 		),
