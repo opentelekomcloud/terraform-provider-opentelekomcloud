@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[ER]** New resource ``resource/opentelekomcloud_er_route_static_route_v3`` (`#2605 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2605>`_)
