@@ -417,7 +417,7 @@ The `volume` block supports:
 
 * `type` - (Required, ForceNew) Specifies the volume type. Changing this resize the volume. Its value can be any of the following
   and is case-sensitive:
-  * COMMON: SATA storage (not more available for RDS deployment of new instances).
+  * COMMON: SATA storage.
   * ULTRAHIGH: ultra-high I/O storage.
   * CLOUDSSD: cloud SSD storage.
   * ESSD: extreme SSD storage.
