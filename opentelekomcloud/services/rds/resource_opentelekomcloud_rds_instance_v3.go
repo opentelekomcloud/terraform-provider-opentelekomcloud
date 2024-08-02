@@ -1347,6 +1347,7 @@ func resourceRdsInstanceV3Delete(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
+//nolint:all
 func validateRDSv3Flavor(argName string) schema.CustomizeDiffFunc {
 	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 		config, ok := meta.(*cfg.Config)
