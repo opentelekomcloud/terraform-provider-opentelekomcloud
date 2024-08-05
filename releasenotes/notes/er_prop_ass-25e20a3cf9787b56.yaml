@@ -1,6 +1,6 @@
 ---
 features:
   |
-  **[ER]** Add new resource ``resource/opentelekomcloud_er_association_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  **[ER]** Add new resource ``resource/opentelekomcloud_er_association_v3`` (`#2607 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2607>`_)
   |
-  **[ER]** Add new resource ``resource/opentelekomcloud_er_propagation_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  **[ER]** Add new resource ``resource/opentelekomcloud_er_propagation_v3`` (`#2607 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2607>`_)
