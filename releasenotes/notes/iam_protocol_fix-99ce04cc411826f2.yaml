@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IAM]** Fix ``resource/opentelekomcloud_identity_protocol_v3`` OIDC update (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)

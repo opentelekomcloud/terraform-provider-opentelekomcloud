@@ -612,7 +612,15 @@ func updateAccessConfig(d *schema.ResourceData, meta interface{}) error {
 		opts.ResponseMode = accessConfig["response_mode"].(string)
 	}
 	log.Printf("[DEBUG] Update access type of provider: %#v", opts)
-	opts.IdpIp = d.Id()
+
+	subId := strings.Split(d.Id(), "/")
+
+	switch len(subId) {
+	case 1:
+		opts.IdpIp = d.Id()
+	case 2:
+		opts.IdpIp = subId[0]
+	}
 	_, err = providers.UpdateOIDC(clientAdmin, opts)
 	return err
 }

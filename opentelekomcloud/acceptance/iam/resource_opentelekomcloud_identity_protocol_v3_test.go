@@ -60,6 +60,18 @@ func TestAccIdentityV3Protocol_OIDC(t *testing.T) {
 					resource.TestCheckResourceAttr(protocolResourceName, "access_config.0.client_id", "your_client_id"),
 				),
 			},
+			{
+				Config: testAccIdentityV3ProtocolOIDCUpdateSignature,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(protocolResourceName, "mapping_id", mapping),
+					resource.TestCheckResourceAttr(protocolResourceName, "provider_id", providerName),
+					resource.TestCheckResourceAttr(protocolResourceName, "links.%", "2"),
+					resource.TestCheckResourceAttrSet(protocolResourceName, "links.self"),
+					resource.TestCheckResourceAttr(protocolResourceName, "access_config.0.access_type", "program_console"),
+					resource.TestCheckResourceAttr(protocolResourceName, "access_config.0.provider_url", "https://accounts.example.com"),
+					resource.TestCheckResourceAttr(protocolResourceName, "access_config.0.client_id", "your_client_id"),
+				),
+			},
 		},
 	})
 }
@@ -187,6 +199,39 @@ resource "opentelekomcloud_identity_protocol_v3" "saml" {
             kty = "RSA"
             n   = "..."
             use = "sig"
+          },
+        ]
+      }
+    )
+  }
+}
+`, testAccIdentityV3ProviderBasic, testAccIdentityV3MappingBasic(mapping), protocolOIDC)
+
+	testAccIdentityV3ProtocolOIDCUpdateSignature = fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_identity_protocol_v3" "saml" {
+  protocol    = "%s"
+  provider_id = opentelekomcloud_identity_provider_v3.provider.id
+  mapping_id  = opentelekomcloud_identity_mapping_v3.mapping.id
+  access_config {
+    access_type            = "program_console"
+    provider_url           = "https://accounts.example.com"
+    client_id              = "your_client_id"
+    authorization_endpoint = "https://accounts.example.com/o/oauth2/v2/auth"
+    scopes                 = ["openid"]
+    response_type          = "id_token"
+    response_mode          = "fragment"
+    signing_key = jsonencode(
+      {
+        keys = [
+          {
+            alg = "RS256"
+            e   = "AQAB"
+            kid = "..."
+            kty = "RSA"
           },
         ]
       }
