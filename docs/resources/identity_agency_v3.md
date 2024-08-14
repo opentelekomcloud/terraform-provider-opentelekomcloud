@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_identity_agency_v3"
 sidebar_current: "docs-opentelekomcloud-resource-identity-agency-v3"
 description: |-
-  Manages a IAM Cgency resource within OpenTelekomCloud.
+  Manages a IAM Agency resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for IAM agency you can get at
