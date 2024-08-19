@@ -1,4 +1,4 @@
 ---
 enhancements:
   - |
-    **[CCE]** Add dedicated host support for ``resource/opentelekomcloud_cce_node_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[CCE]** Add dedicated host support for ``resource/opentelekomcloud_cce_node_v3`` (`#2624 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2624>`_)
