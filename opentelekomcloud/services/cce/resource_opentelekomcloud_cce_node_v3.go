@@ -324,6 +324,11 @@ func ResourceCCENodeV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"dedicated_host_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"tags": {
 				Type:          schema.TypeMap,
 				ConflictsWith: []string{"labels"},
@@ -543,6 +548,7 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 					},
 				},
 			},
+			DedicatedHostID: d.Get("dedicated_host_id").(string),
 			NodeNicSpec: nodes.NodeNicSpec{
 				PrimaryNic: nodes.PrimaryNic{
 					SubnetId: d.Get("subnet_id").(string),

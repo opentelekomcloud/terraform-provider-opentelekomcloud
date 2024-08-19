@@ -118,6 +118,8 @@ The following arguments are supported:
 
 * `extend_param_charging_mode` - (Optional, ForceNew, Int) Node charging mode, 0 is on-demand charging. Changing this parameter will create a new cluster resource.
 
+* `dedicated_host_id` - (Optional, String, ForceNew) Specifies the ID of the DeH to which the node is scheduled.
+
 * `ecs_performance_type` - (Optional, ForceNew, String) Classification of cloud server specifications. Changing this parameter will create a new cluster resource.
 
 * `order_id` - (Optional, ForceNew, String) Order ID, mandatory when the node payment type is the automatic payment package period type.
