@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    **New Data Source:**  ``opentelekomcloud_evs_volumes_v2``
+    (`#2623 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2623>`_)

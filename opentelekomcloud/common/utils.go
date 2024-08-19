@@ -521,3 +521,29 @@ func PathSearch(expression string, obj interface{}, defaultValue interface{}) in
 	}
 	return v
 }
+
+func MapContains(rawMap map[string]string, filterMap map[string]interface{}) bool {
+	if len(filterMap) < 1 {
+		return true
+	}
+
+	hasContain := true
+	for key, value := range filterMap {
+		hasContain = hasContain && hasMapContain(rawMap, key, value.(string))
+	}
+
+	return hasContain
+}
+
+func hasMapContain(rawMap map[string]string, filterKey, filterValue string) bool {
+	if rawTag, ok := rawMap[filterKey]; ok {
+		if filterValue != "" {
+			filterTagValues := strings.Split(filterValue, ",")
+			return StrSliceContains(filterTagValues, rawTag)
+		} else {
+			return true
+		}
+	} else {
+		return false
+	}
+}
