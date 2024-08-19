@@ -4,6 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
+	"sort"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -13,7 +17,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dds/v3/backups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dds/v3/instances"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dds/v3/job"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -70,9 +76,6 @@ func ResourceDdsInstanceV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"wiredTiger", "rocksDB",
-							}, true),
 						},
 					},
 				},
@@ -99,6 +102,11 @@ func ResourceDdsInstanceV3() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.IsUUID,
 			},
+			"port": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
 			"password": {
 				Type:      schema.TypeString,
 				Sensitive: true,
@@ -113,9 +121,6 @@ func ResourceDdsInstanceV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"Sharding", "ReplicaSet", "Single",
-				}, true),
 			},
 			"flavor": {
 				Type:     schema.TypeList,
@@ -127,9 +132,6 @@ func ResourceDdsInstanceV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"mongos", "shard", "config", "replica", "single",
-							}, true),
 						},
 						"num": {
 							Type:         schema.TypeInt,
@@ -140,9 +142,6 @@ func ResourceDdsInstanceV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"ULTRAHIGH",
-							}, true),
 						},
 						"size": {
 							Type:         schema.TypeInt,
@@ -159,22 +158,22 @@ func ResourceDdsInstanceV3() *schema.Resource {
 			"backup_strategy": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: true,
 				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"start_time": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ForceNew:     true,
-							ValidateFunc: common.ValidateDDSStartTime,
+							Type:     schema.TypeString,
+							Required: true,
 						},
 						"keep_days": {
-							Type:         schema.TypeInt,
-							Required:     true,
-							ForceNew:     true,
-							ValidateFunc: validation.IntBetween(0, 732),
+							Type:     schema.TypeInt,
+							Required: true,
+						},
+						"period": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
 						},
 					},
 				},
@@ -190,10 +189,6 @@ func ResourceDdsInstanceV3() *schema.Resource {
 			},
 			"status": {
 				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"port": {
-				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"pay_mode": {
@@ -237,6 +232,18 @@ func ResourceDdsInstanceV3() *schema.Resource {
 				},
 			},
 			"tags": common.TagsSchema(),
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"time_zone": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -276,15 +283,19 @@ func resourceDdsFlavors(d *schema.ResourceData) []instances.Flavor {
 func resourceDdsBackupStrategy(d *schema.ResourceData) instances.BackupStrategy {
 	var backupStrategy instances.BackupStrategy
 	backupStrategyRaw := d.Get("backup_strategy").([]interface{})
-	log.Printf("[DEBUG] backupStrategyRaw: %+v", backupStrategyRaw)
+	startTime := "00:00-01:00"
+	keepDays := 7
+	period := "1,2,3,4,5,6,7"
 	if len(backupStrategyRaw) == 1 {
-		backupStrategy.StartTime = backupStrategyRaw[0].(map[string]interface{})["start_time"].(string)
-		backupStrategy.KeepDays = backupStrategyRaw[0].(map[string]interface{})["keep_days"].(int)
-	} else {
-		backupStrategy.StartTime = "00:00-01:00"
-		backupStrategy.KeepDays = 7
+		startTime = backupStrategyRaw[0].(map[string]interface{})["start_time"].(string)
+		keepDays = backupStrategyRaw[0].(map[string]interface{})["keep_days"].(int)
+		if periodRaw := backupStrategyRaw[0].(map[string]interface{})["period"].(string); periodRaw != "" {
+			period = periodRaw
+		}
 	}
-	log.Printf("[DEBUG] backupStrategy: %+v", backupStrategy)
+	backupStrategy.KeepDays = &keepDays
+	backupStrategy.StartTime = startTime
+	backupStrategy.Period = period
 	return backupStrategy
 }
 
@@ -345,6 +356,10 @@ func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	}
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
+	if val, ok := d.GetOk("port"); ok {
+		createOpts.Port = strconv.Itoa(val.(int))
+	}
+
 	instance, err := instances.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error getting instance from result: %w", err)
@@ -365,6 +380,17 @@ func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", d.Id(), err)
+	}
+
+	// since the POST method has no `period`, update backup strategy for it
+	backupStrategyRaw := d.Get("backup_strategy").([]interface{})
+	if len(backupStrategyRaw) == 1 {
+		period := backupStrategyRaw[0].(map[string]interface{})["period"].(string)
+		if period != "" && !isEqualPeriod(period, "1,2,3,4,5,6,7") {
+			if err := createBackupStrategy(ctx, client, d); err != nil {
+				return diag.FromErr(err)
+			}
+		}
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
@@ -423,6 +449,9 @@ func resourceDdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("status", instance.Status),
 		d.Set("port", instance.Port),
 		d.Set("pay_mode", instance.PayMode),
+		d.Set("created_at", instance.Created),
+		d.Set("updated_at", instance.Updated),
+		d.Set("time_zone", instance.TimeZone),
 		d.Set("tags", tagsMap),
 	)
 
@@ -450,10 +479,16 @@ func resourceDdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf("error setting DDSv3 datastore opts: %w", err)
 	}
 
+	backupStrategyResp, err := backups.GetBackupPolicy(client, d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	backupStrategyList := make([]map[string]interface{}, 0, 1)
 	backupStrategy := map[string]interface{}{
-		"start_time": instance.BackupStrategy.StartTime,
-		"keep_days":  instance.BackupStrategy.KeepDays,
+		"start_time": backupStrategyResp.StartTime,
+		"keep_days":  backupStrategyResp.KeepDays,
+		"period":     backupStrategyResp.Period,
 	}
 	backupStrategyList = append(backupStrategyList, backupStrategy)
 	if err := d.Set("backup_strategy", backupStrategyList); err != nil {
@@ -558,6 +593,53 @@ func resourceDdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 					return diag.FromErr(err)
 				}
 			}
+		}
+	}
+
+	if d.HasChange("backup_strategy") {
+		backupStrategy := resourceDdsBackupStrategy(d)
+		err := backups.SetBackupPolicy(client, backups.ModifyBackupPolicyOpts{
+			InstanceId:   d.Id(),
+			BackupPolicy: &backupStrategy,
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	if d.HasChange("port") {
+		retryFunc := func() (interface{}, bool, error) {
+			resp, err := instances.ModifyPort(client, instances.ModifyPortOpt{
+				Port:       d.Get("port").(int),
+				InstanceId: d.Id(),
+			})
+			retry, err := handleMultiOperationsError(err)
+			return resp, retry, err
+		}
+		r, err := common.RetryContextWithWaitForState(&common.RetryContextWithWaitForStateParam{
+			Ctx:          ctx,
+			RetryFunc:    retryFunc,
+			WaitFunc:     instanceStateRefreshFunc(client, d.Id()),
+			WaitTarget:   []string{"normal"},
+			Timeout:      d.Timeout(schema.TimeoutUpdate),
+			DelayTimeout: 1 * time.Second,
+			PollInterval: 10 * time.Second,
+		})
+		if err != nil {
+			return diag.Errorf("error updating database access port: %s", err)
+		}
+		jobId := r.(*string)
+		stateConf := &resource.StateChangeConf{
+			Pending:      []string{"Running"},
+			Target:       []string{"Completed"},
+			Refresh:      JobStateRefreshFunc(client, *jobId),
+			Timeout:      d.Timeout(schema.TimeoutUpdate),
+			PollInterval: 10 * time.Second,
+		}
+
+		_, err = stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return diag.Errorf("error waiting for the job (%s) completed: %s ", jobId, err)
 		}
 	}
 
@@ -863,4 +945,55 @@ func resourceDdsInstanceWaitUpdate(ctx context.Context, client *golangsdk.Servic
 		return fmt.Errorf("error waiting for instance (%s) to become ready: %w", d.Id(), err)
 	}
 	return nil
+}
+
+func isEqualPeriod(old, new string) bool {
+	if len(old) != len(new) {
+		return false
+	}
+	oldArray := strings.Split(old, ",")
+	newArray := strings.Split(new, ",")
+	sort.Strings(oldArray)
+	sort.Strings(newArray)
+
+	return reflect.DeepEqual(oldArray, newArray)
+}
+
+func createBackupStrategy(ctx context.Context, client *golangsdk.ServiceClient, d *schema.ResourceData) error {
+	retryFunc := func() (interface{}, bool, error) {
+		strategy := resourceDdsBackupStrategy(d)
+		opts := backups.ModifyBackupPolicyOpts{
+			InstanceId:   d.Id(),
+			BackupPolicy: &strategy,
+		}
+		err := backups.SetBackupPolicy(client, opts)
+		retry, err := handleMultiOperationsError(err)
+		return nil, retry, err
+	}
+	_, err := common.RetryContextWithWaitForState(&common.RetryContextWithWaitForStateParam{
+		Ctx:          ctx,
+		RetryFunc:    retryFunc,
+		WaitFunc:     instanceStateRefreshFunc(client, d.Id()),
+		WaitTarget:   []string{"normal"},
+		Timeout:      d.Timeout(schema.TimeoutCreate),
+		DelayTimeout: 1 * time.Second,
+		PollInterval: 10 * time.Second,
+	})
+
+	if err != nil {
+		return fmt.Errorf("error creating backup strategy of the DDS instance: %s ", err)
+	}
+
+	return nil
+}
+
+func JobStateRefreshFunc(client *golangsdk.ServiceClient, jobId string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		resp, err := job.Get(client, jobId)
+		if err != nil {
+			return nil, "", err
+		}
+
+		return resp, resp.Status, nil
+	}
 }

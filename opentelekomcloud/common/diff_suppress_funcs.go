@@ -50,7 +50,7 @@ func SuppressRdsNameDiffs(_, old, new string, _ *schema.ResourceData) bool {
 	return false
 }
 
-func SuppressLBWhitelistDiffs(_, old, new string, _ *schema.ResourceData) bool {
+func SuppressStringSepratedByCommaDiffs(_, old, new string, _ *schema.ResourceData) bool {
 	if len(old) != len(new) {
 		return false
 	}
