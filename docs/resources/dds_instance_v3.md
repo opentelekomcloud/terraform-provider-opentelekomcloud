@@ -255,6 +255,9 @@ The following attributes are exported:
 * `port` - See Argument Reference above.
 * `nodes` - Indicates the instance nodes information. Structure is documented below.
 * `pay_mode` - Indicates the billing mode. `0`: indicates the pay-per-use billing mode.
+* `created_at` - Indicates the creation time.
+* `updated_at` - Indicates the update time.
+* `time_zone` - Indicates the time zone.
 
 The `nodes` block contains:
 
