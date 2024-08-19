@@ -639,7 +639,7 @@ func resourceDdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 
 		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return diag.Errorf("error waiting for the job (%s) completed: %s ", jobId, err)
+			return diag.Errorf("error waiting for the job (%s) completed: %s ", *jobId, err)
 		}
 	}
 
