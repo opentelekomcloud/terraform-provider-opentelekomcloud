@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[DDS]** Add new resource ``resource/opentelekomcloud_dds_backup_v3`` (`#2627 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2627>`_)

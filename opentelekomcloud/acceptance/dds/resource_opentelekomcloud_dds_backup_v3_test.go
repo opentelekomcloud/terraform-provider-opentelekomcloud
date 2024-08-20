@@ -31,7 +31,7 @@ func getBackupFunc(conf *cfg.Config, state *terraform.ResourceState) (interface{
 	return r.Backups[0], err
 }
 
-func TestAccApplication_basic(t *testing.T) {
+func TestAccDdsBackupV3_basic(t *testing.T) {
 	var backupResp interface{}
 
 	name := fmt.Sprintf("dds_acc_backup_%s", acctest.RandString(5))
