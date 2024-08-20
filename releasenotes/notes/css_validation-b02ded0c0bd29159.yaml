@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CSS]** Fix size validation for ``resource/opentelekomcloud_css_cluster_v1`` (`#2626 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2626>`_)
