@@ -44,7 +44,7 @@ func ResourceWhitelistV2() *schema.Resource {
 			"whitelist": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				DiffSuppressFunc: common.SuppressLBWhitelistDiffs,
+				DiffSuppressFunc: common.SuppressStringSepratedByCommaDiffs,
 			},
 		},
 	}

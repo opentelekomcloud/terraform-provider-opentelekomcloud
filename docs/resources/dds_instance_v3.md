@@ -131,76 +131,75 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
 
 The following arguments are supported:
 
-* `region` - (Optional) Specifies the region of the DDS instance. Changing this creates
-  a new instance.
+* `region` - (Optional, String, ForceNew) Specifies the region of the DDS instance.
 
-* `name` - (Required) Specifies the DB instance name. The DB instance name of the same
+* `name` - (Required, String) Specifies the DB instance name. The DB instance name of the same
   type is unique in the same tenant.
 
-* `datastore` - (Required) Specifies database information. The structure is described
-  below. Changing this creates a new instance.
+* `datastore` - (Required, List, ForceNew) Specifies database information. The structure is described
+  below.
 
-* `availability_zone` - (Required) Specifies the ID of the availability zone. Changing
-  this creates a new instance.
+* `availability_zone` - (Required, String, ForceNew) Specifies the ID of the availability zone.
 
-* `vpc_id` - (Required) Specifies the VPC ID. Changing this creates a new instance.
+* `vpc_id` - (Required, String, ForceNew) Specifies the VPC ID.
 
-* `subnet_id` - (Required) Specifies the subnet Network ID. Changing this creates a new instance.
+* `subnet_id` - (Required, String, ForceNew) Specifies the subnet Network ID.
 
-* `security_group_id` - (Required) Specifies the security group ID of the DDS instance.
+* `security_group_id` - (Required, String) Specifies the security group ID of the DDS instance.
 
-* `password` - (Required) Specifies the Administrator password of the database instance.
+* `password` - (Required, String) Specifies the Administrator password of the database instance.
 
-* `disk_encryption_id` - (Required) Specifies the disk encryption ID of the instance.
+* `disk_encryption_id` - (Optional, String, ForceNew) Specifies the disk encryption ID of the instance.
+
+* `mode` - (Required, String, ForceNew) Specifies the mode of the database instance.
+
+* `flavor` - (Required, List, ForceNew) Specifies the flavor information. The structure is described below.
   Changing this creates a new instance.
 
-* `mode` - (Required) Specifies the mode of the database instance. Changing this creates
-  a new instance.
+* `port` - (Optional, Int) Specifies the database access port. The valid values are range from `2100` to `9500` and
+  `27017`, `27018`, `27019`. Defaults to `8635`.
 
-* `flavor` - (Required) Specifies the flavors information. The structure is described below.
-  Changing this creates a new instance.
+* `backup_strategy` - (Optional, List) Specifies the advanced backup policy. The structure is
+  described below.
 
-* `backup_strategy` - (Optional) Specifies the advanced backup policy. The structure is
-  described below. Changing this creates a new instance.
-
-* `ssl` - (Optional) Specifies whether to enable or disable SSL. Defaults to true.
+* `ssl` - (Optional, Bool) Specifies whether to enable or disable SSL. Defaults to true.
 -> The instance will be restarted in the background when switching SSL. Please operate with caution.
 
-* `tags` - (Optional) Tags key/value pairs to associate with the volume.
+* `tags` - (Optional, Map) Tags key/value pairs to associate with the volume.
   Changing this updates the existing volume tags.
 
 The `datastore` block supports:
 
-* `type` - (Required) Specifies the database type. DDS Community Edition is supported.
+* `type` - (Required, String, ForceNew) Specifies the database type. DDS Community Edition is supported.
   The value is `DDS-Community`.
 
-* `version` - (Required) Specifies the database version.
+* `version` - (Required, String, ForceNew) Specifies the database version.
 The values are `3.2`, `3.4`, `4.0`, `4.2`, `4.4`.
 
-* `storage_engine` - (Optional) Specifies the storage engine. Currently, DDS supports the WiredTiger and RocksDB
+* `storage_engine` - (Optional, String, ForceNew) Specifies the storage engine. Currently, DDS supports the WiredTiger and RocksDB
    storage engine. The values are `wiredTiger`, `rocksDB`.
 WiredTiger engine supports versions `3.2`, `3.4`, `4.0` while RocksDB supports versions `4.2`, `4.4`
 
 The `flavor` block supports:
 
-* `type` - (Required) Specifies the node type. Valid value:
+* `type` - (Required, String, ForceNew) Specifies the node type. Valid value:
   * For a cluster instance, the value can be `mongos`, `shard`, or `config`.
   * For a replica set instance, the value is `replica`.
   * For a single node instance, the value is `single`.
 
-* `num` - (Required) Specifies the node quantity. Valid value:
+* `num` - (Required, Int) Specifies the node quantity. Valid value:
   * `mongos`: The value ranges from `2` to `16`.
   * `shard`: The value ranges from `2` to `16`.
   * `config`: The value is `1`.
   * `replica`: The value is `1`.
   * `single`: The value is `1`.
 
-* `storage` - (Optional) Specifies the disk type. Valid value: `ULTRAHIGH` which indicates the type SSD.
+* `storage` - (Optional, String, ForceNew) Specifies the disk type. Valid value: `ULTRAHIGH` which indicates the type SSD.
 
 -> This parameter is optional for all nodes except `mongos`. This parameter is invalid for
   the `mongos` nodes.
 
-* `size` - (Optional) Specifies the disk size. The value must be a multiple of `10`. The unit is GB.
+* `size` - (Optional, Int) Specifies the disk size. The value must be a multiple of `10`. The unit is GB.
   * For a `cluster` instance, the storage space of a shard node can be `10` to `1000` GB, and the config
   storage space is `20` GB. This parameter is invalid for `mongos` nodes. Therefore, you do not need
   to specify the storage space for `mongos` nodes.
@@ -209,21 +208,29 @@ The `flavor` block supports:
 -> This parameter is mandatory for all nodes except `mongos`. This parameter is invalid
   for the `mongos` nodes.
 
-* `spec_code` - (Required) Specifies the resource specification code.
+* `spec_code` - (Required, String) Specifies the resource specification code.
 
 The `backup_strategy ` block supports:
 
-* `start_time` - (Required) Specifies the backup time window. Automated backups will be triggered
+* `start_time` - (Required, String) Specifies the backup time window. Automated backups will be triggered
 	during the backup time window. The value cannot be empty. It must be a valid value in the
 	`"hh:mm-HH:MM"` format. The current time is in the UTC format.
 	* The `HH` value must be 1 greater than the `hh` value.
 	* The values from `mm` and `MM` must be the same and must be set to any of the following `00`, `15`, `30`, or `45`.
 
-* `keep_days` - (Optional) Specifies the number of days to retain the generated backup files. The
+* `keep_days` - (Required, Int) Specifies the number of days to retain the generated backup files. The
 	value range is from `0` to `732`.
 	* If this parameter is set to `0`, the automated backup policy is not set.
 	* If this parameter is not transferred, the automated backup policy is enabled by default.
     Backup files are stored for seven days by default.
+
+* `period` - (Optional, String) Specifies the backup cycle. Data will be automatically backed up on the
+  selected days every week.
+  + If you set the `keep_days` to 0, this parameter is no need to set.
+  + If you set the `keep_days` within 6 days, set the parameter value to `1,2,3,4,5,6,7`, data is automatically
+    backed up on each day every week.
+  + If you set the `keep_days` between 7 and 732 days, set the parameter value to at least one day of every week.
+    For example: `1`, `3,5`.
 
 ## Attributes Reference
 
@@ -244,10 +251,13 @@ The following attributes are exported:
 * `backup_strategy` - See Argument Reference above.
 * `tags` - See Argument Reference above.
 * `db_username` - Indicates the DB Administator name.
-* `status` - Indicates the the DB instance status.
-* `port` - Indicates the database port number. The port range is `2100` to `9500`.
+* `status` - Indicates the DB instance status.
+* `port` - See Argument Reference above.
 * `nodes` - Indicates the instance nodes information. Structure is documented below.
 * `pay_mode` - Indicates the billing mode. `0`: indicates the pay-per-use billing mode.
+* `created_at` - Indicates the creation time.
+* `updated_at` - Indicates the update time.
+* `time_zone` - Indicates the time zone.
 
 The `nodes` block contains:
 

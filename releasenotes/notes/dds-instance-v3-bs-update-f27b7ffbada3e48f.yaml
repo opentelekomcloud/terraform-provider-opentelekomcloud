@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[DDS]** Now can update ``backup_strategy`` and ``port`` in ``resource/opentelekomcloud_dds_instance_v3`` (`#2625 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2625>`_)

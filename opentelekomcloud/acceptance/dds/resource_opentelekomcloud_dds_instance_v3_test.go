@@ -31,6 +31,9 @@ func TestAccDDSV3Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.0.size", "20"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.0.num", "1"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.0.spec_code", "dds.mongodb.s2.medium.4.repset"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "backup_strategy.0.start_time", "08:00-09:00"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "backup_strategy.0.keep_days", "1"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "backup_strategy.0.period", "1,2,3,4,5,6,7"),
 				),
 			},
 			{
@@ -40,11 +43,15 @@ func TestAccDDSV3Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceName, "name", "dds-instance-updated"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "mode", "ReplicaSet"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "ssl", "true"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "port", "8800"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.0.size", "60"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.0.num", "1"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.0.spec_code", "dds.mongodb.s2.xlarge.4.repset"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "tags.new_test", "new_test2"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "tags.john", "doe"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "backup_strategy.0.start_time", "00:00-01:00"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "backup_strategy.0.keep_days", "7"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "backup_strategy.0.period", "2,4,6"),
 				),
 			},
 		},
@@ -257,6 +264,11 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
     start_time = "08:00-09:00"
     keep_days  = "1"
   }
+
+  tags = {
+    foo   = "bar"
+    owner = "terraform"
+  }
 }`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
 var TestAccDDSInstanceV3ConfigUpdated = fmt.Sprintf(`
@@ -267,6 +279,7 @@ var TestAccDDSInstanceV3ConfigUpdated = fmt.Sprintf(`
 resource "opentelekomcloud_dds_instance_v3" "instance" {
   name              = "dds-instance-updated"
   availability_zone = "%s"
+  port              = 8800
   datastore {
     type           = "DDS-Community"
     version        = "3.4"
@@ -284,10 +297,13 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
     size      = 60
     spec_code = "dds.mongodb.s2.xlarge.4.repset"
   }
+
   backup_strategy {
-    start_time = "08:00-09:00"
-    keep_days  = "1"
+    start_time = "00:00-01:00"
+    keep_days  = "7"
+    period     = "2,4,6"
   }
+
   tags = {
     john     = "doe"
     new_test = "new_test2"
