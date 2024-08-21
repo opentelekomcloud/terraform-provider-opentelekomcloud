@@ -152,7 +152,7 @@ The default value is `FULL_INCR_TRANS`.
 The `db_info` block supports:
 
 * `engine_type` - (Required, String, ForceNew) Specifies the engine type of database. Changing this parameter will
-  create a new resource. The options are as follows: `mysql`, `mongodb`, `gaussdbv5`.
+  create a new resource. The options are as follows: `mysql`, `mongodb`, `gaussdbv5`, `postgresql`.
 
 * `ip` - (Required, String, ForceNew) Specifies the IP of database. Changing this parameter will create a new resource.
 
