@@ -73,3 +73,11 @@ The following attributes are exported:
 * `source_type` - See Argument Reference above.
 
 * `cidr` - See Argument Reference above.
+
+## Import
+
+SNAT can be imported using the following format:
+
+```sh
+terraform import opentelekomcloud_nat_snat_rule_v2.snat_1 f4f783a7-b908-4215-b018-724960e5df4b
+```
