@@ -28,6 +28,11 @@ func TestAccNatSnatRule_basic(t *testing.T) {
 					testAccCheckNatV2SnatRuleExists(resourceSnatRuleName),
 				),
 			},
+			{
+				ResourceName:      resourceSnatRuleName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
