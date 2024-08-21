@@ -1273,7 +1273,7 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	// in case when autoscaling was enabled even once size will be overwritten by data from schema
-	if as, ok := d.GetOk("autoscaling_enabled"); ok && as.(bool) == true {
+	if as, ok := d.GetOk("autoscaling_enabled"); ok && as.(bool) {
 		volume["size"] = d.Get("volume.0.size").(int)
 	}
 
