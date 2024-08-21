@@ -426,11 +426,16 @@ The `volume` block supports:
   The MySQL and PostgreSQL DB engines support the following volume types: CLOUDSSD and ESSD. ESSD is not supported for Single instance types for MySQL and PostgreSQL.
   The SQL Server engine supports the following volume types: COMMON, ULTRAHIGH, and ESSD.
 
-~> **Warning** `limit_size` and `trigger_threshold` are supported only by MySQL with `ULTRAHIGH` disk type.
+~> **Warning** Specifying both `limit_size` and `trigger_threshold` will enable autoscaling for RDS instance.
+  Once autoscaling is activated, the `size` parameter for the volume will be ignored to prevent discrepancies
+  between configuration and actual state.
 
 * `limit_size` - (Optional, Int) Specifies the upper limit of automatic expansion of storage, in GB.
+  The value ranges from 40 GB to 4,000 GB and must be no less than the current storage of the instance.
+  If this parameter is configured, `trigger_threshold` is mandatory.
 
 * `trigger_threshold` - (Optional, Int) Specifies the threshold to trigger automatic expansion.
+  If this parameter is configured, `limit_size` is mandatory.
   If the available storage drops to this threshold or `10` GB, the automatic expansion is triggered.
   The valid values are as follows:
     + **10**
@@ -514,6 +519,8 @@ The `nodes` block contains:
 * `role` - Indicates the node type. The value can be master or slave, indicating the primary node or standby node respectively.
 
 * `status` - Indicates the node status.
+
+* `autoscaling_enabled` - Indicates whether autoscaling was enabled for this resource.
 
 ## Timeouts
 

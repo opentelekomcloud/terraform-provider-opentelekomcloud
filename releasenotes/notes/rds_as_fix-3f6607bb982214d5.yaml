@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[RDS]** Fix autoscaling logic and documentation for ``resource/opentelekomcloud_rds_instance_v3`` (`#2631 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2631>`_)

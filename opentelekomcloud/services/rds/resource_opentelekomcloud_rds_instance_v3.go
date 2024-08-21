@@ -332,6 +332,10 @@ func ResourceRdsInstanceV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"autoscaling_enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -966,7 +970,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		log.Printf("[DEBUG] Successfully updated instance %s flavor: %s", d.Id(), d.Get("flavor").(string))
 	}
 
-	if d.HasChange("volume") {
+	if d.HasChange("volume.0.size") {
 		_, newVolume := d.GetChange("volume")
 		volume := make(map[string]interface{})
 		volumeRaw := newVolume.([]interface{})
@@ -1254,14 +1258,23 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 	volume["type"] = rdsInstance.Volume.Type
 	volume["disk_encryption_id"] = rdsInstance.DiskEncryptionId
 
-	if dbInfo["type"] == "MySQL" && region != "eu-ch2" {
+	if region != "eu-ch2" {
 		resp, err := instances.GetAutoScaling(client, d.Id())
 		if err != nil {
 			log.Printf("[ERROR] error query automatic expansion configuration of the instance storage: %s", err)
 		} else if resp.SwitchOption {
+			err = d.Set("autoscaling_enabled", true)
+			if err != nil {
+				return diag.FromErr(err)
+			}
 			volume["limit_size"] = resp.LimitSize
 			volume["trigger_threshold"] = resp.TriggerThreshold
 		}
+	}
+
+	// in case when autoscaling was enabled even once size will be overwritten by data from schema
+	if as, ok := d.GetOk("autoscaling_enabled"); ok && as.(bool) {
+		volume["size"] = d.Get("volume.0.size").(int)
 	}
 
 	volumeList = append(volumeList, volume)
