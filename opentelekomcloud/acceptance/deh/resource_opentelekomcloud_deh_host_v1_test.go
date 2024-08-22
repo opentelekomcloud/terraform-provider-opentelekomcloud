@@ -129,7 +129,7 @@ resource "opentelekomcloud_deh_host_v1" "deh1" {
 
   tags = {
     created_by = "terraform"
-    muh = "value-create"
+    muh        = "value-create"
   }
 }
 `, env.OS_AVAILABILITY_ZONE)
@@ -143,7 +143,7 @@ resource "opentelekomcloud_deh_host_v1" "deh1" {
 
   tags = {
     updated_by = "terraform"
-    muh = "value-update"
+    muh        = "value-update"
   }
 }
 `, env.OS_AVAILABILITY_ZONE)
