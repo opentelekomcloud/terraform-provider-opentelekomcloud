@@ -22,6 +22,10 @@ resource "opentelekomcloud_deh_host_v1" "deh_host" {
   auto_placement    = "on"
   availability_zone = "eu-de-02"
   host_type         = "h1"
+
+  tags = {
+    muh = "kuh"
+  }
 }
 ```
 
@@ -29,14 +33,19 @@ resource "opentelekomcloud_deh_host_v1" "deh_host" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the Dedicated Host.
+* `name` - (Required, String) The name of the Dedicated Host.
 
-* `auto_placement` - (Optional) Allows a instance to be automatically placed onto the available Dedicated Hosts. The default value is `on`.
+* `auto_placement` - (Optional, String) Allows a instance to be automatically placed onto the available Dedicated Hosts. The default value is `on`.
 
-* `availability_zone` - (Required) The Availability Zone to which the Dedicated Host belongs. Changing this parameter creates a new resource.
+* `availability_zone` - (Required, String, ForceNew) The Availability Zone to which the Dedicated Host belongs.
 
-* `host_type` - (Required) The Dedicated Host type. Expected values are `h1`, `general` and `d1`. Changing this parameter creates a new resource.
+* `host_type` - (Required, String, ForceNew) The Dedicated Host type.
+  Expected values are:
+  * in `eu-de`: `c4`, `s2-medium`, `m3`, `c3` and `s2`.
+  * in `eu-nl`: `i3_pro`, `i3`, `m4`, `s3` and `c4`.
+  * in `eu-ch2`: `s3`.
 
+* `tags` - (Optional, Map) Tags key/value pairs to associate with Host.
 
 ## Attributes Reference
 

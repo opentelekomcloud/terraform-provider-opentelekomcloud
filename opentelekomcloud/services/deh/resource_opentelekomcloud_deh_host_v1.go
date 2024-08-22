@@ -10,7 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/deh/v1/hosts"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -122,6 +124,7 @@ func ResourceDeHHostV1() *schema.Resource {
 					},
 				},
 			},
+			"tags": common.TagsSchema(),
 		},
 	}
 }
@@ -163,6 +166,14 @@ func resourceDeHHostV1Create(ctx context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf("error creating OpenTelekomCloud Dedicated Host : %s", stateErr)
 	}
 
+	tagRaw := d.Get("tags").(map[string]interface{})
+	if len(tagRaw) > 0 {
+		tagList := common.ExpandResourceTags(tagRaw)
+		if err := tags.Create(client, "dedicated-host-tags", allocate.AllocatedHostIds[0], tagList).ExtractErr(); err != nil {
+			return fmterr.Errorf("error setting tags of DeH Host: %s", err)
+		}
+	}
+
 	return resourceDeHHostV1Read(ctx, d, meta)
 }
 
@@ -202,6 +213,15 @@ func resourceDeHHostV1Read(_ context.Context, d *schema.ResourceData, meta inter
 		return diag.FromErr(err)
 	}
 
+	resourceTags, err := tags.Get(client, "dedicated-host-tags", d.Id()).Extract()
+	if err != nil {
+		return fmterr.Errorf("error fetching OpenTelekomCloud DeH Host tags: %s", err)
+	}
+	tagMap := common.TagsToMap(resourceTags)
+	if err := d.Set("tags", tagMap); err != nil {
+		return fmterr.Errorf("error saving tags for OpenTelekomCloud DeH Host: %s", err)
+	}
+
 	return nil
 }
 
@@ -224,6 +244,13 @@ func resourceDeHHostV1Update(ctx context.Context, d *schema.ResourceData, meta i
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud Dedicated Host: %s", err)
 	}
+
+	if d.HasChange("tags") {
+		if err := common.UpdateResourceTags(client, d, "dedicated-host-tags", d.Id()); err != nil {
+			return fmterr.Errorf("error updating tags of DeH Host %s: %s", d.Id(), err)
+		}
+	}
+
 	return resourceDeHHostV1Read(ctx, d, meta)
 }
 

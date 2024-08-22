@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[DEH]** `tags` feature implemented for ``resource/opentelekomcloud_deh_host_v1`` (`#2633 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2633>`_)
