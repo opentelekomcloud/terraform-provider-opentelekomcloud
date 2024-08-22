@@ -29,27 +29,9 @@ func TestAccDedicatedHostV1_basic(t *testing.T) {
 					testAccCheckDeHV1Exists(resourceHostName, &host),
 					resource.TestCheckResourceAttr(resourceHostName, "name", "test-deh-1"),
 					resource.TestCheckResourceAttr(resourceHostName, "auto_placement", "off"),
-					resource.TestCheckResourceAttr(resourceHostName, "host_type", "h1"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccDedicatedHostV1_update(t *testing.T) {
-	var host hosts.Host
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckDeHV1Destroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDeHV1Basic,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDeHV1Exists(resourceHostName, &host),
-					resource.TestCheckResourceAttr(resourceHostName, "name", "test-deh-1"),
-					resource.TestCheckResourceAttr(resourceHostName, "auto_placement", "off"),
-					resource.TestCheckResourceAttr(resourceHostName, "host_type", "h1"),
+					resource.TestCheckResourceAttr(resourceHostName, "host_type", "s3"),
+					resource.TestCheckResourceAttr(resourceHostName, "tags.created_by", "terraform"),
+					resource.TestCheckResourceAttr(resourceHostName, "tags.muh", "value-create"),
 				),
 			},
 			{
@@ -58,7 +40,9 @@ func TestAccDedicatedHostV1_update(t *testing.T) {
 					testAccCheckDeHV1Exists(resourceHostName, &host),
 					resource.TestCheckResourceAttr(resourceHostName, "name", "test-deh-2"),
 					resource.TestCheckResourceAttr(resourceHostName, "auto_placement", "on"),
-					resource.TestCheckResourceAttr(resourceHostName, "host_type", "h1"),
+					resource.TestCheckResourceAttr(resourceHostName, "host_type", "s3"),
+					resource.TestCheckResourceAttr(resourceHostName, "tags.updated_by", "terraform"),
+					resource.TestCheckResourceAttr(resourceHostName, "tags.muh", "value-update"),
 				),
 			},
 		},
@@ -140,8 +124,13 @@ var testAccDeHV1Basic = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
   availability_zone = "%s"
   auto_placement    = "off"
-  host_type         = "h1"
+  host_type         = "s3"
   name              = "test-deh-1"
+
+  tags = {
+    created_by = "terraform"
+    muh = "value-create"
+  }
 }
 `, env.OS_AVAILABILITY_ZONE)
 
@@ -149,8 +138,13 @@ var testAccDeHV1Update = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
   availability_zone = "%s"
   auto_placement    = "on"
-  host_type         = "h1"
+  host_type         = "s3"
   name              = "test-deh-2"
+
+  tags = {
+    updated_by = "terraform"
+    muh = "value-update"
+  }
 }
 `, env.OS_AVAILABILITY_ZONE)
 
