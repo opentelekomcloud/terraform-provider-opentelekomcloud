@@ -4,47 +4,47 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-
-	"github.com/huaweicloud/terraform-provider-huaweicloud/huaweicloud/services/acceptance"
-	"github.com/huaweicloud/terraform-provider-huaweicloud/huaweicloud/services/acceptance/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
 func TestAccDatasourceDnatRules_basic(t *testing.T) {
 	var (
-		name           = acceptance.RandomAccResourceName()
+		name           = fmt.Sprintf("acc_nat_dnat_%s", acctest.RandString(5))
 		baseConfig     = testAccDnatRulesDataSource_base(name)
-		dataSourceName = "data.huaweicloud_nat_dnat_rules.test"
-		dc             = acceptance.InitDataSourceCheck(dataSourceName)
+		dataSourceName = "data.opentelekomcloud_nat_dnat_rules_v2.test"
+		dc             = common.InitDataSourceCheck(dataSourceName)
 
-		byRuleId   = "data.huaweicloud_nat_dnat_rules.filter_by_rule_id"
-		dcByRuleId = acceptance.InitDataSourceCheck(byRuleId)
+		byRuleId   = "data.opentelekomcloud_nat_dnat_rules_v2.filter_by_rule_id"
+		dcByRuleId = common.InitDataSourceCheck(byRuleId)
 
-		byGatewayId   = "data.huaweicloud_nat_dnat_rules.filter_by_gateway_id"
-		dcByGatewayId = acceptance.InitDataSourceCheck(byGatewayId)
+		byGatewayId   = "data.opentelekomcloud_nat_dnat_rules_v2.filter_by_gateway_id"
+		dcByGatewayId = common.InitDataSourceCheck(byGatewayId)
 
-		byProtocol   = "data.huaweicloud_nat_dnat_rules.filter_by_protocol"
-		dcByProtocol = acceptance.InitDataSourceCheck(byProtocol)
+		byProtocol   = "data.opentelekomcloud_nat_dnat_rules_v2.filter_by_protocol"
+		dcByProtocol = common.InitDataSourceCheck(byProtocol)
 
-		byInternalServicePort   = "data.huaweicloud_nat_dnat_rules.filter_by_internal_service_port"
-		dcByInternalServicePort = acceptance.InitDataSourceCheck(byInternalServicePort)
+		byInternalServicePort   = "data.opentelekomcloud_nat_dnat_rules_v2.filter_by_internal_service_port"
+		dcByInternalServicePort = common.InitDataSourceCheck(byInternalServicePort)
 
-		byPortId   = "data.huaweicloud_nat_dnat_rules.filter_by_port_id"
-		dcByPortId = acceptance.InitDataSourceCheck(byPortId)
+		byPortId   = "data.opentelekomcloud_nat_dnat_rules_v2.filter_by_port_id"
+		dcByPortId = common.InitDataSourceCheck(byPortId)
 
-		byPrivateIp   = "data.huaweicloud_nat_dnat_rules.filter_by_private_ip"
-		dcByPrivateIp = acceptance.InitDataSourceCheck(byPrivateIp)
+		byPrivateIp   = "data.opentelekomcloud_nat_dnat_rules_v2.filter_by_private_ip"
+		dcByPrivateIp = common.InitDataSourceCheck(byPrivateIp)
 
-		byStatus   = "data.huaweicloud_nat_dnat_rules.filter_by_status"
-		dcByStatus = acceptance.InitDataSourceCheck(byStatus)
+		byStatus   = "data.opentelekomcloud_nat_dnat_rules_v2.filter_by_status"
+		dcByStatus = common.InitDataSourceCheck(byStatus)
 
-		byFloatingIpAddress   = "data.huaweicloud_nat_dnat_rules.filter_by_floating_ip_address"
-		dcByFloatingIpAddress = acceptance.InitDataSourceCheck(byFloatingIpAddress)
+		byFloatingIpAddress   = "data.opentelekomcloud_nat_dnat_rules_v2.filter_by_floating_ip_address"
+		dcByFloatingIpAddress = common.InitDataSourceCheck(byFloatingIpAddress)
 	)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acceptance.TestAccPreCheck(t) },
-		ProviderFactories: acceptance.TestAccProviderFactories,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatasourceDnatRules_basic(baseConfig),
@@ -81,74 +81,72 @@ func TestAccDatasourceDnatRules_basic(t *testing.T) {
 
 func testAccDnatRulesDataSource_base(name string) string {
 	return fmt.Sprintf(`
-%[1]s
 
-resource "huaweicloud_vpc_eip" "test" {
-  publicip {
-    type = "5_bgp"
-  }
+%s
 
-  bandwidth {
-    name        = "eip-test"
-    size        = 5
-    share_type  = "PER"
-    charge_mode = "traffic"
+%s
+
+resource "opentelekomcloud_nat_gateway_v2" "this" {
+  name                = "%[4]s"
+  spec                = "1"
+  router_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  internal_network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+}
+
+resource "opentelekomcloud_networking_floatingip_v2" "eip" {}
+
+resource "opentelekomcloud_networking_port_v2" "this" {
+  name       = "dnat_rule_port"
+  network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  fixed_ip {
+    subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
   }
 }
 
-resource "huaweicloud_compute_instance" "test" {
-  name              = "%[2]s"
-  flavor_id         = data.huaweicloud_compute_flavors.test.ids[0]
-  image_id          = data.huaweicloud_images_image.test.id
-  security_groups   = [huaweicloud_networking_secgroup.test.name]
-  availability_zone = data.huaweicloud_availability_zones.test.names[0]
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name              = "instance_1"
+  security_groups   = ["default"]
+  availability_zone = "%[3]s"
+  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
 
   network {
-    uuid = huaweicloud_vpc_subnet.test.id
+    port = opentelekomcloud_networking_port_v2.this.id
   }
 }
 
-resource "huaweicloud_nat_gateway" "test" {
-  name                  = "%[2]s"
-  spec                  = "1"
-  vpc_id                = huaweicloud_vpc.test.id
-  subnet_id             = huaweicloud_vpc_subnet.test.id
-  enterprise_project_id = "0"
-}
-
-resource "huaweicloud_nat_dnat_rule" "test" {
-  nat_gateway_id        = huaweicloud_nat_gateway.test.id
-  floating_ip_id        = huaweicloud_vpc_eip.test.id
-  private_ip            = huaweicloud_compute_instance.test.network[0].fixed_ip_v4
-  description           = "Created by acc test"
+resource "opentelekomcloud_nat_dnat_rule_v2" "test" {
+  floating_ip_id        = opentelekomcloud_networking_floatingip_v2.eip.id
+  nat_gateway_id        = opentelekomcloud_nat_gateway_v2.this.id
+  external_service_port = 80
   protocol              = "tcp"
-  internal_service_port = 60
-  external_service_port = 2000
+  port_id               = opentelekomcloud_networking_port_v2.this.id
+  internal_service_port = 80
+  depends_on            = [opentelekomcloud_compute_instance_v2.instance_1]
 }
-`, common.TestBaseComputeResources(name), name)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, name)
 }
 
 func testAccDatasourceDnatRules_basic(baseConfig string) string {
 	return fmt.Sprintf(`
 %[1]s
 
-data "huaweicloud_nat_dnat_rules" "test" {
+data "opentelekomcloud_nat_dnat_rules_v2" "test" {
   depends_on = [
-    huaweicloud_nat_dnat_rule.test
+    opentelekomcloud_nat_dnat_rule_v2.test
   ]
 }
 
 locals {
-  rule_id = data.huaweicloud_nat_dnat_rules.test.rules[0].id
+  rule_id = data.opentelekomcloud_nat_dnat_rules_v2.test.rules[0].id
 }
 
-data "huaweicloud_nat_dnat_rules" "filter_by_rule_id" {
+data "opentelekomcloud_nat_dnat_rules_v2" "filter_by_rule_id" {
   rule_id = local.rule_id
 }
 
 locals {
   rule_id_filter_result = [
-    for v in data.huaweicloud_nat_dnat_rules.filter_by_rule_id.rules[*].id : v == local.rule_id
+    for v in data.opentelekomcloud_nat_dnat_rules_v2.filter_by_rule_id.rules[*].id : v == local.rule_id
   ]
 }
 
@@ -157,16 +155,16 @@ output "rule_id_filter_is_useful" {
 }
 
 locals {
-  gateway_id = data.huaweicloud_nat_dnat_rules.test.rules[0].gateway_id
+  gateway_id = data.opentelekomcloud_nat_dnat_rules_v2.test.rules[0].gateway_id
 }
 
-data "huaweicloud_nat_dnat_rules" "filter_by_gateway_id" {
+data "opentelekomcloud_nat_dnat_rules_v2" "filter_by_gateway_id" {
   gateway_id = local.gateway_id
 }
 
 locals {
   gateway_id_filter_result = [
-    for v in data.huaweicloud_nat_dnat_rules.filter_by_gateway_id.rules[*].gateway_id :
+    for v in data.opentelekomcloud_nat_dnat_rules_v2.filter_by_gateway_id.rules[*].gateway_id :
     v == local.gateway_id
   ]
 }
@@ -176,16 +174,16 @@ output "gateway_id_filter_is_useful" {
 }
 
 locals {
-  protocol = data.huaweicloud_nat_dnat_rules.test.rules[0].protocol
+  protocol = data.opentelekomcloud_nat_dnat_rules_v2.test.rules[0].protocol
 }
 
-data "huaweicloud_nat_dnat_rules" "filter_by_protocol" {
+data "opentelekomcloud_nat_dnat_rules_v2" "filter_by_protocol" {
   protocol = local.protocol
 }
 
 locals {
   protocol_filter_result = [
-    for v in data.huaweicloud_nat_dnat_rules.filter_by_protocol.rules[*].protocol : v == local.protocol
+    for v in data.opentelekomcloud_nat_dnat_rules_v2.filter_by_protocol.rules[*].protocol : v == local.protocol
   ]
 }
 
@@ -194,16 +192,16 @@ output "protocol_filter_is_useful" {
 }
 
 locals {
-  internal_service_port = data.huaweicloud_nat_dnat_rules.test.rules[0].internal_service_port
+  internal_service_port = data.opentelekomcloud_nat_dnat_rules_v2.test.rules[0].internal_service_port
 }
 
-data "huaweicloud_nat_dnat_rules" "filter_by_internal_service_port" {
+data "opentelekomcloud_nat_dnat_rules_v2" "filter_by_internal_service_port" {
   internal_service_port = local.internal_service_port
 }
 
 locals {
   internal_service_port_filter_result = [
-    for v in data.huaweicloud_nat_dnat_rules.filter_by_internal_service_port.rules[*].internal_service_port :
+    for v in data.opentelekomcloud_nat_dnat_rules_v2.filter_by_internal_service_port.rules[*].internal_service_port :
     v == local.internal_service_port
   ]
 }
@@ -213,16 +211,16 @@ output "internal_service_port_filter_is_useful" {
 }
 
 locals {
-  port_id = data.huaweicloud_nat_dnat_rules.test.rules[0].port_id
+  port_id = data.opentelekomcloud_nat_dnat_rules_v2.test.rules[0].port_id
 }
 
-data "huaweicloud_nat_dnat_rules" "filter_by_port_id" {
+data "opentelekomcloud_nat_dnat_rules_v2" "filter_by_port_id" {
   port_id = local.port_id
 }
 
 locals {
   port_id_filter_result = [
-    for v in data.huaweicloud_nat_dnat_rules.filter_by_port_id.rules[*].port_id : v == local.port_id
+    for v in data.opentelekomcloud_nat_dnat_rules_v2.filter_by_port_id.rules[*].port_id : v == local.port_id
   ]
 }
 
@@ -231,16 +229,16 @@ output "port_id_filter_is_useful" {
 }
 
 locals {
-  private_ip = data.huaweicloud_nat_dnat_rules.test.rules[0].private_ip
+  private_ip = data.opentelekomcloud_nat_dnat_rules_v2.test.rules[0].private_ip
 }
 
-data "huaweicloud_nat_dnat_rules" "filter_by_private_ip" {
+data "opentelekomcloud_nat_dnat_rules_v2" "filter_by_private_ip" {
   private_ip = local.private_ip
 }
 
 locals {
   private_ip_filter_result = [
-    for v in data.huaweicloud_nat_dnat_rules.filter_by_private_ip.rules[*].private_ip : v == local.private_ip
+    for v in data.opentelekomcloud_nat_dnat_rules_v2.filter_by_private_ip.rules[*].private_ip : v == local.private_ip
   ]
 }
 
@@ -249,16 +247,16 @@ output "private_ip_filter_is_useful" {
 }
 
 locals {
-  status = data.huaweicloud_nat_dnat_rules.test.rules[0].status
+  status = data.opentelekomcloud_nat_dnat_rules_v2.test.rules[0].status
 }
 
-data "huaweicloud_nat_dnat_rules" "filter_by_status" {
+data "opentelekomcloud_nat_dnat_rules_v2" "filter_by_status" {
   status = local.status
 }
 
 locals {
   status_filter_result = [
-    for v in data.huaweicloud_nat_dnat_rules.filter_by_status.rules[*].status : v == local.status
+    for v in data.opentelekomcloud_nat_dnat_rules_v2.filter_by_status.rules[*].status : v == local.status
   ]
 }
 
@@ -268,16 +266,16 @@ output "status_filter_is_useful" {
 
 
 locals {
-  floating_ip_address = data.huaweicloud_nat_dnat_rules.test.rules[0].floating_ip_address
+  floating_ip_address = data.opentelekomcloud_nat_dnat_rules_v2.test.rules[0].floating_ip_address
 }
 
-data "huaweicloud_nat_dnat_rules" "filter_by_floating_ip_address" {
+data "opentelekomcloud_nat_dnat_rules_v2" "filter_by_floating_ip_address" {
   floating_ip_address = local.floating_ip_address
 }
 
 locals {
   floating_ip_address_filter_result = [
-    for v in data.huaweicloud_nat_dnat_rules.filter_by_floating_ip_address.rules[*].floating_ip_address :
+    for v in data.opentelekomcloud_nat_dnat_rules_v2.filter_by_floating_ip_address.rules[*].floating_ip_address :
     v == local.floating_ip_address
   ]
 }

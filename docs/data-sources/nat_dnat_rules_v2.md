@@ -28,18 +28,17 @@ data "opentelekomcloud_nat_dnat_rules_v2" "rule" {
 
 The following arguments are supported:
 
-* `region` - (Optional, String) Specifies the region where the DNAT rules are located.
-  If omitted, the provider-level region will be used.
-
 * `rule_id` - (Optional, String) Specifies the ID of the DNAT rule.
 
 * `gateway_id` - (Optional, String) Specifies the ID of the NAT gateway to which the DNAT rule belongs.
 
 * `protocol` - (Optional, String) Specifies the protocol type of the DNAT rule.
   The value can be one of the following:
-  + **tcp**
-  + **udp**
-  + **any**
+  * `tcp`
+  * `udp`
+  * `any`
+
+* `description` - (Optional, String) Specifies the description of the DNAT rule.
 
 * `port_id` - (Optional, String) Specifies the port ID of the backend instance to which the DNAT rule belongs.
 
@@ -48,28 +47,26 @@ The following arguments are supported:
 
 * `status` - (Optional, String) Specifies the status of the DNAT rule.
   The value can be one of the following:
-  + **ACTIVE**: The SNAT rule is available.
-  + **EIP_FREEZED**: The EIP is frozen associated with SNAT rule.
-  + **INACTIVE**: The SNAT rule is unavailable.
+  * `ACTIVE`: The SNAT rule is available.
+  * `EIP_FREEZED`: The EIP is frozen associated with SNAT rule.
+  * `INACTIVE`: The SNAT rule is unavailable.
 
-* `internal_service_port` - (Optional, String) Specifies the port of the backend instance to which the DNAT rule
+* `internal_service_port` - (Optional, Int) Specifies the port of the backend instance to which the DNAT rule
   belongs.
 
-* `external_service_port` - (Optional, String) Specifies the port of the EIP associated with the DNAT rule.
+* `external_service_port` - (Optional, Int) Specifies the port of the EIP associated with the DNAT rule.
 
 * `floating_ip_id` - (Optional, String) Specifies the ID of the EIP associated with the DNAT rule.
 
 * `floating_ip_address` - (Optional, String) Specifies the IP address of the EIP associated with the DNAT rule.
-
-* `global_eip_id` - (Optional, String) Specifies the ID of the global EIP associated with the DNAT rule.
-
-* `global_eip_address` - (Optional, String) Specifies the IP address of the global EIP associated with the DNAT rule.
 
 ## Attribute Reference
 
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The data source ID.
+
+* `region` - The region where the DNAT rules are located.
 
 * `rules` - The list ot the DNAT rules.
   The [rules](#nat_dnat_rules) structure is documented below.
@@ -94,14 +91,6 @@ The `rules` block supports:
 * `floating_ip_id` - The ID of the EIP associated with the DNAT rule.
 
 * `floating_ip_address` - The IP address of the EIP associated with the DNAT rule.
-
-* `global_eip_id` - The ID of the global EIP associated with the DNAT rule.
-
-* `global_eip_address` - The IP address of the global EIP associated with the DNAT rule.
-
-* `internal_service_port_range` - The port range of the backend instance to which the DNAT rule belongs.
-
-* `external_service_port_range` - The port range of the EIP associated with the DNAT rule.
 
 * `description` - The description of the DNAT rule.
 

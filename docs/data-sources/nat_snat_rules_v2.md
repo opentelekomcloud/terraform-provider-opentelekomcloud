@@ -28,9 +28,6 @@ data "opentelekomcloud_nat_snat_rules_v2" "rule" {
 
 The following arguments are supported:
 
-* `region` - (Optional, String) Specifies the region where the SNAT rules are located.
-  If omitted, the provider-level region will be used.
-
 * `rule_id` - (Optional, String) Specifies the ID of the SNAT rule.
 
 * `gateway_id` - (Optional, String) Specifies the ID of the NAT gateway to which the SNAT rule belongs.
@@ -41,28 +38,30 @@ The following arguments are supported:
 
 * `cidr` - (Optional, String) Specifies the CIDR block to which the SNAT rule belongs.
 
+* `description` - (Optional, String) Specifies the description of the SNAT rule.
+
 * `subnet_id` - (Optional, String) Specifies the ID of the subnet to which the SNAT rule belongs.
+
+* `project_id` - (Optional, String) Specifies the project ID to which the SNAT rule belongs.
 
 * `source_type` - (Optional, String) Specifies the source type of the SNAT rule.
   The value can be one of the following:
-  + **0** : The use scenario is VPC.
-  + **1** : The use scenario is DC.
+  * `0`: The use scenario is VPC.
+  + `1` : The use scenario is DC.
 
 * `status` - (Optional, String) Specifies the status of the SNAT rule.
   The value can be one of the following:
-  + **ACTIVE**: The SNAT rule is available.
-  + **EIP_FREEZED**: The global EIP is frozen associated with SNAT rule.
-  + **INACTIVE**: The SNAT rule is unavailable.
-
-* `global_eip_id` - (Optional, String) Specifies the ID of the global EIP associated with SNAT rule.
-
-* `global_eip_address` - (Optional, String) Specifies the IP of the global EIP associated with SNAT rule.
+  * `ACTIVE`: The SNAT rule is available.
+  * `EIP_FREEZED`: The global EIP is frozen associated with SNAT rule.
+  + `INACTIVE`: The SNAT rule is unavailable.
 
 ## Attribute Reference
 
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The data source ID.
+
+* `region` - The region where the SNAT rules are located.
 
 * `rules` - The list of the SNAT rules.
   The [rules](#nat_snat_rules) structure is documented below.
@@ -78,24 +77,18 @@ The `rules` block supports:
 
 * `subnet_id` - The ID of the subnet to which the SNAT rule belongs.
 
+* `project_id` - The ID of the project ID to which the SNAT rule belongs.
+
 * `source_type` - The source type of the SNAT rule.
 
 * `floating_ip_id` - The IDs of the EIP associated with SNAT rule, multiple EIP IDs separate by commas.
-  e.g. **ID1,ID2**.
+  e.g. `ID1,ID2`.
 
 * `floating_ip_address` - The IPs of the EIP associated with SNAT rule, multiple EIP IPs separate by commas.
-  e.g. **IP1,IP2**.
-
-* `description` - The description of the SNAT rule.
+  e.g. `IP1,IP2`.
 
 * `status` - The status of the SNAT rule.
 
-* `global_eip_id` - The IDs of the global EIP associated with SNAT rule, multiple global EIP IDs separate by commas.
-  e.g. **ID1,ID2**.
-
-* `global_eip_address` - The IPs of the global EIP associated with SNAT rule, multiple global EIP IPs separate by commas.
-  e.g. **IP1,IP2**.
-
-* `freezed_ip_address` - The IP of the frozen global EIP associated with SNAT rule.
+* `admin_state_up` - Specifies whether the SNAT rule is enabled or disabled.
 
 * `created_at` - The creation time of the SNAT rule.

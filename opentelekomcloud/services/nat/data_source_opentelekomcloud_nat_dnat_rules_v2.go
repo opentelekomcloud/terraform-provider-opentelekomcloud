@@ -16,10 +16,6 @@ func DataSourceDnatRulesV2() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceDnatRulesRead,
 		Schema: map[string]*schema.Schema{
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"rule_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -49,11 +45,11 @@ func DataSourceDnatRulesV2() *schema.Resource {
 				Optional: true,
 			},
 			"internal_service_port": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 			},
 			"external_service_port": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 			},
 			"floating_ip_id": {
@@ -64,18 +60,14 @@ func DataSourceDnatRulesV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"global_eip_id": {
+			"region": {
 				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"global_eip_address": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"rules": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem: schema.Resource{
+				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeString,
@@ -110,14 +102,6 @@ func DataSourceDnatRulesV2() *schema.Resource {
 							Computed: true,
 						},
 						"floating_ip_address": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"internal_service_port_range": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"external_service_port_range": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -185,23 +169,21 @@ func flattenListDnatRulesResponseBody(rules []dnatrules.DnatRule) []interface{} 
 		return nil
 	}
 
-	dnatRules := make([]interface{}, len(rules))
+	var dnatRules []interface{}
 	for _, rule := range rules {
 		dnatRules = append(dnatRules, map[string]interface{}{
-			"id":                          rule.ID,
-			"gateway_id":                  rule.NatGatewayId,
-			"protocol":                    rule.Protocol,
-			"port_id":                     rule.PortId,
-			"private_ip":                  rule.PrivateIp,
-			"internal_service_port":       rule.InternalServicePort,
-			"external_service_port":       rule.ExternalServicePort,
-			"floating_ip_id":              rule.FloatingIpId,
-			"floating_ip_address":         rule.FloatingIpAddress,
-			"internal_service_port_range": rule.InternalServicePort,
-			"external_service_port_range": rule.ExternalServicePort,
-			"description":                 rule.Description,
-			"status":                      rule.Status,
-			"created_at":                  rule.CreatedAt,
+			"id":                    rule.ID,
+			"gateway_id":            rule.NatGatewayId,
+			"protocol":              rule.Protocol,
+			"port_id":               rule.PortId,
+			"private_ip":            rule.PrivateIp,
+			"internal_service_port": rule.InternalServicePort,
+			"external_service_port": rule.ExternalServicePort,
+			"floating_ip_id":        rule.FloatingIpId,
+			"floating_ip_address":   rule.FloatingIpAddress,
+			"description":           rule.Description,
+			"status":                rule.Status,
+			"created_at":            rule.CreatedAt,
 		})
 	}
 	return dnatRules

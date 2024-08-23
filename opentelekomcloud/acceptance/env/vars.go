@@ -42,7 +42,7 @@ func imageName() string {
 	if image := os.Getenv("OS_IMAGE_NAME"); image != "" {
 		return image
 	}
-	return "Standard_Debian_10_latest" // value valid for OTC PROD, both eu-de and eu-nl
+	return "Standard_Debian_11_latest" // value valid for OTC PROD, both eu-de and eu-nl
 }
 
 func GetTenantName() cfg.ProjectName {

@@ -44,7 +44,7 @@ func testAccCheckNatV2SnatRuleDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := snatrules.Get(client, rs.Primary.ID).Extract()
+		_, err := snatrules.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("snat rule still exists")
 		}
@@ -70,7 +70,7 @@ func testAccCheckNatV2SnatRuleExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("error creating OpenTelekomCloud NATv2 client: %w", err)
 		}
 
-		found, err := snatrules.Get(client, rs.Primary.ID).Extract()
+		found, err := snatrules.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
