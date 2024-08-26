@@ -512,6 +512,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_rds_backup_v3":                             rds.ResourceRdsBackupV3(),
 			"opentelekomcloud_rds_instance_v1":                           rds.ResourceRdsInstance(),
 			"opentelekomcloud_rds_instance_v3":                           rds.ResourceRdsInstanceV3(),
+			"opentelekomcloud_rds_maintenance_v3":                        rds.ResourceRdsMaintenanceV3(),
 			"opentelekomcloud_rds_parametergroup_v3":                     rds.ResourceRdsConfigurationV3(),
 			"opentelekomcloud_rds_read_replica_v3":                       rds.ResourceRdsReadReplicaV3(),
 			"opentelekomcloud_rts_software_deployment_v1":                rts.ResourceRtsSoftwareDeploymentV1(),
