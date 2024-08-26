@@ -88,7 +88,7 @@ func resourceNatSnatRuleV2Create(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("both `network_id` and `cidr` are empty, must specify one of them.")
 	}
 
-	createOpts := &snatrules.CreateOpts{
+	createOpts := snatrules.CreateOpts{
 		NatGatewayID: d.Get("nat_gateway_id").(string),
 		NetworkID:    networkID.(string),
 		FloatingIPID: d.Get("floating_ip_id").(string),
@@ -97,7 +97,7 @@ func resourceNatSnatRuleV2Create(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	snatRule, err := snatrules.Create(client, createOpts).Extract()
+	snatRule, err := snatrules.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating SNAT Rule: %s", err)
 	}
@@ -129,7 +129,7 @@ func resourceNatSnatRuleV2Read(_ context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf(ErrCreationClient, err)
 	}
 
-	snatRule, err := snatrules.Get(client, d.Id()).Extract()
+	snatRule, err := snatrules.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "Snat Rule")
 	}
@@ -142,13 +142,18 @@ func resourceNatSnatRuleV2Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("region", config.GetRegion(d)),
 	)
 	var sourceType int
-	if i, okFloat := snatRule.SourceType.(float64); okFloat {
-		sourceType = int(i)
-	} else if s, okStr := snatRule.SourceType.(string); okStr {
-		sourceType, err = strconv.Atoi(s)
+	switch v := snatRule.SourceType.(type) {
+	case float64:
+		sourceType = int(v)
+	case string:
+		sourceType, err = strconv.Atoi(v)
 		if err != nil {
 			return fmterr.Errorf("error converting `source_type`: %w", err)
 		}
+	case int:
+		sourceType = v
+	default:
+		return fmterr.Errorf("unsupported type for `source_type`: %T", v)
 	}
 	mErr = multierror.Append(mErr,
 		d.Set("source_type", sourceType),
@@ -188,7 +193,7 @@ func resourceNatSnatRuleV2Delete(ctx context.Context, d *schema.ResourceData, me
 
 func waitForSnatRuleActive(client *golangsdk.ServiceClient, snatRuleID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := snatrules.Get(client, snatRuleID).Extract()
+		n, err := snatrules.Get(client, snatRuleID)
 		if err != nil {
 			return nil, "", err
 		}
@@ -206,7 +211,7 @@ func waitForSnatRuleDelete(client *golangsdk.ServiceClient, snatRuleID string) r
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete OpenTelekomCloud SNAT Rule %s.\n", snatRuleID)
 
-		n, err := snatrules.Get(client, snatRuleID).Extract()
+		n, err := snatrules.Get(client, snatRuleID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud SNAT Rule %s", snatRuleID)
@@ -215,7 +220,7 @@ func waitForSnatRuleDelete(client *golangsdk.ServiceClient, snatRuleID string) r
 			return n, "ACTIVE", err
 		}
 
-		err = snatrules.Delete(client, snatRuleID).ExtractErr()
+		err = snatrules.Delete(client, snatRuleID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud SNAT Rule %s", snatRuleID)
