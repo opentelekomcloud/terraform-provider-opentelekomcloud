@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **New Resource:** ``opentelekomcloud_rds_maintenance_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **New Resource:** ``opentelekomcloud_rds_maintenance_v3`` (`#2638 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2638>`_)
