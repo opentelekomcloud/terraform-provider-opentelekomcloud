@@ -55,10 +55,9 @@ func ResourceComputeVolumeAttachV2() *schema.Resource {
 			},
 
 			"device": {
-				Type:             schema.TypeString,
-				Computed:         true,
-				Optional:         true,
-				DiffSuppressFunc: common.SuppressDiffAll,
+				Type:     schema.TypeString,
+				Computed: true,
+				Optional: true,
 			},
 		},
 	}

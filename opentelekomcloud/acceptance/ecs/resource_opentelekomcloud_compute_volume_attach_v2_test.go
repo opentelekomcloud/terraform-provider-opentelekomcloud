@@ -35,23 +35,6 @@ func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 					testAccCheckComputeV2VolumeAttachExists(resourceVolumeAttach, &va),
 				),
 			},
-		},
-	})
-}
-
-func TestAccComputeV2VolumeAttach_importBasic(t *testing.T) {
-	t.Parallel()
-	qts := serverQuotas(1+4, env.OsFlavorID)
-	quotas.BookMany(t, qts)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeV2VolumeAttachBasic,
-			},
 			{
 				ResourceName:      resourceVolumeAttach,
 				ImportState:       true,
@@ -76,7 +59,36 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 				Config: testAccComputeV2VolumeAttachDevice,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2VolumeAttachExists(resourceVolumeAttach, &va),
-					// testAccCheckComputeV2VolumeAttachDevice(&va, "/dev/vdc"),
+					resource.TestCheckResourceAttr(resourceVolumeAttach, "device", "/dev/vdc"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2VolumeAttach_MultipleDevices(t *testing.T) {
+	var va volumeattach.VolumeAttachment
+	name1 := "opentelekomcloud_compute_volume_attach_v2.va_1"
+	name2 := "opentelekomcloud_compute_volume_attach_v2.va_2"
+	name3 := "opentelekomcloud_compute_volume_attach_v2.va_3"
+	qts := serverQuotas(4+1, env.OsFlavorID)
+	t.Parallel()
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2VolumeAttachMultipleDevices,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2VolumeAttachExists(name1, &va),
+					resource.TestCheckResourceAttr(name1, "device", "/dev/vdb"),
+					testAccCheckComputeV2VolumeAttachExists(name2, &va),
+					resource.TestCheckResourceAttr(name2, "device", "/dev/vdc"),
+					testAccCheckComputeV2VolumeAttachExists(name3, &va),
+					resource.TestCheckResourceAttr(name3, "device", "/dev/vdd"),
 				),
 			},
 		},
@@ -170,27 +182,6 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 var testAccComputeV2VolumeAttachBasic = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_1"
-  size = 1
-}
-
-resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name            = "instance_1"
-  security_groups = ["default"]
-  image_name      = "Standard_Debian_10_latest"
-  network {
-    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  }
-}
-
-resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
-  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
-  volume_id   = opentelekomcloud_blockstorage_volume_v2.volume_1.id
-}
-`, common.DataSourceSubnet)
-
-var testAccComputeV2VolumeAttachDevice = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
@@ -201,7 +192,32 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
-  image_name      = "Standard_Debian_10_latest"
+  image_name      = data.opentelekomcloud_images_image_v2.latest_image.name
+  network {
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+}
+
+resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
+  volume_id   = opentelekomcloud_blockstorage_volume_v2.volume_1.id
+}
+`, common.DataSourceSubnet, common.DataSourceImage)
+
+var testAccComputeV2VolumeAttachDevice = fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
+  name = "volume_1"
+  size = 1
+}
+
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name            = "instance_1"
+  security_groups = ["default"]
+  image_name      = data.opentelekomcloud_images_image_v2.latest_image.name
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -212,9 +228,11 @@ resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
   volume_id   = opentelekomcloud_blockstorage_volume_v2.volume_1.id
   device      = "/dev/vdc"
 }
-`, common.DataSourceSubnet)
+`, common.DataSourceSubnet, common.DataSourceImage)
 
 var testAccComputeV2VolumeAttachTimeout = fmt.Sprintf(`
+%s
+
 %s
 
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
@@ -225,7 +243,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
-  image_name      = "Standard_Debian_10_latest"
+  image_name      = data.opentelekomcloud_images_image_v2.latest_image.name
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -240,4 +258,71 @@ resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
     delete = "5m"
   }
 }
-`, common.DataSourceSubnet)
+`, common.DataSourceSubnet, common.DataSourceImage)
+
+var testAccComputeV2VolumeAttachMultipleDevices = fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_ecs_instance_v1" "ecs" {
+  name     = "server_1"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
+  flavor   = "s2.medium.1"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+
+  nics {
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+
+  password                    = "Password@123"
+  availability_zone           = "%s"
+  auto_recovery               = true
+  delete_disks_on_termination = true
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+
+
+resource "opentelekomcloud_evs_volume_v3" "volume_1" {
+  availability_zone = opentelekomcloud_ecs_instance_v1.ecs.availability_zone
+  name              = "first"
+  volume_type       = "SSD"
+  size              = "10"
+}
+
+resource "opentelekomcloud_evs_volume_v3" "volume_2" {
+  availability_zone = opentelekomcloud_ecs_instance_v1.ecs.availability_zone
+  name              = "second"
+  volume_type       = "SSD"
+  size              = "15"
+}
+
+resource "opentelekomcloud_evs_volume_v3" "volume_3" {
+  availability_zone = opentelekomcloud_ecs_instance_v1.ecs.availability_zone
+  name              = "third"
+  volume_type       = "SAS"
+  size              = "25"
+}
+
+resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
+  instance_id = opentelekomcloud_ecs_instance_v1.ecs.id
+  volume_id   = opentelekomcloud_evs_volume_v3.volume_1.id
+  device      = "/dev/vdb"
+}
+
+resource "opentelekomcloud_compute_volume_attach_v2" "va_2" {
+  instance_id = opentelekomcloud_ecs_instance_v1.ecs.id
+  volume_id   = opentelekomcloud_evs_volume_v3.volume_2.id
+  device      = "/dev/vdc"
+}
+
+resource "opentelekomcloud_compute_volume_attach_v2" "va_3" {
+  instance_id = opentelekomcloud_ecs_instance_v1.ecs.id
+  volume_id   = opentelekomcloud_evs_volume_v3.volume_3.id
+  device      = "/dev/vdd"
+}
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
