@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ECS]** Remove `SuppressDiffAll` from `device` in ``resource/opentelekomcloud_compute_volume_attach_v2`` (`#2639 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2639>`_)
