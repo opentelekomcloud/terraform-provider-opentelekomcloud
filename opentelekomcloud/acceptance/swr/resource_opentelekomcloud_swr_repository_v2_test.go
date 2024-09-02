@@ -27,6 +27,13 @@ func TestSwrRepositoryV2_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRepoName3, "name", "one/two/three"),
 				),
 			},
+			{
+				Config: testSwrRepositoryV2Updated,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRepoName1, "category", "linux"),
+					resource.TestCheckResourceAttr(resourceRepoName1, "description", "Test repository updated"),
+				),
+			},
 		},
 	})
 }
@@ -90,4 +97,24 @@ resource opentelekomcloud_swr_repository_v2 repo_3 {
 
 var (
 	testSwrRepositoryV2Basic = fmt.Sprintf(testSwRepositoryV2BasicTemplate, name)
+)
+
+const (
+	testSwRepositoryV2UpdateTemplate = `
+resource opentelekomcloud_swr_organization_v2 org_1 {
+  name = "%[1]s"
+}
+
+resource opentelekomcloud_swr_repository_v2 repo_1 {
+  organization = opentelekomcloud_swr_organization_v2.org_1.name
+  name         = "%[1]s"
+  description  = "Test repository updated"
+  category     = "linux"
+  is_public    = false
+}
+`
+)
+
+var (
+	testSwrRepositoryV2Updated = fmt.Sprintf(testSwRepositoryV2UpdateTemplate, name)
 )

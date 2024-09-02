@@ -155,7 +155,7 @@ func resourceRepositoryUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	opts := repositories.UpdateOpts{
 		Namespace:   d.Get("organization").(string),
-		Repository:  d.Get("repository").(string),
+		Repository:  d.Get("name").(string),
 		Category:    d.Get("category").(string),
 		Description: d.Get("description").(string),
 		IsPublic:    d.Get("is_public").(bool),
