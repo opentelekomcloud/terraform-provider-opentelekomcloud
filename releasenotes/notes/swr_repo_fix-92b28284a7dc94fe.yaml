@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[SWR]** Fix resource update for ``opentelekomcloud_swr_repository_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[SWR]** Fix resource update for ``opentelekomcloud_swr_repository_v2`` (`#2643 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2643>`_)
