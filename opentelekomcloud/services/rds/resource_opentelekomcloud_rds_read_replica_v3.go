@@ -4,13 +4,17 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/security"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -101,6 +105,11 @@ func ResourceRdsReadReplicaV3() *schema.Resource {
 				MaxItems: 1,
 				Set:      schema.HashString,
 			},
+			"ssl_enable": {
+				Type:     schema.TypeBool,
+				Computed: true,
+				Optional: true,
+			},
 			"security_group_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -189,6 +198,13 @@ func resourceRdsReadReplicaV3Create(ctx context.Context, d *schema.ResourceData,
 		}
 	}
 
+	if sslEnable := d.Get("ssl_enable").(bool); sslEnable {
+		err = switchSsl(client, d, ctx, sslEnable)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return resourceRdsReadReplicaV3Read(ctx, d, meta)
 }
 
@@ -242,6 +258,7 @@ func resourceRdsReadReplicaV3Read(_ context.Context, d *schema.ResourceData, met
 		d.Set("vpc_id", replica.VpcId),
 		d.Set("private_ips", replica.PrivateIps),
 		d.Set("region", replica.Region),
+		d.Set("ssl_enable", *replica.EnableSSL),
 		setReplicaPrivateIPs(d, meta, replica.PrivateIps),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -350,6 +367,13 @@ func resourceRdsReadReplicaV3Update(ctx context.Context, d *schema.ResourceData,
 		}
 	}
 
+	if d.HasChange("ssl_enable") {
+		err = switchSsl(client, d, ctx, d.Get("ssl_enable").(bool))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return resourceRdsReadReplicaV3Read(ctx, d, meta)
 }
 
@@ -369,4 +393,54 @@ func resourceRdsReadReplicaV3Delete(_ context.Context, d *schema.ResourceData, m
 
 	d.SetId("")
 	return nil
+}
+
+func switchSsl(client *golangsdk.ServiceClient, d *schema.ResourceData, ctx context.Context, sslEnable bool) error {
+	replica, err := GetRdsInstance(client, d.Id())
+	if err != nil {
+		return fmt.Errorf("error finding RDS instance: %w", err)
+	}
+	if replica == nil {
+		d.SetId("")
+		return nil
+	}
+	if strings.ToLower(replica.DataStore.Type) == "mysql" {
+		updateOpts := security.SwitchSslOpts{
+			SslOption:  sslEnable,
+			InstanceId: d.Id(),
+		}
+		log.Printf("[DEBUG] Update opts of SSL configuration: %+v", updateOpts)
+		err := security.SwitchSsl(client, updateOpts)
+		if err != nil {
+			return fmt.Errorf("error updating instance SSL configuration: %s ", err)
+		}
+		stateConf := &resource.StateChangeConf{
+			Pending:      []string{"PENDING"},
+			Target:       []string{"SUCCESS"},
+			Refresh:      waitForSSLSwitch(d, client, sslEnable),
+			Timeout:      d.Timeout(schema.TimeoutCreate),
+			PollInterval: 5 * time.Second,
+		}
+
+		_, err = stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func waitForSSLSwitch(d *schema.ResourceData, client *golangsdk.ServiceClient, status bool) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		rdsInstance, err := GetRdsInstance(client, d.Id())
+		if err != nil {
+			return nil, "", fmt.Errorf("error fetching RDS instance SSL status: %s", err)
+		}
+
+		if *rdsInstance.EnableSSL == status {
+			return rdsInstance, "SUCCESS", nil
+		}
+
+		return nil, "PENDING", nil
+	}
 }

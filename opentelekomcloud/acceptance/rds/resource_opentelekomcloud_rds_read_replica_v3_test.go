@@ -58,6 +58,41 @@ func TestAccRdsReadReplicaV3Basic(t *testing.T) {
 	})
 }
 
+func TestAccRdsReadReplicaV3SSL(t *testing.T) {
+	postfix := tools.RandomString("rr", 3)
+	var rdsInstance instances.InstanceResponse
+
+	resName := "opentelekomcloud_rds_read_replica_v3.replica"
+
+	secondAZ := "eu-de-03"
+
+	if env.OS_AVAILABILITY_ZONE == secondAZ {
+		t.Skip("OS_AVAILABILITY_ZONE should be set to value !=", secondAZ)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsReadReplicaV3SSLEnabled(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(resName, &rdsInstance),
+					resource.TestCheckResourceAttr(resName, "ssl_enable", "true"),
+				),
+			},
+			{
+				Config: testAccRdsReadReplicaV3SSLDisabled(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(resName, &rdsInstance),
+					resource.TestCheckResourceAttr(resName, "ssl_enable", "false"),
+				),
+			},
+		},
+	})
+}
+
 func testAccRdsReadReplicaV3Basic(postfix string) string {
 	return fmt.Sprintf(`
 %s
@@ -153,6 +188,104 @@ resource "opentelekomcloud_rds_read_replica_v3" "replica" {
   availability_zone = "eu-de-03"
 
   public_ips = []
+
+  volume {
+    type = "COMMON"
+  }
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccRdsReadReplicaV3SSLEnabled(postfix string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s"]
+  db {
+    password = "MySql!112822"
+    type     = "MySQL"
+    version  = "8.0"
+    port     = "8635"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+  flavor = "rds.mysql.m1.large"
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = 1
+  }
+  tag = {
+    foo = "bar"
+    key = "value"
+  }
+}
+
+resource "opentelekomcloud_rds_read_replica_v3" "replica" {
+  name          = "test-replica"
+  replica_of_id = opentelekomcloud_rds_instance_v3.instance.id
+  flavor_ref    = "${opentelekomcloud_rds_instance_v3.instance.flavor}.rr"
+
+  availability_zone = "eu-de-03"
+  ssl_enable        = true
+
+  volume {
+    type = "COMMON"
+  }
+}
+
+
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccRdsReadReplicaV3SSLDisabled(postfix string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s"]
+  db {
+    password = "MySql!112822"
+    type     = "MySQL"
+    version  = "8.0"
+    port     = "8635"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+  flavor = "rds.mysql.m1.large"
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = 1
+  }
+  tag = {
+    foo = "bar"
+    key = "value"
+  }
+}
+
+resource "opentelekomcloud_rds_read_replica_v3" "replica" {
+  name          = "test-replica"
+  replica_of_id = opentelekomcloud_rds_instance_v3.instance.id
+  flavor_ref    = "${opentelekomcloud_rds_instance_v3.instance.flavor}.rr"
+
+  availability_zone = "eu-de-03"
+  ssl_enable        = false
 
   volume {
     type = "COMMON"

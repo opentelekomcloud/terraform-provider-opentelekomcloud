@@ -77,6 +77,8 @@ The following arguments are supported:
 * `public_ips` - (Optional) Specifies floating IP to be assigned to the instance.
   This should be a list with single element only.
 
+* `ssl_enable` - (Optional) Specifies whether SSL should be enabled for MySql instances.
+
 * `volume` - Specifies the volume information. Structure is documented below.
 
 The `volume` block supports:
