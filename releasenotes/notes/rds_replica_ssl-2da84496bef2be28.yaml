@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[RDS]** Add ssl support for ``resource/opentelekomcloud_rds_read_replica_v3`` (`#2646 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2646>`_)
