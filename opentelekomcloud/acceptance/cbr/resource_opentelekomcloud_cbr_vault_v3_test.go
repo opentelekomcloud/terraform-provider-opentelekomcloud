@@ -59,6 +59,12 @@ func TestAccCBRVaultV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.size", "120"),
 				),
 			},
+			{
+				ResourceName:            resourceVaultName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"billing.0.period_type"},
+			},
 		},
 	})
 }

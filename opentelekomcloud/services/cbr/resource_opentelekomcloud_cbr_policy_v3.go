@@ -23,6 +23,10 @@ func ResourceCBRPolicyV3() *schema.Resource {
 		UpdateContext: resourceCBRPolicyV3Update,
 		DeleteContext: resourceCBRPolicyV3Delete,
 
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -103,6 +107,15 @@ func ResourceCBRPolicyV3() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"destination_region": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"destination_project_id": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"destination_region"},
+			},
 		},
 	}
 }
@@ -110,16 +123,20 @@ func ResourceCBRPolicyV3() *schema.Resource {
 func resourceCBRPolicyV3OpDefinition(d *schema.ResourceData) *policies.PolicyODCreate {
 	opDefinitionRaw := d.Get("operation_definition").([]interface{})
 	if len(opDefinitionRaw) == 1 {
+		policyODCreate := policies.PolicyODCreate{}
 		opDefinition := opDefinitionRaw[0].(map[string]interface{})
-		return &policies.PolicyODCreate{
-			DailyBackups:          opDefinition["day_backups"].(int),
-			WeekBackups:           opDefinition["week_backups"].(int),
-			YearBackups:           opDefinition["year_backups"].(int),
-			MonthBackups:          opDefinition["month_backups"].(int),
-			MaxBackups:            opDefinition["max_backups"].(int),
-			RetentionDurationDays: opDefinition["retention_duration_days"].(int),
-			Timezone:              opDefinition["timezone"].(string),
+		if destinationProjectID, ok := d.GetOk("destination_project_id"); ok {
+			policyODCreate.DestinationProjectId = destinationProjectID.(string)
+			policyODCreate.DestinationRegion = d.Get("destination_region").(string)
 		}
+		policyODCreate.DailyBackups = opDefinition["day_backups"].(int)
+		policyODCreate.WeekBackups = opDefinition["week_backups"].(int)
+		policyODCreate.YearBackups = opDefinition["year_backups"].(int)
+		policyODCreate.MonthBackups = opDefinition["month_backups"].(int)
+		policyODCreate.MaxBackups = opDefinition["max_backups"].(int)
+		policyODCreate.RetentionDurationDays = opDefinition["retention_duration_days"].(int)
+		policyODCreate.Timezone = opDefinition["timezone"].(string)
+		return &policyODCreate
 	}
 	return &policies.PolicyODCreate{
 		Timezone: "UTC+00:00",
@@ -193,9 +210,6 @@ func resourceCBRPolicyV3Read(_ context.Context, d *schema.ResourceData, meta int
 		d.Set("trigger_pattern", cbrPolicy.Trigger.Properties.Pattern),
 		d.Set("region", config.GetRegion(d)),
 	)
-	if mErr.ErrorOrNil() != nil {
-		return diag.FromErr(mErr)
-	}
 
 	var opDefinitionList []map[string]interface{}
 	opDefinition := make(map[string]interface{})
@@ -210,6 +224,14 @@ func resourceCBRPolicyV3Read(_ context.Context, d *schema.ResourceData, meta int
 	opDefinitionList = append(opDefinitionList, opDefinition)
 	if err := d.Set("operation_definition", opDefinitionList); err != nil {
 		return fmterr.Errorf("error setting operetion_definition: %s", err)
+	}
+	mErr = multierror.Append(mErr,
+		d.Set("destination_project_id", cbrPolicyOD.DestinationProjectId),
+		d.Set("destination_region", cbrPolicyOD.DestinationRegion),
+	)
+
+	if mErr.ErrorOrNil() != nil {
+		return diag.FromErr(mErr)
 	}
 
 	return nil

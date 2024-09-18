@@ -113,6 +113,12 @@ func TestAccPreCheckAdminOnly(t *testing.T) {
 	}
 }
 
+func TestAccPreCheckReplication(t *testing.T) {
+	if env.OS_DEST_REGION == "" || env.OS_DEST_PROJECT_ID == "" {
+		t.Skip("Skipping test because it requires set OS_DEST_REGION and OS_DEST_PROJECT_ID.")
+	}
+}
+
 func TestAccVBSBackupShareCheck(t *testing.T) {
 	TestAccPreCheckRequiredEnvVars(t)
 	if env.OS_TO_TENANT_ID == "" {
