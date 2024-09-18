@@ -22,6 +22,8 @@ var (
 	OS_TO_TENANT_ID      = os.Getenv("OS_TO_TENANT_ID")
 	OS_TENANT_NAME       = GetTenantName()
 	OS_PROJECT_ID        = os.Getenv("OS_PROJECT_ID")
+	OS_DEST_REGION       = os.Getenv("OS_DEST_REGION")
+	OS_DEST_PROJECT_ID   = os.Getenv("OS_DEST_PROJECT_ID")
 )
 
 func flavorID() string {

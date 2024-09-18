@@ -26,6 +26,10 @@ func ResourceCBRVaultV3() *schema.Resource {
 
 		CustomizeDiff: common.MultipleCustomizeDiffs(cbrVaultRequiredFields),
 
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"description": {
 				Type:         schema.TypeString,
@@ -316,7 +320,6 @@ func resourceCBRVaultV3Read(_ context.Context, d *schema.ResourceData, meta inte
 		d.Set("provider_id", vault.ProviderID),
 		d.Set("resource", resourceInfo),
 		d.Set("tags", tagsMap),
-		d.Set("enterprise_project_id", vault.EnterpriseProjectID),
 		d.Set("auto_bind", vault.AutoBind),
 		d.Set("auto_expand", vault.AutoExpand),
 		d.Set("bind_rules", bindRules),
@@ -345,16 +348,15 @@ func resourceCBRVaultV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	opts := vaults.CreateOpts{
-		BackupPolicyID:      d.Get("backup_policy_id").(string),
-		Billing:             cbrVaultBillingCreate(d),
-		Description:         d.Get("description").(string),
-		Name:                d.Get("name").(string),
-		Resources:           resources,
-		Tags:                cbrVaultTags(d),
-		EnterpriseProjectID: d.Get("enterprise_project_id").(string),
-		AutoBind:            d.Get("auto_bind").(bool),
-		BindRules:           cbrVaultBindRules(d),
-		AutoExpand:          d.Get("auto_expand").(bool),
+		BackupPolicyID: d.Get("backup_policy_id").(string),
+		Billing:        cbrVaultBillingCreate(d),
+		Description:    d.Get("description").(string),
+		Name:           d.Get("name").(string),
+		Resources:      resources,
+		Tags:           cbrVaultTags(d),
+		AutoBind:       d.Get("auto_bind").(bool),
+		BindRules:      cbrVaultBindRules(d),
+		AutoExpand:     d.Get("auto_expand").(bool),
 	}
 
 	vault, err := vaults.Create(client, opts)

@@ -265,8 +265,6 @@ The following arguments are supported:
 
 * `tags` - (Optional) Tag map.
 
-* `enterprise_project_id` - (Optional) Enterprise project ID. The default value is `"0"`.
-
 * `auto_bind` - (Optional) Whether automatic association is supported.
 
 * `bind_rules` - (Optional)  Tag map, a rules for automatic association. You can only select tag keys and values from
@@ -296,3 +294,11 @@ All above argument parameters can be exported as attribute parameters along with
 * `frozen_scene` - Scenario when an account is frozen.
 
 * `status` - Vault status.
+
+## Import
+
+Volumes can be imported using the `id`, e.g.
+
+```sh
+terraform import opentelekomcloud_cbr_vault_v3.vault ea257959-eeb1-4c10-8d33-26f0409a766b
+```
