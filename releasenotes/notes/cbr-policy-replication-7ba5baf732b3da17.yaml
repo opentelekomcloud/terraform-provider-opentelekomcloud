@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    **[CBR]** Added ``destination_region`` and ``destination_project_id`` for ``resource/opentelekomcloud_cbr_policy_v3`` replication feature (`#2653 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/2653>`_)
+enhancements:
+  - |
+    **[CBR]** Import added for ``resource/opentelekomcloud_cbr_policy_v3`` (`#2653 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2653>`_)
+  - |
+    **[CBR]** Import added for ``resource/opentelekomcloud_cbr_vault_v3`` (`#2653 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2653>`_)
