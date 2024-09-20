@@ -95,7 +95,7 @@ func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.Resource
 	}
 	log.Printf("[DEBUG] CreateOpts: %#v", createOpts)
 
-	n, err := protectiongroups.Create(sdrsClient, createOpts).ExtractJobResponse()
+	n, err := protectiongroups.Create(sdrsClient, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomcomCloud SDRS Protectiongroup: %s", err)
 	}
@@ -126,7 +126,7 @@ func resourceSdrsProtectiongroupV1Read(ctx context.Context, d *schema.ResourceDa
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
 	}
-	n, err := protectiongroups.Get(sdrsClient, d.Id()).Extract()
+	n, err := protectiongroups.Get(sdrsClient, d.Id())
 
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -139,11 +139,11 @@ func resourceSdrsProtectiongroupV1Read(ctx context.Context, d *schema.ResourceDa
 	mErr := multierror.Append(
 		d.Set("name", n.Name),
 		d.Set("description", n.Description),
-		d.Set("source_availability_zone", n.SourceAZ),
-		d.Set("target_availability_zone", n.TargetAZ),
+		d.Set("source_availability_zone", n.SourceAvailabilityZone),
+		d.Set("target_availability_zone", n.TargetAvailabilityZone),
 		d.Set("domain_id", n.DomainID),
-		d.Set("source_vpc_id", n.SourceVpcID),
-		d.Set("dr_type", n.DrType),
+		d.Set("source_vpc_id", n.SourceVPCID),
+		d.Set("dr_type", n.DRType),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -168,7 +168,7 @@ func resourceSdrsProtectiongroupV1Update(ctx context.Context, d *schema.Resource
 	}
 	log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
 
-	_, err = protectiongroups.Update(sdrsClient, d.Id(), updateOpts).Extract()
+	_, err = protectiongroups.Update(sdrsClient, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud SDRS Protectiongroup: %s", err)
 	}
@@ -186,7 +186,7 @@ func resourceSdrsProtectiongroupV1Delete(ctx context.Context, d *schema.Resource
 		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
-	n, err := protectiongroups.Delete(sdrsClient, d.Id()).ExtractJobResponse()
+	n, err := protectiongroups.Delete(sdrsClient, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud SDRS Protectiongroup: %s", err)
 	}

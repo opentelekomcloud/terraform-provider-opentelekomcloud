@@ -17,7 +17,7 @@ import (
 const pgResourceName = "opentelekomcloud_sdrs_protectiongroup_v1.group_1"
 
 func TestAccSdrsProtectionGroupV1_basic(t *testing.T) {
-	var group protectiongroups.Group
+	var group protectiongroups.ServerGroupResponseInfo
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -54,7 +54,7 @@ func testAccCheckSdrsProtectionGroupV1Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := protectiongroups.Get(client, rs.Primary.ID).Extract()
+		_, err := protectiongroups.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("SDRS protectiongroup still exists")
 		}
@@ -63,7 +63,7 @@ func testAccCheckSdrsProtectionGroupV1Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckSdrsProtectionGroupV1Exists(n string, group *protectiongroups.Group) resource.TestCheckFunc {
+func testAccCheckSdrsProtectionGroupV1Exists(n string, group *protectiongroups.ServerGroupResponseInfo) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -80,7 +80,7 @@ func testAccCheckSdrsProtectionGroupV1Exists(n string, group *protectiongroups.G
 			return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 		}
 
-		found, err := protectiongroups.Get(client, rs.Primary.ID).Extract()
+		found, err := protectiongroups.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
