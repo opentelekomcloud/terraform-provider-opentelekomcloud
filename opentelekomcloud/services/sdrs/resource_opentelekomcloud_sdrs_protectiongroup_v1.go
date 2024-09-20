@@ -67,6 +67,10 @@ func ResourceSdrsProtectiongroupV1() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"enable": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -78,10 +82,6 @@ func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.Resource
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
-	}
-
-	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomcomCloud SDRS Client: %s", err)
 	}
 
 	createOpts := protectiongroups.CreateOpts{
@@ -111,6 +111,12 @@ func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.Resource
 
 	if id, ok := entity.(string); ok {
 		d.SetId(id)
+		if d.Get("enable").(bool) {
+			_, err := protectiongroups.Enable(sdrsClient, id)
+			if err != nil {
+				return fmterr.Errorf("error enabling OpenTelekomcomCloud SDRS Protectiongroup: %s", err)
+			}
+		}
 		clientCtx := common.CtxWithClient(ctx, sdrsClient, sdrsClientV1)
 		return resourceSdrsProtectiongroupV1Read(clientCtx, d, meta)
 	}
