@@ -124,6 +124,6 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   domain_id                = data.opentelekomcloud_sdrs_domain_v1.domain_1.id
   source_vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   dr_type                  = "migration"
-  enable				   = true
+  enable                   = true
 }
 `, common.DataSourceSubnet)
