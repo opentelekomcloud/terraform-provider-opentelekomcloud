@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Bump gophertelecomcloud version to fix response for ``isAutoPay``  and ``isAutoRenew`` in ``resource/opentelekomcloud_cce_node_pool_v3`` (`#2658 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2658>`_)
