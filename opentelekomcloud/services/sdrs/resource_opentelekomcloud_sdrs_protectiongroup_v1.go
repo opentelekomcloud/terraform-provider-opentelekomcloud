@@ -197,7 +197,6 @@ func resourceSdrsProtectiongroupV1Update(ctx context.Context, d *schema.Resource
 		var errEnable error
 		if d.Get("enable").(bool) {
 			errEnable = enableProtectionsGroup(d, sdrsClient)
-
 		} else {
 			errEnable = disableProtectionsGroup(d, sdrsClient)
 		}
