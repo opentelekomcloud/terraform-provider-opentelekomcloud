@@ -180,9 +180,9 @@ func resourceSdrsProtectiongroupV1Update(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
 	}
-	var updateOpts protectiongroups.UpdateOpts
 
 	if d.HasChange("name") {
+		var updateOpts protectiongroups.UpdateOpts
 		updateOpts.Name = d.Get("name").(string)
 
 		log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
