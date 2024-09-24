@@ -29,6 +29,7 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   domain_id     = data.opentelekomcloud_sdrs_domain_v1.dom_1.id
   source_vpc_id = var.vpc_id
   dr_type       = "migration"
+  enable        = true
 }
 ```
 
@@ -36,29 +37,32 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of a protection group.
+* `name` - (Required, String) The name of a protection group.
 
-* `description` - (Optional) The description of a protection group. Changing this creates a new group.
+* `description` - (Optional, String, ForceNew) The description of a protection group. Changing this creates a new group.
 
-* `source_availability_zone` - (Required) Specifies the source AZ of a protection group. Changing this creates a new group.
+* `source_availability_zone` - (Required, String, ForceNew) Specifies the source AZ of a protection group. Changing this creates a new group.
 
-* `target_availability_zone` - (Required) Specifies the target AZ of a protection group. Changing this creates a new group.
+* `target_availability_zone` - (Required, String, ForceNew) Specifies the target AZ of a protection group. Changing this creates a new group.
 
-* `domain_id` - (Required) Specifies the ID of an ``active-active domain``. Changing this creates a new group.
+* `domain_id` - (Required, String, ForceNew) Specifies the ID of an ``active-active domain``. Changing this creates a new group.
   An ``active-active domain`` id can be extracted from ``data/opentelekomcloud_sdrs_domain_v1`` and shouldn't be confused
   with tenant ``domain``.
 
-* `source_vpc_id` - (Required) Specifies the ID of the source VPC. Changing this creates a new group.
+* `source_vpc_id` - (Required, String, ForceNew) Specifies the ID of the source VPC. Changing this creates a new group.
 
-* `dr_type` - (Optional) Specifies the deployment model. The default value is migration indicating migration within a VPC.
+* `dr_type` - (Optional, String, ForceNew) Specifies the deployment model. The default value is migration indicating migration within a VPC.
   Changing this creates a new group.
+* `enable` - (Optional, Boolean) Enables or disables the Protection group.
 
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` -  ID of the protection group.
+* `id` - (String) ID of the protection group.
+* `created_at` - (String) Time of creation of the protection group.
+* `updated_at` - (String) Time of last update of the protection group.
 
 ## Import
 
