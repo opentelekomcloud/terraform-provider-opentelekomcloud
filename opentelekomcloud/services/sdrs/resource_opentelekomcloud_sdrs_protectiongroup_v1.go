@@ -123,7 +123,7 @@ func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.Resource
 		if d.Get("enable").(bool) {
 			errEnable := enableProtectionsGroup(d, sdrsClient)
 			if errEnable != nil {
-				return fmterr.Errorf("error while enabling Protections Group, ", errEnable)
+				return fmterr.Errorf("error while enabling Protection Group: %s", errEnable)
 			}
 		}
 		clientCtx := common.CtxWithClient(ctx, sdrsClient, sdrsClientV1)
