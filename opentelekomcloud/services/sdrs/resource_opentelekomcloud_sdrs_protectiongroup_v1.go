@@ -2,6 +2,7 @@ package sdrs
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -67,6 +68,18 @@ func ResourceSdrsProtectiongroupV1() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"enable": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -80,10 +93,6 @@ func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.Resource
 		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
-	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomcomCloud SDRS Client: %s", err)
-	}
-
 	createOpts := protectiongroups.CreateOpts{
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
@@ -95,7 +104,7 @@ func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.Resource
 	}
 	log.Printf("[DEBUG] CreateOpts: %#v", createOpts)
 
-	n, err := protectiongroups.Create(sdrsClient, createOpts).ExtractJobResponse()
+	n, err := protectiongroups.Create(sdrsClient, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomcomCloud SDRS Protectiongroup: %s", err)
 	}
@@ -111,6 +120,12 @@ func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.Resource
 
 	if id, ok := entity.(string); ok {
 		d.SetId(id)
+		if d.Get("enable").(bool) {
+			errEnable := enableProtectionsGroup(d, sdrsClient)
+			if errEnable != nil {
+				return fmterr.Errorf("error while enabling Protection Group: %s", errEnable)
+			}
+		}
 		clientCtx := common.CtxWithClient(ctx, sdrsClient, sdrsClientV1)
 		return resourceSdrsProtectiongroupV1Read(clientCtx, d, meta)
 	}
@@ -126,7 +141,7 @@ func resourceSdrsProtectiongroupV1Read(ctx context.Context, d *schema.ResourceDa
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
 	}
-	n, err := protectiongroups.Get(sdrsClient, d.Id()).Extract()
+	n, err := protectiongroups.Get(sdrsClient, d.Id())
 
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -136,14 +151,18 @@ func resourceSdrsProtectiongroupV1Read(ctx context.Context, d *schema.ResourceDa
 
 		return fmterr.Errorf("error retrieving OpenTelekomCloud SDRS Protectiongroup: %s", err)
 	}
+
 	mErr := multierror.Append(
 		d.Set("name", n.Name),
 		d.Set("description", n.Description),
-		d.Set("source_availability_zone", n.SourceAZ),
-		d.Set("target_availability_zone", n.TargetAZ),
+		d.Set("source_availability_zone", n.SourceAvailabilityZone),
+		d.Set("target_availability_zone", n.TargetAvailabilityZone),
 		d.Set("domain_id", n.DomainID),
-		d.Set("source_vpc_id", n.SourceVpcID),
-		d.Set("dr_type", n.DrType),
+		d.Set("source_vpc_id", n.SourceVPCID),
+		d.Set("dr_type", n.DRType),
+		d.Set("enable", n.Status == "protected"),
+		d.Set("created_at", n.CreatedAt),
+		d.Set("updated_at", n.UpdatedAt),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -161,16 +180,29 @@ func resourceSdrsProtectiongroupV1Update(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
 	}
-	var updateOpts protectiongroups.UpdateOpts
 
 	if d.HasChange("name") {
+		var updateOpts protectiongroups.UpdateOpts
 		updateOpts.Name = d.Get("name").(string)
-	}
-	log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
 
-	_, err = protectiongroups.Update(sdrsClient, d.Id(), updateOpts).Extract()
-	if err != nil {
-		return fmterr.Errorf("error updating OpenTelekomCloud SDRS Protectiongroup: %s", err)
+		log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
+
+		_, err = protectiongroups.Update(sdrsClient, d.Id(), updateOpts)
+		if err != nil {
+			return fmterr.Errorf("error updating OpenTelekomCloud SDRS Protectiongroup: %s", err)
+		}
+	}
+
+	if d.HasChange("enable") {
+		var errEnable error
+		if d.Get("enable").(bool) {
+			errEnable = enableProtectionsGroup(d, sdrsClient)
+		} else {
+			errEnable = disableProtectionsGroup(d, sdrsClient)
+		}
+		if errEnable != nil {
+			return diag.FromErr(errEnable)
+		}
 	}
 
 	clientCtx := common.CtxWithClient(ctx, sdrsClient, sdrsClientV1)
@@ -186,7 +218,7 @@ func resourceSdrsProtectiongroupV1Delete(ctx context.Context, d *schema.Resource
 		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
-	n, err := protectiongroups.Delete(sdrsClient, d.Id()).ExtractJobResponse()
+	n, err := protectiongroups.Delete(sdrsClient, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud SDRS Protectiongroup: %s", err)
 	}
@@ -197,4 +229,20 @@ func resourceSdrsProtectiongroupV1Delete(ctx context.Context, d *schema.Resource
 
 	d.SetId("")
 	return nil
+}
+
+func enableProtectionsGroup(d *schema.ResourceData, sdrsClient *golangsdk.ServiceClient) error {
+	enableResponse, err := protectiongroups.Enable(sdrsClient, d.Id())
+	if err != nil {
+		return fmt.Errorf("error enabling OpenTelekomcomCloud SDRS Protectiongroup: %s", err)
+	}
+	return protectiongroups.WaitForJobSuccess(sdrsClient, int(d.Timeout(schema.TimeoutCreate)/time.Second), enableResponse.JobID)
+}
+
+func disableProtectionsGroup(d *schema.ResourceData, sdrsClient *golangsdk.ServiceClient) error {
+	disableResponse, err := protectiongroups.Disable(sdrsClient, d.Id())
+	if err != nil {
+		return fmt.Errorf("error enabling OpenTelekomcomCloud SDRS Protectiongroup: %s", err)
+	}
+	return protectiongroups.WaitForJobSuccess(sdrsClient, int(d.Timeout(schema.TimeoutCreate)/time.Second), disableResponse.JobID)
 }

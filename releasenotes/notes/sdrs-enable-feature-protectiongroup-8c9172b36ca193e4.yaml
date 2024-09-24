@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    ***[SDRS]*** Refactor SDRS protection group/Add enable (`#2655 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2655>`_)
+enhancements:
+  - |
+    ***[SDRS]*** Refactor SDRS protection group/Add enable (`#2655 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2655>`_)

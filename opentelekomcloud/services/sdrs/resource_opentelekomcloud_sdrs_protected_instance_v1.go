@@ -200,6 +200,10 @@ func resourceSdrsProtectedInstanceV1Update(ctx context.Context, d *schema.Resour
 
 	if d.HasChange("name") {
 		updateOpts.Name = d.Get("name").(string)
+		_, err = protectedinstances.Update(client, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmterr.Errorf("error updating OpenTelekomCloud SDRS Protected Instance: %w", err)
+		}
 	}
 
 	// update tags
@@ -207,11 +211,6 @@ func resourceSdrsProtectedInstanceV1Update(ctx context.Context, d *schema.Resour
 		if err := common.UpdateResourceTags(client, d, "protected-instances", d.Id()); err != nil {
 			return fmterr.Errorf("error updating tags of SDRS Protected Instance %s: %s", d.Id(), err)
 		}
-	}
-
-	_, err = protectedinstances.Update(client, d.Id(), updateOpts).Extract()
-	if err != nil {
-		return fmterr.Errorf("error updating OpenTelekomCloud SDRS Protected Instance: %w", err)
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, sdrsClientV1)
