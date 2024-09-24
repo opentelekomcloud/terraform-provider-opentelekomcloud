@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[CCE]** Add cce addon templates info for ``resource/opentelekomcloud_cce_addon_v3`` documentation (`#2657 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2657>`_)
