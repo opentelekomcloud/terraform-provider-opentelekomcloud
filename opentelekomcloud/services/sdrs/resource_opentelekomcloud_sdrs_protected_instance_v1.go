@@ -111,7 +111,7 @@ func resourceSdrsProtectedInstanceV1Create(ctx context.Context, d *schema.Resour
 		IpAddress:   d.Get("ip_address").(string),
 	}
 
-	job, err := protectedinstances.Create(client, createOpts).ExtractJobResponse()
+	job, err := protectedinstances.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomcomCloud SDRS Protected Instance: %w", err)
 	}
@@ -150,7 +150,7 @@ func resourceSdrsProtectedInstanceV1Read(ctx context.Context, d *schema.Resource
 		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
-	instance, err := protectedinstances.Get(client, d.Id()).Extract()
+	instance, err := protectedinstances.Get(client, d.Id())
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			d.SetId("")
@@ -200,7 +200,7 @@ func resourceSdrsProtectedInstanceV1Update(ctx context.Context, d *schema.Resour
 
 	if d.HasChange("name") {
 		updateOpts.Name = d.Get("name").(string)
-		_, err = protectedinstances.Update(client, d.Id(), updateOpts).Extract()
+		_, err = protectedinstances.Update(client, d.Id(), updateOpts)
 		if err != nil {
 			return fmterr.Errorf("error updating OpenTelekomCloud SDRS Protected Instance: %w", err)
 		}
@@ -234,7 +234,7 @@ func resourceSdrsProtectedInstanceV1Delete(ctx context.Context, d *schema.Resour
 		DeleteTargetEip:    &deleteTargetEIP,
 	}
 
-	job, err := protectedinstances.Delete(client, d.Id(), deleteOpts).ExtractJobResponse()
+	job, err := protectedinstances.Delete(client, d.Id(), deleteOpts)
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud SDRS Protected Instance: %w", err)
 	}

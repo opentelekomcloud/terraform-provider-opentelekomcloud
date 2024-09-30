@@ -55,7 +55,7 @@ func testAccSdrsProtectedInstanceV1Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := protectedinstances.Get(client, rs.Primary.ID).Extract()
+		_, err := protectedinstances.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("SDRS protected instance still exists")
 		}
@@ -81,7 +81,7 @@ func testAccSdrsProtectedInstanceV1Exists(n string, instance *protectedinstances
 			return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 		}
 
-		found, err := protectedinstances.Get(client, rs.Primary.ID).Extract()
+		found, err := protectedinstances.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
