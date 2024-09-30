@@ -1,9 +1,9 @@
 ---
 features:
   |
-  **[DMS]** Add new resource ``resource/opentelekomcloud_dms_dedicated_instance_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/>`_)
+  **[DMS]** Add new resource ``resource/opentelekomcloud_dms_dedicated_instance_v2`` (`#2666 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/2666>`_)
   |
-  **[DMS]** Add new resource ``data_source/opentelekomcloud_dms_flavor_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/>`_)
+  **[DMS]** Add new resource ``data_source/opentelekomcloud_dms_flavor_v2`` (`#2666 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/2666>`_)
 other:
   |
-  **[DMS]** Refactor of ``resource/opentelekomcloud_dms_instance_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/>`_)
+  **[DMS]** Refactor of ``resource/opentelekomcloud_dms_instance_v2`` (`#2666 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/2666>`_)
