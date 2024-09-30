@@ -65,7 +65,7 @@ func TestAccDmsDedicatedInstancesV2_Advanced(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceDedicatedInstanceV2Name, "maintain_begin", "02:00"),
 					resource.TestCheckResourceAttr(resourceDedicatedInstanceV2Name, "maintain_end", "06:00"),
 					resource.TestCheckResourceAttr(resourceDedicatedInstanceV2Name, "retention_policy", "time_base"),
-					resource.TestCheckResourceAttr(resourceDedicatedInstanceV2Name, "node_num", "4"),
+					resource.TestCheckResourceAttr(resourceDedicatedInstanceV2Name, "broker_num", "1"),
 				),
 			},
 			{
@@ -76,6 +76,7 @@ func TestAccDmsDedicatedInstancesV2_Advanced(t *testing.T) {
 					"password",
 					"used_storage_space",
 					"cross_vpc_accesses",
+					"publicip_id",
 				},
 			},
 		},
@@ -208,12 +209,15 @@ func testAccDmsV2DedicatedInstanceAdvanced(instanceName string) string {
 data "opentelekomcloud_dms_az_v1" "az_1" {}
 
 data "opentelekomcloud_dms_flavor_v2" "test" {
-  type      = "cluster"
-  flavor_id = "c6.2u4g.cluster"
+  type      = "single"
+  flavor_id = "s6.2u4g.single.small"
 }
 
 locals {
   flavor = data.opentelekomcloud_dms_flavor_v2.test.flavors[0]
+}
+
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 }
 
 resource "opentelekomcloud_dms_dedicated_instance_v2" "instance_1" {
@@ -228,8 +232,8 @@ resource "opentelekomcloud_dms_dedicated_instance_v2" "instance_1" {
   storage_spec_code = local.flavor.ios[0].storage_spec_code
   available_zones   = [data.opentelekomcloud_dms_az_v1.az_1.id]
   engine_version    = "2.7"
-  storage_space     = 600
-  broker_num        = 4
+  storage_space     = 300
+  broker_num        = 1
 
   ssl_enable       = true
   access_user      = "user"
@@ -237,6 +241,9 @@ resource "opentelekomcloud_dms_dedicated_instance_v2" "instance_1" {
   maintain_begin   = "02:00"
   maintain_end     = "06:00"
   retention_policy = "time_base"
+
+  enable_publicip = true
+  publicip_id     = [opentelekomcloud_networking_floatingip_v2.fip_1.id]
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, instanceName)
 }

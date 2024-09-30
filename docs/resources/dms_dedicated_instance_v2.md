@@ -23,22 +23,17 @@ variable "subnet_id" {}
 variable "security_group_id" {}
 variable "access_password" {}
 
-data "opentelekomcloud_dms_az_v1" "az_1" {}
-
 variable "flavor_id" {
-  default = "your_flavor_id, such: c6.2u4g.cluster"
+  default = "c6.2u4g.cluster"
 }
 variable "storage_spec_code" {
-  default = "your_storage_spec_code, such: dms.physical.storage.ultra.v2"
+  default = "dms.physical.storage.ultra.v2"
 }
 
-# Query flavor information based on flavorID and storage I/O specification.
-# Make sure the flavors are available in the availability zone.
 data "opentelekomcloud_dms_flavor_v2" "test" {
-  type               = "cluster"
-  flavor_id          = var.flavor_id
-  availability_zones = var.availability_zones
-  storage_spec_code  = var.storage_spec_code
+  type              = "cluster"
+  flavor_id         = var.flavor_id
+  storage_spec_code = var.storage_spec_code
 }
 
 resource "opentelekomcloud_dms_dedicated_instance_v2" "test" {
@@ -98,6 +93,15 @@ The following arguments are supported:
 * `arch_type` - (Optional, String, ForceNew) Specifies the CPU architecture. Valid value is **X86**.
   Changing this creates a new instance resource.
 
+* `enable_publicip` - (Optional, Bool, ForceNew) Whether to enable public access. By default, public access is disabled.
+
+* `enable_publicip` - (Optional, List, ForceNew) A list of IDs of the EIP bound to the instance.
+This parameter is mandatory if `enable_publicip` is set to `true`.
+
+* `disk_encrypted_enable` - (Optional, Bool, ForceNew) Indicates whether to enable disk encryption.
+
+* `disk_encrypted_key` - (Optional, String, ForceNew) Disk encryption key. If disk encryption is not enabled, this parameter is left blank.
+
 * `storage_space` - (Required, Int) Specifies the message storage capacity, the unit is GB.
   The storage spaces corresponding to the product IDs are as follows:
   + **c6.2u4g.cluster** (100MB bandwidth): `300` to `300,000` GB
@@ -106,10 +110,7 @@ The following arguments are supported:
   + **c6.12u12g.cluster**: `300` to `900,000` GB
   + **c6.16u32g.cluster** (1,200MB bandwidth): `300` to `900,000` GB
 
-  It is required when creating an instance with `flavor_id`.
-
 * `broker_num` - (Required, Int) Specifies the broker numbers.
-  It is required when creating an instance with `flavor_id`.
 
 * `new_tenant_ips` - (Optional, List) Specifies the IPv4 private IP addresses for the new brokers.
 
@@ -231,7 +232,10 @@ should be updated to align with the instance. Also, you can ignore changes as be
 resource "opentelekomcloud_dms_dedicated_instance_v2" "instance_1" {
   lifecycle {
     ignore_changes = [
-      password, manager_password,
+      "password",
+      "used_storage_space",
+      "cross_vpc_accesses",
+      "publicip_id",
     ]
   }
 }

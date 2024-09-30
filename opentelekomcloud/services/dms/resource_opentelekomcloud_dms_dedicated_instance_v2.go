@@ -7,6 +7,7 @@ import (
 	"log"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -125,6 +126,19 @@ func ResourceDmsDedicatedInstanceV2() *schema.Resource {
 					"access_user",
 				},
 			},
+			"enable_publicip": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"publicip_id": {
+				Type:         schema.TypeList,
+				Optional:     true,
+				ForceNew:     true,
+				Elem:         &schema.Schema{Type: schema.TypeString},
+				RequiredWith: []string{"enable_publicip"},
+			},
 			"maintain_begin": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -169,6 +183,19 @@ func ResourceDmsDedicatedInstanceV2() *schema.Resource {
 			"partition_num": {
 				Type:     schema.TypeInt,
 				Computed: true,
+			},
+			"disk_encrypted_enable": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"disk_encrypted_key": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ForceNew:     true,
+				RequiredWith: []string{"disk_encrypted_enable"},
 			},
 			"used_storage_space": {
 				Type:     schema.TypeInt,
@@ -382,6 +409,22 @@ func resourceDmsKafkaInstanceCreate(ctx context.Context, d *schema.ResourceData,
 		IPv6Enable:            d.Get("ipv6_enable").(bool),
 	}
 
+	if d.Get("enable_publicip").(bool) {
+		createOpts.EnablePublicIP = true
+		rawIpList := d.Get("publicip_id").([]interface{})
+		var ipList []string
+		for _, ip := range rawIpList {
+			ipList = append(ipList, ip.(string))
+		}
+		createOpts.PublicIpID = strings.Join(ipList, ",")
+	}
+
+	if d.Get("disk_encrypted_enable").(bool) {
+		diskEncryptedEnable := true
+		createOpts.DiskEncryptedEnable = &diskEncryptedEnable
+		createOpts.DiskEncryptedKey = d.Get("disk_encrypted_key").(string)
+	}
+
 	if zoneIDs, ok := d.GetOk("available_zones"); ok {
 		createOpts.AvailableZones = common.ExpandToStringList(zoneIDs.([]interface{}))
 	}
@@ -505,8 +548,8 @@ func resourceDmsKafkaInstanceRead(ctx context.Context, d *schema.ResourceData, m
 		d.Set("ipv6_enable", v.EnablePublicIP),
 		d.Set("available_zones", v.AvailableZones),
 		d.Set("broker_num", v.BrokerNum),
-		d.Set("maintain_begin", v.MaintainBegin),
-		d.Set("maintain_end", v.MaintainEnd),
+		d.Set("maintain_begin", strings.TrimSuffix(v.MaintainBegin, ":00")),
+		d.Set("maintain_end", strings.TrimSuffix(v.MaintainEnd, ":00")),
 		d.Set("retention_policy", v.RetentionPolicy),
 		d.Set("dumping", v.ConnectorEnable),
 		d.Set("storage_spec_code", v.StorageSpecCode),
@@ -519,8 +562,11 @@ func resourceDmsKafkaInstanceRead(ctx context.Context, d *schema.ResourceData, m
 		d.Set("user_name", v.UserName),
 		d.Set("type", v.Type),
 		d.Set("access_user", v.AccessUser),
+		d.Set("enable_publicip", v.EnablePublicIP),
 		d.Set("cross_vpc_accesses", crossVpcAccess),
 		d.Set("public_ip_address", v.PublicConnectAddress),
+		d.Set("disk_encrypted_enable", v.DiskEncrypted),
+		d.Set("disk_encrypted_key", v.DiskEncryptedKey),
 		d.Set("connector_node_num", v.ConnectorNodeNum),
 		d.Set("storage_resource_id", v.StorageResourceID),
 		d.Set("storage_type", v.StorageType),
@@ -529,6 +575,7 @@ func resourceDmsKafkaInstanceRead(ctx context.Context, d *schema.ResourceData, m
 		d.Set("node_num", v.NodeNum),
 		d.Set("pod_connect_address", v.PodConnectAddress),
 		d.Set("public_bandwidth", v.PublicBandWidth),
+		d.Set("ssl_enable", v.SslEnable),
 		d.Set("ssl_two_way_enable", v.SSLTwoWayEnable),
 	)
 
