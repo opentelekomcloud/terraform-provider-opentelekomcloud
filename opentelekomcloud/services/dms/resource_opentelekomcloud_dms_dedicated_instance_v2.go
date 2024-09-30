@@ -24,6 +24,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v2/instances/specification"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceDmsDedicatedInstanceV2() *schema.Resource {
@@ -381,9 +382,11 @@ func updateCrossVpcAccess(ctx context.Context, client *golangsdk.ServiceClient, 
 
 func resourceDmsKafkaInstanceCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.DmsV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, dmsClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.DmsV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return diag.Errorf("error initializing DMS Kafka(v2) client: %s", err)
+		return fmterr.Errorf(errCreationClientV2, err)
 	}
 
 	createOpts := lifecycle.CreateOpts{
@@ -465,7 +468,8 @@ func resourceDmsKafkaInstanceCreate(ctx context.Context, d *schema.ResourceData,
 		}
 	}
 
-	return resourceDmsKafkaInstanceRead(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, dmsClientV2)
+	return resourceDmsKafkaInstanceRead(clientCtx, d, meta)
 }
 
 func flattenCrossVpcInfo(str string) (result []map[string]interface{}, err error) {
@@ -511,11 +515,11 @@ func unmarshalFlattenCrossVpcInfo(crossVpcInfoStr string) ([]map[string]interfac
 
 func resourceDmsKafkaInstanceRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	region := config.GetRegion(d)
-
-	client, err := config.DmsV2Client(region)
+	client, err := common.ClientFromCtx(ctx, dmsClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.DmsV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return diag.Errorf("error initializing DMS Kafka(v2) client: %s", err)
+		return fmterr.Errorf(errCreationClientV2, err)
 	}
 
 	v, err := lifecycle.Get(client, d.Id())
@@ -599,9 +603,11 @@ func resourceDmsKafkaInstanceRead(ctx context.Context, d *schema.ResourceData, m
 
 func resourceDmsKafkaInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.DmsV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, dmsClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.DmsV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return diag.Errorf("error initializing DMS Kafka(v2) client: %s", err)
+		return fmterr.Errorf(errCreationClientV2, err)
 	}
 
 	var mErr *multierror.Error
@@ -687,7 +693,9 @@ func resourceDmsKafkaInstanceUpdate(ctx context.Context, d *schema.ResourceData,
 	if mErr.ErrorOrNil() != nil {
 		return diag.Errorf("error while updating DMS Kafka instances, %s", mErr)
 	}
-	return resourceDmsKafkaInstanceRead(ctx, d, meta)
+
+	clientCtx := common.CtxWithClient(ctx, client, dmsClientV2)
+	return resourceDmsKafkaInstanceRead(clientCtx, d, meta)
 }
 
 func resizeKafkaInstance(ctx context.Context, d *schema.ResourceData, meta interface{}) error {
@@ -810,9 +818,11 @@ func kafkaResizeStateRefresh(client *golangsdk.ServiceClient, d *schema.Resource
 
 func resourceDmsKafkaInstanceDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.DmsV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, dmsClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.DmsV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return diag.Errorf("error initializing DMS Kafka(v2) client: %s", err)
+		return fmterr.Errorf(errCreationClientV2, err)
 	}
 
 	retryFunc := func() (interface{}, bool, error) {

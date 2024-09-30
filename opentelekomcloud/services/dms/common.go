@@ -9,7 +9,9 @@ import (
 )
 
 const (
-	errCreationClient = "error creating OpenTelekomCloud DMSv1 client: %w"
+	errCreationClient   = "error creating OpenTelekomCloud DMSv1 client: %w"
+	errCreationClientV2 = "error creating OpenTelekomCloud DMSv2 client: %w"
+	dmsClientV2         = "dms-v2-client"
 )
 
 func MarshalValue(i interface{}) string {
