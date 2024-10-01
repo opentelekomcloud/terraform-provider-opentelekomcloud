@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v2/instances"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v2/instances/lifecycle"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 
@@ -19,7 +19,7 @@ import (
 const resourceInstanceV2Name = "opentelekomcloud_dms_instance_v2.instance_1"
 
 func TestAccDmsInstancesV2_basic(t *testing.T) {
-	var instance instances.Instance
+	var instance lifecycle.Instance
 	var instanceName = fmt.Sprintf("dms_instance_%s", acctest.RandString(5))
 	var instanceUpdate = fmt.Sprintf("dms_instance_update_%s", acctest.RandString(5))
 
@@ -56,7 +56,7 @@ func TestAccDmsInstancesV2_Encrypted(t *testing.T) {
 	if os.Getenv("TF_ACC") == "" {
 		t.Skip("Disk encryption is not supported in current version")
 	}
-	var instance instances.Instance
+	var instance lifecycle.Instance
 	var instanceName = fmt.Sprintf("dms_instance_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
@@ -78,7 +78,7 @@ func TestAccDmsInstancesV2_Encrypted(t *testing.T) {
 }
 
 func TestAccDmsInstancesV2_EIP(t *testing.T) {
-	var instance instances.Instance
+	var instance lifecycle.Instance
 	var instanceName = fmt.Sprintf("dms_instance_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
@@ -111,7 +111,7 @@ func testAccCheckDmsV2InstanceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := instances.Get(client, rs.Primary.ID)
+		_, err := lifecycle.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("DMS instance still exists")
 		}
@@ -119,7 +119,7 @@ func testAccCheckDmsV2InstanceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckDmsV2InstanceExists(n string, instance instances.Instance) resource.TestCheckFunc {
+func testAccCheckDmsV2InstanceExists(n string, instance lifecycle.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -136,7 +136,7 @@ func testAccCheckDmsV2InstanceExists(n string, instance instances.Instance) reso
 			return fmt.Errorf("error creating OpenTelekomCloud DMSv2 client: %w", err)
 		}
 
-		v, err := instances.Get(client, rs.Primary.ID)
+		v, err := lifecycle.Get(client, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("error getting OpenTelekomCloud DMSv2 instance (%s): %w", rs.Primary.ID, err)
 		}
@@ -234,7 +234,7 @@ data "opentelekomcloud_dms_az_v1" "az_1" {}
 data "opentelekomcloud_dms_product_v1" "product_1" {
   engine        = "kafka"
   instance_type = "cluster"
-  version       = "1.1.0"
+  version       = "2.3.0"
 }
 
 resource "opentelekomcloud_dms_instance_v2" "instance_1" {
@@ -265,7 +265,7 @@ data "opentelekomcloud_dms_az_v1" "az_1" {}
 data "opentelekomcloud_dms_product_v1" "product_1" {
   engine        = "kafka"
   instance_type = "cluster"
-  version       = "1.1.0"
+  version       = "2.3.0"
 }
 
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
