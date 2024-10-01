@@ -75,7 +75,8 @@ func TestAccNetworkingV2RouterRoute_basic(t *testing.T) {
 }
 
 func TestAccNetworkingV2RouterRoute_ecs(t *testing.T) {
-	resourceName := "opentelekomcloud_networking_router_route_v2.router_route_1"
+	resourceName1 := "opentelekomcloud_networking_router_route_v2.router_route_1"
+	resourceName2 := "opentelekomcloud_networking_router_route_v2.router_route_2"
 	name := fmt.Sprintf("router_acc_route%s", acctest.RandString(10))
 	t.Parallel()
 	qts := []*quotas.ExpectedQuota{
@@ -92,13 +93,15 @@ func TestAccNetworkingV2RouterRoute_ecs(t *testing.T) {
 			{
 				Config: testAccNetworkingV2RouterRouteEcs(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2RouterRouteExists(resourceName),
+					testAccCheckNetworkingV2RouterRouteExists(resourceName1),
+					testAccCheckNetworkingV2RouterRouteExists(resourceName2),
 				),
 			},
 			{
 				Config: testAccNetworkingV2RouterRouteEcsUpdate(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2RouterRouteExists(resourceName),
+					testAccCheckNetworkingV2RouterRouteExists(resourceName1),
+					testAccCheckNetworkingV2RouterRouteExists(resourceName2),
 				),
 			},
 		},
@@ -450,6 +453,14 @@ resource "opentelekomcloud_networking_router_route_v2" "router_route_1" {
   depends_on = ["opentelekomcloud_networking_router_interface_v2.int_1"]
   router_id  = opentelekomcloud_networking_router_v2.router_1.id
 }
+
+resource "opentelekomcloud_networking_router_route_v2" "router_route_2" {
+  destination_cidr = "10.0.1.0/24"
+  next_hop         = "192.168.199.250"
+
+  depends_on = ["opentelekomcloud_networking_router_interface_v2.int_1"]
+  router_id  = opentelekomcloud_networking_router_v2.router_1.id
+}
 `, name, env.OS_AVAILABILITY_ZONE, common.DataSourceImage)
 }
 
@@ -514,6 +525,14 @@ resource "opentelekomcloud_networking_router_interface_v2" "int_1" {
 resource "opentelekomcloud_networking_router_route_v2" "router_route_1" {
   destination_cidr = "192.168.254.254/32"
   next_hop         = opentelekomcloud_compute_instance_v2.instance_1.network[0].fixed_ip_v4
+
+  depends_on = ["opentelekomcloud_networking_router_interface_v2.int_1"]
+  router_id  = opentelekomcloud_networking_router_v2.router_1.id
+}
+
+resource "opentelekomcloud_networking_router_route_v2" "router_route_2" {
+  destination_cidr = "10.0.1.0/24"
+  next_hop         = "192.168.199.250"
 
   depends_on = ["opentelekomcloud_networking_router_interface_v2.int_1"]
   router_id  = opentelekomcloud_networking_router_v2.router_1.id
