@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[SDRS]** Refactor SDRS protected instances (`#2667 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2667>`_)

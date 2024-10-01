@@ -21,6 +21,8 @@ modules-dev/
 *.test
 localrc2
 localrc
+*.env
+.vscode
 
 # Test exclusions
 !command/test-fixtures/**/*.tfstate

@@ -102,7 +102,7 @@ func resourceSDRSReplicationAttachV1Read(ctx context.Context, d *schema.Resource
 
 	instanceID := d.Get("instance_id").(string)
 	replicationID := d.Get("replication_id").(string)
-	n, err := protectedinstances.Get(client, instanceID).Extract()
+	n, err := protectedinstances.Get(client, instanceID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
