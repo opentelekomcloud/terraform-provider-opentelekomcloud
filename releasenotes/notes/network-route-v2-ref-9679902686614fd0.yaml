@@ -1,0 +1,6 @@
+---
+other:
+  - |
+    **[NETWORK]** Refactoring of ``resource/opentelekomcloud_networking_router_route_v2`` (`#2669 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2669>`_)
+  - |
+    **[NETWORK]** Deprecation message in documentation for ``resource/opentelekomcloud_networking_router_route_v2`` (`#2669 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2669>`_)
