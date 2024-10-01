@@ -54,50 +54,46 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	updateOpts := routers.UpdateOpts{}
+	routerID := d.Get("router_id").(string)
+	osMutexKV.Lock(routerID)
+	defer osMutexKV.Unlock(routerID)
 
-	routerId := d.Get("router_id").(string)
-	osMutexKV.Lock(routerId)
-	defer osMutexKV.Unlock(routerId)
-
-	destCidr := d.Get("destination_cidr").(string)
-	nextHop := d.Get("next_hop").(string)
-
-	n, err := routers.Get(networkingClient, routerId).Extract()
+	n, err := routers.Get(networkingClient, routerID).Extract()
 	if err != nil {
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Neutron Router: %s", err)
 	}
 
-	var routeExists bool
+	routes := n.Routes
+	dstCIDR := d.Get("destination_cidr").(string)
+	nextHop := d.Get("next_hop").(string)
+	exists := false
 
-	rts := n.Routes
-	for _, r := range rts {
-		if r.DestinationCIDR == destCidr && r.NextHop == nextHop {
-			routeExists = true
+	for _, route := range routes {
+		if route.DestinationCIDR == dstCIDR && route.NextHop == nextHop {
+			exists = true
 			break
 		}
 	}
 
-	if !routeExists {
-		if destCidr != "" && nextHop != "" {
-			r := routers.Route{DestinationCIDR: destCidr, NextHop: nextHop}
-			log.Printf(
-				"[INFO] Adding route %s", r)
-			rts = append(rts, r)
-		}
-
-		updateOpts.Routes = rts
-
-		log.Printf("[DEBUG] Updating Router %s with options: %+v", routerId, updateOpts)
-
-		_, err = routers.Update(networkingClient, routerId, updateOpts).Extract()
-		if err != nil {
-			return fmterr.Errorf("error updating OpenTelekomCloud Neutron Router: %s", err)
-		}
-		d.SetId(fmt.Sprintf("%s-route-%s-%s", routerId, destCidr, nextHop))
-	} else {
-		log.Printf("[DEBUG] Router %s has route already", routerId)
+	if exists {
+		log.Printf("[DEBUG] OpenTelekomCloud Neutron Router %s already has route to %s via %s", routerID, dstCIDR, nextHop)
+		return resourceNetworkingRouterRouteV2Read(ctx, d, meta)
 	}
+
+	routes = append(routes, routers.Route{
+		DestinationCIDR: dstCIDR,
+		NextHop:         nextHop,
+	})
+	updateOpts := routers.UpdateOpts{
+		Routes: routes,
+	}
+	log.Printf("[DEBUG] OpenTelekomCloud Neutron Router %s update options: %#v", routerID, updateOpts)
+	_, err = routers.Update(networkingClient, routerID, updateOpts).Extract()
+	if err != nil {
+		return diag.Errorf("Error updating OpenTelekomCloud Neutron Router: %s", err)
+	}
+
+	d.SetId(fmt.Sprintf("%s-route-%s-%s", routerID, dstCIDR, nextHop))
 
 	return resourceNetworkingRouterRouteV2Read(ctx, d, meta)
 }
@@ -122,8 +118,6 @@ func resourceNetworkingRouterRouteV2Read(_ context.Context, d *schema.ResourceDa
 	nextHop := d.Get("next_hop").(string)
 
 	mErr := multierror.Append(
-		d.Set("next_hop", ""),
-		d.Set("destination_cidr", ""),
 		d.Set("region", config.GetRegion(d)),
 	)
 
@@ -152,43 +146,38 @@ func resourceNetworkingRouterRouteV2Delete(_ context.Context, d *schema.Resource
 		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	routerId := d.Get("router_id").(string)
-	osMutexKV.Lock(routerId)
-	defer osMutexKV.Unlock(routerId)
+	routerID := d.Get("router_id").(string)
+	osMutexKV.Lock(routerID)
+	defer osMutexKV.Unlock(routerID)
 
-	n, err := routers.Get(networkingClient, routerId).Extract()
+	n, err := routers.Get(networkingClient, routerID).Extract()
 	if err != nil {
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Neutron Router: %s", err)
 	}
 
-	var updateOpts routers.UpdateOpts
-
-	destCidr := d.Get("destination_cidr").(string)
+	dstCIDR := d.Get("destination_cidr").(string)
 	nextHop := d.Get("next_hop").(string)
 
-	oldRts := n.Routes
-	var newRts []routers.Route
+	oldRoutes := n.Routes
+	var newRoute []routers.Route
 
-	for _, r := range oldRts {
-		if r.DestinationCIDR != destCidr || r.NextHop != nextHop {
-			newRts = append(newRts, r)
+	for _, route := range oldRoutes {
+		if route.DestinationCIDR != dstCIDR || route.NextHop != nextHop {
+			newRoute = append(newRoute, route)
 		}
 	}
 
-	if len(oldRts) != len(newRts) {
-		r := routers.Route{DestinationCIDR: destCidr, NextHop: nextHop}
-		log.Printf(
-			"[INFO] Deleting route %s", r)
-		updateOpts.Routes = newRts
+	if len(oldRoutes) == len(newRoute) {
+		return diag.Errorf("Can't find route to %s via %s on OpenTelekomCloud Neutron Router %s", dstCIDR, nextHop, routerID)
+	}
 
-		log.Printf("[DEBUG] Updating Router %s with options: %+v", routerId, updateOpts)
-
-		_, err = routers.Update(networkingClient, routerId, updateOpts).Extract()
-		if err != nil {
-			return fmterr.Errorf("error updating OpenTelekomCloud Neutron Router: %s", err)
-		}
-	} else {
-		return fmterr.Errorf("route did not exist already")
+	log.Printf("[DEBUG] Deleting OpenTelekomCloud Neutron Router %s route to %s via %s", routerID, dstCIDR, nextHop)
+	updateOpts := routers.UpdateOpts{
+		Routes: newRoute,
+	}
+	_, err = routers.Update(networkingClient, routerID, updateOpts).Extract()
+	if err != nil {
+		return diag.Errorf("Error updating OpenTelekomCloud Neutron Router: %s", err)
 	}
 
 	return nil
