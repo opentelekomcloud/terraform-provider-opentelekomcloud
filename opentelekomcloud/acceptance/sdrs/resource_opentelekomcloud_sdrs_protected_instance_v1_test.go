@@ -13,19 +13,35 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+func getProtectedInstancesResourceFunc(cfg *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
+	client, err := cfg.SdrsV1Client(env.OS_REGION_NAME)
+	if err != nil {
+		return nil, fmt.Errorf("error creating SDRS Client: %s", err)
+	}
+	return protectedinstances.Get(client, state.Primary.ID)
+}
+
 func TestAccSdrsProtectedInstanceV1_basic(t *testing.T) {
 	var instance protectedinstances.Instance
 	resourceName := "opentelekomcloud_sdrs_protected_instance_v1.instance_1"
 
+	rc := common.InitResourceCheck(
+		resourceName,
+		&instance,
+		getProtectedInstancesResourceFunc,
+	)
+
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccSdrsProtectedInstanceV1Destroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSdrsProtectedInstanceV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccSdrsProtectedInstanceV1Exists(resourceName, &instance),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceName, "name", "instance_create"),
 					resource.TestCheckResourceAttr(resourceName, "description", "some interesting description"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
@@ -34,7 +50,7 @@ func TestAccSdrsProtectedInstanceV1_basic(t *testing.T) {
 			{
 				Config: testAccSdrsProtectedInstanceV1Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccSdrsProtectedInstanceV1Exists(resourceName, &instance),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceName, "name", "instance_update"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
 				),
@@ -62,38 +78,6 @@ func testAccSdrsProtectedInstanceV1Destroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func testAccSdrsProtectedInstanceV1Exists(n string, instance *protectedinstances.Instance) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no ID is set")
-		}
-
-		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.SdrsV1Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
-		}
-
-		found, err := protectedinstances.Get(client, rs.Primary.ID)
-		if err != nil {
-			return err
-		}
-
-		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("SDRS protectiongroup not found")
-		}
-
-		*instance = *found
-
-		return nil
-	}
 }
 
 var testAccSdrsProtectedInstanceV1Basic = fmt.Sprintf(`
