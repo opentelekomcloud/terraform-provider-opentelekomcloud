@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v2/instances"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v2/instances/lifecycle"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -277,7 +277,7 @@ func resourceDmsInstancesV2Create(ctx context.Context, d *schema.ResourceData, m
 		sslEnable = true
 	}
 
-	createOpts := instances.CreateOpts{
+	createOpts := lifecycle.CreateDeprOpts{
 		Name:            d.Get("name").(string),
 		Description:     d.Get("description").(string),
 		Engine:          d.Get("engine").(string),
@@ -316,7 +316,7 @@ func resourceDmsInstancesV2Create(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	v, err := instances.Create(client, createOpts)
+	v, err := lifecycle.CreateDepr(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud DMSv2 instance: %w", err)
 	}
@@ -357,7 +357,7 @@ func resourceDmsInstancesV2Read(_ context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
-	v, err := instances.Get(client, d.Id())
+	v, err := lifecycle.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "DMS instance")
 	}
@@ -388,11 +388,11 @@ func resourceDmsInstancesV2Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("user_id", v.UserID),
 		d.Set("user_name", v.UserName),
 		d.Set("access_user", v.AccessUser),
-		d.Set("maintain_begin", v.MaintainBegin),
-		d.Set("maintain_end", v.MaintainEnd),
+		d.Set("maintain_begin", strings.TrimSuffix(v.MaintainBegin, ":00")),
+		d.Set("maintain_end", strings.TrimSuffix(v.MaintainEnd, ":00")),
 		d.Set("retention_policy", v.RetentionPolicy),
 		d.Set("enable_publicip", v.EnablePublicIP),
-		d.Set("public_connect_address", flattenPublicIps(v.PublicConnectionAddress)),
+		d.Set("public_connect_address", flattenPublicIps(v.PublicConnectAddress)),
 		d.Set("public_bandwidth", v.PublicBandWidth),
 		d.Set("ssl_enable", v.SslEnable),
 		d.Set("disk_encrypted_enable", v.DiskEncrypted),
@@ -427,7 +427,7 @@ func resourceDmsInstancesV2Update(ctx context.Context, d *schema.ResourceData, m
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	var updateOpts instances.UpdateOpts
+	var updateOpts lifecycle.UpdateOpts
 	if d.HasChange("name") {
 		updateOpts.Name = d.Get("name").(string)
 	}
@@ -448,7 +448,7 @@ func resourceDmsInstancesV2Update(ctx context.Context, d *schema.ResourceData, m
 		updateOpts.SecurityGroupID = securityGroupID
 	}
 
-	if _, err := instances.Update(client, d.Id(), updateOpts); err != nil {
+	if _, err := lifecycle.Update(client, d.Id(), updateOpts); err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud DMSv2 Instance: %s", err)
 	}
 
@@ -472,12 +472,12 @@ func resourceDmsInstancesV2Delete(ctx context.Context, d *schema.ResourceData, m
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	_, err = instances.Get(client, d.Id())
+	_, err = lifecycle.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "instance")
 	}
 
-	err = instances.Delete(client, d.Id())
+	err = lifecycle.Delete(client, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud DMSv2 instance: %w", err)
 	}
@@ -506,7 +506,7 @@ func resourceDmsInstancesV2Delete(ctx context.Context, d *schema.ResourceData, m
 
 func instancesV2StateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		v, err := instances.Get(client, instanceID)
+		v, err := lifecycle.Get(client, instanceID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return v, "DELETED", nil

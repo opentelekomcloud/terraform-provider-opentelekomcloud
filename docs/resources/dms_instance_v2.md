@@ -158,7 +158,7 @@ The following arguments are supported:
 
 * `available_zones` - (Required) Indicates the ID of an AZ. The parameter value can not be
   left blank or an empty array. For details, see section
-  [Querying AZ Information](https://docs.otc.t-systems.com/en-us/api/dms/dms-api-180514008.html).
+  [Querying AZ Information](https://docs.otc.t-systems.com/distributed-message-service/api-ref/apis_v2_recommended/other_apis/listing_az_information.html#listavailablezones).
 
 * `product_id` - (Required) Indicates a product ID.
 
