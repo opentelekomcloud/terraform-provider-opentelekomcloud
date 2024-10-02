@@ -15,6 +15,8 @@ Up-to-date reference of API arguments for ECS management you can get at
 
 Manages a V2 VM instance resource within OpenTelekomCloud.
 
+-> **NOTE:** Compute v2 API that are used in this resource aren't officially supported on SwissCloud.
+
 ## Example Usage
 
 ### Basic Instance

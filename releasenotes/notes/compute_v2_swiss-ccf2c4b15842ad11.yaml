@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ECS]** Flavor set fix for ``resource/opentelekomcloud_compute_instance_v2`` for SWISS (`#2670 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2670>`_)

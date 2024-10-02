@@ -619,7 +619,10 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 
 	flavorId, ok := server.Flavor["original_name"].(string)
 	if !ok {
-		return fmterr.Errorf("error setting OpenTelekomCloud server's flavor: %v", server.Flavor)
+		flavorId, ok = server.Flavor["id"].(string)
+		if !ok {
+			return fmterr.Errorf("error setting OpenTelekomCloud server's flavor: %v", server.Flavor)
+		}
 	}
 	mErr = multierror.Append(mErr,
 		d.Set("flavor_id", flavorId),

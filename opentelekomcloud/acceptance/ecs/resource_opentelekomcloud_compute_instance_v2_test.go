@@ -543,8 +543,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   description       = "my_desc"
   availability_zone = "%s"
 
-  image_name = "Standard_Debian_10_latest"
-  flavor_id  = "s2.medium.1"
+  image_name = "Standard_Debian_11_latest"
+  flavor_id  = "s3.large.2"
 
   metadata = {
     foo = "bar"
@@ -571,8 +571,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   description       = "my_desc"
   availability_zone = "%s"
 
-  image_name = "Standard_Debian_10_latest"
-  flavor_id  = "s2.medium.1"
+  image_name = "Standard_Debian_11_latest"
+  flavor_id  = "s3.large.2"
 
   metadata = {
     foo = "bar"
@@ -594,8 +594,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   availability_zone = "%s"
   description       = "my_desc_updated"
 
-  image_name = "Standard_Debian_10_latest"
-  flavor_id  = "s2.medium.1"
+  image_name = "Standard_Debian_11_latest"
+  flavor_id  = "s3.large.2"
 
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -637,8 +637,8 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgroup_2" {
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
-  image_name      = "Standard_Debian_10_latest"
-  flavor_id       = "s2.medium.1"
+  image_name      = "Standard_Debian_11_latest"
+  flavor_id       = "s3.large.2"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -674,8 +674,8 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgroup_2" {
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
 
-  image_name = "Standard_Debian_10_latest"
-  flavor_id  = "s2.medium.1"
+  image_name = "Standard_Debian_11_latest"
+  flavor_id  = "s3.large.2"
 
   security_groups = [
     "default",
@@ -727,7 +727,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "vol_1" {
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
-  flavor_id       = "s2.medium.1"
+  flavor_id       = "s3.large.2"
   security_groups = ["default"]
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -749,7 +749,7 @@ var testAccComputeV2InstanceBootFromVolume = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
-  flavor_id       = "s2.medium.1"
+  flavor_id       = "s3.large.2"
   security_groups = ["default"]
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -771,8 +771,8 @@ var testAccComputeV2InstanceFixedIP = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
-  image_name      = "Standard_Debian_10_latest"
-  flavor_id       = "s2.medium.1"
+  image_name      = "Standard_Debian_11_latest"
+  flavor_id       = "s3.large.2"
   security_groups = ["default"]
   network {
     uuid        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -787,8 +787,8 @@ var testAccComputeV2InstanceMetadata = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
-  image_name      = "Standard_Debian_10_latest"
-  flavor_id       = "s2.medium.1"
+  image_name      = "Standard_Debian_11_latest"
+  flavor_id       = "s3.large.2"
   security_groups = ["default"]
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -806,8 +806,8 @@ var testAccComputeV2InstanceMetadataUpdate = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
-  image_name      = "Standard_Debian_10_latest"
-  flavor_id       = "s2.medium.1"
+  image_name      = "Standard_Debian_11_latest"
+  flavor_id       = "s3.large.2"
   security_groups = ["default"]
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -825,8 +825,8 @@ var testAccComputeV2InstanceTimeout = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
-  image_name      = "Standard_Debian_10_latest"
-  flavor_id       = "s2.medium.1"
+  image_name      = "Standard_Debian_11_latest"
+  flavor_id       = "s3.large.2"
   security_groups = ["default"]
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -844,8 +844,8 @@ var testAccComputeV2InstanceAutoRecovery = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
-  image_name        = "Standard_Debian_10_latest"
-  flavor_id         = "s2.medium.1"
+  image_name        = "Standard_Debian_11_latest"
+  flavor_id         = "s3.large.2"
   security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
@@ -876,8 +876,8 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet" {
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
-  image_name      = "Standard_Debian_10_latest"
-  flavor_id       = "s2.medium.1"
+  image_name      = "Standard_Debian_11_latest"
+  flavor_id       = "s3.large.2"
   security_groups = ["default"]
 
   network {
@@ -896,8 +896,8 @@ var testAccComputeV2InstanceActive = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
-  image_name      = "Standard_Debian_10_latest"
-  flavor_id       = "s2.medium.1"
+  image_name      = "Standard_Debian_11_latest"
+  flavor_id       = "s3.large.2"
   security_groups = ["default"]
   power_state     = "active"
   network {
@@ -911,8 +911,8 @@ var testAccComputeV2InstanceShutoff = fmt.Sprintf(`
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
-  image_name      = "Standard_Debian_10_latest"
-  flavor_id       = "s2.medium.1"
+  image_name      = "Standard_Debian_11_latest"
+  flavor_id       = "s3.large.2"
   security_groups = ["default"]
   power_state     = "shutoff"
   network {
