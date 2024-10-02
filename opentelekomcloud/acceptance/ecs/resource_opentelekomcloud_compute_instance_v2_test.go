@@ -572,7 +572,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   availability_zone = "%s"
 
   image_name = "Standard_Debian_11_latest"
-  flavor_id  = "s3.large.2
+  flavor_id  = "s3.large.2"
 
   metadata = {
     foo = "bar"
