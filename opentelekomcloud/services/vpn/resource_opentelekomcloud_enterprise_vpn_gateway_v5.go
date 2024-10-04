@@ -380,8 +380,7 @@ func resourceEvpnGatewayRead(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func flattenEvpGatewayResponseEip(resp gateway.EipResp) []interface{} {
-	var rst []interface{}
-	rst = []interface{}{
+	rst := []interface{}{
 		map[string]interface{}{
 			"bandwidth_id":   resp.BandwidthId,
 			"bandwidth_name": resp.BandwidthName,
@@ -492,9 +491,9 @@ func resourceEvpnGatewayDelete(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func waitForGatewayActive(client *golangsdk.ServiceClient, Id string) resource.StateRefreshFunc {
+func waitForGatewayActive(client *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := gateway.Get(client, Id)
+		n, err := gateway.Get(client, id)
 		if err != nil {
 			return nil, "", err
 		}
