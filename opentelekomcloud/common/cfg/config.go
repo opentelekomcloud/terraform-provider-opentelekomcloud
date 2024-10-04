@@ -1175,6 +1175,13 @@ func (c *Config) TmsV1Client() (*golangsdk.ServiceClient, error) {
 	return service, nil
 }
 
+func (c *Config) EvpnV5Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewEVPNServiceV3(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func reconfigProjectName(src Config, projectName ProjectName) (*Config, error) {
 	config := &Config{}
 	if err := copier.Copy(config, &src); err != nil {
