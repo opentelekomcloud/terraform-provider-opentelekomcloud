@@ -7,6 +7,9 @@ description: |-
 Manages a Enterprise VPN Customer Gateway Service resource within OpenTelekomCloud.
 ---
 
+Up-to-date reference of API arguments for EVPN you can get at
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-network/api-ref/api_reference_enterprise_edition_vpn/apis_of_enterprise_edition_vpn/customer_gateway/index.html)
+
 # opentelekomcloud_enterprise_vpn_customer_gateway_v5
 
 Manages a VPN customer gateway resource within OpenTelekomCloud.
