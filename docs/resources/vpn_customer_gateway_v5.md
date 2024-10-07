@@ -68,7 +68,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `ip` - Specifies the IP address of the customer gateway.
 
-* `region` - Specifies the region in which to create the resource.
+* `region` - Specifies the region in which resource is created.
 
 ## Import
 

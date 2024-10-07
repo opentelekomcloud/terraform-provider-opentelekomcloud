@@ -222,7 +222,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `er_attachment_id` - The ER attachment ID.
 
-* `region` - Specifies the region in which to create the resource.
+* `region` - Specifies the region in which resource is created.
 
 * `eip1` - The master 1 IP in active-active VPN gateway or the master IP in active-standby VPN gateway.
   The [object](#GatewayGetResponseEip) structure is documented below.

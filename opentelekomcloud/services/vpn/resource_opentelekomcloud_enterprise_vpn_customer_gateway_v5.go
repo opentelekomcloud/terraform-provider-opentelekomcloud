@@ -50,14 +50,12 @@ func ResourceEnterpriseCustomerGateway() *schema.Resource {
 			},
 			"tags": common.TagsSchema(),
 			"created_at": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: `The create time.`,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"updated_at": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: `The update time.`,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"region": {
 				Type:     schema.TypeString,
