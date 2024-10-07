@@ -562,6 +562,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_vpnaas_endpoint_group_v2":                  vpn.ResourceVpnEndpointGroupV2(),
 			"opentelekomcloud_vpnaas_site_connection_v2":                 vpn.ResourceVpnSiteConnectionV2(),
 			"opentelekomcloud_enterprise_vpn_gateway_v5":                 vpn.ResourceEnterpriseVpnGateway(),
+			"opentelekomcloud_enterprise_vpn_customer_gateway_v5":        vpn.ResourceEnterpriseCustomerGateway(),
 			"opentelekomcloud_waf_alarm_notification_v1":                 waf.ResourceWafAlarmNotificationV1(),
 			"opentelekomcloud_waf_certificate_v1":                        waf.ResourceWafCertificateV1(),
 			"opentelekomcloud_waf_domain_v1":                             waf.ResourceWafDomainV1(),
