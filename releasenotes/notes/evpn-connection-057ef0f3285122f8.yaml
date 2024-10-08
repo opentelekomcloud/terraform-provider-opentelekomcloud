@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[EVPN]** Add new resource ``resource/opentelekomcloud_enterprise_vpn_connection_v5`` (`#2674 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2674>`_)
