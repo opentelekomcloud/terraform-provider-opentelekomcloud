@@ -7,7 +7,7 @@ description: |-
 Manages a Enterprise VPN Connection Monitoring Service resource within OpenTelekomCloud.
 ---
 
-Up-to-date reference of API arguments for DMS instance you can get at
+Up-to-date reference of API arguments for EVPN connection monitor you can get at
 [documentation portal](https://docs.otc.t-systems.com/virtual-private-network/api-ref/api_reference_enterprise_edition_vpn/apis_of_enterprise_edition_vpn/vpn_connection_monitoring/index.html)
 
 # opentelekomcloud_enterprise_vpn_connection_monitor_v5
