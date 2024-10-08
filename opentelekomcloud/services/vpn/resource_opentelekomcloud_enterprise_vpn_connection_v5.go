@@ -53,7 +53,7 @@ func ResourceEnterpriseConnection() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: common.SuppressCaseDiffs,
+				DiffSuppressFunc: common.SuppressCaseInsensitive,
 			},
 			"customer_gateway_id": {
 				Type:     schema.TypeString,
