@@ -104,3 +104,8 @@ func SuppressEmptyStringSHA(k, old, new string, d *schema.ResourceData) bool {
 	}
 	return false
 }
+
+// SuppressCaseDiffs Suppress changes if we get a string with or without cases
+func SuppressCaseDiffs(k, old, new string, d *schema.ResourceData) bool {
+	return strings.ToLower(old) == strings.ToLower(new)
+}
