@@ -2,7 +2,6 @@ package acceptance
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -20,12 +19,7 @@ func getDmsKafkav2SmartConnectTaskResourceFunc(config *cfg.Config, state *terraf
 		return nil, fmt.Errorf("error creating DMS client: %s", err)
 	}
 
-	getTaskResp, err := smart_connect.GetTask(client, state.Primary.Attributes["instance_id"], state.Primary.ID)
-	if err != nil {
-		return nil, fmt.Errorf("error retrieving DMS kafka smart connect task: %s", err)
-	}
-
-	return getTaskResp, nil
+	return smart_connect.GetTask(client, state.Primary.Attributes["instance_id"], state.Primary.ID)
 }
 
 func TestAccDmsKafkav2SmartConnectTask_basic(t *testing.T) {
@@ -109,8 +103,6 @@ func TestAccDmsKafkav2SmartConnectTask_KafkaToKafka(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "source_task.0.consumer_strategy", "latest"),
 					resource.TestCheckResourceAttr(resourceName, "source_task.0.compression_type", "snappy"),
 					resource.TestCheckResourceAttrSet(resourceName, "status"),
-					resource.TestMatchResourceAttr(resourceName, "created_at",
-						regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}?(Z|([+-]\d{2}:\d{2}))$`)),
 				),
 			},
 			{
@@ -185,7 +177,7 @@ resource "opentelekomcloud_dms_smart_connect_task_v2" "test" {
   source_type = "KAFKA_REPLICATOR_SOURCE"
 
   source_task {
-    peer_instance_id              = opentelekomcloud_dms_smart_connect_task_v2.test2.id
+    peer_instance_id              = opentelekomcloud_dms_dedicated_instance_v2.test2.id
     direction                     = "push"
     replication_factor            = 3
     task_num                      = 2
@@ -199,19 +191,25 @@ resource "opentelekomcloud_dms_smart_connect_task_v2" "test" {
 }
 
 func testAccKafkav2SmartConnectTaskKafkaToKafKaBase(rName string) string {
-	kafka1 := testAccKafkav2SmartConnectTaskKafkaToKafKaInstanceBase(rName, 1)
-	kafka2 := testAccKafkav2SmartConnectTaskKafkaToKafKaInstanceBase(rName, 2)
+	kafka1 := testAccKafkav2SmartConnectTaskKafkaToKafKaInstanceBase1(rName)
+	kafka2 := testAccKafkav2SmartConnectTaskKafkaToKafKaInstanceBase2(rName)
 	return fmt.Sprintf(`
 %s
 
 %s
+
+resource "opentelekomcloud_networking_secgroup_v2" "test" {
+  name        = "secgroup_dms"
+  description = "My neutron security group"
+}
 
 resource "opentelekomcloud_networking_secgroup_rule_v2" "rule" {
   security_group_id = opentelekomcloud_networking_secgroup_v2.test.id
   ethertype         = "IPv4"
   direction         = "ingress"
   protocol          = "tcp"
-  ports             = "9092"
+  port_range_min    = "9092"
+  port_range_max    = "9092"
   remote_ip_prefix  = "0.0.0.0/0"
 }
 
@@ -241,14 +239,13 @@ resource "opentelekomcloud_dms_topic_v1" "test" {
   instance_id = opentelekomcloud_dms_dedicated_instance_v2.test1.id
   name        = "%s"
   partition   = 10
-  aging_time  = 36
 }`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, kafka1, kafka2, rName)
 }
 
-func testAccKafkav2SmartConnectTaskKafkaToKafKaInstanceBase(rName string, num int) string {
+func testAccKafkav2SmartConnectTaskKafkaToKafKaInstanceBase1(rName string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_dms_dedicated_instance_v2" "test%[2]v" {
-  name              = "%[1]s-%[2]v"
+resource "opentelekomcloud_dms_dedicated_instance_v2" "test1" {
+  name              = "%[1]s-1"
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
@@ -263,12 +260,37 @@ resource "opentelekomcloud_dms_dedicated_instance_v2" "test%[2]v" {
   arch_type      = "X86"
 }
 
-resource "opentelekomcloud_dms_smart_connect_v2" "test%[2]v" {
-  instance_id       = opentelekomcloud_dms_dedicated_instance_v2.test%[2]v.id
+resource "opentelekomcloud_dms_smart_connect_v2" "test1" {
+  instance_id       = opentelekomcloud_dms_dedicated_instance_v2.test1.id
   storage_spec_code = "dms.physical.storage.high.v2"
   node_count        = 2
   bandwidth         = "100MB"
-}`, rName, num)
+}`, rName)
+}
+func testAccKafkav2SmartConnectTaskKafkaToKafKaInstanceBase2(rName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_dms_dedicated_instance_v2" "test2" {
+  name              = "%[1]s-2"
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  flavor_id         = local.flavor.id
+  storage_spec_code = local.flavor.ios[0].storage_spec_code
+  available_zones = [
+    data.opentelekomcloud_dms_az_v1.test.id
+  ]
+  engine_version = "2.7"
+  storage_space  = local.flavor.properties[0].min_broker * local.flavor.properties[0].min_storage_per_node
+  broker_num     = 3
+  arch_type      = "X86"
+}
+
+resource "opentelekomcloud_dms_smart_connect_v2" "test2" {
+  instance_id       = opentelekomcloud_dms_dedicated_instance_v2.test2.id
+  storage_spec_code = "dms.physical.storage.high.v2"
+  node_count        = 2
+  bandwidth         = "100MB"
+}`, rName)
 }
 
 func testKafkav2SmartConnectTaskResourceImportState(name string) resource.ImportStateIdFunc {

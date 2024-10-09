@@ -318,7 +318,7 @@ func buildSourceTaskRequestBody(rawParams []interface{}) *smart_connect.SmartCon
 	params := rawParams[0].(map[string]interface{})
 	rst := smart_connect.SmartConnectTaskSourceConfig{
 		CurrentClusterName: params["current_instance_alias"].(string),
-		ClusterName:        params["peer_instance_id"].(string),
+		ClusterName:        params["peer_instance_alias"].(string),
 		InstanceId:         params["peer_instance_id"].(string),
 		BootstrapServers: changeListToStringWithCommasSplit(
 			params["peer_instance_address"].(*schema.Set).List()),
@@ -400,7 +400,7 @@ func resourceDmsV2SmartConnectTaskRead(ctx context.Context, d *schema.ResourceDa
 }
 
 func flattenSourceTaskResponse(d *schema.ResourceData, rawParams smart_connect.SmartConnectTaskSourceConfig) []map[string]interface{} {
-	if reflect.DeepEqual(rawParams, map[string]interface{}{}) {
+	if reflect.DeepEqual(rawParams, smart_connect.SmartConnectTaskSourceConfig{}) {
 		return nil
 	}
 	rst := make([]map[string]interface{}, 1)
@@ -428,7 +428,7 @@ func flattenSourceTaskResponse(d *schema.ResourceData, rawParams smart_connect.S
 }
 
 func flattenSinkTaskResponse(d *schema.ResourceData, rawParams smart_connect.SmartConnectTaskSinkConfig) []map[string]interface{} {
-	if reflect.DeepEqual(rawParams, map[string]interface{}{}) {
+	if reflect.DeepEqual(rawParams, smart_connect.SmartConnectTaskSinkConfig{}) {
 		return nil
 	}
 	rst := make([]map[string]interface{}, 1)
