@@ -26,7 +26,6 @@ func getASLifecycleHookResourceFunc(cfg *cfg.Config, state *terraform.ResourceSt
 }
 
 func TestAccASV1LifecycleHook_basic(t *testing.T) {
-
 	var asLifecycleHook lifecyclehooks.LifecycleHook
 	rc := common.InitResourceCheck(
 		asLifecycleHookName,
@@ -79,7 +78,7 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   display_name = "The display name of topic_1"
 }
 
-resource "opentelekomcloud_as_configuration_v1" "as_config"{
+resource "opentelekomcloud_as_configuration_v1" "as_config" {
   scaling_configuration_name = "as_config_pol_v1"
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
@@ -92,7 +91,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
   }
 }
 
-resource "opentelekomcloud_as_group_v1" "as_group"{
+resource "opentelekomcloud_as_group_v1" "as_group" {
   scaling_group_name       = "as_group_pol_v1"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   delete_instances         = "yes"
@@ -106,14 +105,14 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
   vpc_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 }
 
-resource "opentelekomcloud_as_lifecycle_hook_v1" "as_lifecycle_hook"{
+resource "opentelekomcloud_as_lifecycle_hook_v1" "as_lifecycle_hook" {
   scaling_lifecycle_hook_name = "as_lifecycle_hook_v1"
-  scaling_group_id    = opentelekomcloud_as_group_v1.as_group.id
+  scaling_group_id            = opentelekomcloud_as_group_v1.as_group.id
   scaling_lifecycle_hook_type = "INSTANCE_TERMINATING"
-  default_result = "ABANDON"
-  default_timeout = 3600
-  notification_topic_urn = opentelekomcloud_smn_topic_v2.topic_1.id
-  notification_metadata = "This is a generic message"
+  default_result              = "ABANDON"
+  default_timeout             = 3600
+  notification_topic_urn      = opentelekomcloud_smn_topic_v2.topic_1.id
+  notification_metadata       = "This is a generic message"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_KEYPAIR_NAME)
 
@@ -132,7 +131,7 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   display_name = "The display name of topic_1"
 }
 
-resource "opentelekomcloud_as_configuration_v1" "as_config"{
+resource "opentelekomcloud_as_configuration_v1" "as_config" {
   scaling_configuration_name = "as_config_pol_v1"
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
@@ -145,7 +144,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
   }
 }
 
-resource "opentelekomcloud_as_group_v1" "as_group"{
+resource "opentelekomcloud_as_group_v1" "as_group" {
   scaling_group_name       = "as_group_pol_v1"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   delete_instances         = "yes"
@@ -159,13 +158,13 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
   vpc_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 }
 
-resource "opentelekomcloud_as_lifecycle_hook_v1" "as_lifecycle_hook"{
+resource "opentelekomcloud_as_lifecycle_hook_v1" "as_lifecycle_hook" {
   scaling_lifecycle_hook_name = "as_lifecycle_hook_v1"
-  scaling_group_id    = opentelekomcloud_as_group_v1.as_group.id
+  scaling_group_id            = opentelekomcloud_as_group_v1.as_group.id
   scaling_lifecycle_hook_type = "INSTANCE_TERMINATING"
-  default_result = "ABANDON"
-  default_timeout = 4800
-  notification_topic_urn = opentelekomcloud_smn_topic_v2.topic_1.id
-  notification_metadata = "This is a generic message"
+  default_result              = "ABANDON"
+  default_timeout             = 4800
+  notification_topic_urn      = opentelekomcloud_smn_topic_v2.topic_1.id
+  notification_metadata       = "This is a generic message"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_KEYPAIR_NAME)

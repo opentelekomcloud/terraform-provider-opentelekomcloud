@@ -21,12 +21,12 @@ Manages a V1 AS Lifecycle Hook resource within OpenTelekomCloud.
 ```hcl
 resource "opentelekomcloud_as_lifecycle_hook_v1" "hth_aslifecyclehook" {
   scaling_lifecycle_hook_name = "hth_aslifecyclehook"
-  scaling_group_id    = "4579f2f5-cbe8-425a-8f32-53dcb9d9053a"
+  scaling_group_id            = "4579f2f5-cbe8-425a-8f32-53dcb9d9053a"
   scaling_lifecycle_hook_type = "INSTANCE_TERMINATING"
-  default_result = "ABANDON"
-  default_timeout = 3600
-  notification_topic_urn = "urn:smn:regionId:b53e5554fad0494d96206fb84296510b:gsh"
-  notification_metadata = "Some customized notification"
+  default_result              = "ABANDON"
+  default_timeout             = 3600
+  notification_topic_urn      = "urn:smn:regionId:b53e5554fad0494d96206fb84296510b:gsh"
+  notification_metadata       = "Some customized notification"
 }
 ```
 
