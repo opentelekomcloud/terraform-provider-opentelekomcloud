@@ -181,3 +181,10 @@ func TestAccPreCheckFgsAgency(t *testing.T) {
 		t.Skip("OS_FGS_AGENCY_NAME must be set for FGS acceptance tests")
 	}
 }
+
+// lintignore:AT003
+func TestAccPreCheckOBS(t *testing.T) {
+	if env.OS_ACCESS_KEY == "" || env.OS_SECRET_KEY == "" {
+		t.Skip("HW_ACCESS_KEY and HW_SECRET_KEY must be set for OBS acceptance tests")
+	}
+}

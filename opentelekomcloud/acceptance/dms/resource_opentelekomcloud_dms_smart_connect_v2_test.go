@@ -88,8 +88,5 @@ resource "opentelekomcloud_dms_dedicated_instance_v2" "instance_1" {
 resource "opentelekomcloud_dms_smart_connect_v2" "test" {
   instance_id = opentelekomcloud_dms_dedicated_instance_v2.instance_1.id
   node_count  = 2
-}
-
-
-`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, instanceName)
+}`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, instanceName)
 }
