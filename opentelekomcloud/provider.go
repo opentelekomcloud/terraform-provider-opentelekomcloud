@@ -376,7 +376,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_apigw_throttling_policy_v2":                apigw.ResourceAPIThrottlingPolicyV2(),
 			"opentelekomcloud_apigw_throttling_policy_associate_v2":      apigw.ResourceAPIThrottlingPolicyAssociateV2(),
 			"opentelekomcloud_apigw_vpc_channel_v2":                      apigw.ResourceAPIGWVpcChannelV2(),
-			"opentelekomcloud_as_lifecycle_hooks_v1":                     as.ResourceASLifecycleHook(),
+			"opentelekomcloud_as_lifecycle_hook_v1":                      as.ResourceASLifecycleHook(),
 			"opentelekomcloud_as_configuration_v1":                       as.ResourceASConfiguration(),
 			"opentelekomcloud_as_group_v1":                               as.ResourceASGroup(),
 			"opentelekomcloud_as_policy_v1":                              as.ResourceASPolicy(),

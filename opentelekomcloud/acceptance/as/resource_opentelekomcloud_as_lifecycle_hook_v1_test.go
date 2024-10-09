@@ -15,7 +15,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-const asLifecycleHookName = "opentelekomcloud_as_lifecycle_hooks_v1.as_lifecycle_hook"
+const asLifecycleHookName = "opentelekomcloud_as_lifecycle_hook_v1.as_lifecycle_hook"
 
 func getASLifecycleHookResourceFunc(cfg *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
 	client, err := cfg.AutoscalingV1Client(env.OS_REGION_NAME)
@@ -106,7 +106,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
   vpc_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 }
 
-resource "opentelekomcloud_as_lifecycle_hooks_v1" "as_lifecycle_hook"{
+resource "opentelekomcloud_as_lifecycle_hook_v1" "as_lifecycle_hook"{
   scaling_lifecycle_hook_name = "as_lifecycle_hook_v1"
   scaling_group_id    = opentelekomcloud_as_group_v1.as_group.id
   scaling_lifecycle_hook_type = "INSTANCE_TERMINATING"
@@ -159,7 +159,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
   vpc_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 }
 
-resource "opentelekomcloud_as_lifecycle_hooks_v1" "as_lifecycle_hook"{
+resource "opentelekomcloud_as_lifecycle_hook_v1" "as_lifecycle_hook"{
   scaling_lifecycle_hook_name = "as_lifecycle_hook_v1"
   scaling_group_id    = opentelekomcloud_as_group_v1.as_group.id
   scaling_lifecycle_hook_type = "INSTANCE_TERMINATING"
