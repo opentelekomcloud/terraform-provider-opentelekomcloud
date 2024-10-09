@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[AS]** Add new resource ``opentelekomcloud_as_lifecycle_hook_v1`` (`#2680 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2680>`_)
