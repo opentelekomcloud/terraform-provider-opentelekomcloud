@@ -51,7 +51,6 @@ func ResourceASLifecycleHook() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"INSTANCE_TERMINATING", "INSTANCE_LAUNCHING",
 				}, true),
-				Description: "Specifies the lifecycle hook type. Options: INSTANCE_TERMINATING, INSTANCE_LAUNCHING",
 			},
 			"default_result": {
 				Type:     schema.TypeString,
@@ -60,22 +59,19 @@ func ResourceASLifecycleHook() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"ABANDON", "CONTINUE",
 				}, true),
-				Description: "Specifies the default lifecycle hook callback operation. Options: CONTINUE, ABANDON(Default)",
-				Default:     "ABANDON",
+				Default: "ABANDON",
 			},
 			"default_timeout": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Default:      3600,
 				ValidateFunc: validation.IntBetween(60, 86400),
-				Description:  "Timeout duration, in seconds.",
 				ForceNew:     false,
 			},
 			"notification_topic_urn": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    false,
-				Description: "URN of the SMN Topic",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: false,
 			},
 			"notification_metadata": {
 				Type:         schema.TypeString,
