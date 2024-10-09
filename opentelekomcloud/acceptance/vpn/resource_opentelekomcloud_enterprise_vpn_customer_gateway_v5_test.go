@@ -27,7 +27,7 @@ func TestAccCustomerGateway_basic(t *testing.T) {
 	var gw cgw.CustomerGateway
 	name := fmt.Sprintf("evpn_acc_cgw_%s", acctest.RandString(5))
 	updateName := fmt.Sprintf("evpn_acc_cgw_up_%s", acctest.RandString(5))
-
+	ip := "10.1.2.10"
 	rc := common.InitResourceCheck(
 		resourceEvpnCustomerGatewayName,
 		&gw,
@@ -40,7 +40,7 @@ func TestAccCustomerGateway_basic(t *testing.T) {
 		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testCustomerGateway_basic(name),
+				Config: testCustomerGateway_basic(name, ip),
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceEvpnCustomerGatewayName, "name", name),
@@ -50,7 +50,7 @@ func TestAccCustomerGateway_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testCustomerGateway_update(updateName),
+				Config: testCustomerGateway_update(updateName, ip),
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceEvpnCustomerGatewayName, "name", updateName),
@@ -68,28 +68,28 @@ func TestAccCustomerGateway_basic(t *testing.T) {
 	})
 }
 
-func testCustomerGateway_basic(name string) string {
+func testCustomerGateway_basic(name, ip string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_enterprise_vpn_customer_gateway_v5" "cgw_1" {
   name     = "%s"
-  id_value = "10.1.2.10"
+  id_value = "%s"
 
   tags = {
     key = "val"
     foo = "bar"
   }
-}`, name)
+}`, name, ip)
 }
 
-func testCustomerGateway_update(name string) string {
+func testCustomerGateway_update(name, ip string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_enterprise_vpn_customer_gateway_v5" "cgw_1" {
   name     = "%s"
-  id_value = "10.1.2.10"
+  id_value = "%s"
 
   tags = {
     key = "val"
     foo = "bar-update"
   }
-}`, name)
+}`, name, ip)
 }
