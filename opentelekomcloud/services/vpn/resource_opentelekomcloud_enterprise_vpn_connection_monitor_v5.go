@@ -82,7 +82,6 @@ func resourceEvpnConnectionMonitorRead(ctx context.Context, d *schema.ResourceDa
 	cm, err := connection_monitoring.Get(client, d.Id())
 	if err != nil {
 		return diag.Errorf("error retrieving OpenTelekomCloud EVPN connection monitor (%s): %s", d.Id(), err)
-
 	}
 
 	mErr := multierror.Append(
