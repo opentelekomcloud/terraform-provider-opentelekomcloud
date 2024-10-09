@@ -22,7 +22,7 @@ func getASLifecycleHookResourceFunc(cfg *cfg.Config, state *terraform.ResourceSt
 	if err != nil {
 		return nil, fmt.Errorf("error creating Autoscaling V1 Client: %s", err)
 	}
-	return lifecyclehooks.Get(client, state.Primary.Attributes["scaling_group_id"], state.Primary.ID)
+	return lifecyclehooks.Get(client, state.Primary.Attributes["scaling_group_id"], state.Primary.Attributes["scaling_lifecycle_hook_name"])
 }
 
 func TestAccASV1LifecycleHook_basic(t *testing.T) {
@@ -58,6 +58,11 @@ func TestAccASV1LifecycleHook_basic(t *testing.T) {
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(asLifecycleHookName, "default_timeout", "4800"),
 				),
+			},
+			{
+				ResourceName:      asLifecycleHookName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

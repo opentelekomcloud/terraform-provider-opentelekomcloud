@@ -26,12 +26,14 @@ func ResourceASLifecycleHook() *schema.Resource {
 		UpdateContext: resourceASLifecycleHookUpdate,
 		DeleteContext: resourceASLifecycleHookDelete,
 
+		Importer: &schema.ResourceImporter{
+			StateContext: common.ImportByPath("scaling_group_id", "scaling_lifecycle_hook_name"),
+		},
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 			"scaling_group_id": {
 				Type:     schema.TypeString,
@@ -117,7 +119,7 @@ func resourceASLifecycleHookCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 	log.Printf("[DEBUG] Create AS LifeCycle Hook %q Success!", asLifeCycleHook.LifecycleHookName)
 
-	d.SetId(asLifeCycleHook.LifecycleHookName)
+	d.SetId(fmt.Sprintf("%s/%s", asGroupId, asLifeCycleHook.LifecycleHookName))
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
 	return resourceASLifecycleHookRead(clientCtx, d, meta)
