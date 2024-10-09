@@ -65,3 +65,11 @@ The following extra attributes are exported:
 * `notification_topic_name` - (String) Name of the associated topic in SMN..
 
 * `create_time` - (String) Time of creation of the autoscaling lifecycle hook.
+
+## Import
+
+AS lifecycle hooks can be imported using their `scaling_lifecycle_hook_name` and related AS group ID, separated by a slash, e.g.
+
+```bash
+$ terraform import opentelekomcloud_as_lifecycle_hook_v1.test <scaling_group_id>/<scaling_lifecycle_hook_name>
+```
