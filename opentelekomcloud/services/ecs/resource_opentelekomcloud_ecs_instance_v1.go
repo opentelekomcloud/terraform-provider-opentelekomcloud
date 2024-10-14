@@ -221,7 +221,7 @@ func ResourceEcsInstanceV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"os_scheduler_hints": {
-				Type:     schema.TypeMap,
+				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: true,
 				Elem: &schema.Resource{
@@ -278,6 +278,7 @@ func resourceEcsInstanceV1Create(ctx context.Context, d *schema.ResourceData, me
 		DataVolumes:      resourceInstanceDataVolumesV1(d),
 		AdminPass:        d.Get("password").(string),
 		UserData:         []byte(d.Get("user_data").(string)),
+		SchedulerHints:   resourceInstanceOsSchedulerHints(d),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -390,8 +391,15 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("nics", nics),
 	)
 
-	schedulerHints := resourceInstanceSchedulerHintsV1(server.OsSchedulerHints)
-	mErr = multierror.Append(mErr, d.Set("os_scheduler_hints", schedulerHints))
+	schedulerHints := convertOsSchedulerHintsToSchedulerHintsV1(server.OsSchedulerHints)
+	osSchedulerHints := []map[string]interface{}{
+		{
+			"group":             schedulerHints.Group,
+			"tenancy":           schedulerHints.Tenancy,
+			"dedicated_host_id": schedulerHints.DedicatedHostID,
+		},
+	}
+	mErr = multierror.Append(mErr, d.Set("os_scheduler_hints", osSchedulerHints))
 
 	// save tags
 	resourceTags, err := tags.Get(client, "cloudservers", d.Id()).Extract()
@@ -633,8 +641,22 @@ func resourceInstanceDataVolumesV1(d *schema.ResourceData) []cloudservers.DataVo
 	return dataVolumes
 }
 
+func resourceInstanceOsSchedulerHints(d *schema.ResourceData) *cloudservers.SchedulerHints {
+	rawOsSchedulerHintsList := d.Get("os_scheduler_hints").(*schema.Set).List()
+	var schedulerHints cloudservers.SchedulerHints
+	if len(rawOsSchedulerHintsList) > 0 {
+		rawOsSchedulerHints := rawOsSchedulerHintsList[0].(map[string]interface{})
+		schedulerHints = cloudservers.SchedulerHints{
+			Group:           rawOsSchedulerHints["group"].(string),
+			Tenancy:         rawOsSchedulerHints["tenancy"].(string),
+			DedicatedHostID: rawOsSchedulerHints["dedicated_host_id"].(string),
+		}
+	}
+	return &schedulerHints
+}
+
 // Function to convert OsSchedulerHints struct to SchedulerHints
-func resourceInstanceSchedulerHintsV1(osSchedulerHints cloudservers.OsSchedulerHints) cloudservers.SchedulerHints {
+func convertOsSchedulerHintsToSchedulerHintsV1(osSchedulerHints cloudservers.OsSchedulerHints) cloudservers.SchedulerHints {
 	return cloudservers.SchedulerHints{
 		Group:           firstOrEmpty(osSchedulerHints.Group),
 		Tenancy:         firstOrEmpty(osSchedulerHints.Tenancy),
