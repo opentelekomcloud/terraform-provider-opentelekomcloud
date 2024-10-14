@@ -1,0 +1,6 @@
+---
+enhancements:
+  - |
+    **[CCE]** Add custom security group support for ``resource/opentelekomcloud_cce_cluster_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  - |
+    **[CCE]** Add custom security groups support for ``resource/opentelekomcloud_cce_node_pool_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)

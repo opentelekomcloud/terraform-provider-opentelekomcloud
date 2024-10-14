@@ -164,6 +164,11 @@ The following arguments are supported:
 
 * `subnet_id` - (Required) The Network ID of the subnet used to create the node. Changing this parameter will create a new cluster resource.
 
+* `security_group_id` - (Optional) Default worker node security group ID of the cluster. If specified, the cluster will be bound to the target security group.
+  Otherwise, the system will automatically create a default worker node security group for you.
+  The default worker node security group needs to allow access from certain ports to ensure normal communications.
+  Changing this parameter will create a new cluster resource.
+
 * `highway_subnet_id` - (Optional) The ID of the high speed network used to create bare metal nodes. Changing this parameter will create a new cluster resource.
 
 * `container_network_type` - (Required) Container network type.

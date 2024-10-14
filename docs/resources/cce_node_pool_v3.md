@@ -187,6 +187,10 @@ the AZ based on the AZ sequence. For more details see
 
 * `server_group_reference` - (Optional, String, ForceNew) ECS group ID. If this parameter is specified, all nodes in the node pool will be created in this ECS group.
 
+* `security_group_ids` - (Optional, List, ForceNew) Specifies the list of custom security group IDs for the node pool.
+  If specified, the nodes will be put in these security groups. When specifying a security group, do not modify
+  the rules of the port on which CCE running depends.
+
 * `priority` - (Optional, Int) Weight of a node pool. A node pool with a higher weight has a higher priority during scaling.
 
 * `user_tags` - (Optional, Map, ForceNew) Tag of a VM, key/value pair format. Changing this parameter will create a new resource.

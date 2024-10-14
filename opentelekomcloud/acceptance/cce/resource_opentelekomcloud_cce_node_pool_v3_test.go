@@ -126,6 +126,39 @@ func TestAccCCENodePoolsV3_agency(t *testing.T) {
 	})
 }
 
+func TestAccCCENodePoolsV3_SecurityGroupIds(t *testing.T) {
+	var nodePool nodepools.NodePool
+	rc := common.InitResourceCheck(
+		nodePoolResourceName,
+		&nodePool,
+		getNodePoolFunc,
+	)
+	t.Parallel()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.Server, Count: 2},
+		{Q: quotas.Volume, Count: 2},
+		{Q: quotas.VolumeSize, Count: 40 + 100},
+	}
+	qts = append(qts, ecs.QuotasForFlavor("s2.large.2")...)
+	quotas.BookMany(t, qts)
+	shared.BookCluster(t)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodePoolV3SecurityGroupIds,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "name", "opentelekomcloud-cce-node-pool"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCCENodePoolV3ImportStateIdFunc() resource.ImportStateIdFunc {
 	return func(s *terraform.State) (string, error) {
 		var clusterID string
@@ -609,3 +642,51 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   max_pods         = 16
   docker_base_size = 32
 }`, shared.DataSourceCluster, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
+
+var testAccCCENodePoolV3SecurityGroupIds = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_networking_secgroup_v2" "test" {
+  name        = "secgroup_cce_nodepool_1"
+  description = "My cce security group"
+}
+
+resource "opentelekomcloud_networking_secgroup_v2" "test2" {
+  name        = "secgroup_cce_nodepool_2"
+  description = "My cce modepool security group"
+}
+
+resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
+  cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
+  name               = "opentelekomcloud-cce-node-pool"
+  os                 = "EulerOS 2.9"
+  flavor             = "s2.large.2"
+  initial_node_count = 1
+  availability_zone  = "%s"
+  key_pair           = "%s"
+  runtime            = "containerd"
+
+  security_group_ids = [opentelekomcloud_networking_secgroup_v2.test.id, opentelekomcloud_networking_secgroup_v2.test2.id]
+
+  scale_enable             = false
+  min_node_count           = 1
+  max_node_count           = 3
+  scale_down_cooldown_time = 6
+  priority                 = 1
+
+  root_volume {
+    size       = 40
+    volumetype = "SSD"
+  }
+  data_volumes {
+    size       = 100
+    volumetype = "SSD"
+    extend_params = {
+      "useType" = "docker"
+    }
+  }
+
+  k8s_tags = {
+    "kubelet.kubernetes.io/namespace" = "muh"
+  }
+}`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)

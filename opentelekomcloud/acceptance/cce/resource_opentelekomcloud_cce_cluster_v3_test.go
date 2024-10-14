@@ -104,7 +104,9 @@ func TestAccCCEClusterV3_importBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEClusterV3Basic(clusterName),
+				Config: testAccCCEClusterV3BasicSG(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_id")),
 			},
 			{
 				ResourceName:      resourceClusterName,
@@ -321,6 +323,32 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   kube_proxy_mode          = "ipvs"
   enable_volume_encryption = true
 }
+`, common.DataSourceSubnet, clusterName)
+}
+
+func testAccCCEClusterV3BasicSG(clusterName string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name                     = "%s"
+  cluster_type             = "VirtualMachine"
+  flavor_id                = "cce.s1.small"
+  vpc_id                   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id                = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  container_network_type   = "overlay_l2"
+  kubernetes_svc_ip_range  = "10.247.0.0/16"
+  ignore_addons            = true
+  kube_proxy_mode          = "ipvs"
+  enable_volume_encryption = true
+  security_group_id        = opentelekomcloud_networking_secgroup_v2.test.id
+}
+
+resource "opentelekomcloud_networking_secgroup_v2" "test" {
+  name        = "secgroup_cce"
+  description = "My cce security group"
+}
+
 `, common.DataSourceSubnet, clusterName)
 }
 
