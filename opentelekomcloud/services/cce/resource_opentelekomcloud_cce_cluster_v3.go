@@ -419,10 +419,10 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 			Version:     d.Get("cluster_version").(string),
 			Description: d.Get("description").(string),
 			HostNetwork: clusters.HostNetworkSpec{
-				VpcId:         d.Get("vpc_id").(string),
-				SubnetId:      d.Get("subnet_id").(string),
-				HighwaySubnet: d.Get("highway_subnet_id").(string),
-				SecurityGroup: d.Get("security_group_id").(string),
+				VpcId:           d.Get("vpc_id").(string),
+				SubnetId:        d.Get("subnet_id").(string),
+				HighwaySubnet:   d.Get("highway_subnet_id").(string),
+				SecurityGroupId: d.Get("security_group_id").(string),
 			},
 			ContainerNetwork: clusters.ContainerNetworkSpec{
 				Mode: d.Get("container_network_type").(string),
@@ -526,7 +526,7 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("billing_mode", cluster.Spec.BillingMode),
 		d.Set("vpc_id", cluster.Spec.HostNetwork.VpcId),
 		d.Set("subnet_id", cluster.Spec.HostNetwork.SubnetId),
-		d.Set("security_group_id", cluster.Spec.HostNetwork.SecurityGroup),
+		d.Set("security_group_id", cluster.Spec.HostNetwork.SecurityGroupId),
 		d.Set("highway_subnet_id", cluster.Spec.HostNetwork.HighwaySubnet),
 		d.Set("container_network_type", cluster.Spec.ContainerNetwork.Mode),
 		d.Set("container_network_cidr", cluster.Spec.ContainerNetwork.Cidr),

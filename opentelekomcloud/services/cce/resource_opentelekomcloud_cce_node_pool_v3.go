@@ -358,7 +358,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 			NodeManagement: nodepools.NodeManagementSpec{
 				ServerGroupReference: d.Get("server_group_reference").(string),
 			},
-			CustomSecurityGroups: common.ExpandToStringList(d.Get("security_group_ids").([]interface{})),
+			CustomSecurityGroupIds: common.ExpandToStringList(d.Get("security_group_ids").([]interface{})),
 			NodeTemplate: nodes.Spec{
 				Flavor:      d.Get("flavor").(string),
 				Az:          d.Get("availability_zone").(string),
@@ -485,7 +485,7 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("scale_enable", s.Spec.Autoscaling.Enable),
 		d.Set("max_pods", s.Spec.NodeTemplate.ExtendParam.MaxPods),
 		d.Set("subnet_id", s.Spec.NodeTemplate.NodeNicSpec.PrimaryNic.SubnetId),
-		d.Set("security_group_ids", s.Spec.CustomSecurityGroups),
+		d.Set("security_group_ids", s.Spec.CustomSecurityGroupIds),
 		d.Set("root_volume", rootVolume),
 		d.Set("status", s.Status.Phase),
 	)
