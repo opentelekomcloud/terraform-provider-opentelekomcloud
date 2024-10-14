@@ -220,6 +220,30 @@ func ResourceEcsInstanceV1() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"os_scheduler_hints": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"group": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"tenancy": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"dedicated_host_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+					},
+				},
+			},
 			"tags": common.TagsSchema(),
 			"auto_recovery": {
 				Type:     schema.TypeBool,
@@ -365,6 +389,9 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 	mErr = multierror.Append(mErr,
 		d.Set("nics", nics),
 	)
+
+	schedulerHints := resourceInstanceSchedulerHintsV1(server.OsSchedulerHints)
+	mErr = multierror.Append(mErr, d.Set("os_scheduler_hints", schedulerHints))
 
 	// save tags
 	resourceTags, err := tags.Get(client, "cloudservers", d.Id()).Extract()
@@ -604,6 +631,24 @@ func resourceInstanceDataVolumesV1(d *schema.ResourceData) []cloudservers.DataVo
 		dataVolumes = append(dataVolumes, volRequest)
 	}
 	return dataVolumes
+}
+
+// Function to convert OsSchedulerHints struct to SchedulerHints
+func resourceInstanceSchedulerHintsV1(osSchedulerHints cloudservers.OsSchedulerHints) cloudservers.SchedulerHints {
+	return cloudservers.SchedulerHints{
+		Group:           firstOrEmpty(osSchedulerHints.Group),
+		Tenancy:         firstOrEmpty(osSchedulerHints.Tenancy),
+		DedicatedHostID: firstOrEmpty(osSchedulerHints.DedicatedHostID),
+	}
+
+}
+
+// Helper function to return the first element or an empty string if the slice is empty
+func firstOrEmpty(arr []string) string {
+	if len(arr) > 0 {
+		return arr[0]
+	}
+	return ""
 }
 
 func resourceInstanceSecGroupsV1(d *schema.ResourceData) []cloudservers.SecurityGroup {
