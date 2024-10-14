@@ -340,8 +340,8 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   auto_recovery               = true
   delete_disks_on_termination = true
   os_scheduler_hints {
-    group = opentelekomcloud_compute_servergroup_v2.sg_1.id
-	tenancy = "shared"
+    group   = opentelekomcloud_compute_servergroup_v2.sg_1.id
+    tenancy = "shared"
   }
 
   tags = {
@@ -385,8 +385,8 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   delete_disks_on_termination = true
 
   os_scheduler_hints {
-    group = opentelekomcloud_compute_servergroup_v2.sg_1.id
-	tenancy = "shared"
+    group   = opentelekomcloud_compute_servergroup_v2.sg_1.id
+    tenancy = "shared"
   }
 
   tags = {

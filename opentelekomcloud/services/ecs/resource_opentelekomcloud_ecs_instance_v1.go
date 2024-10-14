@@ -662,7 +662,6 @@ func convertOsSchedulerHintsToSchedulerHintsV1(osSchedulerHints cloudservers.OsS
 		Tenancy:         firstOrEmpty(osSchedulerHints.Tenancy),
 		DedicatedHostID: firstOrEmpty(osSchedulerHints.DedicatedHostID),
 	}
-
 }
 
 // Helper function to return the first element or an empty string if the slice is empty
