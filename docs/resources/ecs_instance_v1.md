@@ -172,6 +172,38 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
 -> `user_data` can come from a variety of sources: inline, read in from the `file`
 function, or the `template_cloudinit_config` resource.
 
+### Instance with scheduler hints
+
+```hcl
+resource "opentelekomcloud_compute_servergroup_v2" "sg_1" {
+  name     = "sg_1"
+  policies = ["anti-affinity"]
+}
+
+resource "opentelekomcloud_ecs_instance_v1" "basic" {
+  name     = "server_1"
+  image_id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
+  flavor   = "s2.large.2"
+  vpc_id   = "8eed4fc7-e5e5-44a2-b5f2-23b3e5d46235"
+
+  nics {
+    network_id = "55534eaa-533a-419d-9b40-ec427ea7195a"
+  }
+
+  availability_zone = "eu-de-01"
+  key_name          = "KeyPair-test"
+
+  os_scheduler_hints {
+    group   = opentelekomcloud_compute_servergroup_v2.sg_1.id
+    tenancy = "shared"
+  }
+
+  tags = {
+    muh = "kuh"
+  }
+}
+```
+
 ### Instance with encrypted disks
 
 ```hcl
@@ -292,6 +324,13 @@ The `data_disks` block supports:
 
 * `snapshot_id` - (Optional) Specifies the snapshot ID or ID of the original data disk contained in the full-ECS image.
   Changing this creates a new server.
+
+The `os_scheduler_hints` (Optional) block supports:
+* `group` - (Optional) Specifies the ECS group ID in UUID format.
+
+* `tenancy` - (Optional) Creates ECSs on a dedicated or shared host. Available options are: `dedicated ` or `shared`.
+
+* `dedicated_host_id` - (Optional) Specifies the dedicated host ID. A Dedicated Host ID takes effect only when `tenancy` is set to `dedicated`.
 
 ## Attributes Reference
 
