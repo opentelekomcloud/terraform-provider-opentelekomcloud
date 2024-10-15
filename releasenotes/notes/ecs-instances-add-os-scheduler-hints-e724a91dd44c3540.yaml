@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[ECS]** Add ``os_scheduler_hints`` in ``resource/opentelekomcloud_ecs_instance_v1`` (`#2683 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2683>`_)

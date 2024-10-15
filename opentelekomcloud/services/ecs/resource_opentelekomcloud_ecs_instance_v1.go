@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
@@ -220,6 +221,33 @@ func ResourceEcsInstanceV1() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"os_scheduler_hints": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"group": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"tenancy": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"dedicated", "shared",
+							}, true),
+						},
+						"dedicated_host_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+					},
+				},
+			},
 			"tags": common.TagsSchema(),
 			"auto_recovery": {
 				Type:     schema.TypeBool,
@@ -254,6 +282,7 @@ func resourceEcsInstanceV1Create(ctx context.Context, d *schema.ResourceData, me
 		DataVolumes:      resourceInstanceDataVolumesV1(d),
 		AdminPass:        d.Get("password").(string),
 		UserData:         []byte(d.Get("user_data").(string)),
+		SchedulerHints:   resourceInstanceOsSchedulerHints(d),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -365,6 +394,16 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 	mErr = multierror.Append(mErr,
 		d.Set("nics", nics),
 	)
+
+	schedulerHints := convertOsSchedulerHintsToSchedulerHintsV1(server.OsSchedulerHints)
+	osSchedulerHints := []map[string]interface{}{
+		{
+			"group":             schedulerHints.Group,
+			"tenancy":           schedulerHints.Tenancy,
+			"dedicated_host_id": schedulerHints.DedicatedHostID,
+		},
+	}
+	mErr = multierror.Append(mErr, d.Set("os_scheduler_hints", osSchedulerHints))
 
 	// save tags
 	resourceTags, err := tags.Get(client, "cloudservers", d.Id()).Extract()
@@ -604,6 +643,37 @@ func resourceInstanceDataVolumesV1(d *schema.ResourceData) []cloudservers.DataVo
 		dataVolumes = append(dataVolumes, volRequest)
 	}
 	return dataVolumes
+}
+
+func resourceInstanceOsSchedulerHints(d *schema.ResourceData) *cloudservers.SchedulerHints {
+	rawOsSchedulerHintsList := d.Get("os_scheduler_hints").(*schema.Set).List()
+	var schedulerHints cloudservers.SchedulerHints
+	if len(rawOsSchedulerHintsList) > 0 {
+		rawOsSchedulerHints := rawOsSchedulerHintsList[0].(map[string]interface{})
+		schedulerHints = cloudservers.SchedulerHints{
+			Group:           rawOsSchedulerHints["group"].(string),
+			Tenancy:         rawOsSchedulerHints["tenancy"].(string),
+			DedicatedHostID: rawOsSchedulerHints["dedicated_host_id"].(string),
+		}
+	}
+	return &schedulerHints
+}
+
+// Function to convert OsSchedulerHints struct to SchedulerHints
+func convertOsSchedulerHintsToSchedulerHintsV1(osSchedulerHints cloudservers.OsSchedulerHints) cloudservers.SchedulerHints {
+	return cloudservers.SchedulerHints{
+		Group:           firstOrEmpty(osSchedulerHints.Group),
+		Tenancy:         firstOrEmpty(osSchedulerHints.Tenancy),
+		DedicatedHostID: firstOrEmpty(osSchedulerHints.DedicatedHostID),
+	}
+}
+
+// Helper function to return the first element or an empty string if the slice is empty
+func firstOrEmpty(arr []string) string {
+	if len(arr) > 0 {
+		return arr[0]
+	}
+	return ""
 }
 
 func resourceInstanceSecGroupsV1(d *schema.ResourceData) []cloudservers.SecurityGroup {

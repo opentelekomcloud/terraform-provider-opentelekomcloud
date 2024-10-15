@@ -314,6 +314,12 @@ var testAccEcsV1InstanceBasic = fmt.Sprintf(`
 
 %s
 
+
+resource "opentelekomcloud_compute_servergroup_v2" "sg_1" {
+  name     = "sg_1"
+  policies = ["anti-affinity"]
+}
+
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
@@ -333,6 +339,10 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   availability_zone           = "%s"
   auto_recovery               = true
   delete_disks_on_termination = true
+  os_scheduler_hints {
+    group   = opentelekomcloud_compute_servergroup_v2.sg_1.id
+    tenancy = "shared"
+  }
 
   tags = {
     muh = "value-create"
@@ -347,6 +357,11 @@ var testAccEcsV1InstanceUpdate = fmt.Sprintf(`
 %s
 
 %s
+
+resource "opentelekomcloud_compute_servergroup_v2" "sg_1" {
+  name     = "sg_1"
+  policies = ["anti-affinity"]
+}
 
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_updated"
@@ -368,6 +383,11 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   availability_zone           = "%s"
   auto_recovery               = false
   delete_disks_on_termination = true
+
+  os_scheduler_hints {
+    group   = opentelekomcloud_compute_servergroup_v2.sg_1.id
+    tenancy = "shared"
+  }
 
   tags = {
     muh = "value-update"
