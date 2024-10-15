@@ -243,29 +243,29 @@ resource opentelekomcloud_ecs_instance_v1 ecs {
 
 The following arguments are supported:
 
-* `name` - (Required) A unique name for the instance.
+* `name` - (Required, String) A unique name for the instance.
 
-* `image_id` - (Required) The ID of the desired image for the server. Changing this creates a new server.
+* `image_id` - (Required, String, ForceNew) The ID of the desired image for the server. Changing this creates a new server.
 
-* `flavor` - (Required) The name of the desired flavor for the server.
+* `flavor` - (Required, String) The name of the desired flavor for the server.
 
-* `user_data` - (Optional) The user data to provide when launching the instance.
+* `user_data` - (Optional, String, ForceNew) The user data to provide when launching the instance.
   Changing this creates a new server.
 
-* `password` - (Optional) The administrative password to assign to the server.
+* `password` - (Optional, String, ForceNew) The administrative password to assign to the server.
   Changing this creates a new server.
 
-* `key_name` - (Optional) The name of a key pair to put on the server. The key
+* `key_name` - (Optional, String, ForceNew) The name of a key pair to put on the server. The key
   pair must already be created and associated with the tenant's account.
   Changing this creates a new server.
 
-* `vpc_id` - (Required) The ID of the desired VPC for the server. Changing this creates a new server.
+* `vpc_id` - (Required, String, ForceNew) The ID of the desired VPC for the server. Changing this creates a new server.
 
-* `nics` - (Required) An array of one or more networks to attach to the
+* `nics` - (Required, List, ForceNew) An array of one or more networks to attach to the
   instance. The nics object structure is documented below. Changing this
   creates a new server.
 
-* `system_disk_type` - (Optional) The system disk type of the server. For HANA, HL1, and HL2 ECSs use `co-p1` and `uh-l1` disks.
+* `system_disk_type` - (Optional, String, ForceNew) The system disk type of the server. For HANA, HL1, and HL2 ECSs use `co-p1` and `uh-l1` disks.
   Changing this creates a new server. Options are limited depending on AZ. Available options are:
   * `SATA`: common I/O disk type. Available for all AZs.
   * `SAS`: high I/O disk type. Available for all AZs.
@@ -274,40 +274,42 @@ The following arguments are supported:
   * `uh-l1`: ultra-high I/O(latency-optimized) disk type.
   * `ESSD`: extreme SSD disk type.
 
-* `system_disk_size` - (Optional) The system disk size in GB, The value range is 1 to 1024.
+* `system_disk_size` - (Optional, Integer, ForceNew) The system disk size in GB, The value range is 1 to 1024.
   Changing this creates a new server.
 
-* `data_disks` - (Optional) An array of one or more data disks to attach to the
+* `data_disks` - (Optional, List, ForceNew) An array of one or more data disks to attach to the
   instance. The `data_disks` object structure is documented below. Changing this
   creates a new server.
 
-* `system_disk_kms_id` - (Optional) The Encryption KMS ID of the system disk. Changing this
+* `system_disk_kms_id` - (Optional, String, ForceNew) The Encryption KMS ID of the system disk. Changing this
   creates a new server.
 
-* `security_groups` - (Optional) An array of one or more security group IDs
+* `security_groups` - (Optional, List) An array of one or more security group IDs
   to associate with the server. If this parameter is left blank, the `default`
   security group is bound to the ECS by default.
 
-* `availability_zone` - (Required) The availability zone in which to create the server.
+* `availability_zone` - (Required, String, ForceNew) The availability zone in which to create the server.
   Changing this creates a new server.
 
-* `auto_recovery` - (Optional) Whether configure automatic recovery of an instance.
+* `os_scheduler_hints` - (Optional, Map, ForceNew) Schedules ECSs, for example, by configuring an ECS group. The `os_scheduler_hints` object structure is documented below. Changing this creates a new server.
 
-* `delete_disks_on_termination` - (Optional) Delete the data disks upon termination of the instance.
+* `auto_recovery` - (Optional, Boolean) Whether configure automatic recovery of an instance.
+
+* `delete_disks_on_termination` - (Optional, Boolean) Delete the data disks upon termination of the instance.
   Defaults to false. Changing this creates a new server.
 
-* `tags` - (Optional) Tags key/value pairs to associate with the instance.
+* `tags` - (Optional, Map) Tags key/value pairs to associate with the instance.
 
 The `nics` block supports:
 
-* `network_id` - (Required) The network UUID to attach to the server. Changing this creates a new server.
+* `network_id` - (Required, String, ForceNew) The network UUID to attach to the server. Changing this creates a new server.
 
-* `ip_address` - (Optional) Specifies a fixed IPv4 address to be used on this
+* `ip_address` - (Optional, String, ForceNew) Specifies a fixed IPv4 address to be used on this
   network. Changing this creates a new server.
 
 The `data_disks` block supports:
 
-* `type` - (Required) The data disk type of the server. For HANA, HL1, and HL2 ECSs use `co-p1` and `uh-l1` disks.
+* `type` - (Required, String, ForceNew) The data disk type of the server. For HANA, HL1, and HL2 ECSs use `co-p1` and `uh-l1` disks.
   Changing this creates a new server. Options are limited depending on AZ. Available options are:
   * `SATA`: common I/O disk type. Available for all AZs.
   * `SAS`: high I/O disk type. Available for all AZs.
@@ -316,35 +318,35 @@ The `data_disks` block supports:
   * `uh-l1`: ultra-high I/O(latency-optimized) disk type.
   * `ESSD`: extreme SSD disk type.
 
-* `size` - (Required) The size of the data disk in GB. The value range is 10 to 32768.
+* `size` - (Required, String, ForceNew) The size of the data disk in GB. The value range is 10 to 32768.
   Changing this creates a new server.
 
-* `kms_id` - (Optional) The Encryption KMS ID of the data disk. Changing this
+* `kms_id` - (Optional, String, ForceNew) The Encryption KMS ID of the data disk. Changing this
   creates a new server.
 
-* `snapshot_id` - (Optional) Specifies the snapshot ID or ID of the original data disk contained in the full-ECS image.
+* `snapshot_id` - (Optional, String, ForceNew) Specifies the snapshot ID or ID of the original data disk contained in the full-ECS image.
   Changing this creates a new server.
 
-The `os_scheduler_hints` (Optional) block supports:
-* `group` - (Optional) Specifies the ECS group ID in UUID format.
+The `os_scheduler_hints` block supports:
+* `group` - (Optional, String, ForceNew) Specifies the ECS group ID in UUID format.
 
-* `tenancy` - (Optional) Creates ECSs on a dedicated or shared host. Available options are: `dedicated ` or `shared`.
+* `tenancy` - (Optional, String, ForceNew) Creates ECSs on a dedicated or shared host. Available options are: `dedicated ` or `shared`.
 
-* `dedicated_host_id` - (Optional) Specifies the dedicated host ID. A Dedicated Host ID takes effect only when `tenancy` is set to `dedicated`.
+* `dedicated_host_id` - (Optional, String, ForceNew) Specifies the dedicated host ID. A Dedicated Host ID takes effect only when `tenancy` is set to `dedicated`.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `system_disk_id` - The ID of the system disk.
+* `system_disk_id` - (String) The ID of the system disk.
 
-* `nics/mac_address` - The MAC address of the NIC on that network.
+* `nics/mac_address` - (String) The MAC address of the NIC on that network.
 
-* `nics/type` - The type of the address of the NIC on that network.
+* `nics/type` - (String) The type of the address of the NIC on that network.
 
-* `nics/port_id` - The port ID of the NIC on that network.
+* `nics/port_id` - (String) The port ID of the NIC on that network.
 
-* `volumes_attached/id` - The ID of the data disk.
+* `volumes_attached/id` - (String) The ID of the data disk.
 
 ## Import
 
