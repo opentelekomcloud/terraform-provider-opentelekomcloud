@@ -17,11 +17,25 @@ import (
 
 const resourceInstanceV1Name = "opentelekomcloud_ecs_instance_v1.instance_1"
 
+func getEcsInstanceFunc(config *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
+	client, err := config.ComputeV1Client(env.OS_REGION_NAME)
+	if err != nil {
+		return nil, fmt.Errorf("error creating ECS v1 client: %s", err)
+	}
+	return cloudservers.Get(client, state.Primary.ID).Extract()
+}
+
 func TestAccEcsV1InstanceBasic(t *testing.T) {
 	var instance cloudservers.CloudServer
 	qts := serverQuotas(10+4, "s2.medium.1")
 	t.Parallel()
 	quotas.BookMany(t, qts)
+
+	rc := common.InitResourceCheck(
+		resourceInstanceV1Name,
+		&instance,
+		getEcsInstanceFunc,
+	)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -31,7 +45,7 @@ func TestAccEcsV1InstanceBasic(t *testing.T) {
 			{
 				Config: testAccEcsV1InstanceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "auto_recovery", "true"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "security_groups.#", "1"),
@@ -41,13 +55,23 @@ func TestAccEcsV1InstanceBasic(t *testing.T) {
 			{
 				Config: testAccEcsV1InstanceUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "auto_recovery", "false"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "security_groups.#", "1"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tags.muh", "value-update"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tags.emp", ""),
 				),
+			},
+			{
+				ResourceName:      resourceInstanceV1Name,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"password",
+					"delete_disks_on_termination",
+					"data_disks",
+				},
 			},
 		},
 	})
@@ -59,6 +83,12 @@ func TestAccEcsV1InstanceIp(t *testing.T) {
 	t.Parallel()
 	quotas.BookMany(t, qts)
 
+	rc := common.InitResourceCheck(
+		resourceInstanceV1Name,
+		&instance,
+		getEcsInstanceFunc,
+	)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -67,7 +97,7 @@ func TestAccEcsV1InstanceIp(t *testing.T) {
 			{
 				Config: testAccEcsV1InstanceIp,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "auto_recovery", "false"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "security_groups.#", "1"),
@@ -85,6 +115,12 @@ func TestAccEcsV1InstanceDeleted(t *testing.T) {
 	t.Parallel()
 	quotas.BookMany(t, qts)
 
+	rc := common.InitResourceCheck(
+		resourceInstanceV1Name,
+		&instance,
+		getEcsInstanceFunc,
+	)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -92,7 +128,7 @@ func TestAccEcsV1InstanceDeleted(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEcsV1InstanceBasic,
-				Check:  testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
+				Check:  rc.CheckResourceExists(),
 			},
 			{
 				PreConfig: func() {
@@ -120,33 +156,6 @@ func testAccEcsV1InstanceDeleted(t *testing.T, id string) {
 	th.AssertNoErr(t, err)
 
 	th.AssertNoErr(t, cloudservers.WaitForJobSuccess(client, 120, jobResponse.JobID))
-}
-
-func TestAccEcsV1Instance_import(t *testing.T) {
-	t.Parallel()
-	qts := serverQuotas(10+4, "s2.medium.1")
-	quotas.BookMany(t, qts)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccEcsV1InstanceBasic,
-			},
-			{
-				ResourceName:      resourceInstanceV1Name,
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"password",
-					"delete_disks_on_termination",
-					"data_disks",
-				},
-			},
-		},
-	})
 }
 
 func TestAccEcsV1InstanceDiskTypeValidation(t *testing.T) {
@@ -205,6 +214,12 @@ func TestAccEcsV1InstanceEncryption(t *testing.T) {
 		t.Skip("OS_KMS_ID is not set")
 	}
 
+	rc := common.InitResourceCheck(
+		resourceInstanceV1Name,
+		&instance,
+		getEcsInstanceFunc,
+	)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -213,7 +228,7 @@ func TestAccEcsV1InstanceEncryption(t *testing.T) {
 			{
 				Config: testAccEcsV1InstanceDataVolumeEncryption,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "data_disks.0.kms_id", env.OS_KMS_ID),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "system_disk_kms_id", env.OS_KMS_ID),
 				),
@@ -228,6 +243,12 @@ func TestAccEcsV1InstanceVolumeAttach(t *testing.T) {
 	t.Parallel()
 	quotas.BookMany(t, qts)
 
+	rc := common.InitResourceCheck(
+		resourceInstanceV1Name,
+		&instance,
+		getEcsInstanceFunc,
+	)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -236,7 +257,7 @@ func TestAccEcsV1InstanceVolumeAttach(t *testing.T) {
 			{
 				Config: testAccEcsV1InstanceAttachVolume,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "auto_recovery", "true"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "volumes_attached.#", "0"),
@@ -245,7 +266,7 @@ func TestAccEcsV1InstanceVolumeAttach(t *testing.T) {
 			{
 				Config: testAccEcsV1InstanceAttachVolumeRepeat,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "auto_recovery", "true"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "volumes_attached.#", "1"),
@@ -276,37 +297,6 @@ func testAccCheckEcsV1InstanceDestroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func testAccCheckEcsV1InstanceExists(n string, instance *cloudservers.CloudServer) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no ID is set")
-		}
-
-		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.ComputeV1Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %w", err)
-		}
-
-		found, err := cloudservers.Get(client, rs.Primary.ID).Extract()
-		if err != nil {
-			return err
-		}
-
-		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("instance not found")
-		}
-		*instance = *found
-
-		return nil
-	}
 }
 
 var testAccEcsV1InstanceBasic = fmt.Sprintf(`
@@ -641,7 +631,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
 
   nics {
     network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-    ip_address = "10.0.2.32"
+    ip_address = cidrhost(data.opentelekomcloud_vpc_subnet_v1.shared_subnet.cidr, 32)
   }
 
 }
@@ -673,7 +663,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
 
   nics {
     network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-    ip_address = "10.0.2.32"
+    ip_address = cidrhost(data.opentelekomcloud_vpc_subnet_v1.shared_subnet.cidr, 32)
   }
 
 }

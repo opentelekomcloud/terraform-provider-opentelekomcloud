@@ -224,6 +224,7 @@ func ResourceEcsInstanceV1() *schema.Resource {
 			"os_scheduler_hints": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
