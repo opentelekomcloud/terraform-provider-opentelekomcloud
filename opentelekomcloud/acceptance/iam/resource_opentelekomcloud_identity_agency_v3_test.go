@@ -37,6 +37,14 @@ func TestAccIdentityV3Agency_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAgencyName, "delegated_domain_name", "op_svc_evs"),
 				),
 			},
+			{
+				Config: testAccIdentityV3AgencyUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3AgencyExists(resourceAgencyName, &a),
+					resource.TestCheckResourceAttr(resourceAgencyName, "name", "test"),
+					resource.TestCheckResourceAttr(resourceAgencyName, "delegated_domain_name", "op_svc_evs"),
+				),
+			},
 		},
 	})
 }
@@ -123,9 +131,38 @@ resource "opentelekomcloud_identity_agency_v3" "agency_1" {
   name                  = "test"
   delegated_domain_name = "op_svc_evs"
   project_role {
-    project = "%s"
+    project = "%[1]s"
     roles = [
       "KMS Administrator",
+      "CCE ReadOnlyAccess",
     ]
   }
+  project_role {
+    all_projects = true
+    roles = [
+      "CES Administrator",
+      "ER ReadOnlyAccess",
+    ]
+  }
+}`, env.OS_TENANT_NAME)
+
+var testAccIdentityV3AgencyUpdate = fmt.Sprintf(`
+resource "opentelekomcloud_identity_agency_v3" "agency_1" {
+  name                  = "test"
+  delegated_domain_name = "op_svc_evs"
+  project_role {
+    project = "%[1]s"
+    roles = [
+      "CCE ReadOnlyAccess",
+      "WAF FullAccess",
+    ]
+  }
+  project_role {
+    all_projects = true
+    roles = [
+      "CES Administrator",
+      "DRS FullWithOutDeletePermission",
+    ]
+  }
+
 }`, env.OS_TENANT_NAME)
