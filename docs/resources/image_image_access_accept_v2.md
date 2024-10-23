@@ -20,8 +20,7 @@ Accept a shared image membershipship proposal within the current project.
 
 ```hcl
 data "opentelekomcloud_images_image_v2" "rancheros" {
-  name       = "RancherOS"
-  visibility = "shared"
+  name = "RancherOS"
 }
 
 resource "opentelekomcloud_images_image_access_accept_v2" "rancheros_member" {
@@ -35,11 +34,11 @@ resource "opentelekomcloud_images_image_access_accept_v2" "rancheros_member" {
 
 The following arguments are supported:
 
-* `image_id` - (Required) The proposed image ID.
+* `image_id` - (Required, String, ForceNew) Specifies the ID of the image.
 
-* `member_id` - (Required) The member ID, e.g. the target project ID.
+* `member_id` - (Required, String, ForceNew) Specifies the IDs of the target projects.
 
-* `status` - (Required) The membership proposal status. Can either be `accepted`, `rejected` or `pending`.
+* `status` - (Required, String) The membership proposal status. Can either be `accepted`, `rejected` or `pending`.
 
 ## Attributes Reference
 

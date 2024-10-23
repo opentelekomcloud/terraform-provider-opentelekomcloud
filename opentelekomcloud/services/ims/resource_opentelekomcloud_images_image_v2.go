@@ -165,9 +165,8 @@ func ResourceImagesImageV2() *schema.Resource {
 			"visibility": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     false,
+				Computed:     true,
 				ValidateFunc: resourceImagesImageV2ValidateVisibility,
-				Default:      "private",
 			},
 		},
 	}
