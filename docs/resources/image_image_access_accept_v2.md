@@ -20,7 +20,7 @@ Accept a shared image membershipship proposal within the current project.
 
 ```hcl
 data "opentelekomcloud_images_image_v2" "rancheros" {
-  name       = "RancherOS"
+  name = "RancherOS"
 }
 
 resource "opentelekomcloud_images_image_access_accept_v2" "rancheros_member" {
