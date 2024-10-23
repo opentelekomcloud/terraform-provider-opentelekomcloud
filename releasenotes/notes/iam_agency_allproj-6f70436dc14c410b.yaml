@@ -1,4 +1,4 @@
 ---
 enhancements:
   - |
-    **[IAM]** Added `all_projects` setting for ``resource/opentelekomcloud_identity_agency_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[IAM]** Added `all_projects` setting for ``resource/opentelekomcloud_identity_agency_v3`` (`#2689 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2689>`_)
