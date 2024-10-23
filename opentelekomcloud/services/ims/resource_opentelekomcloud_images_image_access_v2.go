@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/image/v2/members"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -20,7 +19,6 @@ func ResourceImagesImageAccessV2() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceImagesImageAccessV2Create,
 		ReadContext:   resourceImagesImageAccessV2Read,
-		UpdateContext: resourceImagesImageAccessV2Update,
 		DeleteContext: resourceImagesImageAccessV2Delete,
 
 		Importer: &schema.ResourceImporter{
@@ -40,11 +38,7 @@ func ResourceImagesImageAccessV2() *schema.Resource {
 			},
 			"status": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"pending", "accepted", "rejected",
-				}, false),
 			},
 			"created_at": {
 				Type:     schema.TypeString,
@@ -92,27 +86,6 @@ func resourceImagesImageAccessV2Create(ctx context.Context, d *schema.ResourceDa
 	id := fmt.Sprintf("%s/%s", imageID, memberID)
 	d.SetId(id)
 
-	status := d.Get("status").(string)
-	if status != "" {
-		_, err := members.Update(client, members.UpdateOpts{
-			ImageId:  imageID,
-			MemberId: memberID,
-			Status:   status,
-		})
-		if err != nil {
-			return fmterr.Errorf("error updating the image status: %w", err)
-		}
-		state := &resource.StateChangeConf{
-			Target:  []string{status},
-			Refresh: waitForImageRequestStatus(client, imageID, memberID, status),
-			Timeout: 1 * time.Minute,
-		}
-		_, err = state.WaitForStateContext(ctx)
-		if err != nil {
-			return fmterr.Errorf("error waiting for `%s` status: %w", status, err)
-		}
-	}
-
 	return resourceImagesImageAccessV2Read(ctx, d, meta)
 }
 
@@ -150,40 +123,6 @@ func resourceImagesImageAccessV2Read(_ context.Context, d *schema.ResourceData, 
 	}
 
 	return nil
-}
-
-func resourceImagesImageAccessV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*cfg.Config)
-	client, err := config.ImageV2Client(config.GetRegion(d))
-	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
-	}
-
-	imageID, memberID, err := ResourceImagesImageAccessV2ParseID(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	status := d.Get("status").(string)
-	_, err = members.Update(client, members.UpdateOpts{
-		ImageId:  imageID,
-		MemberId: memberID,
-		Status:   status,
-	})
-	if err != nil {
-		return fmterr.Errorf("error updating share request: %w", err)
-	}
-	stateCluster := &resource.StateChangeConf{
-		Target:  []string{status},
-		Refresh: waitForImageRequestStatus(client, imageID, memberID, status),
-		Timeout: 1 * time.Minute,
-	}
-	_, err = stateCluster.WaitForStateContext(ctx)
-	if err != nil {
-		return fmterr.Errorf("error waiting for `%s` status: %w", status, err)
-	}
-
-	return resourceImagesImageAccessV2Read(ctx, d, meta)
 }
 
 func resourceImagesImageAccessV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

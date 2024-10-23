@@ -16,11 +16,9 @@ Manages members for the shared OpenTelekomCloud Glance Image within the source p
 
 ## Example Usage
 
-### Unprivileged user
-
-Create a shared image and propose a membership to the `bed6b6cbb86a4e2d8dc2735c2f1000e4` project ID.
-
 ```hcl
+variable "member_id" {}
+
 resource "opentelekomcloud_images_image_v2" "rancheros" {
   name             = "RancherOS"
   image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
@@ -30,26 +28,7 @@ resource "opentelekomcloud_images_image_v2" "rancheros" {
 
 resource "opentelekomcloud_images_image_access_v2" "rancheros_member" {
   image_id  = opentelekomcloud_images_image_v2.rancheros.id
-  member_id = "bed6b6cbb86a4e2d8dc2735c2f1000e4"
-}
-```
-
-### Privileged user
-
-Create a shared image and set a membership to the `bed6b6cbb86a4e2d8dc2735c2f1000e4` project ID.
-
-```hcl
-resource "opentelekomcloud_images_image_v2" "rancheros" {
-  name             = "RancherOS"
-  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-  container_format = "bare"
-  disk_format      = "qcow2"
-}
-
-resource "opentelekomcloud_images_image_access_v2" "rancheros_member" {
-  image_id  = opentelekomcloud_images_image_v2.rancheros.id
-  member_id = "bed6b6cbb86a4e2d8dc2735c2f1000e4"
-  status    = "accepted"
+  member_id = var.member_id
 }
 ```
 
@@ -57,14 +36,10 @@ resource "opentelekomcloud_images_image_access_v2" "rancheros_member" {
 
 The following arguments are supported:
 
-* `member_id` - (Required) The member ID, e.g. the target project ID. Optional
+* `member_id` - (Required, String, ForceNew) The member ID, e.g. the target project ID. Optional
   for admin accounts. Defaults to the current scope project ID.
 
-* `image_id` - (Required) The proposed image ID.
-
-* `status` - (Required) The member proposal status. Optional if admin wants to force the member
-  proposal acceptance. Can either be `accepted`, `rejected` or `pending`. Defaults to
-  `pending`. Forbidden for non-admin users.
+* `image_id` - (Required, String, ForceNew) The proposed image ID.
 
 ## Attributes Reference
 

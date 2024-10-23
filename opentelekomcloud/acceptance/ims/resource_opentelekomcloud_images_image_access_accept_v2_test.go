@@ -18,11 +18,10 @@ import (
 func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 	var member ims2.Member
 	acceptResourceName := "opentelekomcloud_images_image_access_accept_v2.accept_1"
-	privateImageID := os.Getenv("OS_PRIVATE_IMAGE_ID")
 	shareProjectID := os.Getenv("OS_PROJECT_ID_2")
 	shareProjectName := os.Getenv("OS_PROJECT_NAME_2")
 	shareCloudID := os.Getenv("OS_CLOUD_2")
-	if privateImageID == "" || shareProjectID == "" || shareCloudID == "" || shareProjectName == "" {
+	if shareProjectID == "" || shareCloudID == "" || shareProjectName == "" {
 		t.Skip("OS_PRIVATE_IMAGE_ID or OS_PROJECT_ID_2 or OS_CLOUD_2 are empty, but test requires")
 	}
 
@@ -32,7 +31,7 @@ func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckImagesImageAccessAcceptV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageAccessAcceptV2Basic(privateImageID, shareProjectID),
+				Config: testAccImagesImageAccessAcceptV2Basic(shareProjectID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageAccessV2Exists(acceptResourceName, &member),
 					resource.TestCheckResourceAttrPtr(acceptResourceName, "status", &member.Status),
@@ -40,12 +39,17 @@ func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccImagesImageAccessAcceptV2Update(privateImageID, shareProjectID),
+				Config: testAccImagesImageAccessAcceptV2Update(shareProjectID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageAccessV2Exists(acceptResourceName, &member),
 					resource.TestCheckResourceAttrPtr(acceptResourceName, "status", &member.Status),
 					resource.TestCheckResourceAttr(acceptResourceName, "status", "rejected"),
 				),
+			},
+			{
+				ResourceName:      acceptResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -80,48 +84,62 @@ func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccImagesImageAccessAcceptV2Basic(privateImageID, projectToShare string) string {
+func testAccImagesImageAccessAcceptV2Basic(projectToShare string) string {
 	return fmt.Sprintf(`
+resource "opentelekomcloud_images_image_v2" "rancheros" {
+  name             = "RancherOS"
+  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format = "bare"
+  disk_format      = "qcow2"
+}
+
 resource "opentelekomcloud_images_image_access_v2" "access_1" {
   provider = "opentelekomcloud"
 
-  image_id  = "%[1]s"
-  member_id = "%[2]s"
+  image_id  = opentelekomcloud_images_image_v2.rancheros.id
+  member_id = "%[1]s"
 }
 
-%[3]s
+%[2]s
 
 resource "opentelekomcloud_images_image_access_accept_v2" "accept_1" {
-  provider = "%[4]s"
+  provider = "%[3]s"
 
   depends_on = [opentelekomcloud_images_image_access_v2.access_1]
 
-  image_id  = "%[1]s"
-  member_id = "%[2]s"
+  image_id  = opentelekomcloud_images_image_v2.rancheros.id
+  member_id = "%[1]s"
   status    = "accepted"
 }
-`, privateImageID, projectToShare, common.AlternativeProviderConfig, common.AlternativeProviderAlias)
+`, projectToShare, common.AlternativeProviderConfig, common.AlternativeProviderAlias)
 }
 
-func testAccImagesImageAccessAcceptV2Update(privateImageID, projectToShare string) string {
+func testAccImagesImageAccessAcceptV2Update(projectToShare string) string {
 	return fmt.Sprintf(`
+resource "opentelekomcloud_images_image_v2" "rancheros" {
+  name             = "RancherOS"
+  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format = "bare"
+  disk_format      = "qcow2"
+}
+
 resource "opentelekomcloud_images_image_access_v2" "access_1" {
   provider = "opentelekomcloud"
 
-  image_id  = "%[1]s"
-  member_id = "%[2]s"
+  image_id  = opentelekomcloud_images_image_v2.rancheros.id
+  member_id = "%[1]s"
 }
 
-%[3]s
+%[2]s
 
 resource "opentelekomcloud_images_image_access_accept_v2" "accept_1" {
-  provider = "%[4]s"
+  provider = "%[3]s"
 
   depends_on = [opentelekomcloud_images_image_access_v2.access_1]
 
-  image_id  = "%[1]s"
-  member_id = "%[2]s"
+  image_id  = opentelekomcloud_images_image_v2.rancheros.id
+  member_id = "%[1]s"
   status    = "rejected"
 }
-`, privateImageID, projectToShare, common.AlternativeProviderConfig, common.AlternativeProviderAlias)
+`, projectToShare, common.AlternativeProviderConfig, common.AlternativeProviderAlias)
 }
