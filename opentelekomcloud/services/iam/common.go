@@ -70,3 +70,12 @@ func buildStatementsSet(role *policies.Policy) ([]interface{}, error) {
 
 	return statements, nil
 }
+
+func findKeyByValue(m map[string]string, searchValue string) (string, bool) {
+	for key, value := range m {
+		if value == searchValue {
+			return key, true
+		}
+	}
+	return "", false
+}

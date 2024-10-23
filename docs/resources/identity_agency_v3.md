@@ -23,7 +23,17 @@ resource "opentelekomcloud_identity_agency_v3" "agency" {
   delegated_domain_name = "***"
   project_role {
     project = "eu-de"
-    roles   = ["KMS Administrator", ]
+    roles = [
+      "KMS Administrator",
+      "CCE ReadOnlyAccess",
+    ]
+  }
+  project_role {
+    all_projects = true
+    roles = [
+      "CES Administrator",
+      "ER ReadOnlyAccess",
+    ]
   }
   domain_roles = ["Anti-DDoS Administrator", ]
 }
@@ -35,25 +45,29 @@ resource "opentelekomcloud_identity_agency_v3" "agency" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of agency. The name is a string of 1 to 64
+* `name` - (Required, String, ForceNew) The name of agency. The name is a string of 1 to 64
   characters.
 
-* `description` - (Optional) Provides supplementary information about the
+* `description` - (Optional, String, ForceNew) Provides supplementary information about the
   agency. The value is a string of 0 to 255 characters.
 
-* `delegated_domain_name` - (Required) The name of delegated domain.
+* `delegated_domain_name` - (Required, String) The name of delegated domain.
 
-* `project_role` - (Optional) An array of roles and projects which are used to
+* `project_role` - (Optional, List) An array of roles and projects which are used to
   grant permissions to agency on project. The structure is documented below.
 
-* `domain_roles` - (optional) An array of role names which stand for the
+* `domain_roles` - (Optional, List) An array of role names which stand for the
   permissions to be granted to agency on domain.
 
 The `project_role` block supports:
 
-* `project` - (Required) The name of project
+* `project` - (Optional, String) The name of project
+  Either `project` or `all_projects` must be provided to specify single `project_role` element.
 
-* `roles` - (Required) An array of role names
+* `roles` - (Required, List) An array of role names
+
+* `all_projects` - (Optional, Bool) Whether roles are applied to all projects.
+  Either `project` or `all_projects` must be provided to specify single `project_role` element.
 
 -> **Note**: One or both of `project_role` and `domain_roles` must be input when creating an agency.
 
