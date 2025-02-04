@@ -99,6 +99,7 @@ func ResourceCTSEventNotificationV3() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"condition": {
@@ -119,22 +120,18 @@ func ResourceCTSEventNotificationV3() *schema.Resource {
 			"notification_id": {
 				Type:     schema.TypeString,
 				Computed: true,
-				ForceNew: true,
 			},
 			"notification_type": {
 				Type:     schema.TypeString,
 				Computed: true,
-				ForceNew: true,
 			},
 			"project_id": {
 				Type:     schema.TypeString,
 				Computed: true,
-				ForceNew: true,
 			},
 			"create_time": {
 				Type:     schema.TypeFloat,
 				Computed: true,
-				ForceNew: true,
 			},
 		},
 	}
