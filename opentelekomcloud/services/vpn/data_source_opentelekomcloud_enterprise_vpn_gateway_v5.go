@@ -2,6 +2,7 @@ package vpn
 
 import (
 	"context"
+	"log"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -176,9 +177,13 @@ func dataSourceEvpnGatewayRead(ctx context.Context, d *schema.ResourceData, meta
 	if err != nil {
 		return diag.Errorf("error retrieving OpenTelekomCloud EVPN gateway (%s): %s", gatewayId, err)
 	}
+	d.SetId(gw.ID)
+
+	log.Printf("[DEBUG] Retrieved Enterprise VPN Gateway %s: %#v", d.Id(), gw)
 
 	mErr := multierror.Append(
 		nil,
+		d.Set("id", gw.ID),
 		d.Set("region", config.GetRegion(d)),
 		d.Set("attachment_type", gw.AttachmentType),
 		d.Set("availability_zones", gw.AvailabilityZoneIds),
