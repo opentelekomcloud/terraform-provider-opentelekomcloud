@@ -165,6 +165,30 @@ func ResourceCssClusterV1() *schema.Resource {
 					},
 				},
 			},
+			"backup_strategy": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"start_time": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"keep_days": {
+							Type:     schema.TypeInt,
+							Required: true,
+							ForceNew: true,
+						},
+						"prefix": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+					},
+				},
+			},
 			"tags": {
 				Type:         schema.TypeMap,
 				Optional:     true,
@@ -199,8 +223,25 @@ func ResourceCssClusterV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"backup_available": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		},
 	}
+}
+
+func resourceCssClusterCreateBackupStrategy(backupRaw []interface{}) *clusters.BackupStrategy {
+	if len(backupRaw) == 0 {
+		return nil
+	}
+	raw := backupRaw[0].(map[string]interface{})
+	opts := clusters.BackupStrategy{
+		Prefix:  raw["prefix"].(string),
+		Period:  raw["start_time"].(string),
+		KeepDay: raw["keep_days"].(int),
+	}
+	return &opts
 }
 
 func resourceCssClusterV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -231,6 +272,7 @@ func resourceCssClusterV1Create(ctx context.Context, d *schema.ResourceData, met
 		},
 		AuthorityEnabled: d.Get("enable_authority").(bool),
 		AdminPassword:    d.Get("admin_pass").(string),
+		BackupStrategy:   resourceCssClusterCreateBackupStrategy(d.Get("backup_strategy").([]interface{})),
 		Tags:             common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 	}
 	if enable, ok := d.GetOk("enable_https"); ok {
@@ -289,6 +331,7 @@ func resourceCssClusterV1Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("nodes", extractNodes(cluster)),
 		d.Set("datastore", extractDatastore(cluster)),
 		d.Set("tags", common.TagsToMap(cluster.Tags)),
+		d.Set("backup_available", cluster.BackupAvailable),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
