@@ -43,7 +43,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 }
 ```
 
-### Creating OpenSearch v1.3.6
+### Creating OpenSearch v1.3.6 with backup strategy
 
 ```hcl
 data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
@@ -60,6 +60,13 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_https     = true
   enable_authority = true
   admin_pass       = "QwertyUI!"
+
+  backup_strategy {
+    keep_days  = 7
+    start_time = "00:00 GMT+08:00"
+    prefix     = "snapshot"
+  }
+
   node_config {
     flavor = "css.medium.8"
     network_info {
@@ -111,6 +118,8 @@ contain at least `3` of the following character types: uppercase letters,
 lowercase letters, numbers, and special characters (`~!@#$%^&*()-_=+\\|[{}];:,<.>/?`).
 
 * `expect_node_num` - (Optional) Number of cluster instances. The value range is `1` to `32`.
+
+* `backup_strategy` - (Optional) Specifies the advanced backup policy. Structure is documented below.
 
 * `tags` - (Optional) Tags key/value pairs to associate with the cluster.
 
@@ -173,6 +182,18 @@ The `datastore` block contains:
 * `version` - Engine version. The value can be `7.6.2`, `7.9.3`, `7.10.2` or `1.3.6` for `opensearch`.
   The default value is `7.6.2`.
 
+The `backup_strategy` block supports:
+
+* `start_time` - (Required) Specifies the time when a snapshot is automatically created everyday. Snapshots can
+  only be created on the hour. The time format is the time followed by the time zone, specifically, **HH:mm z**. In the
+  format, **HH:mm** refers to the hour time and z refers to the time zone. For example, "00:00 GMT+08:00"
+  and "01:00 GMT+08:00".
+
+* `keep_days` - (Required) Specifies the number of days to retain the generated snapshots. Snapshots are reserved
+  for seven days by default.
+
+* `prefix` - (Required) Specifies the prefix of the snapshot that is automatically created.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -182,6 +203,8 @@ In addition to the arguments listed above, the following computed attributes are
 * `endpoint` - Indicates the IP address and port number of the user used to access the VPC.
 
 * `nodes` - List of node objects. Structure is documented below.
+
+* `backup_available` - Indicates whether the snapshot function is enabled.
 
 * `updated` - Last modification time of a cluster. The format is ISO8601: `CCYY-MM-DDThh:mm:ss`.
 
