@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -12,12 +13,16 @@ import (
 const dataVPNEnterpriseCustomerGatewayName = "data.opentelekomcloud_enterprise_vpn_customer_gateway_v5.gw_1"
 
 func TestAccVpnEnterpriseCustomerGatewayV5DataSource_basic(t *testing.T) {
+	gatewayId := os.Getenv("OS_VPN_CUSTOMER_GATEWAY_ID")
+	if gatewayId == "" {
+		t.Skip("Customer Gateway ID is required for the test")
+	}
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceVpnEnterpriseCustomerGatewayV5ConfigBasic,
+				Config: testAccDataSourceVpnEnterpriseCustomerGatewayV5ConfigBasic(gatewayId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVPNEnterpriseCustomerGatewayDataSourceID(dataVPNEnterpriseCustomerGatewayName),
 					resource.TestCheckResourceAttrSet(dataVPNEnterpriseCustomerGatewayName, "name"),
@@ -43,8 +48,10 @@ func testAccCheckVPNEnterpriseCustomerGatewayDataSourceID(n string) resource.Tes
 	}
 }
 
-const testAccDataSourceVpnEnterpriseCustomerGatewayV5ConfigBasic = `
+func testAccDataSourceVpnEnterpriseCustomerGatewayV5ConfigBasic(gatewayId string) string {
+	return fmt.Sprintf(`
 data "opentelekomcloud_enterprise_vpn_customer_gateway_v5" "gw_1" {
-  id = "a44a0a38-8118-4829-95e4-838b349f3a36"
+  id = "%s"
 }
-`
+`, gatewayId)
+}
