@@ -259,16 +259,18 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error waiting for Image: %s", err)
 	}
 
+	addonOpts := make([]ims.UpdateImageOpts, 0)
 	hwFirmwareType := d.Get("hw_firmware_type").(string)
 	if hwFirmwareType != "" {
-		updateOpts := []ims.UpdateImageOpts{
-			{
-				Op:    "add",
-				Path:  "/hw_firmware_type",
-				Value: hwFirmwareType,
-			},
-		}
-		_, err = images.Update(imageClient, d.Id(), updateOpts)
+		addonOpts = append(addonOpts, ims.UpdateImageOpts{
+			Op:    "add",
+			Path:  "/hw_firmware_type",
+			Value: hwFirmwareType,
+		})
+	}
+
+	if len(addonOpts) > 0 {
+		_, err = images.Update(imageClient, d.Id(), addonOpts)
 		if err != nil {
 			return fmterr.Errorf("error updating image: %s", err)
 		}
