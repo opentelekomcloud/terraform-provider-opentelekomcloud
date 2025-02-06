@@ -123,6 +123,22 @@ func ResourceImagesImageV2() *schema.Resource {
 				ForceNew: false,
 			},
 
+			"hw_firmware_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"bios", "uefi",
+				}, true),
+			},
+			"vif_multiqueue_enabled": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"owner": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -243,6 +259,21 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error waiting for Image: %s", err)
 	}
 
+	hwFirmwareType := d.Get("hw_firmware_type").(string)
+	if hwFirmwareType != "" {
+		updateOpts := []ims.UpdateImageOpts{
+			{
+				Op:    "add",
+				Path:  "/hw_firmware_type",
+				Value: hwFirmwareType,
+			},
+		}
+		_, err = images.Update(imageClient, d.Id(), updateOpts)
+		if err != nil {
+			return fmterr.Errorf("error updating image: %s", err)
+		}
+	}
+
 	d.Partial(false)
 
 	return resourceImagesImageV2Read(ctx, d, meta)
@@ -279,6 +310,9 @@ func resourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("min_ram_mb", img.MinRam),
 		d.Set("file", img.File),
 		d.Set("name", img.Name),
+		d.Set("hw_firmware_type", img.HwFirmwareType),
+		d.Set("vif_multiqueue_enabled", img.HwVifMultiqueueEnabled),
+		d.Set("enterprise_project_id", img.EnterpriseProjectId),
 		d.Set("protected", img.Protected),
 		d.Set("tags", img.Tags),
 		d.Set("visibility", img.Visibility),
@@ -314,6 +348,14 @@ func resourceImagesImageV2Update(ctx context.Context, d *schema.ResourceData, me
 			Op:    "replace",
 			Path:  "/name",
 			Value: d.Get("name").(string),
+		})
+	}
+
+	if d.HasChange("hw_firmware_type") {
+		updateOpts = append(updateOpts, ims.UpdateImageOpts{
+			Op:    "replace",
+			Path:  "/hw_firmware_type",
+			Value: d.Get("hw_firmware_type").(string),
 		})
 	}
 
