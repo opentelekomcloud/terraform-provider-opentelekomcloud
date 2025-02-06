@@ -18,10 +18,11 @@ Manages a V2 Image resource within OpenTelekomCloud Glance.
 
 ```hcl
 resource "opentelekomcloud_images_image_v2" "rancheros" {
-  name             = "RancherOS"
-  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-  container_format = "bare"
-  disk_format      = "qcow2"
+  name                   = "RancherOS"
+  image_source_url       = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format       = "bare"
+  disk_format            = "qcow2"
+  hw_firmware_type       = "uefi"
 
   tags = ["foo.bar", "tag.value"]
 }
@@ -69,8 +70,6 @@ The following arguments are supported:
   visibility depends upon the configuration of the OpenTelekomCloud cloud.
 
 * `hw_firmware_type` - (Optional, String) Specifies the boot mode. The value can be `bios` or `uefi`.
-
-* `vif_multiqueue_enabled` - (Optional, String, ForceNew) Specifies whether the image supports NIC multi-queue. The value can be `true` or `false`.
 
 -> **Note:** The `properties` attribute handling in the gophercloud library is currently buggy
 and needs to be fixed before being implemented in this resource.

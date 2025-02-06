@@ -231,10 +231,6 @@ func DataSourceImagesImageV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"vif_multiqueue_enabled": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -340,7 +336,6 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 		d.Set("support_xen_gpu_type", img.SupportXenGpuType),
 		d.Set("support_xen_hana", img.SupportXenHana),
 		d.Set("hw_firmware_type", img.HwFirmwareType),
-		d.Set("vif_multiqueue_enabled", img.HwVifMultiqueueEnabled),
 	)
 
 	if mErr.ErrorOrNil() != nil {
