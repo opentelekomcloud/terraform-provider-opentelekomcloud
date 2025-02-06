@@ -147,8 +147,6 @@ to choose the most recent one.
 
 * `updated_at` - The date the image was modified.
 
-* `vif_multiqueue_enabled` - Indicates whether the image supports NIC multi-queue. The value can be `true` or `false`.
+* `vif_multiqueue_enabled` - Indicates whether the image supports NIC multi-queue. The value can be `true` or `false` when value is set during image creation.
 
-* `enterprise_project_id` - Specifies the enterprise project that the image belongs to.
-
-* `hw_firmware_type` - Specifies the boot mode. The value can be `bios` or `uefi`.
+* `hw_firmware_type` - Specifies the boot mode. The value can be `bios` or `uefi` if set during image creation.
