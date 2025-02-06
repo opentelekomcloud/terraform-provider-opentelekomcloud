@@ -132,13 +132,12 @@ func ResourceImagesImageV2() *schema.Resource {
 			},
 			"vif_multiqueue_enabled": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"true", "false",
+				}, true),
 			},
-			"enterprise_project_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"owner": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -268,6 +267,14 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 			Value: hwFirmwareType,
 		})
 	}
+	vifMultiQueueEnabled := d.Get("vif_multiqueue_enabled").(string)
+	if vifMultiQueueEnabled != "" {
+		addonOpts = append(addonOpts, ims.UpdateImageOpts{
+			Op:    "add",
+			Path:  "/vif_multiqueue_enabled",
+			Value: vifMultiQueueEnabled,
+		})
+	}
 
 	if len(addonOpts) > 0 {
 		_, err = images.Update(imageClient, d.Id(), addonOpts)
@@ -314,7 +321,6 @@ func resourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("name", img.Name),
 		d.Set("hw_firmware_type", img.HwFirmwareType),
 		d.Set("vif_multiqueue_enabled", img.HwVifMultiqueueEnabled),
-		d.Set("enterprise_project_id", img.EnterpriseProjectId),
 		d.Set("protected", img.Protected),
 		d.Set("tags", img.Tags),
 		d.Set("visibility", img.Visibility),

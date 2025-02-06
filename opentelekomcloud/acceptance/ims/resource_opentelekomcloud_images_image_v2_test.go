@@ -157,6 +157,8 @@ func TestAccImagesImageV2_hwFirmwareType(t *testing.T) {
 					testAccCheckImagesImageV2Exists("opentelekomcloud_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_images_image_v2.image_1", "hw_firmware_type", "uefi"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_images_image_v2.image_1", "vif_multiqueue_enabled", "true"),
 				),
 			},
 			{
@@ -388,6 +390,7 @@ resource "opentelekomcloud_images_image_v2" "image_1" {
   container_format = "bare"
   disk_format      = "qcow2"
   hw_firmware_type = "uefi"
+  vif_multiqueue_enabled = "true"
 }`
 
 var testAccImagesImageV2_hw_firmware_type_2 = `
@@ -397,6 +400,7 @@ resource "opentelekomcloud_images_image_v2" "image_1" {
   container_format = "bare"
   disk_format      = "qcow2"
   hw_firmware_type = "bios"
+  vif_multiqueue_enabled = "true"
 }`
 
 var testAccImagesImageV2_timeout = `
