@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CSS]** Add backup options for ``resource/opentelekomcloud_css_cluster_v1`` (`#2813 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2813>`_)
