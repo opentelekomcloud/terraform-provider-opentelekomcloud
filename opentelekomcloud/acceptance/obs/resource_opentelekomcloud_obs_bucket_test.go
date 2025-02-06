@@ -121,6 +121,14 @@ func TestAccObsBucket_logging(t *testing.T) {
 					testAccCheckObsBucketLogging(resourceName, targetBucket, "log/"),
 				),
 			},
+			{
+				Config: testAccObsBucketConfigWithLoggingUpdated(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(resourceName),
+					testAccCheckObsBucketLogging(resourceName, targetBucket, "log/"),
+					resource.TestCheckResourceAttr(resourceName, "logging.0.agency", "test"),
+				),
+			},
 		},
 	})
 }
@@ -478,6 +486,32 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
   logging {
     target_bucket = opentelekomcloud_obs_bucket.log_bucket.id
     target_prefix = "log/"
+  }
+}
+`, randInt, randInt)
+}
+
+func testAccObsBucketConfigWithLoggingUpdated(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_identity_agency_v3" "agency_1" {
+  name                  = "test"
+  delegated_domain_name = "op_svc_obs"
+  domain_roles          = ["OBS Administrator"]
+}
+
+resource "opentelekomcloud_obs_bucket" "log_bucket" {
+  bucket        = "tf-test-log-bucket-%d"
+  acl           = "log-delivery-write"
+  force_destroy = "true"
+}
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket = "tf-test-bucket-%d"
+  acl    = "private"
+
+  logging {
+    target_bucket = opentelekomcloud_obs_bucket.log_bucket.id
+    target_prefix = "log/"
+    agency        = opentelekomcloud_identity_agency_v3.agency_1.name
   }
 }
 `, randInt, randInt)

@@ -79,6 +79,11 @@ func ResourceObsBucket() *schema.Resource {
 							Optional: true,
 							Default:  "logs/",
 						},
+						"agency": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -742,6 +747,10 @@ func resourceObsBucketLoggingUpdate(client *obs.ObsClient, d *schema.ResourceDat
 		if val := c["target_prefix"].(string); val != "" {
 			loggingStatus.TargetPrefix = val
 		}
+
+		if val := c["agency"].(string); val != "" {
+			loggingStatus.Agency = val
+		}
 	}
 	log.Printf("[DEBUG] set logging of OBS bucket %s: %#v", bucket, loggingStatus)
 
@@ -1066,6 +1075,9 @@ func setObsBucketLogging(client *obs.ObsClient, d *schema.ResourceData) error {
 		logging["target_bucket"] = output.TargetBucket
 		if output.TargetPrefix != "" {
 			logging["target_prefix"] = output.TargetPrefix
+		}
+		if output.Agency != "" {
+			logging["agency"] = output.Agency
 		}
 		lcList = append(lcList, logging)
 	}

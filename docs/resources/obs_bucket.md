@@ -431,6 +431,12 @@ The `logging` object supports the following:
 
 * `target_prefix` - (Optional) To specify a key prefix for log objects.
 
+* `agency` - (Optional) Specifies the IAM agency of OBS cloud service.
+
+  -> The IAM agency requires the `PutObject` permission for the target bucket.  If default encryption is enabled for the
+  target bucket, the agency also requires the `KMS Administrator` permission in the region where the target bucket is
+  located.
+
 The `worm_policy` object supports the following:
 
 * `days` - (Optional) Default protection period, in `days`.
