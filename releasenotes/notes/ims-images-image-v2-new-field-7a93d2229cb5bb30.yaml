@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[IMS]** Added `hw_firmware_type` as argument in ``resource/opentelekomcloud_ims_image_v2`` and as attribute in ``datasource/opentelekomcloud_ims_image_v2`` (`#2816 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2816>`_)
