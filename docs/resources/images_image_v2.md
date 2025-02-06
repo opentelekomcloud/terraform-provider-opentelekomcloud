@@ -70,6 +70,8 @@ The following arguments are supported:
 
 * `hw_firmware_type` - (Optional, String) Specifies the boot mode. The value can be `bios` or `uefi`.
 
+* `vif_multiqueue_enabled` - (Optional, String, ForceNew) Specifies whether the image supports NIC multi-queue. The value can be `true` or `false`.
+
 -> **Note:** The `properties` attribute handling in the gophercloud library is currently buggy
 and needs to be fixed before being implemented in this resource.
 
@@ -99,10 +101,6 @@ In additin to the arguments defined above, the following attributes are exported
   or `saving`.
 
 * `update_at` - The date the image was last updated.
-
-* `vif_multiqueue_enabled` - Indicates whether the image supports NIC multi-queue. The value can be `true` or `false`.
-
-* `enterprise_project_id` - Specifies the enterprise project that the image belongs to.
 
 ## Import
 
