@@ -108,12 +108,12 @@ func testAccCheckImagesV2DataSourceID(n string) resource.TestCheckFunc {
 // Standard CirrOS image
 const testAccImagesV2ImageDataSource_cirros = `
 resource "opentelekomcloud_images_image_v2" "image_1" {
-  name                   = "CirrOS-tf"
-  container_format       = "bare"
-  disk_format            = "qcow2"
-  image_source_url       = "https://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
-  hw_firmware_type       = "uefi"
-  tags                   = ["cirros-tf"]
+  name             = "CirrOS-tf"
+  container_format = "bare"
+  disk_format      = "qcow2"
+  image_source_url = "https://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
+  hw_firmware_type = "uefi"
+  tags             = ["cirros-tf"]
 }
 `
 

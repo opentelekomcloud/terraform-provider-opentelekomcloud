@@ -18,11 +18,11 @@ Manages a V2 Image resource within OpenTelekomCloud Glance.
 
 ```hcl
 resource "opentelekomcloud_images_image_v2" "rancheros" {
-  name                   = "RancherOS"
-  image_source_url       = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-  container_format       = "bare"
-  disk_format            = "qcow2"
-  hw_firmware_type       = "uefi"
+  name             = "RancherOS"
+  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format = "bare"
+  disk_format      = "qcow2"
+  hw_firmware_type = "uefi"
 
   tags = ["foo.bar", "tag.value"]
 }
