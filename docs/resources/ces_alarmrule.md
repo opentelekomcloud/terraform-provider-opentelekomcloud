@@ -153,10 +153,12 @@ The `dimensions` block supports:
 The `condition` block supports:
 
 * `period` - (Required) Specifies the alarm checking period in seconds. The
-  value can be `1`, `300`, `1200`, `3600`, `14400`, and `86400`.
+  value can be `0`, `1`, `300`, `1200`, `3600`, `14400`, and `86400`.
 
 -> If `period` is set to `1`, the raw metric data is used to determine
   whether to generate an alarm.
+
+-> To trigger an event immediately, simply set the `period` parameter to 0
 
 * `filter` - (Required) Specifies the data rollup methods. The value can be
   `max`, `min`, `average`, `sum`, and `variance`.

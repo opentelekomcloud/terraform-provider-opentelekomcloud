@@ -152,7 +152,7 @@ func ResourceAlarmRule() *schema.Resource {
 							Required: true,
 							ForceNew: true,
 							ValidateFunc: validation.IntInSlice([]int{
-								1, 300, 1200, 3600, 14400, 86400,
+								0, 1, 300, 1200, 3600, 14400, 86400,
 							}),
 						},
 						"filter": {
