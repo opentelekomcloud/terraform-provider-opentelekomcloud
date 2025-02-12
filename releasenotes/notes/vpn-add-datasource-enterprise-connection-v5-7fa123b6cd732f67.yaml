@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[VPN]** New Data Source: ``opentelekomcloud_enterprise_vpn_connection_v5`` (`#2819 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2819>`_)
