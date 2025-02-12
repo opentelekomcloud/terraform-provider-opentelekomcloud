@@ -45,6 +45,7 @@ func DataSourceEnterpriseConnection() *schema.Resource {
 			},
 			"peer_subnets": {
 				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
 			"tunnel_local_address": {
