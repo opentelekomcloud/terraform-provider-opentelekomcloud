@@ -41,7 +41,7 @@ func DataSourceEnterpriseConnection() *schema.Resource {
 			},
 			"customer_gateway_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Computed: true,
 			},
 			"peer_subnets": {
 				Type:     schema.TypeList,
