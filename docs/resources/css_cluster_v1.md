@@ -88,7 +88,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 
 The following arguments are supported:
 
-* `name` - (Required) Cluster name. It contains `4` to `32` characters. Only letters, digits,
+* `name` - (Required, String) Cluster name. It contains `4` to `32` characters. Only letters, digits,
   hyphens (`-`), and underscores (`_`) are allowed. The value must start with a letter.
   Changing this parameter will create a new resource.
 
@@ -98,18 +98,18 @@ The following arguments are supported:
 * `node_config` - (Required) Instance object. Structure is documented below.
   Changing this parameter will create a new resource.
 
-* `enable_https` - (Optional) Whether communication encryption is performed on the cluster.
+* `enable_https` - (Optional, Bool) Whether communication encryption is performed on the cluster.
   By default, communication encryption is disabled.
   Value `true` indicates that communication encryption is performed on the cluster.
   Value `false` indicates that communication encryption is not performed on the cluster.
   Changing this parameter will create a new resource.
 
-* `enable_authority` - (Optional) Whether to enable authentication.
+* `enable_authority` - (Optional, Bool) Whether to enable authentication.
   Authentication is disabled by default.
   When authentication is enabled, `enable_https` must be set to `true`.
   Changing this parameter will create a new resource.
 
-* `admin_pass` - (Optional) Password of the cluster user admin in security mode.
+* `admin_pass` - (Optional, String) Password of the cluster user admin in security mode.
   This parameter is mandatory only when `enable_authority` is set to `true`.
 
 ~>
@@ -117,7 +117,7 @@ The administrator password must meet the following requirements: contain `8` to 
 contain at least `3` of the following character types: uppercase letters,
 lowercase letters, numbers, and special characters (`~!@#$%^&*()-_=+\\|[{}];:,<.>/?`).
 
-* `expect_node_num` - (Optional) Number of cluster instances. The value range is `1` to `32`.
+* `expect_node_num` - (Optional, Int) Number of cluster instances. The value range is `1` to `32`.
 
 * `backup_strategy` - (Optional) Specifies the advanced backup policy. Structure is documented below.
 
@@ -125,9 +125,9 @@ lowercase letters, numbers, and special characters (`~!@#$%^&*()-_=+\\|[{}];:,<.
 
 The `node_config` block supports:
 
-* `availability_zone` - (Optional) Availability zone (AZ). Changing this parameter will create a new resource.
+* `availability_zone` - (Optional, String) Availability zone (AZ). Changing this parameter will create a new resource.
 
-* `flavor` - (Required) Instance flavor name.
+* `flavor` - (Required, String) Instance flavor name.
   - Value range of flavor `css.medium.8`: 40 GB to 640 GB
   - Value range of flavor `css.xlarge.8`: 40 GB to 2560 GB
   - Value range of flavor `css.2xlarge.8`: 80 GB to 5120 GB
@@ -149,29 +149,31 @@ The `node_config` block supports:
 * `volume` - (Required) Information about the volume. Structure is documented below.
   Changing this parameter will create a new resource.
 
+* `public_access` - (Optional) Specifies the public network access information.
+
 The `network_info` block supports:
 
-* `network_id` - (Required) Network ID. All instances in a cluster must have the same
+* `network_id` - (Required, String) Network ID. All instances in a cluster must have the same
   networks and security groups. Changing this parameter will create a new resource.
 
-* `security_group_id` - (Required) Security group ID. All instances in a cluster must have the
+* `security_group_id` - (Required, String) Security group ID. All instances in a cluster must have the
   same subnets and security groups. Changing this parameter will create a new resource.
 
-* `vpc_id` - (Required) VPC ID, which is used for configuring cluster network.
+* `vpc_id` - (Required, String) VPC ID, which is used for configuring cluster network.
   Changing this parameter will create a new resource.
 
 The `volume` block supports:
 
-* `encryption_key` - (Optional) Key ID. The Default Master Keys cannot be used to create
+* `encryption_key` - (Optional, String) Key ID. The Default Master Keys cannot be used to create
   grants. Specifically, you cannot use Default Master Keys
   whose aliases end with /default in KMS to create clusters.
   After a cluster is created, do not delete the key used by the cluster.
   Otherwise, the cluster will become unavailable.
   Changing this parameter will create a new resource.
 
-* `size` - (Required) Volume size, which must be a multiple of `4` and `10`.
+* `size` - (Required, Int) Volume size, which must be a multiple of `4` and `10`.
 
-* `volume_type` - (Required) `COMMON`: Common I/O. The SATA disk is used. `HIGH`: High I/O.
+* `volume_type` - (Required, String) `COMMON`: Common I/O. The SATA disk is used. `HIGH`: High I/O.
   The SAS disk is used. `ULTRAHIGH`: Ultra-high I/O. The solid-state drive (SSD) is used.
   Changing this parameter will create a new resource.
 
@@ -184,15 +186,24 @@ The `datastore` block contains:
 
 The `backup_strategy` block supports:
 
-* `start_time` - (Required) Specifies the time when a snapshot is automatically created everyday. Snapshots can
+* `start_time` - (Required, String) Specifies the time when a snapshot is automatically created everyday. Snapshots can
   only be created on the hour. The time format is the time followed by the time zone, specifically, **HH:mm z**. In the
   format, **HH:mm** refers to the hour time and z refers to the time zone. For example, "00:00 GMT+08:00"
   and "01:00 GMT+08:00".
 
-* `keep_days` - (Required) Specifies the number of days to retain the generated snapshots. Snapshots are reserved
+* `keep_days` - (Required, Int) Specifies the number of days to retain the generated snapshots. Snapshots are reserved
   for seven days by default.
 
-* `prefix` - (Required) Specifies the prefix of the snapshot that is automatically created.
+* `prefix` - (Required, String) Specifies the prefix of the snapshot that is automatically created.
+
+The `public_access` block supports:
+
+* `bandwidth` - (Required, Int) Specifies the public network bandwidth.
+
+* `whitelist_enabled` - (Required, Bool) Specifies whether to enable the Kibana access control.
+
+* `whitelist` - (Optional, String) Specifies the whitelist of Kibana access control.
+  Separate the whitelisted network segments or IP addresses with commas (,), and each of them must be unique.
 
 ## Attributes Reference
 
