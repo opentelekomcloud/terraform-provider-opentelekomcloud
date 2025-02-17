@@ -188,6 +188,7 @@ The `disk` block supports:
   * `SSD`: ultra-high I/O disk type.
   * `co-p1`: high I/O (performance-optimized I) disk type.
   * `uh-l1`: ultra-high I/O (latency-optimized) disk type.
+  -> **NOTE:** Common I/O (SATA) will reach end of life, end of 2025.
 
 ->For HANA, `HL1`, and `HL2` ECSs, use `co-p1` and `uh-l1` disks. For other ECSs, do not use `co-p1` or `uh-l1` disks.
 

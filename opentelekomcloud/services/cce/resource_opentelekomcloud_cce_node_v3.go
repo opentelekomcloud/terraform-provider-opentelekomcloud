@@ -140,9 +140,10 @@ func ResourceCCENodeV3() *schema.Resource {
 							ForceNew: true,
 						},
 						"volumetype": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:             schema.TypeString,
+							Required:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: common.ValidateDiskType,
 						},
 						"kms_id": {
 							Type:        schema.TypeString,
@@ -177,9 +178,10 @@ func ResourceCCENodeV3() *schema.Resource {
 							ForceNew: true,
 						},
 						"volumetype": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:             schema.TypeString,
+							Required:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: common.ValidateDiskType,
 						},
 						"kms_id": {
 							Type:        schema.TypeString,

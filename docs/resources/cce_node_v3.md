@@ -167,6 +167,7 @@ The following arguments are supported:
   * `extend_param` **DEPRECATED** - (Optional, ForceNew, String) Disk expansion parameters.
   Please use alternative parameter `extend_params`.
   * `kms_id` - (Optional, ForceNew, String) The Encryption KMS ID of the system volume. By default, it tries to get from env by `OS_KMS_ID`.
+  -> **NOTE:** Common I/O (SATA) will reach end of life, end of 2025.
 
 * `data_volumes` - (Required, ForceNew, List) Represents the data disk to be created. Changing this parameter will create a new resource.
   * `size` - (Required, ForceNew, Int) Disk size in GB.
@@ -175,6 +176,7 @@ The following arguments are supported:
   * `extend_param` **DEPRECATED** - (Optional, ForceNew, String) Disk expansion parameters.
   Please use alternative parameter `extend_params`.
   * `kms_id` - (Optional, ForceNew, String) The Encryption KMS ID of the data volume. By default, it tries to get from env by `OS_KMS_ID`.
+  -> **NOTE:** Common I/O (SATA) will reach end of life, end of 2025.
 
 -> To enable encryption with the KMS. Firstly, you need to create the agency to grant KMS rights to EVS.
 The agency has to be created for a new project first with a user who has security `admin` permissions.

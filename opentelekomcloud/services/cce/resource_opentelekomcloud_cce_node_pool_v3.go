@@ -93,9 +93,10 @@ func ResourceCCENodePoolV3() *schema.Resource {
 							ValidateFunc: validation.IntBetween(0xa, 0x8000),
 						},
 						"volumetype": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:             schema.TypeString,
+							Required:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: common.ValidateDiskType,
 						},
 						"kms_id": {
 							Type:        schema.TypeString,
@@ -130,9 +131,10 @@ func ResourceCCENodePoolV3() *schema.Resource {
 							ValidateFunc: validation.IntBetween(0x64, 0x8000),
 						},
 						"volumetype": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:             schema.TypeString,
+							Required:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: common.ValidateDiskType,
 						},
 						"kms_id": {
 							Type:        schema.TypeString,

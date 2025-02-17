@@ -7,7 +7,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v1/volumetypes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
@@ -147,4 +149,17 @@ func MultipleCustomizeDiffs(funcs ...schema.CustomizeDiffFunc) schema.CustomizeD
 		}
 		return mErr.ErrorOrNil()
 	}
+}
+
+func ValidateDiskType(v interface{}, path cty.Path) diag.Diagnostics {
+	diskType := v.(string)
+	if diskType != "SATA" {
+		return nil
+	}
+	return diag.Diagnostics{diag.Diagnostic{
+		Severity:      diag.Warning,
+		Summary:       fmt.Sprintf("[DEPRECATION WARNING]"),
+		Detail:        "Common I/O (SATA) will reach end of life, end of 2025.",
+		AttributePath: path,
+	}}
 }

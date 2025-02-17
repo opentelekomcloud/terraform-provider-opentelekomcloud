@@ -129,10 +129,11 @@ func ResourceEcsInstanceV1() *schema.Resource {
 				Computed: true,
 			},
 			"system_disk_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				Computed:         true,
+				ValidateDiagFunc: common.ValidateDiskType,
 			},
 			"system_disk_size": {
 				Type:     schema.TypeInt,
@@ -158,9 +159,10 @@ func ResourceEcsInstanceV1() *schema.Resource {
 							Computed: true,
 						},
 						"type": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:             schema.TypeString,
+							Required:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: common.ValidateDiskType,
 						},
 						"size": {
 							Type:     schema.TypeInt,

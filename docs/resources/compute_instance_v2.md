@@ -405,6 +405,7 @@ The `block_device` block supports:
 * `volume_type` - (Optional) Currently, the value can be `SSD` (ultra-I/O disk type),
   `SAS` (high I/O disk type), or `SATA` (common I/O disk type)
   [OTC-API](https://docs.otc.t-systems.com/en-us/api/ecs/en-us_topic_0065817708.html)
+  -> **NOTE:** Common I/O (SATA) will reach end of life, end of 2025.
 
 * `boot_index` - (Optional) The boot index of the volume. It defaults to 0. Changing this creates a new server.
 

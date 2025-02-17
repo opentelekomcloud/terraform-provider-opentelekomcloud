@@ -70,6 +70,7 @@ The following arguments are supported:
   Changing this creates a new volume.
 
 * `volume_type` - (Optional) Currently, the value can be `SSD` (ultra-high I/O disk type), `SAS` (high I/O disk type), `SATA` (common I/O disk type), `co-p1` (Exclusive HPC/ SAP HANA: high I/O, performance optimized), or `uh-l1` (Exclusive HPC/ SAP HANA: ultra-high-I/O, latency optimized). Read **Note** for `uh-l1` and `co-p1`: [OTC-API](https://docs.otc.t-systems.com/en-us/api/ecs/en-us_topic_0065817708.html). Changing this creates a new volume.
+  -> **NOTE:** Common I/O (SATA) will reach end of life, end of 2025.
 
 * `device_type` - (Optional) The device type of volume to create. Valid options are VBD and SCSI.
   Defaults to VBD. Changing this creates a new volume.

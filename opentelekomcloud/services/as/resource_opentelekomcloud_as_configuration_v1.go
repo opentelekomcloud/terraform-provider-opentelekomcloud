@@ -95,9 +95,10 @@ func ResourceASConfiguration() *schema.Resource {
 										ForceNew: true,
 									},
 									"volume_type": {
-										Type:     schema.TypeString,
-										Required: true,
-										ForceNew: true,
+										Type:             schema.TypeString,
+										Required:         true,
+										ForceNew:         true,
+										ValidateDiagFunc: common.ValidateDiskType,
 									},
 									"disk_type": {
 										Type:     schema.TypeString,

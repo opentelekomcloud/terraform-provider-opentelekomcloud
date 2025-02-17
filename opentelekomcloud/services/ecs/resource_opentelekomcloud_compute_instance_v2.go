@@ -271,9 +271,10 @@ func ResourceComputeInstanceV2() *schema.Resource {
 							ForceNew: true,
 						},
 						"volume_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
+							Type:             schema.TypeString,
+							Optional:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: common.ValidateDiskType,
 						},
 					},
 				},

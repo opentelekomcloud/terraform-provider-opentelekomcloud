@@ -59,6 +59,7 @@ The following arguments are supported:
 * `volume_type` - (Required) The type of volume to create.
   Currently, the value can be `SSD`, `SAS`, `SATA`, `co-p1`, or `uh-l1`.
   Changing this creates a new volume.
+  -> **NOTE:** Common I/O (SATA) will reach end of life, end of 2025.
 
 * `name` - (Optional) A unique name for the volume. Changing this updates the volume's name.
 

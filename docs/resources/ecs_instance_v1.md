@@ -273,6 +273,7 @@ The following arguments are supported:
   * `co-p1`: high I/O(performance-optimized) disk type.
   * `uh-l1`: ultra-high I/O(latency-optimized) disk type.
   * `ESSD`: extreme SSD disk type.
+  -> **NOTE:** Common I/O (SATA) will reach end of life, end of 2025.
 
 * `system_disk_size` - (Optional, Integer, ForceNew) The system disk size in GB, The value range is 1 to 1024.
   Changing this creates a new server.
@@ -321,6 +322,7 @@ The `data_disks` block supports:
   * `co-p1`: high I/O(performance-optimized) disk type.
   * `uh-l1`: ultra-high I/O(latency-optimized) disk type.
   * `ESSD`: extreme SSD disk type.
+  -> **NOTE:** Common I/O (SATA) will reach end of life, end of 2025.
 
 * `size` - (Required, String, ForceNew) The size of the data disk in GB. The value range is 10 to 32768.
   Changing this creates a new server.
