@@ -158,7 +158,7 @@ func ValidateDiskType(v interface{}, path cty.Path) diag.Diagnostics {
 	}
 	return diag.Diagnostics{diag.Diagnostic{
 		Severity:      diag.Warning,
-		Summary:       fmt.Sprintf("[DEPRECATION WARNING]"),
+		Summary:       "[DEPRECATION WARNING]",
 		Detail:        "Common I/O (SATA) will reach end of life, end of 2025.",
 		AttributePath: path,
 	}}
