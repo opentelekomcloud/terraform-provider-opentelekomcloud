@@ -561,6 +561,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_obs_bucket_policy":                         obs.ResourceObsBucketPolicy(),
 			"opentelekomcloud_obs_bucket_replication":                    obs.ResourceObsBucketReplication(),
 			"opentelekomcloud_rds_backup_v3":                             rds.ResourceRdsBackupV3(),
+			"opentelekomcloud_rds_public_ip_associate_v3":                rds.ResourceRdsPublicIpAssociateV3(),
 			"opentelekomcloud_rds_instance_v1":                           rds.ResourceRdsInstance(),
 			"opentelekomcloud_rds_instance_v3":                           rds.ResourceRdsInstanceV3(),
 			"opentelekomcloud_rds_maintenance_v3":                        rds.ResourceRdsMaintenanceV3(),

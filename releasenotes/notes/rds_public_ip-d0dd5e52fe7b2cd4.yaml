@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[RDS]** Add new resource ``resource/opentelekomcloud_rds_public_ip_associate_v3`` (`#2840 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2840>`_)
