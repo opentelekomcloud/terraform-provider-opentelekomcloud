@@ -16,6 +16,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evpn/v5/gateway"
 	vpntags "github.com/opentelekomcloud/gophertelekomcloud/openstack/evpn/v5/tags"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -114,6 +115,11 @@ func ResourceEnterpriseVpnGateway() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				RequiredWith: []string{"eip1"},
+			},
+			"delete_eip": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"access_vpc_id": {
 				Type:     schema.TypeString,
@@ -472,7 +478,12 @@ func resourceEvpnGatewayDelete(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf(errCreationV5Client, err)
 	}
 
-	err = gateway.Delete(client, d.Id())
+	if v, ok := d.GetOk("delete_eip"); ok && v.(bool) {
+		err = gateway.Delete(client, d.Id())
+	} else {
+		err = unbindEipAndDelete(d, config, client)
+	}
+
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "error deleting OpenTelekomCloud EVPN gateway")
 	}
@@ -481,14 +492,84 @@ func resourceEvpnGatewayDelete(ctx context.Context, d *schema.ResourceData, meta
 		Pending: []string{"DELETING"},
 		Target:  []string{"DELETED"},
 		Refresh: waitForGatewayDeletion(client, d.Id()),
-		Timeout: d.Timeout(schema.TimeoutCreate),
+		Timeout: d.Timeout(schema.TimeoutDelete),
 		Delay:   10 * time.Second,
 	}
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return diag.Errorf("error waiting for deleting OpenTelekomCloud EVPN gateway (%s) to complete: %s", d.Id(), err)
+		return diag.Errorf("error waiting for deleting OpenTelekomCloud EVPN gateway (%s): %s", d.Id(), err)
 	}
 	return nil
+}
+
+func unbindEipAndDelete(d *schema.ResourceData, config *cfg.Config, client *golangsdk.ServiceClient) error {
+	gw, err := gateway.Get(client, d.Id())
+	if err != nil {
+		return err
+	}
+
+	eipClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	if err != nil {
+		return err
+	}
+
+	if gw.Eip1.IpAddress != "" {
+		ipID, err := findFloatingIP(eipClient, gw.Eip1.IpAddress)
+		if err != nil {
+			return err
+		}
+		if ipID != "" {
+			err = floatingips.Update(eipClient, ipID, floatingips.UpdateOpts{PortID: nil}).Err
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if gw.Eip2.IpAddress != "" {
+		ipID, err := findFloatingIP(eipClient, gw.Eip2.IpAddress)
+		if err != nil {
+			return err
+		}
+		if ipID != "" {
+			err = floatingips.Update(eipClient, ipID, floatingips.UpdateOpts{PortID: nil}).Err
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	err = gateway.Delete(client, d.Id())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func findFloatingIP(client *golangsdk.ServiceClient, address string) (string, error) {
+	opts := floatingips.ListOpts{FloatingIP: address}
+	pgFIP, err := floatingips.List(client, opts).AllPages()
+	if err != nil {
+		return "", err
+	}
+
+	floatingIPs, err := floatingips.ExtractFloatingIPs(pgFIP)
+	if err != nil {
+		return "", err
+	}
+
+	if len(floatingIPs) == 0 {
+		return "", nil
+	}
+
+	for _, ip := range floatingIPs {
+		if address == ip.FloatingIP {
+			return ip.ID, nil
+		}
+	}
+
+	return "", nil
 }
 
 func waitForGatewayActive(client *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {

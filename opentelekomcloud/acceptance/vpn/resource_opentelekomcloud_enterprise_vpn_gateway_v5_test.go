@@ -70,6 +70,48 @@ func TestAccGateway_basic(t *testing.T) {
 				ResourceName:      resourceEvpnGatewayName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"delete_eip",
+				},
+			},
+		},
+	})
+}
+
+func TestAccGateway_DeleteEip(t *testing.T) {
+	var gw gateway.Gateway
+	name := fmt.Sprintf("evpn_acc_gw_%s", acctest.RandString(5))
+	updateName := fmt.Sprintf("evpn_acc_gw_up_%s", acctest.RandString(5))
+
+	rc := common.InitResourceCheck(
+		resourceEvpnGatewayName,
+		&gw,
+		getGatewayResourceFunc,
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testEvpnGateway_basic(name),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceEvpnGatewayName, "name", name),
+					resource.TestCheckResourceAttr(resourceEvpnGatewayName, "ha_mode", "active-active"),
+					resource.TestCheckResourceAttr(resourceEvpnGatewayName, "status", "ACTIVE"),
+					resource.TestCheckResourceAttrPair(resourceEvpnGatewayName, "eip1.0.id", resourceEvpnGatewayEip1Name, "id"),
+					resource.TestCheckResourceAttrPair(resourceEvpnGatewayName, "eip2.0.id", resourceEvpnGatewayEip2Name, "id"),
+					resource.TestCheckResourceAttr(resourceEvpnGatewayName, "tags.key", "val"),
+					resource.TestCheckResourceAttr(resourceEvpnGatewayName, "tags.foo", "bar"),
+				),
+			},
+			{
+				Config: testEvpnGateway_unbindEip(updateName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("opentelekomcloud_vpc_eip_v1.eip_1", "publicip.0.type", "5_bgp"),
+				),
 			},
 		},
 	})
@@ -249,6 +291,12 @@ resource "opentelekomcloud_enterprise_vpn_gateway_v5" "gw_1" {
   }
 }
 `, testEvpnGateway_base(name), name)
+}
+
+func testEvpnGateway_unbindEip(name string) string {
+	return fmt.Sprintf(`
+%s
+`, testEvpnGateway_base(name))
 }
 
 func testEvpnGateway_activeStandbyHAMode(name string) string {
