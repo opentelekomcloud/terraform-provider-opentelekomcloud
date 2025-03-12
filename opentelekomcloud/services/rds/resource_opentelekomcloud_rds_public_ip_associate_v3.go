@@ -59,7 +59,7 @@ func resourceRdsPublicIpAssociateV3Create(ctx context.Context, d *schema.Resourc
 	ip := d.Get("public_ip").(string)
 	ipId := d.Get("public_ip_id").(string)
 
-	err = instances.AttachEip(client, instances.AttachEipOpts{
+	_, err = instances.AttachEip(client, instances.AttachEipOpts{
 		InstanceId: d.Get("instance_id").(string),
 		PublicIp:   ip,
 		PublicIpId: ipId,
@@ -117,7 +117,7 @@ func resourceRdsPublicIpAssociateV3Update(ctx context.Context, d *schema.Resourc
 		oldIp, _ := d.GetChange("public_ip")
 		oldId, _ := d.GetChange("public_ip_id")
 		// detach old ip
-		err = instances.AttachEip(client, instances.AttachEipOpts{
+		_, err = instances.AttachEip(client, instances.AttachEipOpts{
 			PublicIp:   oldIp.(string),
 			PublicIpId: oldId.(string),
 			InstanceId: d.Id(),
@@ -129,7 +129,7 @@ func resourceRdsPublicIpAssociateV3Update(ctx context.Context, d *schema.Resourc
 		time.Sleep(120 * time.Second)
 
 		// attach new ip
-		err = instances.AttachEip(client, instances.AttachEipOpts{
+		_, err = instances.AttachEip(client, instances.AttachEipOpts{
 			InstanceId: d.Id(),
 			PublicIp:   d.Get("public_ip").(string),
 			PublicIpId: d.Get("public_ip_id").(string),
@@ -156,7 +156,7 @@ func resourceRdsPublicIpAssociateV3Delete(ctx context.Context, d *schema.Resourc
 
 	log.Printf("[DEBUG] Unassigning public ip for Instance %s", d.Id())
 
-	err = instances.AttachEip(client, instances.AttachEipOpts{
+	_, err = instances.AttachEip(client, instances.AttachEipOpts{
 		InstanceId: d.Get("instance_id").(string),
 		IsBind:     pointerto.Bool(false),
 	})
