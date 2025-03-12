@@ -26,6 +26,11 @@ func ResourceRdsPublicIpAssociateV3() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(10 * time.Minute),
+			Update: schema.DefaultTimeout(10 * time.Minute),
+		},
+
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -59,7 +64,7 @@ func resourceRdsPublicIpAssociateV3Create(ctx context.Context, d *schema.Resourc
 	ip := d.Get("public_ip").(string)
 	ipId := d.Get("public_ip_id").(string)
 
-	err = instances.AttachEip(client, instances.AttachEipOpts{
+	jobId, err := instances.AttachEip(client, instances.AttachEipOpts{
 		InstanceId: d.Get("instance_id").(string),
 		PublicIp:   ip,
 		PublicIpId: ipId,
@@ -70,8 +75,10 @@ func resourceRdsPublicIpAssociateV3Create(ctx context.Context, d *schema.Resourc
 		return fmterr.Errorf("error attaching public ip to rds instance: %w", err)
 	}
 
-	// ugly sleep, because there's no other way to check if bind job is completed
-	time.Sleep(30 * time.Second)
+	timeout := d.Timeout(schema.TimeoutCreate)
+	if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), *jobId); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return resourceRdsPublicIpAssociateV3Read(ctx, d, meta)
 }
@@ -114,10 +121,11 @@ func resourceRdsPublicIpAssociateV3Update(ctx context.Context, d *schema.Resourc
 	}
 
 	if d.HasChange("public_ip") || d.HasChange("public_ip_id") {
+		timeout := d.Timeout(schema.TimeoutUpdate)
 		oldIp, _ := d.GetChange("public_ip")
 		oldId, _ := d.GetChange("public_ip_id")
 		// detach old ip
-		err = instances.AttachEip(client, instances.AttachEipOpts{
+		jobId, err := instances.AttachEip(client, instances.AttachEipOpts{
 			PublicIp:   oldIp.(string),
 			PublicIpId: oldId.(string),
 			InstanceId: d.Id(),
@@ -126,10 +134,13 @@ func resourceRdsPublicIpAssociateV3Update(ctx context.Context, d *schema.Resourc
 		if err != nil {
 			return fmterr.Errorf("error detaching old ip: %w", err)
 		}
-		time.Sleep(120 * time.Second)
+
+		if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), *jobId); err != nil {
+			return diag.FromErr(err)
+		}
 
 		// attach new ip
-		err = instances.AttachEip(client, instances.AttachEipOpts{
+		jobId, err = instances.AttachEip(client, instances.AttachEipOpts{
 			InstanceId: d.Id(),
 			PublicIp:   d.Get("public_ip").(string),
 			PublicIpId: d.Get("public_ip_id").(string),
@@ -138,7 +149,10 @@ func resourceRdsPublicIpAssociateV3Update(ctx context.Context, d *schema.Resourc
 		if err != nil {
 			return fmterr.Errorf("error attaching new ip: %w", err)
 		}
-		time.Sleep(30 * time.Second)
+
+		if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), *jobId); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
@@ -156,7 +170,7 @@ func resourceRdsPublicIpAssociateV3Delete(ctx context.Context, d *schema.Resourc
 
 	log.Printf("[DEBUG] Unassigning public ip for Instance %s", d.Id())
 
-	err = instances.AttachEip(client, instances.AttachEipOpts{
+	jobId, err := instances.AttachEip(client, instances.AttachEipOpts{
 		InstanceId: d.Get("instance_id").(string),
 		IsBind:     pointerto.Bool(false),
 	})
@@ -164,7 +178,10 @@ func resourceRdsPublicIpAssociateV3Delete(ctx context.Context, d *schema.Resourc
 	if err != nil {
 		return fmterr.Errorf("error detaching public ip from RDS instance: %w", err)
 	}
-	time.Sleep(120 * time.Second)
+	timeout := d.Timeout(schema.TimeoutUpdate)
+	if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), *jobId); err != nil {
+		return diag.FromErr(err)
+	}
 
 	d.SetId("")
 	return nil
