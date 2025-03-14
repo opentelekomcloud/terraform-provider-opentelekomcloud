@@ -27,6 +27,11 @@ resource "opentelekomcloud_er_instance_v3" "test" {
 
   name = var.router_name
   asn  = 64512
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
 }
 ```
 
@@ -58,6 +63,8 @@ The following arguments are supported:
 * `auto_accept_shared_attachments` - (Optional, Bool) Whether to automatically accept the creation of shared
 attachment.
   The default value is **false**.
+
+* `tags` - (Optional, Map) Tags key/value pairs to associate with the instance.
 
 ## Attribute Reference
 

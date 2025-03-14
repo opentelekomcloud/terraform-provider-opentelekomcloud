@@ -13,6 +13,7 @@ import (
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/er/v3/instance"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/er/v3/tags"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -70,6 +71,7 @@ func ResourceErInstanceV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"tags": common.TagsSchema(),
 			"default_propagation_route_table_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -124,6 +126,7 @@ func resourceErInstanceV3Create(ctx context.Context, d *schema.ResourceData, met
 		EnableDefaultAssociation:    pointerto.Bool(d.Get("enable_default_association").(bool)),
 		AvailabilityZoneIDs:         getAvailabilityZones(d),
 		AutoAcceptSharedAttachments: pointerto.Bool(d.Get("auto_accept_shared_attachments").(bool)),
+		Tags:                        common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 	}
 
 	createResp, err := instance.Create(client, createOpts)
@@ -163,7 +166,10 @@ func resourceErInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return diag.Errorf("error retrieving er instance (%s): %s", d.Id(), err)
 	}
-
+	tagsMap := make(map[string]string)
+	for _, tag := range getResp.Instance.Tags {
+		tagsMap[tag.Key] = tag.Value
+	}
 	mErr := multierror.Append(
 		nil,
 		d.Set("region", config.GetRegion(d)),
@@ -179,6 +185,7 @@ func resourceErInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("default_association_route_table_id", getResp.Instance.DefaultAssociationRouteTableID),
 		d.Set("availability_zones", getResp.Instance.AvailabilityZoneIDs),
 		d.Set("auto_accept_shared_attachments", getResp.Instance.AutoAcceptSharedAttachments),
+		d.Set("tags", tagsMap),
 	)
 
 	return diag.FromErr(mErr.ErrorOrNil())
@@ -214,6 +221,13 @@ func resourceErInstanceV3Update(ctx context.Context, d *schema.ResourceData, met
 		_, err = instance.Update(client, updateOpts)
 		if err != nil {
 			return diag.Errorf("error updating Instance: %s", err)
+		}
+	}
+
+	if d.HasChange("tags") {
+		err = UpdateErTags(client, d, "instance", d.Id())
+		if err != nil {
+			return diag.Errorf("error updating OpenTelekomCloud EnterpriseRouter v3 instance tags: %s", err)
 		}
 	}
 
@@ -268,7 +282,7 @@ func waitForErInstanceDeletion(client *golangsdk.ServiceClient, id string) resou
 		r, err := instance.Get(client, id)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[DEBUG] The opentelekomcloud ER instance has been deleted (ID:%s).", id)
+				log.Printf("[DEBUG] The OpenTelekomCloud EnterpriseRouter v3 instance has been deleted (ID:%s).", id)
 				return r, "Deleted", nil
 			}
 			return nil, "Error", err
@@ -282,4 +296,36 @@ func waitForErInstanceDeletion(client *golangsdk.ServiceClient, id string) resou
 			return r, "Error", err
 		}
 	}
+}
+
+func UpdateErTags(client *golangsdk.ServiceClient, d *schema.ResourceData, resourceType, id string) error {
+	if d.HasChange("tags") {
+		oldMapRaw, newMapRaw := d.GetChange("tags")
+		oldMap := oldMapRaw.(map[string]interface{})
+		newMap := newMapRaw.(map[string]interface{})
+
+		// remove old tags
+		if len(oldMap) > 0 {
+			tagList := common.ExpandResourceTags(oldMap)
+			for _, tag := range tagList {
+				err := tags.Delete(client, resourceType, id, tag.Key)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		// set new tags
+		if len(newMap) > 0 {
+			tagList := common.ExpandResourceTags(newMap)
+			for _, tag := range tagList {
+				err := tags.Create(client, resourceType, id, tags.TagOpts{Tag: tag})
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
 }

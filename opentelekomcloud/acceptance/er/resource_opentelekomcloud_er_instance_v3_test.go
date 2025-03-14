@@ -56,6 +56,8 @@ func TestAccInstance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(rName, "enable_default_propagation", "true"),
 					resource.TestCheckResourceAttr(rName, "enable_default_association", "false"),
 					resource.TestCheckResourceAttr(rName, "auto_accept_shared_attachments", "true"),
+					resource.TestCheckResourceAttr(rName, "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(rName, "tags.key", "value"),
 				),
 			},
 			{
@@ -68,6 +70,8 @@ func TestAccInstance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(rName, "enable_default_propagation", "false"),
 					resource.TestCheckResourceAttr(rName, "enable_default_association", "true"),
 					resource.TestCheckResourceAttr(rName, "auto_accept_shared_attachments", "false"),
+					resource.TestCheckResourceAttr(rName, "tags.foo", "baar"),
+					resource.TestCheckResourceAttr(rName, "tags.newkey", "value"),
 				),
 			},
 			{
@@ -81,10 +85,6 @@ func TestAccInstance_basic(t *testing.T) {
 
 func testInstance_basic_step1(name string, bgpAsNum int) string {
 	return fmt.Sprintf(`
-
-
-
-
 resource "opentelekomcloud_er_instance_v3" "test" {
   availability_zones = ["eu-de-01", "eu-de-02"]
 
@@ -95,14 +95,17 @@ resource "opentelekomcloud_er_instance_v3" "test" {
   enable_default_propagation     = true
   enable_default_association     = false
   auto_accept_shared_attachments = true
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
 }
 `, name, bgpAsNum)
 }
 
 func testInstance_basic_step2(name string, bgpAsNum int) string {
 	return fmt.Sprintf(`
-
-
 resource "opentelekomcloud_er_instance_v3" "test" {
   availability_zones = ["eu-de-01", "eu-de-02"]
 
@@ -113,6 +116,11 @@ resource "opentelekomcloud_er_instance_v3" "test" {
   enable_default_propagation     = false
   enable_default_association     = true
   auto_accept_shared_attachments = false
+
+  tags = {
+    foo    = "baar"
+    newkey = "value"
+  }
 }
 `, name, bgpAsNum)
 }
