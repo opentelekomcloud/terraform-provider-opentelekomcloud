@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[ER]**  New ``tags`` attribute for ``resource/opentelekomcloud_er_instance_v3`` (`#2856 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2856>`_)
