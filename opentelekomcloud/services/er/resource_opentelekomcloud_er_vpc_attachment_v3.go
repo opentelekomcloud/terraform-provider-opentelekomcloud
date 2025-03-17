@@ -73,6 +73,7 @@ func ResourceErVpcAttachmentV3() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"tags": common.TagsSchema(),
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -111,6 +112,7 @@ func resourceVpcAttachmentV3Create(ctx context.Context, d *schema.ResourceData, 
 		Name:                d.Get("name").(string),
 		Description:         d.Get("description").(string),
 		AutoCreateVpcRoutes: d.Get("auto_create_vpc_routes").(bool),
+		Tags:                common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 	}
 
 	resp, err := vpc.Create(client, opts)
@@ -155,7 +157,10 @@ func resourceVpcAttachmentV3Read(ctx context.Context, d *schema.ResourceData, me
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "ER VPC attachment")
 	}
-
+	tagsMap := make(map[string]string)
+	for _, tag := range resp.VpcAttachment.Tags {
+		tagsMap[tag.Key] = tag.Value
+	}
 	mErr := multierror.Append(nil,
 		d.Set("region", region),
 		d.Set("vpc_id", resp.VpcAttachment.VpcId),
@@ -166,6 +171,7 @@ func resourceVpcAttachmentV3Read(ctx context.Context, d *schema.ResourceData, me
 		d.Set("status", resp.VpcAttachment.State),
 		d.Set("created_at", resp.VpcAttachment.CreatedAt),
 		d.Set("updated_at", resp.VpcAttachment.UpdatedAt),
+		d.Set("tags", tagsMap),
 	)
 
 	if mErr.ErrorOrNil() != nil {
@@ -234,6 +240,13 @@ func resourceVpcAttachmentV3Update(ctx context.Context, d *schema.ResourceData, 
 		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return diag.FromErr(err)
+		}
+	}
+
+	if d.HasChange("tags") {
+		err = UpdateErTags(client, d, "vpc-attachment", d.Id())
+		if err != nil {
+			return diag.Errorf("error updating OpenTelekomCloud EnterpriseRouter v3 vpc attachment tags: %s", err)
 		}
 	}
 

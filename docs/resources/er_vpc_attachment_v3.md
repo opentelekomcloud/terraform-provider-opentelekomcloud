@@ -29,6 +29,11 @@ resource "opentelekomcloud_er_vpc_attachment_v3" "test" {
   name                   = var.attachment_name
   description            = "VPC attachment created by terraform"
   auto_create_vpc_routes = true
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
 }
 ```
 
@@ -61,6 +66,8 @@ The following arguments are supported:
     + **192.168.0.0/16**
 
   The default value is false. Changing this parameter will create a new resource.
+
+* `tags` - (Optional, Map) Tags key/value pairs to associate with the instance.
 
 ## Attribute Reference
 
