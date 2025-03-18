@@ -94,6 +94,7 @@ The following arguments are supported:
               `containerd` - Containerd
 
 * `agency_name` - (Optional) IAM agency name. Changing this parameter will create a new resource.
+  -> **NOTE:** The IAM agency requires `tms:resourceTags:list` in order to properly read resource state.
 
 * `taints` - (Optional, ForceNew, List) Taints to created nodes to configure anti-affinity.
   * `key` - (Required, String) A key must contain 1 to 63 characters starting with a letter or digit. Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed. A DNS subdomain name can be used as the prefix of a key.
