@@ -1457,16 +1457,18 @@ func resourceObsBucketEncryptionUpdate(client *obs.ObsClient, d *schema.Resource
 }
 
 func setObsBucketEncryption(client *obs.ObsClient, d *schema.ResourceData) error {
+	var value []map[string]interface{}
+
 	config, err := client.GetBucketEncryption(d.Id())
 	if err != nil {
 		if oErr, ok := err.(obs.ObsError); ok {
 			if oErr.BaseModel.StatusCode == 404 || oErr.Code == "NoSuchEncryptionConfiguration" || oErr.Code == "FsNotSupport" {
-				return nil
+				return d.Set("server_side_encryption", value)
 			}
 		}
 		return fmt.Errorf("error reading bucket encryption: %w", err)
 	}
-	value := []map[string]interface{}{{
+	value = []map[string]interface{}{{
 		"kms_key_id": config.KMSMasterKeyID,
 		"algorithm":  config.SSEAlgorithm,
 	}}
