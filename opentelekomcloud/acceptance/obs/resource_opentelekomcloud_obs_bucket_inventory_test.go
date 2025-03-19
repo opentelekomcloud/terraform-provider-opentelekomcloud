@@ -85,6 +85,53 @@ func TestAccObsBucketInventory_basic(t *testing.T) {
 	})
 }
 
+func TestAccObsBucketInventory_optionalFields(t *testing.T) {
+	var (
+		obsInventory  = obs.BucketInventoryConfiguration{}
+		rInt          = acctest.RandIntRange(4, 200)
+		inventoryName = "opentelekomcloud_obs_bucket_inventory.inventory"
+		inventoryId   = acctest.RandString(5)
+		rc            = common.InitResourceCheck(
+			inventoryName,
+			&obsInventory,
+			getBucketInventoryResourceFunc,
+		)
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObsInventoryOptionalFields(rInt, inventoryId),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(inventoryName, "optional_fields.0", "Size"),
+					resource.TestCheckResourceAttr(inventoryName, "optional_fields.1", "LastModifiedDate"),
+					resource.TestCheckResourceAttr(inventoryName, "optional_fields.2", "ReplicationStatus"),
+				),
+			},
+			{
+				Config: testAccObsInventoryOptionalFieldsUpdate(rInt, inventoryId),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(inventoryName, "optional_fields.0", "Size"),
+				),
+			},
+			{
+				ResourceName:      inventoryName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccOBSInventoryImportStateIdFunc(),
+				ImportStateVerifyIgnore: []string{
+					"configuration_id",
+				},
+			},
+		},
+	})
+}
+
 func testAccOBSInventoryImportStateIdFunc() resource.ImportStateIdFunc {
 	return func(s *terraform.State) (string, error) {
 		var bucket string
@@ -137,6 +184,50 @@ resource "opentelekomcloud_obs_bucket_inventory" "inventory" {
   }
   filter_prefix            = "test-filter-prefix"
   included_object_versions = "Current"
+}
+`, testAccObsBucketBasic(rInt), configName)
+}
+
+func testAccObsInventoryOptionalFields(rInt int, configName string) string {
+	return fmt.Sprintf(`
+%[1]s
+
+resource "opentelekomcloud_obs_bucket_inventory" "inventory" {
+  bucket           = opentelekomcloud_obs_bucket.bucket.bucket
+  configuration_id = "%[2]s"
+  is_enabled       = false
+  frequency        = "Daily"
+  destination {
+    bucket = opentelekomcloud_obs_bucket.bucket.bucket
+    format = "CSV"
+  }
+  included_object_versions = "All"
+  optional_fields = [
+    "Size",
+    "LastModifiedDate",
+    "ReplicationStatus"
+  ]
+}
+`, testAccObsBucketBasic(rInt), configName)
+}
+
+func testAccObsInventoryOptionalFieldsUpdate(rInt int, configName string) string {
+	return fmt.Sprintf(`
+%[1]s
+
+resource "opentelekomcloud_obs_bucket_inventory" "inventory" {
+  bucket           = opentelekomcloud_obs_bucket.bucket.bucket
+  configuration_id = "%[2]s"
+  is_enabled       = false
+  frequency        = "Daily"
+  destination {
+    bucket = opentelekomcloud_obs_bucket.bucket.bucket
+    format = "CSV"
+  }
+  included_object_versions = "All"
+  optional_fields = [
+    "Size"
+  ]
 }
 `, testAccObsBucketBasic(rInt), configName)
 }
