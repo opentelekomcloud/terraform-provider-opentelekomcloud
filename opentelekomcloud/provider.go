@@ -471,6 +471,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_ecs_instance_v1":                           ecs.ResourceEcsInstanceV1(),
 			"opentelekomcloud_er_association_v3":                         er.ResourceErAssociationV3(),
 			"opentelekomcloud_er_instance_v3":                            er.ResourceErInstanceV3(),
+			"opentelekomcloud_er_flow_log_v3":                            er.ResourceErFlowLogV3(),
 			"opentelekomcloud_er_propagation_v3":                         er.ResourceErPropagationV3(),
 			"opentelekomcloud_er_static_route_v3":                        er.ResourceErStaticRouteV3(),
 			"opentelekomcloud_er_route_table_v3":                         er.ResourceErRouteTableV3(),
