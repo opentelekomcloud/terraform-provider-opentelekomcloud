@@ -114,7 +114,7 @@ resource "opentelekomcloud_logtank_group_v2" "test" {
 }
 
 resource "opentelekomcloud_logtank_topic_v2" "test" {
-  group_id    = opentelekomcloud_logtank_group_v2.test.id
+  group_id   = opentelekomcloud_logtank_group_v2.test.id
   topic_name = "%[2]s"
 }
 
