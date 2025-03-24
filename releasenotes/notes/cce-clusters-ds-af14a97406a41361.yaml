@@ -1,0 +1,8 @@
+---
+enhancements:
+  - |
+    **[CCE]** Added ID as search parameter in ``data_source/opentelekomcloud_cce_cluster_v3``
+    (`#2868 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2868>`_)
+  - |
+    **[CCE]** Add new data-resource ``data_source/opentelekomcloud_cce_clusters_v3``
+    (`#2868 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2868>`_)
