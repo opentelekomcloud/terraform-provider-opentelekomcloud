@@ -233,7 +233,6 @@ func dataSourceCCEClustersV3Read(_ context.Context, d *schema.ResourceData, meta
 	clustersToSet := make([]map[string]interface{}, 0, len(refinedClusters))
 
 	for _, v := range refinedClusters {
-
 		ids = append(ids, v.Metadata.Id)
 
 		cluster := map[string]interface{}{
@@ -259,7 +258,6 @@ func dataSourceCCEClustersV3Read(_ context.Context, d *schema.ResourceData, meta
 
 		var endpoints []map[string]interface{}
 		for _, endpoint := range v.Status.Endpoints {
-
 			mapping := map[string]interface{}{
 				"url":  endpoint.Url,
 				"type": endpoint.Type,
