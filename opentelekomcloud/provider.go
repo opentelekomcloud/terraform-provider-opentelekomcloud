@@ -265,6 +265,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cbr_backup_v3":                      cbr.DataSourceCBRBackupsV3(),
 			"opentelekomcloud_cbr_backup_ids_v3":                  cbr.DataSourceCBRBackupsIdsV3(),
 			"opentelekomcloud_cce_cluster_v3":                     cce.DataSourceCCEClusterV3(),
+			"opentelekomcloud_cce_clusters_v3":                    cce.DataSourceCCEClustersV3(),
 			"opentelekomcloud_cce_cluster_kubeconfig_v3":          cce.DataSourceCCEClusterKubeConfigV3(),
 			"opentelekomcloud_cce_addon_template_v3":              cce.DataSourceCceAddonTemplateV3(),
 			"opentelekomcloud_cce_addon_templates_v3":             cce.DataSourceCceAddonTemplatesV3(),

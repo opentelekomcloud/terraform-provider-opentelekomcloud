@@ -28,6 +28,11 @@ func DataSourceCCEClusterV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"flavor_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -143,13 +148,12 @@ func DataSourceCCEClusterV3() *schema.Resource {
 func dataSourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
-
 	if err != nil {
 		return fmterr.Errorf("unable to create opentelekomcloud CCE client : %s", err)
 	}
 
 	listOpts := clusters.ListOpts{
-		ID:    d.Id(),
+		ID:    d.Get("id").(string),
 		Name:  d.Get("name").(string),
 		Type:  d.Get("cluster_type").(string),
 		Phase: d.Get("status").(string),
