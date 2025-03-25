@@ -28,6 +28,8 @@ func ResourceVBSBackupPolicyV2() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
+		DeprecationMessage: "Please use `opentelekomcloud_cbr_policy_v3` resource instead.",
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
 			Delete: schema.DefaultTimeout(5 * time.Minute),
