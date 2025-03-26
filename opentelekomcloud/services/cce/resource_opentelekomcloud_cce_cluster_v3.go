@@ -165,7 +165,7 @@ func ResourceCCEClusterV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "x509",
+				Default:  "rbac",
 			},
 			"masters": {
 				Type:          schema.TypeList,

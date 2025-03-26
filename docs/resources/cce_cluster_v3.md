@@ -213,7 +213,7 @@ The following arguments are supported:
   * Clusters of Kubernetes v1.13 and later
     Possible values: `rbac` and `authenticating_proxy`
 
-  Default value: `x509`
+  Default value: `rbac`
   Changing this parameter will create a new cluster resource.
 
 * `authenticating_proxy_ca` - (Optional) CA root certificate provided in the `authenticating_proxy` mode.
