@@ -197,9 +197,10 @@ The following arguments are supported:
 * `highway_subnet_id` - (Optional) The ID of the high speed network used to create bare metal nodes. Changing this parameter will create a new cluster resource.
 
 * `container_network_type` - (Required) Container network type.
-  * `overlay_l2` - An overlay_l2 network built for containers by using Open vSwitch(OVS)
+  * `overlay_l2` - An overlay_l2 network built for containers by using Open vSwitch(OVS).
+  * `vpc-router` - A vpc-router network built for containers by using ipvlan and custom VPC routes.
+  * `eni` - Cloud native 2.0 network model which integrates the native ENI capability of VPC.
   * `underlay_ipvlan` - An underlay_ipvlan network built for bare metal servers by using ipvlan.
-  * `vpc-router` - An vpc-router network built for containers by using ipvlan and custom VPC routes.
 
 * `container_network_cidr` - (Optional) Container network segment. Changing this parameter will create a new cluster resource.
 
