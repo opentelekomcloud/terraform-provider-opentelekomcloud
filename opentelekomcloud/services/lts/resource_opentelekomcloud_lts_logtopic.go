@@ -26,6 +26,8 @@ func ResourceLTSTopicV2() *schema.Resource {
 			StateContext: resourceTopicV2Import,
 		},
 
+		DeprecationMessage: "Please use `opentelekomcloud_lts_stream_v2` resource instead",
+
 		Schema: map[string]*schema.Schema{
 			"group_id": {
 				Type:     schema.TypeString,
@@ -62,7 +64,7 @@ func resourceTopicV2Create(ctx context.Context, d *schema.ResourceData, meta int
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	topicCreate, err := streams.CreateLogStream(client, createOpts)
+	topicCreate, err := streams.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating log topic: %s", err)
 	}
@@ -79,7 +81,7 @@ func resourceTopicV2Read(_ context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	groupId := d.Get("group_id").(string)
-	allTopics, err := streams.ListLogStream(client, groupId)
+	allTopics, err := streams.List(client, groupId)
 	if err != nil {
 		return fmterr.Errorf("error getting OpenTelekomCloud log topic %s: %s", d.Id(), err)
 	}
@@ -118,7 +120,7 @@ func resourceTopicV2Delete(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	groupId := d.Get("group_id").(string)
-	err = streams.DeleteLogStream(client, streams.DeleteOpts{
+	err = streams.Delete(client, streams.DeleteOpts{
 		GroupId:  groupId,
 		StreamId: d.Id(),
 	})
@@ -153,7 +155,7 @@ func resourceTopicV2Import(_ context.Context, d *schema.ResourceData, meta inter
 	log.Printf("[DEBUG] Import log topic %s / %s", groupId, topicId)
 
 	// check the parent logtank group whether exists.
-	_, err = groups.ListLogGroups(client)
+	_, err = groups.List(client)
 	if err != nil {
 		return nil, fmt.Errorf("error importing OpenTelekomCloud log topic %s: %s", topicId, err)
 	}

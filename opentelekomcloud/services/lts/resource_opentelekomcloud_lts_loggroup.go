@@ -25,6 +25,8 @@ func ResourceLTSGroupV2() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
+		DeprecationMessage: "Please use `opentelekomcloud_lts_group_v2` resource instead",
+
 		Schema: map[string]*schema.Schema{
 			"group_name": {
 				Type:     schema.TypeString,
@@ -57,7 +59,7 @@ func resourceGroupV2Create(ctx context.Context, d *schema.ResourceData, meta int
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	groupCreate, err := groups.CreateLogGroup(client, createOpts)
+	groupCreate, err := groups.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating log group: %s", err)
 	}
@@ -73,7 +75,7 @@ func resourceGroupV2Read(_ context.Context, d *schema.ResourceData, meta interfa
 		return fmterr.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
-	allGroups, err := groups.ListLogGroups(client)
+	allGroups, err := groups.List(client)
 	if err != nil {
 		return fmterr.Errorf("error listing OpenTelekomCloud log groups")
 	}
@@ -110,7 +112,7 @@ func resourceGroupV2Update(ctx context.Context, d *schema.ResourceData, meta int
 		return fmterr.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
-	_, err = groups.UpdateLogGroup(client, groups.UpdateLogGroupOpts{
+	_, err = groups.Update(client, groups.UpdateLogGroupOpts{
 		TTLInDays:  int32(d.Get("ttl_in_days").(int)),
 		LogGroupId: d.Id(),
 	})
@@ -128,7 +130,7 @@ func resourceGroupV2Delete(_ context.Context, d *schema.ResourceData, meta inter
 		return fmterr.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
-	err = groups.DeleteLogGroup(client, d.Id())
+	err = groups.Delete(client, d.Id())
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault400); ok {
 			d.SetId("")

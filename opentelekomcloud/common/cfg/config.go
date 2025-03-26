@@ -1139,6 +1139,13 @@ func (c *Config) LtsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) LtsV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewLTSV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) DdsV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewDDSServiceV3(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,

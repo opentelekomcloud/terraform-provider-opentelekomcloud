@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/lts/v2/transfers"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -13,49 +14,75 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+func getLtsTransferResourceFunc(config *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
+	client, err := config.LtsV2Client(env.OS_REGION_NAME)
+	if err != nil {
+		return nil, fmt.Errorf("error creating LTS v2 client: %s", err)
+	}
+	requestResp, err := transfers.List(client, transfers.ListTransfersOpts{})
+	if err != nil {
+		return nil, err
+	}
+	if len(requestResp) < 1 {
+		return nil, golangsdk.ErrDefault404{}
+	}
+	var transferResult *transfers.Transfer
+	for _, transfer := range requestResp {
+		if transfer.LogTransferId == state.Primary.ID {
+			transferResult = &transfer
+		}
+	}
+	if transferResult == nil {
+		return nil, golangsdk.ErrDefault404{}
+	}
+	return transferResult, nil
+}
+
 func TestAccLogTankTransferV2_basic(t *testing.T) {
-	var transfer transfers.Transfer
+	var (
+		transfer     transfers.Transfer
+		resourceName = "opentelekomcloud_logtank_transfer_v2.transfer"
+		rc           = common.InitResourceCheck(resourceName, &transfer, getLtsTransferResourceFunc)
+	)
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckLogTankTopicV2Destroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLogTankTransferV2_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLogTankTransferV2Exists(
-						"opentelekomcloud_logtank_transfer_v2.transfer", &transfer),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "period", "12"),
+						resourceName, "period", "12"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "switch_on", "true"),
+						resourceName, "switch_on", "true"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "obs_bucket_name", "tf-test-bucket-lts"),
+						resourceName, "obs_bucket_name", "tf-test-bucket-lts"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "period_unit", "hour"),
+						resourceName, "period_unit", "hour"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "storage_format", "RAW"),
+						resourceName, "storage_format", "RAW"),
 				),
 			},
 			{
 				Config: testAccLogTankTransferV2_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLogTankTransferV2Exists(
-						"opentelekomcloud_logtank_transfer_v2.transfer", &transfer),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "period", "30"),
+						resourceName, "period", "30"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "switch_on", "false"),
+						resourceName, "switch_on", "false"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "obs_bucket_name", "tf-test-bucket-lts"),
+						resourceName, "obs_bucket_name", "tf-test-bucket-lts"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "period_unit", "min"),
+						resourceName, "period_unit", "min"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "storage_format", "JSON"),
+						resourceName, "storage_format", "JSON"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "prefix_name", "prefix"),
+						resourceName, "prefix_name", "prefix"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "dir_prefix_name", "dir"),
+						resourceName, "dir_prefix_name", "dir"),
 				),
 			},
 		},
@@ -63,64 +90,34 @@ func TestAccLogTankTransferV2_basic(t *testing.T) {
 }
 
 func TestAccLogTankTransferV2_encryptedBucket(t *testing.T) {
-	var transfer transfers.Transfer
+	var (
+		transfer     transfers.Transfer
+		resourceName = "opentelekomcloud_logtank_transfer_v2.transfer"
+		rc           = common.InitResourceCheck(resourceName, &transfer, getLtsTransferResourceFunc)
+	)
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckLogTankTopicV2Destroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLogTankTransferV2_encrypted(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLogTankTransferV2Exists(
-						"opentelekomcloud_logtank_transfer_v2.transfer", &transfer),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "period", "30"),
+						resourceName, "period", "30"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "switch_on", "false"),
+						resourceName, "switch_on", "false"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "obs_bucket_name", "tf-test-bucket-lts-encrypted"),
+						resourceName, "obs_bucket_name", "tf-test-bucket-lts-encrypted"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "period_unit", "min"),
+						resourceName, "period_unit", "min"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_transfer_v2.transfer", "storage_format", "JSON"),
+						resourceName, "storage_format", "JSON"),
 				),
 			},
 		},
 	})
-}
-
-func testAccCheckLogTankTransferV2Exists(n string, transfer *transfers.Transfer) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no ID is set")
-		}
-
-		config := common.TestAccProvider.Meta().(*cfg.Config)
-		ltsclient, err := config.LtsV2Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
-		}
-
-		allTransfers, err := transfers.ListTransfers(ltsclient, transfers.ListTransfersOpts{})
-		if err != nil {
-			return err
-		}
-
-		for _, transferRaw := range allTransfers {
-			if transferRaw.LogTransferId == rs.Primary.ID {
-				*transfer = transferRaw
-				break
-			}
-		}
-
-		return nil
-	}
 }
 
 const testAccLogTankTransferV2_basic = `
@@ -226,7 +223,7 @@ resource "opentelekomcloud_logtank_transfer_v2" "transfer" {
   period          = 30
   period_unit     = "min"
   prefix_name     = "prefix"
-  dir_prefix_name = "dir"
+  // dir_prefix_name = "dir"
 }
 `, env.OS_KMS_ID)
 }
