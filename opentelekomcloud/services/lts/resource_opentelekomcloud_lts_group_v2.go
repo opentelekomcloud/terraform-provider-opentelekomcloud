@@ -111,7 +111,7 @@ func resourceLtsGroupV2Read(ctx context.Context, d *schema.ResourceData, meta in
 		d.Set("enterprise_project_id", groupResult.Tag["_sys_enterprise_project_id"]),
 		d.Set("tags", ignoreSysEpsTag(groupResult.Tag)),
 		d.Set("ttl_in_days", groupResult.TTLInDays),
-		d.Set("created_at", common.FormatTimeStampRFC3339(int64(groupResult.CreationTime)/1000, false)),
+		d.Set("created_at", common.FormatTimeStampRFC3339(groupResult.CreationTime/1000, false)),
 	)
 	return diag.FromErr(mErr.ErrorOrNil())
 }

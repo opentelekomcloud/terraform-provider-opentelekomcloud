@@ -14,8 +14,6 @@ const (
 	keyClientV2         = "lts-v2-client"
 	errCreationV2Client = "error creating OpenTelekomCloud LTS V2 client: %w"
 	errCreationV1Client = "error creating OpenTelekomCloud LTS V1 client: %w"
-
-	ePSTagKey string = "_sys_enterprise_project_id"
 )
 
 func ltsTags(d *schema.ResourceData) []rt.ResourceTag {
