@@ -163,3 +163,16 @@ func ValidateDiskType(v interface{}, path cty.Path) diag.Diagnostics {
 		AttributePath: path,
 	}}
 }
+
+func ValidateVpnRegion(v interface{}, path cty.Path) diag.Diagnostics {
+	region := v.(string)
+	if region != "eu-de" {
+		return nil
+	}
+	return diag.Diagnostics{diag.Diagnostic{
+		Severity:      diag.Warning,
+		Summary:       "[DEPRECATION WARNING]",
+		Detail:        "Classic VPN reach end of life for eu-de region, end of may 2025.",
+		AttributePath: path,
+	}}
+}

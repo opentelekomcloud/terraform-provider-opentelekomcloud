@@ -14,6 +14,9 @@ Up-to-date reference of API arguments for VPNAAS ike policy you can get at
 
 Manages a V2 IKE policy resource within OpenTelekomCloud.
 
+~>
+Resource is deprecated for `eu-de` region, use `enterprise vpn` solution instead
+
 ## Example Usage
 
 ```hcl
