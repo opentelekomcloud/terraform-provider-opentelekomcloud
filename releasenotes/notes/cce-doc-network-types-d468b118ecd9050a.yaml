@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[CCE]** Update ``container_network_type`` description for ``resource/opentelekomcloud_cce_cluster_v3`` documentation (`#2872 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2872>`_)
