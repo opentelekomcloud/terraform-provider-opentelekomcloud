@@ -1,0 +1,4 @@
+---
+critical:
+  - |
+    **[CCE]** Breaking: ``x509`` removed from defaults in ``authentication_mode`` and not supported anymore by api in ``resource/opentelekomcloud_cce_cluster_v3``, need manual actions in configurations like ``ignore_changes`` in ``lifecycle`` block  (`#2875 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2875>`_)
