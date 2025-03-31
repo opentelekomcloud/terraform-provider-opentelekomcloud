@@ -119,6 +119,12 @@ func TestAccPreCheckDcHostedConnection(t *testing.T) {
 	}
 }
 
+func TestLtsPreCheckLts(t *testing.T) {
+	if env.OS_ACCESS_KEY == "" || env.OS_SECRET_KEY == "" || env.OS_PROJECT_ID == "" {
+		t.Skip("OS_ACCESS_KEY, OS_SECRET_KEY and OS_PROJECT_ID must be set for LTS acceptance tests")
+	}
+}
+
 func TestAccPreCheckAdminOnly(t *testing.T) {
 	v := os.Getenv("OS_TENANT_ADMIN")
 	if v == "" {

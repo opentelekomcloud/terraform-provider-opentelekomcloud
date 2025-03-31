@@ -538,6 +538,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_logtank_topic_v2":                          lts.ResourceLTSTopicV2(),
 			"opentelekomcloud_logtank_transfer_v2":                       lts.ResourceLTSTransferV2(),
 			"opentelekomcloud_lts_group_v2":                              lts.ResourceLTSNewGroupV2(),
+			"opentelekomcloud_lts_host_group_v3":                         lts.ResourceHostGroupV3(),
 			"opentelekomcloud_lts_stream_v2":                             lts.ResourceLTSStreamV2(),
 			"opentelekomcloud_lts_transfer_v2":                           lts.ResourceLTSNewTransferV2(),
 			"opentelekomcloud_mrs_cluster_v1":                            mrs.ResourceMRSClusterV1(),
