@@ -64,7 +64,7 @@ resource "opentelekomcloud_lts_cce_access_v3" "container_file" {
 
   access_config {
     path_type = "container_file"
-    paths       = ["/var"]
+    paths     = ["/var"]
 
     windows_log_info {
       categories       = ["System", "Application"]
@@ -98,7 +98,7 @@ resource "opentelekomcloud_lts_cce_access_v3" "host_file" {
 
   access_config {
     path_type = "host_file"
-    paths       = ["/var"]
+    paths     = ["/var"]
 
     single_log_format {
       mode = "system"
