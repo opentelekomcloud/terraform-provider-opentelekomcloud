@@ -52,6 +52,8 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_updated_"+postfix),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8636"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "lower_case_table_names", "0"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.keep_days", "2"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.period", "1,2,3,4"),
 				),
 			},
 		},
@@ -225,6 +227,7 @@ func TestAccRdsInstanceV3Backup(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.period", "1,2"),
 				),
 			},
 		},
@@ -456,6 +459,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 0
+    period     = "1,2,3"
   }
   tags = {
     muh = "value-create"
@@ -494,7 +498,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   flavor = "rds.pg.n1.large.4"
   backup_strategy {
     start_time = "08:00-09:00"
-    keep_days  = 1
+    keep_days  = 2
+    period     = "1,2,3,4"
   }
   tags = {
     muh = "value-update"
@@ -611,13 +616,14 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 100
   }
-  flavor = "rds.pg.c2.large"
+  flavor = "rds.pg.n1.large.4"
   backup_strategy {
     start_time = "10:00-11:00"
     keep_days  = 5
+    period     = "1,2"
   }
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)

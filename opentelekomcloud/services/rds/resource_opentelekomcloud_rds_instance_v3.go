@@ -223,6 +223,10 @@ func ResourceRdsInstanceV3() *schema.Resource {
 							Computed: true,
 							Optional: true,
 						},
+						"period": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 					},
 				},
 			},
@@ -612,6 +616,12 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
+	if period := d.Get("backup_strategy.0.period").(string); period != "" {
+		if err = enableBackupStrategy(ctx, d, client, d.Id()); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return resourceRdsInstanceV3Read(ctx, d, meta)
 }
 
@@ -919,19 +929,29 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	var updateBackupOpts backups.UpdateOpts
-
 	if d.HasChange("backup_strategy") {
-		backupRaw := resourceRDSBackupStrategy(d)
-		updateBackupOpts.InstanceId = d.Id()
-		if backupRaw.KeepDays != 0 {
-			updateBackupOpts.KeepDays = &backupRaw.KeepDays
-			updateBackupOpts.StartTime = backupRaw.StartTime
-			updateBackupOpts.Period = "1,2,3,4,5,6,7"
-			log.Printf("[DEBUG] updateOpts: %#v", updateBackupOpts)
-		} else {
-			updateBackupOpts.KeepDays = pointerto.Int(0)
+		var updateBackupOpts = backups.UpdateOpts{
+			InstanceId: d.Id(),
 		}
+
+		backupStrategyRaw := d.Get("backup_strategy").([]interface{})
+		updateBackupOpts.KeepDays = pointerto.Int(0)
+
+		if len(backupStrategyRaw) > 0 {
+			backupStrategyInfo := backupStrategyRaw[0].(map[string]interface{})
+			keepDays := backupStrategyInfo["keep_days"].(int)
+
+			if keepDays != 0 {
+				period := backupStrategyInfo["period"].(string)
+				startTime := backupStrategyInfo["start_time"].(string)
+
+				updateBackupOpts.KeepDays = &keepDays
+				updateBackupOpts.StartTime = startTime
+				updateBackupOpts.Period = period
+				log.Printf("[DEBUG] updateOpts: %#v", updateBackupOpts)
+			}
+		}
+
 		if err = backups.Update(client, updateBackupOpts); err != nil {
 			return fmterr.Errorf("error updating OpenTelekomCloud RDSv3 Instance: %s", err)
 		}
@@ -1258,17 +1278,27 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(err)
 	}
 
+	strategy, err := backups.ShowBackupPolicy(client, d.Id())
+	if err != nil {
+		return fmterr.Errorf("error retrieving backup strategy: %s", err)
+	}
+
 	var backupStrategyList []map[string]interface{}
 	backupStrategy := make(map[string]interface{})
-	backupStrategy["keep_days"] = rdsInstance.BackupStrategy.KeepDays
-	// if `keep_days` is set to 0 backend returns empty `start_time`
-	// which forces instance update
-	if backupStrategy["keep_days"] != 0 {
-		backupStrategy["start_time"] = rdsInstance.BackupStrategy.StartTime
+	backupStrategy["keep_days"] = strategy.KeepDays
+
+	if strategy.KeepDays != 0 {
+		backupStrategy["period"] = strategy.Period
+		backupStrategy["start_time"] = strategy.StartTime
 	} else {
-		backupRaw := resourceRDSBackupStrategy(d)
-		backupStrategy["start_time"] = backupRaw.StartTime
+		if period, ok := d.GetOk("backup_strategy.0.period"); ok {
+			backupStrategy["period"] = period.(string)
+		}
+		if period, ok := d.GetOk("backup_strategy.0.start_time"); ok {
+			backupStrategy["start_time"] = period.(string)
+		}
 	}
+
 	backupStrategyList = append(backupStrategyList, backupStrategy)
 	if err := d.Set("backup_strategy", backupStrategyList); err != nil {
 		return fmterr.Errorf("error setting backup strategy: %s", err)
@@ -1507,6 +1537,37 @@ func enableVolumeAutoExpand(ctx context.Context, d *schema.ResourceData, client 
 	}
 	retryFunc := func() (interface{}, bool, error) {
 		err := instances.ManageAutoScaling(client, d.Id(), opts)
+		retry, err := handleMultiOperationsError(err)
+		return nil, retry, err
+	}
+	_, err := common.RetryContextWithWaitForState(&common.RetryContextWithWaitForStateParam{
+		Ctx:          ctx,
+		RetryFunc:    retryFunc,
+		WaitFunc:     rdsInstanceStateRefreshFunc(client, instanceID),
+		WaitTarget:   []string{"ACTIVE"},
+		Timeout:      d.Timeout(schema.TimeoutUpdate),
+		DelayTimeout: 10 * time.Second,
+		PollInterval: 10 * time.Second,
+	})
+	if err != nil {
+		return fmt.Errorf("an error occurred while enable automatic expansion of instance storage: %v", err)
+	}
+	return nil
+}
+
+func enableBackupStrategy(ctx context.Context, d *schema.ResourceData, client *golangsdk.ServiceClient,
+	instanceID string) error {
+	backupStrategyRaw := d.Get("backup_strategy").([]interface{})
+	backupStrategyInfo := backupStrategyRaw[0].(map[string]interface{})
+	backupOpts := backups.UpdateOpts{
+		InstanceId: instanceID,
+		StartTime:  backupStrategyInfo["start_time"].(string),
+		KeepDays:   pointerto.Int(backupStrategyInfo["keep_days"].(int)),
+		Period:     backupStrategyInfo["period"].(string),
+	}
+
+	retryFunc := func() (interface{}, bool, error) {
+		err := backups.Update(client, backupOpts)
 		retry, err := handleMultiOperationsError(err)
 		return nil, retry, err
 	}

@@ -48,6 +48,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
+    period     = "1,2,3,4,5"
   }
 
   tags = {
@@ -458,6 +459,11 @@ The `backup_strategy` block supports:
   be 1 greater than the hh value. The values of mm and MM must be
   the same and must be set to any of the following: 00, 15, 30, or
   45. Example value: 08:15-09:15 23:00-00:00.
+
+* `period` - (Optional) Specifies the backup cycle configuration. Data will be automatically backed up on the selected days every week.
+  This parameter is mandatory except that the automated backup policy is disabled.
+  Value range: The value is digits separated by commas (,), indicating the day of the week and starting from Monday.
+  For example, the value `1,2,3,4` indicates that the backup period is Monday, Tuesday, Wednesday, and Thursday.
 
 The `restore_point` block supports:
 
