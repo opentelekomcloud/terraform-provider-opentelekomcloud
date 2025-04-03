@@ -87,6 +87,10 @@ The `access_config` block supports:
 * `windows_log_info` - (Optional, List) Specifies the configuration of Windows event logs.
   The [windows_log_info](#HostAccessConfigWindowsLogInfo) structure is documented below.
 
+* `binary_collect` - (Optional, Bool) Specifies whether collect in binary format. Default is **false**.
+
+* `log_split` - (Optional, Bool) Specifies whether to split log. Default is false.
+
 <a name="HostAccessConfigSingleLogFormat"></a>
 The `single_log_format` blocks supports:
 
@@ -142,13 +146,15 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the host access.
 
+* `created_at` - The creation time of the Host access, in RFC3339 format.
+
 * `access_type` - The log access type.
 
 * `log_group_name` - The log group name.
 
 * `log_stream_name` - The log stream name.
 
-* `region` - Shows the region in the host group resource created.
+* `region` - Shows the region in the host access resource created.
 
 ## Import
 

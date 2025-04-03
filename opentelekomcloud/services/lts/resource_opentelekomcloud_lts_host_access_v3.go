@@ -72,6 +72,10 @@ func ResourceHostAccessConfigV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"log_group_name": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -199,7 +203,7 @@ func resourceHostAccessConfigV3Create(ctx context.Context, d *schema.ResourceDat
 	}
 	access, err := ac.Create(client, opts)
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud LTS v3 host group: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud LTS v3 host access: %s", err)
 	}
 	d.SetId(access.ID)
 
@@ -348,6 +352,7 @@ func resourceHostAccessConfigV3Read(ctx context.Context, d *schema.ResourceData,
 		d.Set("host_group_ids", getHostGroupIDs(configResult.HostGroupInfo)),
 		d.Set("tags", tagsMap),
 		d.Set("access_config", flattenHostAccessConfigDetail(configResult.AccessConfigDetail)),
+		d.Set("created_at", common.FormatTimeStampRFC3339(configResult.CreatedAt/1000, false)),
 	)
 
 	return diag.FromErr(mErr.ErrorOrNil())
@@ -472,14 +477,24 @@ func buildWindowsLogInfoUpdateBody(rawParams interface{}) *ac.AccessConfigWindow
 		if !ok {
 			return nil
 		}
+		rawCategories := raw["categories"].([]interface{})
+		categories := make([]string, len(rawCategories))
+		for i, r := range rawCategories {
+			categories[i] = r.(string)
+		}
 
+		rawEventLevels := raw["event_level"].([]interface{})
+		eventLevels := make([]string, len(rawEventLevels))
+		for i, r := range rawEventLevels {
+			eventLevels[i] = r.(string)
+		}
 		timeOffsetOpts := ac.AccessConfigTimeOffset{
 			Offset: int64(raw["time_offset"].(int)),
 			Unit:   raw["time_offset_unit"].(string),
 		}
 		params := ac.AccessConfigWindowsLogInfoUpdate{
-			Categories: common.ExpandToStringList(raw["categories"].(*schema.Set).List()),
-			EventLevel: common.ExpandToStringList(raw["event_level"].(*schema.Set).List()),
+			Categories: categories,
+			EventLevel: eventLevels,
 			TimeOffset: &timeOffsetOpts,
 		}
 		return &params

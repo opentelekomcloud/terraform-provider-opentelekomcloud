@@ -617,3 +617,15 @@ func PasswordEncrypt(password string) (string, error) {
 	}
 	return base64.StdEncoding.EncodeToString([]byte(passwordEncrypted)), nil
 }
+
+func ConvertToMapString(raw interface{}) map[string]string {
+	m := make(map[string]string)
+	if rawMap, ok := raw.(map[string]interface{}); ok {
+		for k, v := range rawMap {
+			if s, ok := v.(string); ok {
+				m[k] = s
+			}
+		}
+	}
+	return m
+}
