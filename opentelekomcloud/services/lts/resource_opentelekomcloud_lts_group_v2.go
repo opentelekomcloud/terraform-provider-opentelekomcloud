@@ -99,6 +99,7 @@ func resourceLtsGroupV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	for _, gr := range requestResp {
 		if gr.LogGroupId == d.Id() {
 			groupResult = gr
+			break
 		}
 	}
 	if groupResult.LogGroupId == "" {

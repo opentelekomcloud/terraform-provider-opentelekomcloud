@@ -159,6 +159,7 @@ func resourceHostGroupV3Read(ctx context.Context, d *schema.ResourceData, meta i
 	for _, gr := range requestResp.Result {
 		if gr.ID == d.Id() {
 			groupResult = gr
+			break
 		}
 	}
 	if groupResult.ID == "" {

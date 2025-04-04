@@ -123,6 +123,7 @@ func resourceStreamV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 	for _, stream := range requestResp {
 		if stream.LogStreamId == d.Id() {
 			streamResult = stream
+			break
 		}
 	}
 	if streamResult.LogStreamId == "" {

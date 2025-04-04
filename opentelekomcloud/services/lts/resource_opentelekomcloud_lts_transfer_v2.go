@@ -335,6 +335,7 @@ func resourceLtsTransferV2Read(ctx context.Context, d *schema.ResourceData, meta
 	for _, tr := range requestResp {
 		if tr.LogTransferId == d.Id() {
 			transferResult = tr
+			break
 		}
 	}
 	if transferResult.LogTransferId == "" {

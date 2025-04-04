@@ -290,6 +290,7 @@ func resourceCceAccessConfigV3Read(ctx context.Context, d *schema.ResourceData, 
 	for _, acc := range requestResp.Result {
 		if acc.ID == d.Id() {
 			configResult = acc
+			break
 		}
 	}
 	if configResult.ID == "" {

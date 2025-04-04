@@ -47,7 +47,7 @@ func TestAccHostAccessConfigV3_basic(t *testing.T) {
 		rc     = common.InitResourceCheck(rName, &access, getHostAccessConfigResourceFunc)
 	)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      rc.CheckResourceDestroy(),
@@ -98,7 +98,7 @@ func TestAccHostAccessConfigV3_windows(t *testing.T) {
 		rc     = common.InitResourceCheck(rName, &access, getHostAccessConfigResourceFunc)
 	)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      rc.CheckResourceDestroy(),
