@@ -160,13 +160,13 @@ func resourceCrossAccountAccessV2Read(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	var configResult *ac.AccessConfigInfo
+	var configResult ac.AccessConfigInfo
 	for _, acc := range requestResp.Result {
 		if acc.Name == d.Get("name").(string) {
-			configResult = &acc
+			configResult = acc
 		}
 	}
-	if configResult == nil {
+	if configResult.ID == "" {
 		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v3 cross account access config by its ID (%s)", d.Id()))
 	}
 	tagsMap := make(map[string]string)
