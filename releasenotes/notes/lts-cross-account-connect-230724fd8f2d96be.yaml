@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[LTS]** New LTS Cross account access resource ``resource/opentelekomcloud_lts_cross_account_access_v2`` (`#2885 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2885>`_)
