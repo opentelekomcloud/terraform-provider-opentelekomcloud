@@ -23,7 +23,7 @@ func TestAccCceAccessConfig_containerFile(t *testing.T) {
 		rc     = common.InitResourceCheck(rName, &access, getHostAccessConfigResourceFunc)
 	)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
 		},
@@ -111,7 +111,7 @@ func TestAccCceAccessConfig_containerStdout(t *testing.T) {
 		rc     = common.InitResourceCheck(rName, &access, getHostAccessConfigResourceFunc)
 	)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
 		},
@@ -192,7 +192,7 @@ func TestAccCceAccessConfig_hostFile(t *testing.T) {
 		rc     = common.InitResourceCheck(rName, &access, getHostAccessConfigResourceFunc)
 	)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
 		},

@@ -27,13 +27,13 @@ func getHostAccessConfigResourceFunc(config *cfg.Config, state *terraform.Resour
 	if len(requestResp.Result) < 1 {
 		return nil, golangsdk.ErrDefault404{}
 	}
-	var accessResult *ac.AccessConfigInfo
+	var accessResult ac.AccessConfigInfo
 	for _, acc := range requestResp.Result {
 		if acc.ID == state.Primary.ID {
-			accessResult = &acc
+			accessResult = acc
 		}
 	}
-	if accessResult == nil {
+	if accessResult.ID == "" {
 		return nil, golangsdk.ErrDefault404{}
 	}
 	return accessResult, nil
@@ -47,7 +47,7 @@ func TestAccHostAccessConfigV3_basic(t *testing.T) {
 		rc     = common.InitResourceCheck(rName, &access, getHostAccessConfigResourceFunc)
 	)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      rc.CheckResourceDestroy(),
@@ -98,7 +98,7 @@ func TestAccHostAccessConfigV3_windows(t *testing.T) {
 		rc     = common.InitResourceCheck(rName, &access, getHostAccessConfigResourceFunc)
 	)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      rc.CheckResourceDestroy(),

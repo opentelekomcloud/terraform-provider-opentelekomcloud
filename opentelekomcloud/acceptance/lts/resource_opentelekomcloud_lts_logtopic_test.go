@@ -28,13 +28,13 @@ func getLtsStreamResourceFunc(config *cfg.Config, state *terraform.ResourceState
 	if len(requestResp) < 1 {
 		return nil, golangsdk.ErrDefault404{}
 	}
-	var streamResult *streams.LogStream
+	var streamResult streams.LogStream
 	for _, stream := range requestResp {
 		if stream.LogStreamId == state.Primary.ID {
-			streamResult = &stream
+			streamResult = stream
 		}
 	}
-	if streamResult == nil {
+	if streamResult.LogStreamId == "" {
 		return nil, golangsdk.ErrDefault404{}
 	}
 	return streamResult, nil

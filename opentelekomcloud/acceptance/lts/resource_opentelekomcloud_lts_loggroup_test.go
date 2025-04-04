@@ -28,13 +28,13 @@ func getLtsGroupResourceFunc(config *cfg.Config, state *terraform.ResourceState)
 	if len(requestResp) < 1 {
 		return nil, golangsdk.ErrDefault404{}
 	}
-	var groupResult *groups.LogGroup
+	var groupResult groups.LogGroup
 	for _, group := range requestResp {
 		if group.LogGroupId == state.Primary.ID {
-			groupResult = &group
+			groupResult = group
 		}
 	}
-	if groupResult == nil {
+	if groupResult.LogGroupId == "" {
 		return nil, golangsdk.ErrDefault404{}
 	}
 	return groupResult, nil

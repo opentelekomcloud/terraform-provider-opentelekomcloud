@@ -27,13 +27,13 @@ func getHostGroupResourceFunc(config *cfg.Config, state *terraform.ResourceState
 	if len(requestResp.Result) < 1 {
 		return nil, golangsdk.ErrDefault404{}
 	}
-	var groupResult *hg.HostGroupResponse
+	var groupResult hg.HostGroupResponse
 	for _, group := range requestResp.Result {
 		if group.ID == state.Primary.ID {
-			groupResult = &group
+			groupResult = group
 		}
 	}
-	if groupResult == nil {
+	if groupResult.ID == "" {
 		return nil, golangsdk.ErrDefault404{}
 	}
 	return groupResult, nil

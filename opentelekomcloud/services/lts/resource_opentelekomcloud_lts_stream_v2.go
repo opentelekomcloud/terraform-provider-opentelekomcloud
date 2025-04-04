@@ -118,13 +118,15 @@ func resourceStreamV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	var streamResult *streams.LogStream
+	var streamResult streams.LogStream
+
 	for _, stream := range requestResp {
 		if stream.LogStreamId == d.Id() {
-			streamResult = &stream
+			streamResult = stream
+			break
 		}
 	}
-	if streamResult == nil {
+	if streamResult.LogStreamId == "" {
 		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 log stream by its ID (%s)", d.Id()))
 	}
 

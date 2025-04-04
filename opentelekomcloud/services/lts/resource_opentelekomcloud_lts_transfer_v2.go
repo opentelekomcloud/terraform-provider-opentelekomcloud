@@ -330,13 +330,15 @@ func resourceLtsTransferV2Read(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	requestResp, err := transfers.List(client, transfers.ListTransfersOpts{})
-	var transferResult *transfers.Transfer
+	var transferResult transfers.Transfer
+
 	for _, tr := range requestResp {
 		if tr.LogTransferId == d.Id() {
-			transferResult = &tr
+			transferResult = tr
+			break
 		}
 	}
-	if transferResult == nil {
+	if transferResult.LogTransferId == "" {
 		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 log transfer by its ID (%s)", d.Id()))
 	}
 	mErr := multierror.Append(nil,

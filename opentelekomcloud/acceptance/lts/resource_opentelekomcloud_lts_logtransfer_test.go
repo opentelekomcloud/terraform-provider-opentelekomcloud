@@ -26,13 +26,13 @@ func getLtsTransferResourceFunc(config *cfg.Config, state *terraform.ResourceSta
 	if len(requestResp) < 1 {
 		return nil, golangsdk.ErrDefault404{}
 	}
-	var transferResult *transfers.Transfer
+	var transferResult transfers.Transfer
 	for _, transfer := range requestResp {
 		if transfer.LogTransferId == state.Primary.ID {
-			transferResult = &transfer
+			transferResult = transfer
 		}
 	}
-	if transferResult == nil {
+	if transferResult.LogTransferId == "" {
 		return nil, golangsdk.ErrDefault404{}
 	}
 	return transferResult, nil

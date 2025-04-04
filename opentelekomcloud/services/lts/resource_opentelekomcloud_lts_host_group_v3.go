@@ -154,13 +154,15 @@ func resourceHostGroupV3Read(ctx context.Context, d *schema.ResourceData, meta i
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	var groupResult *hg.HostGroupResponse
+	var groupResult hg.HostGroupResponse
+
 	for _, gr := range requestResp.Result {
 		if gr.ID == d.Id() {
-			groupResult = &gr
+			groupResult = gr
+			break
 		}
 	}
-	if groupResult == nil {
+	if groupResult.ID == "" {
 		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 host group by its ID (%s)", d.Id()))
 	}
 	tagsMap := make(map[string]string)
