@@ -293,7 +293,7 @@ func resourceCceAccessConfigV3Read(ctx context.Context, d *schema.ResourceData, 
 		}
 	}
 	if configResult == nil {
-		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 cce access config by its ID (%s)", d.Id()))
+		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v3 cce access config by its ID (%s)", d.Id()))
 	}
 	tagsMap := make(map[string]string)
 	for _, tag := range configResult.Tags {
