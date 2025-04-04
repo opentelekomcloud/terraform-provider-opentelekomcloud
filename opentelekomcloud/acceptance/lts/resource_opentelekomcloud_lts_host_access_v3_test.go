@@ -27,13 +27,13 @@ func getHostAccessConfigResourceFunc(config *cfg.Config, state *terraform.Resour
 	if len(requestResp.Result) < 1 {
 		return nil, golangsdk.ErrDefault404{}
 	}
-	var accessResult *ac.AccessConfigInfo
+	var accessResult ac.AccessConfigInfo
 	for _, acc := range requestResp.Result {
 		if acc.ID == state.Primary.ID {
-			accessResult = &acc
+			accessResult = acc
 		}
 	}
-	if accessResult == nil {
+	if accessResult.ID == "" {
 		return nil, golangsdk.ErrDefault404{}
 	}
 	return accessResult, nil

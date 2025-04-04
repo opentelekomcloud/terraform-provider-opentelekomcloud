@@ -95,13 +95,13 @@ func resourceLtsGroupV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	var groupResult *groups.LogGroup
+	var groupResult groups.LogGroup
 	for _, gr := range requestResp {
 		if gr.LogGroupId == d.Id() {
-			groupResult = &gr
+			groupResult = gr
 		}
 	}
-	if groupResult == nil {
+	if groupResult.LogGroupId == "" {
 		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 log group by its ID (%s)", d.Id()))
 	}
 
