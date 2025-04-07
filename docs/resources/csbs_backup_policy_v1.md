@@ -14,6 +14,9 @@ Up-to-date reference of API arguments for CSBS backup policy you can get at
 
 Provides an OpenTelekomCloud Backup Policy of Resources.
 
+~>
+Deprecated, use `opentelekomcloud_cbr_policy_v3` resource instead.
+
 ## Example Usage
 
 ### Basic example
