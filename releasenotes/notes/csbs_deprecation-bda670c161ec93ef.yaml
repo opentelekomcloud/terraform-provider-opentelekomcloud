@@ -1,6 +1,6 @@
 ---
 deprecations:
   - |
-    **[CSBS]** ``resource/opentelekomcloud_csbs_backup_v1`` is deprecated in favor of cbr (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[CSBS]** ``resource/opentelekomcloud_csbs_backup_v1`` is deprecated in favor of cbr (`#2887 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2887>`_)
   - |
-    **[CSBS]** ``resource/opentelekomcloud_csbs_backup_policy_v1`` is deprecated in favor of cbr (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[CSBS]** ``resource/opentelekomcloud_csbs_backup_policy_v1`` is deprecated in favor of cbr (`#2887 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2887>`_)
