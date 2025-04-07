@@ -15,6 +15,9 @@ Up-to-date reference of API arguments for CSBS backup you can get at
 
 Provides an OpenTelekomCloud Backup of Resources.
 
+~>
+Deprecated, use `opentelekomcloud_cbr_vault_v3` resource instead.
+
 ## Example Usage
 
 ```hcl
