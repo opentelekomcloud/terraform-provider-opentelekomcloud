@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **SMN** New Data Source: ``opentelekomcloud_smn_topic_v2`` (`#2890 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2890>`_)
