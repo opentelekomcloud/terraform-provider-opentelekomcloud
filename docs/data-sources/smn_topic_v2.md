@@ -18,7 +18,7 @@ Get details about an SMN topic V2 resource within OpenTelekomCloud.
 
 ```hcl
 data "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name         = "topic_1"
+  name = "topic_1"
 }
 ```
 

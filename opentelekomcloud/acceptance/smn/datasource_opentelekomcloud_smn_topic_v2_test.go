@@ -47,6 +47,6 @@ func testAccCheckSMNTopicV2DataSourceID(n string) resource.TestCheckFunc {
 
 var TestAccSMNV2DataSourceTopicConfig_basic = `
 data "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name         = "test_topic"
+  name = "test_topic"
 }
 `
