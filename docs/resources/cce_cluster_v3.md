@@ -164,7 +164,7 @@ The following arguments are supported:
 
 * `annotations` - (Optional) Cluster annotation, key/value pair format. Changing this parameter will create a new cluster resource.
 
-* `timezone` - (Optional) Cluster timezone in string format.
+* `timezone` - (Optional) Cluster timezone in string format. Changing this parameter will create a new cluster resource.
 
 * `flavor_id` - (Required) Cluster specifications. Changing this parameter will create a new cluster resource.
   * `cce.s1.small` - small-scale single cluster (up to 50 nodes).
