@@ -42,6 +42,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
   kube_proxy_mode        = "ipvs"
+  timezone               = "Europe/Madrid"
 }
 ```
 
@@ -122,6 +123,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   subnet_id              = var.subnet_id
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
+  timezone               = "UTC"
 
   depends_on = [opentelekomcloud_identity_agency_v3.enable_cce_auto_creation]
 }
@@ -161,6 +163,8 @@ The following arguments are supported:
 * `labels` - (Optional) Cluster tag, key/value pair format. Changing this parameter will create a new cluster resource.
 
 * `annotations` - (Optional) Cluster annotation, key/value pair format. Changing this parameter will create a new cluster resource.
+
+* `timezone` - (Optional) Cluster timezone in string format. Changing this parameter will create a new cluster resource.
 
 * `flavor_id` - (Required) Cluster specifications. Changing this parameter will create a new cluster resource.
   * `cce.s1.small` - small-scale single cluster (up to 50 nodes).

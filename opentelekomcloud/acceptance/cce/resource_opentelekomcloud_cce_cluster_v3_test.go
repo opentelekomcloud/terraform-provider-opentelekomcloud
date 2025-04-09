@@ -63,6 +63,7 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceClusterName, "certificate_users.0.name", "user"),
 					resource.TestCheckResourceAttr(resourceClusterName, "enable_volume_encryption", "true"),
 					resource.TestCheckResourceAttr(resourceClusterName, "masters.0.availability_zone", "eu-de-01"),
+					resource.TestCheckResourceAttr(resourceClusterName, "timezone", "Europe/Madrid"),
 				),
 			},
 			{
@@ -72,6 +73,7 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceClusterName, "kube_proxy_mode", "ipvs"),
 					resource.TestCheckResourceAttr(resourceClusterName, "enable_volume_encryption", "true"),
 					resource.TestCheckResourceAttr(resourceClusterName, "masters.0.availability_zone", "eu-de-01"),
+					resource.TestCheckResourceAttr(resourceClusterName, "timezone", "Europe/Madrid"),
 				),
 			},
 		},
@@ -330,6 +332,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   ignore_addons            = true
   kube_proxy_mode          = "ipvs"
   enable_volume_encryption = true
+  timezone                 = "Europe/Madrid"
   masters {
     availability_zone = "eu-de-01"
   }
@@ -400,6 +403,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   delete_all_storage       = "true"
   delete_all_network       = "true"
   enable_volume_encryption = true
+  timezone                 = "Europe/Madrid"
   masters {
     availability_zone = "eu-de-01"
   }

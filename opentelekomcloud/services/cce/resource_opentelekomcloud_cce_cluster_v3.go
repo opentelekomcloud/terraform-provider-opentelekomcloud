@@ -81,6 +81,12 @@ func ResourceCCEClusterV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"timezone": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
 			"flavor_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -456,6 +462,7 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 			Name:        d.Get("name").(string),
 			Labels:      resourceClusterLabelsV3(d),
 			Annotations: resourceClusterAnnotationsV3(d),
+			Timezone:    d.Get("timezone").(string),
 		},
 		Spec: clusters.Spec{
 			Type:        d.Get("cluster_type").(string),
@@ -591,6 +598,7 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("region", config.GetRegion(d)),
 		d.Set("eip", eip),
 		d.Set("enable_volume_encryption", cluster.Spec.EnableMasterVolumeEncryption),
+		d.Set("timezone", cluster.Metadata.Timezone),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting cce cluster fields: %w", err)
