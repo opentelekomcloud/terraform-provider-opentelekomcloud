@@ -176,13 +176,13 @@ The following arguments are supported:
 
 * `cluster_id` - (Required, String, ForceNew) ID of cluster to install the add-on on.
 
-* `values` - (Required, List, ForceNew) Parameters of the template to be installed or upgraded.
+* `values` - (Required, List) Parameters of the template to be installed or upgraded.
 
-    * `basic` - (Required, Map, ForceNew) Basic add-on information.
+    * `basic` - (Required, Map) Basic add-on information.
 
-    * `custom` - (Required, Map, ForceNew) Custom parameters of the add-on.
+    * `custom` - (Required, Map) Custom parameters of the add-on.
 
-    * `flavor` - (Optional, String, ForceNew) Specifies the json string vary depending on the add-on.
+    * `flavor` - (Optional, String) Specifies the json string vary depending on the add-on.
 
 Arguments which can be passed to the `basic` and `custom` addon parameters depends on the addon type and version.
 For more detailed description of addons for k8s version `v1.17.9` see [addons description](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/blob/devel/opentelekomcloud/services/cce/addon-templates-v1.17.9.md).
