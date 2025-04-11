@@ -263,13 +263,6 @@ resource "opentelekomcloud_lts_cce_access_v3" "container_file" {
     pod_name_regex       = "podname%[3]s"
     container_name_regex = "containername%[3]s"
 
-    windows_log_info {
-      categories       = ["System", "Application"]
-      event_level      = ["warning", "error"]
-      time_offset_unit = "day"
-      time_offset      = 7
-    }
-
     single_log_format {
       mode = "system"
     }
@@ -358,13 +351,6 @@ resource "opentelekomcloud_lts_cce_access_v3" "container_stdout" {
     name_space_regex     = "namespace%[2]s"
     pod_name_regex       = "podname%[2]s"
     container_name_regex = "containername%[2]s"
-
-    windows_log_info {
-      categories       = ["System", "Application"]
-      event_level      = ["warning", "error"]
-      time_offset_unit = "day"
-      time_offset      = 7
-    }
 
     single_log_format {
       mode = "system"
