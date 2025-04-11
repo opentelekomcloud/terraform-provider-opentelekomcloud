@@ -1,6 +1,6 @@
 ---
 other:
   - |
-    **[LTS]** Updated ``event_level`` values in ``docs/resources/lts_cce_access_v3`` (`#2894 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2894>`_)
+    **[LTS]** Removed ``windows_log_info`` from ``resource/opentelekomcloud_lts_cce_access_v3`` (`#2894 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2894>`_)
   - |
     **[LTS]** Updated ``event_level`` values in ``docs/resources/lts_host_access_v3`` (`#2894 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2894>`_)
