@@ -272,7 +272,7 @@ The `windows_log_info` block supports:
   `Application`, `System`, `Security` and `Setup`.
 
 * `event_level` - (Required, List) Specifies the Windows event severity. The valid values are `information`,
-  `warning`, `error`, `critical` and `verbose`. Only Windows Vista or later is supported.
+  `warning`, `error`, `critical` and `verbose`.
 
 * `time_offset_unit` - (Required, String) Specifies the collection time offset unit. The valid values are
   `day`, `hour` and `sec`.
