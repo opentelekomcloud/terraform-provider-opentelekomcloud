@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -209,8 +210,27 @@ func checkScaleDownForAutoscaler(name string, enabled bool) resource.TestCheckFu
 			return fmt.Errorf("addon not found")
 		}
 
-		if actual := found.Spec.Values.Advanced["scaleDownEnabled"]; actual != enabled {
-			return fmt.Errorf("invalid `scaleDownEnabled` value: expected %v, got %v", enabled, actual)
+		actual, exists := found.Spec.Values.Advanced["scaleDownEnabled"]
+		if !exists {
+			return fmt.Errorf("scaleDownEnabled parameter not found")
+		}
+
+		var actualBool bool
+		switch v := actual.(type) {
+		case bool:
+			actualBool = v
+		case string:
+			var err error
+			actualBool, err = strconv.ParseBool(v)
+			if err != nil {
+				return fmt.Errorf("failed to parse scaleDownEnabled value: %w", err)
+			}
+		default:
+			return fmt.Errorf("unexpected type for scaleDownEnabled: %T", actual)
+		}
+
+		if actualBool != enabled {
+			return fmt.Errorf("invalid `scaleDownEnabled` value: expected %v, got %v", enabled, actualBool)
 		}
 
 		return nil
