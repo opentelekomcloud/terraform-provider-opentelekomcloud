@@ -66,13 +66,6 @@ resource "opentelekomcloud_lts_cce_access_v3" "container_file" {
     path_type = "container_file"
     paths     = ["/var"]
 
-    windows_log_info {
-      categories       = ["System", "Application"]
-      event_level      = ["warning", "error"]
-      time_offset_unit = "day"
-      time_offset      = 7
-    }
-
     single_log_format {
       mode = "system"
     }
@@ -144,10 +137,6 @@ The `access_config` block supports:
   or `host_file`.
 
 * `black_paths` - (Optional, List) Specifies the collection path blacklist.
-
-* `windows_log_info` - (Optional, List) Specifies the configuration of Windows event logs. Required when
-  `path_type` is `container_file` or `container_stdout`.
-  The [windows_log_info](#windows_log_info) structure is documented below.
 
 * `single_log_format` - (Optional, List) Specifies the configuration single-line logs. Each log line is displayed
   as a single log event.
@@ -264,25 +253,6 @@ The `multi_log_format` block supports:
 -> The time wildcard and regular expression will look for the specified pattern right from the beginning of each
    log line. If no match is found, the system time, which may be different from the time in the log event, is used.
    In general cases, you are advised to select `Single-line` for Log Format and `system` time for Log Time.
-
-<a name="windows_log_info"></a>
-The `windows_log_info` block supports:
-
-* `categorys` - (Required, List) Specifies the types of Windows event logs to collect. The valid values are
-  `Application`, `System`, `Security` and `Setup`.
-
-* `event_level` - (Required, List) Specifies the Windows event severity. The valid values are `information`,
-  `warning`, `error`, `critical` and `verbose`. Only Windows Vista or later is supported.
-
-* `time_offset_unit` - (Required, String) Specifies the collection time offset unit. The valid values are
-  `day`, `hour` and `sec`.
-
-* `time_offset` - (Required, Int) Specifies the collection time offset. This time takes effect only for the first
-  time to ensure that the logs are not collected repeatedly.
-
-  + When `time_offset_unit` is set to `day`, the value ranges from `1` to `7` days.
-  + When `time_offset_unit` is set to `hour`, the value ranges from `1` to `168` hours.
-  + When `time_offset_unit` is set to `sec`, the value ranges from `1` to `604,800` seconds.
 
 ## Attribute Reference
 

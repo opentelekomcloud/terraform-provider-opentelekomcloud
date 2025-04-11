@@ -111,12 +111,6 @@ func cceAccessConfigDetailSchema() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 			},
-			"windows_log_info": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Elem:     windowsLogInfoSchema(),
-				Optional: true,
-			},
 			"single_log_format": {
 				Type:         schema.TypeList,
 				MaxItems:     1,
@@ -254,7 +248,6 @@ func buildCceDetailRequestBody(rawParams interface{}) *ac.AccessConfigDetails {
 		Paths:              common.ExpandToStringList(raw["paths"].(*schema.Set).List()),
 		BlackPaths:         common.ExpandToStringList(raw["black_paths"].(*schema.Set).List()),
 		Format:             buildFormatBody(raw),
-		WindowsLogInfo:     buildWindowsLogInfoBody(raw["windows_log_info"]),
 		Stdout:             pointerto.Bool(raw["stdout"].(bool)),
 		Stderr:             pointerto.Bool(raw["stderr"].(bool)),
 		NamespaceRegex:     raw["name_space_regex"].(string),
@@ -329,7 +322,6 @@ func flattenCceAccessConfigDetail(resp *ac.AccessConfigDetailResponse) []map[str
 			"black_paths":          resp.BlackPaths,
 			"single_log_format":    flattenHostAccessConfigLogFormat(resp.Format.Single),
 			"multi_log_format":     flattenHostAccessConfigLogFormat(resp.Format.Multi),
-			"windows_log_info":     flattenHostAccessConfigWindowsLogInfo(resp.WindowsLogInfo),
 			"stdout":               resp.Stdout,
 			"stderr":               resp.Stderr,
 			"name_space_regex":     resp.NamespaceRegex,
@@ -401,13 +393,11 @@ func buildCceDetailUpdateRequestBody(rawParams interface{}) *ac.AccessConfigDeta
 	if !ok {
 		return nil
 	}
-	logInfo := buildWindowsLogInfoUpdateBody(raw["windows_log_info"])
 	params := ac.AccessConfigDetailsUpdate{
 		PathType:           raw["path_type"].(string),
 		Paths:              common.ExpandToStringList(raw["paths"].(*schema.Set).List()),
 		BlackPaths:         common.ExpandToStringList(raw["black_paths"].(*schema.Set).List()),
 		Format:             buildFormatBody(raw),
-		WindowsLogInfo:     logInfo,
 		Stdout:             raw["stdout"].(bool),
 		Stderr:             raw["stderr"].(bool),
 		NamespaceRegex:     raw["name_space_regex"].(string),
