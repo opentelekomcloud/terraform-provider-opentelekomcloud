@@ -200,3 +200,30 @@ This resource provides the following timeouts configuration options:
 - `create` - Default is 10 minutes.
 
 - `delete` - Default is 10 minutes.
+
+## Import
+
+CCE node can be imported using the cluster ID and node ID separated by a slash, e.g.:
+
+```bash
+$ terraform import opentelekomcloud_cce_node_v3.my_node 5c20fdad-7288-11eb-b817-0255ac10158b/e9287dff-7288-11eb-b817-0255ac10158b
+```
+
+Note that the imported state may not be identical to your resource definition, due to some attributes missing from the
+API response, security or some other reason. The missing attributes include:
+`key_pair`, `private_ip`, `eip_id`, `iptype`, `bandwidth_charge_mode`,
+`bandwidth_size`, `share_type`, `extend_params`, `dedicated_host_id`, `labels`, `taints`
+and arguments for pre-paid. It is generally recommended running `terraform plan` after importing a node.
+You can then decide if changes should be applied to the node, or the resource definition should be updated to align
+with the node. Also you can ignore changes as below.
+
+```hcl
+resource "opentelekomcloud_cce_node_v3" "my_node" {
+
+  lifecycle {
+    ignore_changes = [
+      extend_params, labels,
+    ]
+  }
+}
+```

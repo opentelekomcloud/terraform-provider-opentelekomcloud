@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -62,7 +63,7 @@ func ResourceCCENodeV3() *schema.Resource {
 		DeleteContext: resourceCCENodeV3Delete,
 
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceNodeImport,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -1187,4 +1188,23 @@ func recursiveCreate(ctx context.Context, client *golangsdk.ServiceClient, opts 
 		return node, "fail"
 	}
 	return node, "success"
+}
+
+func resourceNodeImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 {
+		err := fmt.Errorf("invalid format specified for CCE Node. Format must be <cluster id>/<node id>")
+		return nil, err
+	}
+
+	clusterID := parts[0]
+	nodeID := parts[1]
+
+	d.SetId(nodeID)
+	err := d.Set("cluster_id", clusterID)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
