@@ -68,8 +68,30 @@ func TestAccResourceCCENodesV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameNode, "data_volumes.0.extend_params.useType", "docker"),
 				),
 			},
+			{
+				ResourceName:      resourceNameNode,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccCCENodeImportStateIdFunc(),
+				ImportStateVerifyIgnore: []string{
+					"taints", "extend_params",
+				},
+			},
 		},
 	})
+}
+
+func testAccCCENodeImportStateIdFunc() resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		node, ok := s.RootModule().Resources["opentelekomcloud_cce_node_v3.node_1"]
+		if !ok {
+			return "", fmt.Errorf("node not found: %s", node)
+		}
+		if node.Primary.Attributes["cluster_id"] == "" || node.Primary.ID == "" {
+			return "", fmt.Errorf("resource not found: %s/%s", node.Primary.Attributes["cluster_id"], node.Primary.ID)
+		}
+		return fmt.Sprintf("%s/%s", node.Primary.Attributes["cluster_id"], node.Primary.ID), nil
+	}
 }
 
 func TestAccResourceCCENodesV3Agency(t *testing.T) {
