@@ -55,12 +55,6 @@ The following arguments are supported:
   (must be "true" or "false" if provided). Changing this updates the
   `admin_state_up` of an existing port.
 
-* `mac_address` - (Optional, String, ForceNew) Specify a specific MAC address for the port. Changing
-  this creates a new port.
-
-* `tenant_id` - (Optional, String, ForceNew) The owner of the Port. Required if admin wants
-  to create a port for another tenant. Changing this creates a new port.
-
 * `device_owner` - (Optional. String, ForceNew) The device owner of the Port. Changing this creates
   a new port.
 
@@ -112,8 +106,6 @@ The following attributes are exported:
 
 * `admin_state_up` - See Argument Reference above.
 
-* `mac_address` - See Argument Reference above.
-
 * `tenant_id` - See Argument Reference above.
 
 * `device_owner` - See Argument Reference above.
@@ -123,6 +115,8 @@ The following attributes are exported:
 * `device_id` - See Argument Reference above.
 
 * `fixed_ip` - See Argument Reference above.
+
+* `mac_address` - Specifies the port MAC address.
 
 * `all fixed_ips` - The collection of Fixed IP addresses on the port in the order returned by the Network v2 API.
 
@@ -137,6 +131,8 @@ terraform import opentelekomcloud_networking_port_v2.port_1 eae26a3e-1c33-4cc1-9
 ```
 
 ## Notes
+
+> The arguments `mac_address` and `tenant_id` are no longer supported as input and are therefore removed from the argument reference.
 
 ### Ports and Instances
 
