@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[DCS]** Additional info for arguments in ``docs/resource/dcs_instance_v1.md`` (`#2898 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2898>`_)
