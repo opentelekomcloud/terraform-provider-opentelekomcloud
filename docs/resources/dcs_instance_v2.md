@@ -117,7 +117,7 @@ The following arguments are supported:
 * `vpc_id` - (Required, String, ForceNew) The ID of VPC which the instance belongs to.
   Changing this creates a new instance resource.
 
-* `subnet_id` - (Required, String, ForceNew) The ID of subnet which the instance belongs to.
+* `subnet_id` - (Required, String, ForceNew) The ID of subnet (Network ID) which the instance belongs to.
   Changing this creates a new instance resource.
 
 * `security_group_id` - (Optional, String) The ID of the security group which the instance belongs to.
@@ -145,7 +145,7 @@ The following arguments are supported:
     + The new password cannot be the same as the old password.
 
 * `whitelist` - (Optional, List) Specifies the IP addresses which can access the instance.
-  This parameter is valid for Redis 4.0 and 5.0 versions. The structure is described below.
+  This parameter is valid for Redis 4.0 and 5.0 versions. The structure is described below. Required if `enable_whitelist` is used.
 
 * `enable_whitelist` - (Optional, Bool) Enable or disable the IP address whitelists. Defaults to true.
   If the whitelist is disabled, all IP addresses connected to the VPC can access the instance.
@@ -184,7 +184,7 @@ The following arguments are supported:
 
 * `access_user` - (Optional, String, ForceNew) Specifies the username used for accessing a DCS instance.
   The username starts with a letter, consists of 1 to 64 characters, and supports only letters, digits, and
-  hyphens (-). Changing this creates a new instance.
+  hyphens (-). Changing this creates a new instance. If the cache engine is Redis, leave this parameter empty.
 
 * `description` - (Optional, String) Specifies the description of an instance.
   It is a string that contains a maximum of 1024 characters.
