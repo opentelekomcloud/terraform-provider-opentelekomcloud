@@ -31,10 +31,12 @@ variable "flavor_id" {}
 variable "vpc_id" {}
 variable "subnet_id" {}
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name        = "cluster"
-  description = "Create cluster"
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name                   = "cluster"
+  description            = "Create cluster"
+  eip                    = opentelekomcloud_networking_floatingip_v2.fip_1.address
   cluster_type           = "VirtualMachine"
   flavor_id              = var.flavor_id
   vpc_id                 = var.vpc_id
