@@ -389,6 +389,8 @@ func testAccCCEClusterV3Update(clusterName string) string {
 	return fmt.Sprintf(`
 %s
 
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                     = "%s"
   cluster_type             = "VirtualMachine"
@@ -398,6 +400,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   container_network_type   = "overlay_l2"
   description              = "new description"
   kubernetes_svc_ip_range  = "10.247.0.0/16"
+  eip                      = opentelekomcloud_networking_floatingip_v2.fip_1.address
   ignore_addons            = true
   kube_proxy_mode          = "ipvs"
   delete_all_storage       = "true"
