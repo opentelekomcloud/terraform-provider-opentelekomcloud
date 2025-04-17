@@ -2,7 +2,9 @@ package cfw
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -26,7 +28,7 @@ func ResourceCfwFirewallV1() *schema.Resource {
 		DeleteContext: resourceCFWFirewallV1Delete,
 
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: common.ImportByPath("id", "service_type"),
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -41,10 +43,14 @@ func ResourceCfwFirewallV1() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"enterprise_project_id": {
+			"service_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Default:  "0",
+				ValidateFunc: validation.StringInSlice([]string{
+					"0",
+				}, true),
 			},
 			"flavor": {
 				Type:     schema.TypeList,
@@ -118,7 +124,11 @@ func ResourceCfwFirewallV1() *schema.Resource {
 					},
 				},
 			},
-			"ID": {
+			"id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"enterprise_project_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -127,10 +137,6 @@ func ResourceCfwFirewallV1() *schema.Resource {
 				Computed: true,
 			},
 			"charge_mode": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"service_type": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
@@ -159,7 +165,7 @@ func ResourceCfwFirewallV1() *schema.Resource {
 				},
 			},
 			"status": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"is_old_firewall_instance": {
@@ -245,8 +251,7 @@ func resourceCFWFirewallV1Create(ctx context.Context, d *schema.ResourceData, me
 	flavor := d.Get("flavor").([]interface{})[0].(map[string]interface{})
 	chargeInfo := d.Get("charge_info").([]interface{})[0].(map[string]interface{})
 	createOpts := cfwmanagementv2.CreateOpts{
-		Name:                d.Get("name").(string),
-		EnterpriseProjectId: d.Get("enterprise_project_id").(string),
+		Name: d.Get("name").(string),
 		ChargeInfo: cfwmanagementv2.ChargeInfo{
 			ChargeMode: chargeInfo["charge_mode"].(string),
 		},
@@ -281,20 +286,25 @@ func resourceCFWFirewallV1Read(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
-	firewallInstance, err := cfwmanagementv1.Get(client, d.Id(), 0)
+	serviceType, err := strconv.Atoi(d.Get("service_type").(string))
+	if err != nil {
+		return fmterr.Errorf("error converting service type to integer: %s", err)
+	}
+	firewallInstance, err := cfwmanagementv1.Get(client, d.Id(), serviceType)
 	if err != nil {
 		return fmterr.Errorf("error fetching CFW Firewall instance: %w", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved instance %s: %#v", d.Id(), firewallInstance)
 
+	serviceTypeStr := fmt.Sprintf("%d", firewallInstance.ServiceType)
 	mErr := multierror.Append(nil,
-		d.Set("ID", d.Id()),
+		d.Set("id", d.Id()),
 		d.Set("name", firewallInstance.FwInstanceName),
 		d.Set("enterprise_project_id", firewallInstance.EnterpriseProjectID),
 		d.Set("ha_type", firewallInstance.HAType),
 		d.Set("charge_mode", firewallInstance.ChargeMode),
-		d.Set("service_type", firewallInstance.ServiceType),
+		d.Set("service_type", serviceTypeStr),
 		d.Set("engine_type", firewallInstance.EngineType),
 		d.Set("status", firewallInstance.Status),
 		d.Set("is_old_firewall_instance", firewallInstance.IsOldFirewallInstance),
@@ -364,7 +374,13 @@ func resourceCFWFirewallV1Read(ctx context.Context, d *schema.ResourceData, meta
 
 func resourceCFWFirewallV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+	clientV1, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.CfwV1Client(config.GetRegion(d))
+	})
+	if err != nil {
+		return fmterr.Errorf(errCreationV1Client, err)
+	}
+	clientV2, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
 		return config.CfwV2Client(config.GetRegion(d))
 	})
 	if err != nil {
@@ -373,9 +389,14 @@ func resourceCFWFirewallV1Delete(ctx context.Context, d *schema.ResourceData, me
 
 	log.Printf("[DEBUG] Deleting OpenTelekomCloud CFW Firewall Instance %s", d.Id())
 
-	_, err = cfwmanagementv2.Delete(client, d.Id())
+	_, err = cfwmanagementv2.Delete(clientV2, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud CFW Firewall instance: %s", err)
+	}
+
+	err = WaitForDeleteFirewall(clientV1, 600, 5, d.Id())
+	if err != nil {
+		return fmterr.Errorf("error waiting for OpenTelekomCloud CFW Firewall instance (%s) to become ready: %w", d.Id(), err)
 	}
 
 	d.SetId("")

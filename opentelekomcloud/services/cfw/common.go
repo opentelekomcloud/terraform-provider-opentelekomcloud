@@ -5,6 +5,7 @@ import (
 	"time"
 
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	cfwmanagementv1 "github.com/opentelekomcloud/gophertelekomcloud/openstack/cfw/v1/management"
 	cfwjob "github.com/opentelekomcloud/gophertelekomcloud/openstack/cfw/v3/job"
 )
 
@@ -33,6 +34,34 @@ func WaitForJobCompleted(client *golangsdk.ServiceClient, waitTime int, interval
 		if job.Status == "Failed" {
 			err = fmt.Errorf("job %s failed", job.Id)
 			return false, err
+		}
+
+		time.Sleep(interval * time.Second)
+		return false, nil
+	})
+}
+
+func WaitForDeleteFirewall(client *golangsdk.ServiceClient, waitTime int, interval time.Duration, firewallID string) error {
+	jobClient := *client
+	jobClient.ResourceBase = jobClient.Endpoint
+
+	return golangsdk.WaitFor(waitTime, func() (bool, error) {
+		firewallList, err := cfwmanagementv1.List(client, cfwmanagementv1.ListOpts{
+			Limit:  1024,
+			Offset: 0,
+		})
+		if err != nil {
+			return false, err
+		}
+		found := false
+
+		for _, fw := range firewallList {
+			if fw.FwInstanceId == firewallID {
+				found = true
+			}
+		}
+		if !found {
+			return true, nil
 		}
 
 		time.Sleep(interval * time.Second)
