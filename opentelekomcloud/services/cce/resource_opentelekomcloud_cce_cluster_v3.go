@@ -222,6 +222,12 @@ func ResourceCCEClusterV3() *schema.Resource {
 				ForceNew:   true,
 				Deprecated: "Please use `authenticating_proxy` instead",
 			},
+			"api_access_trustlist": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+				ForceNew: true,
+			},
 			"kubernetes_svc_ip_range": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -497,6 +503,20 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 			Cidr:     d.Get("eni_subnet_cidr").(string),
 		}
 		createOpts.Spec.EniNetwork = &eniNetwork
+	}
+
+	if listRaw, ok := d.GetOk("api_access_trustlist"); ok {
+		rawList := listRaw.([]interface{})
+		cidrs := make([]string, len(rawList))
+
+		for i, v := range rawList {
+			cidrs[i] = v.(string)
+		}
+
+		publicAccess := clusters.PublicAccess{
+			Cidrs: cidrs,
+		}
+		createOpts.Spec.PublicAccess = &publicAccess
 	}
 
 	masters, err := resourceClusterMasters(d)

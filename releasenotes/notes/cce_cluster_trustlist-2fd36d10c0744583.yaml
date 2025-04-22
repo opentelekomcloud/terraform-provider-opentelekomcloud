@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CCE]** Added `api_access_trustlist` parameter for ``resource/opentelekomcloud_cce_cluster_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
