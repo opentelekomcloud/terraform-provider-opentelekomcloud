@@ -77,3 +77,11 @@ func InterfaceToIntPtr(i interface{}) *int {
 	}
 	return &v
 }
+
+func InterfaceToInt64(i interface{}) int64 {
+	v, ok := i.(int)
+	if !ok {
+		panic(fmterr.Errorf("InterfaceToInt64: value is not of type int: %#v", i))
+	}
+	return int64(v)
+}

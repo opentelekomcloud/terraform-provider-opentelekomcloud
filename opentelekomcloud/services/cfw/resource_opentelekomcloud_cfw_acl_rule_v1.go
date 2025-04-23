@@ -3,6 +3,7 @@ package cfw
 import (
 	"context"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -400,10 +401,10 @@ func resourceCFWAclRuleV1Create(ctx context.Context, d *schema.ResourceData, met
 				Status:                 InterfaceToIntPtr(d.Get("status")),
 				Applications:           common.ExpandToStringList(d.Get("applications").([]interface{})),
 				ApplicationsJsonString: d.Get("applications_json_string").(string),
-				LongConnectTime:        d.Get("long_connect_time").(int64),
-				LongConnectTimeHour:    d.Get("long_connect_time_hour").(int64),
-				LongConnectTimeMinute:  d.Get("long_connect_time_minute").(int64),
-				LongConnectTimeSecond:  d.Get("long_connect_time_second").(int64),
+				LongConnectTime:        InterfaceToInt64(d.Get("long_connect_time")),
+				LongConnectTimeHour:    InterfaceToInt64(d.Get("long_connect_time_hour")),
+				LongConnectTimeMinute:  InterfaceToInt64(d.Get("long_connect_time_minute")),
+				LongConnectTimeSecond:  InterfaceToInt64(d.Get("long_connect_time_second")),
 				LongConnectEnable:      InterfaceToIntPtr(d.Get("long_connect_enable")),
 				Description:            d.Get("description").(string),
 				Direction:              InterfaceToIntPtr(d.Get("direction")),
@@ -444,9 +445,14 @@ func resourceCFWAclRuleV1Read(ctx context.Context, d *schema.ResourceData, meta 
 
 	log.Printf("[DEBUG] Retrieved ACL rule %s: %#v", rule.RuleId, rule)
 
+	typeInt, err := strconv.Atoi(rule.Type)
+	if err != nil {
+		return fmterr.Errorf("error converting type to integer: %w", err)
+	}
+
 	mErr := multierror.Append(nil,
 		d.Set("id", d.Id()),
-		d.Set("type", rule.Type),
+		d.Set("type", typeInt),
 		d.Set("name", rule.Name),
 		d.Set("address_type", rule.AddressType),
 		d.Set("action_type", rule.ActionType),
@@ -488,10 +494,10 @@ func resourceCFWAclRuleV1Update(ctx context.Context, d *schema.ResourceData, met
 		Status:                 InterfaceToIntPtr(d.Get("status")),
 		Applications:           common.ExpandToStringList(d.Get("applications").([]interface{})),
 		ApplicationsJsonString: d.Get("applications_json_string").(string),
-		LongConnectTime:        d.Get("long_connect_time").(int64),
-		LongConnectTimeHour:    d.Get("long_connect_time_hour").(int64),
-		LongConnectTimeMinute:  d.Get("long_connect_time_minute").(int64),
-		LongConnectTimeSecond:  d.Get("long_connect_time_second").(int64),
+		LongConnectTime:        InterfaceToInt64(d.Get("long_connect_time")),
+		LongConnectTimeHour:    InterfaceToInt64(d.Get("long_connect_time_hour")),
+		LongConnectTimeMinute:  InterfaceToInt64(d.Get("long_connect_time_minute")),
+		LongConnectTimeSecond:  InterfaceToInt64(d.Get("long_connect_time_second")),
 		LongConnectEnable:      InterfaceToIntPtr(d.Get("long_connect_enable")),
 		Description:            d.Get("description").(string),
 		Direction:              InterfaceToIntPtr(d.Get("direction")),
