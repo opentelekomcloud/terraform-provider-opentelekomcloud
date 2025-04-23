@@ -443,6 +443,7 @@ func resourceCFWAclRuleV1Read(ctx context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf("error fetching CFW ACL rule: %w", err)
 	}
 
+	d.SetId(rule.RuleId)
 	log.Printf("[DEBUG] Retrieved ACL rule %s: %#v", rule.RuleId, rule)
 
 	typeInt, err := strconv.Atoi(rule.Type)
@@ -451,7 +452,7 @@ func resourceCFWAclRuleV1Read(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	mErr := multierror.Append(nil,
-		d.Set("id", d.Id()),
+		d.Set("id", rule.RuleId),
 		d.Set("type", typeInt),
 		d.Set("name", rule.Name),
 		d.Set("address_type", rule.AddressType),
