@@ -86,19 +86,22 @@ func ResourceCfwAclRuleV1() *schema.Resource {
 				},
 			},
 			"address_type": {
-				Type: schema.TypeInt,
+				Type:     schema.TypeInt,
+				Required: true,
 				ValidateFunc: validation.IntInSlice([]int{
 					0, 1,
 				}),
 			},
 			"action_type": {
-				Type: schema.TypeInt,
+				Type:     schema.TypeInt,
+				Required: true,
 				ValidateFunc: validation.IntInSlice([]int{
 					0, 1,
 				}),
 			},
 			"status": {
-				Type: schema.TypeInt,
+				Type:     schema.TypeInt,
+				Required: true,
 				ValidateFunc: validation.IntInSlice([]int{
 					0, 1,
 				}),
@@ -106,7 +109,7 @@ func ResourceCfwAclRuleV1() *schema.Resource {
 			"applications": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Elem:     schema.TypeString,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"applications_json_string": {
 				Type:     schema.TypeString,
@@ -179,7 +182,7 @@ func ResourceCfwAclRuleV1() *schema.Resource {
 						"protocols": {
 							Type:     schema.TypeList,
 							Optional: true,
-							Elem:     schema.TypeInt,
+							Elem:     &schema.Schema{Type: schema.TypeInt},
 						},
 						"source_port": {
 							Type:     schema.TypeString,
@@ -231,12 +234,12 @@ func ResourceCfwAclRuleV1() *schema.Resource {
 						"predefined_group": {
 							Type:     schema.TypeList,
 							Optional: true,
-							Elem:     schema.TypeString,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"service_group": {
 							Type:     schema.TypeList,
 							Optional: true,
-							Elem:     schema.TypeString,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"service_group_names": {
 							Type:     schema.TypeList,
@@ -250,7 +253,7 @@ func ResourceCfwAclRuleV1() *schema.Resource {
 									"protocols": {
 										Type:     schema.TypeList,
 										Optional: true,
-										Elem:     schema.TypeInt,
+										Elem:     &schema.Schema{Type: schema.TypeInt},
 									},
 									"service_set_type": {
 										Type:         schema.TypeInt,
@@ -354,9 +357,7 @@ func ruleAddressSchema() *schema.Resource {
 			"ip_address": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"address_set_type": {
 				Type:         schema.TypeInt,
@@ -366,16 +367,12 @@ func ruleAddressSchema() *schema.Resource {
 			"predefined_group": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"address_group": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
@@ -393,23 +390,23 @@ func resourceCFWAclRuleV1Create(ctx context.Context, d *schema.ResourceData, met
 
 	createOpts := acl.CreateACLRuleOpts{
 		ObjectID: d.Get("object_id").(string),
-		Type:     d.Get("type").(*int),
+		Type:     InterfaceToIntPtr(d.Get("type")),
 		Rules: []acl.Rule{
 			{
 				Name:                   d.Get("name").(string),
 				Sequence:               resourceGetSequence(d),
-				AddressType:            d.Get("address_type").(*int),
-				ActionType:             d.Get("action_type").(*int),
-				Status:                 d.Get("status").(*int),
-				Applications:           d.Get("applications").([]string),
+				AddressType:            InterfaceToIntPtr(d.Get("address_type")),
+				ActionType:             InterfaceToIntPtr(d.Get("action_type")),
+				Status:                 InterfaceToIntPtr(d.Get("status")),
+				Applications:           common.ExpandToStringList(d.Get("applications").([]interface{})),
 				ApplicationsJsonString: d.Get("applications_json_string").(string),
 				LongConnectTime:        d.Get("long_connect_time").(int64),
 				LongConnectTimeHour:    d.Get("long_connect_time_hour").(int64),
 				LongConnectTimeMinute:  d.Get("long_connect_time_minute").(int64),
 				LongConnectTimeSecond:  d.Get("long_connect_time_second").(int64),
-				LongConnectEnable:      d.Get("long_connect_enable").(*int),
+				LongConnectEnable:      InterfaceToIntPtr(d.Get("long_connect_enable")),
 				Description:            d.Get("description").(string),
-				Direction:              d.Get("direction").(*int),
+				Direction:              InterfaceToIntPtr(d.Get("direction")),
 				Source:                 resourceGetRuleAddress(d, "source"),
 				Destination:            resourceGetRuleAddress(d, "destination"),
 				Service:                resourceGetService(d),
@@ -486,22 +483,22 @@ func resourceCFWAclRuleV1Update(ctx context.Context, d *schema.ResourceData, met
 
 	updateOpts := acl.UpdateACLRuleOpts{
 		Name:                   d.Get("name").(string),
-		AddressType:            d.Get("address_type").(*int),
-		ActionType:             d.Get("action_type").(*int),
-		Status:                 d.Get("status").(*int),
-		Applications:           d.Get("applications").([]string),
+		AddressType:            InterfaceToIntPtr(d.Get("address_type")),
+		ActionType:             InterfaceToIntPtr(d.Get("action_type")),
+		Status:                 InterfaceToIntPtr(d.Get("status")),
+		Applications:           common.ExpandToStringList(d.Get("applications").([]interface{})),
 		ApplicationsJsonString: d.Get("applications_json_string").(string),
 		LongConnectTime:        d.Get("long_connect_time").(int64),
 		LongConnectTimeHour:    d.Get("long_connect_time_hour").(int64),
 		LongConnectTimeMinute:  d.Get("long_connect_time_minute").(int64),
 		LongConnectTimeSecond:  d.Get("long_connect_time_second").(int64),
-		LongConnectEnable:      d.Get("long_connect_enable").(*int),
+		LongConnectEnable:      InterfaceToIntPtr(d.Get("long_connect_enable")),
 		Description:            d.Get("description").(string),
-		Direction:              d.Get("direction").(*int),
+		Direction:              InterfaceToIntPtr(d.Get("direction")),
 		Source:                 &source,
 		Destination:            &destination,
 		Service:                &service,
-		Type:                   d.Get("type").(*int),
+		Type:                   InterfaceToIntPtr(d.Get("type")),
 	}
 
 	rule, err := acl.UpdateACLRule(client, d.Id(), updateOpts)
@@ -539,8 +536,8 @@ func resourceGetSequence(d *schema.ResourceData) acl.OrderRuleAclDto {
 	sequenceRaw := d.Get("sequence").([]interface{})[0].(map[string]interface{})
 	sequence := acl.OrderRuleAclDto{
 		DestRuleId: sequenceRaw["dest_rule_id"].(string),
-		Top:        sequenceRaw["top"].(*int),
-		Bottom:     sequenceRaw["bottom"].(*int),
+		Top:        InterfaceToIntPtr(sequenceRaw["top"]),
+		Bottom:     InterfaceToIntPtr(sequenceRaw["bottom"]),
 	}
 	return sequence
 }
@@ -551,7 +548,7 @@ func getRegionList(regionListRaw []interface{}) []acl.IpRegionDto {
 		regionRaw := v.(map[string]interface{})
 		region := acl.IpRegionDto{
 			RegionID:   regionRaw["region_id"].(string),
-			RegionType: regionRaw["region_type"].(*int),
+			RegionType: InterfaceToIntPtr(regionRaw["region_type"]),
 		}
 		regionList = append(regionList, region)
 	}
@@ -562,8 +559,8 @@ func resourceGetRuleAddress(d *schema.ResourceData, argName string) acl.RuleAddr
 	ruleAddressDtoRaw := d.Get(argName).([]interface{})[0].(map[string]interface{})
 	regionListRaw := ruleAddressDtoRaw["region_list"].([]interface{})
 	ruleAddressDto := acl.RuleAddressDtoRequest{
-		Type:              ruleAddressDtoRaw["type"].(*int),
-		AddressType:       ruleAddressDtoRaw["address_type"].(*int),
+		Type:              InterfaceToIntPtr(ruleAddressDtoRaw["type"]),
+		AddressType:       InterfaceToIntPtr(ruleAddressDtoRaw["address_type"]),
 		Address:           ruleAddressDtoRaw["address"].(string),
 		AddressSetID:      ruleAddressDtoRaw["address_set_id"].(string),
 		AddressSetName:    ruleAddressDtoRaw["address_set_name"].(string),
@@ -572,10 +569,10 @@ func resourceGetRuleAddress(d *schema.ResourceData, argName string) acl.RuleAddr
 		RegionList:        getRegionList(regionListRaw),
 		DomainSetID:       ruleAddressDtoRaw["domain_set_id"].(string),
 		DomainSetName:     ruleAddressDtoRaw["domain_set_name"].(string),
-		IPAddresses:       ruleAddressDtoRaw["ip_address"].([]string),
-		AddressSetType:    ruleAddressDtoRaw["address_set_type"].(*int),
-		PredefinedGroup:   ruleAddressDtoRaw["predefined_group"].([]string),
-		AddressGroup:      ruleAddressDtoRaw["address_group"].([]string),
+		IPAddresses:       common.ExpandToStringList(ruleAddressDtoRaw["ip_address"].([]interface{})),
+		AddressSetType:    InterfaceToIntPtr(ruleAddressDtoRaw["address_set_type"]),
+		PredefinedGroup:   common.ExpandToStringList(ruleAddressDtoRaw["predefined_group"].([]interface{})),
+		AddressGroup:      common.ExpandToStringList(ruleAddressDtoRaw["address_group"].([]interface{})),
 	}
 	return ruleAddressDto
 }
@@ -602,8 +599,8 @@ func getServiceGroupNames(serviceGroupNamesRaw []interface{}) []acl.ServiceGroup
 		serviceGroupNameRaw := v.(map[string]interface{})
 		serviceGroupName := acl.ServiceGroupVO{
 			Name:           serviceGroupNameRaw["name"].(string),
-			Protocols:      serviceGroupNameRaw["protocols"].([]int),
-			ServiceSetType: serviceGroupNameRaw["service_set_type"].(*int),
+			Protocols:      common.ExpandToIntList(serviceGroupNameRaw["protocols"].([]interface{})),
+			ServiceSetType: InterfaceToIntPtr(serviceGroupNameRaw["service_set_type"]),
 			SetID:          serviceGroupNameRaw["set_id"].(string),
 		}
 		serviceGroupNames = append(serviceGroupNames, serviceGroupName)
@@ -617,18 +614,18 @@ func resourceGetService(d *schema.ResourceData) acl.RuleServiceDto {
 	serviceGroupNamesRaw := ruleServiceRaw["service_group_names"].([]interface{})
 
 	ruleService := acl.RuleServiceDto{
-		Type:              ruleServiceRaw["type"].(*int),
+		Type:              InterfaceToIntPtr(ruleServiceRaw["type"]),
 		Protocol:          ruleServiceRaw["protocol"].(int),
-		Protocols:         ruleServiceRaw["protocols"].([]int),
+		Protocols:         common.ExpandToIntList(ruleServiceRaw["protocols"].([]interface{})),
 		SourcePort:        ruleServiceRaw["source_port"].(string),
 		DestPort:          ruleServiceRaw["dest_port"].(string),
 		ServiceSetID:      ruleServiceRaw["service_set_id"].(string),
 		ServiceSetName:    ruleServiceRaw["service_set_name"].(string),
 		CustomService:     getCustomService(customServiceRaw),
-		PredefinedGroup:   ruleServiceRaw["predefined_group"].([]string),
-		ServiceGroup:      ruleServiceRaw["service_group"].([]string),
+		PredefinedGroup:   common.ExpandToStringList(ruleServiceRaw["predefined_group"].([]interface{})),
+		ServiceGroup:      common.ExpandToStringList(ruleServiceRaw["service_group"].([]interface{})),
 		ServiceGroupNames: getServiceGroupNames(serviceGroupNamesRaw),
-		ServiceSetType:    ruleServiceRaw["service_set_type"].(*int),
+		ServiceSetType:    InterfaceToIntPtr(ruleServiceRaw["service_set_type"]),
 	}
 
 	return ruleService
