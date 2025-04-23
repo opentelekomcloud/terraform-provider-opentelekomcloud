@@ -381,6 +381,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   ignore_addons           = true
   eni_subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
   eni_subnet_cidr         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.cidr
+  api_access_trustlist    = ["192.168.45.0/24", "10.234.128.0/20"]
 }
 `, common.DataSourceSubnet, clusterName)
 }

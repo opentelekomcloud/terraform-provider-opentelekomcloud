@@ -44,6 +44,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
   kube_proxy_mode        = "ipvs"
+  api_access_trustlist   = ["192.168.45.0/24", "10.234.128.0/20"]
   timezone               = "Europe/Madrid"
 }
 ```
@@ -213,6 +214,9 @@ The following arguments are supported:
 * `eni_subnet_id` -  - (Optional) Specifies the ENI subnet ID. Specified when creating a CCE Turbo cluster. Changing this parameter will create a new cluster resource.
 
 * `eni_subnet_cidr` - (Optional) Specifies the ENI network segment. Specified when creating a CCE Turbo cluster. Changing this parameter will create a new cluster resource.
+
+* `api_access_trustlist` - (Optional) Specifies the trustlist of network CIDRs that are allowed to access cluster APIs. Specified when creating a CCE cluster.
+  Changing this parameter will create a new cluster resource.
 
 * `authentication_mode` - (Optional) Cluster authentication mode.
   * Clusters of Kubernetes v1.11 and earlier
