@@ -270,7 +270,7 @@ func resourceKeywordsAlarmRuleV2Create(ctx context.Context, d *schema.ResourceDa
 	}
 	rule, err := alarm.CreateKeywordRule(client, opts)
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud LTS v2 Alarm Keyword Rule: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud LTS v2 alarm keyword rule: %s", err)
 	}
 	d.SetId(rule)
 
@@ -389,7 +389,7 @@ func resourceKeywordsAlarmRuleV2Read(ctx context.Context, d *schema.ResourceData
 		}
 	}
 	if keywordResult.ID == "" {
-		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 cce access config by its ID (%s)", d.Id()))
+		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 alarm keyword rule by its ID (%s)", d.Id()))
 	}
 
 	mErr := multierror.Append(nil,
@@ -511,7 +511,7 @@ func resourceKeywordsAlarmRuleV2Delete(ctx context.Context, d *schema.ResourceDa
 
 	err = alarm.DeleteKeywordRule(client, d.Id())
 	if err != nil {
-		return common.CheckDeletedDiag(d, err, "error deleting OpenTelekomCloud LTS v2 Alarm Keyword Rule")
+		return common.CheckDeletedDiag(d, err, "error deleting OpenTelekomCloud LTS v2 alarm keyword rule")
 	}
 	return nil
 }
