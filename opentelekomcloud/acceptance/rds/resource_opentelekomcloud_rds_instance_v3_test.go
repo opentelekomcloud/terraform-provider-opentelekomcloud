@@ -73,7 +73,7 @@ func TestAccRdsPostgre13V3ParamsBasic(t *testing.T) {
 				Config: testAccRdsPostrgre13V3ParamsBasic(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.medium"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.n1.large.4"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8635"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "PostgreSQL"),
@@ -87,7 +87,7 @@ func TestAccRdsPostgre13V3ParamsBasic(t *testing.T) {
 				Config: testAccRdsPostrgre13V3ParamsBasicUpdate(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.medium"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.n1.large.4"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8635"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "PostgreSQL"),
@@ -529,10 +529,10 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.n1.large.4"
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
@@ -561,7 +561,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 100
   }
   flavor = "rds.mysql.s1.large.ha"
@@ -916,10 +916,10 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.n1.large.4"
   tags = {
     muh = "value-create"
     kuh = "value-create"
@@ -951,10 +951,10 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.n1.large.4"
   tags = {
     muh = "value-create"
     kuh = "value-create"

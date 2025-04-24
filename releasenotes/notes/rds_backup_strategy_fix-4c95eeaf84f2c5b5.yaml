@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[RDS]** Add `computed` property to `period` parameter for ``resource/opentelekomcloud_rds_instance_v3`` (`#2912 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2912>`_)
