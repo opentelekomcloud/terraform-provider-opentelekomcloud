@@ -226,6 +226,7 @@ func ResourceRdsInstanceV3() *schema.Resource {
 						"period": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
