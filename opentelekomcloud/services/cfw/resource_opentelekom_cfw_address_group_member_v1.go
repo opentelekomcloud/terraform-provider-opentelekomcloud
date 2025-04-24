@@ -25,7 +25,7 @@ func ResourceCfwAddressGroupMemberV1() *schema.Resource {
 		DeleteContext: resourceCFWAddressGroupMemberV1Delete,
 
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: common.ImportByPath("set_id", "address"),
 		},
 
 		Timeouts: &schema.ResourceTimeout{
