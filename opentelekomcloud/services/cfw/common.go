@@ -7,6 +7,7 @@ import (
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	cfwmanagementv1 "github.com/opentelekomcloud/gophertelekomcloud/openstack/cfw/v1/management"
 	cfwjob "github.com/opentelekomcloud/gophertelekomcloud/openstack/cfw/v3/job"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 const (
@@ -67,4 +68,20 @@ func WaitForDeleteFirewall(client *golangsdk.ServiceClient, waitTime int, interv
 		time.Sleep(interval * time.Second)
 		return false, nil
 	})
+}
+
+func InterfaceToIntPtr(i interface{}) *int {
+	v, ok := i.(int)
+	if !ok {
+		panic(fmterr.Errorf(`interfaceToIntPtr: value is not of type int: %#v`, i))
+	}
+	return &v
+}
+
+func InterfaceToInt64(i interface{}) int64 {
+	v, ok := i.(int)
+	if !ok {
+		panic(fmterr.Errorf("InterfaceToInt64: value is not of type int: %#v", i))
+	}
+	return int64(v)
 }

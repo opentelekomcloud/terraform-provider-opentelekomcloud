@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CFW]** Add new resource ``resource/opentelekomcloud_cfw_acl_rule_v1`` (`#2905 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2905>`_).
