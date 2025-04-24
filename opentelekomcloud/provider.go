@@ -419,6 +419,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_ces_alarmrule":                             ces.ResourceAlarmRule(),
 			"opentelekomcloud_cfw_firewall_v1":                           cfw.ResourceCfwFirewallV1(),
 			"opentelekomcloud_cfw_acl_rule_v1":                           cfw.ResourceCfwAclRuleV1(),
+			"opentelekomcloud_cfw_address_group_v1":                      cfw.ResourceCfwAddressGroupV1(),
 			"opentelekomcloud_compute_bms_server_v2":                     bms.ResourceComputeBMSInstanceV2(),
 			"opentelekomcloud_compute_bms_tags_v2":                       bms.ResourceBMSTagsV2(),
 			"opentelekomcloud_compute_secgroup_v2":                       ecs.ResourceComputeSecGroupV2(),
