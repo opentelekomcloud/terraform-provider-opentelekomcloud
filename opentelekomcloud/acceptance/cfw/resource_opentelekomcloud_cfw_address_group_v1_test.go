@@ -75,9 +75,9 @@ resource "opentelekomcloud_cfw_firewall_v1" "firewall_1" {
 }
 
 resource "opentelekomcloud_cfw_address_group_v1" "group_1" {
-  object_id = opentelekomcloud_cfw_firewall_v1.firewall_1.protect_objects.0.object_id
-  name      = "test-acc-tf-address-group"
-  address_type        = 0
+  object_id    = opentelekomcloud_cfw_firewall_v1.firewall_1.protect_objects.0.object_id
+  name         = "test-acc-tf-address-group"
+  address_type = 0
 }
 `
 
@@ -93,8 +93,8 @@ resource "opentelekomcloud_cfw_firewall_v1" "firewall_1" {
 }
 
 resource "opentelekomcloud_cfw_address_group_v1" "group_1" {
-  object_id = opentelekomcloud_cfw_firewall_v1.firewall_1.protect_objects.0.object_id
-  name      = "test-acc-tf-address-group-updated"
-  address_type        = 0
+  object_id    = opentelekomcloud_cfw_firewall_v1.firewall_1.protect_objects.0.object_id
+  name         = "test-acc-tf-address-group-updated"
+  address_type = 0
 }
 `

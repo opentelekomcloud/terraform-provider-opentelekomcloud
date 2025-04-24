@@ -19,9 +19,9 @@ Manages a CFW Address Group resource within OpenTelekomCloud.
 variable object_id {}
 
 resource "opentelekomcloud_cfw_address_group_v1" "group_1" {
-  object_id = var.object_id
-  name      = "test-acc-tf-address-group"
-  address_type        = 0
+  object_id    = var.object_id
+  name         = "test-acc-tf-address-group"
+  address_type = 0
 }
 ```
 
