@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[LTS]** New resource ``resource/opentelekomcloud_lts_keywords_alarm_rule_v2`` (`#2910 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2910>`_)

@@ -547,6 +547,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_lts_cross_account_access_v2":               lts.ResourceCrossAccountAccessV2(),
 			"opentelekomcloud_lts_host_access_v3":                        lts.ResourceHostAccessConfigV3(),
 			"opentelekomcloud_lts_host_group_v3":                         lts.ResourceHostGroupV3(),
+			"opentelekomcloud_lts_keywords_alarm_rule_v2":                lts.ResourceKeywordsAlarmRuleV2(),
 			"opentelekomcloud_lts_stream_v2":                             lts.ResourceLTSStreamV2(),
 			"opentelekomcloud_lts_transfer_v2":                           lts.ResourceLTSNewTransferV2(),
 			"opentelekomcloud_mrs_cluster_v1":                            mrs.ResourceMRSClusterV1(),
