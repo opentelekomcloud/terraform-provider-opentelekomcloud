@@ -88,9 +88,9 @@ func resourceCFWAddressGroupV1Create(ctx context.Context, d *schema.ResourceData
 
 	addressGroup, err := group.CreateAddressGroup(client, createOpts)
 	if err != nil {
-		return fmterr.Errorf("error getting OpenTelekomCloud CFW firewall instance from result: %w", err)
+		return fmterr.Errorf("error getting OpenTelekomCloud CFW address group from result: %w", err)
 	}
-	log.Printf("[DEBUG] Create CFW Firewall instance %s: %#v", addressGroup.Id, addressGroup)
+	log.Printf("[DEBUG] Create CFW address group %s: %#v", addressGroup.Id, addressGroup)
 
 	d.SetId(addressGroup.Id)
 
@@ -112,7 +112,7 @@ func resourceCFWAddressGroupV1Read(ctx context.Context, d *schema.ResourceData, 
 		return fmterr.Errorf("error fetching CFW Address Group: %w", err)
 	}
 
-	log.Printf("[DEBUG] Retrieved instance %s: %#v", d.Id(), addressGroup)
+	log.Printf("[DEBUG] Retrieved address group %s: %#v", d.Id(), addressGroup)
 
 	mErr := multierror.Append(nil,
 		d.Set("id", d.Id()),
