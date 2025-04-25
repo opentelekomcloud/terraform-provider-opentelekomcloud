@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[LTS]** New resource ``resource/opentelekomcloud_lts_notification_template_v2`` (`#2914 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2914>`_)
