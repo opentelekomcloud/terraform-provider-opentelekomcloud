@@ -14,10 +14,12 @@ const (
 	keyClientV2          = "lts-v2-client"
 	keyClientV3          = "lts-v3-client"
 	keyClientV20         = "lts-v20-client"
+	keyClientV10         = "lts-v10-client"
 	errCreationV2Client  = "error creating OpenTelekomCloud LTS V2 client: %w"
 	errCreationV1Client  = "error creating OpenTelekomCloud LTS V1 client: %w"
 	errCreationV3Client  = "error creating OpenTelekomCloud LTS V3 client: %w"
 	errCreationV20Client = "error creating OpenTelekomCloud LTS V2.0 client: %w"
+	errCreationV10Client = "error creating OpenTelekomCloud LTS V1.0 client: %w"
 )
 
 func ltsTags(d *schema.ResourceData) []rt.ResourceTag {
