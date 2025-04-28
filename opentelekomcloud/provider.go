@@ -422,6 +422,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cfw_address_group_member_v1":               cfw.ResourceCfwAddressGroupMemberV1(),
 			"opentelekomcloud_cfw_firewall_v1":                           cfw.ResourceCfwFirewallV1(),
 			"opentelekomcloud_cfw_service_group_v1":                      cfw.ResourceCfwServiceGroupV1(),
+			"opentelekomcloud_cfw_service_group_member_v1":               cfw.ResourceCfwServiceGroupMemberV1(),
 			"opentelekomcloud_compute_bms_server_v2":                     bms.ResourceComputeBMSInstanceV2(),
 			"opentelekomcloud_compute_bms_tags_v2":                       bms.ResourceBMSTagsV2(),
 			"opentelekomcloud_compute_secgroup_v2":                       ecs.ResourceComputeSecGroupV2(),
