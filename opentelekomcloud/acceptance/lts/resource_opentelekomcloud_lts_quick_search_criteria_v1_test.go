@@ -112,7 +112,7 @@ resource "opentelekomcloud_lts_quick_search_criteria_v1" "log" {
 
   criteria = "context:test"
   name     = "%[1]s"
-  type 	   = "ORIGINALLOG"
+  type     = "ORIGINALLOG"
 }
 `, name)
 }

@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[LTS]** New resource ``resource/opentelekomcloud_lts_quick_search_criteria_v1`` (`#2916 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2916>`_)
