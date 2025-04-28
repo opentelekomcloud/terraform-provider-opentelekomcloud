@@ -19,8 +19,8 @@ Manages a CFW Service Group resource within OpenTelekomCloud.
 variable object_id {}
 
 resource "opentelekomcloud_cfw_service_group_v1" "group_1" {
-  object_id    = var.object_id
-  name         = "test-acc-tf-service-group"
+  object_id = var.object_id
+  name      = "test-acc-tf-service-group"
 }
 ```
 
