@@ -45,7 +45,7 @@ In addition to the arguments mentioned above, the following attributes are expor
 
 ## Import
 
-CFW Address Group V1 resource can be imported using the address group ID, `set_id` and IP address, `address`, e.g.
+CFW Address Group Member V1 resource can be imported using the address group ID, `set_id` and IP address, `address`, e.g.
 
 ```shell
 terraform import opentelekomcloud_cfw_address_group_member_v1.member_1 b4cd6aeb0b7445d3bf271457c6941544in09/address
