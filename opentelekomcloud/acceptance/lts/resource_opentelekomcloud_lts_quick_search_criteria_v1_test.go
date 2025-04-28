@@ -30,6 +30,9 @@ func getQuickSearchCriteriaResourceFunc(config *cfg.Config, state *terraform.Res
 			SearchType: state.Primary.Attributes["type"],
 		},
 	)
+	if err != nil {
+		return nil, err
+	}
 	if len(requestResp) < 1 {
 		return nil, golangsdk.ErrDefault404{}
 	}
