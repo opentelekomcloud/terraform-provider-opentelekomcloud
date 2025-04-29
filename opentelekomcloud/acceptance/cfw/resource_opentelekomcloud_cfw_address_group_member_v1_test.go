@@ -24,10 +24,10 @@ func getAddressGroupMemberFunc(conf *cfg.Config, state *terraform.ResourceState)
 }
 
 func TestAccCFWAddressGroupMemberV1_basic(t *testing.T) {
-	var aclRule addressgroup.AddressGroupData
+	var member addressgroup.AddressGroupData
 	rc := common.InitResourceCheck(
 		addressGroupMemberResourceName,
-		&aclRule,
+		&member,
 		getAddressGroupMemberFunc,
 	)
 
