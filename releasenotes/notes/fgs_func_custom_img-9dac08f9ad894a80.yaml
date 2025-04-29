@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[FGS]** Add new parameters for `custom_image` for ``resource/opentelekomcloud_fgs_function_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
