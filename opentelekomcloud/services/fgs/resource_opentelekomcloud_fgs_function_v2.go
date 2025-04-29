@@ -214,6 +214,19 @@ func ResourceFgsFunctionV2() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
+						"command": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"args": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"working_dir": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -361,8 +374,11 @@ func buildCustomImage(imageConfig []interface{}) *function.CustomImage {
 
 	cfg := imageConfig[0].(map[string]interface{})
 	return &function.CustomImage{
-		Enabled: pointerto.Bool(true),
-		Image:   cfg["url"].(string),
+		Enabled:    pointerto.Bool(true),
+		Image:      cfg["url"].(string),
+		Command:    cfg["command"].(string),
+		Args:       cfg["args"].(string),
+		WorkingDir: cfg["working_dir"].(string),
 	}
 }
 
@@ -560,7 +576,10 @@ func flattenFgsCustomImage(imageConfig function.CustomImage) []map[string]interf
 	if (imageConfig != function.CustomImage{}) {
 		return []map[string]interface{}{
 			{
-				"url": imageConfig.Image,
+				"url":         imageConfig.Image,
+				"command":     imageConfig.Command,
+				"args":        imageConfig.Args,
+				"working_dir": imageConfig.WorkingDir,
 			},
 		}
 	}

@@ -237,8 +237,9 @@ The following arguments are supported:
 * `func_mounts` - (Optional, List) Specifies the file system list. The `func_mounts` object structure is documented
   below.
 
-* `custom_image` - (Optional, List) Specifies the custom image configuration for creating function.
+* `custom_image` - (Optional, List) Specifies the custom image configuration of the function.
   The `custom_image` structure is documented below.
+  Required if the parameter `code_type` is **Custom-Image-Swr**.
 
 * `max_instance_num` - (Optional, String) Specifies the maximum number of instances of the function.
   The valid value ranges from `-1` to `1,000`, defaults to `400`.
@@ -289,6 +290,18 @@ The `func_mounts` block supports:
 The `custom_image` block supports:
 
 * `url` - (Required, String) Specifies the URL of SWR image, the URL must start with `swr.`.
+
+* `command` - (Optional, String) Specifies the startup commands of the SWR image.
+  Multiple commands are separated by commas (,). e.g. `/bin/sh`.
+  If this parameter is not specified, the entrypoint or CMD in the image configuration will be used by default.
+
+* `args` - (Optional, String) Specifies the command line arguments used to start the SWR image.
+  If multiple arguments are separated by commas (,). e.g. `-args,value`.
+  If this parameter is not specified, the CMD in the image configuration will be used by default.
+
+* `working_dir` - (Optional, String) Specifies the working directory of the SWR image.
+  If not specified, the default value is `/`.
+  Currently, the folder path can only be set to `/` and it cannot be created or modified.
 
 The `versions` block supports:
 

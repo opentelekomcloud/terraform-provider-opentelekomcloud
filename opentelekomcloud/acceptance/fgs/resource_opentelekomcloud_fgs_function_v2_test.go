@@ -172,7 +172,7 @@ func TestAccFgsV2Function_createByImage(t *testing.T) {
 				Config: testAccFgsV2Function_createByImage_step_2(randName),
 				Check: resource.ComposeTestCheckFunc(
 					rc1.CheckResourceExists(),
-					resource.TestCheckResourceAttr(rName1, "handler", "index.py"),
+					resource.TestCheckResourceAttr(rName1, "handler", "-"),
 					resource.TestCheckResourceAttr(rName1, "vpc_id", ""),
 					resource.TestCheckResourceAttr(rName1, "network_id", ""),
 					resource.TestCheckResourceAttr(rName1, "custom_image.0.url", common.OTC_BUILD_IMAGE_URL_UPDATED),
@@ -314,7 +314,7 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
   runtime     = "Python2.7"
   code_type   = "inline"
   func_code   = "aW1wb3J0IGpzb24KZGVmIGhhbmRsZXIgKGV2ZW50LCBjb250ZXh0KToKICAgIG91dHB1dCA9ICdIZWxsbyBtZXNzYWdlOiAnICsganNvbi5kdW1wcyhldmVudCkKICAgIHJldHVybiBvdXRwdXQ="
-  agency      = "function_vpc_trust"
+  agency      = "functiongraph_swr_trust"
   vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   network_id  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
@@ -342,7 +342,7 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
   runtime     = "Python2.7"
   code_type   = "obs"
   code_url    = format("https://%%s/%%s", opentelekomcloud_obs_bucket.test.bucket_domain_name, opentelekomcloud_obs_bucket_object.test.key)
-  agency      = "function_vpc_trust"
+  agency      = "functiongraph_swr_trust"
   vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   network_id  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
@@ -390,7 +390,7 @@ func testAccFgsV2Function_createByImage_step_1(rName string) string {
 resource "opentelekomcloud_fgs_function_v2" "create_with_vpc_access" {
   name        = "%[2]s_1"
   app         = "default"
-  handler     = "index.py"
+  handler     = "-"
   memory_size = 128
   runtime     = "Custom Image"
   timeout     = 3
@@ -408,7 +408,7 @@ resource "opentelekomcloud_fgs_function_v2" "create_with_vpc_access" {
 resource "opentelekomcloud_fgs_function_v2" "create_without_vpc_access" {
   name        = "%[2]s_2"
   app         = "default"
-  handler     = "index.py"
+  handler     = "-"
   memory_size = 128
   runtime     = "Custom Image"
   timeout     = 3
@@ -416,7 +416,10 @@ resource "opentelekomcloud_fgs_function_v2" "create_without_vpc_access" {
   code_type   = "Custom-Image-Swr"
 
   custom_image {
-    url = "%[3]s"
+    url         = "%[3]s"
+    command     = "/bin/sh"
+    args        = "-args,value"
+    working_dir = "/"
   }
 }
 `, common.DataSourceSubnet, rName, common.OTC_BUILD_IMAGE_URL)
@@ -430,7 +433,7 @@ func testAccFgsV2Function_createByImage_step_2(rName string) string {
 resource "opentelekomcloud_fgs_function_v2" "create_with_vpc_access" {
   name        = "%[2]s_1"
   app         = "default"
-  handler     = "index.py"
+  handler     = "-"
   memory_size = 128
   runtime     = "Custom Image"
   timeout     = 3
@@ -438,7 +441,10 @@ resource "opentelekomcloud_fgs_function_v2" "create_with_vpc_access" {
   code_type   = "Custom-Image-Swr"
 
   custom_image {
-    url = "%[3]s"
+    url         = "%[3]s"
+    command     = "/bin/sh"
+    args        = "-args,value"
+    working_dir = "/"
   }
 }
 
@@ -446,7 +452,7 @@ resource "opentelekomcloud_fgs_function_v2" "create_with_vpc_access" {
 resource "opentelekomcloud_fgs_function_v2" "create_without_vpc_access" {
   name        = "%[2]s_2"
   app         = "default"
-  handler     = "index.py"
+  handler     = "-"
   memory_size = 128
   runtime     = "Custom Image"
   timeout     = 3
@@ -454,7 +460,8 @@ resource "opentelekomcloud_fgs_function_v2" "create_without_vpc_access" {
   code_type   = "Custom-Image-Swr"
 
   custom_image {
-    url = "%[3]s"
+    url         = "%[3]s"
+    working_dir = "/"
   }
 
   vpc_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
