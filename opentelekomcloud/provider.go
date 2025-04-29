@@ -553,6 +553,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_lts_stream_v2":                             lts.ResourceLTSStreamV2(),
 			"opentelekomcloud_lts_notification_template_v2":              lts.ResourceNotificationTemplate(),
 			"opentelekomcloud_lts_transfer_v2":                           lts.ResourceLTSNewTransferV2(),
+			"opentelekomcloud_lts_quick_search_criteria_v1":              lts.ResourceQuickSearchCriteriaV1(),
 			"opentelekomcloud_mrs_cluster_v1":                            mrs.ResourceMRSClusterV1(),
 			"opentelekomcloud_mrs_job_v1":                                mrs.ResourceMRSJobV1(),
 			"opentelekomcloud_nat_gateway_v2":                            nat.ResourceNatGatewayV2(),
