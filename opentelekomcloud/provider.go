@@ -420,6 +420,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cfw_acl_rule_v1":                           cfw.ResourceCfwAclRuleV1(),
 			"opentelekomcloud_cfw_address_group_v1":                      cfw.ResourceCfwAddressGroupV1(),
 			"opentelekomcloud_cfw_address_group_member_v1":               cfw.ResourceCfwAddressGroupMemberV1(),
+			"opentelekomcloud_cfw_blacklist_whitelist_rule_v1":           cfw.ResourceCfwBlacklistWhitelistRuleV1(),
 			"opentelekomcloud_cfw_firewall_v1":                           cfw.ResourceCfwFirewallV1(),
 			"opentelekomcloud_cfw_service_group_v1":                      cfw.ResourceCfwServiceGroupV1(),
 			"opentelekomcloud_cfw_service_group_member_v1":               cfw.ResourceCfwServiceGroupMemberV1(),

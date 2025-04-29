@@ -75,7 +75,7 @@ func testAccCFWServiceGroupMemberV1ImportStateIdFunc() resource.ImportStateIdFun
 		if setId == "" || id == "" {
 			return "", fmt.Errorf("resource not found: %s/%s", setId, id)
 		}
-		return fmt.Sprintf(" %s/%s", setId, id), nil
+		return fmt.Sprintf("%s/%s", setId, id), nil
 	}
 }
 
