@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CFW]** Add new resource ``resource/opentelekomcloud_cfw_blacklist_whitelist_rule_v1`` (`#2920 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2920>`_).
