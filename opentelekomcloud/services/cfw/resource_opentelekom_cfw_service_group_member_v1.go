@@ -136,7 +136,6 @@ func resourceCFWServiceGroupMemberV1Read(ctx context.Context, d *schema.Resource
 				d.Set("description", member.Description),
 			)
 			return diag.FromErr(mErr.ErrorOrNil())
-
 		}
 	}
 	return fmterr.Errorf("unable to find OpenTelekomCloud CFW service group member or group member does not exist: %w", err)
@@ -167,7 +166,10 @@ func customImportServiceGroupMember(ctx context.Context, d *schema.ResourceData,
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid format specified for import ID, must be <set_id>/<id>")
 	}
-	d.Set("set_id", strings.TrimSpace(parts[0]))
+	err := d.Set("set_id", strings.TrimSpace(parts[0]))
+	if err != nil {
+		return nil, fmt.Errorf("error while setting set_id: %s", err)
+	}
 	id := strings.TrimSpace(parts[1])
 	d.SetId(id)
 

@@ -30,7 +30,6 @@ func getServiceGroupMemberFunc(conf *cfg.Config, state *terraform.ResourceState)
 		}
 	}
 	return nil, fmt.Errorf("unable to find OpenTelekomCloud CFW service group member or member does not exist: %s", err)
-
 }
 
 func TestAccCFWServiceGroupMemberV1_basic(t *testing.T) {
