@@ -46,7 +46,7 @@ func ResourceDdmSchemaV1() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: common.ValidateDDMSchemaName,
+				ValidateFunc: validation.IsUUID,
 			},
 			"shard_mode": {
 				Type:     schema.TypeString,
