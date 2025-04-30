@@ -423,7 +423,7 @@ func resourceCFWAclRuleV1Create(ctx context.Context, d *schema.ResourceData, met
 
 	d.SetId(ruleIdList[0].ID)
 
-	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
 	return resourceCFWAclRuleV1Read(clientCtx, d, meta)
 }
 
