@@ -19,12 +19,14 @@ Up-to-date reference of API arguments for CFW EIP protection you can get at
 variable firewall_id {}
 variable object_id {}
 variable eip_id {}
+variable ip_address {}
 
 resource "opentelekomcloud_cfw_eip_protection_v1" "protect_1" {
   firewall_id = var.firewall_id
   object_id   = var.object_id
   status      = 0
   eip_id      = var.eip_id
+  public_ip   = var.ip_address
 }
 ```
 
@@ -40,9 +42,9 @@ The following arguments are supported:
 
 * `eip_id` - (Required, String, ForceNew) Specifies the EIP ID.
 
-* `public_ip` - (Optional, String, ForceNew) Specifies the EIP IPV4 address.
+* `public_ip` - (Optional, String, ForceNew) Specifies the EIP IPV4 address. Required if `public_ipv6` is not set.
 
-* `public_ipv6` - (Optional, String, ForceNew) Specifies the EIP IPV6 address.
+* `public_ipv6` - (Optional, String, ForceNew) Specifies the EIP IPV6 address. Required if `public_ip` is not set.
 
 ## Timeouts
 

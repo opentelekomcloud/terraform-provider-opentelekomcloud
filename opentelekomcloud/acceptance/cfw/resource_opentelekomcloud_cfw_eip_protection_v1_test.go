@@ -79,5 +79,6 @@ resource "opentelekomcloud_cfw_eip_protection_v1" "protect_1" {
   object_id   = opentelekomcloud_cfw_firewall_v1.firewall_1.protect_objects.0.object_id
   status      = 0
   eip_id      = opentelekomcloud_vpc_eip_v1.eip_1.id
+  public_ip   = opentelekomcloud_vpc_eip_v1.eip_1.publicip.0.ip_address
 }
 `
