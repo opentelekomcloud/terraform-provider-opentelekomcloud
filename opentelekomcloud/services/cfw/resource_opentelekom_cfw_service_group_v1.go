@@ -85,7 +85,7 @@ func resourceCFWServiceGroupV1Create(ctx context.Context, d *schema.ResourceData
 
 	d.SetId(serviceGroup.Id)
 
-	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
 	return resourceCFWServiceGroupV1Read(clientCtx, d, meta)
 }
 

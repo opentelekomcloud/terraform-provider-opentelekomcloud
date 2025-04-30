@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CFW]** Add new resource ``resource/opentelekomcloud_cfw_eip_protection_v1`` (`#2924 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2924>`_).

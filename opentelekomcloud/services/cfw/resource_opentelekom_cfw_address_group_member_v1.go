@@ -107,7 +107,7 @@ func resourceCFWAddressGroupmemberV1Create(ctx context.Context, d *schema.Resour
 
 	d.SetId(groupMember.ItemID)
 
-	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
 	return resourceCFWAddressGroupMemberV1Read(clientCtx, d, meta)
 }
 

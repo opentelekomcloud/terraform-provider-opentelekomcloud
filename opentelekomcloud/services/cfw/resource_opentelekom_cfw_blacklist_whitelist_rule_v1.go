@@ -127,7 +127,7 @@ func resourceCFWBlacklistWhitelistRuleV1Create(ctx context.Context, d *schema.Re
 
 	d.SetId(blacklistWhitelistRule.Id)
 
-	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV1)
 	return resourceCFWBlacklistWhitelistRuleV1Read(clientCtx, d, meta)
 }
 
