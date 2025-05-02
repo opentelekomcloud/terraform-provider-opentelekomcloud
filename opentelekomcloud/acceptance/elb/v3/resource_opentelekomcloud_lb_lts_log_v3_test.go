@@ -19,7 +19,6 @@ func getLbLogResourceFunc(config *cfg.Config, state *terraform.ResourceState) (i
 		return nil, fmt.Errorf("error creating ELB v3 client: %s", err)
 	}
 	return log.Get(client, state.Primary.ID)
-
 }
 
 func TestAccLtsElb_basic(t *testing.T) {
