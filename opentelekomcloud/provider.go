@@ -534,6 +534,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_lb_loadbalancer_v3":                        elbv3.ResourceLoadBalancerV3(),
 			"opentelekomcloud_lb_listener_v2":                            elbv2.ResourceListenerV2(),
 			"opentelekomcloud_lb_listener_v3":                            elbv3.ResourceListenerV3(),
+			"opentelekomcloud_lb_lts_log_v3":                             elbv3.ResourceLtsLogV3(),
 			"opentelekomcloud_lb_member_v2":                              elbv2.ResourceMemberV2(),
 			"opentelekomcloud_lb_member_v3":                              elbv3.ResourceLBMemberV3(),
 			"opentelekomcloud_lb_monitor_v2":                             elbv2.ResourceMonitorV2(),
