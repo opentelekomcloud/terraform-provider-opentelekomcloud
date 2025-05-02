@@ -22,7 +22,7 @@ func getLbLogResourceFunc(config *cfg.Config, state *terraform.ResourceState) (i
 
 }
 
-func TestAccLtsElbComp_basic(t *testing.T) {
+func TestAccLtsElb_basic(t *testing.T) {
 	var instance log.Log
 	rName := "opentelekomcloud_lb_lts_log_v3.log"
 	name := fmt.Sprintf("lb_log%s", acctest.RandString(3))
