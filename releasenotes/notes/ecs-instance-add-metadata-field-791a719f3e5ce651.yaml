@@ -1,0 +1,6 @@
+---
+enhancements:
+  - |
+    **[ECS]** Add ``agency_name`` and ``metadata`` arguments to
+    ``resource/opentelekomcloud_ecs_instance_v1``
+    (`#2835 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2835>`_)

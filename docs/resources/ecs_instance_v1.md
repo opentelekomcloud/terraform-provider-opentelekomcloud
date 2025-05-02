@@ -265,6 +265,8 @@ The following arguments are supported:
   instance. The nics object structure is documented below. Changing this
   creates a new server.
 
+* `metadata` - (Optional, Map) Metadata key/value pairs to associate with the instance.
+
 * `system_disk_type` - (Optional, String, ForceNew) The system disk type of the server. For HANA, HL1, and HL2 ECSs use `co-p1` and `uh-l1` disks.
   Changing this creates a new server. Options are limited depending on AZ. Available options are:
   * `SATA`: common I/O disk type. Available for all AZs.
@@ -311,6 +313,10 @@ The `nics` block supports:
 
 * `ip_address` - (Optional, String, ForceNew) Specifies a fixed IPv4 address to be used on this
   network. Changing this creates a new server.
+
+The `metadata` block supports:
+
+* `agency_name` - (Optional, String) Association to an [agency](identity_agency_v3.md)
 
 The `data_disks` block supports:
 

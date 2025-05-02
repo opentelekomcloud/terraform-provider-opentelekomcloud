@@ -124,6 +124,20 @@ func ResourceEcsInstanceV1() *schema.Resource {
 					},
 				},
 			},
+			"metadata": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"agency_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
 			"system_disk_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -287,6 +301,7 @@ func resourceEcsInstanceV1Create(ctx context.Context, d *schema.ResourceData, me
 		DataVolumes:      resourceInstanceDataVolumesV1(d),
 		AdminPass:        d.Get("password").(string),
 		UserData:         []byte(d.Get("user_data").(string)),
+		MetaData:         resourceInstanceMetadataV1(d),
 		SchedulerHints:   resourceInstanceOsSchedulerHints(d),
 	}
 
@@ -394,6 +409,15 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("volumes_attached", volumeList),
 	)
 
+	var metadata []map[string]interface{}
+	md := map[string]interface{}{
+		"agency_name": server.Metadata.AgencyName,
+	}
+	metadata = append(metadata, md)
+	mErr = multierror.Append(mErr,
+		d.Set("metadata", metadata),
+	)
+
 	// Get the instance network and address information
 	nics := flattenInstanceNicsV1(d, meta, server.Addresses)
 	mErr = multierror.Append(mErr,
@@ -481,6 +505,55 @@ func resourceEcsInstanceV1Update(ctx context.Context, d *schema.ResourceData, me
 				return fmterr.Errorf("error adding security group (%s) to OpenTelekomCloud server (%s): %w", sg, d.Id(), err)
 			}
 			log.Printf("[DEBUG] Added security group (%s) to instance (%s)", sg, d.Id())
+		}
+	}
+
+	if d.HasChange("metadata") {
+		oldMetadataRaw, newMetadataRaw := d.GetChange("metadata")
+		oldMetadata := oldMetadataRaw.([]interface{})
+		newMetadata := newMetadataRaw.([]interface{})
+
+		var metadataToDelete []string
+
+		// Determine if any metadata keys were removed from the configuration.
+		// Then request those keys to be deleted.
+		if len(oldMetadata) > 0 {
+			for oldKey := range oldMetadata[0].(map[string]interface{}) {
+				var found bool
+				if len(newMetadata) > 0 {
+					for newKey := range newMetadata[0].(map[string]interface{}) {
+						if oldKey == newKey {
+							found = true
+						}
+					}
+				} else {
+					found = true
+				}
+
+				if !found {
+					metadataToDelete = append(metadataToDelete, oldKey)
+				}
+			}
+		}
+
+		for _, key := range metadataToDelete {
+			err := servers.DeleteMetadatum(client, d.Id(), key).ExtractErr()
+			if err != nil {
+				return fmterr.Errorf("error deleting metadata (%s) from server (%s): %s", key, d.Id(), err)
+			}
+		}
+
+		// Update existing metadata and add any new metadata.
+		metadataOpts := make(servers.MetadataOpts)
+		if len(newMetadata) > 0 {
+			for k, v := range newMetadata[0].(map[string]interface{}) {
+				metadataOpts[k] = v.(string)
+			}
+		}
+
+		_, err := servers.UpdateMetadata(client, d.Id(), metadataOpts).Extract()
+		if err != nil {
+			return fmterr.Errorf("error updating OpenTelekomCloud server (%s) metadata: %s", d.Id(), err)
 		}
 	}
 
@@ -690,6 +763,19 @@ func resourceInstanceSecGroupsV1(d *schema.ResourceData) []cloudservers.Security
 		}
 	}
 	return secGroups
+}
+
+func resourceInstanceMetadataV1(d *schema.ResourceData) *cloudservers.MetaData {
+	metaDatas, ok := d.Get("metadata").([]interface{})
+
+	var metaData cloudservers.MetaData
+	if ok && len(metaDatas) == 1 {
+		md := metaDatas[0].(map[string]interface{})
+		metaData = cloudservers.MetaData{
+			AgencyName: md["agency_name"].(string),
+		}
+	}
+	return &metaData
 }
 
 func flattenInstanceNicsV1(d *schema.ResourceData, meta interface{}, addresses map[string][]cloudservers.Address) []map[string]interface{} {
