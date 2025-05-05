@@ -63,9 +63,10 @@ func ResourceDcsInstanceV2() *schema.Resource {
 				}, true),
 			},
 			"engine_version": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: common.ValidateDcsEngineVersion,
 			},
 			"capacity": {
 				Type:     schema.TypeFloat,

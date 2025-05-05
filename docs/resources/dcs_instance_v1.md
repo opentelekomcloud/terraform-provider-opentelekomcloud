@@ -16,51 +16,6 @@ Manages a DCSv1 instance in the OpenTelekomCloud DCS Service.
 
 ## Example Usage
 
-### Engine version 3.0 (`security_group_id` is required):
-
-```hcl
-variable "network_id" {}
-variable "vpc_id" {}
-
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name        = "secgroup_1"
-  description = "secgroup_1"
-}
-
-data "opentelekomcloud_dcs_az_v1" "az_1" {
-  name = "eu-de-01"
-}
-
-data "opentelekomcloud_dcs_product_v1" "product_1" {
-  spec_code = "dcs.master_standby"
-}
-
-resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
-  name           = "test_dcs_instance"
-  engine_version = "3.0"
-  password       = "0TCTestP@ssw0rd"
-  engine         = "Redis"
-  capacity       = 2
-  vpc_id         = var.vpc_id
-
-  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-  subnet_id         = var.network_id
-  available_zones   = [data.opentelekomcloud_dcs_az_v1.az_1.id]
-  product_id        = data.opentelekomcloud_dcs_product_v1.product_1.id
-  backup_policy {
-    save_days   = 1
-    backup_type = "manual"
-    begin_at    = "00:00-01:00"
-    period_type = "weekly"
-    backup_at   = [1, 2, 4, 6]
-  }
-  tags = {
-    environment = "basic"
-    managed_by  = "terraform"
-  }
-}
-```
-
 ### Engine version 5.0 (please pay attention of proper selection of the spec_code):
 
 ```hcl
@@ -110,7 +65,7 @@ The following arguments are supported:
 * `engine` - (Required, ForceNew, String) Indicates a cache engine. Only `Redis` is supported. Changing this
   creates a new instance.
 
-* `engine_version` - (Required, ForceNew, String) Indicates the version of a cache engine, which can be `3.0`/`4.0`/`5.0`/`6.0`.
+* `engine_version` - (Required, ForceNew, String) Indicates the version of a cache engine, which can be `4.0`/`5.0`/`6.0`.
   Changing this creates a new instance.
 
 * `capacity` - (Required, ForceNew, Float) Indicates the Cache capacity. Unit: GB.
@@ -118,8 +73,6 @@ The following arguments are supported:
     `0.5`, `1`, `2`, `4`, `8`, `16`, `32` and `64`.
     Cluster instance specifications support `4`,`8`,`16`, `24`, `32`, `48`, `64`, `96`, `128`, `192`, `256`,
     `384`, `512`, `768` and `1024`.
-  + **Redis3.0**: Stand-alone and active/standby type instance values: `2`, `4`, `8`, `16`, `32` and `64`.
-    Proxy cluster instance specifications support `64`, `128`, `256`, `512`, and `1024`.
   + **Memcached**: Stand-alone and active/standby type instance values: `2`, `4`, `8`, `16`, `32` and `64`.
 
 * `password` - (Optional, ForceNew, String) Indicates the password of an instance. An instance password
