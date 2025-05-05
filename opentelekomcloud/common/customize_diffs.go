@@ -176,3 +176,16 @@ func ValidateVpnRegion(v interface{}, path cty.Path) diag.Diagnostics {
 		AttributePath: path,
 	}}
 }
+
+func ValidateDcsEngineVersion(v interface{}, path cty.Path) diag.Diagnostics {
+	engine := v.(string)
+	if engine != "3.0" {
+		return nil
+	}
+	return diag.Diagnostics{diag.Diagnostic{
+		Severity:      diag.Warning,
+		Summary:       "[DEPRECATION WARNING]",
+		Detail:        "Redis 3.x versions in DCS have reached their End of Sale status on 21st June 2024.",
+		AttributePath: path,
+	}}
+}
