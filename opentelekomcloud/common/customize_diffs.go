@@ -189,3 +189,16 @@ func ValidateDcsEngineVersion(v interface{}, path cty.Path) diag.Diagnostics {
 		AttributePath: path,
 	}}
 }
+
+func ValidateDmsEngineVersion(v interface{}, path cty.Path) diag.Diagnostics {
+	engine := v.(string)
+	if !strings.HasPrefix(engine, "1") {
+		return nil
+	}
+	return diag.Diagnostics{diag.Diagnostic{
+		Severity:      diag.Warning,
+		Summary:       "[DEPRECATION WARNING]",
+		Detail:        "Kafka 1.x versions in DMS has reached their End of Sale status on 21st June 2024.",
+		AttributePath: path,
+	}}
+}

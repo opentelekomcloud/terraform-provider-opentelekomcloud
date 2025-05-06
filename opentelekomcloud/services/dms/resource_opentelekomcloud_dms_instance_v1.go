@@ -61,9 +61,10 @@ func ResourceDmsInstancesV1() *schema.Resource {
 				}, false),
 			},
 			"engine_version": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: common.ValidateDmsEngineVersion,
 			},
 			"storage_space": {
 				Type:     schema.TypeInt,
