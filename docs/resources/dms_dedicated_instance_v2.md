@@ -117,7 +117,7 @@ The following arguments are supported:
   e.g. **c6.2u4g.cluster**.
 
 * `engine_version` - (Required, String, ForceNew) Specifies the version of the Kafka engine,
-  such as 1.1.0, 2.3.0, 2.7 or other supported versions. Changing this creates a new instance resource.
+  such as 2.3.0, 2.7 or other supported versions. Changing this creates a new instance resource.
 
 * `storage_spec_code` - (Required, String, ForceNew) Specifies the storage I/O specification.
   The valid values are as follows:
