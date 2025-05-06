@@ -62,8 +62,8 @@ resource "opentelekomcloud_cfw_firewall_v1" "firewall_1" {
 }
 
 resource "opentelekomcloud_cfw_ips_protection_v1" "protect_1" {
-  object_id              = opentelekomcloud_cfw_firewall_v1.firewall_1.protect_objects.0.object_id
+  object_id      = opentelekomcloud_cfw_firewall_v1.firewall_1.protect_objects.0.object_id
   feature_status = 1
-  mode                   = 0
+  mode           = 0
 }
 `
