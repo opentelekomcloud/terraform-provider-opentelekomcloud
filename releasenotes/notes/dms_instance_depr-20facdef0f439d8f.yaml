@@ -2,10 +2,10 @@
 deprecations:
   - |
     **[DMS]** Add deprecation message for v1 engine version for ``resource/opentelekomcloud_dms_instance_v1``
-    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    (`#2929 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2929>`_)
   - |
     **[DMS]** Add deprecation message for v1 engine version for ``resource/opentelekomcloud_dms_instance_v2``
-    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    (`#2929 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2929>`_)
   - |
     **[DMS]** Add deprecation message for v1 engine version for ``resource/opentelekomcloud_dms_dedicated_instance_v2``
-    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    (`#2929 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2929>`_)
