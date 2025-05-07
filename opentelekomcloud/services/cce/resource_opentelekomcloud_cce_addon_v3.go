@@ -40,7 +40,6 @@ func ResourceCCEAddonV3() *schema.Resource {
 			"template_version": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"cluster_id": {
 				Type:     schema.TypeString,
@@ -50,7 +49,6 @@ func ResourceCCEAddonV3() *schema.Resource {
 			"template_name": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -239,7 +237,7 @@ func resourceCCEAddonV3Update(ctx context.Context, d *schema.ResourceData, meta 
 			},
 		},
 		Spec: addons.RequestSpec{
-			Version:           d.Get("template_version").(string), // Исправлено с version на template_version
+			Version:           d.Get("template_version").(string),
 			ClusterID:         clusterID,
 			AddonTemplateName: d.Get("template_name").(string),
 			Values: addons.Values{
