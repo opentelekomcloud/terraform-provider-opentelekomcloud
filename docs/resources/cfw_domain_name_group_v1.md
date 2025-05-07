@@ -22,7 +22,7 @@ variable object_id {}
 resource "opentelekomcloud_cfw_domain_name_group_v1" "group_1" {
   firewall_id = var.firewall_id
   object_id   = var.object_id
-  name        = "test-acc-tf-domain-group-updated"
+  name        = "test-acc-tf-domain-group"
   domain_names {
     domain_name = "www.testacctf.com"
   }
@@ -55,7 +55,7 @@ The `domain_names` block supports:
 In addition to the arguments mentioned above, the following attributes are exported:
 
 * `id` - Indicates the domain name group ID.
-* `domain_name` - Indicates the domain name information list. The `domain_name` structure is as follows:
+* `domain_names` - Indicates the domain name information list. The `domain_name` structure is as follows:
     - `domain_name` - See Argument Reference above.
     - `description` - See Argument Reference above.
     - `domain_address_id` - Indicates the domain name ID.
