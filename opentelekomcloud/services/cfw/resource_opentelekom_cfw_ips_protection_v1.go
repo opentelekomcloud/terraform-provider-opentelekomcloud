@@ -131,6 +131,8 @@ func resourceCFWIpsProtectionV1Read(ctx context.Context, d *schema.ResourceData,
 	mErr := multierror.Append(nil,
 		d.Set("ips_switch_id", ipsFeatResp.ID),
 		d.Set("basic_defense_status", ipsFeatResp.BasicDefenseStatus),
+		d.Set("feature_status", ipsFeatResp.VirtualPatchesStatus),
+		d.Set("mode", ipsProtectionResp.Mode),
 		d.Set("ips_protection_mode_id", ipsProtectionResp.ID),
 	)
 	return diag.FromErr(mErr.ErrorOrNil())
