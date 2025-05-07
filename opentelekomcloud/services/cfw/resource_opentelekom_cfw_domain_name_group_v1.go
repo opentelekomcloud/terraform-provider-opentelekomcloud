@@ -80,7 +80,7 @@ func ResourceCfwDomainNameGroupV1() *schema.Resource {
 					},
 				},
 			},
-			"domnain_set_type": {
+			"domain_set_type": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
@@ -132,7 +132,7 @@ func resourceCFWDomainNameGroupV1Create(ctx context.Context, d *schema.ResourceD
 		Name:          d.Get("name").(string),
 		Description:   d.Get("description").(string),
 		DomainNames:   getDomainNames(d),
-		DomainSetType: d.Get("domnain_set_type").(int),
+		DomainSetType: d.Get("domain_set_type").(int),
 	}
 
 	domainNameGroup, err := group.CreateDomainNameGroup(client, createOpts)
@@ -179,8 +179,8 @@ func resourceCFWDomainNameGroupV1Read(ctx context.Context, d *schema.ResourceDat
 		d.Set("description", domainNameGroup.Description),
 		d.Set("domain_names", setDomainNames(domainNames)),
 		d.Set("domain_set_type", domainNameGroup.DomainSetType),
-		d.Set("ref_count", domainNameGroup.DomainSetType),
-		d.Set("config_status", domainNameGroup.DomainSetType),
+		d.Set("ref_count", domainNameGroup.RefCount),
+		d.Set("config_status", domainNameGroup.ConfigStatus),
 		d.Set("rules", setRules(domainNameGroup.Rules)),
 	)
 

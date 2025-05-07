@@ -23,7 +23,7 @@ func getDomainNameFunc(conf *cfg.Config, state *terraform.ResourceState) (interf
 	return group.GetDomainNameGroup(client, state.Primary.Attributes["name"], state.Primary.Attributes["firewall_id"], state.Primary.Attributes["object_id"])
 }
 
-func TestAccCFWDomainNameV1_basic(t *testing.T) {
+func TestAccCFWDomainNameGroupV1_basic(t *testing.T) {
 	var group group.DomainSetVO
 	rc := common.InitResourceCheck(
 		domainNameResourceName,
