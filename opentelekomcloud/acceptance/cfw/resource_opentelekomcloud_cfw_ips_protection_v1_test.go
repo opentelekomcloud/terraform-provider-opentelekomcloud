@@ -44,6 +44,8 @@ func TestAccCFWIpsProtetionV1_basic(t *testing.T) {
 				Config: testAccCFWIpsProtectionV1Basic,
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr("opentelekomcloud_cfw_ips_protection_v1.protect_1", "feature_status", "1"),
+					resource.TestCheckResourceAttr("opentelekomcloud_cfw_ips_protection_v1.protect_1", "mode", "0"),
 				),
 			},
 		},
