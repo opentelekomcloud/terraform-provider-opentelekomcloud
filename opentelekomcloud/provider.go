@@ -272,6 +272,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cce_addon_templates_v3":             cce.DataSourceCceAddonTemplatesV3(),
 			"opentelekomcloud_cce_node_ids_v3":                    cce.DataSourceCceNodeIdsV3(),
 			"opentelekomcloud_cce_node_v3":                        cce.DataSourceCceNodesV3(),
+			"opentelekomcloud_cfw_firewall_v1":                    cfw.DataSourceCfwFirewallV1(),
 			"opentelekomcloud_compute_availability_zones_v2":      ecs.DataSourceComputeAvailabilityZonesV2(),
 			"opentelekomcloud_compute_bms_flavors_v2":             bms.DataSourceBMSFlavorV2(),
 			"opentelekomcloud_compute_bms_keypairs_v2":            bms.DataSourceBMSKeyPairV2(),
