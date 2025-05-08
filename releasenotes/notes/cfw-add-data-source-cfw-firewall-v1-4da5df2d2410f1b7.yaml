@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CFW]** Add new data source ``opentelekomcloud_cfw_firewall_v1`` (`#2935 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2935>`_).
