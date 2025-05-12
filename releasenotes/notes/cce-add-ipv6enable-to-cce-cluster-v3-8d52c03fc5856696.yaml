@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CCE]** Add `ipv6_enable` parameter for ``resource/opentelekomcloud_cce_cluster_v3`` (`#2938 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2938>`_)
