@@ -109,6 +109,12 @@ func ResourceCCEClusterV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"ipv6_enable": {
+				Type:     schema.TypeBool,
+				Default:  false,
+				Optional: true,
+				ForceNew: true,
+			},
 			"billing_mode": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -474,6 +480,7 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 			Type:        d.Get("cluster_type").(string),
 			Flavor:      d.Get("flavor_id").(string),
 			Version:     d.Get("cluster_version").(string),
+			Ipv6Enable:  d.Get("ipv6_enable").(bool),
 			Description: d.Get("description").(string),
 			HostNetwork: clusters.HostNetworkSpec{
 				VpcId:           d.Get("vpc_id").(string),
@@ -600,6 +607,7 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("cluster_type", cluster.Spec.Type),
 		d.Set("cluster_version", cluster.Spec.Version),
 		d.Set("description", cluster.Spec.Description),
+		d.Set("ipv6_enable", cluster.Spec.Ipv6Enable),
 		d.Set("billing_mode", cluster.Spec.BillingMode),
 		d.Set("vpc_id", cluster.Spec.HostNetwork.VpcId),
 		d.Set("subnet_id", cluster.Spec.HostNetwork.SubnetId),
