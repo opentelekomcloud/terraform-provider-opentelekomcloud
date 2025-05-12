@@ -317,6 +317,44 @@ func TestAccCCEClusterV3_withVersionDiff(t *testing.T) {
 	})
 }
 
+func TestAccCCEClusterV3_Ipv6Enable(t *testing.T) {
+	var cluster clusters.Clusters
+	rc := common.InitResourceCheck(
+		resourceClusterName,
+		&cluster,
+		getCceClusterResourceFunc,
+	)
+	clusterName := randClusterName()
+	t.Parallel()
+
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCEClusterTurboV3IPV6Enable(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceClusterName, "name", clusterName),
+					resource.TestCheckResourceAttr(resourceClusterName, "status", "Available"),
+					resource.TestCheckResourceAttr(resourceClusterName, "cluster_type", "VirtualMachine"),
+					resource.TestCheckResourceAttr(resourceClusterName, "flavor_id", "cce.s1.small"),
+					resource.TestCheckResourceAttr(resourceClusterName, "container_network_type", "eni"),
+					resource.TestCheckResourceAttr(resourceClusterName, "authentication_mode", "rbac"),
+					resource.TestCheckResourceAttr(resourceClusterName, "kube_proxy_mode", "ipvs"),
+					resource.TestCheckResourceAttr(resourceClusterName, "kubernetes_svc_ip_range", "10.247.0.0/16"),
+					resource.TestCheckResourceAttr(resourceClusterName, "ipv6_enable", "true"),
+					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_control"),
+					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_node"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCCEClusterV3Basic(clusterName string) string {
 	return fmt.Sprintf(`
 %s
@@ -625,6 +663,28 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 
   ignore_certificate_clusters_data = true
   ignore_certificate_users_data    = true
+}
+`, common.DataSourceSubnet, clusterName)
+}
+
+func testAccCCEClusterTurboV3IPV6Enable(clusterName string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  ipv6_enable             = true
+  kube_proxy_mode         = "ipvs"
+  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  container_network_type  = "eni"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+  ignore_addons           = true
+  eni_subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+  eni_subnet_cidr         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.cidr
+  api_access_trustlist    = ["192.168.45.0/24", "10.234.128.0/20"]
 }
 `, common.DataSourceSubnet, clusterName)
 }
