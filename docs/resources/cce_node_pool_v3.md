@@ -150,11 +150,16 @@ the AZ based on the AZ sequence. For more details see
   This parameter and password are alternative. Changing this parameter will create a new resource.
 
 * `os` - (Optional, ForceNew, String) Node OS. Changing this parameter will create a new resource.
+  
   Supported OS depends on kubernetes version of the cluster.
-  * Clusters of Kubernetes `v1.13` or later support `EulerOS 2.5`.
-  * Clusters of Kubernetes `v1.17` or later support `EulerOS 2.5` and `CentOS 7.7`.
-  * Clusters of Kubernetes `v1.21` or later support `EulerOS 2.5`, `EulerOS 2.9`, and `CentOS 7.7`.
-  * Clusters of Kubernetes `v1.25` or later support `EulerOS 2.5`, `EulerOS 2.9`, `CentOS 7.7` and `Ubuntu 22.04`.
+  | OS           | Kubernetes version |
+  | :----------- | :----------------- |
+  | HCE OS 2.0   | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
+  | Ubuntu 22.04 | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
+  | EulerOS release 2.9 | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
+
+  For detailed information, visit the CCE node operating systems [reference document](https://docs.otc.t-systems.com/cloud-container-engine/umn/nodes/node_oss.html).
+
 
 * `name` - (Required, String) Node Pool Name.
 
