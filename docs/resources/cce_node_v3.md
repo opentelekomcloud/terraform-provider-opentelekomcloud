@@ -69,10 +69,11 @@ The following arguments are supported:
   Supported OS depends on kubernetes version of the cluster.
   | OS           | Kubernetes version |
   | :----------- | :----------------- |
-  | HCE OS 2.0   | `v1.29`, `v1.28`, `v1.27`, `v1.25` |
-  | Ubuntu 22.04 | `v1.29`, `v1.28`, `v1.27`, `v1.25` |
-  | EulerOS release 2.9 | `v1.29`, `v1.28`, `v1.27`, `v1.25`, `v1.23`, `v1.21`, `V1.19` |
-  | EulerOS release 2.5 | `v1.25`, `v1.23`, `v1.21`, `V1.19` |
+  | HCE OS 2.0   | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
+  | Ubuntu 22.04 | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
+  | EulerOS release 2.9 | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
+
+  For detailed information, visit the CCE node operating systems [reference document](https://docs.otc.t-systems.com/cloud-container-engine/umn/nodes/node_oss.html).
 
 * `billing_mode` - (Optional, ForceNew, Int) Node's billing mode: The value is `0` (on demand). Changing this parameter will create a new resource.
 
