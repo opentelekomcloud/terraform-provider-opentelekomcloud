@@ -56,7 +56,7 @@ The following arguments are supported:
   Changing this creates a new instance.
 
 * `engine_version` - (Optional, String, ForceNew) Specifies the version of a cache engine.
-  It is mandatory when the engine is *Redis*, the value can be 4.0, 5.0 or 6.0.
+  It is mandatory when the engine is *Redis*, the value can be 4.0, 5.0, 6.0 or 7.0.
   Changing this creates a new instance.
 
 * `capacity` - (Required, Float) Specifies the cache capacity. Unit: GB.
