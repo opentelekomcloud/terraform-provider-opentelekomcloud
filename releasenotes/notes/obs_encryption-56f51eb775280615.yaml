@@ -1,4 +1,4 @@
 ---
 enhancements:
   - |
-    **[OBS]** Added new encryption parameter `kms_project_id` for ``resource/opentelekomcloud_obs_bucket`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[OBS]** Added new encryption parameter `kms_project_id` for ``resource/opentelekomcloud_obs_bucket`` (`#2946 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2946>`_)
