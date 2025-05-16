@@ -7,6 +7,9 @@ description: |-
   Manages a BlockStorage volume resource within OpenTelekomCloud.
 ---
 
+Up-to-date reference of API arguments for EVS blockstorage volume you can get at
+[documentation portal](https://docs.otc.t-systems.com/elastic-volume-service/api-ref/openstack_cinder_apis_recommended/disk_management/index.html)
+
 # opentelekomcloud_blockstorage_volume_v2
 
 Manages a V2 volume resource within OpenTelekomCloud.
@@ -69,8 +72,15 @@ The following arguments are supported:
 * `source_vol_id` - (Optional) The volume ID from which to create the volume.
   Changing this creates a new volume.
 
-* `volume_type` - (Optional) Currently, the value can be `SSD` (ultra-high I/O disk type), `SAS` (high I/O disk type), `SATA` (common I/O disk type), `co-p1` (Exclusive HPC/ SAP HANA: high I/O, performance optimized), or `uh-l1` (Exclusive HPC/ SAP HANA: ultra-high-I/O, latency optimized). Read **Note** for `uh-l1` and `co-p1`: [OTC-API](https://docs.otc.t-systems.com/en-us/api/ecs/en-us_topic_0065817708.html). Changing this creates a new volume.
-  -> **NOTE:** Common I/O (SATA) will reach end of life, end of 2025.
+* `volume_type` - (Optional) Currently, the value can be 
+  * `SATA`: common I/O disk type.
+  * `SAS`: high I/O disk type.
+  * `SSD`: ultra-high I/O disk type.
+  * `GPSSD`: the general purpose SSD type
+  * `ESSD`: the extreme SSD type
+  
+  -> **NOTE:** 
+  Common I/O (SATA) will reach end of life, end of 2025.
 
 * `device_type` - (Optional) The device type of volume to create. Valid options are VBD and SCSI.
   Defaults to VBD. Changing this creates a new volume.

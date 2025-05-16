@@ -57,7 +57,7 @@ func TestAccASV1Configuration_publicIP(t *testing.T) {
 				Config: testAccASV1ConfigurationPublicIP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1ConfigurationExists(resourceName, &asConfig),
-					resource.TestCheckResourceAttr(resourceName, "scaling_configuration_name", "as_config"),
+					resource.TestCheckResourceAttr(resourceName, "scaling_configuration_name", "as_config_eip"),
 					resource.TestCheckResourceAttrSet(resourceName, "instance_config.0.image"),
 					resource.TestCheckResourceAttr(resourceName, "instance_config.0.key_name", env.OS_KEYPAIR_NAME),
 				),
