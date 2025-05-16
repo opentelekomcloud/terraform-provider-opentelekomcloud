@@ -1,0 +1,10 @@
+---
+doc:
+  - |
+    **[AS]** Update argument `disk/volume_type` in doc for resource `as_configuration_v1` (`#2944 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2944>`_)
+  - |
+    **[EVS]** Update argument `volume_type` in doc for resource `blockstorage_volume_v2` (`#2944 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2944>`_)
+  - |
+    **[ECS]** Update argument `system_disk_type` and `data_disks/type` in doc for resource `ecs_instance_v1` (`#2944 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2944>`_)
+  - |
+    **[EVS]** Update argument `volume_type` in doc for resource `evs_volume_v3` (`#2944 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2944>`_)
