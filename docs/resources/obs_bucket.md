@@ -540,6 +540,8 @@ The `server_side_encryption` object supports the following
 
 * `kms_key_id` - (Required) The ID of KMS key used for the encryption.
 
+* `kms_project_id` - (Optional) The ID of the project where the KMS master key belongs.
+
 ~> Only base project (e.g. `eu-de`) KMS keys can be used for the encryption
 
 The `event_notifications` object supports the following
