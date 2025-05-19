@@ -20,7 +20,6 @@ import (
 func ResourceCCINamespaceV2() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceCciNamespaceV2Create,
-		UpdateContext: resourceCciNamespaceV2Update,
 		ReadContext:   resourceCciNamespaceV2Read,
 		DeleteContext: resourceCciNamespaceV2Delete,
 
@@ -37,6 +36,7 @@ func ResourceCCINamespaceV2() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"annotations": {
 				Type:     schema.TypeMap,

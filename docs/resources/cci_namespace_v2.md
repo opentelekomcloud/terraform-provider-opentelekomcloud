@@ -24,7 +24,7 @@ resource "opentelekomcloud_cci_namespace_v2" "test" {
 
 The following arguments are supported:
 
-* `name` - (Required, String, NonUpdatable) Specifies the unique name of the namespace.
+* `name` - (Required, String, ForceNew) Specifies the unique name of the namespace.
 
 ## Attribute Reference
 
