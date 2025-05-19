@@ -167,10 +167,6 @@ func resourceCciNamespaceV2Read(ctx context.Context, d *schema.ResourceData, met
 	return diag.FromErr(mErr.ErrorOrNil())
 }
 
-func resourceCciNamespaceV2Update(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
-	return nil
-}
-
 func resourceCciNamespaceV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, cesClientV1, func() (*golangsdk.ServiceClient, error) {
