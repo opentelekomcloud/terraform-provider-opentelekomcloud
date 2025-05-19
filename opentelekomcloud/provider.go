@@ -13,6 +13,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/bms"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/cbr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/cce"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/cci"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ces"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/cfw"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/csbs"
@@ -417,6 +418,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cce_node_attach_v3":                        cce.ResourceCCENodeV3Attach(),
 			"opentelekomcloud_cce_node_v3":                               cce.ResourceCCENodeV3(),
 			"opentelekomcloud_cce_node_pool_v3":                          cce.ResourceCCENodePoolV3(),
+			"opentelekomcloud_cci_namespace_v2":                          cci.ResourceCCINamespaceV2(),
 			"opentelekomcloud_ces_alarmrule":                             ces.ResourceAlarmRule(),
 			"opentelekomcloud_cfw_acl_rule_v1":                           cfw.ResourceCfwAclRuleV1(),
 			"opentelekomcloud_cfw_address_group_v1":                      cfw.ResourceCfwAddressGroupV1(),
