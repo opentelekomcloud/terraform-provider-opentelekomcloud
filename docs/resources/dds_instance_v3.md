@@ -188,10 +188,10 @@ The `flavor` block supports:
   * For a single node instance, the value is `single`.
 
 * `num` - (Required, Int) Specifies the node quantity. Valid value:
-  * `mongos`: The value ranges from `2` to `16`.
-  * `shard`: The value ranges from `2` to `16`.
+  * `mongos`: The value ranges from `2` to `32`.
+  * `shard`: The value ranges from `2` to `32`.
   * `config`: The value is `1`.
-  * `replica`: The value is `1`.
+  * `replica`: The number of nodes can be `3`, `5`, or `7`.
   * `single`: The value is `1`.
 
 * `storage` - (Optional, String, ForceNew) Specifies the disk type. Valid value: `ULTRAHIGH` which indicates the type SSD.
