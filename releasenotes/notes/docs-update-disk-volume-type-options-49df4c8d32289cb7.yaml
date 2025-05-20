@@ -1,5 +1,5 @@
 ---
-doc:
+other:
   - |
     **[AS]** Update argument `disk/volume_type` in doc for resource `as_configuration_v1` (`#2944 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2944>`_)
   - |
