@@ -462,6 +462,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_ddm_schema_v1":                             ddm.ResourceDdmSchemaV1(),
 			"opentelekomcloud_dds_backup_v3":                             dds.ResourceDdsBackupV3(),
 			"opentelekomcloud_dds_instance_v3":                           dds.ResourceDdsInstanceV3(),
+			"opentelekomcloud_dds_lts_log_v3":                            dds.ResourceDdsLtsLogV3(),
 			"opentelekomcloud_deh_host_v1":                               deh.ResourceDeHHostV1(),
 			"opentelekomcloud_dis_stream_v2":                             dis.ResourceDisStreamV2(),
 			"opentelekomcloud_dis_app_v2":                                dis.ResourceDisAppV2(),
