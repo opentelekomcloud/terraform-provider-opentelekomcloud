@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dds_lts_log_v3"
 sidebar_current: "docs-opentelekomcloud-resource-dds-lts-log-v3"
 description: |-
-Manages a DDS LTS Log resource within OpenTelekomCloud.
+  Manages a DDS LTS Log resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud_dds_lts_log_v3
