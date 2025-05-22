@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[RDS]** Change parameter name ``database_type`` to ``datastore_type`` in ``data-source/opentelekomcloud_rds_instance_v3`` documentation (`#2955 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2955>`_)
