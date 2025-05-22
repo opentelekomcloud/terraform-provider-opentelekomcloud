@@ -1112,6 +1112,10 @@ func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn s
 		strategyConfig := function.StrategyConfig{
 			ConcurrentNum: v.(int),
 		}
+		if v, ok := d.GetOk("max_instance_num"); ok && v.(string) != "" {
+			maxInstanceNum, _ := strconv.Atoi(v.(string))
+			strategyConfig.Concurrency = maxInstanceNum
+		}
 		updateMetadateOpts.StrategyConfig = &strategyConfig
 	}
 
