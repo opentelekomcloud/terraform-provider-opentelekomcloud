@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[DDS]** Update import block for resource `opentelekomcloud_dds_instance_v3` (`#2962 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2962>`_)

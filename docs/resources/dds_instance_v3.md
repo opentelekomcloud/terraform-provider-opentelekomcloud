@@ -283,3 +283,20 @@ DDSv3 Instance can be imported using the `id`, e.g.
 ```shell
 terraform import opentelekomcloud_dds_instance_v3.instance_1 c1851195-cdcb-4d23-96cb-032e6a3ee667
 ```
+
+Note that the imported state may not be identical to your resource definition, due to some attributes missing from the
+API response or in a different data structures. The missing attributes include: `flavor`, `password` and `availability_zone`.
+It is generally recommended running `terraform plan` after importing an instance.
+You can then decide if changes should be applied to the instance, or the resource definition should be updated to
+align with the instance. Also, you can ignore changes as below.
+
+```hcl
+resource "opentelekomcloud_dds_instance_v3" "instance_1" {
+
+  lifecycle {
+    ignore_changes = [
+      flavor, password, availability_zone,
+    ]
+  }
+}
+```
