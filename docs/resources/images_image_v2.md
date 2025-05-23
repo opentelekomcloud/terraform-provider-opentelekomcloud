@@ -14,6 +14,8 @@ Up-to-date reference of API arguments for Image management you can get at
 
 Manages a V2 Image resource within OpenTelekomCloud Glance.
 
+-> **Note:** This resource is not supported when using AK/SK authentication due to API Gateway limitations.
+
 ## Example Usage
 
 ```hcl
