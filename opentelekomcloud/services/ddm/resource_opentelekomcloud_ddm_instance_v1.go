@@ -86,9 +86,8 @@ func ResourceDdmInstanceV1() *schema.Resource {
 				ValidateFunc: validation.IsUUID,
 			},
 			"param_group_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.IsUUID,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"time_zone": {
 				Type:         schema.TypeString,
