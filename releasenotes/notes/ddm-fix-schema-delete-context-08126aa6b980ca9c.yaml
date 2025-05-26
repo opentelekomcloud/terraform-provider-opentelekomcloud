@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DDM]** Check delete completed for ``resource/opentelekomcloud_ddm_schema_v1`` (`#2965 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2965>`_)
