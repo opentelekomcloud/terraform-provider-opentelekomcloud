@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DDM]** Remove validation in ``param_group_id`` schema parameter in ``resource/opentelekomcloud_ddm_schema_v1`` (`#2966 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2966>`_)
