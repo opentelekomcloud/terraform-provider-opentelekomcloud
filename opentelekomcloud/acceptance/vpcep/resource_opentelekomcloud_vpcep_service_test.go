@@ -26,8 +26,8 @@ func getVPCServiceFunc(config *cfg.Config, state *terraform.ResourceState) (inte
 
 func TestVPCEPService_basic(t *testing.T) {
 	var svc services.Service
-	srvName := tools.RandomString("tf-test-", 4)
-	srvName2 := tools.RandomString("tf-test-", 4)
+	srvName := tools.RandomString("tftest", 4)
+	srvName2 := tools.RandomString("tf-test", 4)
 
 	rc := common.InitResourceCheck(
 		resourceVPCEPServiceName,

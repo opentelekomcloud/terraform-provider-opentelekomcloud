@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPCEP]** Remove redundant validation for ``resource/opentelekomcloud_vpcep_service_v1`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
