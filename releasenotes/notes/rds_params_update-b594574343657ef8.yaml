@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[RDS]** Change required restart option for ``resource/opentelekomcloud_rds_instance_v3`` after `parameters` update depending on API response (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)

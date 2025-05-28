@@ -1478,11 +1478,11 @@ func updateInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceC
 		Values:     d.Get("parameters").(map[string]interface{}),
 		InstanceId: d.Id(),
 	}
-	_, err := configurations.UpdateInstanceConfiguration(client, opts)
+	rawConf, err := configurations.UpdateInstanceConfiguration(client, opts)
 	if err != nil {
 		return false, err
 	}
-	return true, err
+	return rawConf.RestartRequired, err
 }
 
 func rdsInstanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
