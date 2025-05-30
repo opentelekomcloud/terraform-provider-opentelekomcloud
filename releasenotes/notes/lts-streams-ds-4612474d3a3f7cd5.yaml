@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **LTS** New Data Source: ``opentelekomcloud_lts_streams_v2`` (`#2975 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2975>`_)
