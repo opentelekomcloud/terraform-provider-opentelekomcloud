@@ -61,6 +61,9 @@ The following arguments are supported:
   access is enabled for the gateway. After you configure the bandwidth for the gateway,
   users can access resources on public networks.
 
+* `enterprise_project_id` - (Optional, String) Specifies the enterprise project ID to which the dedicated
+  instance belongs. This parameter is required for enterprise users.
+
 * `bandwidth_charging_mode` - (Optional, String, ForceNew) Billing type of the public outbound access bandwidth.
   The valid values are as follows:
   + **bandwidth**: Billed by bandwidth.

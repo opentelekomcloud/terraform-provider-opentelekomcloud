@@ -134,6 +134,11 @@ func ResourceAPIGWv2() *schema.Resource {
 					"The start-time format of maintenance window is not 'xx:00:00' or "+
 						"the hour is not 02, 06, 10, 14, 18 or 22."),
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"maintain_end": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -204,6 +209,7 @@ func buildInstanceCreateOpts(d *schema.ResourceData) (gateway.CreateOpts, error)
 		LoadBalancerProvider:         d.Get("loadbalancer_provider").(string),
 		IngressBandwidthSize:         pointerto.Int(d.Get("ingress_bandwidth_size").(int)),
 		IngressBandwidthChargingMode: d.Get("ingress_bandwidth_charging_mode").(string),
+		EnterpriseProjectId:          d.Get("enterprise_project_id").(string),
 	}
 
 	azList, err := buildInstanceAvailabilityZones(d)
@@ -306,6 +312,7 @@ func resourceGatewayRead(_ context.Context, d *schema.ResourceData, meta interfa
 		d.Set("vpc_ingress_address", resp.IngressIp),
 		d.Set("public_egress_address", resp.NatEipAddress),
 		d.Set("vpcep_service_name", resp.EndpointService.ServiceName),
+		d.Set("enterprise_project_id", resp.EnterpriseProjectId),
 		// d.Set("bandwidth_charging_mode", resp.BandwidthChargingMode),
 		// d.Set("ingress_bandwidth_charging_mode", resp.IngressBandwidthChargingMode),
 	)
