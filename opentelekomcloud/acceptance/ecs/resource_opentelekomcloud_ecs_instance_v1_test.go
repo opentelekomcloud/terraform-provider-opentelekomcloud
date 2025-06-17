@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"testing"
 
@@ -103,6 +104,40 @@ func TestAccEcsV1InstanceIp(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "security_groups.#", "1"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "data_disks.0.type", "ESSD"),
 					resource.TestCheckResourceAttrSet(resourceInstanceV1Name, "nics.0.port_id"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccEcsV1InstanceIpv6(t *testing.T) {
+	networkId := os.Getenv("OS_IPV6_ENABLED_NETWORK_ID")
+	if networkId == "" {
+		t.Skip("TestAccEcsV1InstanceIpv6 required OS_IPV6_ENABLED_NETWORK_ID to continue.")
+	}
+	var instance cloudservers.CloudServer
+	qts := serverQuotas(10+4, "s2.medium.1")
+	t.Parallel()
+	quotas.BookMany(t, qts)
+
+	rc := common.InitResourceCheck(
+		resourceInstanceV1Name,
+		&instance,
+		getEcsInstanceFunc,
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEcsV1InstanceIpv6(networkId),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttrSet(resourceInstanceV1Name, "nics.0.port_id"),
+					resource.TestCheckResourceAttrSet(resourceInstanceV1Name, "nics.0.ipv6_address"),
 				),
 			},
 		},
@@ -668,6 +703,37 @@ resource "opentelekomcloud_networking_floatingip_associate_v2" "this" {
   port_id     = opentelekomcloud_ecs_instance_v1.instance_1.nics.0.port_id
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+func testAccEcsV1InstanceIpv6(networkID string) string {
+	return fmt.Sprintf(`
+	%s
+
+	data "opentelekomcloud_vpc_subnet_v1" "sub_1"  {
+		id = "%s"
+	}
+
+	resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+	name     = "server_1"
+	image_id = data.opentelekomcloud_images_image_v2.latest_image.id
+	flavor   = "s3.xlarge.4"
+	vpc_id   = data.opentelekomcloud_vpc_subnet_v1.sub_1.vpc_id
+
+	nics {
+		network_id = data.opentelekomcloud_vpc_subnet_v1.sub_1.network_id
+		ipv6_enable = true
+	}
+
+	data_disks {
+		size = 10
+		type = "ESSD"
+	}
+
+	password                    = "Password@123"
+	availability_zone           = "%s"
+	delete_disks_on_termination = true
+	}
+	`, common.DataSourceImage, networkID, env.OS_AVAILABILITY_ZONE)
+}
 
 var testAccEcsV1InstanceAttachVolume = fmt.Sprintf(`
 %s
