@@ -112,6 +112,7 @@ func ResourceEcsInstanceV1() *schema.Resource {
 						"ipv6_enable": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							ForceNew: true,
 						},
 						"ipv6_address": {
 							Type:     schema.TypeString,
