@@ -315,6 +315,11 @@ The `nics` block supports:
 * `ip_address` - (Optional, String, ForceNew) Specifies a fixed IPv4 address to be used on this
   network. Changing this creates a new server.
 
+* `ipv6_enable` - (Optional, Bool, ForceNew) Specifies whether to support IPv6 addresses. If this parameter is set to true, the NIC supports IPv6 addresses.
+  
+  -> **NOTE:**
+  IPV6 enable requires the subnet to have IPV6 enabled as well.
+
 The `metadata` block supports:
 
 * `agency_name` - (Optional, String) Association to an [agency](identity_agency_v3.md)
@@ -359,6 +364,8 @@ In addition to all arguments above, the following attributes are exported:
 * `nics/type` - (String) The type of the address of the NIC on that network.
 
 * `nics/port_id` - (String) The port ID of the NIC on that network.
+
+* `nics/ipv6_address` - (String) The IPV6 address of the NIC on that network.
 
 * `volumes_attached/id` - (String) The ID of the data disk.
 

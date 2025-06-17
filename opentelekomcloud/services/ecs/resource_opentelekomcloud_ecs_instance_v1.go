@@ -109,6 +109,15 @@ func ResourceEcsInstanceV1() *schema.Resource {
 							ForceNew: true,
 							Computed: true,
 						},
+						"ipv6_enable": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							ForceNew: true,
+						},
+						"ipv6_address": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"mac_address": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -668,8 +677,9 @@ func resourceInstanceNicsV1(d *schema.ResourceData) []cloudservers.Nic {
 	for i := range nics {
 		nic := nics[i].(map[string]interface{})
 		nicRequest := cloudservers.Nic{
-			SubnetId:  nic["network_id"].(string),
-			IpAddress: nic["ip_address"].(string),
+			SubnetId:   nic["network_id"].(string),
+			IpAddress:  nic["ip_address"].(string),
+			Ipv6Enable: nic["ipv6_enable"].(bool),
 		}
 
 		nicRequests = append(nicRequests, nicRequest)
@@ -803,14 +813,32 @@ func flattenInstanceNicsV1(d *schema.ResourceData, meta interface{}, addresses m
 				network = p.NetworkID
 			}
 
-			v := map[string]interface{}{
-				"network_id":  network,
-				"ip_address":  addr.Addr,
-				"mac_address": addr.MacAddr,
-				"port_id":     addr.PortID,
-				"type":        addr.Type,
+			if addr.Version == "4" {
+				v := map[string]interface{}{
+					"network_id":   network,
+					"ip_address":   addr.Addr,
+					"mac_address":  addr.MacAddr,
+					"port_id":      addr.PortID,
+					"type":         addr.Type,
+					"ipv6_enable":  false,
+					"ipv6_address": "",
+				}
+				nics = append(nics, v)
 			}
-			nics = append(nics, v)
+		}
+		for _, addr := range addrs {
+			// Skip if not fixed ip
+			if addr.Type != "fixed" {
+				continue
+			}
+			if addr.Version == "6" {
+				for _, nic := range nics {
+					if nic["port_id"] == addr.PortID {
+						nic["ipv6_address"] = addr.Addr
+						nic["ipv6_enable"] = true
+					}
+				}
+			}
 		}
 	}
 
