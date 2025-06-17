@@ -708,30 +708,30 @@ func testAccEcsV1InstanceIpv6(networkID string) string {
 	return fmt.Sprintf(`
 	%s
 
-	data "opentelekomcloud_vpc_subnet_v1" "sub_1"  {
-		id = "%s"
-	}
+data "opentelekomcloud_vpc_subnet_v1" "sub_1" {
+  id = "%s"
+}
 
-	resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
-	name     = "server_1"
-	image_id = data.opentelekomcloud_images_image_v2.latest_image.id
-	flavor   = "s3.xlarge.4"
-	vpc_id   = data.opentelekomcloud_vpc_subnet_v1.sub_1.vpc_id
+resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+  name     = "server_1"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
+  flavor   = "s3.xlarge.4"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.sub_1.vpc_id
 
-	nics {
-		network_id = data.opentelekomcloud_vpc_subnet_v1.sub_1.network_id
-		ipv6_enable = true
-	}
+  nics {
+    network_id  = data.opentelekomcloud_vpc_subnet_v1.sub_1.network_id
+    ipv6_enable = true
+  }
 
-	data_disks {
-		size = 10
-		type = "ESSD"
-	}
+  data_disks {
+    size = 10
+    type = "ESSD"
+  }
 
-	password                    = "Password@123"
-	availability_zone           = "%s"
-	delete_disks_on_termination = true
-	}
+  password                    = "Password@123"
+  availability_zone           = "%s"
+  delete_disks_on_termination = true
+}
 	`, common.DataSourceImage, networkID, env.OS_AVAILABILITY_ZONE)
 }
 
