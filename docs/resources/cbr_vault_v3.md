@@ -227,14 +227,7 @@ The following arguments are supported:
 
     * `size` - Capacity, in GB. Minimum `1`, maximum `10485760`
 
-    * `charging_mode` - Billing mode. Possible values are `post_paid` (pay-per-use) or `pre_paid`
-      (yearly/monthly packages). The value defaults to `post_paid`.
-
-    * `period_type` - (Optional) Package type. This parameter is mandatory if `charging_mode` is set to `pre_paid`.
-      Possible values are `year` (yearly) or `month` (monthly).
-
-    * `period_num` - (Optional) Required duration for the package. This parameter is mandatory if
-      `charging_mode` is set to `pre_paid`.
+    * `charging_mode` - Billing mode. Possible value is `post_paid` (pay-per-use).
 
     * `is_auto_renew` - (Optional) Whether to automatically renew the subscription after expiration. By default, it is
       not renewed.

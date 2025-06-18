@@ -140,25 +140,19 @@ func ResourceCBRVaultV3() *schema.Resource {
 						"charging_mode": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"post_paid", "pre_paid",
-							}, false),
-							Default: "post_paid",
+							Computed: true,
 						},
 						"period_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"year", "month",
-							}, false),
-							Default: "month",
+							Type:       schema.TypeString,
+							Optional:   true,
+							Computed:   true,
+							Deprecated: "This parameter is no longer available after an API update",
 						},
 						"period_num": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							ForceNew: true,
+							Type:       schema.TypeInt,
+							Optional:   true,
+							Computed:   true,
+							Deprecated: "This parameter is no longer available after an API update",
 						},
 						"is_auto_renew": {
 							Type:     schema.TypeBool,
