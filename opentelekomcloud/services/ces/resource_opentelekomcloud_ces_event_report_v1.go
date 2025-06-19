@@ -17,7 +17,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
-func ResourceCesEventReport() *schema.Resource {
+func ResourceCesEventReportV1() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceCesEventReportCreate,
 		ReadContext:   resourceCesEventReportRead,
