@@ -54,8 +54,8 @@ func ResourceCesEventReportV1() *schema.Resource {
 				ValidateFunc: validation.All(
 					validation.StringLenBetween(3, 32),
 					validation.StringMatch(
-						regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`),
-						"Only lowercase/uppercase letters, digits, and underscores (_) are allowed and must start with a letter.",
+						regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*\.[a-zA-Z][a-zA-Z0-9_]*$`),
+						"Must be of type service.item. service and item each must only have lowercase/uppercase letters, digits, and underscores (_) and must start with a letter.",
 					),
 				),
 			},
@@ -97,7 +97,7 @@ func ResourceCesEventReportV1() *schema.Resource {
 							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"normal", "warning", "incident",
-							}, true),
+							}, false),
 						},
 						"event_level": {
 							Type:     schema.TypeString,
@@ -105,7 +105,7 @@ func ResourceCesEventReportV1() *schema.Resource {
 							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"Critical", "Major", "Minor", "Info",
-							}, true),
+							}, false),
 						},
 						"event_user": {
 							Type:     schema.TypeString,
@@ -118,7 +118,7 @@ func ResourceCesEventReportV1() *schema.Resource {
 							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"EVENT.SYS", "EVENT.CUSTOM",
-							}, true),
+							}, false),
 						},
 					},
 				},
@@ -132,7 +132,7 @@ func ResourceCesEventReportV1() *schema.Resource {
 }
 
 func getEventDetails(d *schema.ResourceData) events.EventItemDetail {
-	eventDetailsRaw := d.Get("alarm_actions").([]interface{})
+	eventDetailsRaw := d.Get("detail").([]interface{})
 	eventDetail := eventDetailsRaw[0].(map[string]interface{})
 
 	return events.EventItemDetail{
@@ -159,7 +159,7 @@ func resourceCesEventReportCreate(ctx context.Context, d *schema.ResourceData, m
 	createOpts := events.EventItem{
 		EventName:   d.Get("event_name").(string),
 		EventSource: d.Get("event_source").(string),
-		Time:        d.Get("time").(int64),
+		Time:        InterfaceToInt64(d.Get("time")),
 		Detail:      getEventDetails(d),
 	}
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
