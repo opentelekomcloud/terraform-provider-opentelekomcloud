@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CES]** Add new resource ``resource/opentelekomcloud_ces_event_report_v1`` (`#2989 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2989>`_).
