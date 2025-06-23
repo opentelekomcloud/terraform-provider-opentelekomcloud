@@ -422,6 +422,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cce_node_pool_v3":                          cce.ResourceCCENodePoolV3(),
 			"opentelekomcloud_cci_namespace_v2":                          cci.ResourceCCINamespaceV2(),
 			"opentelekomcloud_ces_alarmrule":                             ces.ResourceAlarmRule(),
+			"opentelekomcloud_ces_event_report_v1":                       ces.ResourceCesEventReportV1(),
 			"opentelekomcloud_cfw_acl_rule_v1":                           cfw.ResourceCfwAclRuleV1(),
 			"opentelekomcloud_cfw_address_group_v1":                      cfw.ResourceCfwAddressGroupV1(),
 			"opentelekomcloud_cfw_address_group_member_v1":               cfw.ResourceCfwAddressGroupMemberV1(),
