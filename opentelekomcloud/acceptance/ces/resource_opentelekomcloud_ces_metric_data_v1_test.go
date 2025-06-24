@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -13,9 +14,9 @@ import (
 const resourceCesMetricDataName = "opentelekomcloud_ces_metric_data_v1.metric_1"
 
 func TestResourceCesMetricDataV1(t *testing.T) {
-	// if os.Getenv("RUN_CES_EVENTS") == "" {
-	// 	t.Skip("CES tests are not suitable for CI runner unless specifically flagged")
-	// }
+	if os.Getenv("RUN_CES_EVENTS") == "" {
+		t.Skip("CES tests are not suitable for CI runner unless specifically flagged")
+	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
