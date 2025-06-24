@@ -184,6 +184,7 @@ func resourceCesMetricDataCreate(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error creating metric_data: %w", err)
 	}
 	log.Printf("[DEBUG] Created custom metric data: %#v", createOpts)
+	d.SetId(createOpts.Metric.MetricName)
 
 	clientCtx := common.CtxWithClient(ctx, client, cesClientV1)
 	return resourceCesMetricDataRead(clientCtx, d, meta)
