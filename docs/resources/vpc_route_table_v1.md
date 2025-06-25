@@ -166,8 +166,8 @@ resource "opentelekomcloud_er_vpc_attachment_v3" "att" {
 }
 
 resource "opentelekomcloud_vpc_route_table_v1" "table_1" {
-  name        = "table-1"
-  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
+  name   = "table-1"
+  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
 
   route {
     destination = "0.0.0.0/0"
