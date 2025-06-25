@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[VPC]** Documentation update for ``resource/opentelekomcloud_vpc_route_table_v1`` (`#2995 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2995>`_)
