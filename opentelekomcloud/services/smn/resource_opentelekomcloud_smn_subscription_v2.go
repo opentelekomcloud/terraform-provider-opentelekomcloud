@@ -58,10 +58,9 @@ func ResourceSubscription() *schema.Resource {
 				Computed: true,
 			},
 			"project_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "Parameter has been deprecated",
 			},
 		},
 	}
@@ -81,7 +80,7 @@ func resourceSubscriptionCreate(ctx context.Context, d *schema.ResourceData, met
 	}
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	subscription, err := subscriptions.Create(client, createOpts, topicUrn).Extract()
+	subscription, err := subscriptions.Create(client, createOpts, topicUrn)
 	if err != nil {
 		return fmterr.Errorf("error creating subscription: %w", err)
 	}
@@ -100,7 +99,7 @@ func resourceSubscriptionRead(_ context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[DEBUG] Getting subscription %s", d.Id())
 
-	subscriptionsList, err := subscriptions.List(client).Extract()
+	subscriptionsList, err := subscriptions.List(client, subscriptions.ListOpts{})
 	if err != nil {
 		return fmterr.Errorf("error getting subscriptions: %w", err)
 	}
@@ -137,7 +136,7 @@ func resourceSubscriptionDelete(_ context.Context, d *schema.ResourceData, meta 
 
 	log.Printf("[DEBUG] Deleting subscription %s", d.Id())
 
-	if err := subscriptions.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := subscriptions.Delete(client, d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 

@@ -1,0 +1,8 @@
+---
+other:
+  - |
+    **[SMN]** Refactoring of ``resource/opentelekomcloud_smn_topic_v2`` after gophertelekomcloud update (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  - |
+    **[SMN]** Refactoring of ``resource/opentelekomcloud_smn_subscription_v2`` after gophertelekomcloud update (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  - |
+    **[SMN]** Refactoring of ``data_source/opentelekomcloud_smn_topic_v2`` after gophertelekomcloud update (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)

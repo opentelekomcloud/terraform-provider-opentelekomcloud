@@ -55,12 +55,12 @@ func dataSourceTopicRead(_ context.Context, d *schema.ResourceData, meta interfa
 
 	name := d.Get("name").(string)
 
-	allTopics, err := topics.List(client).Extract()
+	allTopics, err := topics.List(client, topics.ListOpts{})
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	var filterdTopics []topics.TopicGet
+	var filterdTopics []topics.Topic
 	for _, topic := range allTopics {
 		if name != "" && topic.Name != name {
 			continue

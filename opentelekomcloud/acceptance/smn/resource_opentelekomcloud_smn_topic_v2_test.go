@@ -2,7 +2,6 @@ package acceptance
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -17,7 +16,7 @@ import (
 const resourceTopicName = "opentelekomcloud_smn_topic_v2.topic_1"
 
 func TestAccSMNV2Topic_basic(t *testing.T) {
-	var topic topics.TopicGet
+	var topic topics.Topic
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -46,31 +45,6 @@ func TestAccSMNV2Topic_basic(t *testing.T) {
 	})
 }
 
-func TestAccSMNV2Topic_schemaProjectName(t *testing.T) {
-	var topic topics.TopicGet
-	var projectName2 = os.Getenv("OS_PROJECT_NAME_2")
-	if projectName2 == "" {
-		t.Skip("OS_PROJECT_NAME_2 should be set in order to run test")
-	}
-	env.OS_TENANT_NAME = cfg.ProjectName(projectName2)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckSMNTopicV2Destroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccSMNV2TopicConfig_projectName(env.OS_TENANT_NAME),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSMNV2TopicExists(resourceTopicName, &topic, env.OS_TENANT_NAME),
-					resource.TestCheckResourceAttr(resourceTopicName, "project_name", string(env.OS_TENANT_NAME)),
-				),
-			},
-		},
-	})
-	env.OS_TENANT_NAME = env.GetTenantName()
-}
-
 func testAccCheckSMNTopicV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	smnClient, err := config.SmnV2Client(env.OS_TENANT_NAME)
@@ -83,7 +57,7 @@ func testAccCheckSMNTopicV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := topics.Get(smnClient, rs.Primary.ID).Extract()
+		_, err := topics.Get(smnClient, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("topic still exists")
 		}
@@ -92,7 +66,7 @@ func testAccCheckSMNTopicV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckSMNV2TopicExists(n string, topic *topics.TopicGet, projectName cfg.ProjectName) resource.TestCheckFunc {
+func testAccCheckSMNV2TopicExists(n string, topic *topics.Topic, projectName cfg.ProjectName) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -109,7 +83,7 @@ func testAccCheckSMNV2TopicExists(n string, topic *topics.TopicGet, projectName 
 			return fmt.Errorf("error creating OpenTelekomCloud smn client: %s", err)
 		}
 
-		found, err := topics.Get(smnClient, rs.Primary.ID).ExtractGet()
+		found, err := topics.Get(smnClient, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -146,13 +120,3 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   }
 }
 `
-
-func testAccSMNV2TopicConfig_projectName(projectName cfg.ProjectName) string {
-	return fmt.Sprintf(`
-resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name         = "topic_1"
-  display_name = "The display name of topic_1"
-  project_name = "%s"
-}
-`, projectName)
-}
