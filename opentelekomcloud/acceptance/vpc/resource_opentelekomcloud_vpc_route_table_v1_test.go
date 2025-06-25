@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
@@ -77,6 +78,29 @@ func TestAccVpcRouteTableV1_multipleRoutes(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "description", "created by terraform with multi routes"),
 					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "route.#", "6"),
 					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "subnets.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccVpcRouteTableV1_er(t *testing.T) {
+	var rtb routetables.RouteTable
+	rtbName := tools.RandomString("rtb-er", 5)
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRouteTableV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVpcRouteTable_er(rtbName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRouteTableV1Exists(resourceVPCRouteTableName, &rtb),
+					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "description", "created by terraform with routes"),
+					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "route.#", "1"),
+					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "subnets.#", "0"),
+					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "route.0.destination", "172.16.0.0/16"),
+					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "route.0.type", "er"),
 				),
 			},
 		},
@@ -315,4 +339,60 @@ resource "opentelekomcloud_vpc_route_table_v1" "table_1" {
   }
 }
 `, testAccVpcRouteTable_network(name), name, common.DataSourceImage, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccVpcRouteTable_er(name string) string {
+	bgpAsNum := acctest.RandIntRange(64512, 65534)
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_er_instance_v3" "er" {
+  availability_zones = ["eu-de-01", "eu-de-02"]
+
+  name        = "%[2]s"
+  asn         = %[3]d
+  description = "test"
+
+  enable_default_propagation     = true
+  enable_default_association     = false
+  auto_accept_shared_attachments = true
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+
+resource "opentelekomcloud_er_vpc_attachment_v3" "test" {
+  instance_id = opentelekomcloud_er_instance_v3.er.id
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
+  subnet_id   = opentelekomcloud_vpc_subnet_v1.subnet_1-1.id
+
+  name                   = "%[2]s"
+  description            = "Create by acc test"
+  auto_create_vpc_routes = true
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+
+resource "opentelekomcloud_vpc_route_table_v1" "table_1" {
+  name        = "%[2]s"
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
+  description = "created by terraform with routes"
+
+  route {
+    destination = "0.0.0.0/0"
+    type        = "er"
+    nexthop     = opentelekomcloud_er_instance_v3.er.id
+    description = "er rule"
+  }
+
+  depends_on = [
+    opentelekomcloud_er_vpc_attachment_v3.test
+  ]
+}
+`, testAccVpcRouteTable_network(name), name, bgpAsNum)
 }

@@ -129,6 +129,59 @@ resource "opentelekomcloud_vpc_route_table_v1" "table_1" {
 }
 ```
 
+### Associating Enterprise Router with a Route Table
+
+```hcl
+resource "opentelekomcloud_vpc_v1" "vpc" {
+  name = "vpc-1"
+  cidr = "192.168.0.0/16"
+}
+
+resource "opentelekomcloud_vpc_subnet_v1" "subnet" {
+  name       = "vpc-1-subnet"
+  cidr       = "192.168.0.0/24"
+  gateway_ip = "192.168.0.1"
+  vpc_id     = opentelekomcloud_vpc_v1.vpc.id
+}
+
+resource "opentelekomcloud_er_instance_v3" "er" {
+  availability_zones = ["eu-de-01", "eu-de-02"]
+
+  name        = "er-1"
+  asn         = 64512
+  description = "test"
+
+  enable_default_propagation     = true
+  enable_default_association     = false
+  auto_accept_shared_attachments = true
+}
+
+resource "opentelekomcloud_er_vpc_attachment_v3" "att" {
+  instance_id = opentelekomcloud_er_instance_v3.er.id
+  vpc_id      = opentelekomcloud_vpc_v1.vpc.id
+  subnet_id   = opentelekomcloud_vpc_subnet_v1.subnet.id
+
+  name                   = "er-attachment-1"
+  auto_create_vpc_routes = true
+}
+
+resource "opentelekomcloud_vpc_route_table_v1" "table_1" {
+  name        = "table-1"
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
+
+  route {
+    destination = "0.0.0.0/0"
+    type        = "er"
+    nexthop     = opentelekomcloud_er_instance_v3.er.id
+    description = "er route"
+  }
+
+  depends_on = [
+    opentelekomcloud_er_vpc_attachment_v3.att
+  ]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -161,7 +214,7 @@ The `route` block supports:
   with any subnet in the VPC.
 
 * `type` - (Required, String) Specifies the route type. Currently, the value can be:
-  **ecs**, **eni**, **vip**, **nat**, **peering**, **vpn**, **dc** and **cc**.
+  **ecs**, **eni**, **vip**, **nat**, **peering**, **vpn**, **dc**, **egw**, **er**, **subeni** and **local**
 
 * `nexthop` - (Required, String) Specifies the next hop.
   + If the route type is **ecs**, the value is an ECS instance ID in the VPC.
@@ -171,7 +224,9 @@ The `route` block supports:
   + If the route type is **peering**, the value is a VPC peering connection ID.
   + If the route type is **vpn**, the value is a VPN gateway ID.
   + If the route type is **dc**, the value is a Direct Connect gateway ID.
-  + If the route type is **cc**, the value is a Cloud Connection ID.
+  + If the route type is **egw**, the value is a VPC endpoint ID.
+  + If the route type is **er**, the value is the ID of an enterprise router.
+  + If the route type is **subeni**, the value is the ID of a supplementary network interface.
 
 * `description` - (Optional, String) Specifies the supplementary information about the route.
   The value is a string of no more than 255 characters and cannot contain angle brackets (< or >).
