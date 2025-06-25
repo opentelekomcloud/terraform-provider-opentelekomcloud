@@ -99,7 +99,7 @@ func TestAccVpcRouteTableV1_er(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "description", "created by terraform with routes"),
 					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "route.#", "1"),
 					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "subnets.#", "0"),
-					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "route.0.destination", "172.16.0.0/16"),
+					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "route.0.destination", "0.0.0.0/0"),
 					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "route.0.type", "er"),
 				),
 			},
