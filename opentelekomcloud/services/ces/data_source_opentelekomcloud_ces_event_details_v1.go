@@ -3,7 +3,6 @@ package ces
 import (
 	"context"
 	"log"
-	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -19,17 +18,6 @@ import (
 func DataSourceCesEventDetailsV1() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceCesEventDetailsRead,
-
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
-
-		CustomizeDiff: checkCesAlarmRestrictions,
-
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(10 * time.Minute),
-			Delete: schema.DefaultTimeout(5 * time.Minute),
-		},
 
 		Schema: map[string]*schema.Schema{
 			"event_name": {
