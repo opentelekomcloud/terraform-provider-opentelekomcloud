@@ -60,6 +60,7 @@ func ResourceSubscription() *schema.Resource {
 			"project_name": {
 				Type:       schema.TypeString,
 				Optional:   true,
+				ForceNew:   true,
 				Deprecated: "Parameter has been deprecated",
 			},
 		},
