@@ -46,7 +46,7 @@ The following arguments are supported:
 
 * `detail` - (Required, List, ForceNew) Specifies the event details. The structure is described below.
 
-The `metric` block supports:
+The `detail` block supports:
 
 * `content` - (Optional, String, ForceNew) Specifies the event content. Enter up to `4,096` characters.
 * `group_id` - (Optional, String, ForceNew) Specifies the resource group the event belongs to. This ID must be an existing resource group ID. This can be attained from `Cloud Eye` in management console. Resource group ID is listed under `Name/ID` column in `Resource Groups`.
