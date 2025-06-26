@@ -23,12 +23,6 @@ func ResourceCesEventReportV1() *schema.Resource {
 		ReadContext:   resourceCesEventReportRead,
 		DeleteContext: resourceCesEventReportDelete,
 
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
-
-		CustomizeDiff: checkCesAlarmRestrictions,
-
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(5 * time.Minute),
