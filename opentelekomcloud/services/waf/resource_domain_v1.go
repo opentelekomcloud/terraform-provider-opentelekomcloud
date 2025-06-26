@@ -344,6 +344,7 @@ func resourceWafDomainV1Read(_ context.Context, d *schema.ResourceData, meta int
 	}
 
 	mErr = multierror.Append(mErr,
+		d.Set("server", servers),
 		d.Set("block_page", blockPage),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
