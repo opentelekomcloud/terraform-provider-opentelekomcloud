@@ -158,7 +158,6 @@ func DataSourceCesEventDetailsV1() *schema.Resource {
 }
 
 func dataSourceCesEventDetailsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, cesClientV1, func() (*golangsdk.ServiceClient, error) {
 		return config.CesV1Client(config.GetRegion(d))
