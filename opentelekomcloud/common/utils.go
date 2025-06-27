@@ -629,3 +629,10 @@ func ConvertToMapString(raw interface{}) map[string]string {
 	}
 	return m
 }
+
+func StringSliceIgnoreEmpty(e string) []string {
+	if e != "" {
+		return []string{e}
+	}
+	return nil
+}
