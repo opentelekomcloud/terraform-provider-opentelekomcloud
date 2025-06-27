@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/smn/v2/topics"
 
@@ -60,9 +61,11 @@ func ResourceTopic() *schema.Resource {
 
 func resourceTopicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SmnV2Client(config.GetProjectName(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.SmnV2Client(config.GetProjectName(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud smn client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	createOpts := topics.CreateOpts{
@@ -102,11 +105,13 @@ func resourceTopicCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	return fmterr.Errorf("unexpected conversion error in resourceTopicCreate.")
 }
 
-func resourceTopicRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceTopicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SmnV2Client(config.GetProjectName(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.SmnV2Client(config.GetProjectName(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud smn client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	topicUrn := d.Id()
@@ -151,11 +156,13 @@ func resourceTopicRead(_ context.Context, d *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceTopicDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceTopicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SmnV2Client(config.GetProjectName(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.SmnV2Client(config.GetProjectName(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud smn client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	log.Printf("[DEBUG] Deleting topic %s", d.Id())
@@ -171,9 +178,11 @@ func resourceTopicDelete(_ context.Context, d *schema.ResourceData, meta interfa
 
 func resourceTopicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SmnV2Client(config.GetProjectName(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.SmnV2Client(config.GetProjectName(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud smn client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	log.Printf("[DEBUG] Updating topic %s", d.Id())

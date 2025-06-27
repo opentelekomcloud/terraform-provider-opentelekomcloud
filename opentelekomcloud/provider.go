@@ -614,6 +614,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_sfs_file_system_v2":                        sfs.ResourceSFSFileSystemV2(),
 			"opentelekomcloud_sfs_share_access_rules_v2":                 sfs.ResourceSFSShareAccessRulesV2(),
 			"opentelekomcloud_sfs_turbo_share_v1":                        sfs.ResourceSFSTurboShareV1(),
+			"opentelekomcloud_smn_message_template_v2":                   smn.ResourceSmnMessageTemplateV2(),
 			"opentelekomcloud_smn_topic_v2":                              smn.ResourceTopic(),
 			"opentelekomcloud_smn_topic_attribute_v2":                    smn.ResourceSMNTopicAttributeV2(),
 			"opentelekomcloud_smn_subscription_v2":                       smn.ResourceSubscription(),
