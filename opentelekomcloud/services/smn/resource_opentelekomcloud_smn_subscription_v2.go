@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/smn/v2/subscriptions"
 
@@ -69,10 +71,13 @@ func ResourceSubscription() *schema.Resource {
 
 func resourceSubscriptionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SmnV2Client(config.GetProjectName(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.SmnV2Client(config.GetProjectName(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
+
 	topicUrn := d.Get("topic_urn").(string)
 	createOpts := subscriptions.CreateOpts{
 		Endpoint: d.Get("endpoint").(string),
@@ -88,12 +93,15 @@ func resourceSubscriptionCreate(ctx context.Context, d *schema.ResourceData, met
 
 	d.SetId(subscription.SubscriptionUrn)
 
-	return resourceSubscriptionRead(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceSubscriptionRead(clientCtx, d, meta)
 }
 
-func resourceSubscriptionRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSubscriptionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SmnV2Client(config.GetProjectName(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.SmnV2Client(config.GetProjectName(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
@@ -128,9 +136,11 @@ func resourceSubscriptionRead(_ context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceSubscriptionDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSubscriptionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SmnV2Client(config.GetProjectName(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.SmnV2Client(config.GetProjectName(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}

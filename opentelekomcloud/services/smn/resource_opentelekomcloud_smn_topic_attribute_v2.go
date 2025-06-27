@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/smn/v2/topicattributes"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -56,7 +57,9 @@ func ResourceSMNTopicAttributeV2() *schema.Resource {
 
 func resourceSMNTopicAttributeV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SmnV2Client(config.GetProjectName(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.SmnV2Client(config.GetProjectName(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
@@ -73,12 +76,16 @@ func resourceSMNTopicAttributeV2Create(ctx context.Context, d *schema.ResourceDa
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s", topicURN, attributeName))
-	return resourceSMNTopicAttributeV2Read(ctx, d, meta)
+
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceSMNTopicAttributeV2Read(clientCtx, d, meta)
 }
 
-func resourceSMNTopicAttributeV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSMNTopicAttributeV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SmnV2Client(config.GetProjectName(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.SmnV2Client(config.GetProjectName(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
@@ -109,9 +116,11 @@ func resourceSMNTopicAttributeV2Read(_ context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceSMNTopicAttributeV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSMNTopicAttributeV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SmnV2Client(config.GetProjectName(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.SmnV2Client(config.GetProjectName(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
