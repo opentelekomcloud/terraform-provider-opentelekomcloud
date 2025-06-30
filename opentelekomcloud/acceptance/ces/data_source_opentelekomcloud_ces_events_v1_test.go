@@ -64,8 +64,8 @@ resource "opentelekomcloud_ces_event_report_v1" "event_report_1" {
 data "opentelekomcloud_ces_events_v1" "events_1" {
   depends_on = [opentelekomcloud_ces_event_report_v1.event_report_1]
   event_type = "EVENT.CUSTOM"
-  from  = %d
-  to    = %d
-  limit = 1
+  from       = %d
+  to         = %d
+  limit      = 1
 }
 `, time.Now().Unix()*1000, time.Now().Unix()*1000-100000, time.Now().Unix()*1000+10000)
