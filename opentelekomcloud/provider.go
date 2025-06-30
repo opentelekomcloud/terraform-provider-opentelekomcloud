@@ -309,6 +309,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_dns_zone_v2":                        dns.DataSourceDNSZoneV2(),
 			"opentelekomcloud_dws_flavors_v2":                     dws.DataSourceDwsFlavorsV2(),
 			"opentelekomcloud_er_instances_v3":                    er.DataSourceErInstancesV3(),
+			"opentelekomcloud_er_availability_zones_v3":           er.DataSourceErAvailabilityZonesV3(),
 			"opentelekomcloud_evs_volumes_v2":                     evs.DataSourceEvsVolumesV2(),
 			"opentelekomcloud_hss_host_groups_v5":                 hss.DataSourceHostGroups(),
 			"opentelekomcloud_hss_quotas_v5":                      hss.DataSourceQuotas(),
