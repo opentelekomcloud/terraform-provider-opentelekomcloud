@@ -44,4 +44,4 @@ The following attributes are exported:
 
 * `owner` - Project ID of the topic creator.
 
-* `remark` - Remarks.
+* `description` - Subscription description.

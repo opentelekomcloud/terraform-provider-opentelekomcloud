@@ -26,7 +26,7 @@ func TestAccDataSourceSmnTopicSubscriptions_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(dataSource, "endpoint"),
 					resource.TestCheckResourceAttrSet(dataSource, "topic_urn"),
 					resource.TestCheckResourceAttrSet(dataSource, "owner"),
-					resource.TestCheckResourceAttrSet(dataSource, "remark"),
+					resource.TestCheckResourceAttrSet(dataSource, "description"),
 				),
 			},
 		},

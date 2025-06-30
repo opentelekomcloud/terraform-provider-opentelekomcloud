@@ -42,7 +42,7 @@ func DataSourceSmnSubscriptionV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"remark": {
+			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -93,7 +93,7 @@ func dataSourceSmnSubscriptionReadV2(ctx context.Context, d *schema.ResourceData
 		d.Set("status", filteredSubs[0].Status),
 		d.Set("endpoint", filteredSubs[0].Endpoint),
 		d.Set("owner", filteredSubs[0].Owner),
-		d.Set("remark", filteredSubs[0].Remark),
+		d.Set("description", filteredSubs[0].Remark),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
