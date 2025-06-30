@@ -14,3 +14,11 @@ func InterfaceToInt64(i interface{}) int64 {
 	}
 	return int64(v)
 }
+
+func InterfaceToIntPtr(i interface{}) *int {
+	v, ok := i.(int)
+	if !ok {
+		panic(fmterr.Errorf(`interfaceToIntPtr: value is not of type int: %#v`, i))
+	}
+	return &v
+}
