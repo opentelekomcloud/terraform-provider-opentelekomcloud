@@ -166,9 +166,9 @@ func dataSourceCesMetricsRead(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func setMetricsInfo(dimensionsInResp []metrics.MetricInfoList) []map[string]interface{} {
+func setMetricsInfo(metricInfoListInResp []metrics.MetricInfoList) []map[string]interface{} {
 	var metricsInfoList []map[string]interface{}
-	for _, metricsInfoInResp := range dimensionsInResp {
+	for _, metricsInfoInResp := range metricInfoListInResp {
 		metricsInfo := map[string]interface{}{
 			"namespace":   metricsInfoInResp.Namespace,
 			"dimensions":  setMetricsDimension(metricsInfoInResp.Dimensions),
