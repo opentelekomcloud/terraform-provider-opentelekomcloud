@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[DDS]**Fix title in doc for resource `opentelekomcloud_ddm_schema_v1` (`#3009 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3009>`_)
