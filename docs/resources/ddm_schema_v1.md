@@ -10,7 +10,7 @@ description: |-
 Up-to-date reference of API arguments for DDM schema you can get at
 [documentation portal](https://docs.otc.t-systems.com/distributed-database-middleware/api-ref/apis_recommended/schemas/)
 
-# opentelekomcloud_ddm_instance_v1
+# opentelekomcloud_ddm_schema_v1
 
 Manages DDM schema resource within OpenTelekomCloud
 
