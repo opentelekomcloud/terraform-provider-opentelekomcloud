@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -251,6 +252,43 @@ func TestAccCBRVaultV3_bind_rules(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceVaultName, "auto_bind", "true"),
 					resource.TestCheckResourceAttr(resourceVaultName, "bind_rules.#", "1"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccVault_locked(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.Volume, Count: 2},
+				{Q: quotas.VolumeSize, Count: 20},
+				{Q: quotas.CBRPolicy, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVault_locked_step("true"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.object_type", "server"),
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.protect_type", "backup"),
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.size", "100"),
+					resource.TestCheckResourceAttr(resourceVaultName, "locked", "true"),
+				),
+			},
+			{
+				Config: testAccVault_locked_step("false"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.object_type", "server"),
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.protect_type", "backup"),
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.size", "100"),
+					resource.TestCheckResourceAttr(resourceVaultName, "locked", "false"),
+				),
+				ExpectError: regexp.MustCompile("vault not support to modify locked attribute from true to false."),
 			},
 		},
 	})
@@ -858,3 +896,19 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   }
 }
 `
+
+func testAccVault_locked_step(locked string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name   = "cbr-vault-test"
+  locked = %s
+
+  billing {
+    size          = 100
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+  }
+}
+`, locked)
+}

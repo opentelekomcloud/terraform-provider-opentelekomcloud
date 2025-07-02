@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[CBR]** Add cbr vault lock feature for ``resource/opentelekomcloud_cbr_vault_v3``
+    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
