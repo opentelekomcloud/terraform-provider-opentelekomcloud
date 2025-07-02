@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cbr/v3/vaults"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -220,6 +221,11 @@ func ResourceCBRVaultV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"locked": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 			"auto_bind": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -319,6 +325,7 @@ func resourceCBRVaultV3Read(_ context.Context, d *schema.ResourceData, meta inte
 		d.Set("bind_rules", bindRules),
 		d.Set("user_id", vault.UserID),
 		d.Set("created_at", vault.CreatedAt),
+		d.Set("locked", vault.Locked),
 
 		setVaultBilling(d, &vault.Billing),
 	)
@@ -351,6 +358,7 @@ func resourceCBRVaultV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		AutoBind:       d.Get("auto_bind").(bool),
 		BindRules:      cbrVaultBindRules(d),
 		AutoExpand:     d.Get("auto_expand").(bool),
+		Locked:         pointerto.Bool(d.Get("locked").(bool)),
 	}
 
 	vault, err := vaults.Create(client, opts)
@@ -611,6 +619,12 @@ func resourceCBRVaultV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	if d.HasChange("bind_rules") {
 		rules := cbrVaultBindRules(d)
 		opts.BindRules = rules
+		needsUpdate = true
+	}
+
+	if d.HasChange("locked") {
+		locked := d.Get("locked").(bool)
+		opts.Locked = &locked
 		needsUpdate = true
 	}
 

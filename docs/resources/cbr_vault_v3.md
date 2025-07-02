@@ -98,6 +98,8 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 
   description = "CBR vault for terraform provider test"
 
+  locked = false
+
   billing {
     size          = 100
     object_type   = "disk"
@@ -267,6 +269,9 @@ The following arguments are supported:
 
 * `auto_expand` - (Optional) Whether to automatically expand the vault capacity. Only pay-per-use vaults support this
   function.
+
+* `locked` - (Optional) Specifies whether the vault is locked. A locked vault cannot be unlocked.
+  Defaults to **false**.
 
 ## Attributes Reference
 
