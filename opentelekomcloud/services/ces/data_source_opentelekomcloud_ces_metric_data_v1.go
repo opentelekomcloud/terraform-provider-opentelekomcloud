@@ -47,10 +47,16 @@ func DataSourceCesMetricDataV1() *schema.Resource {
 			"period": {
 				Type:     schema.TypeInt,
 				Required: true,
+				ValidateFunc: validation.IntInSlice([]int{
+					1, 300, 1200, 3600, 14400, 86400,
+				}),
 			},
 			"filter": {
 				Type:     schema.TypeString,
 				Required: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"average", "max", "min", "sum", "variance",
+				}, false),
 			},
 			"dim0": {
 				Type:     schema.TypeString,
