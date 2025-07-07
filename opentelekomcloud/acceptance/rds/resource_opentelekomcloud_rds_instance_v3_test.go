@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"testing"
 
@@ -384,6 +385,27 @@ func TestAccRdsInstanceV3_SSLEnable(t *testing.T) {
 	})
 }
 
+func TestAccRdsInstanceV3_PrivateIp(t *testing.T) {
+	postfix := acctest.RandString(3)
+	var rdsInstance instances.InstanceResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsInstanceV3PrivateIp(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttrPair(instanceV3ResourceName, "private_ips.0", instanceV3ResourceName, "private_ip"),
+					testAccCheckRdsInstanceV3PrivateIp(),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.RdsV3Client(env.OS_REGION_NAME)
@@ -429,6 +451,36 @@ func testAccCheckRdsInstanceV3Exists(n string, rdsInstance *instances.InstanceRe
 		}
 
 		*rdsInstance = *found
+
+		return nil
+	}
+}
+
+func testAccCheckRdsInstanceV3PrivateIp() resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		subnet, ok := s.RootModule().Resources["data.opentelekomcloud_vpc_subnet_v1.shared_subnet"]
+		if !ok {
+			return fmt.Errorf("subnet not found in state")
+		}
+
+		subnetCIDR := subnet.Primary.Attributes["cidr"]
+
+		rs, ok := s.RootModule().Resources[instanceV3ResourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", instanceV3ResourceName)
+		}
+
+		actualIP := rs.Primary.Attributes["private_ip"]
+
+		_, network, _ := net.ParseCIDR(subnetCIDR)
+		ip := make(net.IP, len(network.IP))
+		copy(ip, network.IP)
+
+		ip[len(ip)-1] += byte(10)
+
+		if actualIP != ip.String() {
+			return fmt.Errorf("expected private_ip %s (from CIDR %s + 10), got %s", ip.String(), subnetCIDR, actualIP)
+		}
 
 		return nil
 	}
@@ -1162,6 +1214,33 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   parameters = {
     require_secure_transport = "ON"
   }
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccRdsInstanceV3PrivateIp(postfix string) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "15"
+    port     = "8635"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  private_ip        = cidrhost(data.opentelekomcloud_vpc_subnet_v1.shared_subnet.cidr, 10)
+  volume {
+    type = "CLOUDSSD"
+    size = 40
+  }
+  flavor = "rds.pg.n1.large.4"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }

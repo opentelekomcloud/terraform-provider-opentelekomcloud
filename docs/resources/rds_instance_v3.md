@@ -342,6 +342,8 @@ The following arguments are supported:
 
 * `vpc_id` - (Required, ForceNew) Specifies the VPC ID. Changing this parameter will create a new resource.
 
+* `private_ip` - (Optional, ForceNew) Specifies the private IP address of a DB instance.
+
 * `backup_strategy` - (Optional) Specifies the advanced backup policy. Structure is documented below.
 
 * `ha_replication_mode` - (Optional, ForceNew) Specifies the replication mode for the standby DB instance. For MySQL, the value

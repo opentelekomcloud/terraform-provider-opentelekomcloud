@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[RDS]** Added new parameter `private_ip` for ``opentelekomcloud_rds_instance_v3``
+    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)

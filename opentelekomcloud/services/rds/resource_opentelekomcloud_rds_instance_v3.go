@@ -207,6 +207,11 @@ func ResourceRdsInstanceV3() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"private_ip": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"backup_strategy": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -443,6 +448,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			AvailabilityZone: resourceRDSAvailabilityZones(d),
 			VpcId:            d.Get("vpc_id").(string),
 			SubnetId:         d.Get("subnet_id").(string),
+			DataVip:          d.Get("private_ip").(string),
 			SecurityGroupId:  d.Get("security_group_id").(string),
 			RestorePoint:     resourceRestorePoint(d),
 		}
@@ -473,6 +479,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			AvailabilityZone: resourceRDSAvailabilityZones(d),
 			VpcId:            d.Get("vpc_id").(string),
 			SubnetId:         d.Get("subnet_id").(string),
+			DataVip:          d.Get("private_ip").(string),
 			SecurityGroupId:  d.Get("security_group_id").(string),
 			ChargeInfo:       resourceRDSChangeMode(),
 		}
