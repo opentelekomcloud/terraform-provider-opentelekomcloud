@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **ER** New Data Source: ``opentelekomcloud_er_flow_logs_v3`` (`#3026 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3026>`_)
