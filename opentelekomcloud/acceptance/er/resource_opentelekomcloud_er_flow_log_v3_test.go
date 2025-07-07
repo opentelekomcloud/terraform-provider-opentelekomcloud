@@ -102,20 +102,22 @@ func testaccFlowLog_base(name string) string {
 	return fmt.Sprintf(`
 %[1]s
 
+data "opentelekomcloud_er_availability_zones_v3" "test" {}
+
 resource "opentelekomcloud_er_instance_v3" "test" {
-  availability_zones = ["eu-de-01", "eu-de-02"]
+  availability_zones = slice(data.opentelekomcloud_er_availability_zones_v3.test.names, 0, 1)
   name               = "%[2]s"
   asn                = %[3]d
 }
 
-resource "opentelekomcloud_logtank_group_v2" "test" {
+resource "opentelekomcloud_lts_group_v2" "test" {
   group_name  = "%[2]s"
-  ttl_in_days = 7
+  ttl_in_days = 30
 }
 
-resource "opentelekomcloud_logtank_topic_v2" "test" {
-  group_id   = opentelekomcloud_logtank_group_v2.test.id
-  topic_name = "%[2]s"
+resource "opentelekomcloud_lts_stream_v2" "test" {
+  group_id    = opentelekomcloud_lts_group_v2.test.id
+  stream_name = "%[2]s"
 }
 
 resource "opentelekomcloud_er_vpc_attachment_v3" "test" {
@@ -139,8 +141,8 @@ func testFlowLog_basic(baseConfig, name string) string {
 resource "opentelekomcloud_er_flow_log_v3" "test" {
   instance_id    = opentelekomcloud_er_instance_v3.test.id
   log_store_type = "LTS"
-  log_group_id   = opentelekomcloud_logtank_group_v2.test.id
-  log_stream_id  = opentelekomcloud_logtank_topic_v2.test.id
+  log_group_id   = opentelekomcloud_lts_group_v2.test.id
+  log_stream_id  = opentelekomcloud_lts_stream_v2.test.id
   resource_type  = "attachment"
   resource_id    = opentelekomcloud_er_vpc_attachment_v3.test.id
   name           = "%[2]s"
