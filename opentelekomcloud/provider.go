@@ -276,6 +276,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_ces_event_details_v1":               ces.DataSourceCesEventDetailsV1(),
 			"opentelekomcloud_ces_events_v1":                      ces.DataSourceCesEventsV1(),
 			"opentelekomcloud_ces_metrics_v1":                     ces.DataSourceCesMetricsV1(),
+			"opentelekomcloud_ces_metric_data_v1":                 ces.DataSourceCesMetricDataV1(),
 			"opentelekomcloud_ces_quotas_v1":                      ces.DataSourceCesQuotasV1(),
 			"opentelekomcloud_cfw_firewall_v1":                    cfw.DataSourceCfwFirewallV1(),
 			"opentelekomcloud_compute_availability_zones_v2":      ecs.DataSourceComputeAvailabilityZonesV2(),
