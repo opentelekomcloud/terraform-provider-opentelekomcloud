@@ -3,7 +3,6 @@ package acceptance
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"testing"
 	"time"
 
@@ -76,9 +75,9 @@ data "opentelekomcloud_ces_multiple_metric_data_v1" "metric_data_1" {
       value = "72d1377e-09e4-47bd-8ea4-71a815d4815d"
     }
   }
-  from   = "%s"
-  to     = "%s"
-  period = 1
+  from   = %d
+  to     = %d
+  period = "1"
   filter = "average"
 }
-`, time.Now().UnixMilli(), strconv.FormatInt(time.Now().UnixMilli()-300000, 10), strconv.FormatInt(time.Now().UnixMilli()+10000, 10))
+`, time.Now().UnixMilli(), time.Now().UnixMilli()-300000, time.Now().UnixMilli()+10000)
