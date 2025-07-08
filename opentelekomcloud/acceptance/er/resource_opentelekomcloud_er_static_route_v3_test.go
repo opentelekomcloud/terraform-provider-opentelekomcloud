@@ -134,6 +134,8 @@ variable "base_vpc_cidr" {
   default = "192.168.0.0/16"
 }
 
+data "opentelekomcloud_er_availability_zones_v3" "test" {}
+
 resource "opentelekomcloud_vpc_v1" "source" {
   name = "%[1]s_source"
   cidr = cidrsubnet(var.base_vpc_cidr, 2, 1)
@@ -161,7 +163,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "destination" {
 }
 
 resource "opentelekomcloud_er_instance_v3" "test" {
-  availability_zones = ["eu-de-01", "eu-de-02"]
+  availability_zones = slice(data.opentelekomcloud_er_availability_zones_v3.test.names, 0, 1)
   name               = "%[1]s"
   asn                = %[2]d
 }
