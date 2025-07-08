@@ -57,8 +57,8 @@ func testAccDataSourceQuotas_basic() string {
 %[1]s
 
 locals {
-  all_used_quota_types = ["er_instance", "route_table", "vpc_attachment", "static_route"]
-  instance_used_quota_types = ["route_table", "vpc_attachment", "static_route"]
+  all_used_quota_types         = ["er_instance", "route_table", "vpc_attachment", "static_route"]
+  instance_used_quota_types    = ["route_table", "vpc_attachment", "static_route"]
   route_table_used_quota_types = ["static_route"]
 }
 
@@ -71,8 +71,8 @@ data "opentelekomcloud_er_quotas_v3" "test" {
 # 2. setintersection(quotaListA, quotaListB): Find the union of two lists.
 # 3. length(setsubtract(quotaListA, quotaListB)) == 0: There are no different elements between two lists.
 output "is_no_filter_useful" {
-  value = length(setsubtract(setintersection([for _, v in data.opentelekomcloud_er_quotas_v3.test.quotas: v.type if v.used > 0],
-            local.all_used_quota_types), local.all_used_quota_types)) == 0
+  value = length(setsubtract(setintersection([for _, v in data.opentelekomcloud_er_quotas_v3.test.quotas : v.type if v.used > 0],
+  local.all_used_quota_types), local.all_used_quota_types)) == 0
 }
 
 # Filter by type
