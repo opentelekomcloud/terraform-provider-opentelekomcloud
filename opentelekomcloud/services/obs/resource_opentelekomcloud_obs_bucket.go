@@ -196,6 +196,22 @@ func ResourceObsBucket() *schema.Resource {
 								},
 							},
 						},
+						"tag": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"value": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -777,8 +793,29 @@ func mapToRule(src map[string]interface{}) (rule obs.LifecycleRule) {
 		rule.Status = obs.RuleStatusDisabled
 	}
 
-	// Prefix
-	rule.Prefix = src["prefix"].(string)
+	prefix := src["prefix"].(string)
+
+	tags := src["tag"].([]interface{})
+
+	// Filter
+	if len(tags) > 0 {
+		filter := obs.LifecycleFilter{
+			Prefix: prefix,
+		}
+		tagList := make([]obs.Tag, len(tags))
+		for i, tag := range tags {
+			tagMap := tag.(map[string]interface{})
+			tagList[i] = obs.Tag{
+				Key:   tagMap["key"].(string),
+				Value: tagMap["value"].(string),
+			}
+		}
+		filter.Tags = tagList
+		rule.Filter = filter
+	} else {
+		// Prefix
+		rule.Prefix = prefix
+	}
 
 	// Expiration
 	expiration := src["expiration"].(*schema.Set).List()
@@ -1103,6 +1140,16 @@ func ruleToMap(src obs.LifecycleRule) map[string]interface{} {
 
 	if src.Prefix != "" {
 		rule["prefix"] = src.Prefix
+	} else if src.Filter.Prefix != "" {
+		rule["prefix"] = src.Filter.Prefix
+		tags := make([]interface{}, len(src.Filter.Tags))
+		for i, v := range src.Filter.Tags {
+			tag := make(map[string]interface{})
+			tag["key"] = v.Key
+			tag["value"] = v.Value
+			tags[i] = tag
+		}
+		rule["tag"] = tags
 	}
 
 	// expiration
