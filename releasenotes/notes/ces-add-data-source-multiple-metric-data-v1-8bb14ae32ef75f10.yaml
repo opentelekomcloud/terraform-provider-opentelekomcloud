@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CES]** Add new data source ``opentelekomcloud_ces_multiple_metric_data_v1`` (`#3028 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3028>`_).
