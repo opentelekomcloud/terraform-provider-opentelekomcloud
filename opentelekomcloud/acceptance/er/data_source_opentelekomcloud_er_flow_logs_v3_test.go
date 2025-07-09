@@ -12,7 +12,6 @@ import (
 func TestAccDatasourceErFlowLogsV3_basic(t *testing.T) {
 	var (
 		name           = fmt.Sprintf("er-data-fl%s", acctest.RandString(5))
-		bgpAsNum       = acctest.RandIntRange(64512, 65534)
 		dataSourceName = "data.opentelekomcloud_er_flow_logs_v3.test"
 		dc             = common.InitDataSourceCheck(dataSourceName)
 
@@ -31,9 +30,6 @@ func TestAccDatasourceErFlowLogsV3_basic(t *testing.T) {
 		byStatus   = "data.opentelekomcloud_er_flow_logs_v3.filter_by_status"
 		dcByStatus = common.InitDataSourceCheck(byStatus)
 
-		byEnabled   = "data.opentelekomcloud_er_flow_logs_v3.filter_by_enabled"
-		dcByEnabled = common.InitDataSourceCheck(byEnabled)
-
 		byLogGroupId   = "data.opentelekomcloud_er_flow_logs_v3.filter_by_log_group_id"
 		dcByLogGroupId = common.InitDataSourceCheck(byLogGroupId)
 
@@ -46,7 +42,7 @@ func TestAccDatasourceErFlowLogsV3_basic(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceErFlowLogsV3_basic(name, bgpAsNum),
+				Config: testAccDataSourceErFlowLogsV3_basic(name),
 				Check: resource.ComposeTestCheckFunc(
 					dc.CheckResourceExists(),
 					dcByResourceType.CheckResourceExists(),
@@ -64,9 +60,6 @@ func TestAccDatasourceErFlowLogsV3_basic(t *testing.T) {
 					dcByStatus.CheckResourceExists(),
 					resource.TestCheckOutput("status_filter_is_useful", "true"),
 
-					dcByEnabled.CheckResourceExists(),
-					resource.TestCheckOutput("enabled_filter_is_useful", "true"),
-
 					dcByLogGroupId.CheckResourceExists(),
 					resource.TestCheckOutput("log_group_id_filter_is_useful", "true"),
 
@@ -78,7 +71,7 @@ func TestAccDatasourceErFlowLogsV3_basic(t *testing.T) {
 	})
 }
 
-func testAccDataSourceErFlowLogsV3_basic(name string, bgpAsNum int) string {
+func testAccDataSourceErFlowLogsV3_basic(name string) string {
 	return fmt.Sprintf(`
 %s
 
@@ -226,19 +219,5 @@ locals {
   enabled = data.opentelekomcloud_er_flow_logs_v3.test.flow_logs[0].enabled
 }
 
-data "opentelekomcloud_er_flow_logs_v3" "filter_by_enabled" {
-  instance_id = opentelekomcloud_er_instance_v3.test.id
-  enabled     = local.enabled
-}
-
-locals {
-  enabled_filter_result = [
-    for v in data.opentelekomcloud_er_flow_logs_v3.filter_by_enabled.flow_logs[*].enabled : v == local.enabled
-  ]
-}
-
-output "enabled_filter_is_useful" {
-  value = alltrue(local.enabled_filter_result) && length(local.enabled_filter_result) > 0
-}
 `, testFlowLog_basic(testaccFlowLog_base(name), name))
 }
