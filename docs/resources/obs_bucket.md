@@ -278,6 +278,14 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
     prefix  = "tmp/"
     enabled = true
 
+    tag {
+      key   = "key1"
+      value = "value1"
+    }
+    tag {
+      key   = "key2"
+      value = "value2"
+    }
     noncurrent_version_expiration {
       days = 180
     }
@@ -496,6 +504,8 @@ The `lifecycle_rule` object supports the following:
   or end with a slash (/), cannot have consecutive slashes (/), and cannot contain the following
   special characters: \:*?"<>|.
 
+* `tag` - (Optional) A list of tags to filter objects. Maximum 10 tags per rule with unique keys (documented below).
+
 * `expiration` - (Optional) Specifies a period when objects that have been last updated are automatically
   deleted. (documented below).
 
@@ -510,6 +520,12 @@ The `lifecycle_rule` object supports the following:
 
 -> At least one of `expiration`, `transition`, `noncurrent_version_expiration`, `noncurrent_version_transition`
 must be specified.
+
+The `tag` object supports the following:
+
+* `key` - (Required) The tag key. Must be unique within the rule, cannot be blank, maximum 128 characters. Cannot contain: =*<>\,|/?!;
+
+* `value` - (Required) The tag value. Can be blank, maximum 255 characters. Cannot contain: =*<>\,|?!;
 
 The `expiration` object supports the following
 

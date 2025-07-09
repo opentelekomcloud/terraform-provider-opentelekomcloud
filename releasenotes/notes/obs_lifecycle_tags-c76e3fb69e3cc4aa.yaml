@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[OBS]** Add tag filters for lifecycle rules for ``opentelekomcloud_obs_bucket`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
