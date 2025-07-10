@@ -92,9 +92,6 @@ The `volume` block supports:
     * `ULTRAHIGH`: indicates the SSD type.
     * `ESSD`: indicates the extreme SSD type.
 
--> Note
-  The MySQL and PostgreSQL supports CLOUDSSD and ESSD, SQL Server supports only ESSD
-
 ## Attributes Reference
 
 The following attributes are exported:

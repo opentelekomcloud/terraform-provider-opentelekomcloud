@@ -57,7 +57,7 @@ The `datastore` block supports:
 
 * `version` - (Required) Specifies the database version.
   * MySQL databases support MySQL `5.6`, `5.7`, `8.0`. Example value: `8.0`.
-  * PostgreSQL databases support PostgreSQL `11`, `12` and above. Example value: `16`.
+  * PostgreSQL databases support PostgreSQL `12` and above. Example value: `16`.
   * Microsoft SQL Server databases support `2017_SE`, `2017_EE`, and above. Example value: `2022_EE`.
 
 

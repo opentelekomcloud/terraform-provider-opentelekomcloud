@@ -30,7 +30,7 @@ data "opentelekomcloud_rds_flavors_v3" "flavor" {
 
 * `db_version` - (Required) Specifies the database version.
   * MySQL: 8.0, 5.7, and 5.6
-  * PostgreSQL: 11 through 16
+  * PostgreSQL: 12 through 16
   * Microsoft SQL Server: 2017 (Enterprise/Standard) through 2022 (Enterprise/Standard)
 
 * `instance_mode` - (Required) The mode of instance. Possible values are:
