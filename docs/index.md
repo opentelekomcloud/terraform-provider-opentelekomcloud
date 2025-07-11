@@ -47,12 +47,12 @@ This provider offers 5 means for authentication.
 
 ```hcl
 variable tenant_name {
-  type = string
+  type    = string
   default = "eu-xx_project"
 }
 
 variable domain_name {
-  type = string
+  type    = string
   default = "OTC000000000010000XXXXXX"
 }
 
