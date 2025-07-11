@@ -46,6 +46,16 @@ This provider offers 5 means for authentication.
 ### User name + Password
 
 ```hcl
+variable tenant_name {
+  type = string
+  default = "eu-xx_project"
+}
+
+variable domain_name {
+  type = string
+  default = "OTC000000000010000XXXXXX"
+}
+
 provider "opentelekomcloud" {
   user_name   = var.user_name
   password    = var.password
