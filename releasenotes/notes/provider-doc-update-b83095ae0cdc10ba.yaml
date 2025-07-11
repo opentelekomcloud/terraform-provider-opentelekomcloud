@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[Provider]** Add example variables for ``tenant_name`` and ``domain_name`` in ``index`` (`#3035 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3035>`_)
