@@ -816,8 +816,8 @@ func analyseApiType(t int) string {
 
 func analyseNetworkType(t string) string {
 	networkType := map[string]string{
-		"NON-VPC": "V1",
-		"VPC":     "V2",
+		"V1": "NON-VPC",
+		"V2": "VPC",
 	}
 	if v, ok := networkType[t]; ok {
 		return v
