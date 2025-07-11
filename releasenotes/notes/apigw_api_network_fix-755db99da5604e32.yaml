@@ -1,0 +1,4 @@
+---
+fix:
+  |
+  **[APIGW]** Fix network_type set for ``resource/opentelekomcloud_apigw_api_v2`` (`#3036 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3036>`_)
