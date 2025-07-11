@@ -409,7 +409,7 @@ The `db` block supports:
 
 * `version` - (Required, ForceNew) Specifies the database version.
   * MySQL: 8.0, 5.7, and 5.6
-  * PostgreSQL: 11 through 16
+  * PostgreSQL: 12 through 16
   * Microsoft SQL Server: 2017 (Enterprise/Standard) through 2022 (Enterprise/Standard)
   Changing this parameter will create a new resource.
 
@@ -428,8 +428,8 @@ The `volume` block supports:
   * ESSD: extreme SSD storage.
 
 -> Note
-  The MySQL and PostgreSQL DB engines support the following volume types: CLOUDSSD and ESSD. ESSD is not supported for Single instance types for MySQL and PostgreSQL.
-  The SQL Server engine supports the following volume types: COMMON, ULTRAHIGH, and ESSD.
+  The MySQL, PostgreSQL and SQLServer DB engines support the following volume types: CLOUDSSD and ESSD.
+  However, ESSD is not supported for MySQL DB Single instances and PostgreSQL DB Single instances.
 
 ~> **Warning** Specifying both `limit_size` and `trigger_threshold` will enable autoscaling for RDS instance.
   Once autoscaling is activated, the `size` parameter for the volume will be ignored to prevent discrepancies
