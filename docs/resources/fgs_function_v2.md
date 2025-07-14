@@ -302,6 +302,10 @@ The following arguments are supported:
 * `reserved_instances` - (Optional, List) Specifies the reserved instance policies of the function.
   The `reserved_instances` structure is documented below.
 
+* `gpu_memory` - (Optional, Int) Specifies the GPU memory size allocated to the function, in MByte (MB).
+  The valid value ranges form `1,024` to `16,384`, the value must be a multiple of `1,024`.
+  If not specified, the GPU function is disabled.
+
 * `pre_stop_handler` - (Optional, String) Specifies the pre-stop handler of a function. The value must contain a period (.)
  in the format of xx.xx. For example, for Node.js function myfunction.pre_stop_handler, the file name is myfunction.js,
  and the initialization function is pre_stop_handler.
