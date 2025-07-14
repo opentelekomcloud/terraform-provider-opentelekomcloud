@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[FGS]** Added `network_controller`, `peering_cidr` and `pre_stop_handler` parameters for ``resource/opentelekomcloud_fgs_function_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
