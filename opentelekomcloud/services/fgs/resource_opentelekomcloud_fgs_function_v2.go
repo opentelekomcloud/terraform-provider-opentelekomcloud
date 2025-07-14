@@ -133,6 +133,38 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"network_controller": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"trigger_access_vpcs": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"vpc_id": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+									},
+									"vpc_name": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+									},
+								},
+							},
+						},
+						"disable_public_network": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+					},
+				},
+			},
 			"vpc_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -142,6 +174,10 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				RequiredWith: []string{"vpc_id"},
+			},
+			"peering_cidr": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"mount_user_id": {
 				Type:     schema.TypeInt,
@@ -308,6 +344,14 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
+			"pre_stop_handler": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"pre_stop_timeout": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
 			"gpu_type": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -412,6 +456,8 @@ func buildFgsFunctionParameters(d *schema.ResourceData) (function.CreateOpts, er
 		Timeout:           d.Get("timeout").(int),
 		UserData:          d.Get("user_data").(string),
 		EncryptedUserData: d.Get("encrypted_user_data").(string),
+		PreStopHandler:    d.Get("pre_stop_handler").(string),
+		PreStopTimeout:    pointerto.Int(d.Get("pre_stop_timeout").(int)),
 		Xrole:             agencyV,
 		CustomImage:       buildCustomImage(d.Get("custom_image").([]interface{})),
 		GpuMemory:         pointerto.Int(d.Get("gpu_memory").(int)),
@@ -431,7 +477,53 @@ func buildFgsFunctionParameters(d *schema.ResourceData) (function.CreateOpts, er
 		}
 		result.LogConfig = &logConfig
 	}
+	if v, ok := d.GetOk("network_controller"); ok && len(v.([]interface{})) > 0 {
+		result.NetworkController = buildNetworkControlConfig(d)
+	}
+
 	return result, nil
+}
+
+func buildNetworkControlConfig(d *schema.ResourceData) *function.NetworkControlConfig {
+	v := d.Get("network_controller").([]interface{})
+	if len(v) < 1 || v[0] == nil {
+		return nil
+	}
+
+	networkController := v[0].(map[string]interface{})
+	config := &function.NetworkControlConfig{}
+
+	if disablePublic, ok := networkController["disable_public_network"].(bool); ok {
+		config.DisablePublicNetwork = &disablePublic
+	}
+
+	if vpcsSet, ok := networkController["trigger_access_vpcs"].(*schema.Set); ok && vpcsSet.Len() > 0 {
+		config.TriggerAccessVpcs = buildTriggerAccessVpcs(vpcsSet.List())
+	}
+
+	return config
+}
+
+func buildTriggerAccessVpcs(vpcs []interface{}) []function.VpcConfig {
+	result := make([]function.VpcConfig, 0, len(vpcs))
+
+	for _, vpc := range vpcs {
+		if vpcMap, ok := vpc.(map[string]interface{}); ok {
+			vpcConfig := function.VpcConfig{}
+
+			if vpcID, ok := vpcMap["vpc_id"].(string); ok {
+				vpcConfig.VpcID = vpcID
+			}
+
+			if vpcName, ok := vpcMap["vpc_name"].(string); ok {
+				vpcConfig.VpcName = vpcName
+			}
+
+			result = append(result, vpcConfig)
+		}
+	}
+
+	return result
 }
 
 func resourceFgsFunctionV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -455,7 +547,8 @@ func resourceFgsFunctionV2Create(ctx context.Context, d *schema.ResourceData, me
 
 	d.SetId(f.FuncURN)
 	urn := resourceFgsFunctionUrn(d.Id())
-	if d.HasChanges("vpc_id", "func_mounts", "app_agency", "initializer_handler", "initializer_timeout", "concurrency_num") {
+	if d.HasChanges("vpc_id", "network_id", "peering_cidr", "func_mounts", "app_agency", "initializer_handler",
+		"initializer_timeout", "concurrency_num") {
 		err := resourceFgsFunctionMetadataUpdate(fgsClient, urn, d)
 		if err != nil {
 			return diag.FromErr(err)
@@ -584,6 +677,43 @@ func flattenFgsCustomImage(imageConfig function.CustomImage) []map[string]interf
 		}
 	}
 	return nil
+}
+
+func flattenFunctionNetworkController(networkController *function.NetworkControlConfig) []map[string]interface{} {
+	if networkController == nil {
+		return nil
+	}
+
+	if len(networkController.TriggerAccessVpcs) == 0 &&
+		(networkController.DisablePublicNetwork == nil || !*networkController.DisablePublicNetwork) {
+		return nil
+	}
+
+	result := map[string]interface{}{
+		"trigger_access_vpcs": flattenNetworkControllerTriggerAccessVpcs(networkController.TriggerAccessVpcs),
+	}
+
+	if networkController.DisablePublicNetwork != nil {
+		result["disable_public_network"] = *networkController.DisablePublicNetwork
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func flattenNetworkControllerTriggerAccessVpcs(vpcs []function.VpcConfig) []map[string]interface{} {
+	if len(vpcs) < 1 {
+		return nil
+	}
+
+	result := make([]map[string]interface{}, 0, len(vpcs))
+	for _, vpc := range vpcs {
+		result = append(result, map[string]interface{}{
+			"vpc_id":   vpc.VpcID,
+			"vpc_name": vpc.VpcName,
+		})
+	}
+
+	return result
 }
 
 func queryFunctionVersions(client *golangsdk.ServiceClient, functionUrn string) ([]string, error) {
@@ -734,6 +864,10 @@ func resourceFgsFunctionV2Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("initializer_timeout", f.InitTimeout),
 		d.Set("functiongraph_version", f.Type),
 		d.Set("custom_image", flattenFgsCustomImage(f.CustomImage)),
+		d.Set("network_controller", flattenFunctionNetworkController(&f.NetworkController)),
+		d.Set("peering_cidr", f.PeeringCIDR),
+		d.Set("pre_stop_handler", f.PreStopHandler),
+		d.Set("pre_stop_timeout", f.PreStopTimeout),
 		d.Set("max_instance_num", strconv.Itoa(f.StrategyConfig.Concurrency)),
 		d.Set("dns_list", f.DomainNames),
 		d.Set("log_group_id", f.LogGroupID),
@@ -995,8 +1129,9 @@ func resourceFgsFunctionV2Update(ctx context.Context, d *schema.ResourceData, me
 	// lintignore:R019
 	if d.HasChanges("app", "handler", "memory_size", "timeout", "encrypted_user_data",
 		"user_data", "agency", "app_agency", "description", "initializer_handler", "initializer_timeout",
-		"vpc_id", "network_id", "mount_user_id", "mount_user_group_id", "func_mounts", "custom_image",
-		"log_group_id", "log_topic_id", "log_group_name", "log_topic_name", "concurrency_num", "gpu_memory", "gpu_type") {
+		"vpc_id", "network_controller", "network_id", "mount_user_id", "mount_user_group_id", "func_mounts", "custom_image",
+		"log_group_id", "log_topic_id", "log_group_name", "log_topic_name", "concurrency_num", "gpu_memory", "gpu_type",
+		"pre_stop_handler", "pre_stop_timeout") {
 		err := resourceFgsFunctionMetadataUpdate(fgsClient, urn, d)
 		if err != nil {
 			return diag.FromErr(err)
@@ -1087,6 +1222,9 @@ func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn s
 		InitTimeout:       pointerto.Int(d.Get("initializer_timeout").(int)),
 		CustomImage:       buildCustomImage(d.Get("custom_image").([]interface{})),
 		GpuMemory:         pointerto.Int(d.Get("gpu_memory").(int)),
+		PreStopHandler:    d.Get("pre_stop_handler").(string),
+		PreStopTimeout:    pointerto.Int(d.Get("pre_stop_timeout").(int)),
+		PeeringCIDR:       d.Get("peering_cidr").(string),
 	}
 
 	if _, ok := d.GetOk("vpc_id"); ok {
@@ -1107,6 +1245,8 @@ func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn s
 		}
 		updateMetadateOpts.LogConfig = &logConfig
 	}
+
+	updateMetadateOpts.NetworkController = buildNetworkControlConfig(d)
 
 	if v, ok := d.GetOk("concurrency_num"); ok {
 		strategyConfig := function.StrategyConfig{
