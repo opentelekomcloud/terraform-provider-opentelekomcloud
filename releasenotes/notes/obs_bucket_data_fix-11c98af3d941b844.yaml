@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[OBS]** Fix `kms_project_id` set for ``data_source/opentelekomcloud_obs_bucket`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[OBS]** Fix `kms_project_id` set for ``data_source/opentelekomcloud_obs_bucket`` (`#3040 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3040>`_)
