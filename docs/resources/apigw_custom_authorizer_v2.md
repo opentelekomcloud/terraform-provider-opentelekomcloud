@@ -26,7 +26,7 @@ resource "opentelekomcloud_apigw_custom_authorizer_v2" "test" {
   name         = var.authorizer_name
   function_urn = var.function_urn
   type         = "FRONTEND"
-  cache_age    = 60
+  ttl          = 60
 
   identity {
     name     = "user_name"
