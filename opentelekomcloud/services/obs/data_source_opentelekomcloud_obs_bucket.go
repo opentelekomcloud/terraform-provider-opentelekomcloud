@@ -202,6 +202,10 @@ func DataSourceObsBucket() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"kms_project_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
