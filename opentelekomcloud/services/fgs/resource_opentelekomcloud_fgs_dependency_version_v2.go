@@ -118,7 +118,7 @@ func resourceDependencyVersionV2Create(ctx context.Context, d *schema.ResourceDa
 
 	createResp, err := dependency_version.Create(fgsClient, createOpts)
 	if err != nil {
-		return diag.Errorf("error creating dependency package version: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud dependency package version: %s", err)
 	}
 
 	d.SetId(fmt.Sprintf("%s/%v", createResp.DepId, createResp.Version))
@@ -153,7 +153,7 @@ func resourceDependencyVersionV2Read(ctx context.Context, d *schema.ResourceData
 
 	getResp, err := dependency_version.Get(fgsClient, dependId, dependVersion)
 	if err != nil {
-		return common.CheckDeletedDiag(d, err, "FunctionGraph dependency package version")
+		return common.CheckDeletedDiag(d, err, "OpenTelekomCloud FunctionGraph dependency package version")
 	}
 
 	mErr := multierror.Append(
