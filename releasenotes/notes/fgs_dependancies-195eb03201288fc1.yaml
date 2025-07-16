@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **[FGS]** Added new resource ``resource/opentelekomcloud_fgs_dependency_version_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[FGS]** Added new resource ``resource/opentelekomcloud_fgs_dependency_version_v2`` (`#3042 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3042>`_)
