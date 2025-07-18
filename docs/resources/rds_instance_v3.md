@@ -422,10 +422,8 @@ The `volume` block supports:
 
 * `type` - (Required, ForceNew) Specifies the volume type. Changing this resize the volume. Its value can be any of the following
   and is case-sensitive:
-  * COMMON: SATA storage.
-  * ULTRAHIGH: ultra-high I/O storage.
-  * CLOUDSSD: cloud SSD storage.
-  * ESSD: extreme SSD storage.
+  * `CLOUDSSD`: indicates cloud SSD storage.
+  * `ESSD`: indicates the extreme SSD type.
 
 -> Note
   The MySQL, PostgreSQL and SQLServer DB engines support the following volume types: CLOUDSSD and ESSD.
