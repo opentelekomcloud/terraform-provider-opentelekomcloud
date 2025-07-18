@@ -1,0 +1,6 @@
+---
+other:
+  - |
+    **[RDS]** Change supported values for ``type`` in ``resource/opentelekomcloud_rds_instance_v3`` documentation (`#3049 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3049>`_)
+  - |
+    **[RDS]** Change supported values for ``type`` in ``resource/opentelekomcloud_rds_read_replica_v3`` documentation (`#3049 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3049>`_)
