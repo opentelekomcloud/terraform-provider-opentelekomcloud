@@ -88,9 +88,8 @@ The `volume` block supports:
 
 * `type` - Specifies the volume type. Changing this parameter will create a new resource. Its value can be any of the
   following and is case-sensitive.
-    * `COMMON`: indicates the SATA type.
-    * `ULTRAHIGH`: indicates the SSD type.
-    * `ESSD`: indicates the extreme SSD type.
+  * `CLOUDSSD`: indicates cloud SSD storage.
+  * `ESSD`: indicates the extreme SSD type.
 
 ## Attributes Reference
 
