@@ -561,11 +561,6 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	templateRestart, err := assureTemplateApplied(d, client)
-	if err != nil {
-		return fmterr.Errorf("error making sure configuration template is applied: %w", err)
-	}
-
 	paramRestart := false
 	if _, ok := d.GetOk("parameters"); ok {
 		stateConf := &resource.StateChangeConf{
@@ -583,7 +578,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		paramRestart = result.(bool)
 	}
 
-	if templateRestart || paramRestart {
+	if paramRestart {
 		if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
 			return fmterr.Errorf("error waiting for instance to become available: %w", err)
 		}
@@ -645,45 +640,6 @@ func resourceRestorePoint(d *schema.ResourceData) backups.RestorePoint {
 		restorePoint.Type = backups.TypeBackup
 	}
 	return restorePoint
-}
-
-func assureTemplateApplied(d *schema.ResourceData, client *golangsdk.ServiceClient) (bool, error) {
-	templateID := d.Get("param_group_id").(string)
-	if templateID == "" {
-		return false, nil
-	}
-
-	applied, err := configurations.Get(client, templateID)
-	if err != nil {
-		return false, fmt.Errorf("error getting parameter template %s: %w", templateID, err)
-	}
-	// convert to the map
-	appliedParams := make(map[string]configurations.Parameter, len(applied.Parameters))
-	for _, param := range applied.Parameters {
-		appliedParams[param.Name] = param
-	}
-
-	current, err := configurations.GetForInstance(client, d.Id())
-	if err != nil {
-		return false, fmt.Errorf("error getting configuration of instance %s: %w", d.Id(), err)
-	}
-
-	needsReapply := false
-	for _, val := range current.Parameters {
-		param, ok := appliedParams[val.Name]
-		if !ok { // Then it's not from the template
-			continue
-		}
-		if val.Value != param.Value {
-			needsReapply = true
-			break // that's enough
-		}
-	}
-	if !needsReapply {
-		return false, nil
-	}
-
-	return applyTemplate(d, client)
 }
 
 func restartInstance(d *schema.ResourceData, client *golangsdk.ServiceClient) error {
@@ -1115,7 +1071,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		if err != nil {
 			return fmterr.Errorf("error applying parameter template: %w", err)
 		}
-		restartRequired = restartRequired || templateRestart
+		restartRequired = templateRestart
 	}
 
 	if d.HasChange("parameters") {
