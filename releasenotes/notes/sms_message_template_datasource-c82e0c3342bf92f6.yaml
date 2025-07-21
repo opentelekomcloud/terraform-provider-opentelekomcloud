@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **New Data Source:** ``data_source/opentelekomcloud_smn_message_templates_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **New Data Source:** ``data_source/opentelekomcloud_smn_message_templates_v2`` (`#3050 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3050>`_)
