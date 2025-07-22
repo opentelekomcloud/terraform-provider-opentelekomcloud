@@ -48,10 +48,11 @@ func TestAccWafDedicatedAntiLeakageRuleV1_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      wafdAntiLeakageRuleName,
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateIdFunc: dedicatedRuleImportStateIDFunc(wafdAntiLeakageRuleName, wafdPolicyResourceName),
+				ResourceName:            wafdAntiLeakageRuleName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdFunc:       dedicatedRuleImportStateIDFunc(wafdAntiLeakageRuleName, wafdPolicyResourceName),
+				ImportStateVerifyIgnore: []string{"action"},
 			},
 		},
 	})
@@ -118,6 +119,7 @@ resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
 resource "opentelekomcloud_waf_dedicated_anti_leakage_rule_v1" "rule_1" {
   policy_id   = opentelekomcloud_waf_dedicated_policy_v1.policy_1.id
   url         = "/attack"
+  action      = "block"
   category    = "sensitive"
   contents    = ["id_card"]
   description = "test description"
@@ -132,6 +134,7 @@ resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
 resource "opentelekomcloud_waf_dedicated_anti_leakage_rule_v1" "rule_1" {
   policy_id   = opentelekomcloud_waf_dedicated_policy_v1.policy_1.id
   url         = "/pass"
+  action      = "block"
   category    = "sensitive"
   contents    = ["id_card"]
   description = "test description updated"

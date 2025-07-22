@@ -23,6 +23,7 @@ resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
 
 resource "opentelekomcloud_waf_dedicated_anti_leakage_rule_v1" "rule_1" {
   policy_id   = opentelekomcloud_waf_dedicated_policy_v1.policy_1.id
+  action      = "block"
   url         = "/attack"
   category    = "sensitive"
   contents    = ["id_card"]
@@ -42,6 +43,11 @@ The following arguments are supported:
   + `code`: The rule blocks response pages of specified HTTP response code.
 
 * `url` - (Required, String) URL to which the rule applies, for example, `/admin`
+
+* `action` - (Required, ForceNew, String) Protective action of the Anti Leakage rule.
+  Values:
+  + `block`: WAF blocks attacks.
+  + `log`: WAF only logs discovered attacks.
 
 * `description` - (Optional, String) Rule description.
 
@@ -68,4 +74,9 @@ Dedicated WAF Web Information Leakage Protection rules can be imported using `po
 
 ```sh
 terraform import opentelekomcloud_waf_dedicated_anti_leakage_rule_v1.rule_1 ff95e71c8ae74eba9887193ab22c5757/b39f3a5a1b4f447a8030f0b0703f47f5
+  lifecycle {
+    ignore_changes = [
+      action,
+    ]
+  }
 ```
