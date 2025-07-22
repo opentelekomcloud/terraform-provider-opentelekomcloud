@@ -100,7 +100,7 @@ func resourceCCEAddonV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	clusterID := d.Get("cluster_id").(string)
 	basic, custom, flavor, err := getAddonValues(d)
 	if err != nil {
-		return fmterr.Errorf("error getting values for CCE addon: %w", err)
+		return fmterr.Errorf("error getting values for CCE addon: %s", err)
 	}
 
 	basic = unStringMap(basic)
@@ -132,7 +132,7 @@ func resourceCCEAddonV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		if aErr == nil {
 			errMsg = fmt.Errorf("\nAddon template spec: %s\n%s", addonSpec, errMsg)
 		}
-		return fmterr.Errorf("error creating CCE addon instance: %w", errMsg)
+		return fmterr.Errorf("error creating CCE addon instance: %s", errMsg)
 	}
 
 	d.SetId(addon.Metadata.Id)
@@ -173,7 +173,7 @@ func resourceCCEAddonV3Read(ctx context.Context, d *schema.ResourceData, meta in
 			return nil
 		}
 
-		return fmterr.Errorf("error reading CCE addon instance: %w", logHttpError(err))
+		return fmterr.Errorf("error reading CCE addon instance: %s", logHttpError(err))
 	}
 
 	mErr := multierror.Append(nil,
@@ -185,7 +185,7 @@ func resourceCCEAddonV3Read(ctx context.Context, d *schema.ResourceData, meta in
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
-		return fmterr.Errorf("error setting addon attributes: %w", err)
+		return fmterr.Errorf("error setting addon attributes: %s", err)
 	}
 
 	return nil
@@ -308,7 +308,7 @@ func resourceCCEAddonV3Delete(ctx context.Context, d *schema.ResourceData, meta 
 	clusterID := d.Get("cluster_id").(string)
 
 	if err := addons.Delete(client, d.Id(), clusterID); err != nil {
-		return fmterr.Errorf("error deleting CCE addon : %w", err)
+		return fmterr.Errorf("error deleting CCE addon : %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -384,7 +384,7 @@ func waitForCCEAddonDelete(client *golangsdk.ServiceClient, addonID, clusterID s
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return addon, "deleted", nil
 			}
-			return nil, "error", fmt.Errorf("error waiting CCE addon to become deleted: %w", err)
+			return nil, "error", fmt.Errorf("error waiting CCE addon to become deleted: %s", err)
 		}
 
 		return addon, "available", nil
@@ -404,7 +404,7 @@ func resourceCCEAddonV3Import(_ context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {
-		return nil, fmt.Errorf("error creating CCE client: %w", logHttpError(err))
+		return nil, fmt.Errorf("error creating CCE client: %s", logHttpError(err))
 	}
 
 	addon, err := addons.Get(client, d.Id(), clusterID)
@@ -414,7 +414,7 @@ func resourceCCEAddonV3Import(_ context.Context, d *schema.ResourceData, meta in
 			return nil, fmt.Errorf("addon wasn't found")
 		}
 
-		return nil, fmt.Errorf("error reading CCE addon instance: %w", logHttpError(err))
+		return nil, fmt.Errorf("error reading CCE addon instance: %s", logHttpError(err))
 	}
 
 	mErr := multierror.Append(nil,
@@ -426,7 +426,7 @@ func resourceCCEAddonV3Import(_ context.Context, d *schema.ResourceData, meta in
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
-		return nil, fmt.Errorf("error setting addon attributes: %w", err)
+		return nil, fmt.Errorf("error setting addon attributes: %s", err)
 	}
 
 	return []*schema.ResourceData{d}, nil
