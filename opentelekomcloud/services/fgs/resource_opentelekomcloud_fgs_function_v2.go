@@ -352,8 +352,48 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
+			"enable_dynamic_memory": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"extend_config": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"is_stateful_function": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"is_bridge_function": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"apig_route_enable": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"heartbeat_handler": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"enable_class_isolation": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"gpu_type": {
 				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"allow_ephemeral_storage": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"ephemeral_storage": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"enable_auth_in_header": {
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 			"version": {
@@ -443,25 +483,27 @@ func buildFgsFunctionParameters(d *schema.ResourceData) (function.CreateOpts, er
 	}
 
 	result := function.CreateOpts{
-		Name:              d.Get("name").(string),
-		Type:              d.Get("functiongraph_version").(string),
-		Package:           packV,
-		CodeType:          d.Get("code_type").(string),
-		CodeURL:           d.Get("code_url").(string),
-		Description:       d.Get("description").(string),
-		CodeFilename:      d.Get("code_filename").(string),
-		Handler:           d.Get("handler").(string),
-		MemorySize:        d.Get("memory_size").(int),
-		Runtime:           d.Get("runtime").(string),
-		Timeout:           d.Get("timeout").(int),
-		UserData:          d.Get("user_data").(string),
-		EncryptedUserData: d.Get("encrypted_user_data").(string),
-		PreStopHandler:    d.Get("pre_stop_handler").(string),
-		PreStopTimeout:    pointerto.Int(d.Get("pre_stop_timeout").(int)),
-		Xrole:             agencyV,
-		CustomImage:       buildCustomImage(d.Get("custom_image").([]interface{})),
-		GpuMemory:         pointerto.Int(d.Get("gpu_memory").(int)),
+		Name:                d.Get("name").(string),
+		Type:                d.Get("functiongraph_version").(string),
+		Package:             packV,
+		CodeType:            d.Get("code_type").(string),
+		CodeURL:             d.Get("code_url").(string),
+		Description:         d.Get("description").(string),
+		CodeFilename:        d.Get("code_filename").(string),
+		Handler:             d.Get("handler").(string),
+		MemorySize:          d.Get("memory_size").(int),
+		Runtime:             d.Get("runtime").(string),
+		Timeout:             d.Get("timeout").(int),
+		UserData:            d.Get("user_data").(string),
+		EncryptedUserData:   d.Get("encrypted_user_data").(string),
+		PreStopHandler:      d.Get("pre_stop_handler").(string),
+		PreStopTimeout:      pointerto.Int(d.Get("pre_stop_timeout").(int)),
+		Xrole:               agencyV,
+		CustomImage:         buildCustomImage(d.Get("custom_image").([]interface{})),
+		GpuMemory:           pointerto.Int(d.Get("gpu_memory").(int)),
+		EnableDynamicMemory: pointerto.Bool(d.Get("enable_dynamic_memory").(bool)),
 	}
+
 	if v, ok := d.GetOk("func_code"); ok {
 		funcCode := function.FuncCode{
 			File: hashcode.TryBase64EncodeString(v.(string)),
@@ -879,7 +921,17 @@ func resourceFgsFunctionV2Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("concurrency_num", getConcurrencyNum(pointerto.Int(f.StrategyConfig.ConcurrentNum))),
 		d.Set("versions", versionConfig),
 		d.Set("gpu_memory", f.GpuMemory),
+		d.Set("enable_dynamic_memory", f.EnableDynamicMemory),
+		d.Set("extend_config", f.ExtendConfig),
+		d.Set("is_stateful_function", f.IsStatefulFunction),
+		d.Set("is_bridge_function", f.IsBridgeFunction),
+		d.Set("apig_route_enable", f.ApigRouteEnable),
+		d.Set("heartbeat_handler", f.HeartbeatHandler),
+		d.Set("enable_class_isolation", f.EnableClassIsolation),
 		d.Set("gpu_type", f.GpuType),
+		d.Set("allow_ephemeral_storage", f.AllowEphemeralStorage),
+		d.Set("ephemeral_storage", f.EphemeralStorage),
+		d.Set("enable_auth_in_header", f.EnableAuthInHeader),
 	)
 
 	reservedInstances, err := getReservedInstanceConfig(fgsClient, d)
@@ -1131,7 +1183,7 @@ func resourceFgsFunctionV2Update(ctx context.Context, d *schema.ResourceData, me
 		"user_data", "agency", "app_agency", "description", "initializer_handler", "initializer_timeout",
 		"vpc_id", "network_controller", "network_id", "mount_user_id", "mount_user_group_id", "func_mounts", "custom_image",
 		"log_group_id", "log_topic_id", "log_group_name", "log_topic_name", "concurrency_num", "gpu_memory", "gpu_type",
-		"pre_stop_handler", "pre_stop_timeout") {
+		"pre_stop_handler", "pre_stop_timeout", "enable_dynamic_memory") {
 		err := resourceFgsFunctionMetadataUpdate(fgsClient, urn, d)
 		if err != nil {
 			return diag.FromErr(err)
@@ -1207,24 +1259,25 @@ func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn s
 	}
 
 	updateMetadateOpts := function.UpdateFuncMetadataOpts{
-		Name:              d.Get("name").(string),
-		Handler:           d.Get("handler").(string),
-		MemorySize:        d.Get("memory_size").(int),
-		Timeout:           d.Get("timeout").(int),
-		Runtime:           d.Get("runtime").(string),
-		Package:           packV,
-		Description:       d.Get("description").(string),
-		UserData:          d.Get("user_data").(string),
-		EncryptedUserData: d.Get("encrypted_user_data").(string),
-		Xrole:             agencyV,
-		AppXrole:          d.Get("app_agency").(string),
-		InitHandler:       d.Get("initializer_handler").(string),
-		InitTimeout:       pointerto.Int(d.Get("initializer_timeout").(int)),
-		CustomImage:       buildCustomImage(d.Get("custom_image").([]interface{})),
-		GpuMemory:         pointerto.Int(d.Get("gpu_memory").(int)),
-		PreStopHandler:    d.Get("pre_stop_handler").(string),
-		PreStopTimeout:    pointerto.Int(d.Get("pre_stop_timeout").(int)),
-		PeeringCIDR:       d.Get("peering_cidr").(string),
+		Name:                d.Get("name").(string),
+		Handler:             d.Get("handler").(string),
+		MemorySize:          d.Get("memory_size").(int),
+		Timeout:             d.Get("timeout").(int),
+		Runtime:             d.Get("runtime").(string),
+		Package:             packV,
+		Description:         d.Get("description").(string),
+		UserData:            d.Get("user_data").(string),
+		EncryptedUserData:   d.Get("encrypted_user_data").(string),
+		Xrole:               agencyV,
+		AppXrole:            d.Get("app_agency").(string),
+		InitHandler:         d.Get("initializer_handler").(string),
+		InitTimeout:         pointerto.Int(d.Get("initializer_timeout").(int)),
+		CustomImage:         buildCustomImage(d.Get("custom_image").([]interface{})),
+		GpuMemory:           pointerto.Int(d.Get("gpu_memory").(int)),
+		PreStopHandler:      d.Get("pre_stop_handler").(string),
+		PreStopTimeout:      pointerto.Int(d.Get("pre_stop_timeout").(int)),
+		PeeringCIDR:         d.Get("peering_cidr").(string),
+		EnableDynamicMemory: pointerto.Bool(d.Get("enable_dynamic_memory").(bool)),
 	}
 
 	if _, ok := d.GetOk("vpc_id"); ok {
