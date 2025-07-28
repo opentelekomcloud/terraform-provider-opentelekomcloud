@@ -1256,14 +1256,11 @@ func (c *Config) DwsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return service, nil
 }
 
-func (c *Config) TmsV1Client() (*golangsdk.ServiceClient, error) {
-	service, err := c.IdentityV3Client()
-	if err != nil {
-		return nil, err
-	}
-	service.Endpoint = strings.Replace(service.Endpoint, "v3/", "v1.0/", 1)
-	service.Endpoint = strings.Replace(service.Endpoint, "iam", "tms", 1)
-	return service, nil
+func (c *Config) TmsV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewTMSV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
 }
 
 func (c *Config) EvpnV5Client(region string) (*golangsdk.ServiceClient, error) {

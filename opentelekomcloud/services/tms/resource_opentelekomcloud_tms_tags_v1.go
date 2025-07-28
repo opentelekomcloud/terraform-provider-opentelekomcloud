@@ -10,7 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/tms/v1/tags"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
@@ -63,9 +65,11 @@ func ResourceTmsTagV1() *schema.Resource {
 
 func resourceTmsTagV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.TmsV1Client()
+	client, err := common.ClientFromCtx(ctx, tmsClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.TmsV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("Error creating Opentelekomcloud TMS client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	var tagIds []string
@@ -99,9 +103,11 @@ func resourceTmsTagV1Create(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceTmsTagV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.TmsV1Client()
+	client, err := common.ClientFromCtx(ctx, tmsClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.TmsV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("Error creating Opentelekomcloud TMS client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	allTags, err := tags.Get(client).Extract()
@@ -136,9 +142,11 @@ func resourceTmsTagV1Read(ctx context.Context, d *schema.ResourceData, meta inte
 
 func resourceTmsTagV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.TmsV1Client()
+	client, err := common.ClientFromCtx(ctx, tmsClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.TmsV1Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("Error creating Opentelekomcloud TMS client")
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	var predefineTags []tags.Tag
