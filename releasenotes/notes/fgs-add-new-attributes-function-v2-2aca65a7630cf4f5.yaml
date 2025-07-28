@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[FGS]** Add new attributes in ``resource/opentelekomcloud_fgs_function_v2`` (`#3071 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3071>`_)

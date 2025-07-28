@@ -319,6 +319,8 @@ The following arguments are supported:
   conflicts with the VPC cidr blocks used by the service.
   The cidr blocks are separated by semicolons and cannot exceed `5`.
 
+* `enable_dynamic_memory` - (Optional, Boolean) Specifies whether to enable dynamic memory allocation.
+
 The `func_mounts` block supports:
 
 * `mount_type` - (Required, String) Specifies the mount type.
@@ -435,6 +437,24 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The resource ID, consist of `urn` and current `version`, the format is `<urn>:<version>`.
 
 * `region` - The region in which function graph resource is created.
+
+* `extend_config` - The extended configuration.
+
+* `is_stateful_function` - Whether stateful functions are supported.
+
+* `is_bridge_function` - Whether this is a bridge function.
+
+* `apig_route_enable` - Whether to configure gateway routing rules.
+
+* `heartbeat_handler` - Entry of the heartbeat function in the format of "xx.xx".
+
+* `enable_class_isolation` - Indicates whether to enable class isolation.
+
+* `allow_ephemeral_storage` - Indicates whether ephemeral storage can be configured.
+
+* `ephemeral_storage` - Indicates the ephemeral storage.
+
+* `enable_auth_in_header` - Whether to add authentication information to request header for custom image-based functions.
 
 * `func_mounts/status` - The status of file system.
 
