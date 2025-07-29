@@ -20,7 +20,9 @@ func TestAccTmsTagDS_basic(t *testing.T) {
 				Config: testTmsTagDS_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTMSTagsV1DsId(dataSourceName),
+					resource.TestCheckResourceAttr(dataSourceName, "tags.#", "2"),
 					resource.TestCheckResourceAttr(dataSourceName, "tags.0.key", "foo"),
+					resource.TestCheckResourceAttr(dataSourceName, "tags.1.key", "foo1"),
 				),
 			},
 		},
@@ -48,8 +50,19 @@ resource "opentelekomcloud_tms_tags_v1" "test" {
     key   = "foo"
     value = "bar"
   }
+  tags {
+    key   = "foo1"
+    value = "bar1"
+  }
+  tags {
+    key   = "one"
+    value = "two"
+  }
 }
 
 data "opentelekomcloud_tms_tags_v1" "tags_1" {
+  key = "foo"
+
+  depends_on = ["opentelekomcloud_tms_tags_v1.test"]
 }
 `

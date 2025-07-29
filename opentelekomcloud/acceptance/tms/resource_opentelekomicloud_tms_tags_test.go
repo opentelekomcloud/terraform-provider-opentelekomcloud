@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/tms/v1/tags"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
@@ -43,7 +42,7 @@ func TestAccTmsTag_basic(t *testing.T) {
 
 func testAccCheckTmsV1TagDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	tmsClient, err := config.TmsV1Client(env.OS_REGION_NAME)
+	tmsClient, err := config.TmsV1Client()
 	if err != nil {
 		return fmt.Errorf("error creating opentelekomcloud tms client: %s", err)
 	}
@@ -66,7 +65,7 @@ func testAccCheckTmsV1TagDestroy(s *terraform.State) error {
 func testAccCheckTmsV1TagExists(key, value string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		tmsClient, err := config.TmsV1Client(env.OS_REGION_NAME)
+		tmsClient, err := config.TmsV1Client()
 		if err != nil {
 			return fmt.Errorf("error creating opentelekomcloud tms client: %s", err)
 		}

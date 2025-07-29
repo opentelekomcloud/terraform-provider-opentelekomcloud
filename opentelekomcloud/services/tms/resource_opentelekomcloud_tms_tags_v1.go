@@ -66,7 +66,7 @@ func ResourceTmsTagV1() *schema.Resource {
 func resourceTmsTagV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, tmsClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.TmsV1Client(config.GetRegion(d))
+		return config.TmsV1Client()
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
@@ -104,7 +104,7 @@ func resourceTmsTagV1Create(ctx context.Context, d *schema.ResourceData, meta in
 func resourceTmsTagV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, tmsClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.TmsV1Client(config.GetRegion(d))
+		return config.TmsV1Client()
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
@@ -143,7 +143,7 @@ func resourceTmsTagV1Read(ctx context.Context, d *schema.ResourceData, meta inte
 func resourceTmsTagV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, tmsClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.TmsV1Client(config.GetRegion(d))
+		return config.TmsV1Client()
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
