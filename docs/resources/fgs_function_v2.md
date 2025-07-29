@@ -442,8 +442,6 @@ In addition to all arguments above, the following attributes are exported:
 
 * `is_stateful_function` - Whether stateful functions are supported.
 
-* `is_bridge_function` - Whether this is a bridge function.
-
 * `apig_route_enable` - Whether to configure gateway routing rules.
 
 * `heartbeat_handler` - Entry of the heartbeat function in the format of "xx.xx".

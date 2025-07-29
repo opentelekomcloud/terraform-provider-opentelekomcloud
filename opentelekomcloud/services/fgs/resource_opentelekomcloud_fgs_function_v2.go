@@ -364,10 +364,6 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"is_bridge_function": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
 			"apig_route_enable": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -924,7 +920,6 @@ func resourceFgsFunctionV2Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("enable_dynamic_memory", f.EnableDynamicMemory),
 		d.Set("extend_config", f.ExtendConfig),
 		d.Set("is_stateful_function", f.IsStatefulFunction),
-		d.Set("is_bridge_function", f.IsBridgeFunction),
 		d.Set("apig_route_enable", f.ApigRouteEnable),
 		d.Set("heartbeat_handler", f.HeartbeatHandler),
 		d.Set("enable_class_isolation", f.EnableClassIsolation),
