@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[FGS]** Remove attribute `is_bridge_function` from resource ``resource/opentelekomcloud_fgs_function_v2`` (`#3072 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3072>`_)
