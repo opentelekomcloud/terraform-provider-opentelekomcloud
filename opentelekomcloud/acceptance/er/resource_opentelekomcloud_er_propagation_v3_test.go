@@ -106,7 +106,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "test" {
 }
 
 resource "opentelekomcloud_er_instance_v3" "test" {
-  availability_zones = ["eu-de-01", "eu-de-02"]
+  availability_zones = ["eu-de-02"]
 
   name = "%[1]s"
   asn  = %[2]d

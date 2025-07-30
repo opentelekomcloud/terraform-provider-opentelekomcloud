@@ -317,6 +317,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_er_availability_zones_v3":           er.DataSourceErAvailabilityZonesV3(),
 			"opentelekomcloud_er_quotas_v3":                       er.DataSourceErQuotasV3(),
 			"opentelekomcloud_er_flow_logs_v3":                    er.DataSourceErFlowLogsV3(),
+			"opentelekomcloud_er_propagations_v3":                 er.DataSourcePropagationsV3(),
 			"opentelekomcloud_er_route_tables_v3":                 er.DataSourceRouteTablesV2(),
 			"opentelekomcloud_evs_volumes_v2":                     evs.DataSourceEvsVolumesV2(),
 			"opentelekomcloud_hss_host_groups_v5":                 hss.DataSourceHostGroups(),
