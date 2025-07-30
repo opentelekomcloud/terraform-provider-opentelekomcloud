@@ -92,6 +92,8 @@ func testAccPropagation_base(name string) string {
 	bgpAsNum := acctest.RandIntRange(64512, 65534)
 
 	return fmt.Sprintf(`
+data "opentelekomcloud_er_availability_zones_v3" "test" {}
+
 resource "opentelekomcloud_vpc_v1" "test" {
   name = "%[1]s"
   cidr = "192.168.0.0/16"
@@ -106,7 +108,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "test" {
 }
 
 resource "opentelekomcloud_er_instance_v3" "test" {
-  availability_zones = ["eu-de-02"]
+  availability_zones = slice(data.opentelekomcloud_er_availability_zones_v3.test.names, 0, 1)
 
   name = "%[1]s"
   asn  = %[2]d
