@@ -365,6 +365,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_rms_advanced_queries_v1":            rms.DataSourceRmsAdvancedQueriesV1(),
 			"opentelekomcloud_rms_policy_definitions_v1":          rms.DataSourcePolicyDefinitionsV1(),
 			"opentelekomcloud_rms_policy_states_v1":               rms.DataSourcePolicyStates(),
+			"opentelekomcloud_rms_regions_v1":                     rms.DataSourceRmsRegionsV1(),
 			"opentelekomcloud_rts_software_deployment_v1":         rts.DataSourceRtsSoftwareDeploymentV1(),
 			"opentelekomcloud_rts_software_config_v1":             rts.DataSourceRtsSoftwareConfigV1(),
 			"opentelekomcloud_rts_stack_resource_v1":              rts.DataSourceRTSStackResourcesV1(),
