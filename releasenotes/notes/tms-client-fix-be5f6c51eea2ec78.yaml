@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[TMS]** Fix wrong endpoint assignment for ``eu-ch2`` region in ``TmsV1Client`` (`#3075 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3075>`_)

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -1257,13 +1258,27 @@ func (c *Config) DwsV2Client(region string) (*golangsdk.ServiceClient, error) {
 }
 
 func (c *Config) TmsV1Client() (*golangsdk.ServiceClient, error) {
-	service, err := c.IdentityV3Client()
+	client, err := c.IdentityV3Client()
 	if err != nil {
 		return nil, err
 	}
-	service.Endpoint = strings.Replace(service.Endpoint, "v3/", "v1.0/", 1)
-	service.Endpoint = strings.Replace(service.Endpoint, "iam", "tms", 1)
-	return service, nil
+
+	parsedURL, err := url.Parse(client.Endpoint)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse IAM endpoint: %w", err)
+	}
+	re := regexp.MustCompile(`^[^.]+`)
+	parsedURL.Host = re.ReplaceAllString(parsedURL.Host, "tms")
+	segments := strings.Split(parsedURL.Path, "/")
+	if len(segments) > 1 {
+		segments[1] = "v1.0"
+	}
+	parsedURL.Path = strings.Join(segments, "/")
+
+	client.Endpoint = parsedURL.String()
+	client.ResourceBase = client.Endpoint
+	client.Type = "tms"
+	return client, nil
 }
 
 func (c *Config) EvpnV5Client(region string) (*golangsdk.ServiceClient, error) {
