@@ -321,6 +321,8 @@ The following arguments are supported:
 
 * `enable_dynamic_memory` - (Optional, Boolean) Specifies whether to enable dynamic memory allocation.
 
+* `enable_class_isolation` - (Optional, Boolean) Specifies whether to enable class isolation.
+
 The `func_mounts` block supports:
 
 * `mount_type` - (Required, String) Specifies the mount type.
@@ -445,8 +447,6 @@ In addition to all arguments above, the following attributes are exported:
 * `apig_route_enable` - Whether to configure gateway routing rules.
 
 * `heartbeat_handler` - Entry of the heartbeat function in the format of "xx.xx".
-
-* `enable_class_isolation` - Indicates whether to enable class isolation.
 
 * `allow_ephemeral_storage` - Indicates whether ephemeral storage can be configured.
 
