@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[ER]** Add new ``data_source/opentelekomcloud_er_associations_v3`` (`#3078 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3078>`_)
