@@ -356,6 +356,10 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"enable_class_isolation": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"extend_config": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -370,10 +374,6 @@ func ResourceFgsFunctionV2() *schema.Resource {
 			},
 			"heartbeat_handler": {
 				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"enable_class_isolation": {
-				Type:     schema.TypeBool,
 				Computed: true,
 			},
 			"gpu_type": {
@@ -586,7 +586,7 @@ func resourceFgsFunctionV2Create(ctx context.Context, d *schema.ResourceData, me
 	d.SetId(f.FuncURN)
 	urn := resourceFgsFunctionUrn(d.Id())
 	if d.HasChanges("vpc_id", "network_id", "peering_cidr", "func_mounts", "app_agency", "initializer_handler",
-		"initializer_timeout", "concurrency_num") {
+		"initializer_timeout", "concurrency_num", "enable_class_isolation") {
 		err := resourceFgsFunctionMetadataUpdate(fgsClient, urn, d)
 		if err != nil {
 			return diag.FromErr(err)
@@ -1254,25 +1254,26 @@ func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn s
 	}
 
 	updateMetadateOpts := function.UpdateFuncMetadataOpts{
-		Name:                d.Get("name").(string),
-		Handler:             d.Get("handler").(string),
-		MemorySize:          d.Get("memory_size").(int),
-		Timeout:             d.Get("timeout").(int),
-		Runtime:             d.Get("runtime").(string),
-		Package:             packV,
-		Description:         d.Get("description").(string),
-		UserData:            d.Get("user_data").(string),
-		EncryptedUserData:   d.Get("encrypted_user_data").(string),
-		Xrole:               agencyV,
-		AppXrole:            d.Get("app_agency").(string),
-		InitHandler:         d.Get("initializer_handler").(string),
-		InitTimeout:         pointerto.Int(d.Get("initializer_timeout").(int)),
-		CustomImage:         buildCustomImage(d.Get("custom_image").([]interface{})),
-		GpuMemory:           pointerto.Int(d.Get("gpu_memory").(int)),
-		PreStopHandler:      d.Get("pre_stop_handler").(string),
-		PreStopTimeout:      pointerto.Int(d.Get("pre_stop_timeout").(int)),
-		PeeringCIDR:         d.Get("peering_cidr").(string),
-		EnableDynamicMemory: pointerto.Bool(d.Get("enable_dynamic_memory").(bool)),
+		Name:                 d.Get("name").(string),
+		Handler:              d.Get("handler").(string),
+		MemorySize:           d.Get("memory_size").(int),
+		Timeout:              d.Get("timeout").(int),
+		Runtime:              d.Get("runtime").(string),
+		Package:              packV,
+		Description:          d.Get("description").(string),
+		UserData:             d.Get("user_data").(string),
+		EncryptedUserData:    d.Get("encrypted_user_data").(string),
+		Xrole:                agencyV,
+		AppXrole:             d.Get("app_agency").(string),
+		InitHandler:          d.Get("initializer_handler").(string),
+		InitTimeout:          pointerto.Int(d.Get("initializer_timeout").(int)),
+		CustomImage:          buildCustomImage(d.Get("custom_image").([]interface{})),
+		GpuMemory:            pointerto.Int(d.Get("gpu_memory").(int)),
+		PreStopHandler:       d.Get("pre_stop_handler").(string),
+		PreStopTimeout:       pointerto.Int(d.Get("pre_stop_timeout").(int)),
+		PeeringCIDR:          d.Get("peering_cidr").(string),
+		EnableDynamicMemory:  pointerto.Bool(d.Get("enable_dynamic_memory").(bool)),
+		EnableClassIsolation: pointerto.Bool(d.Get("enable_class_isolation").(bool)),
 	}
 
 	if _, ok := d.GetOk("vpc_id"); ok {
