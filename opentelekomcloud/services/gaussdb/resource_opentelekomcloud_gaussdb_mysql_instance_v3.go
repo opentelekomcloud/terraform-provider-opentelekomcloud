@@ -137,13 +137,11 @@ func ResourceGaussDBInstanceV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"gaussdb-mysql",
-							}, true),
 						},
 						"version": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
+							Computed: true,
 							ForceNew: true,
 						},
 					},
@@ -161,7 +159,7 @@ func ResourceGaussDBInstanceV3() *schema.Resource {
 							Required: true,
 						},
 						"keep_days": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Optional: true,
 						},
 					},
@@ -408,13 +406,12 @@ func resourceGaussDBInstanceV3Read(_ context.Context, d *schema.ResourceData, me
 
 	log.Printf("[DEBUG] Retrieved instance %s: %#v", d.Id(), inst)
 
-	// set data store
-	dbList := make([]map[string]interface{}, 1)
-	db := map[string]interface{}{
-		"version": inst.Datastore.Version,
-		"engine":  inst.Datastore.Type,
+	ds := []interface{}{
+		map[string]interface{}{
+			"engine":  inst.Datastore.Type,
+			"version": normalizeVersion(inst.Datastore.Version),
+		},
 	}
-	dbList = append(dbList, db)
 
 	port, err := strconv.Atoi(inst.Port)
 	if err != nil {
@@ -440,7 +437,7 @@ func resourceGaussDBInstanceV3Read(_ context.Context, d *schema.ResourceData, me
 		d.Set("availability_zone_mode", inst.AzMode),
 		d.Set("master_availability_zone", inst.MasterAzCode),
 		d.Set("port", port),
-		d.Set("datastore", dbList),
+		d.Set("datastore", ds),
 		d.Set("alias", inst.Alias),
 		d.Set("charging_mode", inst.ChargeInfo.ChargeMode),
 		d.Set("node_count", inst.NodeCount),
@@ -504,9 +501,7 @@ func resourceGaussDBInstanceV3Read(_ context.Context, d *schema.ResourceData, me
 	backupStrategyList := make([]map[string]interface{}, 1)
 	backupStrategy := map[string]interface{}{
 		"start_time": inst.BackupStrategy.StartTime,
-	}
-	if days, err := strconv.Atoi(inst.BackupStrategy.KeepDays); err == nil {
-		backupStrategy["keep_days"] = days
+		"keep_days":  inst.BackupStrategy.KeepDays,
 	}
 	backupStrategyList[0] = backupStrategy
 	mErr = multierror.Append(d.Set("backup_strategy", backupStrategyList))
@@ -652,8 +647,8 @@ func resourceGaussDBInstanceV3Update(ctx context.Context, d *schema.ResourceData
 		}
 		backupRaw := d.Get("backup_strategy").([]interface{})
 		rawMap := backupRaw[0].(map[string]interface{})
-		keepDays := rawMap["keep_days"].(int)
-		updateOpts.BackupPolicy.KeepDays = keepDays
+		keepDays := rawMap["keep_days"].(string)
+		updateOpts.BackupPolicy.KeepDays, _ = strconv.Atoi(keepDays)
 		updateOpts.BackupPolicy.StartTime = rawMap["start_time"].(string)
 		// Fixed to "1,2,3,4,5,6,7"
 		updateOpts.BackupPolicy.Period = "1,2,3,4,5,6,7"
@@ -718,4 +713,12 @@ func waitForGaussJob(client *golangsdk.ServiceClient, jobId string, timeout int)
 	})
 
 	return false, err
+}
+
+func normalizeVersion(v string) string {
+	parts := strings.Split(v, ".")
+	if len(parts) >= 2 {
+		return fmt.Sprintf("%s.%s", parts[0], parts[1])
+	}
+	return v
 }
