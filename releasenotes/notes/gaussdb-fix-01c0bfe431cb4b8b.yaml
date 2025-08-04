@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[GAUSSDB]** Fix resource parameters setting ``backup_strategy`` and ``datastore`` for ``resource/opentelekomcloud_gaussdb_mysql_instance_v3`` (`#3084 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3084>`_)
