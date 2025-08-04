@@ -112,8 +112,7 @@ The `backup_strategy` block supports:
   HH value must be 1 greater than the hh value. The values of mm and MM must be the same and must be set to 00. Example
   value: 08:00-09:00, 03:00-04:00.
 
-* `keep_days` - (Optional, String
-* ) Specifies the number of days to retain the generated backup files. The value ranges from
+* `keep_days` - (Optional, String) Specifies the number of days to retain the generated backup files. The value ranges from
   0 to 35. If this parameter is set to 0, the automated backup policy is not set. If this parameter is not transferred,
   the automated backup policy is enabled by default. Backup files are stored for seven days by default.
 
