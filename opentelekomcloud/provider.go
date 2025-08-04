@@ -642,6 +642,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_swr_organization_v2":                       swr.ResourceSwrOrganizationV2(),
 			"opentelekomcloud_swr_repository_v2":                         swr.ResourceSwrRepositoryV2(),
 			"opentelekomcloud_tms_tags_v1":                               tms.ResourceTmsTagV1(),
+			"opentelekomcloud_tms_resource_tags_v1":                      tms.ResourceTmsResourceTagsV1(),
 			"opentelekomcloud_vpc_bandwidth_associate_v2":                vpc.ResourceBandwidthAssociateV2(),
 			"opentelekomcloud_vpc_bandwidth_v2":                          vpc.ResourceBandwidthV2(),
 			"opentelekomcloud_vpc_eip_v1":                                vpc.ResourceVpcEIPV1(),
