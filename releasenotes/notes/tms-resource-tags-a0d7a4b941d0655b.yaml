@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[TMS]** New Reource ``opentelekomcloud_tms_resource_tags_v1`` (`#3085 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3085>`_)
