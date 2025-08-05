@@ -8,7 +8,7 @@ description: |-
 ---
 
 Up-to-date reference of API arguments for RMS resource tags you can get at
-[documentation portal](https://docs.otc.t-systems.com/config/api-ref/apis/region_management/index.html)
+[documentation portal](https://docs.otc.t-systems.com/config/api-ref/apis/resource_query/querying_resource_tags.html#rms-04-0106)
 
 
 # opentelekomcloud_rms_resource_tags_v1
@@ -18,7 +18,6 @@ Manages an RMS resource tags data source, used to query all resource tags under 
 ## Example Usage
 
 ```hcl
-
 data "opentelekomcloud_rms_resource_tags_v1" "test" {}
 ```
 

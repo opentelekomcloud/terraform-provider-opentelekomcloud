@@ -18,7 +18,6 @@ Manages an RMS regions data source, used to query regions visible to you, within
 ## Example Usage
 
 ```hcl
-
 data "opentelekomcloud_rms_regions_v1" "test" {}
 ```
 
