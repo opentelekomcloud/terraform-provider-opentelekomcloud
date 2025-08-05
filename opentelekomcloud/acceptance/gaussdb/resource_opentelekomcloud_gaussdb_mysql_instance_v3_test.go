@@ -76,6 +76,14 @@ resource "opentelekomcloud_gaussdb_mysql_instance_v3" "instance" {
   availability_zone_mode   = "multi"
   master_availability_zone = "eu-de-01"
   read_replicas            = 1
+  datastore {
+    engine  = "gaussdb-mysql"
+    version = "8.0"
+  }
+  backup_strategy {
+    start_time = "03:00-04:00"
+    keep_days  = 7
+  }
 }
 `, common.DataSourceSubnet, common.DataSourceSecGroupDefault, postfix)
 }
@@ -94,6 +102,14 @@ resource "opentelekomcloud_gaussdb_mysql_instance_v3" "instance" {
   availability_zone_mode   = "multi"
   master_availability_zone = "eu-de-01"
   read_replicas            = 1
+  datastore {
+    engine  = "gaussdb-mysql"
+    version = "8.0"
+  }
+  backup_strategy {
+    start_time = "03:00-04:00"
+    keep_days  = 8
+  }
 }
 `, common.DataSourceSubnet, common.DataSourceSecGroupDefault, postfix)
 }
