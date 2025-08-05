@@ -8,6 +8,7 @@ import (
 )
 
 func TestAccDataSourceRmsResourceRelationships_basic(t *testing.T) {
+	t.Skip("You are not authorized with rms:resources:list impossible to run within CI.")
 	dataSource := "data.opentelekomcloud_rms_resource_relationships_v1.relations_1"
 	dc := common.InitDataSourceCheck(dataSource)
 
