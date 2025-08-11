@@ -154,9 +154,11 @@ The following arguments are supported:
   * `hive_script_path` - (Optional, String, ForceNew) SQL program path. This parameter is needed by Spark Script and Hive Script jobs only and must meet the following requirements: Contains a maximum of `1023` characters, excluding special characters such as `;|&><'$`. The address cannot be empty or full of spaces. Starts with `/` or `s3a://`. Ends with `.sql`. `sql` is case-insensitive.
 
 * `bootstrap_scripts` - (Optional, List, ForceNew) Bootstrap action scripts. For details, see bootstrap_scripts block below.
-  * `name` - (Required, String, ForceNew) Name of a bootstrap action script.
+  * `name` - (Required, String, ForceNew) Name of a bootstrap action script. It must be unique in a cluster. The value can contain only digits, letters, spaces, hyphens (-), and underscores (_) and cannot start with a space.The value can contain `1` to `64` characters.
   
-  * `uri` - (Required, String, ForceNew) Path of the shell script. Set this parameter to an OBS bucket path or a local VM path.
+  * `uri` - (Required, String, ForceNew) Path of a bootstrap action script. Set this parameter to an OBS bucket path or a local VM path.
+    **OBS bucket path**: Enter a script path manually. For example, enter the path of the public sample script provided by MRS. Example: s3a://bootstrap/presto/presto-install.sh. If dualroles is installed, the parameter of the presto-install.sh script is dualroles. If worker is installed, the parameter of the presto-install.sh script is worker. Based on the Presto usage habit, you are advised to install dualroles on the active Master nodes and worker on the Core nodes.
+    **Local VM path**: Enter a script path. The script path must start with a slash (/) and end with .sh.
   
   * `parameters` - (Optional, String, ForceNew) Bootstrap action script parameters.
   
@@ -164,9 +166,12 @@ The following arguments are supported:
   
   * `active_master` - (Optional, Boolean, ForceNew) Whether the bootstrap action script runs only on active Master nodes.
   
-  * `before_component_start` - (Optional, Boolean, ForceNew) Time when the bootstrap action script is executed. Currently, the script can be executed before and after the component is started.
+  * `before_component_start` - (Optional, Boolean, ForceNew) Time when the bootstrap action script is executed. Currently, the script can be executed before and after the component is started. The default value is `false`, indicating that the bootstrap action script is executed after the component is started.
   
   * `fail_action` - (Required, String, ForceNew) Whether to continue to execute subsequent scripts and create a cluster after the bootstrap action script fails to be executed. `continue`: Continue to execute subsequent scripts. `errorout`: Stop the action.
+
+  -> **NOTE:**
+  Please refer to [user guide](https://docs.otc.t-systems.com/mapreduce-service/umn/managing_clusters/bootstrap_actions/index.html) for configuring bootstrap actions.
 
 * `tags` - (Optional, Map) Tags key/value pairs to associate with the cluster.
 
