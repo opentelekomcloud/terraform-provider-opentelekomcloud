@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[MRS]** Remove validation check in ``cluster_version`` field and fix docs in ``resource/opentelekomcloud_mrs_cluster_v1`` (`#3089 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3089>`_)
