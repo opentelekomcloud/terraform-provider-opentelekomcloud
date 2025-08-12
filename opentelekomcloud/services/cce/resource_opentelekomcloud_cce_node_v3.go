@@ -603,16 +603,7 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	node, err := nodes.Create(client, clusterID, createOpts)
-	switch err.(type) {
-	case golangsdk.ErrDefault403:
-		retryNode, err := recursiveCreate(ctx, client, createOpts, clusterID)
-		if err == "fail" {
-			return fmterr.Errorf("error creating OpenTelekomCloud Node")
-		}
-		node = retryNode
-	case nil:
-		break
-	default:
+	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud Node: %s", err)
 	}
 
@@ -1166,28 +1157,6 @@ func waitForClusterAvailable(cceClient *golangsdk.ServiceClient, clusterId strin
 
 		return n, n.Status.Phase, nil
 	}
-}
-
-func recursiveCreate(ctx context.Context, client *golangsdk.ServiceClient, opts nodes.CreateOpts, clusterID string) (*nodes.Nodes, string) {
-	stateCluster := &resource.StateChangeConf{
-		Target:     []string{"Available"},
-		Refresh:    waitForClusterAvailable(client, clusterID),
-		Timeout:    15 * time.Minute,
-		Delay:      15 * time.Second,
-		MinTimeout: 3 * time.Second,
-	}
-	_, stateErr := stateCluster.WaitForStateContext(ctx)
-	if stateErr != nil {
-		log.Printf("[INFO] Cluster Unavailable %s.\n", stateErr)
-	}
-	node, err := nodes.Create(client, clusterID, opts)
-	if err != nil {
-		if _, ok := err.(golangsdk.ErrDefault403); ok {
-			return recursiveCreate(ctx, client, opts, clusterID)
-		}
-		return node, "fail"
-	}
-	return node, "success"
 }
 
 func resourceNodeImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {

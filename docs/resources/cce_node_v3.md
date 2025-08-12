@@ -36,12 +36,12 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
   data_volumes {
     size       = 100

@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Remove redundant error switch for ``resource/opentelekomcloud_cce_node_v3`` (`#3091 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3091>`_)
