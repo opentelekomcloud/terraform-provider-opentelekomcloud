@@ -81,5 +81,4 @@ func dataSourceTmsQuotasV1Read(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf("Error setting TMS tag quotas: %s", err)
 	}
 	return nil
-
 }
