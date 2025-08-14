@@ -92,6 +92,8 @@ All above argument parameters can be exported as attribute parameters along with
 * `maintain_end` - End time of the maintenance time window. It must be in the format "xx:00:00".
   There is a 4-hour difference between the start time and end time.
 
+* `default_group_id` - The ID of `DEFAULT` group.
+
 * `vpc_ingress_address` - VPC ingress address.
 
 * `public_egress_address` - IP address for public outbound access.

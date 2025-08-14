@@ -48,6 +48,7 @@ func TestAccAPIGWv2Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceGwName, "spec_id", "BASIC"),
 					resource.TestCheckResourceAttr(resourceGwName, "description", "test gateway"),
 					resource.TestCheckResourceAttr(resourceGwName, "maintain_begin", "22:00:00"),
+					resource.TestCheckResourceAttrSet(resourceGwName, "default_group_id"),
 				),
 			},
 			{

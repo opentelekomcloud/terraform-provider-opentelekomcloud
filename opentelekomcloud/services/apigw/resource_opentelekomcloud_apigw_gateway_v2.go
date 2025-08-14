@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/apigw/v2/gateway"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/apigw/v2/group"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -164,6 +165,10 @@ func ResourceAPIGWv2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"default_group_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"private_egress_addresses": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -290,6 +295,15 @@ func resourceGatewayRead(_ context.Context, d *schema.ResourceData, meta interfa
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, fmt.Sprintf("error getting instance (%s) details form server", instanceId))
 	}
+
+	groups, err := group.List(client, group.ListOpts{
+		GatewayID: instanceId,
+		Name:      "DEFAULT",
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	log.Printf("[DEBUG] Retrieved the dedicated instance (%s): %#v", instanceId, resp)
 
 	mErr := multierror.Append(nil,
@@ -323,6 +337,11 @@ func resourceGatewayRead(_ context.Context, d *schema.ResourceData, meta interfa
 	if len(resp.NodeIps.Shubao) > 0 {
 		mErr = multierror.Append(mErr, d.Set("private_egress_addresses", resp.NodeIps.Shubao))
 	}
+
+	if len(groups) > 0 {
+		mErr = multierror.Append(mErr, d.Set("default_group_id", groups[0].ID))
+	}
+
 	if mErr.ErrorOrNil() != nil {
 		return diag.Errorf("error saving resource fields of the dedicated instance: %s", mErr)
 	}
