@@ -636,3 +636,11 @@ func StringSliceIgnoreEmpty(e string) []string {
 	}
 	return nil
 }
+
+// Convert String Pointer to string
+func StringPtrToString(p *string) string {
+	if p == nil {
+		return ""
+	}
+	return *p
+}
