@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccTmsResourceInstancesDS_basic(t *testing.T) {
-	dataSourceName := "data.opentelekomcloud_tms_resource_instances_v1.tags.ds_1"
+	dataSourceName := "data.opentelekomcloud_tms_resource_instances_v1.ds_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -76,7 +76,7 @@ resource "opentelekomcloud_tms_resource_tags_v1" "tags_1" {
   }
 }
 
-data "opentelekomcloud_tms_resource_instances_v1" "tags_ds_1" {
+data "opentelekomcloud_tms_resource_instances_v1" "ds_1" {
   depends_on     = ["opentelekomcloud_tms_resource_tags_v1.tags_1"]
   resource_types = ["disk", "ecs"]
   tags {

@@ -60,11 +60,11 @@ func DataSourceTmsResourceInstancesV1() *schema.Resource {
 							Computed: true,
 						},
 						"project_name": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"resource_id": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"resource_name": {
