@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/catalog"
@@ -276,4 +277,8 @@ func GenerateRootCA(privateKeyPEM string) (string, error) {
 	}
 
 	return out.String(), nil
+}
+
+func RandomAccResourceName() string {
+	return fmt.Sprintf("tf_test_%s", acctest.RandString(5))
 }

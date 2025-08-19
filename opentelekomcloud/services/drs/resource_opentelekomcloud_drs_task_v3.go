@@ -182,6 +182,11 @@ func ResourceDrsTaskV3() *schema.Resource {
 				Default:  false,
 			},
 
+			"action": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -202,13 +207,29 @@ func ResourceDrsTaskV3() *schema.Resource {
 				Computed: true,
 			},
 
+			"vpc_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"private_ip": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"subnet_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"security_group_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 	}
@@ -255,6 +276,13 @@ func dbInfoSchemaResource() *schema.Resource {
 			},
 
 			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+
+			"vpc_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -360,7 +388,7 @@ func resourceDrsJobCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			tmp := v.(map[string]interface{})
 			speedLimits[i] = public.SpeedLimitInfo{
 				Speed: tmp["speed"].(string),
-				Begin: tmp["begin_time"].(string),
+				Begin: tmp["start_time"].(string),
 				End:   tmp["end_time"].(string),
 			}
 		}
@@ -383,6 +411,12 @@ func resourceDrsJobCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.FromErr(err)
 	}
 
+	startTime := d.Get("start_time").(string)
+	startMode := "start"
+	if startTime != "" && startTime != "0" {
+		startMode = "start_later"
+	}
+
 	startReq := public.BatchStartJobOpts{
 		Jobs: []public.StartInfo{
 			{
@@ -397,7 +431,7 @@ func resourceDrsJobCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf("start DRS job failed,error: %s", err)
 	}
 
-	err = waitingforJobStatus(ctx, client, jobId, "start", d.Timeout(schema.TimeoutCreate))
+	err = waitingforJobStatus(ctx, client, jobId, startMode, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -434,8 +468,11 @@ func resourceDrsJobRead(_ context.Context, d *schema.ResourceData, meta interfac
 		d.Set("description", detail.Description),
 		d.Set("multi_write", detail.MultiWrite),
 		d.Set("created_at", detail.CreateTime),
+		d.Set("vpc_id", detail.VpcId),
 		d.Set("status", detail.Status),
 		d.Set("node_num", nodeNum),
+		d.Set("subnet_id", detail.SubnetId),
+		d.Set("security_group_id", detail.SecurityGroupId),
 		setDbInfoToState(d, detail.SourceEndpoint, "source_db"),
 		setDbInfoToState(d, detail.TargetEndpoint, "destination_db"),
 	)
@@ -466,19 +503,66 @@ func resourceDrsJobUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		return nil
 	}
 
-	updateParams := public.BatchModifyJobOpts{
-		Jobs: []public.ModifyJobReq{
-			{
-				JobId:       d.Id(),
-				Name:        d.Get("name").(string),
-				Description: d.Get("description").(string),
+	if d.HasChanges("name", "description") {
+		updateParams := public.BatchModifyJobOpts{
+			Jobs: []public.ModifyJobReq{
+				{
+					JobId:       d.Id(),
+					Name:        d.Get("name").(string),
+					Description: d.Get("description").(string),
+				},
 			},
-		},
+		}
+
+		_, err = public.BatchUpdateTask(client, updateParams)
+		if err != nil {
+			return fmterr.Errorf("Update job=%s failed,error: %s", d.Id(), err)
+		}
 	}
 
-	_, err = public.BatchUpdateTask(client, updateParams)
-	if err != nil {
-		return fmterr.Errorf("Update job=%s failed,error: %s", d.Id(), err)
+	if d.HasChange("action") {
+		if action, ok := d.GetOk("action"); ok &&
+			common.StrSliceContains([]string{"start"}, action.(string)) {
+			resp, err := public.BatchListTaskStatus(client, public.BatchQueryTaskOpts{Jobs: []string{d.Id()}})
+			if err != nil {
+				return diag.Errorf("Error retrieving job status: %s", err)
+			}
+			if resp.Count == 0 || resp.Results[0].ErrorCode != "" {
+				return diag.Errorf("Error retrieving job status, %s: %s", resp.Results[0].ErrorCode, resp.Results[0].ErrorMessage)
+			}
+
+			err = preCheckStatus(action.(string), resp.Results[0].Status)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+
+			err = executeJobAction(client, action.(string), d.Id())
+			if err != nil {
+				return diag.FromErr(err)
+			}
+
+			err = waitingforJobStatus(ctx, client, d.Id(), action.(string), d.Timeout(schema.TimeoutUpdate))
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
+
+	if d.HasChange("start_time") {
+		if v := d.Get("start_time").(string); v != "0" && v != "" {
+			startReq := public.BatchStartJobOpts{
+				Jobs: []public.StartInfo{
+					{
+						JobId:     d.Id(),
+						StartTime: v,
+					},
+				},
+			}
+			_, err = public.BatchStartTasks(client, startReq)
+			if err != nil {
+				return diag.Errorf("Error updating start time: %s", err)
+			}
+		}
 	}
 
 	return resourceDrsJobRead(ctx, d, meta)
@@ -554,6 +638,9 @@ func waitingforJobStatus(ctx context.Context, client *golangsdk.ServiceClient, i
 	case "start":
 		pending = []string{"STARTJOBING", "WAITING_FOR_START"}
 		target = []string{"FULL_TRANSFER_STARTED", "FULL_TRANSFER_COMPLETE", "INCRE_TRANSFER_STARTED"}
+	case "start_later":
+		pending = []string{"CONFIGURATION"}
+		target = []string{"WAITING_FOR_START"}
 	case "terminate":
 		pending = []string{"RELEASE_RESOURCE_STARTED"}
 		target = []string{"RELEASE_RESOURCE_COMPLETE"}
@@ -652,6 +739,7 @@ func buildDbConfigParameter(d *schema.ResourceData, dbType, projectId string) (*
 		DbPassword:      configRaw["password"].(string),
 		DbPort:          configRaw["port"].(int),
 		Region:          configRaw["region"].(string),
+		VpcId:           configRaw["vpc_id"].(string),
 		SubnetId:        configRaw["subnet_id"].(string),
 		ProjectId:       projectId,
 		SslCertPassword: configRaw["ssl_cert_password"].(string),
@@ -679,17 +767,17 @@ func parseDrsJobErrorToError404(respErr error) error {
 
 func setDbInfoToState(d *schema.ResourceData, endpoint public.Endpoint, fieldName string) error {
 	result := make([]interface{}, 1)
-	configRaw := d.Get(fieldName).([]interface{})[0].(map[string]interface{})
 	item := map[string]interface{}{
 		"engine_type":        endpoint.DbType,
-		"ip":                 configRaw["ip"].(string),
+		"ip":                 d.Get(fieldName + ".0.ip"),
 		"private_ip":         endpoint.Ip,
 		"port":               endpoint.DbPort,
 		"user":               endpoint.DbUser,
-		"password":           configRaw["password"].(string),
+		"password":           endpoint.DbPassword,
 		"instance_id":        endpoint.InstId,
 		"name":               endpoint.InstName,
 		"region":             endpoint.Region,
+		"vpc_id":             endpoint.VpcId,
 		"subnet_id":          endpoint.SubnetId,
 		"ssl_cert_password":  endpoint.SslCertPassword,
 		"ssl_cert_check_sum": endpoint.SslCertCheckSum,
@@ -825,4 +913,27 @@ func preCheck(ctx context.Context, client *golangsdk.ServiceClient, jobId string
 		return fmt.Errorf("error waiting for DRS job (%s) to be terminate: %s", jobId, err)
 	}
 	return nil
+}
+
+func preCheckStatus(action, status string) error {
+	if action == "start" && status != "WAITING_FOR_START" {
+		return fmt.Errorf("error starting job for status(%s)", status)
+	}
+
+	return nil
+}
+
+func executeJobAction(client *golangsdk.ServiceClient, action, jobId string) error {
+	if action == "start" {
+		startReq := public.BatchStartJobOpts{
+			Jobs: []public.StartInfo{
+				{
+					JobId: jobId,
+				},
+			},
+		}
+		_, err := public.BatchStartTasks(client, startReq)
+		return err
+	}
+	return fmt.Errorf("unsupported action: %s", action)
 }
