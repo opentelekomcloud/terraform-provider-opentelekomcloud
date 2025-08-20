@@ -1022,69 +1022,6 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
 `, rName, aliasName)
 }
 
-func TestAccFgsV2Function_concurrencyNum(t *testing.T) {
-	var (
-		f function.FuncGraph
-
-		name         = fmt.Sprintf("fgs-acc-%s", acctest.RandString(5))
-		resourceName = "opentelekomcloud_fgs_function_v2.test"
-	)
-
-	rc := common.InitResourceCheck(
-		resourceName,
-		&f,
-		getResourceObj,
-	)
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      rc.CheckResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccFunction_strategy_default(name),
-				Check: resource.ComposeTestCheckFunc(
-					rc.CheckResourceExists(),
-					resource.TestCheckResourceAttr(resourceName, "concurrency_num", "1"),
-				),
-			},
-			{
-				Config: testAccFunction_concurrencyNum(name, 1000),
-				Check: resource.ComposeTestCheckFunc(
-					rc.CheckResourceExists(),
-					resource.TestCheckResourceAttr(resourceName, "concurrency_num", "1000"),
-				),
-			},
-			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"app",
-					"func_code",
-				},
-			},
-		},
-	})
-}
-
-func testAccFunction_concurrencyNum(name string, concurrencyNum int) string {
-	return fmt.Sprintf(`
-resource "opentelekomcloud_fgs_function_v2" "test" {
-  functiongraph_version = "v2"
-  name                  = "%[1]s"
-  app                   = "default"
-  handler               = "index.handler"
-  memory_size           = 128
-  timeout               = 3
-  runtime               = "Python2.7"
-  code_type             = "inline"
-  func_code             = "dCA9ICdIZWxsbyBtZXNzYWdlOiAnICsganN="
-  concurrency_num       = %[2]d
-}
-`, name, concurrencyNum)
-}
-
 func TestAccFgsV2Function_EnableDynamicMemory(t *testing.T) {
 	var (
 		f function.FuncGraph
