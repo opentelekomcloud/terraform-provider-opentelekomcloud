@@ -335,11 +335,6 @@ func ResourceFgsFunctionV2() *schema.Resource {
 					},
 				},
 			},
-			"concurrency_num": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-			},
 			"gpu_memory": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -586,7 +581,7 @@ func resourceFgsFunctionV2Create(ctx context.Context, d *schema.ResourceData, me
 	d.SetId(f.FuncURN)
 	urn := resourceFgsFunctionUrn(d.Id())
 	if d.HasChanges("vpc_id", "network_id", "peering_cidr", "func_mounts", "app_agency", "initializer_handler",
-		"initializer_timeout", "concurrency_num", "enable_class_isolation") {
+		"initializer_timeout", "enable_class_isolation") {
 		err := resourceFgsFunctionMetadataUpdate(fgsClient, urn, d)
 		if err != nil {
 			return diag.FromErr(err)
@@ -857,10 +852,6 @@ func getReservedInstanceConfig(c *golangsdk.ServiceClient, d *schema.ResourceDat
 	return result, nil
 }
 
-func getConcurrencyNum(concurrencyNum *int) int {
-	return *concurrencyNum
-}
-
 func resourceFgsFunctionV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	fgsClient, err := common.ClientFromCtx(ctx, fgsClientV2, func() (*golangsdk.ServiceClient, error) {
@@ -914,7 +905,6 @@ func resourceFgsFunctionV2Read(ctx context.Context, d *schema.ResourceData, meta
 		setFgsFunctionApp(d, f.Package),
 		setFgsFunctionVpcAccess(d, f.FuncVpc),
 		setFunctionMountConfig(d, f.MountConfig),
-		d.Set("concurrency_num", getConcurrencyNum(pointerto.Int(f.StrategyConfig.ConcurrentNum))),
 		d.Set("versions", versionConfig),
 		d.Set("gpu_memory", f.GpuMemory),
 		d.Set("enable_dynamic_memory", f.EnableDynamicMemory),
@@ -1177,7 +1167,7 @@ func resourceFgsFunctionV2Update(ctx context.Context, d *schema.ResourceData, me
 	if d.HasChanges("app", "handler", "memory_size", "timeout", "encrypted_user_data",
 		"user_data", "agency", "app_agency", "description", "initializer_handler", "initializer_timeout",
 		"vpc_id", "network_controller", "network_id", "mount_user_id", "mount_user_group_id", "func_mounts", "custom_image",
-		"log_group_id", "log_topic_id", "log_group_name", "log_topic_name", "concurrency_num", "gpu_memory", "gpu_type",
+		"log_group_id", "log_topic_id", "log_group_name", "log_topic_name", "gpu_memory", "gpu_type",
 		"pre_stop_handler", "pre_stop_timeout", "enable_dynamic_memory") {
 		err := resourceFgsFunctionMetadataUpdate(fgsClient, urn, d)
 		if err != nil {
@@ -1296,17 +1286,6 @@ func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn s
 	}
 
 	updateMetadateOpts.NetworkController = buildNetworkControlConfig(d)
-
-	if v, ok := d.GetOk("concurrency_num"); ok {
-		strategyConfig := function.StrategyConfig{
-			ConcurrentNum: v.(int),
-		}
-		if v, ok := d.GetOk("max_instance_num"); ok && v.(string) != "" {
-			maxInstanceNum, _ := strconv.Atoi(v.(string))
-			strategyConfig.Concurrency = maxInstanceNum
-		}
-		updateMetadateOpts.StrategyConfig = &strategyConfig
-	}
 
 	log.Printf("[DEBUG] Metaddata Update Options: %#v", updateMetadateOpts)
 	updateMetadateOpts.FuncUrn = urn
