@@ -16,44 +16,97 @@ Manages DRS task resource within OpenTelekomCloud.
 
 ## Example Usage
 
-### Create a DRS task to migrate data to the OpenTelekomCloud RDS database
+### Create a DRS task to migrate data using EIP (up direction)
 
 ```hcl
-resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
-resource "opentelekomcloud_networking_floatingip_v2" "fip_2" {}
+resource "opentelekomcloud_rds_instance_v3" "source" {}
+resource "opentelekomcloud_rds_instance_v3" "destination" {}
 
-resource "opentelekomcloud_rds_instance_v3" "mysql_1" {}
-
-resource "opentelekomcloud_rds_instance_v3" "mysql_2" {}
-
-resource "opentelekomcloud_drs_task_v3" "test" {
-  name           = "test-drs-task"
+resource "opentelekomcloud_drs_task_v3" "migration_down" {
+  name           = "mysql-migration-up"
   type           = "migration"
   engine_type    = "mysql"
-  direction      = "down"
+  direction      = "up"
   net_type       = "eip"
-  migration_type = "FULL_TRANS"
-  description    = "TEST"
-  force_destroy  = "true"
+  migration_type = "FULL_INCR_TRANS"
+  description    = "mysql-migration-up"
+  force_destroy  = true
 
   source_db {
     engine_type = "mysql"
-    ip          = opentelekomcloud_networking_floatingip_v2.fip_1.address
-    port        = "3306"
+    ip          = opentelekomcloud_rds_instance_v3.source.public_ips[0]
+    port        = 3306
     user        = "root"
-    password    = "MySql_120521"
-    instance_id = opentelekomcloud_rds_instance_v3.mysql_1.id
-    subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+    password    = "MySql_password123"
+  }
+
+  destination_db {
+    ip          = opentelekomcloud_rds_instance_v3.destination.public_ips[0]
+    port        = 3306
+    engine_type = "mysql"
+    user        = "root"
+    password    = "MySql_password123"
+    instance_id = opentelekomcloud_rds_instance_v3.destination.id
+    subnet_id   = opentelekomcloud_rds_instance_v3.destination.subnet_id
+  }
+
+  tags = {
+    key = "mysql-migration-up"
+  }
+
+  action     = "start"
+  start_time = "1640995200000"
+
+  lifecycle {
+    ignore_changes = [
+      source_db.0.password, destination_db.0.password, force_destroy,
+    ]
+  }
+}
+```
+
+### Create a DRS task to migrate data using VPC (down direction)
+
+```hcl
+resource "opentelekomcloud_rds_instance_v3" "source" {}
+resource "opentelekomcloud_rds_instance_v3" "destination" {}
+
+resource "opentelekomcloud_drs_task_v3" "migration_down" {
+  name          = "mysql-migration-down"
+  type          = "migration"
+  engine_type   = "mysql"
+  direction     = "down"
+  net_type      = "vpc"
+  force_destroy = true
+
+  source_db {
+    engine_type = "mysql"
+    ip          = opentelekomcloud_rds_instance_v3.source.private_ips[0]
+    port        = 3306
+    user        = "root"
+    password    = "MySql_password123"
+    instance_id = opentelekomcloud_rds_instance_v3.source.id
+    subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
   destination_db {
     engine_type = "mysql"
-    ip          = opentelekomcloud_networking_floatingip_v2.fip_2.address
+    ip          = opentelekomcloud_rds_instance_v3.destination.private_ips[0]
     port        = 3306
     user        = "root"
-    password    = "MySql_120521"
-    instance_id = opentelekomcloud_rds_instance_v3.mysql_2.id
-    subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+    password    = "MySql_password123"
+    subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+    vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  }
+
+  destination_db_readonly = false
+
+  lifecycle {
+    ignore_changes = [
+      source_db.0.password,
+      destination_db.0.password,
+      force_destroy,
+    ]
   }
 }
 ```
@@ -149,6 +202,11 @@ The default value is `FULL_INCR_TRANS`.
 * `force_destroy` - (Optional, Bool) Specifies whether to forcibly destroy the job even if it is running.
   The default value is `false`.
 
+* `action` - (Optional, String) Specifies the action of job. The options are as follows:
+    + **start**: Start the job. Available when job status is **WAITING_FOR_START**.
+
+  -> It will only take effect when **updating** a job.
+
 The `db_info` block supports:
 
 * `engine_type` - (Required, String, ForceNew) Specifies the engine type of database. Changing this parameter will
@@ -167,8 +225,14 @@ The `db_info` block supports:
 * `instance_id` - (Optional, String, ForceNew) Specifies the instance id of database when it is a RDS database.
   Changing this parameter will create a new resource.
 
+* `vpc_id` - (Optional, String, ForceNew) Specifies vpc ID of database.
+  Changing this parameter will create a new resource.
+
 * `subnet_id` - (Optional, String, ForceNew) Specifies subnet ID of database when it is a RDS database.
-  It is mandatory when `direction` is `down`. Changing this parameter will create a new resource.
+  It is mandatory when `direction` is **down**. Changing this parameter will create a new resource.
+
+  -> When `net_type` is **vpc**, if `direction` is **up**, `source_db.vpc_id` and `source_db.subnet_id` is mandatory, if
+  `direction` is **down**, `destination_db.vpc_id` and `destination_db.subnet_id` is mandatory.
 
 * `region` - (Optional, String, ForceNew) Specifies the region which the database belongs when it is a RDS database.
   Changing this parameter will create a new resource.
@@ -219,6 +283,12 @@ In addition to all arguments above, the following attributes are exported:
 
 * `region` - The region in which to create the resource.
 
+* `vpc_id` - The VPC ID to which the DRS instance belongs.
+
+* `subnet_id` - The subnet ID to which the DRS instance belongs.
+
+* `security_group_id` - The security group ID to which the DRS instance belongs.
+
 ## Timeouts
 
 This resource provides the following timeouts configuration options:
@@ -236,10 +306,11 @@ terraform import opentelekomcloud_drs_task_v3.test b11b407c-e604-4e8d-8bc4-92398
 ```
 
 Note that the imported state may not be identical to your resource definition, due to some attributes missing from the
-API response, security or some other reason. The missing attributes include: `tags`, `force_destroy`,
-`source_db.0.password` and `destination_db.0.password`.It is generally recommended running
-`terraform plan` after importing a job. You can then decide if changes should be applied to the job, or the resource
-definition should be updated to align with the job. Also you can ignore changes as below.
+API response, security or some other reason. The missing attributes include: `source_db.0.password`, `destination_db.0.password`,
+`expired_days`, `migrate_definer`, `force_destroy`, `status`, `auto_renew`, `updated_at`, `policy_config`,
+`source_db.0.ip`, `destination_db.0.ip`, `engine_type`, `tags`, `status`, `net_type`, `start_time`, `action`.
+It is generally recommended running `terraform plan` after importing a job. You can then decide if changes should be
+applied to the job, or the resource definition should be updated to align with the job. Also you can ignore changes as below.
 
 ```
 resource "opentelekomcloud_drs_job" "test" {
@@ -247,7 +318,7 @@ resource "opentelekomcloud_drs_job" "test" {
 
   lifecycle {
     ignore_changes = [
-      source_db.0.password,destination_db.0.password
+      source_db.0.password,destination_db.0.password,
     ]
   }
 }
