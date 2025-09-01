@@ -64,6 +64,7 @@ func ResourcePrivateNatGatewayV3() *schema.Resource {
 							Type:     schema.TypeString,
 							ForceNew: true,
 							Optional: true,
+							Computed: true,
 						},
 						"vpc_id": {
 							Type:     schema.TypeString,
@@ -84,6 +85,7 @@ func ResourcePrivateNatGatewayV3() *schema.Resource {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Optional: true,
+				Computed: true,
 			},
 			"id": {
 				Type:     schema.TypeString,
@@ -166,7 +168,7 @@ func resourcePrivateNatGatewayV3Read(ctx context.Context, d *schema.ResourceData
 		d.Set("name", natGateway.Name),
 		d.Set("description", natGateway.Description),
 		d.Set("spec", natGateway.Spec),
-		d.Set("tags", setDownlinkVpcs(natGateway.DownlinkVpcs)),
+		d.Set("downlink_vpcs", setDownlinkVpcs(natGateway.DownlinkVpcs)),
 		d.Set("tags", setGatewayTags(natGateway.Tags)),
 		d.Set("enterprise_project_id", natGateway.EnterpriseProjectID),
 		d.Set("project_id", natGateway.ProjectId),
