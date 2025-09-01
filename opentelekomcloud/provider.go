@@ -45,6 +45,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/mrs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/nat"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/obs"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/privatenat"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/rds"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/rms"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/rts"
@@ -617,6 +618,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_obs_bucket_object_acl":                     obs.ResourceOBSBucketObjectAcl(),
 			"opentelekomcloud_obs_bucket_policy":                         obs.ResourceObsBucketPolicy(),
 			"opentelekomcloud_obs_bucket_replication":                    obs.ResourceObsBucketReplication(),
+			"opentelekomcloud_private_nat_gateway_v3":                    privatenat.ResourcePrivateNatGatewayV3(),
 			"opentelekomcloud_rds_backup_v3":                             rds.ResourceRdsBackupV3(),
 			"opentelekomcloud_rds_public_ip_associate_v3":                rds.ResourceRdsPublicIpAssociateV3(),
 			"opentelekomcloud_rds_instance_v1":                           rds.ResourceRdsInstance(),

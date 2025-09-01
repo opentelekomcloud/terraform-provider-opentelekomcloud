@@ -853,6 +853,13 @@ func (c *Config) NatV2Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) NatV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewNatV3(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) OrchestrationV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewOrchestrationV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
