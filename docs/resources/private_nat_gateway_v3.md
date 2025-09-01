@@ -1,5 +1,5 @@
 ---
-subcategory: "NAT"
+subcategory: "Private NAT"
 layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_private_nat_gateway_v3"
 sidebar_current: "docs-opentelekomcloud-resource-private-nat-gateway-v3"
