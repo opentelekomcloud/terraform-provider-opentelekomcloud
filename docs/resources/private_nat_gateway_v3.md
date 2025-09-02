@@ -10,7 +10,7 @@ description: |-
 Up-to-date reference of API arguments for Private NAT gateway you can get at
 [documentation portal](https://docs.otc.t-systems.com/nat-gateway/api-ref/apis_for_private_nat_gateways_v3.0/private_nat_gateways/index.html)
 
-# opentelekomcloud_nat_gateway_v2
+# opentelekomcloud_private_nat_gateway_v3
 
 Manages a V3 Private NAT Gateway resource within OpenTelekomCloud.
 
