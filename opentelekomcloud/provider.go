@@ -385,6 +385,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_smn_topic_subscription_v2":          smn.DataSourceSmnTopicSubscriptionV2(),
 			"opentelekomcloud_tms_quotas_v1":                      tms.DataSourceTmsQuotasV1(),
 			"opentelekomcloud_tms_resource_instances_v1":          tms.DataSourceTmsResourceInstancesV1(),
+			"opentelekomcloud_tms_resource_types_v1":              tms.DataSourceResourceTypesV1(),
 			"opentelekomcloud_tms_tags_v1":                        tms.DataSourceTmsTagV1(),
 			"opentelekomcloud_vpc_eip_v1":                         vpc.DataSourceVPCEipV1(),
 			"opentelekomcloud_vpc_v1":                             vpc.DataSourceVirtualPrivateCloudVpcV1(),

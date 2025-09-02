@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[TMS]** New Data Source ``opentelekomcloud_tms_resource_types_v1`` (`#3107 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3107>`_)
