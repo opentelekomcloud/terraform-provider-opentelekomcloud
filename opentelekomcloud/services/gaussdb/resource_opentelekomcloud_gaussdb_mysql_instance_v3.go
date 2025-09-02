@@ -34,6 +34,8 @@ func ResourceGaussDBInstanceV3() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
+		DeprecationMessage: "The `opentelekomcloud_gaussdb_mysql_instance_v3` resource is deprecated. Starting from release 1.36.47, use taurusdb instead.",
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(60 * time.Minute),
 			Update: schema.DefaultTimeout(60 * time.Minute),
