@@ -15,7 +15,7 @@ Up-to-date reference of API arguments for GaussDB for MySql you can get at
 GaussDB MySql instance management within OpenTelekomCloud.
 
 ~>
-Deprecated, use `opentelekomcloud_taurusdb_mysql_instance_v3.go` resource instead.
+Deprecated, use `opentelekomcloud_taurusdb_mysql_instance_v3` resource instead.
 
 ## Example Usage
 
