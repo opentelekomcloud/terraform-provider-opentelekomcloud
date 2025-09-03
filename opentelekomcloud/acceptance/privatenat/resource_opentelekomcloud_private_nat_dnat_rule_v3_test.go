@@ -75,8 +75,8 @@ func testAccPrivateNatDnatRuleV3Basic(transitIpId, networkInterfaceId string) st
 %s
 
 resource "opentelekomcloud_private_nat_gateway_v3" "gateway_1" {
-  name        = "test-acc-nat-gateway"
-  spec        = "Small"
+  name = "test-acc-nat-gateway"
+  spec = "Small"
 
   downlink_vpcs {
     virsubnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -84,10 +84,10 @@ resource "opentelekomcloud_private_nat_gateway_v3" "gateway_1" {
 }
 
 resource "opentelekomcloud_private_nat_dnat_rule_v3" "rule_1" {
-  description = "created"
-  transit_ip_id = "%s"
+  description          = "created"
+  transit_ip_id        = "%s"
   network_interface_id = "%s"
-  gateway_id = opentelekomcloud_private_nat_gateway_v3.gateway_1.id
+  gateway_id           = opentelekomcloud_private_nat_gateway_v3.gateway_1.id
 }
 `, common.DataSourceSubnet, transitIpId, networkInterfaceId)
 }
@@ -97,8 +97,8 @@ func testAccPrivateNatDnatRuleV3Update(transitIpId, networkInterfaceId string) s
 %s
 
 resource "opentelekomcloud_private_nat_gateway_v3" "gateway_1" {
-  name        = "test-acc-nat-gateway"
-  spec        = "Small"
+  name = "test-acc-nat-gateway"
+  spec = "Small"
 
   downlink_vpcs {
     virsubnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -106,10 +106,10 @@ resource "opentelekomcloud_private_nat_gateway_v3" "gateway_1" {
 }
 
 resource "opentelekomcloud_private_nat_dnat_rule_v3" "rule_1" {
-  description = "updated"
-  transit_ip_id = "%s"
+  description          = "updated"
+  transit_ip_id        = "%s"
   network_interface_id = "%s"
-  gateway_id = opentelekomcloud_private_nat_gateway_v3.gateway_1.id
+  gateway_id           = opentelekomcloud_private_nat_gateway_v3.gateway_1.id
 }
 `, common.DataSourceSubnet, transitIpId, networkInterfaceId)
 }
