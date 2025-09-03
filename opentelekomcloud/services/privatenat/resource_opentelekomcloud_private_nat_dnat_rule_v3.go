@@ -58,14 +58,17 @@ func ResourcePrivateNatDnatRuleV3() *schema.Resource {
 			"protocol": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"internal_service_port": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"transit_service_port": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"id": {
 				Type:     schema.TypeString,
@@ -110,8 +113,8 @@ func resourcePrivateNatDnatRuleV3Create(ctx context.Context, d *schema.ResourceD
 
 	networkInterfaceId := d.Get("network_interface_id").(string)
 	privateIpAddress := d.Get("private_ip_address").(string)
-	if networkInterfaceId == "" && privateIpAddress == "" {
-		return fmterr.Errorf("Error: One of network_interface_id or private_ip_address must be specified")
+	if (networkInterfaceId == "" && privateIpAddress == "") || (networkInterfaceId != "" && privateIpAddress != "") {
+		return fmterr.Errorf("Error: (Only) one of network_interface_id or private_ip_address must be specified.")
 	}
 	createOpts := dnatrules.CreatePrivateDnatOpts{
 		Description:         d.Get("description").(string),
@@ -184,19 +187,27 @@ func resourcePrivateNatDnatRuleV3Update(ctx context.Context, d *schema.ResourceD
 		return fmterr.Errorf(errCreationV3Client, err)
 	}
 
-	networkInterfaceId := d.Get("network_interface_id").(string)
-	privateIpAddress := d.Get("private_ip_address").(string)
-	if networkInterfaceId == "" && privateIpAddress == "" {
-		return fmterr.Errorf("Error: One of network_interface_id or private_ip_address must be specified")
+	var updateOpts dnatrules.UpdatePrivateDnatOpts
+	if d.HasChange("description") {
+		updateOpts.Description = d.Get("description").(string)
 	}
-	updateOpts := dnatrules.UpdatePrivateDnatOpts{
-		Description:         d.Get("description").(string),
-		TransitIpId:         d.Get("transit_ip_id").(string),
-		NetworkInterfaceId:  networkInterfaceId,
-		PrivateIpAddress:    privateIpAddress,
-		Protocol:            d.Get("protocol").(string),
-		InternalServicePort: d.Get("internal_service_port").(string),
-		TransitServicePort:  d.Get("transit_service_port").(string),
+	if d.HasChange("transit_ip_id") {
+		updateOpts.TransitIpId = d.Get("transit_ip_id").(string)
+	}
+	if d.HasChange("network_interface_id") {
+		updateOpts.NetworkInterfaceId = d.Get("network_interface_id").(string)
+	}
+	if d.HasChange("private_ip_address") {
+		updateOpts.PrivateIpAddress = d.Get("private_ip_address").(string)
+	}
+	if d.HasChange("protocol") {
+		updateOpts.Protocol = d.Get("protocol").(string)
+	}
+	if d.HasChange("internal_service_port") {
+		updateOpts.InternalServicePort = d.Get("internal_service_port").(string)
+	}
+	if d.HasChange("transit_service_port") {
+		updateOpts.TransitServicePort = d.Get("transit_service_port").(string)
 	}
 
 	log.Printf("[DEBUG] Update Options: %#v", updateOpts)
@@ -206,7 +217,7 @@ func resourcePrivateNatDnatRuleV3Update(ctx context.Context, d *schema.ResourceD
 		return fmterr.Errorf("error updating Private NAT DNAT rule: %w", err)
 	}
 
-	return resourcePrivateNatGatewayV3Read(ctx, d, meta)
+	return resourcePrivateNatDnatRuleV3Read(ctx, d, meta)
 }
 
 func resourcePrivateNatDnatRuleV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
