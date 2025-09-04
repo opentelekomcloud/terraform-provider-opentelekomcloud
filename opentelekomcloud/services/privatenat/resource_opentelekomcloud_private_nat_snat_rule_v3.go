@@ -41,11 +41,14 @@ func ResourcePrivateNatSnatRuleV3() *schema.Resource {
 			"cidr": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 				Computed: true,
 			},
 			"virsubnet_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
+				Computed: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
