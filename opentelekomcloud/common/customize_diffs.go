@@ -62,7 +62,7 @@ func ValidateVolumeType(argName string) schema.CustomizeDiffFunc {
 			return nil
 		}
 		config := meta.(*cfg.Config)
-		client, err := config.BlockStorageV3Client(config.GetRegion(d))
+		client, err := config.BlockStorageV2Client(config.GetRegion(d))
 		if err != nil {
 			return fmt.Errorf("error creating blockstorage v3 client: %s", err)
 		}
@@ -95,6 +95,9 @@ func ValidateVolumeType(argName string) schema.CustomizeDiffFunc {
 }
 
 func getZonesFromVolumeType(t volumetypes.VolumeType) []string {
+	if t.ExtraSpecs == nil || len(t.ExtraSpecs) == 0 {
+		return []string{}
+	}
 	zonesStr := t.ExtraSpecs["RESKEY:availability_zones"].(string)
 	return strings.Split(zonesStr, ",")
 }

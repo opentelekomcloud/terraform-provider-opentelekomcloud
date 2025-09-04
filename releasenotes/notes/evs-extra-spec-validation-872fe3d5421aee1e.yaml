@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[EVS]** Extra check for ``getZonesFromVolumeType`` in ``common/customize_diffs`` for newest storage types (`#3115 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3115>`_)
