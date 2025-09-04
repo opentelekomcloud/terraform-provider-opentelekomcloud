@@ -253,7 +253,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_1"
   description       = "first test volume"
   availability_zone = "%s"
-  volume_type       = "SATA"
+  volume_type       = "SSD"
   size              = 12
 }
 `, env.OS_AVAILABILITY_ZONE)
@@ -262,7 +262,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_1-updated"
   description       = "first test volume"
   availability_zone = "%s"
-  volume_type       = "SATA"
+  volume_type       = "SSD"
   size              = 12
 }
 `, env.OS_AVAILABILITY_ZONE)
@@ -271,7 +271,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_tags"
   description       = "test volume with tags"
   availability_zone = "%s"
-  volume_type       = "SATA"
+  volume_type       = "SSD"
   tags = {
     muh = "value-create"
     kuh = "value-create"
@@ -284,7 +284,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_tags-updated"
   description       = "test volume with tags"
   availability_zone = "%s"
-  volume_type       = "SATA"
+  volume_type       = "SSD"
   tags = {
     muh = "value-update"
   }
@@ -297,7 +297,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_1"
   availability_zone = "%s"
-  volume_type       = "SATA"
+  volume_type       = "SSD"
   size              = 12
   image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
 }
@@ -308,7 +308,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   description       = "first test volume"
   availability_zone = "%s"
   size              = 12
-  volume_type       = "SATA"
+  volume_type       = "SSD"
   device_type       = "SCSI"
   timeouts {
     create = "10m"
@@ -331,7 +331,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_1"
   description       = "first test volume"
   availability_zone = "%s"
-  volume_type       = "SATA"
+  volume_type       = "SSD"
   size              = 20
 }
 `, env.OS_AVAILABILITY_ZONE)
