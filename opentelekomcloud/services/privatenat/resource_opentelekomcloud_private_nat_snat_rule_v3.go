@@ -60,10 +60,6 @@ func ResourcePrivateNatSnatRuleV3() *schema.Resource {
 				MaxItems: 20,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"project_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -154,7 +150,6 @@ func resourcePrivateNatSnatRuleV3Read(ctx context.Context, d *schema.ResourceDat
 
 	transitIpIds, transitIpAssociations := processTransitIpAssociations(natSnatRule.TransitIpAssociations)
 	mErr := multierror.Append(
-		d.Set("id", d.Id()),
 		d.Set("gateway_id", natSnatRule.GatewayId),
 		d.Set("cidr", natSnatRule.Cidr),
 		d.Set("virsubnet_id", natSnatRule.VirSubnetId),
