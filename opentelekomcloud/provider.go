@@ -621,6 +621,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_obs_bucket_replication":                    obs.ResourceObsBucketReplication(),
 			"opentelekomcloud_private_nat_dnat_rule_v3":                  privatenat.ResourcePrivateNatDnatRuleV3(),
 			"opentelekomcloud_private_nat_gateway_v3":                    privatenat.ResourcePrivateNatGatewayV3(),
+			"opentelekomcloud_private_nat_snat_rule_v3":                  privatenat.ResourcePrivateNatSnatRuleV3(),
 			"opentelekomcloud_private_nat_transit_ip_v3":                 privatenat.ResourcePrivateNatTransitIpV3(),
 			"opentelekomcloud_rds_backup_v3":                             rds.ResourceRdsBackupV3(),
 			"opentelekomcloud_rds_public_ip_associate_v3":                rds.ResourceRdsPublicIpAssociateV3(),
