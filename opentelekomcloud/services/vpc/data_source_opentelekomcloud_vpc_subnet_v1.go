@@ -33,10 +33,12 @@ func DataSourceVpcSubnetV1() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"cidr": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"dns_list": {
 				Type:     schema.TypeSet,
@@ -47,14 +49,17 @@ func DataSourceVpcSubnetV1() *schema.Resource {
 			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"vpc_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"gateway_ip": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"dhcp_enable": {
 				Type:     schema.TypeBool,
@@ -63,14 +68,17 @@ func DataSourceVpcSubnetV1() *schema.Resource {
 			"primary_dns": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"secondary_dns": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"availability_zone": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"cidr_ipv6": {
 				Type:     schema.TypeString,

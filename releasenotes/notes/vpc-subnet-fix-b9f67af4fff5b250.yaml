@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Make attributes computed for ``data-source/opentelekomcloud_vpc_subnet_v1`` (`#3117 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3117>`_)
