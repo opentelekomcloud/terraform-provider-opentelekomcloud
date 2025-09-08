@@ -744,6 +744,14 @@ func (c *Config) GaussDBV3Client(region string) (*golangsdk.ServiceClient, error
 	})
 }
 
+func (c *Config) TaurusDBV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewTaurusDBV3(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+
 func (c *Config) IdentityV3Client(_ ...string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewIdentityV3(c.DomainClient, golangsdk.EndpointOpts{
 		Availability: c.getEndpointType(),
