@@ -359,6 +359,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_obs_bucket":                         obs.DataSourceObsBucket(),
 			"opentelekomcloud_obs_bucket_object":                  obs.DataSourceObsBucketObject(),
 			"opentelekomcloud_private_nat_gateway_v3":             privatenat.DataSourcePrivateNatGatewayV3(),
+			"opentelekomcloud_private_nat_transit_ip_v3":          privatenat.DataSourcePrivateNatTransitIpV3(),
 			"opentelekomcloud_rds_instance_v3":                    rds.DataSourceRdsInstanceV3(),
 			"opentelekomcloud_rds_backup_v3":                      rds.DataSourceRDSv3Backup(),
 			"opentelekomcloud_rds_flavors_v1":                     rds.DataSourceRdsFlavorV1(),
