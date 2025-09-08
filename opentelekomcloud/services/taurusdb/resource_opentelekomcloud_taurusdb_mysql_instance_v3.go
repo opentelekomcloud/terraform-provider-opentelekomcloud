@@ -289,7 +289,7 @@ func resourceTaurusDbV3InstanceCreate(ctx context.Context, d *schema.ResourceDat
 		DedicatedResourceId: d.Get("dedicated_resource_id").(string),
 		TimeZone:            d.Get("time_zone").(string),
 		SlaveCount:          d.Get("read_replicas").(int),
-		EnterpriseProjectId: pointerto.String(d.Get("enterprise_project_id").(string)),
+		Password:            d.Get("password").(string),
 		Mode:                "Cluster",
 		DataStore:           resourceTaurusDbV3DataStore(d),
 	}
@@ -297,6 +297,10 @@ func resourceTaurusDbV3InstanceCreate(ctx context.Context, d *schema.ResourceDat
 	if d.Get("table_name_case_sensitivity").(bool) {
 		lowerCaseTableNames := 0
 		createOpts.LowerCaseTableNames = &lowerCaseTableNames
+	}
+
+	if v, ok := d.GetOk("enterprise_project_id"); ok {
+		createOpts.EnterpriseProjectId = pointerto.String(v.(string))
 	}
 
 	azMode := d.Get("availability_zone_mode").(string)
@@ -315,9 +319,6 @@ func resourceTaurusDbV3InstanceCreate(ctx context.Context, d *schema.ResourceDat
 		}
 		createOpts.Volume = volume
 	}
-
-	log.Printf("[DEBUG] create options: %#v", createOpts)
-	createOpts.Password = d.Get("password").(string)
 
 	instance, err := instance.Create(client, createOpts)
 	if err != nil {
