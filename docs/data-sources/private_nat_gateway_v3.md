@@ -50,22 +50,6 @@ The following arguments are supported:
 
 * `id` - (Optional, String) Specifies the private NAT gateway name.
 
-* `spec` - (Optional, String) Specifies the private NAT gateway specifications. The value can be: `Small`, `Medium`, `Large`, `Extra-large`. Default value: `Small`.
-
-* `downlink_vpcs` - (Required, List, ForceNew) Specifies the VPC where the private NAT gateway works. The [downlink_vpcs](#downlink_vpcs) structure is documented below. Default value: `0`.
-
-* `enterprise_project_id` - (Optional, String, ForceNew) Specifies the ID of the enterprise project that is associated with the private NAT gateway when the private NAT gateway is created.
-
-* `tags` - (Optional, Map, ForceNew) Specifies the tag list in key/value format.
-
-<a name="downlink_vpcs"></a>
-The `downlink_vpcs` block supports:
-
-* `virsubnet_id` - (Required, String, ForceNew) Specifies the ID of the enterprise project that is associated with the private NAT gateway when the private NAT gateway is created.
-
-* `ngport_ip_address` - (Optional, String, ForceNew) Specifies the private IP address of the private NAT gateway.
-
-
 ## Attributes Reference
 
 In addition to the arguments mentioned above, the following attributes are exported:
