@@ -208,8 +208,6 @@ The `ipsecpolicy` block supports:
 <a name="Connection_PolicyRule"></a>
 The `policy_rules` block supports:
 
-* `rule_index` - (Optional, Int) The rule index.
-
 * `destination` - (Optional, List) The list of destination CIDRs.
 
 * `source` - (Optional, String) The source CIDR.

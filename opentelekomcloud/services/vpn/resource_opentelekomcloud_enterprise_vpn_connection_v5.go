@@ -266,11 +266,6 @@ func ConnectionIpsecPolicySchema() *schema.Resource {
 func ConnectionPolicyRuleSchema() *schema.Resource {
 	sc := schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"rule_index": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-			},
 			"source": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -367,7 +362,6 @@ func buildConnectionPolicyRules(d *schema.ResourceData) []connection.PolicyRules
 				dest = append(dest, s.(string))
 			}
 			rules[i] = connection.PolicyRules{
-				RuleIndex:   rawMap["rule_index"].(int),
 				Source:      rawMap["source"].(string),
 				Destination: dest,
 			}
@@ -534,7 +528,6 @@ func flattenConnectionPolicyRule(resp []connection.PolicyRules) []interface{} {
 	rst := make([]interface{}, 0, len(resp))
 	for _, v := range resp {
 		rst = append(rst, map[string]interface{}{
-			"rule_index":  v.RuleIndex,
 			"destination": v.Destination,
 			"source":      v.Source,
 		})
