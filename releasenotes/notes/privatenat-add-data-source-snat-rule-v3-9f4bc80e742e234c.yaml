@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[PrivateNAT]** Add new data source ``opentelekomcloud_private_nat_snat_rule_v3`` (`#3124 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3124>`_).
