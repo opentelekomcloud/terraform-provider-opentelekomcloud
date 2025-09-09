@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[EVPN]** Remove ``rule_index`` from ``resource/opentelekomcloud_enterprise_vpn_gateway_v5`` (`#3125 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3125>`_)
