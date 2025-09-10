@@ -156,6 +156,7 @@ func TestAccObsBucket_lifecycle(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.transition.1.days", "180"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.noncurrent_version_transition.0.days", "60"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.noncurrent_version_transition.1.days", "180"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.abort_incomplete_multipart_upload.0.days", "360"),
 				),
 			},
 		},
@@ -594,6 +595,9 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
     noncurrent_version_transition {
       days          = 180
       storage_class = "COLD"
+    }
+    abort_incomplete_multipart_upload {
+      days = 360
     }
   }
 }

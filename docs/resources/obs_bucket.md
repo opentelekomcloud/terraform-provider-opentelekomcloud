@@ -271,6 +271,9 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
       days          = 180
       storage_class = "COLD"
     }
+    abort_incomplete_multipart_upload {
+      days = 360
+    }
   }
 
   lifecycle_rule {
@@ -296,6 +299,9 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
     noncurrent_version_transition {
       days          = 60
       storage_class = "COLD"
+    }
+    abort_incomplete_multipart_upload {
+      days = 180
     }
   }
 }
@@ -518,6 +524,9 @@ The `lifecycle_rule` object supports the following:
 * `noncurrent_version_transition` - (Optional) Specifies a period when noncurrent object versions are
   automatically transitioned to `WARM` or `COLD` storage class (documented below).
 
+* `abort_incomplete_multipart_upload` - (Optional) Specifies a period when the not merged parts (fragments) in an
+  incomplete upload are automatically deleted. (documented below).
+
 -> At least one of `expiration`, `transition`, `noncurrent_version_expiration`, `noncurrent_version_transition`
 must be specified.
 
@@ -549,6 +558,11 @@ The `noncurrent_version_transition` object supports the following
   transitioned to the specified storage class.
 
 * `storage_class` - (Required) The class of storage used to store the object. Only `WARM` and `COLD` are supported.
+
+The `abort_incomplete_multipart_upload` object supports the following
+
+* `days` - (Required, Int) Specifies the number of days since the initiation of an incomplete multipart upload that OBS
+  will wait before deleting the not merged parts (fragments) of the upload.
 
 The `server_side_encryption` object supports the following
 
