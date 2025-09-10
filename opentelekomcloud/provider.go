@@ -359,6 +359,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_networking_secgroup_rule_ids_v2":    vpc.DataSourceNetworkingSecGroupRuleIdsV2(),
 			"opentelekomcloud_obs_bucket":                         obs.DataSourceObsBucket(),
 			"opentelekomcloud_obs_bucket_object":                  obs.DataSourceObsBucketObject(),
+			"opentelekomcloud_private_nat_dnat_rule_v3":           privatenat.DataSourcePrivateNatDnatRuleV3(),
 			"opentelekomcloud_private_nat_gateway_v3":             privatenat.DataSourcePrivateNatGatewayV3(),
 			"opentelekomcloud_private_nat_transit_ip_v3":          privatenat.DataSourcePrivateNatTransitIpV3(),
 			"opentelekomcloud_private_nat_snat_rule_v3":           privatenat.DataSourcePrivateNatSnatRuleV3(),

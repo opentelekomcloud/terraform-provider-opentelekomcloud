@@ -38,11 +38,11 @@ func testAccCheckPrivateNATSnatRuleV3DataSourceID(n string) resource.TestCheckFu
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("can't find Private NAT Gateway data source: %s ", n)
+			return fmt.Errorf("can't find Private NAT SNAT rule data source: %s ", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Private NAT Gateway data source ID not set")
+			return fmt.Errorf("Private NAT SNAT rule data source ID not set")
 		}
 
 		return nil
