@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/asm/v1/servicemesh"
@@ -77,11 +78,13 @@ func ResourceASMServiceMeshV1() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 			},
 			"proxy_config": {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -89,31 +92,37 @@ func ResourceASMServiceMeshV1() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
+							Computed: true,
 						},
 						"exclude_ip_ranges": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
+							Computed: true,
 						},
 						"exclude_outbound_ports": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
+							Computed: true,
 						},
 						"exclude_inbound_ports": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
+							Computed: true,
 						},
 						"include_outbound_ports": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
+							Computed: true,
 						},
 						"include_inbound_ports": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
+							Computed: true,
 						},
 					},
 				},
@@ -122,17 +131,20 @@ func ResourceASMServiceMeshV1() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"random_sampling_percentage": {
 							Type:     schema.TypeFloat,
 							Optional: true,
+							Computed: true,
 							ForceNew: true,
 						},
 						"default_providers": {
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							ForceNew: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
@@ -172,10 +184,6 @@ func ResourceASMServiceMeshV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"status_update_timestamp": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -193,6 +201,14 @@ func resourceASMServiceMeshV1Create(ctx context.Context, d *schema.ResourceData,
 		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
+	var meshConfig servicemesh.MeshConfig
+	if d.Get("proxy_config.#").(int) != 0 {
+		meshConfig.ProxyConfig = getProxyConfig(d)
+	}
+	if d.Get("telemetry_config_tracing.#").(int) != 0 {
+		meshConfig.TelemetryConfig = getTelemetryConfig(d)
+	}
+
 	createOpts := servicemesh.CreateOpts{
 		APIVersion: "v1",
 		Kind:       "mesh",
@@ -206,10 +222,7 @@ func resourceASMServiceMeshV1Create(ctx context.Context, d *schema.ResourceData,
 				Clusters: getClusters(d),
 			},
 			IPv6Enable: d.Get("ipv6_enable").(bool),
-			Config: &servicemesh.MeshConfig{
-				ProxyConfig:     getProxyConfig(d),
-				TelemetryConfig: getTelemetryConfig(d),
-			},
+			Config:     &meshConfig,
 		},
 	}
 
@@ -218,6 +231,21 @@ func resourceASMServiceMeshV1Create(ctx context.Context, d *schema.ResourceData,
 		return fmterr.Errorf("error creating asm service mesh: %w", err)
 	}
 	d.SetId(createResp.Metadata.UID)
+
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"Creating"},
+		Target:     []string{"Running"},
+		Refresh:    instanceStateRefreshFunc(client, d.Id()),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      15 * time.Second,
+		MinTimeout: 10 * time.Second,
+	}
+
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for ASM service mesh (%s) to become ready: %w", d.Id(), err)
+	}
+
 	log.Printf("Created ASM Service Mesh %s: %#v", d.Id(), createResp.Spec)
 
 	return resourceASMServiceMeshV1Read(ctx, d, meta)
@@ -251,7 +279,6 @@ func resourceASMServiceMeshV1Read(ctx context.Context, d *schema.ResourceData, m
 		d.Set("telemetry_config_tracing", setTelemetryConfig(getResp.Spec.Config.TelemetryConfig)),
 		d.Set("cluster_ids", clusterIds),
 		d.Set("creation_timestamp", getResp.Metadata.CreationTimestamp),
-		d.Set("status_update_timestamp", getResp.Status.UpdateTimestamp),
 		d.Set("status", getResp.Status.Phase),
 	)
 
@@ -274,6 +301,11 @@ func resourceASMServiceMeshV1Delete(ctx context.Context, d *schema.ResourceData,
 	err = servicemesh.Delete(client, d.Id())
 	if err != nil {
 		return fmterr.Errorf("error deleting ASM Service Mesh: %w", err)
+	}
+
+	err = WaitForDeleteServiceMesh(client, 600, 5, d.Id())
+	if err != nil {
+		return fmterr.Errorf("error waiting for ASM service Mesh (%s) to be deleted: %w", d.Id(), err)
 	}
 
 	d.SetId("")
@@ -361,19 +393,20 @@ func getExtensionProviders(extensionProvidersInput []interface{}) []servicemesh.
 	return result
 }
 
-func setProxyConfig(proxyConfigInResp servicemesh.ProxyConfigResponse) map[string]interface{} {
-	return map[string]interface{}{
-		"include_ip_ranges":      proxyConfigInResp.IncludeIPRanges,
-		"exclude_ip_ranges":      proxyConfigInResp.ExcludeIPRanges,
-		"exclude_outbound_ports": proxyConfigInResp.ExcludeOutboundPorts,
-		"exclude_inbound_ports":  proxyConfigInResp.ExcludeInboundPorts,
-		"include_outbound_ports": proxyConfigInResp.IncludeOutboundPorts,
-		"include_inbound_ports":  proxyConfigInResp.IncludeInboundPorts,
+func setProxyConfig(proxyConfigInResp servicemesh.ProxyConfigResponse) []map[string]interface{} {
+	return []map[string]interface{}{
+		{
+			"include_ip_ranges":      proxyConfigInResp.IncludeIPRanges,
+			"exclude_ip_ranges":      proxyConfigInResp.ExcludeIPRanges,
+			"exclude_outbound_ports": proxyConfigInResp.ExcludeOutboundPorts,
+			"exclude_inbound_ports":  proxyConfigInResp.ExcludeInboundPorts,
+			"include_outbound_ports": proxyConfigInResp.IncludeOutboundPorts,
+			"include_inbound_ports":  proxyConfigInResp.IncludeInboundPorts,
+		},
 	}
 }
 
-func setTelemetryConfig(telemetryConfigInResp servicemesh.TelemetryConfigResponse) map[string]interface{} {
-
+func setTelemetryConfig(telemetryConfigInResp servicemesh.TelemetryConfigResponse) []map[string]interface{} {
 	var extensionProviders []map[string]interface{}
 	for _, extensionProviderInResp := range telemetryConfigInResp.Tracing.ExtensionProviders {
 		extensionProvider := map[string]interface{}{
@@ -384,9 +417,11 @@ func setTelemetryConfig(telemetryConfigInResp servicemesh.TelemetryConfigRespons
 		extensionProviders = append(extensionProviders, extensionProvider)
 	}
 
-	return map[string]interface{}{
-		"random_sampling_percentage": telemetryConfigInResp.Tracing.RandomSamplingPercentage,
-		"default_providers":          telemetryConfigInResp.Tracing.DefaultProviders,
-		"extension_providers":        extensionProviders,
+	return []map[string]interface{}{
+		{
+			"random_sampling_percentage": telemetryConfigInResp.Tracing.RandomSamplingPercentage,
+			"default_providers":          telemetryConfigInResp.Tracing.DefaultProviders,
+			"extension_providers":        extensionProviders,
+		},
 	}
 }
