@@ -177,6 +177,7 @@ func ResourceObsBucket() *schema.Resource {
 								},
 							},
 						},
+
 						"noncurrent_version_transition": {
 							Type:     schema.TypeList,
 							Optional: true,
@@ -192,6 +193,18 @@ func ResourceObsBucket() *schema.Resource {
 										ValidateFunc: validation.StringInSlice([]string{
 											"WARM", "COLD",
 										}, true),
+									},
+								},
+							},
+						},
+						"abort_incomplete_multipart_upload": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"days": {
+										Type:     schema.TypeInt,
+										Required: true,
 									},
 								},
 							},
@@ -854,6 +867,17 @@ func mapToRule(src map[string]interface{}) (rule obs.LifecycleRule) {
 		}
 	}
 
+	// AbortIncompleteMultipartUpload
+	abortIncompleteMultipartUpload := src["abort_incomplete_multipart_upload"].(*schema.Set).List()
+	if len(abortIncompleteMultipartUpload) > 0 {
+		raw := abortIncompleteMultipartUpload[0].(map[string]interface{})
+		abincomMultipartUpload := &rule.AbortIncompleteMultipartUpload
+
+		if val, ok := raw["days"].(int); ok && val > 0 {
+			abincomMultipartUpload.DaysAfterInitiation = val
+		}
+	}
+
 	// NoncurrentVersionTransition
 	ncTransitions := src["noncurrent_version_transition"].([]interface{})
 	ncList := make([]obs.NoncurrentVersionTransition, len(ncTransitions))
@@ -1175,6 +1199,13 @@ func ruleToMap(src obs.LifecycleRule) map[string]interface{} {
 		expiration := make(map[string]interface{})
 		expiration["days"] = days
 		rule["noncurrent_version_expiration"] = schema.NewSet(s3.ExpirationHash, []interface{}{expiration})
+	}
+
+	// abort_incomplete_multipart_upload
+	if days := src.AbortIncompleteMultipartUpload.DaysAfterInitiation; days > 0 {
+		a := make(map[string]interface{})
+		a["days"] = days
+		rule["abort_incomplete_multipart_upload"] = schema.NewSet(s3.ExpirationHash, []interface{}{a})
 	}
 
 	// noncurrent_version_transition
