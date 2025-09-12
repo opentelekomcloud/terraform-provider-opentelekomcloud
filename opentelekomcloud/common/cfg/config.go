@@ -681,6 +681,13 @@ func obsProxyConf() (obs.Configurer, error) {
 	return proxyConfigure, nil
 }
 
+func (c *Config) AsmV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewASMV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) BlockStorageV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewBlockStorageV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
