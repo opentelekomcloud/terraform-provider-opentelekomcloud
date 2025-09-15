@@ -268,15 +268,11 @@ The following arguments are supported:
 * `metadata` - (Optional, Map) Metadata key/value pairs to associate with the instance.
 
 * `system_disk_type` - (Optional, String, ForceNew) The system disk type of the server.
-  Changing this creates a new server. Options are limited depending on AZ. Available options are:
-  * `SATA`: common I/O disk type. Available for all AZs.
+  Changing this creates a new server. Options are limited depending on AZ. Default: `SSD`. Available options are:
   * `SAS`: high I/O disk type. Available for all AZs.
   * `SSD`: ultra-high I/O disk type. Available for all AZs.
   * `GPSSD`: the general purpose SSD type
   * `ESSD`: extreme SSD disk type.
-
-  -> **NOTE:** 
-  Common I/O (SATA) will reach end of life, end of 2025.
 
 * `system_disk_size` - (Optional, Integer, ForceNew) The system disk size in GB, The value range is 1 to 1024.
   Changing this creates a new server.
@@ -316,7 +312,7 @@ The `nics` block supports:
   network. Changing this creates a new server.
 
 * `ipv6_enable` - (Optional, Bool, ForceNew) Specifies whether to support IPv6 addresses. If this parameter is set to true, the NIC supports IPv6 addresses.
-  
+
   -> **NOTE:**
   IPV6 enable requires the subnet to have IPV6 enabled as well.
 
