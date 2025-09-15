@@ -268,6 +268,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_apigw_api_history_v2":               apigw.DataSourceApigwApiHistory(),
 			"opentelekomcloud_apigw_gateway_features_v2":          apigw.DataSourceGatewayFeaturesV2(),
 			"opentelekomcloud_apigw_groups_v2":                    apigw.DataSourceApigwGroupsV2(),
+			"opentelekomcloud_asm_service_mesh_v1":                asm.DataSourceASMServiceMeshV1(),
 			"opentelekomcloud_cbr_backup_v3":                      cbr.DataSourceCBRBackupsV3(),
 			"opentelekomcloud_cbr_backup_ids_v3":                  cbr.DataSourceCBRBackupsIdsV3(),
 			"opentelekomcloud_cce_cluster_v3":                     cce.DataSourceCCEClusterV3(),
