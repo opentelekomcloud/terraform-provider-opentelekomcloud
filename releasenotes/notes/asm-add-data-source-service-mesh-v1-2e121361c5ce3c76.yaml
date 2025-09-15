@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[ASM]** Add new data source ``opentelekomcloud_asm_service_mesh_v1`` (`#3131 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3131>`_).
