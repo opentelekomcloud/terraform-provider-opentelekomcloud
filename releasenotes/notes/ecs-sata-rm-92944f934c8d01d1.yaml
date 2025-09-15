@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ECS]** Change dafault ``system_disk_type`` from ``SATA`` to ``SSD`` in ``resource/opentelekomcloud_compute_instances_v2`` (`#3130 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3130>`_)
