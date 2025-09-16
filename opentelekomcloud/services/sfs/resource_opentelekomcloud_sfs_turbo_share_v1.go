@@ -86,6 +86,13 @@ func ResourceSFSTurboShareV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"enhanced": {
+				Type:       schema.TypeBool,
+				Optional:   true,
+				ForceNew:   true,
+				Computed:   true,
+				Deprecated: "Use field expand_type instead for standard-enhanced or performance-enhanced fileshare",
+			},
 			"crypt_key_id": {
 				Type:     schema.TypeString,
 				Optional: true,
