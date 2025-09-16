@@ -58,3 +58,7 @@ In addition to all arguments above, the following attributes are exported:
 * `security_group_id` - The share security group ID.
 
 * `crypt_key_id` - The ID of a KMS key to encrypt the file system.
+
+* `expand_type` - Specifies the extension type.
+
+* `hpc_bw` - Specifies the file system bandwidth.

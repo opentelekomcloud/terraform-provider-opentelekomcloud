@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sfs_turbo/v1/shares"
-	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -60,6 +59,14 @@ func DataSourceSFSTurboShareV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"expand_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"hpc_bw": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"version": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -85,23 +92,15 @@ func dataSourceSFSTurboShareV1Read(_ context.Context, d *schema.ResourceData, me
 
 	var share *shares.Turbo
 	name := d.Get("name")
-	err = shares.List(client, shares.ListOpts{}).EachPage(func(p pagination.Page) (bool, error) {
-		results, err := shares.ExtractTurbos(p)
-		if err != nil {
-			return false, err
-		}
-		for _, turbo := range results {
-			if turbo.Name == name {
-				share = &turbo
-				return false, nil
-			}
-		}
-		return true, nil
-	})
+	shares, err := shares.List(client, shares.ListOpts{})
 	if err != nil {
 		return fmterr.Errorf("error listing SFS turbo shares: %w", err)
 	}
-
+	for _, turbo := range shares {
+		if turbo.Name == name {
+			share = &turbo
+		}
+	}
 	if share == nil {
 		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again")
@@ -127,6 +126,8 @@ func dataSourceSFSTurboShareV1Read(_ context.Context, d *schema.ResourceData, me
 		d.Set("available_capacity", share.AvailCapacity),
 		d.Set("export_location", share.ExportLocation),
 		d.Set("crypt_key_id", share.CryptKeyID),
+		d.Set("expand_type", share.ExpandType),
+		d.Set("hpc_bw", share.HpcBW),
 		d.Set("size", fSize),
 	)
 
