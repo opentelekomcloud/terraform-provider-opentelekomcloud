@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **[TMS]** New Data Source ``opentelekomcloud_tms_resource_tag_keys_v1`` (`#3133 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3133>`_)
+  - |
+    **[TMS]** New Data Source ``opentelekomcloud_tms_resource_tag_values_v1`` (`#3133 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3133>`_)
