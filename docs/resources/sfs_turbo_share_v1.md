@@ -47,8 +47,8 @@ resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
   name              = "sfs-turbo"
   size              = 500
   share_proto       = "NFS"
-  enhanced          = true
   share_type        = "PERFORMANCE"
+  expand_type       = "bandwidth"
   vpc_id            = var.vpc_id
   subnet_id         = var.subnet_id
   security_group_id = var.sg_id
@@ -66,7 +66,8 @@ The following arguments are supported:
   characters and must start with a letter. Changing this will create a new resource.
 
 * `size` - (Required, Int) Specifies the capacity of a common file system, in GB. The value ranges
-  from `500` to `32768`.
+  from `500` to `32768`.For an SFS Turbo Enhanced file system, if expand_type is set to bandwidth in the metadata field, the capacity ranges from 10240 to 327680, in GiB. If `expand_type` is set to `hpc` and `hpc_bw` is set to `20M` (20MB/s/TiB), `40M` (40MB/s/TiB:), `125M` (125MB/s/TiB), or `250M` (250MB/s/TiB), the capacity ranges from 3686 to 1048576, in GiB. The capacity must be a **multiple of 1.2 TiB**. The value must be rounded down after being converted to GiB. For example, 3.6TiB->3686GiB, 4.8TiB->4915GiB, 8.4TiB->8601GiB.
+
 
 * `share_proto` - (Optional, String, ForceNew) Specifies the protocol for sharing file systems. The valid value is `NFS`.
   Changing this will create a new resource.
@@ -86,8 +87,11 @@ The following arguments are supported:
 * `crypt_key_id` - (Optional, String, ForceNew) Specifies the ID of a KMS key to encrypt the file system.
   Changing this will create a new resource.
 
-* `enhanced` - (Optional, Bool, ForceNew) Specifies whether the file system is enhanced or not. Changing this will
-  create a new resource with type `StandardEnhanced`/`PerformanceEnhanced`.
+* `expand_type` - (Optional, String, ForceNew) Specifies the extension type. This parameter is mandatory when you are creating an SFS Turbo 250 MB/s/TiB, 125 MB/s/TiB, 40 MB/s/TiB, 20 MB/s/TiB, or Enhanced file system. Accepted values: 
+    * `bandwidth`: To create a `Standard - Enhanced` or `Performance - Enhanced` file system.
+    * `hpc`: To create a 250 MB/s/TiB, 125 MB/s/TiB, 40 MB/s/TiB, or 20 MB/s/TiB file system.
+
+* `hpc_bw` - (Optional, String, ForceNew) Specifies the file system bandwidth. This parameter is mandatory when you are creating an SFS Turbo 250 MB/s/TiB, 125 MB/s/TiB, 40 MB/s/TiB, 20 MB/s/TiB file system. Accepted values: `20M` (for a 20 MB/s/TiB file system), `40M` (for a 40 MB/s/TiB file system), `125M` (for a 125 MB/s/TiB file system), and `250M` (for a 250 MB/s/TiB file system).
 
 -> SFS Turbo will create two private IP addresses and one virtual IP address under the subnet you specified.
 To ensure normal use, SFS Turbo will enable the inbound rules for ports `111`, `445`, `2049`, `2051`, `2052`,
@@ -106,8 +110,6 @@ In addition to all arguments above, the following attributes are exported:
 * `export_location` - The mount point of the SFS Turbo file system.
 
 * `available_capacity` - The available capacity of the SFS Turbo file system in the unit of GB.
-
-* `expand_type` -Specifies the extension type
 
 ## Timeouts
 
