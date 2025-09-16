@@ -191,10 +191,17 @@ func resourceSFSTurboShareV1Read(ctx context.Context, d *schema.ResourceData, me
 		return common.CheckDeletedDiag(d, err, "Error deleting SFS Turbo")
 	}
 
+	var shareType string
+	if share.ExpandType == "hpc" {
+		shareType = "STANDARD"
+	} else {
+		shareType = share.ShareType
+	}
+
 	mErr := multierror.Append(nil,
 		d.Set("name", share.Name),
 		d.Set("share_proto", share.ShareProto),
-		d.Set("share_type", share.ShareType),
+		d.Set("share_type", shareType),
 		d.Set("vpc_id", share.VpcID),
 		d.Set("subnet_id", share.SubnetID),
 		d.Set("security_group_id", share.SecurityGroupID),

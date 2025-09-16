@@ -119,7 +119,6 @@ func TestAccSFSTurboShareV1_hpc(t *testing.T) {
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(sfsShareResourceName, "name", shareName),
 					resource.TestCheckResourceAttr(sfsShareResourceName, "share_proto", "NFS"),
-					resource.TestCheckResourceAttr(sfsShareResourceName, "share_type", "STANDARD"),
 					resource.TestCheckResourceAttr(sfsShareResourceName, "expand_type", "hpc"),
 					resource.TestCheckResourceAttr(sfsShareResourceName, "size", "3686"),
 				),
@@ -137,7 +136,6 @@ resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
   name        = "%s"
   size        = 3686
   share_proto = "NFS"
-  share_type  = "STANDARD"
   vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   expand_type = "hpc"

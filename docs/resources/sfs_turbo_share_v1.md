@@ -56,6 +56,27 @@ resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
 }
 ```
 
+### SFS Turbo share with 20, 40, 125 or 250 MB/s/TiB file system
+
+```hcl
+variable "vpc_id" {}
+variable "subnet_id" {}
+variable "sg_id" {}
+variable "az" {}
+
+resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
+  name              = "sfs-turbo"
+  size              = 3686
+  share_proto       = "NFS"
+  expand_type       = "hpc"
+  hpc_bw            = "20M"
+  vpc_id            = var.vpc_id
+  subnet_id         = var.subnet_id
+  security_group_id = var.sg_id
+  availability_zone = var.az
+}
+```
+
 ## Argument Reference
 The following arguments are supported:
 
