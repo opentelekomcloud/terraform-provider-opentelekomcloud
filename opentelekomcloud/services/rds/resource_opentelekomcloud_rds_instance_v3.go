@@ -162,6 +162,11 @@ func ResourceRdsInstanceV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"time_zone": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"subnet_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -481,6 +486,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			SubnetId:         d.Get("subnet_id").(string),
 			DataVip:          d.Get("private_ip").(string),
 			SecurityGroupId:  d.Get("security_group_id").(string),
+			TimeZone:         d.Get("time_zone").(string),
 			ChargeInfo:       resourceRDSChangeMode(),
 		}
 		if ok := d.Get("lower_case_table_names").(string); ok != "" {

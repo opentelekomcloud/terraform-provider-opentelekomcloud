@@ -336,6 +336,11 @@ The following arguments are supported:
 * `security_group_id` - (Required) Specifies the security group which the RDS DB instance belongs to.
   Changing this parameter will create a new resource.
 
+* `time_zone` - (Optional, ForceNew) Specifies the UTC time zone. Changing this parameter will create a new resource.
+If this parameter is not specified, the time zone of each engine uses UTC by default.
+If this parameter is specified, the value range is from UTC-12:00 to UTC+12:00 on the hour.
+For example, the parameter can be UTC+08:00 rather than UTC+08:30.
+
 * `subnet_id` - (Required, ForceNew) Specifies the subnet id. Changing this parameter will create a new resource.
 
 * `volume` - (Required, ForceNew) Specifies the volume information. Structure is documented below.
