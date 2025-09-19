@@ -643,10 +643,12 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 100
   }
-  flavor = "rds.pg.c2.large"
+
+  time_zone = "UTC+04:00"
+  flavor    = "rds.pg.n1.large.4"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
