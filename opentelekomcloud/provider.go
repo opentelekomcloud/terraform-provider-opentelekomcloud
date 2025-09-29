@@ -266,6 +266,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"opentelekomcloud_antiddos_v1":                        antiddos.DataSourceAntiDdosV1(),
 			"opentelekomcloud_apigw_api_history_v2":               apigw.DataSourceApigwApiHistory(),
+			"opentelekomcloud_apigw_environments_v2":              apigw.DataSourceApigwEnvironmentsV2(),
 			"opentelekomcloud_apigw_gateway_features_v2":          apigw.DataSourceGatewayFeaturesV2(),
 			"opentelekomcloud_apigw_groups_v2":                    apigw.DataSourceApigwGroupsV2(),
 			"opentelekomcloud_asm_service_mesh_v1":                asm.DataSourceASMServiceMeshV1(),
