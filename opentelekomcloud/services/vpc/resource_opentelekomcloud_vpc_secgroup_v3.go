@@ -46,6 +46,7 @@ func ResourceVpcSecGroupV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 			},
 			"tags": {
 				Type:     schema.TypeMap,
