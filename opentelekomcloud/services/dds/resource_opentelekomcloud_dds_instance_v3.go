@@ -407,8 +407,8 @@ func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	if begin, ok := d.GetOk("maintain_begin"); ok {
 		windowOpts := instances.ModifyMaintenanceWindowOpt{
 			InstanceId: instance.Id,
-			StartTime: begin.(string),
-			EndTime:   d.Get("maintain_end").(string),
+			StartTime:  begin.(string),
+			EndTime:    d.Get("maintain_end").(string),
 		}
 		err = instances.ModifyMaintenanceWindow(client, windowOpts)
 		if err != nil {
@@ -643,8 +643,8 @@ func resourceDdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 	if d.HasChange("maintain_begin") {
 		windowOpts := instances.ModifyMaintenanceWindowOpt{
 			InstanceId: d.Id(),
-			StartTime: d.Get("maintain_begin").(string),
-			EndTime:   d.Get("maintain_end").(string),
+			StartTime:  d.Get("maintain_begin").(string),
+			EndTime:    d.Get("maintain_end").(string),
 		}
 		retryFunc := func() (interface{}, bool, error) {
 			err = instances.ModifyMaintenanceWindow(client, windowOpts)
@@ -664,7 +664,6 @@ func resourceDdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 			return diag.Errorf("error setting maintenance window of the DDS instance %s: %s", d.Id(), err)
 		}
 	}
-
 
 	if d.HasChange("port") {
 		retryFunc := func() (interface{}, bool, error) {
