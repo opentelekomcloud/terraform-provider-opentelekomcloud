@@ -29,6 +29,9 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
     storage_engine = "wiredTiger"
   }
 
+  maintain_begin = "02:00"
+  maintain_end   = "03:00"
+
   availability_zone = var.availability_zone
   vpc_id            = var.vpc_id
   subnet_id         = var.subnet_id
@@ -164,6 +167,14 @@ The following arguments are supported:
 
 * `ssl` - (Optional, Bool) Specifies whether to enable or disable SSL. Defaults to true.
 -> The instance will be restarted in the background when switching SSL. Please operate with caution.
+
+* `maintain_begin` - (Optional, String) Specifies begin time of the time range within which you are allowed to start a
+  task that affects the running of database instances. It must be a valid value in the format of **hh:mm** in UTC+0,
+  such as **02:00**, meanwhile, this time in console displays in the format of **hh:mm** in UTC+08:00, e.g. **10:00**.
+
+* `maintain_end` - (Optional, String) Specifies end time of the time range within which you are allowed to start a
+  task that affects the running of database instances. It must be a valid value in the format of **hh:mm** in UTC+0,
+  such as **04:00**, meanwhile, this time in console displays in the format of **hh:mm** in UTC+08:00, e.g. **12:00**.
 
 * `tags` - (Optional, Map) Tags key/value pairs to associate with the volume.
   Changing this updates the existing volume tags.

@@ -178,6 +178,17 @@ func ResourceDdsInstanceV3() *schema.Resource {
 					},
 				},
 			},
+			"maintain_begin": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				RequiredWith: []string{"maintain_end"},
+			},
+			"maintain_end": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"ssl": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -393,6 +404,18 @@ func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
+	if begin, ok := d.GetOk("maintain_begin"); ok {
+		windowOpts := instances.ModifyMaintenanceWindowOpt{
+			InstanceId: instance.Id,
+			StartTime: begin.(string),
+			EndTime:   d.Get("maintain_end").(string),
+		}
+		err = instances.ModifyMaintenanceWindow(client, windowOpts)
+		if err != nil {
+			return diag.Errorf("error setting maintenance window of the DDS instance %s: %s", instance.Id, err)
+		}
+	}
+
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
 	return resourceDdsInstanceV3Read(clientCtx, d, meta)
 }
@@ -462,6 +485,16 @@ func resourceDdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 	mErr = multierror.Append(
 		mErr,
 		d.Set("ssl", sslEnable),
+	)
+
+	// set maintenance window
+	windows := strings.Split(instance.MaintenanceWindow, "-")
+	if len(windows) != 2 {
+		return diag.Errorf("invalid format of maintenance window, must be <start_time>-<end_time>")
+	}
+	mErr = multierror.Append(mErr,
+		d.Set("maintain_begin", windows[0]),
+		d.Set("maintain_end", windows[1]),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -606,6 +639,32 @@ func resourceDdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 			return diag.FromErr(err)
 		}
 	}
+
+	if d.HasChange("maintain_begin") {
+		windowOpts := instances.ModifyMaintenanceWindowOpt{
+			InstanceId: d.Id(),
+			StartTime: d.Get("maintain_begin").(string),
+			EndTime:   d.Get("maintain_end").(string),
+		}
+		retryFunc := func() (interface{}, bool, error) {
+			err = instances.ModifyMaintenanceWindow(client, windowOpts)
+			retry, err := handleMultiOperationsError(err)
+			return nil, retry, err
+		}
+		_, err = common.RetryContextWithWaitForState(&common.RetryContextWithWaitForStateParam{
+			Ctx:          ctx,
+			RetryFunc:    retryFunc,
+			WaitFunc:     instanceStateRefreshFunc(client, d.Id()),
+			WaitTarget:   []string{"normal"},
+			Timeout:      d.Timeout(schema.TimeoutUpdate),
+			DelayTimeout: 1 * time.Second,
+			PollInterval: 10 * time.Second,
+		})
+		if err != nil {
+			return diag.Errorf("error setting maintenance window of the DDS instance %s: %s", d.Id(), err)
+		}
+	}
+
 
 	if d.HasChange("port") {
 		retryFunc := func() (interface{}, bool, error) {
