@@ -1,4 +1,4 @@
 ---
 enhancements:
   - |
-    **[IAM]** Added validation of group name length to `opentelekomcloud_identity_group_v3`
+    **[IAM]** Added validation of group name length to `opentelekomcloud_identity_group_v3` (`#3148 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3148>`_)
