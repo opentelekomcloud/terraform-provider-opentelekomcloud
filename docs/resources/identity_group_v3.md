@@ -29,7 +29,7 @@ resource "opentelekomcloud_identity_group_v3" "group_1" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the group.The length is less than or equal to 64 bytes.
+* `name` - (Required) The name of the group. The length is less than or equal to 64 bytes.
 
 * `description` - (Optional) A description of the group.
 
@@ -39,7 +39,10 @@ The following arguments are supported:
 
 The following attributes are exported:
 
+* `description` - See Argument Reference above.
 * `domain_id` - See Argument Reference above.
+* `id` - The resource ID
+* `name` - See Argument Reference above.
 
 ## Import
 
