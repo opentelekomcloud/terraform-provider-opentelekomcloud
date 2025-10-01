@@ -20,6 +20,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/csbs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/css"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/cts"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dataarts"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dcaas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dcs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ddm"
@@ -488,6 +489,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_css_cluster_restart_v1":                    css.ResourceCssClusterRestartV1(),
 			"opentelekomcloud_css_configuration_v1":                      css.ResourceCssConfigurationV1(),
 			"opentelekomcloud_css_snapshot_configuration_v1":             css.ResourceCssSnapshotConfigurationV1(),
+			"opentelekomcloud_dataarts_cluster_v11":                      dataarts.ResourceDataArtsClusterV11(),
 			"opentelekomcloud_direct_connect_v2":                         dcaas.ResourceDirectConnectV2(),
 			"opentelekomcloud_dc_endpoint_group_v2":                      dcaas.ResourceDCEndpointGroupV2(),
 			"opentelekomcloud_dc_virtual_interface_v2":                   dcaas.ResourceVirtualInterfaceV2(),

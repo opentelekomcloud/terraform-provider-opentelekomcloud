@@ -944,6 +944,20 @@ func (c *Config) CsbsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) DataArtsV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewDataArtsV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) DataArtsV11Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewDataArtsV11(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) DCaaSV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewDCaaSV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
