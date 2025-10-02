@@ -75,6 +75,7 @@ func ResourceTaurusDbV3Instance() *schema.Resource {
 			"enterprise_project_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"dedicated_resource_id": {
 				Type:     schema.TypeString,

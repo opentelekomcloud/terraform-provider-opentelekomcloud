@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_taurusdb_mysql_instance_v3"
 sidebar_current: "docs-opentelekomcloud-resource-taurusdb-mysql-instance-v3"
 description: |-
-  Manages an SWR Repository resource within OpenTelekomCloud.
+  Manages an TaurusDb mysql instance resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud_taurusdb_mysql_instance_v3
