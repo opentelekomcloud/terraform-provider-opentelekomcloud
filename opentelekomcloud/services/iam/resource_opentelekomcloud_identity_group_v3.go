@@ -35,7 +35,9 @@ func ResourceIdentityGroupV3() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: common.ValidateName,
+				ValidateFunc: validation.StringLenBetween(1, 64),
+
+,
 			},
 
 			"description": {
