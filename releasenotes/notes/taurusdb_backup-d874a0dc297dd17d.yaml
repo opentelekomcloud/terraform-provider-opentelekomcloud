@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    **New Resource:** ``opentelekomcloud_taurusdb_mysql_backup_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+fix:
+  - |
+    **[TaurusDb]** Fix `enterprise_project_id` parameter set for ``opentelekomcloud_taurusdb_mysql_instance_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
