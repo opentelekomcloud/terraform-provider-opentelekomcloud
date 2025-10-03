@@ -268,8 +268,8 @@ resource "opentelekomcloud_enterprise_vpn_connection_v5" "pol" {
     authentication_algorithm = "sha2-512"
     encryption_algorithm     = "aes-256"
     lifetime_seconds         = 172800
-    peer_id_type = "ip"
-    peer_id      = "192.168.1.254"
+    peer_id_type             = "ip"
+    peer_id                  = "192.168.1.254"
     dpd {
       timeout  = 15
       interval = 30
@@ -310,8 +310,8 @@ resource "opentelekomcloud_enterprise_vpn_connection_v5" "pol" {
     authentication_algorithm = "sha2-512"
     encryption_algorithm     = "aes-256"
     lifetime_seconds         = 172800
-    peer_id_type = "ip"
-    peer_id      = "192.168.2.254"
+    peer_id_type             = "ip"
+    peer_id                  = "192.168.2.254"
     dpd {
       timeout  = 15
       interval = 30
