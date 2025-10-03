@@ -664,6 +664,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_swr_repository_v2":                         swr.ResourceSwrRepositoryV2(),
 			"opentelekomcloud_taurusdb_mysql_backup_v3":                  taurusdb.ResourceTaurusDbMysqlBackup(),
 			"opentelekomcloud_taurusdb_mysql_instance_v3":                taurusdb.ResourceTaurusDbV3Instance(),
+			"opentelekomcloud_taurusdb_mysql_proxy_v3":                   taurusdb.ResourceTaurusDbV3Proxy(),
 			"opentelekomcloud_tms_tags_v1":                               tms.ResourceTmsTagV1(),
 			"opentelekomcloud_tms_resource_tags_v1":                      tms.ResourceTmsResourceTagsV1(),
 			"opentelekomcloud_vpc_bandwidth_associate_v2":                vpc.ResourceBandwidthAssociateV2(),
