@@ -410,12 +410,6 @@ func buildConnectionIkePolicy(d *schema.ResourceData) *connection.IkePolicy {
 			DhGroup:                 raw["dh_group"].(string),
 			Dpd:                     buildConnectionDPD(raw["dpd"]),
 		}
-		// if raw["local_id_type"].(string) != "ip" {
-		// 	params.LocalId = raw["local_id"].(string)
-		// }
-		// if raw["peer_id_type"].(string) != "ip" {
-		// 	params.PeerId = raw["peer_id"].(string)
-		// }
 		return &params
 	}
 	return nil
