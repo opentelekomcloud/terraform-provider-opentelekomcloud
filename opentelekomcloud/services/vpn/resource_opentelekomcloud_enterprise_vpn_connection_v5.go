@@ -402,17 +402,13 @@ func buildConnectionIkePolicy(d *schema.ResourceData) *connection.IkePolicy {
 			IkeVersion:              raw["ike_version"].(string),
 			LifetimeSeconds:         pointerto.Int(raw["lifetime_seconds"].(int)),
 			LocalIdType:             raw["local_id_type"].(string),
+			LocalId:                 raw["local_id"].(string),
 			PeerIdType:              raw["peer_id_type"].(string),
+			PeerId:                  raw["peer_id"].(string),
 			PhaseOneNegotiationMode: raw["phase_one_negotiation_mode"].(string),
 			AuthenticationMethod:    raw["authentication_method"].(string),
 			DhGroup:                 raw["dh_group"].(string),
 			Dpd:                     buildConnectionDPD(raw["dpd"]),
-		}
-		if raw["local_id_type"].(string) != "ip" {
-			params.LocalId = raw["local_id"].(string)
-		}
-		if raw["peer_id_type"].(string) != "ip" {
-			params.PeerId = raw["peer_id"].(string)
 		}
 		return &params
 	}

@@ -114,6 +114,27 @@ func TestAccConnection_policy(t *testing.T) {
 					resource.TestCheckResourceAttr(rName, "ikepolicy.0.authentication_algorithm", "sha2-512"),
 					resource.TestCheckResourceAttr(rName, "ikepolicy.0.encryption_algorithm", "aes-256"),
 					resource.TestCheckResourceAttr(rName, "ikepolicy.0.lifetime_seconds", "172800"),
+					resource.TestCheckResourceAttr(rName, "ikepolicy.0.peer_id_type", "ip"),
+					resource.TestCheckResourceAttr(rName, "ikepolicy.0.peer_id", "192.168.1.254"),
+					resource.TestCheckResourceAttr(rName, "ipsecpolicy.0.authentication_algorithm", "sha2-512"),
+					resource.TestCheckResourceAttr(rName, "ipsecpolicy.0.encryption_algorithm", "aes-256"),
+					resource.TestCheckResourceAttr(rName, "ipsecpolicy.0.lifetime_seconds", "7200"),
+				),
+			},
+			{
+				Config: testEvpnConnection_policy_update(name, ipAddress),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(rName, "name", name),
+					resource.TestCheckResourceAttr(rName, "vpn_type", "POLICY"),
+					resource.TestCheckResourceAttr(rName, "policy_rules.0.source", "192.168.11.0/24"),
+					resource.TestCheckResourceAttr(rName, "policy_rules.0.destination.0", "192.168.12.0/24"),
+					resource.TestCheckResourceAttr(rName, "policy_rules.0.destination.1", "192.168.13.0/24"),
+					resource.TestCheckResourceAttr(rName, "ikepolicy.0.authentication_algorithm", "sha2-512"),
+					resource.TestCheckResourceAttr(rName, "ikepolicy.0.encryption_algorithm", "aes-256"),
+					resource.TestCheckResourceAttr(rName, "ikepolicy.0.lifetime_seconds", "172800"),
+					resource.TestCheckResourceAttr(rName, "ikepolicy.0.peer_id_type", "ip"),
+					resource.TestCheckResourceAttr(rName, "ikepolicy.0.peer_id", "192.168.2.254"),
 					resource.TestCheckResourceAttr(rName, "ipsecpolicy.0.authentication_algorithm", "sha2-512"),
 					resource.TestCheckResourceAttr(rName, "ipsecpolicy.0.encryption_algorithm", "aes-256"),
 					resource.TestCheckResourceAttr(rName, "ipsecpolicy.0.lifetime_seconds", "7200"),
@@ -247,6 +268,55 @@ resource "opentelekomcloud_enterprise_vpn_connection_v5" "pol" {
     authentication_algorithm = "sha2-512"
     encryption_algorithm     = "aes-256"
     lifetime_seconds         = 172800
+    peer_id_type             = "ip"
+    peer_id                  = "192.168.1.254"
+    dpd {
+      timeout  = 15
+      interval = 30
+      msg      = "seq-hash-notify"
+    }
+  }
+
+  ipsecpolicy {
+    authentication_algorithm = "sha2-512"
+    encryption_algorithm     = "aes-256"
+    lifetime_seconds         = 7200
+  }
+}
+`, testEvpnGateway_basic(name), testCustomerGateway_basic(name, ip), name)
+}
+
+func testEvpnConnection_policy_update(name, ip string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_enterprise_vpn_connection_v5" "pol" {
+  name                = "%s"
+  gateway_id          = opentelekomcloud_enterprise_vpn_gateway_v5.gw_1.id
+  gateway_ip          = opentelekomcloud_vpc_eip_v1.eip_1.id
+  customer_gateway_id = opentelekomcloud_enterprise_vpn_customer_gateway_v5.cgw_1.id
+  peer_subnets        = ["192.168.55.0/24"]
+  vpn_type            = "policy"
+  psk                 = "Test@123"
+
+  policy_rules {
+    source      = "192.168.11.0/24"
+    destination = ["192.168.12.0/24", "192.168.13.0/24"]
+  }
+
+  ikepolicy {
+    authentication_algorithm = "sha2-512"
+    encryption_algorithm     = "aes-256"
+    lifetime_seconds         = 172800
+    peer_id_type             = "ip"
+    peer_id                  = "192.168.2.254"
+    dpd {
+      timeout  = 15
+      interval = 30
+      msg      = "seq-hash-notify"
+    }
   }
 
   ipsecpolicy {
