@@ -310,6 +310,9 @@ The following arguments are supported:
   variable. If not set, default value is used.
   Default: `60` seconds.
 
+* `enterprise_project_id` - (Optional) Default Enterprise Project ID for supported resources.
+  If omitted, the `OS_ENTERPRISE_PROJECT_ID` environment variable is used.
+
 ## Additional Logging
 
 This provider has the ability to log all HTTP requests and responses between

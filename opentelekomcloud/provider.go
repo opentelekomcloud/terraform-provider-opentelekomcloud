@@ -261,6 +261,12 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("OS_BACKOFF_RETRY_TIMEOUT", 60),
 				Description: common.Descriptions["backoff_retry_timeout"],
 			},
+			"enterprise_project_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: common.Descriptions["enterprise_project_id"],
+				DefaultFunc: schema.EnvDefaultFunc("OS_ENTERPRISE_PROJECT_ID", ""),
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
