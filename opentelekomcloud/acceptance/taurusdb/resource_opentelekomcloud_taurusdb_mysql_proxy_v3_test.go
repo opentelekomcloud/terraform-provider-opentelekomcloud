@@ -16,20 +16,49 @@ import (
 
 const proxyResourceName = "opentelekomcloud_taurusdb_mysql_proxy_v3.test"
 
+func getTaurusDbMysqlProxyResourceFunc(conf *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
+	client, err := conf.TaurusDBV3Client(env.OS_REGION_NAME)
+	if err != nil {
+		return nil, fmt.Errorf("error creating TaurusDB client: %s", err)
+	}
+
+	instanceID := state.Primary.Attributes["instance_id"]
+	proxyID := state.Primary.ID
+
+	proxies, err := proxy.List(client, instanceID, proxy.ListOpts{})
+	if err != nil {
+		return nil, fmt.Errorf("error listing proxies: %s", err)
+	}
+
+	for _, p := range proxies {
+		if p.Proxy.PoolId == proxyID {
+			return p, nil
+		}
+	}
+
+	return nil, fmt.Errorf("TaurusDB MySQL proxy not found: %s", proxyID)
+}
+
 func TestAccTaurusDBMySQLProxyV3_basic(t *testing.T) {
-	var proxyInstance proxy.ProxyInstanceResponse
+	var obj interface{}
 
 	name := "tf_taurusdb_proxy_" + acctest.RandString(3)
+
+	rc := common.InitResourceCheck(
+		proxyResourceName,
+		&obj,
+		getTaurusDbMysqlProxyResourceFunc,
+	)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckTaurusDBProxyDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccTaurusDBMySQLProxyV3Basic(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTaurusDBProxyExists(proxyResourceName, &proxyInstance),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttrSet(proxyResourceName, "instance_id"),
 					resource.TestCheckResourceAttrSet(proxyResourceName, "flavor"),
 					resource.TestCheckResourceAttr(proxyResourceName, "node_num", "2"),
@@ -45,7 +74,7 @@ func TestAccTaurusDBMySQLProxyV3_basic(t *testing.T) {
 			{
 				Config: testAccTaurusDBMySQLProxyV3Update(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTaurusDBProxyExists(proxyResourceName, &proxyInstance),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(proxyResourceName, "node_num", "3"),
 					resource.TestCheckResourceAttr(proxyResourceName, "master_node_weight.#", "1"),
 					resource.TestCheckResourceAttr(proxyResourceName, "readonly_nodes_weight.#", "2"),
@@ -65,16 +94,25 @@ func TestAccTaurusDBMySQLProxyV3_basic(t *testing.T) {
 }
 
 func TestAccTaurusDBMySQLProxyV3_reduceNodes(t *testing.T) {
+	var obj interface{}
+
 	name := "tf_taurusdb_proxy_" + acctest.RandString(3)
+
+	rc := common.InitResourceCheck(
+		proxyResourceName,
+		&obj,
+		getTaurusDbMysqlProxyResourceFunc,
+	)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckTaurusDBProxyDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccTaurusDBMySQLProxyV3WithNodes(name, 3),
 				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(proxyResourceName, "node_num", "3"),
 				),
 			},
@@ -84,72 +122,6 @@ func TestAccTaurusDBMySQLProxyV3_reduceNodes(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccCheckTaurusDBProxyDestroy(s *terraform.State) error {
-	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.TaurusDBV3Client(env.OS_REGION_NAME)
-	if err != nil {
-		return fmt.Errorf("error creating TaurusDB client: %s", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_taurusdb_mysql_proxy_v3" {
-			continue
-		}
-
-		instanceID := rs.Primary.Attributes["instance_id"]
-		proxyID := rs.Primary.ID
-
-		proxies, err := proxy.List(client, instanceID, proxy.ListOpts{})
-		if err != nil {
-			return nil
-		}
-
-		for _, p := range proxies {
-			if p.Proxy.PoolId == proxyID {
-				return fmt.Errorf("TaurusDB MySQL proxy still exists: %s", proxyID)
-			}
-		}
-	}
-
-	return nil
-}
-
-func testAccCheckTaurusDBProxyExists(n string, proxyInstance *proxy.ProxyInstanceResponse) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no ID is set")
-		}
-
-		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.TaurusDBV3Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating TaurusDB client: %s", err)
-		}
-
-		instanceID := rs.Primary.Attributes["instance_id"]
-		proxyID := rs.Primary.ID
-
-		proxies, err := proxy.List(client, instanceID, proxy.ListOpts{})
-		if err != nil {
-			return fmt.Errorf("error listing proxies: %s", err)
-		}
-
-		for _, p := range proxies {
-			if p.Proxy.PoolId == proxyID {
-				*proxyInstance = p
-				return nil
-			}
-		}
-
-		return fmt.Errorf("TaurusDB MySQL proxy not found: %s", proxyID)
-	}
 }
 
 func testAccTaurusDBProxyImportStateFunc(name string) resource.ImportStateIdFunc {
