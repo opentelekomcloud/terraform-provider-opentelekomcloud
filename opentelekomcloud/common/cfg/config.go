@@ -22,6 +22,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/hashicorp/go-cleanhttp"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/jinzhu/copier"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
@@ -64,6 +65,7 @@ type Config struct {
 	MaxRetries          int
 	MaxBackoffRetries   int
 	BackoffRetryTimeout int
+	EnterpriseProjectID string
 
 	UserAgent string
 
@@ -1399,6 +1401,24 @@ func SetOptionalEndpoint(cfg *aws.Config) string {
 		log.Printf("[INFO] Setting custom metadata endpoint: %q", endpoint)
 		cfg.Endpoint = aws.String(endpoint)
 		return endpoint
+	}
+	return ""
+}
+
+// GetEnterpriseProjectID returns the enterprise_project_id that was specified in the resource.
+// If it was not set, the provider-level value is checked. The provider-level value can
+// either be set by the `enterprise_project_id` argument or by OS_ENTERPRISE_PROJECT_ID.
+// If the provider-level value
+func (c *Config) GetEnterpriseProjectID(d *schema.ResourceData, defaultEps ...string) string {
+	if v, ok := d.GetOk("enterprise_project_id"); ok {
+		return v.(string)
+	}
+
+	if c.EnterpriseProjectID != "" {
+		return c.EnterpriseProjectID
+	}
+	if len(defaultEps) > 0 {
+		return defaultEps[0]
 	}
 	return ""
 }
