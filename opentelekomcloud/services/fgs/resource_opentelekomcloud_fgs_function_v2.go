@@ -58,6 +58,10 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
+			"app": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"code_type": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -68,6 +72,10 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"functiongraph_version": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -77,13 +85,10 @@ func ResourceFgsFunctionV2() *schema.Resource {
 					"v1", "v2",
 				}, false),
 			},
-			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"app": {
-				Type:     schema.TypeString,
-				Optional: true,
+			"func_code": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				StateFunc: hashcode.DecodeHashAndHexEncode,
 			},
 			"code_url": {
 				Type:     schema.TypeString,
@@ -93,6 +98,12 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+			},
+			"depend_list": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"user_data": {
 				Type:     schema.TypeString,
@@ -112,17 +123,6 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"func_code": {
-				Type:      schema.TypeString,
-				Optional:  true,
-				StateFunc: hashcode.DecodeHashAndHexEncode,
-			},
-			"depend_list": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
 			"initializer_handler": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -130,6 +130,11 @@ func ResourceFgsFunctionV2() *schema.Resource {
 			},
 			"initializer_timeout": {
 				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
@@ -173,6 +178,12 @@ func ResourceFgsFunctionV2() *schema.Resource {
 			"network_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				RequiredWith: []string{"vpc_id"},
+			},
+			"dns_list": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
 				RequiredWith: []string{"vpc_id"},
 			},
 			"peering_cidr": {
@@ -263,6 +274,14 @@ func ResourceFgsFunctionV2() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
+						"user_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"user_group_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 					},
 				},
 			},
@@ -280,9 +299,12 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "The version name.",
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 						"aliases": {
 							Type:     schema.TypeList,
@@ -335,6 +357,11 @@ func ResourceFgsFunctionV2() *schema.Resource {
 					},
 				},
 			},
+			"concurrency_num": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
 			"gpu_memory": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -370,6 +397,27 @@ func ResourceFgsFunctionV2() *schema.Resource {
 			"heartbeat_handler": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
+			},
+			"restore_hook_handler": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"lts_custom_tag": {
+				Type:             schema.TypeMap,
+				Optional:         true,
+				Computed:         true,
+				Elem:             &schema.Schema{Type: schema.TypeString},
+				DiffSuppressFunc: common.SuppressMapDiffs(),
+			},
+			"enable_lts_log": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"restore_hook_timeout": {
+				Type:     schema.TypeInt,
+				Optional: true,
 			},
 			"gpu_type": {
 				Type:     schema.TypeString,
@@ -381,17 +429,15 @@ func ResourceFgsFunctionV2() *schema.Resource {
 			},
 			"ephemeral_storage": {
 				Type:     schema.TypeInt,
+				Optional: true,
 				Computed: true,
 			},
 			"enable_auth_in_header": {
 				Type:     schema.TypeBool,
+				Optional: true,
 				Computed: true,
 			},
 			"version": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"dns_list": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -447,17 +493,35 @@ func buildCustomImage(imageConfig []interface{}) *function.CustomImage {
 		return nil
 	}
 
-	cfg := imageConfig[0].(map[string]interface{})
+	c := imageConfig[0].(map[string]interface{})
 	return &function.CustomImage{
 		Enabled:    pointerto.Bool(true),
-		Image:      cfg["url"].(string),
-		Command:    cfg["command"].(string),
-		Args:       cfg["args"].(string),
-		WorkingDir: cfg["working_dir"].(string),
+		Image:      c["url"].(string),
+		Command:    c["command"].(string),
+		Args:       c["args"].(string),
+		WorkingDir: c["working_dir"].(string),
+		UID:        c["user_id"].(string),
+		GID:        c["user_group_id"].(string),
 	}
 }
 
-func buildFgsFunctionParameters(d *schema.ResourceData) (function.CreateOpts, error) {
+// isAttrSet returns true if an attribute was explicitly set in configuration.
+func isAttrSet(d *schema.ResourceData, key string) bool {
+	rc := d.GetRawConfig()
+	// If raw config is unknown or null, nothing is set.
+	if !rc.IsKnown() || rc.IsNull() {
+		return false
+	}
+	// Ensure the attribute exists on the object type before accessing it.
+	t := rc.Type()
+	if !t.HasAttribute(key) {
+		return false
+	}
+	attr := rc.GetAttr(key)
+	return attr.IsKnown() && !attr.IsNull()
+}
+
+func buildFgsFunctionParameters(config *cfg.Config, d *schema.ResourceData) (function.CreateOpts, error) {
 	// check app
 	app, appOk := d.GetOk("app")
 	if !appOk {
@@ -471,6 +535,17 @@ func buildFgsFunctionParameters(d *schema.ResourceData) (function.CreateOpts, er
 	agencyV := ""
 	if v, ok := d.GetOk("agency"); ok {
 		agencyV = v.(string)
+	}
+
+	var ltsTags map[string]string
+	if v, ok := d.GetOk("lts_custom_tag"); ok {
+		raw := v.(map[string]interface{})
+		ltsTags = make(map[string]string, len(raw))
+		for k, val := range raw {
+			if s, ok := val.(string); ok {
+				ltsTags[k] = s
+			}
+		}
 	}
 
 	result := function.CreateOpts{
@@ -493,8 +568,13 @@ func buildFgsFunctionParameters(d *schema.ResourceData) (function.CreateOpts, er
 		CustomImage:         buildCustomImage(d.Get("custom_image").([]interface{})),
 		GpuMemory:           pointerto.Int(d.Get("gpu_memory").(int)),
 		EnableDynamicMemory: pointerto.Bool(d.Get("enable_dynamic_memory").(bool)),
+		IsStatefulFunction:  pointerto.Bool(d.Get("is_stateful_function").(bool)),
+		LtsCustomTag:        ltsTags,
+		EnterpriseProjectId: config.GetEnterpriseProjectID(d),
 	}
-
+	if isAttrSet(d, "enable_lts_log") {
+		result.EnableLtsLog = pointerto.Bool(d.Get("enable_lts_log").(bool))
+	}
 	if v, ok := d.GetOk("func_code"); ok {
 		funcCode := function.FuncCode{
 			File: hashcode.TryBase64EncodeString(v.(string)),
@@ -568,7 +648,7 @@ func resourceFgsFunctionV2Create(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	createOpts, err := buildFgsFunctionParameters(d)
+	createOpts, err := buildFgsFunctionParameters(config, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -581,8 +661,9 @@ func resourceFgsFunctionV2Create(ctx context.Context, d *schema.ResourceData, me
 	d.SetId(f.FuncURN)
 	urn := resourceFgsFunctionUrn(d.Id())
 	if d.HasChanges("vpc_id", "network_id", "peering_cidr", "func_mounts", "app_agency", "initializer_handler",
-		"initializer_timeout", "enable_class_isolation") {
-		err := resourceFgsFunctionMetadataUpdate(fgsClient, urn, d)
+		"initializer_timeout", "enable_class_isolation", "concurrency_num", "ephemeral_storage", "lts_custom_tag",
+		"restore_hook_timeout", "restore_hook_handler", "heartbeat_handler") {
+		err := resourceFgsFunctionMetadataUpdate(config, fgsClient, urn, d)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -658,6 +739,17 @@ func createFunctionVersions(client *golangsdk.ServiceClient, functionUrn string,
 func setFgsFunctionApp(d *schema.ResourceData, app string) error {
 	if _, ok := d.GetOk("app"); ok {
 		return d.Set("app", app)
+	}
+	return nil
+}
+
+func setFgsFunctionLtsTags(d *schema.ResourceData, tags map[string]string) error {
+	if _, ok := d.GetOk("lts_custom_tag"); ok {
+		m := make(map[string]interface{}, len(tags))
+		for k, v := range tags {
+			m[k] = v
+		}
+		return d.Set("lts_custom_tag", m)
 	}
 	return nil
 }
@@ -917,6 +1009,11 @@ func resourceFgsFunctionV2Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("allow_ephemeral_storage", f.AllowEphemeralStorage),
 		d.Set("ephemeral_storage", f.EphemeralStorage),
 		d.Set("enable_auth_in_header", f.EnableAuthInHeader),
+		d.Set("enterprise_project_id", f.EnterpriseProjectId),
+		setFgsFunctionLtsTags(d, f.LtsCustomTag),
+		d.Set("concurrency_num", f.StrategyConfig.ConcurrentNum),
+		d.Set("enable_lts_log", f.EnableLtsLog),
+		d.Set("tags", d.Get("tags")),
 	)
 
 	reservedInstances, err := getReservedInstanceConfig(fgsClient, d)
@@ -1168,8 +1265,8 @@ func resourceFgsFunctionV2Update(ctx context.Context, d *schema.ResourceData, me
 		"user_data", "agency", "app_agency", "description", "initializer_handler", "initializer_timeout",
 		"vpc_id", "network_controller", "network_id", "mount_user_id", "mount_user_group_id", "func_mounts", "custom_image",
 		"log_group_id", "log_topic_id", "log_group_name", "log_topic_name", "gpu_memory", "gpu_type",
-		"pre_stop_handler", "pre_stop_timeout", "enable_dynamic_memory") {
-		err := resourceFgsFunctionMetadataUpdate(fgsClient, urn, d)
+		"pre_stop_handler", "pre_stop_timeout", "enable_dynamic_memory", "enable_lts_log") {
+		err := resourceFgsFunctionMetadataUpdate(config, fgsClient, urn, d)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -1227,7 +1324,7 @@ func resourceFgsFunctionV2Delete(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn string, d *schema.ResourceData) error {
+func resourceFgsFunctionMetadataUpdate(config *cfg.Config, fgsClient *golangsdk.ServiceClient, urn string, d *schema.ResourceData) error {
 	// check app
 	app, appOk := d.GetOk("app")
 	if !appOk {
@@ -1241,6 +1338,17 @@ func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn s
 	agencyV := ""
 	if v, ok := d.GetOk("agency"); ok {
 		agencyV = v.(string)
+	}
+
+	var ltsTags map[string]string
+	if v, ok := d.GetOk("lts_custom_tag"); ok {
+		raw := v.(map[string]interface{})
+		ltsTags = make(map[string]string, len(raw))
+		for k, val := range raw {
+			if s, ok := val.(string); ok {
+				ltsTags[k] = s
+			}
+		}
 	}
 
 	updateMetadateOpts := function.UpdateFuncMetadataOpts{
@@ -1264,6 +1372,16 @@ func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn s
 		PeeringCIDR:          d.Get("peering_cidr").(string),
 		EnableDynamicMemory:  pointerto.Bool(d.Get("enable_dynamic_memory").(bool)),
 		EnableClassIsolation: pointerto.Bool(d.Get("enable_class_isolation").(bool)),
+		DomainNames:          d.Get("dns_list").(string),
+		StrategyConfig:       buildFunctionStrategyConfig(d.Get("concurrency_num").(int)),
+		IsStatefulFunction:   pointerto.Bool(d.Get("is_stateful_function").(bool)),
+		EnterpriseProjectId:  config.GetEnterpriseProjectID(d),
+		EnableAuthInHeader:   pointerto.Bool(d.Get("enable_auth_in_header").(bool)),
+		EphemeralStorage:     pointerto.Int(d.Get("ephemeral_storage").(int)),
+		HeartbeatHandler:     d.Get("heartbeat_handler").(string),
+		RestoreHookHandler:   d.Get("heartbeat_handler").(string),
+		RestoreHookTimeout:   pointerto.Int(d.Get("restore_hook_timeout").(int)),
+		LtsCustomTag:         ltsTags,
 	}
 
 	if _, ok := d.GetOk("vpc_id"); ok {
@@ -1284,6 +1402,9 @@ func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn s
 		}
 		updateMetadateOpts.LogConfig = &logConfig
 	}
+	if isAttrSet(d, "enable_lts_log") {
+		updateMetadateOpts.EnableLtsLog = pointerto.Bool(d.Get("enable_lts_log").(bool))
+	}
 
 	updateMetadateOpts.NetworkController = buildNetworkControlConfig(d)
 
@@ -1296,6 +1417,16 @@ func resourceFgsFunctionMetadataUpdate(fgsClient *golangsdk.ServiceClient, urn s
 	}
 
 	return nil
+}
+
+func buildFunctionStrategyConfig(concurrencyNum int) *function.StrategyConfig {
+	if concurrencyNum < 1 {
+		return nil
+	}
+
+	return &function.StrategyConfig{
+		ConcurrentNum: concurrencyNum,
+	}
 }
 
 func resourceFgsFunctionCodeUpdate(fgsClient *golangsdk.ServiceClient, urn string, d *schema.ResourceData) error {

@@ -141,7 +141,7 @@ func DataSourceFunctionsV2() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"fgs_version": {
+						"functiongraph_version": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -155,20 +155,47 @@ func DataSourceFunctionsV2() *schema.Resource {
 func filterFunctions(config *cfg.Config, d *schema.ResourceData, functions []function.FuncGraph) []function.FuncGraph {
 	result := functions
 
-	if name, ok := d.GetOk("name"); ok && len(result) > 0 {
-		// result = filtered by func_name
+	if nameRaw, ok := d.GetOk("name"); ok && len(result) > 0 {
+		name := nameRaw.(string)
+		filtered := make([]function.FuncGraph, 0, len(result))
+		for _, fn := range result {
+			if fn.FuncName == name {
+				filtered = append(filtered, fn)
+			}
+		}
+		result = filtered
 	}
 
-	if urn, ok := d.GetOk("urn"); ok && len(result) > 0 {
-		// result = filtered by func_urn
+	if urnRaw, ok := d.GetOk("urn"); ok && len(result) > 0 {
+		urn := urnRaw.(string)
+		filtered := make([]function.FuncGraph, 0, len(result))
+		for _, fn := range result {
+			if fn.FuncURN == urn {
+				filtered = append(filtered, fn)
+			}
+		}
+		result = filtered
 	}
 
-	if runtime, ok := d.GetOk("runtime"); ok && len(result) > 0 {
-		// result = filtered by runtime
+	if runtimeRaw, ok := d.GetOk("runtime"); ok && len(result) > 0 {
+		runtime := runtimeRaw.(string)
+		filtered := make([]function.FuncGraph, 0, len(result))
+		for _, fn := range result {
+			if fn.Runtime == runtime {
+				filtered = append(filtered, fn)
+			}
+		}
+		result = filtered
 	}
 
-	if epsId := config.GetEnterpriseProjectID(d); epsId != "" && len(result) > 0 {
-		// result = filtered by enterprise_project_id
+	if epsID := config.GetEnterpriseProjectID(d); epsID != "" && len(result) > 0 {
+		filtered := make([]function.FuncGraph, 0, len(result))
+		for _, fn := range result {
+			if fn.EnterpriseProjectId == epsID {
+				filtered = append(filtered, fn)
+			}
+		}
+		result = filtered
 	}
 
 	return result
@@ -205,7 +232,7 @@ func flattenFunctions(fns []function.FuncGraph) []map[string]interface{} {
 			"enterprise_project_id": fn.EnterpriseProjectId,
 			"log_group_id":          fn.LogGroupID,
 			"log_stream_id":         fn.LogStreamID,
-			"fgs_version":           fn.Type,
+			"functiongraph_version": fn.Type,
 		})
 	}
 
