@@ -59,4 +59,6 @@ var Descriptions = map[string]string{
 	"backoff_retry_timeout": "Timeout in seconds for backoff retry",
 
 	"passcode": "One-time MFA passcode",
+
+	"enterprise_project_id": "enterprise project id",
 }

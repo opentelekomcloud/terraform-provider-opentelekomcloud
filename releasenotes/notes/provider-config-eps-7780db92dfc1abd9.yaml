@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[Provider]** Added ``enterprise_project_id`` argument (`#3154 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3154>`_)
