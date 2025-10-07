@@ -1379,7 +1379,7 @@ func resourceFgsFunctionMetadataUpdate(config *cfg.Config, fgsClient *golangsdk.
 		EnableAuthInHeader:   pointerto.Bool(d.Get("enable_auth_in_header").(bool)),
 		EphemeralStorage:     pointerto.Int(d.Get("ephemeral_storage").(int)),
 		HeartbeatHandler:     d.Get("heartbeat_handler").(string),
-		RestoreHookHandler:   d.Get("heartbeat_handler").(string),
+		RestoreHookHandler:   d.Get("restore_hook_handler").(string),
 		RestoreHookTimeout:   pointerto.Int(d.Get("restore_hook_timeout").(int)),
 		LtsCustomTag:         ltsTags,
 	}
