@@ -848,7 +848,13 @@ func TestAccFgsV2Function_reservedInstance_version(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      rc.CheckResourceDestroy(),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {
+				Source:            "hashicorp/time",
+				VersionConstraint: "0.12.1",
+			},
+		},
+		CheckDestroy: rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFgsV2Function_reservedInstance_step1(name),
@@ -943,6 +949,14 @@ func TestAccFgsV2Function_reservedInstance_alias(t *testing.T) {
 
 func testAccFgsV2Function_reservedInstance_step1(rName string) string {
 	return fmt.Sprintf(`
+# Using the current time as the start time.
+resource "time_static" "test" {}
+
+# Using the current time one day later as the expiration time.
+resource "time_offset" "test" {
+  offset_days = 1
+}
+
 resource "opentelekomcloud_fgs_function_v2" "test" {
   name        = "%[1]s"
   app         = "default"
@@ -962,8 +976,8 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
       cron_configs {
         name         = "scheme-waekcy"
         cron         = "0 */10 * * * ?"
-        start_time   = "1708342889"
-        expired_time = "1739878889"
+        start_time   = time_static.test.unix
+        expired_time = time_offset.test.unix
         count        = 2
       }
     }

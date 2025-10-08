@@ -1,0 +1,6 @@
+---
+enhancements:
+  |
+  **[FGS]** Refactoring of ``resource/opentelekomcloud_fgs_function_v2`` (`#3155 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3155>`_)
+  |
+  **[FGS]** New data-source ``opentelekomcloud_fgs_functions_v2`` (`#3155 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3155>`_)

@@ -202,17 +202,19 @@ The following arguments are supported:
     + **Node.js10.16**
     + **Node.js12.13**
     + **Node.js14.18**
+    + **Node.js16.17**
+    + **Node.js18.15**
     + **Python2.7**
     + **Python3.6**
     + **Python3.9**
-    + **Go1.8**
+    + **Python3.10**
     + **Go1.x**
-    + **C#(.NET Core 2.0)**
     + **C#(.NET Core 2.1)**
     + **C#(.NET Core 3.1)**
     + **PHP7.3**
     + **Custom**
     + **http**
+    + **Custom Image**
 
 * `timeout` - (Required, Int) Specifies the timeout interval of the function, in seconds.
   The value ranges from `3` to `900`.
@@ -322,6 +324,50 @@ The following arguments are supported:
 * `enable_dynamic_memory` - (Optional, Boolean) Specifies whether to enable dynamic memory allocation.
 
 * `enable_class_isolation` - (Optional, Boolean) Specifies whether to enable class isolation.
+
+* `enterprise_project_id` - (Optional, String) Specifies the ID of the enterprise project to which the
+  function belongs.
+
+* `dns_list` - (Optional, String) Specifies the private DNS configuration of the function network.
+  Private DNS list is associated to the function by a string in the following format:
+  `[{\"id\":\"ff8080828a07ffea018a17184aa310f5\","domain_name":"functiondebug.example1.com."}]`
+
+  -> Ensure the agency with DNS management permissions specified before using this parameter.
+
+* `enable_lts_log` - (Optional, Bool) Specifies whether to enable the LTS logging feature.
+  The valid values are as follows:
+  + **null** or omit this parameter definition: Using the default value configured on the FunctionGraph service to
+    configure the LTS logging feature.
+  + **true**: Explicitly enable the LTS logging feature.
+  + **false**: Explicitly disable the LTS logging feature.
+
+* `concurrency_num` - (Optional, Int) Specifies the number of concurrent requests of the function.
+  The valid value is range from `1` to `1,000`, the default value is `1`.
+
+  -> 1. This parameter is only supported by the `v2` version of the function.
+  <br>2. This parameter is available only when the `runtime` parameter is set to **http** or **Custom Image**.
+
+* `is_stateful_function` - (Optional, Bool) Specifies whether the function is a stateful function.
+  Defaults to **false**.
+
+* `enable_auth_in_header` - (Optional, Bool) Specifies whether the authentication in the request header is enabled.
+  Defaults to **false**.
+
+* `ephemeral_storage` - (Optional, Int) Specifies the size of the function ephemeral storage.
+  The valid values are as follows:
+  + **512**
+  + **10240**
+
+  Defaults to `512`. Only custom image or http runtime supported.
+
+* `heartbeat_handler` - (Optional, String) Specifies the heartbeat handler of the function.
+  The rule is **xx.xx**, such as **com.huawei.demo.TriggerTests.heartBeat**, it must contain periods (.).
+  The heartbeat function entry must be in the same file as the function execution entry.
+
+* `lts_custom_tag` - (Optional, Map) Specifies the custom tags configuration that used to filter the LTS logs.
+  This parameter is available only when `enable_lts_log` is set to **true**.
+
+  -> This parameter is only supported by the `v2` version of the function.
 
 The `func_mounts` block supports:
 
@@ -437,23 +483,13 @@ In addition to all arguments above, the following attributes are exported:
 
 * `extend_config` - The extended configuration.
 
-* `is_stateful_function` - Whether stateful functions are supported.
-
 * `apig_route_enable` - Whether to configure gateway routing rules.
 
-* `heartbeat_handler` - Entry of the heartbeat function in the format of "xx.xx".
-
 * `allow_ephemeral_storage` - Indicates whether ephemeral storage can be configured.
-
-* `ephemeral_storage` - Indicates the ephemeral storage.
-
-* `enable_auth_in_header` - Whether to add authentication information to request header for custom image-based functions.
 
 * `func_mounts/status` - The status of file system.
 
 * `urn` - Uniform Resource Name.
-
-* `dns_list` - The private DNS configuration of the function network.
 
 * `version` - The version of the function.
 
