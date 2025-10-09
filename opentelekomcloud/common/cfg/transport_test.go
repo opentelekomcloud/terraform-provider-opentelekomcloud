@@ -37,7 +37,7 @@ func (f *failHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(f.ErrorCode)
 	} else {
 		w.WriteHeader(f.OkCode)
-		_, _ = fmt.Fprintf(w, f.OkResponse)
+		_, _ = fmt.Fprint(w, f.OkResponse)
 	}
 }
 
