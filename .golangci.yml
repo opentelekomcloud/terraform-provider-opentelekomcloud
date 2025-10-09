@@ -1,34 +1,55 @@
+version: "2"
 run:
-  deadline: 12m10s
+  timeout: 12m10s
   modules-download-mode: readonly
-
-issues:
-  max-per-linter: 0
-  max-same-issues: 0
-
 linters:
-  disable-all: true
+  default: none
   enable:
     - asciicheck
     - errcheck
     - gocritic
-    - gofmt
-    - goimports
-    - gosimple
     - govet
     - ineffassign
     - misspell
     - staticcheck
-    - typecheck
-    - unused
     - unconvert
+    - unused
     - whitespace
-
-linters-settings:
-  misspell:
-    ignore-words:
-      - unknwon
-  staticcheck:
-    checks:
-      - all
-      - '-SA1019' # disable the rule SA1019
+  settings:
+    misspell:
+      ignore-rules:
+        - unknwon
+    staticcheck:
+      checks:
+        - all
+        - -SA1019
+        - -ST1003
+        - -QF1003
+        - -S1009
+        - -ST1005
+        - -QF1001
+        - -QF1007
+        - -QF1008
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+issues:
+  max-same-issues: 0
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
