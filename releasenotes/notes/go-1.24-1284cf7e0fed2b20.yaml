@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **GO:** Switch to go ``v1.24.0`` (`#3159 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3159>`_)
