@@ -1,6 +1,6 @@
 ---
 features:
   - |
-    **New Data Source:** ``data_source/opentelekomcloud_taurusdb_engine_versions_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **New Data Source:** ``data_source/opentelekomcloud_taurusdb_engine_versions_v3`` (`#3160 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3160>`_)
   - |
-    **New Data Source:** ``data_source/opentelekomcloud_taurusdb_flavors_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **New Data Source:** ``data_source/opentelekomcloud_taurusdb_flavors_v3`` (`#3160 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3160>`_)
