@@ -30,7 +30,9 @@ func ResourceCBRPolicyV3() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
