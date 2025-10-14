@@ -192,7 +192,7 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 ### Vault with backup and replication policies
 ```hcl
 resource "opentelekomcloud_cbr_vault_v3" "policies" {
-  name            = "multipolicy"
+  name = "multipolicy"
 
   billing {
     size          = 100

@@ -395,8 +395,8 @@ func testAccVault_bindPolicies_base(name string) string {
 resource "opentelekomcloud_cbr_policy_v3" "backup" {
   count = 2
 
-  name            = format("%[1]s_%%d", count.index)
-  operation_type  = "backup"
+  name           = format("%[1]s_%%d", count.index)
+  operation_type = "backup"
 
   operation_definition {
     day_backups   = 1
@@ -455,7 +455,7 @@ resource "opentelekomcloud_cbr_vault_v3" "legacy" {
 }
 
 resource "opentelekomcloud_cbr_vault_v3" "test" {
-  name            = "%[2]s"
+  name = "%[2]s"
 
   billing {
     size          = 100
@@ -496,7 +496,7 @@ resource "opentelekomcloud_cbr_vault_v3" "legacy" {
 }
 
 resource "opentelekomcloud_cbr_vault_v3" "test" {
-  name            = "%[2]s"
+  name = "%[2]s"
 
   billing {
     size          = 100
