@@ -189,6 +189,29 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 }
 ```
 
+### Vault with backup and replication policies
+```hcl
+resource "opentelekomcloud_cbr_vault_v3" "policies" {
+  name            = "multipolicy"
+
+  billing {
+    size          = 100
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+    period_type   = "month"
+    period_num    = 2
+  }
+
+  policy {
+    id = opentelekomcloud_cbr_policy_v3.backup[1].id
+  }
+  policy {
+    id                   = var.replication_policy_id
+    destination_vault_id = var.destination_vault
+  }
+}
+```
 ### Vault with auto bind and bind rule
 
 ```hcl
