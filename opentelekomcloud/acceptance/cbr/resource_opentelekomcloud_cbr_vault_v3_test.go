@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"testing"
 
@@ -324,6 +325,9 @@ func testAccCheckCBRVaultV3Destroy(s *terraform.State) error {
 }
 
 func TestAccVault_bindPolicies(t *testing.T) {
+	if os.Getenv("OS_DEST_VAULT_ID") == "" {
+		t.Skip("OS_DEST_VAULT_ID is not set; skipping OpenTelekomCloud CBR bind policies test.")
+	}
 	var (
 		vault interface{}
 
@@ -350,7 +354,7 @@ func TestAccVault_bindPolicies(t *testing.T) {
 					resource.TestCheckResourceAttr(mainRcName, "name", randName),
 					resource.TestCheckResourceAttr(mainRcName, "policy.#", "2"),
 					legacyRc.CheckResourceExists(),
-					resource.TestCheckResourceAttrPair(legacyRcName, "policy_id",
+					resource.TestCheckResourceAttrPair(legacyRcName, "backup_policy_id",
 						"opentelekomcloud_cbr_policy_v3.backup.0", "id"),
 				),
 			},
@@ -361,7 +365,7 @@ func TestAccVault_bindPolicies(t *testing.T) {
 					resource.TestCheckResourceAttr(mainRcName, "name", randName),
 					resource.TestCheckResourceAttr(mainRcName, "policy.#", "2"),
 					legacyRc.CheckResourceExists(),
-					resource.TestCheckResourceAttrPair(legacyRcName, "policy_id",
+					resource.TestCheckResourceAttrPair(legacyRcName, "backup_policy_id",
 						"opentelekomcloud_cbr_policy_v3.backup.1", "id"),
 				),
 			},
@@ -369,13 +373,17 @@ func TestAccVault_bindPolicies(t *testing.T) {
 				ResourceName:      mainRcName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"billing",
+				},
 			},
 			{
 				ResourceName:      legacyRcName,
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
-					"policy_id",
+					"billing",
+					"backup_policy_id",
 				},
 			},
 		},
@@ -407,7 +415,7 @@ resource "opentelekomcloud_cbr_policy_v3" "backup" {
 resource "opentelekomcloud_cbr_policy_v3" "replication" {
   count = 2
 
-  name                   = "%[1]s"
+  name                   = format("%[1]s_%%d", count.index)
   operation_type         = "replication"
   destination_region     = "%[2]s"
   destination_project_id = "%[3]s"
@@ -424,20 +432,6 @@ resource "opentelekomcloud_cbr_policy_v3" "replication" {
   trigger_pattern = [
     "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYHOUR=14;BYMINUTE=00"
   ]
-}
-
-resource "opentelekomcloud_cbr_vault_v3" "destination" {
-  region          = "%[2]s"
-  name            = "%[1]s"
-
-  billing {
-    size          = 100
-    object_type   = "server"
-    protect_type  = "replication"
-    charging_mode = "post_paid"
-    period_type   = "month"
-    period_num    = 2
-  }
 }
 `, name, env.OS_DEST_REGION, env.OS_DEST_PROJECT_ID)
 }
@@ -477,10 +471,10 @@ resource "opentelekomcloud_cbr_vault_v3" "test" {
   }
   policy {
     id                   = opentelekomcloud_cbr_policy_v3.replication[0].id
-    destination_vault_id = opentelekomcloud_cbr_vault_v3.destination.id
+    destination_vault_id = "%[3]s"
   }
 }
-`, testAccVault_bindPolicies_base(name), name)
+`, testAccVault_bindPolicies_base(name), name, env.OS_DEST_VAULT_ID)
 }
 
 func testAccVault_bindPolicies_step2(name string) string {
@@ -489,7 +483,7 @@ func testAccVault_bindPolicies_step2(name string) string {
 
 resource "opentelekomcloud_cbr_vault_v3" "legacy" {
   name             = "%[2]s_legacy"
-  backup_policy_id = opentelekomcloud_cbr_policy_v3.backup[0].id
+  backup_policy_id = opentelekomcloud_cbr_policy_v3.backup[1].id
 
   billing {
     size          = 100
@@ -518,10 +512,10 @@ resource "opentelekomcloud_cbr_vault_v3" "test" {
   }
   policy {
     id                   = opentelekomcloud_cbr_policy_v3.replication[1].id
-    destination_vault_id = opentelekomcloud_cbr_vault_v3.destination.id
+    destination_vault_id = "%[3]s"
   }
 }
-`, testAccVault_bindPolicies_base(name), name)
+`, testAccVault_bindPolicies_base(name), name, env.OS_DEST_VAULT_ID)
 }
 
 var (
@@ -828,7 +822,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   }
 
   data_disks {
-    type = "SATA"
+    type = "SAS"
     size = "10"
   }
   data_disks {

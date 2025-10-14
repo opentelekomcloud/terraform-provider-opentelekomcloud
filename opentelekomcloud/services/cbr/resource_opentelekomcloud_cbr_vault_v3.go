@@ -36,9 +36,7 @@ func ResourceCBRVaultV3() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 			"description": {
 				Type:         schema.TypeString,
@@ -463,10 +461,8 @@ func updatePoliciesBinding(client *golangsdk.ServiceClient, vaultID string, oPol
 			return fmt.Errorf("unexpected policy type in removal set: %T", item)
 		}
 		policyID, _ := p["id"].(string)
-		destVaultID, _ := p["destination_vault_id"].(string)
 		if _, err := vaults.UnbindPolicy(client, vaultID, vaults.BindPolicyOpts{
-			PolicyID:           policyID,
-			DestinationVaultId: destVaultID,
+			PolicyID: policyID,
 		}); err != nil {
 			return fmt.Errorf("error unbinding policy from vault (%s): %w", vaultID, err)
 		}
@@ -478,8 +474,10 @@ func updatePoliciesBinding(client *golangsdk.ServiceClient, vaultID string, oPol
 			return fmt.Errorf("unexpected policy type in addition set: %T", item)
 		}
 		policyID, _ := p["id"].(string)
+		destVaultID, _ := p["destination_vault_id"].(string)
 		if _, err := vaults.BindPolicy(client, vaultID, vaults.BindPolicyOpts{
-			PolicyID: policyID,
+			PolicyID:           policyID,
+			DestinationVaultId: destVaultID,
 		}); err != nil {
 			return fmt.Errorf("error binding policy to vault (%s): %w", vaultID, err)
 		}
