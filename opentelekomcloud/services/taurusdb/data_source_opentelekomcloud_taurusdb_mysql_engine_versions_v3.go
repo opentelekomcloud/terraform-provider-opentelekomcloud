@@ -10,7 +10,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func DataSourceTaurusDBV33MysqlEngineVersions() *schema.Resource {
+func DataSourceTaurusDBV3MysqlEngineVersions() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceTausurDBV3MysqlEngineVersionsRead,
 
