@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Data Source:** ``data_source/opentelekomcloud_taurusdb_mysql_backups_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
