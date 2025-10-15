@@ -189,6 +189,29 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 }
 ```
 
+### Vault with backup and replication policies
+```hcl
+resource "opentelekomcloud_cbr_vault_v3" "policies" {
+  name = "multipolicy"
+
+  billing {
+    size          = 100
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+    period_type   = "month"
+    period_num    = 2
+  }
+
+  policy {
+    id = opentelekomcloud_cbr_policy_v3.backup[1].id
+  }
+  policy {
+    id                   = var.replication_policy_id
+    destination_vault_id = var.destination_vault
+  }
+}
+```
 ### Vault with auto bind and bind rule
 
 ```hcl
@@ -254,7 +277,7 @@ The following arguments are supported:
     * `include_volumes` - (Optional) List of included volumes.
 
 * `backup_policy_id` - (Optional) Backup policy ID. If the value of this parameter is empty, automatic backup is not
-  performed.
+  performed. Deprecated use `policy` instead.
 
 * `description` - (Optional) User-defined vault description.
 
@@ -272,6 +295,19 @@ The following arguments are supported:
 
 * `locked` - (Optional) Specifies whether the vault is locked. A locked vault cannot be unlocked.
   Defaults to **false**.
+
+* `policy` - (Optional, List) Specifies the policy details to associate with the CBR vault.
+  The [object](#vault_policies) structure is documented below.
+
+<a name="vault_policies"></a>
+The `policy` block supports:
+
+* `id` - (Required, String) Specifies the policy ID.
+
+* `destination_vault_id` - (Optional, String) Specifies the ID of destination vault to which the replication policy
+  will be associated.
+
+-> Only one policy of each type (backup and replication) can be associated.
 
 ## Attributes Reference
 
