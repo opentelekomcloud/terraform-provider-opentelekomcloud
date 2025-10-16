@@ -2,6 +2,8 @@ module github.com/opentelekomcloud/terraform-provider-opentelekomcloud
 
 go 1.24.0
 
+toolchain go1.24.5
+
 require (
 	github.com/GehirnInc/crypt v0.0.0-20230320061759-8cc1b52080c5
 	github.com/apparentlymart/go-cidr v1.1.0

@@ -1,0 +1,4 @@
+---
+fix:
+  - |
+    **GO:** Fix go version format for goreleaser ``v1.24`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
