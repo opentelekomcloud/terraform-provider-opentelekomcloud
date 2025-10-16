@@ -10,7 +10,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOpenTelekomCloudTaurusDBMysqlConfigurationDataSource_basic(t *testing.T) {
+func TestAccTaurusDBMysqlConfigurationDataSource_basic(t *testing.T) {
 	dataSource := "data.opentelekomcloud_taurusdb_mysql_configuration_v3.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -18,7 +18,7 @@ func TestAccOpenTelekomCloudTaurusDBMysqlConfigurationDataSource_basic(t *testin
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenTelekomCloudTaurusDBMysqlConfigurationDataSource_basic,
+				Config: testAccTaurusDBMysqlConfigurationDataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTaurusDBMysqlConfigurationDataSourceID(dataSource),
 					resource.TestCheckResourceAttr(
@@ -55,7 +55,7 @@ func testAccCheckTaurusDBMysqlConfigurationDataSourceID(n string) resource.TestC
 	}
 }
 
-const testAccOpenTelekomCloudTaurusDBMysqlConfigurationDataSource_basic = `
+const testAccTaurusDBMysqlConfigurationDataSource_basic = `
 data "opentelekomcloud_taurusdb_mysql_configuration_v3" "test" {
   name = "Default-TaurusDB V2.0"
 }
