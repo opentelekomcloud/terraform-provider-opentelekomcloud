@@ -401,6 +401,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_smn_topic_subscription_v2":          smn.DataSourceSmnTopicSubscriptionV2(),
 			"opentelekomcloud_taurusdb_mysql_backups_v3":          taurusdb.DataSourceTaurusDBV3MysqlBackups(),
 			"opentelekomcloud_taurusdb_mysql_configuration_v3":    taurusdb.DataSourceTaurusDBV3MysqlConfiguration(),
+			"opentelekomcloud_taurusdb_mysql_configurations_v3":   taurusdb.DataSourceTaurusDBV3MysqlConfigurations(),
 			"opentelekomcloud_taurusdb_mysql_engine_versions_v3":  taurusdb.DataSourceTaurusDBV3MysqlEngineVersions(),
 			"opentelekomcloud_taurusdb_mysql_flavors_v3":          taurusdb.DataSourceTaurusDBV3MysqlFlavors(),
 			"opentelekomcloud_taurusdb_mysql_instance_v3":         taurusdb.DataSourceTaurusDBV3Instance(),
