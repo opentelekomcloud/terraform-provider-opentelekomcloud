@@ -1,0 +1,4 @@
+---
+fix:
+  |
+  **[APIGW]** Fix typo for ``resource/opentelekomcloud_apigw_vpc_channel_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
