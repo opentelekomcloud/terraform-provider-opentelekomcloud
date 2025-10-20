@@ -1,4 +1,4 @@
 ---
 fix:
   |
-  **[APIGW]** Fix typo for ``resource/opentelekomcloud_apigw_vpc_channel_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  **[APIGW]** Fix `microservice_tags` parameter set for ``resource/opentelekomcloud_apigw_vpc_channel_v2`` (`#3174 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3174>`_)
