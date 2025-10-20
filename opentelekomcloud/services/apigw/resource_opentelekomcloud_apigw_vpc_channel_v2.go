@@ -561,7 +561,7 @@ func flattenChannelMemberGroups(groups []channel.MemberGroupsResp) []map[string]
 			"weight":               v.Weight,
 			"microservice_version": v.MicroserviceVersion,
 			"microservice_port":    v.MicroservicePort,
-			"microservice_tagss":   flattenMicroserviceLabels(v.MicroserviceTags),
+			"microservice_tags":    flattenMicroserviceLabels(v.MicroserviceTags),
 		}
 	}
 	return result
