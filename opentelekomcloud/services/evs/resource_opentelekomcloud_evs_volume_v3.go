@@ -129,7 +129,6 @@ func ResourceEvsStorageVolumeV3() *schema.Resource {
 			"cascade": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: false,
 				Default:  true,
 			},
 			"wwn": {
@@ -230,9 +229,9 @@ func resourceEvsVolumeV3Read(ctx context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Retrieved volume %s: %+v", d.Id(), v)
 
-	var device_type = "VBD"
+	var deviceType = "VBD"
 	if v.Metadata["hw:passthrough"] == "true" {
-		device_type = "SCSI"
+		deviceType = "SCSI"
 	}
 
 	mErr := multierror.Append(
@@ -243,7 +242,7 @@ func resourceEvsVolumeV3Read(ctx context.Context, d *schema.ResourceData, meta i
 		d.Set("snapshot_id", v.SnapshotID),
 		d.Set("volume_type", v.VolumeType),
 		d.Set("multiattach", v.Multiattach),
-		d.Set("device_type", device_type),
+		d.Set("device_type", deviceType),
 		d.Set("wwn", v.WWN),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
