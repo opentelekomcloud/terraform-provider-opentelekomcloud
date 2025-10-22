@@ -177,12 +177,14 @@ func TestAccGateway_withER(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceEvpnGatewayName, "status", "ACTIVE"),
 					resource.TestCheckResourceAttr(resourceEvpnGatewayName, "access_private_ip_1", "172.16.0.99"),
 					resource.TestCheckResourceAttr(resourceEvpnGatewayName, "access_private_ip_2", "172.16.0.100"),
+					resource.TestCheckResourceAttrSet(resourceEvpnGatewayName, "er_attachment_id"),
 				),
 			},
 			{
-				ResourceName:      resourceEvpnGatewayName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceEvpnGatewayName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"delete_eip"},
 			},
 		},
 	})

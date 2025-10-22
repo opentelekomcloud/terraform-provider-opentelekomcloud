@@ -379,6 +379,7 @@ func resourceEvpnGatewayRead(ctx context.Context, d *schema.ResourceData, meta i
 		d.Set("network_type", gw.NetworkType),
 		d.Set("access_private_ip_1", gw.AccessPrivateIp1),
 		d.Set("access_private_ip_2", gw.AccessPrivateIp2),
+		d.Set("er_attachment_id", gw.ErAttachmentId),
 		d.Set("tags", tagsMap),
 	)
 
