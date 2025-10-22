@@ -563,6 +563,14 @@ func TestAccFgsV2Function_strategy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "max_instance_num", "1000"),
 				),
 			},
+			{
+				Config: testAccFunction_strategy_update(name, 1000),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceName, "max_instance_num", "1000"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "60"),
+				),
+			},
 			// UpdateMaxInstances doesn't work when max_instance is set to 0
 			// Response: 400 "no param has changed"
 			// {
@@ -624,6 +632,23 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
   handler               = "index.handler"
   memory_size           = 128
   timeout               = 3
+  runtime               = "Python2.7"
+  code_type             = "inline"
+  func_code             = "dCA9ICdIZWxsbyBtZXNzYWdlOiAnICsganN="
+  max_instance_num      = %[2]d
+}
+`, name, maxInstanceNum)
+}
+
+func testAccFunction_strategy_update(name string, maxInstanceNum int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_fgs_function_v2" "test" {
+  functiongraph_version = "v2"
+  name                  = "%[1]s"
+  app                   = "default"
+  handler               = "index.handler"
+  memory_size           = 128
+  timeout               = 60
   runtime               = "Python2.7"
   code_type             = "inline"
   func_code             = "dCA9ICdIZWxsbyBtZXNzYWdlOiAnICsganN="

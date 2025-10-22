@@ -989,7 +989,7 @@ func resourceFgsFunctionV2Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("peering_cidr", f.PeeringCIDR),
 		d.Set("pre_stop_handler", f.PreStopHandler),
 		d.Set("pre_stop_timeout", f.PreStopTimeout),
-		d.Set("max_instance_num", strconv.Itoa(f.StrategyConfig.Concurrency)),
+		d.Set("max_instance_num", strconv.Itoa(*f.StrategyConfig.Concurrency)),
 		d.Set("dns_list", f.DomainNames),
 		d.Set("log_group_id", f.LogGroupID),
 		d.Set("log_topic_id", f.LogStreamID),
@@ -1265,7 +1265,7 @@ func resourceFgsFunctionV2Update(ctx context.Context, d *schema.ResourceData, me
 		"user_data", "agency", "app_agency", "description", "initializer_handler", "initializer_timeout",
 		"vpc_id", "network_controller", "network_id", "mount_user_id", "mount_user_group_id", "func_mounts", "custom_image",
 		"log_group_id", "log_topic_id", "log_group_name", "log_topic_name", "gpu_memory", "gpu_type",
-		"pre_stop_handler", "pre_stop_timeout", "enable_dynamic_memory", "enable_lts_log") {
+		"pre_stop_handler", "pre_stop_timeout", "enable_dynamic_memory", "enable_lts_log", "concurrency_num") {
 		err := resourceFgsFunctionMetadataUpdate(config, fgsClient, urn, d)
 		if err != nil {
 			return diag.FromErr(err)
