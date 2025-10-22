@@ -218,14 +218,16 @@ func ResourceCBRVaultV3() *schema.Resource {
 				},
 			},
 			"backup_policy_id": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "Use parameter 'policy' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Deprecated:    "Use parameter 'policy' instead.",
+				ConflictsWith: []string{"policy"},
 			},
 			"policy": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true,
+				Type:          schema.TypeSet,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"backup_policy_id"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -749,15 +751,18 @@ func resourceCBRVaultV3Update(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	if d.HasChange("backup_policy_id") {
-		if err := updatePolicy(d, client); err != nil {
+	oldPolicyId, _ := d.GetChange("backup_policy_id")
+	isMigration := oldPolicyId.(string) != "" && d.Get("backup_policy_id").(string) == ""
+
+	if isMigration || d.HasChange("policy") {
+		oPolicies, nPolicies := d.GetChange("policy")
+		if err := updatePoliciesBinding(client, d.Id(), oPolicies, nPolicies); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
-	if d.HasChange("policy") {
-		oPolicies, nPolicies := d.GetChange("policy")
-		if err := updatePoliciesBinding(client, d.Id(), oPolicies, nPolicies); err != nil {
+	if !isMigration && d.HasChange("backup_policy_id") {
+		if err := updatePolicy(d, client); err != nil {
 			return diag.FromErr(err)
 		}
 	}
