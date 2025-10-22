@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[FGS]** Fix update when `max_instance_num` is set in resource ``resource/opentelekomcloud_fgs_function_v2`` (`#3185 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3185>`_)
