@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPN]** Fix setting ``er_attachment_id`` for ``resource/opentelekomcloud_enterprise_vpn_gateway_v5`` (`#3183 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3183>`_)
