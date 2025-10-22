@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Data Source:** ``data_source/opentelekomcloud_taurusdb_mysql_proxy_flavors_v3`` (`#3181 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3181>`_)
