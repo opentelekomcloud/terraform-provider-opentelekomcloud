@@ -406,6 +406,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_taurusdb_mysql_flavors_v3":          taurusdb.DataSourceTaurusDBV3MysqlFlavors(),
 			"opentelekomcloud_taurusdb_mysql_instance_v3":         taurusdb.DataSourceTaurusDBV3Instance(),
 			"opentelekomcloud_taurusdb_mysql_proxies_v3":          taurusdb.DataSourceTaurusDBV3MysqlProxies(),
+			"opentelekomcloud_taurusdb_mysql_proxy_flavors_v3":    taurusdb.DataSourceTaurusDBV3MysqlProxyFlavors(),
 			"opentelekomcloud_tms_quotas_v1":                      tms.DataSourceTmsQuotasV1(),
 			"opentelekomcloud_tms_resource_instances_v1":          tms.DataSourceTmsResourceInstancesV1(),
 			"opentelekomcloud_tms_resource_tag_keys_v1":           tms.DataSourceTmsTagKeysV1(),
