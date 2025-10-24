@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    **New Data Source:** ``data_source/opentelekomcloud_taurusdb_mysql_error_logs_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  - |
+    **New Data Source:** ``data_source/opentelekomcloud_taurusdb_mysql_slow_logs_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  - |
+    **New Data Source:** ``data_source/opentelekomcloud_taurusdb_mysql_project_quotas_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
