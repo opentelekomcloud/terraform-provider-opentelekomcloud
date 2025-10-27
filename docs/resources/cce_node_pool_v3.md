@@ -150,7 +150,7 @@ the AZ based on the AZ sequence. For more details see
   This parameter and password are alternative. Changing this parameter will create a new resource.
 
 * `os` - (Optional, ForceNew, String) Node OS. Changing this parameter will create a new resource.
-  
+
   Supported OS depends on kubernetes version of the cluster.
   | OS           | Kubernetes version |
   | :----------- | :----------------- |
@@ -167,10 +167,10 @@ the AZ based on the AZ sequence. For more details see
 
 * `subnet_id` - (Optional, String, ForceNew) The ID of the subnet to which the NIC belongs. Changing this parameter will create a new resource.
 
-* `preinstall` - (Optional, String, ForceNew) Script required before installation. The input value can be a Base64 encoded string or not.
+* `preinstall` - (Optional, String) Script required before installation. The input value can be a Base64 encoded string or not.
   Changing this parameter will create a new resource.
 
-* `postinstall` - (Optional, String, ForceNew) Script required after installation. The input value can be a Base64 encoded string or not.
+* `postinstall` - (Optional, String) Script required after installation. The input value can be a Base64 encoded string or not.
   Changing this parameter will create a new resource.
 
 * `max_pods` - (Optional, Int, ForceNew) The maximum number of instances a node is allowed to create.

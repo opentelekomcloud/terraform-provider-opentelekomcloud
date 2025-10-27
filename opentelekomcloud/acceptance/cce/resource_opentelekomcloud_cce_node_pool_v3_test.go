@@ -1,6 +1,7 @@
 package acceptance
 
 import (
+	"encoding/base64"
 	"fmt"
 	"testing"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/cce/shared"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	ecs "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/ecs"
+	cmn "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -44,18 +46,30 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 	quotas.BookMany(t, qts)
 	shared.BookCluster(t)
 
+	initialPreInstallScript := "#!/bin/bash\necho 'Initial preinstall script'"
+	initialPostInstallScript := "#!/bin/bash\necho 'Initial postinstall script'"
+	updatedPreInstallScript := "#!/bin/bash\necho 'Updated preinstall script'"
+	updatedPostInstallScript := "#!/bin/bash\necho 'Updated postinstall script'"
+
+	initialPreInstall := base64.StdEncoding.EncodeToString([]byte(initialPreInstallScript))
+	initialPostInstall := base64.StdEncoding.EncodeToString([]byte(initialPostInstallScript))
+	updatedPreInstall := base64.StdEncoding.EncodeToString([]byte(updatedPreInstallScript))
+	updatedPostInstall := base64.StdEncoding.EncodeToString([]byte(updatedPostInstallScript))
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCENodePoolV3Basic,
+				Config: testAccCCENodePoolV3Basic(initialPreInstall, initialPostInstall),
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "name", "opentelekomcloud-cce-node-pool"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "flavor", "s2.large.2"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "os", "EulerOS 2.9"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "preinstall", cmn.GetHashOrEmpty(initialPreInstall)),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "postinstall", cmn.GetHashOrEmpty(initialPostInstall)),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "muh"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "data_volumes.0.extend_params.useType", "docker"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "taints.0.key", "example.com/node"),
@@ -64,9 +78,11 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCCENodePoolV3Update,
+				Config: testAccCCENodePoolV3Update(updatedPreInstall, updatedPostInstall),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(nodePoolResourceName, "initial_node_count", "2"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "preinstall", cmn.GetHashOrEmpty(updatedPreInstall)),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "postinstall", cmn.GetHashOrEmpty(updatedPostInstall)),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "kuh"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "data_volumes.0.extend_params.useType", "docker"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "taints.0.key", "example-updated.com/node"),
@@ -305,7 +321,8 @@ func TestAccCCENodePoolsV3StorageJsonEncode(t *testing.T) {
 	})
 }
 
-var testAccCCENodePoolV3Basic = fmt.Sprintf(`
+func testAccCCENodePoolV3Basic(preinstall, postinstall string) string {
+	return fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
@@ -317,6 +334,8 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   availability_zone  = "%s"
   key_pair           = "%s"
   runtime            = "containerd"
+  preinstall         = "%s"
+  postinstall        = "%s"
 
   scale_enable             = false
   min_node_count           = 1
@@ -346,9 +365,11 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     value  = "infra"
     effect = "NoSchedule"
   }
-}`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+}`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, preinstall, postinstall)
+}
 
-var testAccCCENodePoolV3Update = fmt.Sprintf(`
+func testAccCCENodePoolV3Update(preinstall, postinstall string) string {
+	return fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
@@ -359,6 +380,8 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   initial_node_count = 2
   availability_zone  = "%s"
   key_pair           = "%s"
+  preinstall         = "%s"
+  postinstall        = "%s"
 
   scale_enable             = true
   min_node_count           = 2
@@ -387,7 +410,8 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     value  = "infra"
     effect = "NoExecute"
   }
-}`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+}`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, preinstall, postinstall)
+}
 
 var testAccCCENodePoolV3RandomAZ = fmt.Sprintf(`
 %s

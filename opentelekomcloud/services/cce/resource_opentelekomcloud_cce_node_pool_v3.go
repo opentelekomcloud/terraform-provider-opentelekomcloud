@@ -237,13 +237,13 @@ func ResourceCCENodePoolV3() *schema.Resource {
 			"preinstall": {
 				Type:      schema.TypeString,
 				Optional:  true,
-				ForceNew:  true,
+				Computed:  true,
 				StateFunc: common.GetHashOrEmpty,
 			},
 			"postinstall": {
 				Type:      schema.TypeString,
 				Optional:  true,
-				ForceNew:  true,
+				Computed:  true,
 				StateFunc: common.GetHashOrEmpty,
 			},
 			"max_pods": {
@@ -486,6 +486,8 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("key_pair", s.Spec.NodeTemplate.Login.SshKey),
 		d.Set("scale_enable", s.Spec.Autoscaling.Enable),
 		d.Set("max_pods", s.Spec.NodeTemplate.ExtendParam.MaxPods),
+		d.Set("postinstall", common.GetHashOrEmpty(s.Spec.NodeTemplate.ExtendParam.PostInstall)),
+		d.Set("preinstall", common.GetHashOrEmpty(s.Spec.NodeTemplate.ExtendParam.PreInstall)),
 		d.Set("subnet_id", s.Spec.NodeTemplate.NodeNicSpec.PrimaryNic.SubnetId),
 		d.Set("security_group_ids", s.Spec.CustomSecurityGroupIds),
 		d.Set("root_volume", rootVolume),
@@ -557,6 +559,26 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf(cceClientError, err)
 	}
 
+	var base64PreInstall, base64PostInstall string
+	if v, ok := d.GetOk("preinstall"); ok {
+		base64PreInstall = common.InstallScriptEncode(v.(string))
+	}
+	if v, ok := d.GetOk("postinstall"); ok {
+		base64PostInstall = common.InstallScriptEncode(v.(string))
+	}
+	var loginSpec nodes.LoginSpec
+	if common.HasFilledOpt(d, "key_pair") {
+		loginSpec = nodes.LoginSpec{SshKey: d.Get("key_pair").(string)}
+	}
+	if common.HasFilledOpt(d, "password") {
+		loginSpec = nodes.LoginSpec{
+			UserPassword: nodes.UserPassword{
+				Username: "root",
+				Password: d.Get("password").(string),
+			},
+		}
+	}
+
 	updateOpts := nodepools.UpdateOpts{
 		Metadata: nodepools.UpdateMetaData{
 			Name: d.Get("name").(string),
@@ -570,9 +592,30 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 				ScaleDownCooldownTime: d.Get("scale_down_cooldown_time").(int),
 				Priority:              d.Get("priority").(int),
 			},
-			NodeTemplate: nodepools.UpdateNodeTemplate{
-				K8sTags: resourceCCENodeK8sTags(d),
-				Taints:  resourceCCENodeTaints(d),
+			NodeTemplate: nodes.Spec{
+				Flavor:      d.Get("flavor").(string),
+				Az:          d.Get("availability_zone").(string),
+				Os:          d.Get("os").(string),
+				Login:       loginSpec,
+				RootVolume:  resourceCCERootVolume(d),
+				DataVolumes: resourceCCEDataVolume(d),
+				Count:       1,
+				NodeNicSpec: nodes.NodeNicSpec{
+					PrimaryNic: nodes.PrimaryNic{
+						SubnetId: d.Get("subnet_id").(string),
+					},
+				},
+				ExtendParam: nodes.ExtendParam{
+					MaxPods:                 d.Get("max_pods").(int),
+					PreInstall:              base64PreInstall,
+					PostInstall:             base64PostInstall,
+					DockerBaseSize:          d.Get("docker_base_size").(int),
+					DockerLVMConfigOverride: d.Get("docker_lvm_config_override").(string),
+					AgencyName:              d.Get("agency_name").(string),
+				},
+				Taints:   resourceCCENodeTaints(d),
+				K8sTags:  resourceCCENodeK8sTags(d),
+				UserTags: resourceCCENodePoolUserTags(d),
 			},
 		},
 	}
