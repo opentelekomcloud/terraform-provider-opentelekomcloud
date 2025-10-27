@@ -43,6 +43,9 @@ func InstallScriptEncode(script string) string {
 func GetHashOrEmpty(v interface{}) string {
 	switch v := v.(type) {
 	case string:
+		if v == "" {
+			return ""
+		}
 		return InstallScriptHashSum(v)
 	default:
 		return ""
