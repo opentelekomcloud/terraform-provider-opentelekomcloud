@@ -318,6 +318,7 @@ func ResourceRdsInstanceV3() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Computed: true,
 			},
 			"ssl_enable": {
 				Type:     schema.TypeBool,
@@ -662,6 +663,8 @@ func restartInstance(d *schema.ResourceData, client *golangsdk.ServiceClient) er
 	if err := instances.WaitForStateAvailable(client, int(timeout.Seconds()), d.Id()); err != nil {
 		return fmt.Errorf("error waiting for instance to become available: %w", err)
 	}
+	// sleep is required after restart to get consistent results for configurations.GetForInstance
+	time.Sleep(20 * time.Second)
 	return nil
 }
 
@@ -1085,7 +1088,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		if err != nil {
 			return fmterr.Errorf("error applying parameters to the instance: %w", err)
 		}
-		restartRequired = restartRequired || paramRestart
+		restartRequired = restartRequired || paramRestart.RestartRequired
 	}
 
 	if d.HasChange("db.0.port") {
@@ -1376,6 +1379,10 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
+	if diags := setRdsInstanceParameters(d, client); diags != nil {
+		return diags
+	}
+
 	return nil
 }
 
@@ -1396,6 +1403,29 @@ func resourceRdsInstanceV3Delete(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	d.SetId("")
+	return nil
+}
+
+func setRdsInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceClient) diag.Diagnostics {
+	configuration, err := configurations.GetForInstance(client, d.Id())
+	if err != nil {
+		log.Printf("[WARN] error fetching parameters of instance (%s): %s", d.Id(), err)
+		return nil
+	}
+
+	rawParameters := d.Get("parameters").(map[string]interface{})
+	params := make(map[string]interface{})
+
+	for _, configParam := range configuration.Parameters {
+		if _, exists := rawParameters[configParam.Name]; exists {
+			params[configParam.Name] = configParam.Value
+		}
+	}
+
+	if err = d.Set("parameters", params); err != nil {
+		log.Printf("error saving parameters to RDS instance (%s): %s", d.Id(), err)
+	}
+
 	return nil
 }
 
@@ -1442,16 +1472,16 @@ func disableVolumeAutoExpand(ctx context.Context, timeout time.Duration, client 
 	return nil
 }
 
-func updateInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceClient) (bool, error) {
+func updateInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceClient) (*configurations.UpdateInstanceConfigurationResponse, error) {
 	opts := configurations.UpdateInstanceConfigurationOpts{
 		Values:     d.Get("parameters").(map[string]interface{}),
 		InstanceId: d.Id(),
 	}
 	rawConf, err := configurations.UpdateInstanceConfiguration(client, opts)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	return rawConf.RestartRequired, err
+	return rawConf, err
 }
 
 func rdsInstanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
@@ -1474,12 +1504,20 @@ func waitForParameterApply(d *schema.ResourceData, client *golangsdk.ServiceClie
 
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault403); ok {
-				return r, "PENDING", nil
+				return false, "PENDING", nil
 			}
 			return nil, "", fmt.Errorf("error applying configuration parameters: %w", err)
 		}
 
-		return r, "SUCCESS", nil
+		if err := instances.WaitForJobCompleted(client, 60, r.JobId); err != nil {
+			// sometimes `task not found` error message is returned
+			// with 400 status which is fine
+			if _, ok := err.(golangsdk.ErrDefault400); ok {
+				return r.RestartRequired, "SUCCESS", nil
+			}
+		}
+
+		return r.RestartRequired, "SUCCESS", nil
 	}
 }
 

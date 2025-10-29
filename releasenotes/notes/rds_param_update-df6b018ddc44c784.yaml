@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[RDS]** Make `parameters` a computed property for ``resource/opentelekomcloud_rds_instance_v3`` (`#3189 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3189>`_)
