@@ -88,7 +88,7 @@ func resourceCTSTrackerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		FilePrefixName: d.Get("file_prefix_name").(string),
 	}
 
-	if ltsEnabled == true {
+	if ltsEnabled {
 		createOpts.Lts = &tracker.CreateLts{
 			IsLtsEnabled: ltsEnabled,
 			LogGroupName: logGroupName,
