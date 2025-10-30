@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cts/v1/tracker"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -79,13 +80,20 @@ func resourceCTSTrackerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	ltsEnabled := d.Get("is_lts_enabled").(bool)
+	logGroupName := tools.RandomString("cts-log-group-", 5)
+	logTopicName := tools.RandomString("cts-log-topic-", 5)
 
 	createOpts := tracker.CreateOpts{
 		BucketName:     d.Get("bucket_name").(string),
 		FilePrefixName: d.Get("file_prefix_name").(string),
-		Lts: tracker.CreateLts{
-			IsLtsEnabled: &ltsEnabled,
-		},
+	}
+
+	if ltsEnabled == true {
+		createOpts.Lts = &tracker.CreateLts{
+			IsLtsEnabled: ltsEnabled,
+			LogGroupName: logGroupName,
+			LogTopicName: logTopicName,
+		}
 	}
 
 	ctsTracker, err := tracker.Create(client, createOpts)
@@ -133,13 +141,10 @@ func resourceCTSTrackerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return fmterr.Errorf(clientError, err)
 	}
-	ltsEnabled := d.Get("is_lts_enabled").(bool)
+
 	updateOpts := tracker.UpdateOpts{
 		BucketName:     d.Get("bucket_name").(string),
 		FilePrefixName: d.Get("file_prefix_name").(string),
-		Lts: tracker.CreateLts{
-			IsLtsEnabled: &ltsEnabled,
-		},
 	}
 
 	if d.HasChange("file_prefix_name") {
@@ -147,6 +152,13 @@ func resourceCTSTrackerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	if d.HasChange("status") {
 		updateOpts.Status = d.Get("status").(string)
+	}
+	if d.HasChange("is_lts_enabled") {
+		updateOpts.Lts = &tracker.CreateLts{
+			IsLtsEnabled: d.Get("is_lts_enabled").(bool),
+			LogGroupName: tools.RandomString("cts-log-group-", 5),
+			LogTopicName: tools.RandomString("cts-log-topic-", 5),
+		}
 	}
 
 	_, err = tracker.Update(client, updateOpts, trackerName)
