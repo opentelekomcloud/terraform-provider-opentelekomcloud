@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    **[CTS]** Fix LTS logic in ``resource/opentelekomcloud_cts_tracker_v1`` (`#3192 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3192>`_)
+deprecations:
+  - |
+    **[CTS]** Deprecate ``resource/opentelekomcloud_cts_tracker_v1`` (`#3192 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3192>`_)
