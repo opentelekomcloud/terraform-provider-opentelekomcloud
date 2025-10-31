@@ -31,6 +31,9 @@ func ResourceCTSTrackerV1() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		DeprecationMessage: "Support will be discontinued in favor of CTS v3. " +
+			"Please use `opentelekomcloud_cts_tracker_v3` resource instead",
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
