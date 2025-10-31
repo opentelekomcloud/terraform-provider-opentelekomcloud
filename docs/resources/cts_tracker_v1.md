@@ -10,6 +10,7 @@ description: |-
 Up-to-date reference of API arguments for CTS tracker you can get at
 [documentation portal](https://docs.otc.t-systems.com/cloud-trace-service/api-ref/api_description/tracker_management)
 
+**DEPRECATED**
 # opentelekomcloud_cts_tracker_v1
 
 Allows you to collect, store, and query cloud resource operation records.
