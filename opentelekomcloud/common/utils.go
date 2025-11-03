@@ -674,3 +674,49 @@ func TryMapValueAnalysis(v interface{}) map[string]interface{} {
 	}
 	return result
 }
+
+// ParseAnyType tries to coerce a string to bool/number/JSON; falls back to the original string.
+func ParseAnyType(s string) interface{} {
+	ls := strings.ToLower(strings.TrimSpace(s))
+	if ls == "true" {
+		return true
+	}
+	if ls == "false" {
+		return false
+	}
+	// Try integer
+	if i, err := strconv.ParseInt(s, 10, 64); err == nil {
+		return i
+	}
+	// Try float
+	if f, err := strconv.ParseFloat(s, 64); err == nil {
+		return f
+	}
+	// Try JSON object/array/string literal
+	var v interface{}
+	if err := json.Unmarshal([]byte(s), &v); err == nil {
+		return v
+	}
+	return s
+}
+
+// StringifyAny renders AnyType into a string for TF state.
+func StringifyAny(v interface{}) string {
+	switch t := v.(type) {
+	case nil:
+		return ""
+	case string:
+		return t
+	case bool:
+		if t {
+			return "true"
+		}
+		return "false"
+	default:
+		b, err := json.Marshal(t)
+		if err != nil {
+			return fmt.Sprintf("%v", t)
+		}
+		return string(b)
+	}
+}

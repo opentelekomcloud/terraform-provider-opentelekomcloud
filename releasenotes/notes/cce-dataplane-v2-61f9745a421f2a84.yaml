@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[CCE]** Added ``component_configurations`` for overriding component configurations in ``resource/opentelekomcloud_cce_cluster_v3``
+    (`#3193 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3193>`_)
