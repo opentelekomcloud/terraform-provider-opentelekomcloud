@@ -676,6 +676,7 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("timezone", cluster.Metadata.Timezone),
 		d.Set("support_istio", cluster.Spec.SupportIstio),
 		d.Set("custom_san", cluster.Spec.CustomSan),
+		// d.Set("component_configurations", flattenResourceClusterConfigurationsOverride(cluster.Spec.ConfigurationsOverride)),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting cce cluster fields: %w", err)
