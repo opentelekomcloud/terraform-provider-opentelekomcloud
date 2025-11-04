@@ -31,6 +31,10 @@ resource "opentelekomcloud_apigw_gateway_v2" "gateway" {
   ingress_bandwidth_size          = 5
   ingress_bandwidth_charging_mode = "bandwidth"
   maintain_begin                  = "22:00:00"
+
+  tags = {
+    foo = "bar"
+  }
 }
 ```
 
@@ -84,6 +88,8 @@ The following arguments are supported:
 
 * `maintain_begin` - (Optional, String) Specifies start time of the maintenance time window.
   It must be in the format "xx:00:00". The value of xx can be 02, 06, 10, 14, 18, or 22.
+
+* `tags` - (Optional, Map) Specifies the key/value pairs to associate with the dedicated instance.
 
 ## Attributes Reference
 
