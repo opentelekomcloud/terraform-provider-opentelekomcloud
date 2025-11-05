@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[APIGW]** Add ``tags`` argument to ``resource/opentelekomcloud_apigw_gateway_v2``
+    (`#3195 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3195>`_)
