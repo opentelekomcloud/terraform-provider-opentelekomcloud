@@ -32,7 +32,7 @@ vet:
 	fi
 
 fmt:
-	@gofmt -w $(GOFMT_FILES)
+	@find . -name '*.go' -exec gofmt -w {} +
 
 fmtcheck:
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"

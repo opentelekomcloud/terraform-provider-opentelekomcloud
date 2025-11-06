@@ -38,6 +38,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/fgs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/fw"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/gaussdb"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/gemini"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/hss"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/iam"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ims"
@@ -562,6 +563,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_fw_policy_v2":                              fw.ResourceFWPolicyV2(),
 			"opentelekomcloud_fw_rule_v2":                                fw.ResourceFWRuleV2(),
 			"opentelekomcloud_gaussdb_mysql_instance_v3":                 gaussdb.ResourceGaussDBInstanceV3(),
+			"opentelekomcloud_gemini_instance_v3":                        gemini.ResourceGeminiDBInstanceV3(),
 			"opentelekomcloud_hss_host_group_v5":                         hss.ResourceHostGroup(),
 			"opentelekomcloud_hss_host_protection_v5":                    hss.ResourceHostProtection(),
 			"opentelekomcloud_identity_acl_v3":                           iam.ResourceIdentityAclV3(),
