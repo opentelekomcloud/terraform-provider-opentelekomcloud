@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[RDS]** Change parameter description ``availability_zone`` in ``resource/opentelekomcloud_rds_instance_v3`` documentation (`#3200 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3200>`_)
