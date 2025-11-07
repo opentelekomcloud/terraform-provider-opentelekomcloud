@@ -319,7 +319,7 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
 
 The following arguments are supported:
 
-* `availability_zone` - (Required, ForceNew) Specifies the AZ name. Changing this parameter will create a new resource.
+* `availability_zone` - (Required, ForceNew) Specifies the AZ ID. Changing this parameter will create a new resource.
 
 * `db` - (Required, ForceNew) Specifies the database information. Structure is documented below. Changing this parameter will create a new resource.
 
