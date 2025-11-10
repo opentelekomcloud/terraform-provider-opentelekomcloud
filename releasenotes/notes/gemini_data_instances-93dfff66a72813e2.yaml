@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Data Source:** ``data_source/opentelekomcloud_gemini_instances_v3`` (`#3201 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3201>`_)
