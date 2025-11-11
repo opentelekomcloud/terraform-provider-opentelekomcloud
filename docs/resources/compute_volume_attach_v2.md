@@ -61,6 +61,16 @@ output "volume devices" {
 }
 ```
 
+### Example with force_detach flag
+
+```hcl
+resource "opentelekomcloud_compute_volume_attach_v2" "va_force" {
+  instance_id  = opentelekomcloud_compute_instance_v2.instance_1.id
+  volume_id    = opentelekomcloud_blockstorage_volume_v2.volume_1.id
+  force_detach = true
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -76,6 +86,10 @@ The following arguments are supported:
   the same device the hypervisor chose. If this happens, Terraform will wish
   to update the device upon subsequent applying which will cause the volume
   to be detached and reattached indefinitely. Please use with caution.
+
+* `force_detach` - (Optional) Indicates whether to force detach the disk when deleting the attachment resource.
+  If set to `true`, the provider will call the force detach API, ensuring the disk is detached even
+  if the normal detach operation fails. Defaults to `false`.
 
 ## Attributes Reference
 

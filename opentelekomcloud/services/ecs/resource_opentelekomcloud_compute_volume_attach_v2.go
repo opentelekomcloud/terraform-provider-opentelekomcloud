@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/volumeattach"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/disk"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -58,6 +59,13 @@ func ResourceComputeVolumeAttachV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+			},
+
+			"force_detach": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  false,
 			},
 		},
 	}
@@ -165,10 +173,17 @@ func resourceComputeVolumeAttachV2Delete(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
+	var refresh resource.StateRefreshFunc
+	if v, ok := d.GetOk("force_detach"); ok && v.(bool) {
+		refresh = resourceVolumeAttachV2ForceDetachFunc(instanceId, attachmentId, d, meta)
+	} else {
+		refresh = resourceComputeVolumeAttachV2DetachFunc(client, instanceId, attachmentId)
+	}
+
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{""},
 		Target:     []string{"DETACHED"},
-		Refresh:    resourceComputeVolumeAttachV2DetachFunc(client, instanceId, attachmentId),
+		Refresh:    refresh,
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      15 * time.Second,
 		MinTimeout: 15 * time.Second,
@@ -211,6 +226,42 @@ func resourceComputeVolumeAttachV2DetachFunc(
 		}
 
 		err = volumeattach.Delete(computeClient, instanceId, attachmentId).ExtractErr()
+		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
+				return va, "DETACHED", nil
+			}
+
+			if _, ok := err.(golangsdk.ErrDefault400); ok {
+				return nil, "", nil
+			}
+
+			return nil, "", err
+		}
+
+		log.Printf("[DEBUG] OpenTelekomCloud Volume Attachment (%s) is still active.", attachmentId)
+		return nil, "", nil
+	}
+}
+
+func resourceVolumeAttachV2ForceDetachFunc(instanceId, attachmentId string, d *schema.ResourceData, meta interface{}) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		log.Printf("[DEBUG] Attempting to detach OpenTelekomCloud volume %s from instance %s",
+			attachmentId, instanceId)
+		config := meta.(*cfg.Config)
+		client, err := config.ComputeV1Client(config.GetRegion(d))
+		if err != nil {
+			return fmterr.Errorf(errCreateClient, err), "", nil
+		}
+
+		va, err := volumeattach.Get(client, instanceId, attachmentId).Extract()
+		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
+				return va, "DETACHED", nil
+			}
+			return va, "", err
+		}
+
+		_, err = disk.Detach(client, instanceId, attachmentId, 1)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return va, "DETACHED", nil

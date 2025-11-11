@@ -321,8 +321,9 @@ resource "opentelekomcloud_compute_volume_attach_v2" "va_2" {
 }
 
 resource "opentelekomcloud_compute_volume_attach_v2" "va_3" {
-  instance_id = opentelekomcloud_ecs_instance_v1.ecs.id
-  volume_id   = opentelekomcloud_evs_volume_v3.volume_3.id
-  device      = "/dev/vdd"
+  instance_id  = opentelekomcloud_ecs_instance_v1.ecs.id
+  volume_id    = opentelekomcloud_evs_volume_v3.volume_3.id
+  device       = "/dev/vdd"
+  force_detach = true
 }
 `, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
