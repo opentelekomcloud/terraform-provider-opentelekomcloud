@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/go-multierror"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/volumeattach"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservers"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/disk"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -58,6 +60,13 @@ func ResourceComputeVolumeAttachV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+			},
+
+			"force_detach": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  false,
 			},
 		},
 	}
@@ -159,23 +168,40 @@ func resourceComputeVolumeAttachV2Delete(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return fmterr.Errorf(errCreateV2Client, err)
 	}
+	clientV1, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
+		return config.ComputeV1Client(config.GetRegion(d))
+	})
+	if err != nil {
+		return fmterr.Errorf(errCreateClient, err)
+	}
 
 	instanceId, attachmentId, err := ParseComputeVolumeAttachmentId(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{""},
-		Target:     []string{"DETACHED"},
-		Refresh:    resourceComputeVolumeAttachV2DetachFunc(client, instanceId, attachmentId),
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      15 * time.Second,
-		MinTimeout: 15 * time.Second,
-	}
+	if v, ok := d.GetOk("force_detach"); ok && v.(bool) {
+		dt, err := disk.Detach(clientV1, instanceId, attachmentId, 1)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		timeout := int(d.Timeout(schema.TimeoutDelete) / time.Second)
+		if err := cloudservers.WaitForJobSuccess(clientV1, timeout, dt.JobID); err != nil {
+			return fmterr.Errorf("error detaching OpenTelekomCloud volume: %s", err)
+		}
+	} else {
+		stateConf := &resource.StateChangeConf{
+			Pending:    []string{""},
+			Target:     []string{"DETACHED"},
+			Refresh:    resourceComputeVolumeAttachV2DetachFunc(client, instanceId, attachmentId),
+			Timeout:    d.Timeout(schema.TimeoutDelete),
+			Delay:      15 * time.Second,
+			MinTimeout: 15 * time.Second,
+		}
 
-	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
-		return fmterr.Errorf("error detaching OpenTelekomCloud volume: %s", err)
+		if _, err = stateConf.WaitForStateContext(ctx); err != nil {
+			return fmterr.Errorf("error detaching OpenTelekomCloud volume: %s", err)
+		}
 	}
 
 	return nil
