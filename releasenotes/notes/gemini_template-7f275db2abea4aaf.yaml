@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **New Resource:** ``opentelekomcloud_gemini_template_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **New Resource:** ``opentelekomcloud_gemini_template_v3`` (`#3204 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3204>`_)
