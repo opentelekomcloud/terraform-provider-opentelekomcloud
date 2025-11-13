@@ -42,9 +42,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `updated_at` - Indicates the update time in the **yyyy-MM-ddTHH:mm:ssZ** format.
 
-* `mode` - Indicates the instance type. The value can be:
-    + **Cluster**: GeminiDB Cassandra cluster type.
-    + **Cluster**: GeminiDB Influx cluster type.
+* `mode` - Indicates the instance type.
 
 * `configuration_parameters` - Indicates the list of parameters defined by users based on a default parameter template.
 

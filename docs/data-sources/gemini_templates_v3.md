@@ -45,9 +45,7 @@ The `templates` block supports:
 
 * `updated_at` - Indicates the update time in the **yyyy-MM-ddTHH:mm:ssZ** format.
 
-* `mode` - Indicates the instance type. The value can be:
-    + **Cluster**: GeminiDB Cassandra cluster type.
-    + **Cluster**: GeminiDB Influx cluster type.
+* `mode` - Indicates the instance type.
 
 * `user_defined` - Indicates whether the parameter template is a custom template.
     + **false**: default parameter template.
