@@ -63,7 +63,7 @@ func testAccCheckGeminiDBInstanceTemplateParameterValue(n, paramName, expectedVa
 		}
 
 		found := false
-		for key, _ := range rs.Primary.Attributes {
+		for key := range rs.Primary.Attributes {
 			if key == fmt.Sprintf("configuration_parameters.%d.name", 0) {
 				continue
 			}
