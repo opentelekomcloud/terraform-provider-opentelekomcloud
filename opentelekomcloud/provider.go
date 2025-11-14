@@ -337,6 +337,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_fgs_functions_v2":                   fgs.DataSourceFunctionsV2(),
 			"opentelekomcloud_gemini_instances_v3":                gemini.DataSourceGeminiDBInstancesV3(),
 			"opentelekomcloud_gemini_instance_template_v3":        gemini.DataSourceGeminiDBV3InstanceTemplate(),
+			"opentelekomcloud_gemini_quotas_v3":                   gemini.DataSourceGeminiQuotasV3(),
 			"opentelekomcloud_gemini_templates_v3":                gemini.DataSourceGeminiDBV3Templates(),
 			"opentelekomcloud_hss_host_groups_v5":                 hss.DataSourceHostGroups(),
 			"opentelekomcloud_hss_quotas_v5":                      hss.DataSourceQuotas(),
