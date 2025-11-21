@@ -383,6 +383,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_rds_backup_v3":                      rds.DataSourceRDSv3Backup(),
 			"opentelekomcloud_rds_flavors_v1":                     rds.DataSourceRdsFlavorV1(),
 			"opentelekomcloud_rds_flavors_v3":                     rds.DataSourceRdsFlavorV3(),
+			"opentelekomcloud_rds_major_versions_v3":              rds.DataSourceRdsAvailableVersionV3(),
 			"opentelekomcloud_rds_versions_v3":                    rds.DataSourceRdsVersionsV3(),
 			"opentelekomcloud_rms_advanced_query_v1":              rms.DataSourceAdvancedQueryV1(),
 			"opentelekomcloud_rms_advanced_query_schemas_v1":      rms.DataSourceRmsAdvancedQuerySchemasV1(),
