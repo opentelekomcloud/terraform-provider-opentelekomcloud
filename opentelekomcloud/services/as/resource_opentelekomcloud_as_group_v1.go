@@ -167,7 +167,7 @@ func ResourceASGroup() *schema.Resource {
 				Optional: true,
 				Default:  "OLD_CONFIG_OLD_INSTANCE",
 				ValidateFunc: validation.StringInSlice([]string{
-					"OLD_CONFIG_OLD_INSTANCE ", "OLD_CONFIG_NEW_INSTANCE", "OLD_INSTANCE", "NEW_INSTANCE",
+					"OLD_CONFIG_OLD_INSTANCE", "OLD_CONFIG_NEW_INSTANCE", "OLD_INSTANCE", "NEW_INSTANCE",
 				}, true),
 			},
 			"notifications": {
