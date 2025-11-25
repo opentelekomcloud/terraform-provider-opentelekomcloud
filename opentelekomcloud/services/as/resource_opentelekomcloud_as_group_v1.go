@@ -187,6 +187,11 @@ func ResourceASGroup() *schema.Resource {
 				}, true),
 				Description: "Whether to delete instances when they are removed from the AS group.",
 			},
+			"enable": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 			"instances": {
 				Type:        schema.TypeList,
 				Computed:    true,
@@ -336,6 +341,30 @@ func refreshInstancesLifeStates(client *golangsdk.ServiceClient, groupID string,
 	}
 }
 
+func enableGroup(ctx context.Context, d *schema.ResourceData, client *golangsdk.ServiceClient, asGroupID string, initNum int) error {
+	enableResult := groups.Enable(client, asGroupID)
+	if enableResult != nil {
+		return fmt.Errorf("error enabling ASGroup %q: %s", asGroupID, enableResult)
+	}
+	log.Printf("[DEBUG] Enable ASGroup %q success!", asGroupID)
+	// check all instances are inService
+	if initNum > 0 {
+		stateConf := &resource.StateChangeConf{
+			Pending: []string{"PENDING"},
+			Target:  []string{"INSERVICE"}, // if there is no lifecycle status, meaning no instances in asg
+			Refresh: refreshInstancesLifeStates(client, asGroupID, initNum, true),
+			Timeout: d.Timeout(schema.TimeoutCreate),
+			Delay:   10 * time.Second,
+		}
+
+		_, err := stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return fmt.Errorf("error waiting for instances in the ASGroup %q to become inservice: %s", asGroupID, err)
+		}
+	}
+	return nil
+}
+
 func resourceASGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
@@ -398,24 +427,16 @@ func resourceASGroupCreate(ctx context.Context, d *schema.ResourceData, meta int
 	time.Sleep(5 * time.Second)
 
 	// enable AutoScaling Group
-	enableResult := groups.Enable(client, asGroupID)
-	if enableResult != nil {
-		return fmterr.Errorf("error enabling ASGroup %q: %s", asGroupID, enableResult)
-	}
-	log.Printf("[DEBUG] Enable ASGroup %q success!", asGroupID)
-	// check all instances are inService
-	if initNum > 0 {
-		stateConf := &resource.StateChangeConf{
-			Pending: []string{"PENDING"},
-			Target:  []string{"INSERVICE"}, // if there is no lifecycle status, meaning no instances in asg
-			Refresh: refreshInstancesLifeStates(client, asGroupID, initNum, true),
-			Timeout: d.Timeout(schema.TimeoutCreate),
-			Delay:   10 * time.Second,
-		}
-
-		_, err := stateConf.WaitForStateContext(ctx)
+	enable := d.Get("enable").(bool)
+	if enable {
+		err = enableGroup(ctx, d, client, asGroupID, initNum)
 		if err != nil {
-			return fmterr.Errorf("error waiting for instances in the ASGroup %q to become inservice: %s", asGroupID, err)
+			return fmterr.Errorf("error enabling ASGroup %q: %s", asGroupID, err)
+		}
+	} else {
+		err = groups.Disable(client, asGroupID)
+		if err != nil {
+			return fmterr.Errorf("error disabling ASGroup %q: %s", asGroupID, err)
 		}
 	}
 
@@ -543,11 +564,20 @@ func resourceASGroupUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	isDeletePublicIp := d.Get("delete_publicip").(bool)
 
 	asgLBaaSListeners := getAllLBaaSListeners(d)
+	minNum := d.Get("min_instance_number").(int)
+	desireNum := d.Get("desire_instance_number").(int)
+	var initNum int
+	if desireNum > 0 {
+		initNum = desireNum
+	} else {
+		initNum = minNum
+	}
+
 	updateOpts := groups.UpdateOpts{
 		Name:                      d.Get("scaling_group_name").(string),
 		ConfigurationID:           d.Get("scaling_configuration_id").(string),
-		DesireInstanceNumber:      d.Get("desire_instance_number").(int),
-		MinInstanceNumber:         d.Get("min_instance_number").(int),
+		DesireInstanceNumber:      desireNum,
+		MinInstanceNumber:         minNum,
 		MaxInstanceNumber:         d.Get("max_instance_number").(int),
 		CoolDownTime:              d.Get("cool_down_time").(int),
 		LBListenerID:              d.Get("lb_listener_id").(string),
@@ -565,6 +595,22 @@ func resourceASGroupUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	asGroupID, err := groups.Update(client, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating ASGroup %q: %s", asGroupID, err)
+	}
+
+	if d.HasChange("enable") {
+		// enable AutoScaling Group
+		enable := d.Get("enable").(bool)
+		if enable {
+			err = enableGroup(ctx, d, client, asGroupID, initNum)
+			if err != nil {
+				return fmterr.Errorf("error enabling ASGroup %q: %s", asGroupID, err)
+			}
+		} else {
+			err = groups.Disable(client, asGroupID)
+			if err != nil {
+				return fmterr.Errorf("error disabling ASGroup %q: %s", asGroupID, err)
+			}
+		}
 	}
 
 	// update tags
