@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -15,6 +16,9 @@ import (
 )
 
 func TestAccASV1Group_basic(t *testing.T) {
+	if os.Getenv("RUN_AS_TESTS") == "" {
+		t.Skip("RUN_AS_TESTS not set, skipping OpenTelekomCloud Autoscaling group test.")
+	}
 	supportedRegions := []string{"eu-de", "eu-nl", "eu-ch2"}
 	var asGroup groups.Group
 	resourceName := "opentelekomcloud_as_group_v1.as_group"
