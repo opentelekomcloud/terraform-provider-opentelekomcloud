@@ -133,6 +133,9 @@ The following arguments are supported:
 * `cool_down_time` - (Optional) The cooling duration (in seconds). The value ranges
   from 0 to 86400, and is 900 by default.
 
+* `enable` - (Optional) It specifies whether to enable or disable the AS group. Supported values: `true`, `false`.
+  Default value: `true`.
+
 * `lb_listener_id` **DEPRECATED** - (Optional) The Classic LB listener IDs. The system
   supports up to six Classic LB listeners, the IDs of which are separated using a comma (,).
   This parameter is alternative to `lbaas_listeners`.
