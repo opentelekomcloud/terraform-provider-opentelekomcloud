@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 	"time"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -65,12 +65,36 @@ func ResourceCCEAddonV3() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"basic": {
-							Type:     schema.TypeMap,
-							Required: true,
+							Type:         schema.TypeMap,
+							Optional:     true,
+							Elem:         &schema.Schema{Type: schema.TypeString},
+							ExactlyOneOf: []string{"values.0.basic", "values.0.basic_json"},
+						},
+						"basic_json": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringIsJSON,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								equal, _ := common.CompareJsonTemplateAreEquivalent(old, new)
+								return equal
+							},
+							ExactlyOneOf: []string{"values.0.basic", "values.0.basic_json"},
 						},
 						"custom": {
-							Type:     schema.TypeMap,
-							Required: true,
+							Type:          schema.TypeMap,
+							Optional:      true,
+							Elem:          &schema.Schema{Type: schema.TypeString},
+							ConflictsWith: []string{"values.0.custom_json"},
+						},
+						"custom_json": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringIsJSON,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								equal, _ := common.CompareJsonTemplateAreEquivalent(old, new)
+								return equal
+							},
+							ConflictsWith: []string{"values.0.custom"},
 						},
 						"flavor": {
 							Type:         schema.TypeString,
@@ -80,6 +104,17 @@ func ResourceCCEAddonV3() *schema.Resource {
 								jsonString, _ := common.NormalizeJsonString(v)
 								return jsonString
 							},
+							ConflictsWith: []string{"values.0.flavor_json"},
+						},
+						"flavor_json": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringIsJSON,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								equal, _ := common.CompareJsonTemplateAreEquivalent(old, new)
+								return equal
+							},
+							ConflictsWith: []string{"values.0.flavor"},
 						},
 					},
 				},
@@ -98,13 +133,11 @@ func resourceCCEAddonV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	clusterID := d.Get("cluster_id").(string)
-	basic, custom, flavor, err := getAddonValues(d)
+	basic, custom, flavor, err := buildAddonValues(d)
 	if err != nil {
 		return fmterr.Errorf("error getting values for CCE addon: %s", err)
 	}
 
-	basic = unStringMap(basic)
-	custom = unStringMap(custom)
 	templateName := d.Get("template_name").(string)
 	addon, err := addons.Create(client, addons.CreateOpts{
 		Kind:       "Addon",
@@ -191,27 +224,6 @@ func resourceCCEAddonV3Read(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func getAddonValues(d *schema.ResourceData) (basic, custom, flavor map[string]interface{}, err error) {
-	valLength := d.Get("values.#").(int)
-	if valLength == 0 {
-		err = fmt.Errorf("no values are set for CCE addon")
-		return
-	}
-	basic = d.Get("values.0.basic").(map[string]interface{})
-	custom = d.Get("values.0.custom").(map[string]interface{})
-	values := d.Get("values").([]interface{})
-	valuesMap := values[0].(map[string]interface{})
-	if flavorJsonRaw := valuesMap["flavor"].(string); flavorJsonRaw != "" {
-		err = json.Unmarshal([]byte(flavorJsonRaw), &flavor)
-		if err != nil {
-			err = fmt.Errorf("error unmarshalling flavor json %s", err)
-			return
-		}
-	}
-
-	return
-}
-
 func resourceCCEAddonV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientAddonV3, func() (*golangsdk.ServiceClient, error) {
@@ -279,13 +291,31 @@ func buildAddonValues(d *schema.ResourceData) (basic, custom, flavor map[string]
 	valuesMap := values[0].(map[string]interface{})
 	if basicRaw := valuesMap["basic"].(map[string]interface{}); len(basicRaw) != 0 {
 		basic = basicRaw
+	} else if basicJsonRaw := valuesMap["basic_json"].(string); basicJsonRaw != "" {
+		err = json.Unmarshal([]byte(basicJsonRaw), &basic)
+		if err != nil {
+			err = fmt.Errorf("error unmarshalling basic json: %s", err)
+			return
+		}
 	}
 
 	if customRaw := valuesMap["custom"].(map[string]interface{}); len(customRaw) != 0 {
 		custom = customRaw
+	} else if customJsonRaw := valuesMap["custom_json"].(string); customJsonRaw != "" {
+		err = json.Unmarshal([]byte(customJsonRaw), &custom)
+		if err != nil {
+			err = fmt.Errorf("error unmarshalling custom json: %s", err)
+			return
+		}
 	}
 
-	if flavorJsonRaw := valuesMap["flavor"].(string); flavorJsonRaw != "" {
+	if flavorRaw := valuesMap["flavor"].(string); flavorRaw != "" {
+		err = json.Unmarshal([]byte(flavorRaw), &flavor)
+		if err != nil {
+			err = fmt.Errorf("error unmarshalling flavor json %s", err)
+			return
+		}
+	} else if flavorJsonRaw := valuesMap["flavor_json"].(string); flavorJsonRaw != "" {
 		err = json.Unmarshal([]byte(flavorJsonRaw), &flavor)
 		if err != nil {
 			err = fmt.Errorf("error unmarshalling flavor json %s", err)
@@ -342,39 +372,6 @@ func logHttpError(err error) error {
 		return fmt.Errorf("response: %s\n %s", httpErr.Error(), httpErr.Body)
 	}
 	return err
-}
-
-func unStringMap(src map[string]interface{}) map[string]interface{} {
-	out := make(map[string]interface{}, len(src))
-	var jsonStr interface{}
-	for key, v := range src {
-		val := v.(string)
-		if intVal, err := strconv.Atoi(val); err == nil {
-			out[key] = intVal
-			continue
-		}
-		if boolVal, err := strconv.ParseBool(val); err == nil {
-			out[key] = boolVal
-			continue
-		}
-		if floatVal, err := strconv.ParseFloat(val, 64); err == nil {
-			out[key] = floatVal
-			continue
-		}
-		// Check if the value is a JSON array
-		if err := json.Unmarshal([]byte(val), &jsonStr); err == nil {
-			switch jsonStr.(type) {
-			case []interface{}:
-				out[key] = jsonStr
-				continue
-			case map[string]interface{}:
-				out[key] = jsonStr
-				continue
-			}
-		}
-		out[key] = val
-	}
-	return out
 }
 
 func waitForCCEAddonDelete(client *golangsdk.ServiceClient, addonID, clusterID string) resource.StateRefreshFunc {

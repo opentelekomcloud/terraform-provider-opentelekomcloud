@@ -166,6 +166,68 @@ resource "opentelekomcloud_cce_addon_v3" "coredns" {
 }
 ```
 
+### CCE metric-server addon with nested data structures in custom values
+```hcl
+variable "vpc_id" {}
+variable "network_id" {}
+
+data "opentelekomcloud_identity_project_v3" "project" {}
+
+resource opentelekomcloud_cce_cluster_v3 cluster_1 {
+  name                    = "my_cluster"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.medium"
+  vpc_id                  = var.vpc_id
+  subnet_id               = var.network_id
+  cluster_version         = "v1.29"
+  container_network_type  = "overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+  no_addons               = true
+}
+
+
+data "opentelekomcloud_cce_addon_template_v3" "ms" {
+  addon_version = "1.3.102"
+  addon_name    = "metrics-server"
+}
+
+resource "opentelekomcloud_cce_addon_v3" "ms" {
+  template_name    = data.opentelekomcloud_cce_addon_template_v3.ms.addon_name
+  template_version = data.opentelekomcloud_cce_addon_template_v3.ms.addon_version
+  cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
+
+  values {
+    basic = {
+      "image_version" : data.opentelekomcloud_cce_addon_template_v3.ms.image_version,
+      "swr_addr" : data.opentelekomcloud_cce_addon_template_v3.ms.swr_addr,
+      "swr_user" : data.opentelekomcloud_cce_addon_template_v3.ms.swr_user
+    }
+    custom_json = jsonencode({
+      tolerations = [
+        {
+          key      = "somedomain/somekey"
+          operator = "Equal"
+          value    = "test"
+          effect   = "NoSchedule"
+        }
+      ],
+      node_match_expressions = [
+        {
+          key      = "somedomain/somekey"
+          operator = "In"
+          values = [
+            "test"
+          ]
+        }
+      ],
+      cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+      tenant_id  = data.opentelekomcloud_identity_project_v3.project.id
+      logLevel   = 3
+    })
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -178,11 +240,22 @@ The following arguments are supported:
 
 * `values` - (Required, List) Parameters of the template to be installed or upgraded.
 
-    * `basic` - (Required, Map) Basic add-on information.
+  * `basic_json` - (Optional, String) Specifies the json string vary depending on the add-on.
 
-    * `custom` - (Required, Map) Custom parameters of the add-on.
+  * `custom_json` - (Optional, String) Specifies the json string vary depending on the add-on.
+
+  * `flavor_json` - (Optional, String) Specifies the json string vary depending on the add-on.
+
+  * `basic` - (Optional, Map) Specifies the key/value pairs vary depending on the add-on.
+    Only supports non-nested structure and only supports string type elements.
+    This is an alternative to `basic_json`, but it is not recommended.
+
+  * `custom` - (Optional, Map) Specifies the key/value pairs vary depending on the add-on.
+    Only supports non-nested structure and only supports string type elements.
+    This is an alternative to `custom_json`, but it is not recommended.
 
     * `flavor` - (Optional, String) Specifies the json string vary depending on the add-on.
+    This is an alternative to `flavor_json`, left for backward compatibility.
 
 Arguments which can be passed to the `basic` and `custom` addon parameters depends on the addon type and version.
 For more detailed description of addons for k8s version `v1.17.9` see [addons description](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/blob/devel/opentelekomcloud/services/cce/addon-templates-v1.17.9.md).
