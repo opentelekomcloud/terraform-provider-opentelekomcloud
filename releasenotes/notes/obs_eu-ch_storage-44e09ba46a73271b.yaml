@@ -1,4 +1,4 @@
 ---
 enhancements:
   - |
-    **[OBS]** Enable storage class for `eu-ch` region for ``resource/opentelekomcloud_obs_bucket`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[OBS]** Enable storage class for `eu-ch` region for ``resource/opentelekomcloud_obs_bucket`` (`#3227 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3227>`_)
