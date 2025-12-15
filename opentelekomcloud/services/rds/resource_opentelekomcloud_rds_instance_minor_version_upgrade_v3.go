@@ -18,7 +18,6 @@ func ResourceRdsInstanceMinorVersionUpgrade() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceRdsInstanceMinorVersionUpgradeCreate,
 		ReadContext:   resourceRdsInstanceMinorVersionUpgradeRead,
-		UpdateContext: resourceRdsInstanceMinorVersionUpgradeUpdate,
 		DeleteContext: resourceRdsInstanceMinorVersionUpgradeDelete,
 
 		Schema: map[string]*schema.Schema{
@@ -65,10 +64,6 @@ func resourceRdsInstanceMinorVersionUpgradeCreate(ctx context.Context, d *schema
 }
 
 func resourceRdsInstanceMinorVersionUpgradeRead(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
-	return nil
-}
-
-func resourceRdsInstanceMinorVersionUpgradeUpdate(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	return nil
 }
 
