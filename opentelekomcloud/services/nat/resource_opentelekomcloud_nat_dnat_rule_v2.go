@@ -51,6 +51,11 @@ func ResourceNatDnatRuleV2() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.IsUUID,
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"port_id": {
 				Type:          schema.TypeString,
 				ConflictsWith: []string{"private_ip"},
@@ -122,6 +127,7 @@ func resourceNatDnatRuleCreate(ctx context.Context, d *schema.ResourceData, meta
 		FloatingIpID:        d.Get("floating_ip_id").(string),
 		ExternalServicePort: &externalServicePort,
 		Protocol:            d.Get("protocol").(string),
+		Description:         d.Get("description").(string),
 	}
 
 	rule, err := createRuleWithRetry(ctx, client, createOpts, time.Minute)

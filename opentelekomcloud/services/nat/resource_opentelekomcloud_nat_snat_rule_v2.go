@@ -54,6 +54,11 @@ func ResourceNatSnatRuleV2() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.IsUUID,
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"cidr": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -94,6 +99,7 @@ func resourceNatSnatRuleV2Create(ctx context.Context, d *schema.ResourceData, me
 		FloatingIPID: d.Get("floating_ip_id").(string),
 		SourceType:   d.Get("source_type").(int),
 		Cidr:         cidr.(string),
+		Description:  d.Get("description").(string),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -140,6 +146,7 @@ func resourceNatSnatRuleV2Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("floating_ip_id", snatRule.FloatingIPID),
 		d.Set("cidr", snatRule.Cidr),
 		d.Set("region", config.GetRegion(d)),
+		d.Set("description", snatRule.Description),
 	)
 	var sourceType int
 	switch v := snatRule.SourceType.(type) {
