@@ -60,6 +60,9 @@ The following arguments are supported:
 * `floating_ip_id` - (Required) ID of the floating ip this snat rule connects to.
   Changing this creates a new snat rule.
 
+* `description` - (Optional) Provides supplementary information about the SNAT rule.
+  Changing this creates a new snat rule.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -73,6 +76,8 @@ The following attributes are exported:
 * `source_type` - See Argument Reference above.
 
 * `cidr` - See Argument Reference above.
+
+* `description` - See Argument Reference above.
 
 ## Import
 

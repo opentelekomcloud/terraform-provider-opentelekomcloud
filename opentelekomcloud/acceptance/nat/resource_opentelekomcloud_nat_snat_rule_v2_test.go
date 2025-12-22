@@ -26,6 +26,7 @@ func TestAccNatSnatRule_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatV2GatewayExists(resourceGatewayName),
 					testAccCheckNatV2SnatRuleExists(resourceSnatRuleName),
+					resource.TestCheckResourceAttr(resourceSnatRuleName, "description", "test for terraform"),
 				),
 			},
 			{
@@ -104,6 +105,7 @@ resource "opentelekomcloud_nat_gateway_v2" "nat_1" {
 resource "opentelekomcloud_nat_snat_rule_v2" "snat_1" {
   nat_gateway_id = opentelekomcloud_nat_gateway_v2.nat_1.id
   floating_ip_id = opentelekomcloud_networking_floatingip_v2.fip_1.id
+  description    = "test for terraform"
   cidr           = "192.168.0.0/24"
   source_type    = 0
 }

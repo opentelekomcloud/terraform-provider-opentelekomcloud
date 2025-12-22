@@ -28,6 +28,7 @@ func TestAccNatDnat_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceDnatRuleName, "internal_service_port", "993"),
 					resource.TestCheckResourceAttr(resourceDnatRuleName, "external_service_port", "242"),
 					resource.TestCheckResourceAttr(resourceDnatRuleName, "protocol", "tcp"),
+					resource.TestCheckResourceAttr(resourceDnatRuleName, "description", "test for terraform"),
 					resource.TestCheckResourceAttrSet(resourceDnatRuleName, "private_ip"),
 				),
 			},
@@ -202,6 +203,7 @@ resource "opentelekomcloud_nat_dnat_rule_v2" "dnat" {
   nat_gateway_id        = opentelekomcloud_nat_gateway_v2.nat_gw.id
   private_ip            = opentelekomcloud_compute_instance_v2.instance_1.network.0.fixed_ip_v4
   internal_service_port = 993
+  description           = "test for terraform"
   protocol              = "tcp"
   external_service_port = 242
 }

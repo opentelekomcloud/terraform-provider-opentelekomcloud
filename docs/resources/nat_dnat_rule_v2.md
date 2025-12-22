@@ -70,6 +70,9 @@ When the DNAT rule is used in the **Direct Connect** scenario, use `private_ip` 
 * `external_service_port` - (Required) Specifies port used by ECSs or
   BMSs to provide services for external systems. Changing this creates a new DNAT rule.
 
+* `description` - (Optional) Provides supplementary information about the DNAT rule.
+  Changing this creates a new DNAT rule.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -79,6 +82,8 @@ In addition to the arguments listed above, the following computed attributes are
 * `status` - DNAT rule status.
 
 * `floating_ip_address` - The actual floating IP address.
+
+* `description` - See Argument Reference above.
 
 ## Import
 
