@@ -166,35 +166,35 @@ func ResourceASPolicyV2() *schema.Resource {
 	}
 }
 
-func resourceASPolicyScheduledPolicy(d *schema.ResourceData) policies.SchedulePolicyOpts {
-	rawScheduledPolicyList := d.Get("scheduled_policy").(*schema.Set).List()
-	var scheduledOpts policies.SchedulePolicyOpts
-	if len(rawScheduledPolicyList) > 0 {
-		rawScheduledPolicy := rawScheduledPolicyList[0].(map[string]interface{})
-		scheduledOpts = policies.SchedulePolicyOpts{
-			LaunchTime:      rawScheduledPolicy["launch_time"].(string),
-			RecurrenceType:  rawScheduledPolicy["recurrence_type"].(string),
-			RecurrenceValue: rawScheduledPolicy["recurrence_value"].(string),
-			StartTime:       rawScheduledPolicy["start_time"].(string),
-			EndTime:         rawScheduledPolicy["end_time"].(string),
-		}
+func resourceASPolicyScheduledPolicy(d *schema.ResourceData) *policies.SchedulePolicyOpts {
+	rawSchedulePolicyList := d.Get("scheduled_policy").(*schema.Set).List()
+	if len(rawSchedulePolicyList) == 0 {
+		return nil
 	}
-	return scheduledOpts
+
+	rawSchedulePolicy := rawSchedulePolicyList[0].(map[string]interface{})
+	return &policies.SchedulePolicyOpts{
+		LaunchTime:      rawSchedulePolicy["launch_time"].(string),
+		RecurrenceType:  rawSchedulePolicy["recurrence_type"].(string),
+		RecurrenceValue: rawSchedulePolicy["recurrence_value"].(string),
+		StartTime:       rawSchedulePolicy["start_time"].(string),
+		EndTime:         rawSchedulePolicy["end_time"].(string),
+	}
 }
 
-func resourceASPolicyScalingAction(d *schema.ResourceData) policies.ActionOpts {
+func resourceASPolicyScalingAction(d *schema.ResourceData) *policies.ActionOpts {
 	rawPolicyActionList := d.Get("scaling_policy_action").(*schema.Set).List()
-	var actionOpts policies.ActionOpts
-	if len(rawPolicyActionList) > 0 {
-		rawPolicyAction := rawPolicyActionList[0].(map[string]interface{})
-		actionOpts = policies.ActionOpts{
-			Operation:  rawPolicyAction["operation"].(string),
-			Size:       rawPolicyAction["size"].(int),
-			Percentage: rawPolicyAction["percentage"].(int),
-			Limits:     rawPolicyAction["limits"].(int),
-		}
+	if len(rawPolicyActionList) == 0 {
+		return nil
 	}
-	return actionOpts
+
+	rawPolicyAction := rawPolicyActionList[0].(map[string]interface{})
+	return &policies.ActionOpts{
+		Operation:  rawPolicyAction["operation"].(string),
+		Size:       rawPolicyAction["size"].(int),
+		Percentage: rawPolicyAction["percentage"].(int),
+		Limits:     rawPolicyAction["limits"].(int),
+	}
 }
 
 func resourceASPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -247,26 +247,9 @@ func resourceASPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta in
 		d.Set("scaling_resource_type", asPolicy.ScalingResourceType),
 		d.Set("alarm_id", asPolicy.AlarmID),
 		d.Set("cool_down_time", asPolicy.CoolDownTime),
+		d.Set("scheduled_policy", setSchedulePolicy(asPolicy.SchedulePolicy)),
+		d.Set("scaling_policy_action", setPolicyAction(asPolicy.PolicyAction)),
 	)
-
-	scheduledPolicy := []map[string]interface{}{
-		{
-			"launch_time":      asPolicy.SchedulePolicy.LaunchTime,
-			"recurrence_type":  asPolicy.SchedulePolicy.RecurrenceType,
-			"recurrence_value": asPolicy.SchedulePolicy.RecurrenceValue,
-			"start_time":       asPolicy.SchedulePolicy.StartTime,
-			"end_time":         asPolicy.SchedulePolicy.EndTime,
-		},
-	}
-
-	policyAction := []map[string]interface{}{
-		{
-			"operation":  asPolicy.PolicyAction.Operation,
-			"size":       asPolicy.PolicyAction.Size,
-			"percentage": asPolicy.PolicyAction.Percentage,
-			"limits":     asPolicy.PolicyAction.Limits,
-		},
-	}
 
 	metadata := []map[string]interface{}{
 		{
@@ -276,8 +259,6 @@ func resourceASPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta in
 		},
 	}
 	mErr = multierror.Append(mErr,
-		d.Set("scheduled_policy", scheduledPolicy),
-		d.Set("scaling_policy_action", policyAction),
 		d.Set("metadata", metadata),
 	)
 
@@ -342,4 +323,42 @@ func validateAction(_ context.Context, d *schema.ResourceDiff, _ interface{}) er
 		}
 	}
 	return nil
+}
+
+func setSchedulePolicy(sp policies.SchedulePolicy) []map[string]interface{} {
+	if sp.LaunchTime == "" &&
+		sp.RecurrenceType == "" &&
+		sp.RecurrenceValue == "" &&
+		sp.StartTime == "" &&
+		sp.EndTime == "" {
+		return nil
+	}
+
+	return []map[string]interface{}{
+		{
+			"launch_time":      sp.LaunchTime,
+			"recurrence_type":  sp.RecurrenceType,
+			"recurrence_value": sp.RecurrenceValue,
+			"start_time":       sp.StartTime,
+			"end_time":         sp.EndTime,
+		},
+	}
+}
+
+func setPolicyAction(pa policies.Action) []map[string]interface{} {
+	if pa.Operation == "" &&
+		pa.Size == 0 &&
+		pa.Percentage == 0 &&
+		pa.Limits == 0 {
+		return nil
+	}
+
+	return []map[string]interface{}{
+		{
+			"operation":  pa.Operation,
+			"size":       pa.Size,
+			"percentage": pa.Percentage,
+			"limits":     pa.Limits,
+		},
+	}
 }
