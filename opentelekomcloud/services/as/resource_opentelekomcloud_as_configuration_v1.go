@@ -306,11 +306,11 @@ func getInstanceConfig(d *schema.ResourceData) configurations.InstanceConfigOpts
 		}
 	}
 
-	pubicIpData := configDataMap["public_ip"].([]interface{})
+	publicIpData := configDataMap["public_ip"].([]interface{})
 	// user specify public_ip
-	if len(pubicIpData) == 1 {
-		publicIpMap := pubicIpData[0].(map[string]interface{})
-		instanceConfigOpts.PubicIp = getPublicIps(publicIpMap)
+	if len(publicIpData) == 1 {
+		publicIpMap := publicIpData[0].(map[string]interface{})
+		instanceConfigOpts.PublicIp = getPublicIps(publicIpMap)
 	}
 
 	return instanceConfigOpts
