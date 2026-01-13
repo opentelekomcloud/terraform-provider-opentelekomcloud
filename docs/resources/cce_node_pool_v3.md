@@ -146,8 +146,9 @@ the AZ based on the AZ sequence. For more details see
 * `key_pair` - (Optional, ForceNew, String) Key pair name when logging in to select the key pair mode.
   This parameter and password are alternative. Changing this parameter will create a new resource.
 
-* `password` - (Optional, ForceNew, String) Key pair name when logging in to select the key pair mode.
+* `password` - (Optional, ForceNew, String) Password used for node login.
   This parameter and password are alternative. Changing this parameter will create a new resource.
+  -> **NOTE:** This field is not supported for the current version.
 
 * `os` - (Optional, ForceNew, String) Node OS. Changing this parameter will create a new resource.
 
