@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[AS]** Fix variable misspelling in ``resource/opentelekomcloud_as_configuration_v2`` (`#3235 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3235>`_)
