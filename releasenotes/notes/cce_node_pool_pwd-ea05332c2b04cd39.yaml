@@ -1,4 +1,4 @@
 ---
 other:
   |
-  **[CCE]** Fix documentation for `password` parameter for ``resource/opentelekomcloud_cce_node_pool_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  **[CCE]** Fix documentation for `password` parameter for ``resource/opentelekomcloud_cce_node_pool_v3`` (`#3236 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3236>`_)
