@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **[CES]** New resource ``resource/opentelekomcloud_ces_alarmrule_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[CES]** New resource ``resource/opentelekomcloud_ces_alarmrule_v2`` (`#3242 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3242>`_)
