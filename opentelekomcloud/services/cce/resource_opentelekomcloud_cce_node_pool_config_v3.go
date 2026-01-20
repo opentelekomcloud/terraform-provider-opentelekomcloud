@@ -53,7 +53,7 @@ func ResourceCCENodePoolConfigV3() *schema.Resource {
 			},
 			"packages": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -62,7 +62,7 @@ func ResourceCCENodePoolConfigV3() *schema.Resource {
 						},
 						"configurations": {
 							Type:     schema.TypeList,
-							Optional: true,
+							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
