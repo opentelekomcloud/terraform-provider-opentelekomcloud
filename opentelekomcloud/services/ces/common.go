@@ -3,8 +3,10 @@ package ces
 import "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 
 const (
-	errCreationClient = "error creating CESv1 client: %w"
-	cesClientV1       = "ces-v1-client"
+	errCreationClient   = "error creating CESv1 client: %w"
+	errCreationClientV2 = "error creating CESv2 client: %w"
+	cesClientV1         = "ces-v1-client"
+	cesClientV2         = "ces-v2-client"
 )
 
 func InterfaceToInt64(i interface{}) int64 {
