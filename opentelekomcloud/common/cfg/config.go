@@ -852,6 +852,13 @@ func (c *Config) CesV1Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) CesV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewCESV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) getEndpointType() golangsdk.Availability {
 	if c.EndpointType == "internal" || c.EndpointType == "internalURL" {
 		return golangsdk.AvailabilityInternal
