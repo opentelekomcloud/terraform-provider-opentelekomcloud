@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CCE]** Add new resource ``resource/opentelekomcloud_cce_node_pool_config_v3`` (`#3243 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3243>`_).
