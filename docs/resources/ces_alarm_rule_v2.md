@@ -1,8 +1,8 @@
 ---
 subcategory: "Cloud Eye (CES)"
 layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_ces_alarmrule_v2"
-sidebar_current: "docs-opentelekomcloud-resource-ces-alarmrule-v2"
+page_title: "OpenTelekomCloud: opentelekomcloud_ces_alarm_rule_v2"
+sidebar_current: "docs-opentelekomcloud-resource-ces-alarm-rule-v2"
 description: |-
   Manages a CES Alarm Rule v2 resource within OpenTelekomCloud.
 ---
@@ -10,7 +10,7 @@ description: |-
 Up-to-date reference of API arguments for CES alarm rule you can get at
 [documentation portal](https://docs.otc.t-systems.com/cloud-eye/api-ref/api_v2/alarm_rules/index.html)
 
-# opentelekomcloud_ces_alarmrule_v2
+# opentelekomcloud_ces_alarm_rule_v2
 
 Manages a CES Alarm Rule v2 resource within OpenTelekomCloud.
 
@@ -26,7 +26,7 @@ variable "instance_id_1" {}
 variable "instance_id_2" {}
 variable "topic_urn" {}
 
-resource "opentelekomcloud_ces_alarmrule_v2" "test" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   name                 = "alarm-rule-test"
   namespace            = "SYS.ECS"
   type                 = "MULTI_INSTANCE"
@@ -83,7 +83,7 @@ resource "opentelekomcloud_ces_alarmrule_v2" "test" {
 ```hcl
 variable "topic_urn" {}
 
-resource "opentelekomcloud_ces_alarmrule_v2" "test" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   name                 = "alarm-rule-all-instance"
   namespace            = "AGT.ECS"
   type                 = "ALL_INSTANCE"
@@ -121,7 +121,7 @@ resource "opentelekomcloud_ces_alarmrule_v2" "test" {
 ### Alarm rule for system event monitoring
 
 ```hcl
-resource "opentelekomcloud_ces_alarmrule_v2" "test" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   name                 = "alarm-rule-sys-event"
   namespace            = "SYS.ECS"
   type                 = "EVENT.SYS"
@@ -154,7 +154,7 @@ resource "opentelekomcloud_ces_alarmrule_v2" "test" {
 ```hcl
 variable "topic_urn" {}
 
-resource "opentelekomcloud_ces_alarmrule_v2" "test" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   name                 = "alarm-rule-sys-event"
   namespace            = "SYS.ECS"
   type                 = "EVENT.SYS"
@@ -193,7 +193,7 @@ resource "opentelekomcloud_ces_alarmrule_v2" "test" {
 variable "instance_id" {}
 variable "topic_urn" {}
 
-resource "opentelekomcloud_ces_alarmrule_v2" "test" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   name                 = "alarm-rule-with-ok-actions"
   namespace            = "SYS.ECS"
   type                 = "MULTI_INSTANCE"
@@ -399,5 +399,5 @@ This resource provides the following timeouts configuration options:
 CES alarm rules v2 can be imported using the `id`, e.g.
 
 ```bash
-$ terraform import opentelekomcloud_ces_alarmrule_v2.alarm_rule al1619578509719Ga0X1RGWv
+$ terraform import opentelekomcloud_ces_alarm_rule_v2.alarm_rule al1619578509719Ga0X1RGWv
 ```

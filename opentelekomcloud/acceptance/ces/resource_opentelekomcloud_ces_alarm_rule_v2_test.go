@@ -16,7 +16,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-const resourceAlarmRuleV2Name = "opentelekomcloud_ces_alarmrule_v2.alarmrule_1"
+const resourceAlarmRuleV2Name = "opentelekomcloud_ces_alarm_rule_v2.alarmrule_1"
 
 func getAlarmRuleV2Func(conf *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
 	c, err := conf.CesV2Client(env.OS_REGION_NAME)
@@ -142,7 +142,7 @@ resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   }
 }
 
-resource "opentelekomcloud_ces_alarmrule_v2" "alarmrule_1" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "alarmrule_1" {
   name      = "alarm_rule_v2_1"
   namespace = "SYS.ECS"
   type      = "MULTI_INSTANCE"
@@ -183,7 +183,7 @@ resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   }
 }
 
-resource "opentelekomcloud_ces_alarmrule_v2" "alarmrule_1" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "alarmrule_1" {
   name      = "alarm_rule_v2_1"
   namespace = "SYS.ECS"
   type      = "MULTI_INSTANCE"
@@ -229,7 +229,7 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   display_name = "The display name of topic_1"
 }
 
-resource "opentelekomcloud_ces_alarmrule_v2" "alarmrule_1" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "alarmrule_1" {
   name      = "alarm_rule_v2_1"
   namespace = "SYS.ECS"
   type      = "MULTI_INSTANCE"
@@ -267,7 +267,7 @@ resource "opentelekomcloud_ces_alarmrule_v2" "alarmrule_1" {
 func TestCESAlarmRuleV2_multiplePolicies(t *testing.T) {
 	var (
 		ar    alarms.Alarm
-		rName = "opentelekomcloud_ces_alarmrule_v2.test"
+		rName = "opentelekomcloud_ces_alarm_rule_v2.test"
 		name  = fmt.Sprintf("ces-rule-%s", acctest.RandString(5))
 	)
 
@@ -340,7 +340,7 @@ resource "opentelekomcloud_smn_topic_v2" "test" {
   display_name = "The display name of smn topic"
 }
 
-resource "opentelekomcloud_ces_alarmrule_v2" "test" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   name      = "%[2]s"
   namespace = "SYS.ECS"
   type      = "MULTI_INSTANCE"
@@ -408,7 +408,7 @@ resource "opentelekomcloud_smn_topic_v2" "test" {
   display_name = "The display name of smn topic"
 }
 
-resource "opentelekomcloud_ces_alarmrule_v2" "test" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   name      = "%[2]s"
   namespace = "SYS.ECS"
   type      = "MULTI_INSTANCE"
@@ -460,7 +460,7 @@ resource "opentelekomcloud_ces_alarmrule_v2" "test" {
 func TestCESAlarmRuleV2_multipleResources(t *testing.T) {
 	var (
 		ar    alarms.Alarm
-		rName = "opentelekomcloud_ces_alarmrule_v2.test"
+		rName = "opentelekomcloud_ces_alarm_rule_v2.test"
 		name  = fmt.Sprintf("ces-rule-%s", acctest.RandString(5))
 	)
 
@@ -524,7 +524,7 @@ resource "opentelekomcloud_smn_topic_v2" "test" {
   display_name = "The display name of smn topic"
 }
 
-resource "opentelekomcloud_ces_alarmrule_v2" "test" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   name      = "%[2]s"
   namespace = "SYS.ECS"
   type      = "MULTI_INSTANCE"
@@ -580,7 +580,7 @@ resource "opentelekomcloud_smn_topic_v2" "test" {
   display_name = "The display name of smn topic"
 }
 
-resource "opentelekomcloud_ces_alarmrule_v2" "test" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   name      = "%[2]s"
   namespace = "SYS.ECS"
   type      = "MULTI_INSTANCE"
@@ -626,7 +626,7 @@ resource "opentelekomcloud_ces_alarmrule_v2" "test" {
 func TestCESAlarmRuleV2_sysEvent(t *testing.T) {
 	var (
 		ar    alarms.Alarm
-		rName = "opentelekomcloud_ces_alarmrule_v2.test"
+		rName = "opentelekomcloud_ces_alarm_rule_v2.test"
 		name  = fmt.Sprintf("ces-rule-%s", acctest.RandString(5))
 	)
 
@@ -672,7 +672,7 @@ func TestCESAlarmRuleV2_sysEvent(t *testing.T) {
 
 func testCESAlarmRuleV2SysEvent(name string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_ces_alarmrule_v2" "test" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   name      = "%[1]s"
   namespace = "SYS.ECS"
   type      = "EVENT.SYS"
@@ -704,7 +704,7 @@ resource "opentelekomcloud_ces_alarmrule_v2" "test" {
 
 func testCESAlarmRuleV2SysEventUpdate(name string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_ces_alarmrule_v2" "test" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   name      = "%[1]s"
   namespace = "SYS.ECS"
   type      = "EVENT.SYS"
@@ -737,7 +737,7 @@ resource "opentelekomcloud_ces_alarmrule_v2" "test" {
 func TestCESAlarmRuleV2_sysEventWithNotification(t *testing.T) {
 	var (
 		ar    alarms.Alarm
-		rName = "opentelekomcloud_ces_alarmrule_v2.test"
+		rName = "opentelekomcloud_ces_alarm_rule_v2.test"
 		name  = fmt.Sprintf("ces-rule-%s", acctest.RandString(5))
 	)
 
@@ -780,7 +780,7 @@ resource "opentelekomcloud_smn_topic_v2" "test" {
   display_name = "The display name of smn topic"
 }
 
-resource "opentelekomcloud_ces_alarmrule_v2" "test" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   name      = "%[1]s"
   namespace = "SYS.ECS"
   type      = "EVENT.SYS"
@@ -820,7 +820,7 @@ resource "opentelekomcloud_ces_alarmrule_v2" "test" {
 func TestCESAlarmRuleV2_allInstance(t *testing.T) {
 	var (
 		ar    alarms.Alarm
-		rName = "opentelekomcloud_ces_alarmrule_v2.test"
+		rName = "opentelekomcloud_ces_alarm_rule_v2.test"
 		name  = fmt.Sprintf("ces-rule-%s", acctest.RandString(5))
 	)
 
@@ -861,7 +861,7 @@ resource "opentelekomcloud_smn_topic_v2" "test" {
   display_name = "The display name of smn topic"
 }
 
-resource "opentelekomcloud_ces_alarmrule_v2" "test" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   name      = "%[1]s"
   namespace = "AGT.ECS"
   type      = "ALL_INSTANCE"
@@ -903,7 +903,7 @@ resource "opentelekomcloud_ces_alarmrule_v2" "test" {
 func TestCESAlarmRuleV2_withOkActions(t *testing.T) {
 	var (
 		ar    alarms.Alarm
-		rName = "opentelekomcloud_ces_alarmrule_v2.test"
+		rName = "opentelekomcloud_ces_alarm_rule_v2.test"
 		name  = fmt.Sprintf("ces-rule-%s", acctest.RandString(5))
 	)
 
@@ -967,7 +967,7 @@ resource "opentelekomcloud_smn_topic_v2" "test" {
   display_name = "The display name of smn topic"
 }
 
-resource "opentelekomcloud_ces_alarmrule_v2" "test" {
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   name      = "%[2]s"
   namespace = "SYS.ECS"
   type      = "MULTI_INSTANCE"
