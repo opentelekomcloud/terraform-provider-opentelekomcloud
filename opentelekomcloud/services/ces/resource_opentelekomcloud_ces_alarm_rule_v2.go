@@ -69,14 +69,17 @@ func ResourceAlarmRuleV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"alarm_template_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"alarm_template_id", "policies"},
 			},
 			"policies": {
-				Type:     schema.TypeSet,
-				Required: true,
-				Set:      resourcePolicyHash,
+				Type:         schema.TypeSet,
+				Optional:     true,
+				Computed:     true,
+				Set:          resourcePolicyHash,
+				ExactlyOneOf: []string{"alarm_template_id", "policies"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"metric_name": {
@@ -543,8 +546,9 @@ func resourceAlarmRuleV2Update(ctx context.Context, d *schema.ResourceData, meta
 
 	alarmId := d.Id()
 
-	// Update policies if changed
-	if d.HasChange("policies") {
+	// Update policies if changed (only when not using alarm_template_id)
+	// Template-associated alarm's policies cannot be modified via API
+	if d.HasChange("policies") && d.Get("alarm_template_id").(string) == "" {
 		updatePolicies := buildUpdatePoliciesOpts(d)
 		_, err := policies.Update(client, alarmId, policies.UpdateOpts{
 			Policies: updatePolicies,
