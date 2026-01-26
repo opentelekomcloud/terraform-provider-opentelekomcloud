@@ -1009,3 +1009,217 @@ resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
 }
 `, common.DataSourceSubnet, name)
 }
+
+func TestCESAlarmRuleV2_withAlarmTemplate(t *testing.T) {
+	var (
+		ar    alarms.Alarm
+		rName = "opentelekomcloud_ces_alarm_rule_v2.test"
+		name  = fmt.Sprintf("ces-rule-%s", acctest.RandString(5))
+	)
+
+	rc := common.InitResourceCheck(
+		rName,
+		&ar,
+		getAlarmRuleV2Func,
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := ecs.QuotasForFlavor(env.OsFlavorID)
+			qts = append(qts,
+				&quotas.ExpectedQuota{Q: quotas.Server, Count: 2},
+				&quotas.ExpectedQuota{Q: quotas.Volume, Count: 2},
+				&quotas.ExpectedQuota{Q: quotas.VolumeSize, Count: 8},
+			)
+			quotas.BookMany(t, qts)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testCESAlarmRuleV2WithAlarmTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(rName, "name", name),
+					resource.TestCheckResourceAttr(rName, "namespace", "SYS.ECS"),
+					resource.TestCheckResourceAttr(rName, "type", "MULTI_INSTANCE"),
+					resource.TestCheckResourceAttr(rName, "alarm_enabled", "true"),
+					resource.TestCheckResourceAttr(rName, "notification_enabled", "true"),
+					resource.TestCheckResourceAttrPair(rName, "alarm_template_id",
+						"opentelekomcloud_ces_alarm_template_v2.test", "id"),
+					resource.TestCheckResourceAttr(rName, "policies.#", "1"),
+				),
+			},
+			{
+				Config: testCESAlarmRuleV2WithAlarmTemplateUpdate(name),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(rName, "name", name),
+					resource.TestCheckResourceAttr(rName, "alarm_enabled", "false"),
+					resource.TestCheckResourceAttrPair(rName, "alarm_template_id",
+						"opentelekomcloud_ces_alarm_template_v2.test", "id"),
+				),
+			},
+			{
+				ResourceName:      rName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testCESAlarmRuleV2WithAlarmTemplate(name string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_compute_instance_v2" "test" {
+  count       = 2
+  name        = "ecs-%[2]s-${count.index}"
+  image_name  = "Standard_Debian_11_latest"
+  flavor_name = "s3.large.2"
+
+  network {
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+}
+
+resource "opentelekomcloud_smn_topic_v2" "test" {
+  name         = "smn-%[2]s"
+  display_name = "The display name of smn topic"
+}
+
+resource "opentelekomcloud_ces_alarm_template_v2" "test" {
+  name        = "template-%[2]s"
+  description = "Test alarm template for alarm rule"
+
+  policies {
+    namespace           = "SYS.ECS"
+    dimension_name      = "instance_id"
+    metric_name         = "cpu_util"
+    period              = 300
+    filter              = "average"
+    comparison_operator = ">"
+    value               = 80
+    unit                = "%%%%"
+    count               = 3
+    alarm_level         = 2
+    suppress_duration   = 300
+  }
+
+  depends_on = [
+    opentelekomcloud_compute_instance_v2.test,
+    opentelekomcloud_smn_topic_v2.test
+  ]
+}
+
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
+  name              = "%[2]s"
+  namespace         = "SYS.ECS"
+  type              = "MULTI_INSTANCE"
+  alarm_template_id = opentelekomcloud_ces_alarm_template_v2.test.id
+
+  resources {
+    dimensions {
+      name  = "instance_id"
+      value = opentelekomcloud_compute_instance_v2.test[0].id
+    }
+  }
+
+  notification_enabled = true
+  alarm_enabled        = true
+
+  alarm_actions {
+    type = "notification"
+    notification_list = [
+      opentelekomcloud_smn_topic_v2.test.topic_urn
+    ]
+  }
+
+  ok_actions {
+    type = "notification"
+    notification_list = [
+      opentelekomcloud_smn_topic_v2.test.topic_urn
+    ]
+  }
+}
+`, common.DataSourceSubnet, name)
+}
+
+func testCESAlarmRuleV2WithAlarmTemplateUpdate(name string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_compute_instance_v2" "test" {
+  count       = 2
+  name        = "ecs-%[2]s-${count.index}"
+  image_name  = "Standard_Debian_11_latest"
+  flavor_name = "s3.large.2"
+
+  network {
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+}
+
+resource "opentelekomcloud_smn_topic_v2" "test" {
+  name         = "smn-%[2]s"
+  display_name = "The display name of smn topic"
+}
+
+resource "opentelekomcloud_ces_alarm_template_v2" "test" {
+  name        = "template-%[2]s"
+  description = "Test alarm template for alarm rule"
+
+  policies {
+    namespace           = "SYS.ECS"
+    dimension_name      = "instance_id"
+    metric_name         = "cpu_util"
+    period              = 300
+    filter              = "average"
+    comparison_operator = ">"
+    value               = 80
+    unit                = "%%%%"
+    count               = 3
+    alarm_level         = 2
+    suppress_duration   = 300
+  }
+
+  depends_on = [
+    opentelekomcloud_compute_instance_v2.test,
+    opentelekomcloud_smn_topic_v2.test
+  ]
+}
+
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
+  name              = "%[2]s"
+  namespace         = "SYS.ECS"
+  type              = "MULTI_INSTANCE"
+  alarm_template_id = opentelekomcloud_ces_alarm_template_v2.test.id
+
+  resources {
+    dimensions {
+      name  = "instance_id"
+      value = opentelekomcloud_compute_instance_v2.test[1].id
+    }
+  }
+
+  notification_enabled = true
+  alarm_enabled        = false
+
+  alarm_actions {
+    type = "notification"
+    notification_list = [
+      opentelekomcloud_smn_topic_v2.test.topic_urn
+    ]
+  }
+
+  ok_actions {
+    type = "notification"
+    notification_list = [
+      opentelekomcloud_smn_topic_v2.test.topic_urn
+    ]
+  }
+}
+`, common.DataSourceSubnet, name)
+}

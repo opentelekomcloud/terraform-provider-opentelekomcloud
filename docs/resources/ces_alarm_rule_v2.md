@@ -230,6 +230,40 @@ resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
 }
 ```
 
+### Alarm rule using alarm template
+
+```hcl
+variable "instance_id" {}
+variable "topic_urn" {}
+variable "alarm_template_id" {}
+
+resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
+  name                 = "alarm-rule-with-template"
+  namespace            = "SYS.ECS"
+  type                 = "MULTI_INSTANCE"
+  alarm_template_id    = var.alarm_template_id
+  notification_enabled = true
+  alarm_enabled        = true
+
+  resources {
+    dimensions {
+      name  = "instance_id"
+      value = var.instance_id
+    }
+  }
+
+  alarm_actions {
+    type              = "notification"
+    notification_list = [var.topic_urn]
+  }
+
+  ok_actions {
+    type              = "notification"
+    notification_list = [var.topic_urn]
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -243,8 +277,9 @@ The following arguments are supported:
   Changing this creates a new resource.
   For details, see [Services Interconnected with Cloud Eye](https://docs.otc.t-systems.com/cloud-eye/api-ref/appendix/services_interconnected_with_cloud_eye.html).
 
-* `policies` - (Required, Set) Specifies the alarm policies. The [policies](#policies_struct) structure is
-  documented below.
+* `policies` - (Optional, Set) Specifies the alarm policies. The [policies](#policies_struct) structure is
+  documented below. Exactly one of `policies` or `alarm_template_id` must be specified.
+  When using `alarm_template_id`, the policies are inherited from the template and cannot be modified directly.
 
 * `description` - (Optional, String, ForceNew) The value can be a string of `0` to `256` characters.
   Changing this creates a new resource.
@@ -264,6 +299,8 @@ The following arguments are supported:
   Changing this creates a new resource.
 
 * `alarm_template_id` - (Optional, String, ForceNew) Specifies the ID of the alarm template.
+  When using an alarm template, the policies are inherited from the template.
+  Exactly one of `alarm_template_id` or `policies` must be specified.
   Changing this creates a new resource.
 
 * `alarm_actions` - (Optional, List, ForceNew) Specifies the action triggered by an alarm.
