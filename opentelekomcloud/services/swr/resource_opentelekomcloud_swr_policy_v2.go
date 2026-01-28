@@ -2,9 +2,7 @@ package swr
 
 import (
 	"context"
-	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -24,7 +22,7 @@ func ResourceSwrPolicyV2() *schema.Resource {
 		UpdateContext: resourcePolicyUpdate,
 		DeleteContext: resourcePolicyDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourcePolicyImport,
+			StateContext: common.ImportByPath("organization", "repository", "id"),
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -178,25 +176,6 @@ func resourcePolicyDelete(_ context.Context, d *schema.ResourceData, meta interf
 	}
 
 	return nil
-}
-
-func resourcePolicyImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.SplitN(d.Id(), "/", 3)
-	if len(parts) != 3 {
-		err := fmt.Errorf("invalid format specified for SWR retention policy import: format must be <organization>/<repository>/<policy_id>")
-		return nil, err
-	}
-	org := parts[0]
-	repo := parts[1]
-	policyId := parts[2]
-	d.SetId(policyId)
-	if err := d.Set("organization", org); err != nil {
-		return nil, err
-	}
-	if err := d.Set("repository", repo); err != nil {
-		return nil, err
-	}
-	return schema.ImportStatePassthroughContext(ctx, d, meta)
 }
 
 func getRules(d *schema.ResourceData) []policy.Rule {
