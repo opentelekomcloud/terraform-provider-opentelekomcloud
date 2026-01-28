@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CES]** New resource ``resource/opentelekomcloud_ces_dashboard_v2`` (`#3250 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3250>`_)

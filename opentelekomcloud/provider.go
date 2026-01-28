@@ -486,6 +486,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_ces_alarmrule":                             ces.ResourceAlarmRule(),
 			"opentelekomcloud_ces_alarm_rule_v2":                         ces.ResourceAlarmRuleV2(),
 			"opentelekomcloud_ces_alarm_template_v2":                     ces.ResourceAlarmTemplateV2(),
+			"opentelekomcloud_ces_dashboard_v2":                          ces.ResourceDashboardV2(),
 			"opentelekomcloud_ces_event_report_v1":                       ces.ResourceCesEventReportV1(),
 			"opentelekomcloud_ces_metric_data_v1":                        ces.ResourceCesMetricDataV1(),
 			"opentelekomcloud_cfw_acl_rule_v1":                           cfw.ResourceCfwAclRuleV1(),
