@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[SWR]** Add new resource ``resource/opentelekomcloud_swr_policy_v2`` (`#3249 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3249>`_).
