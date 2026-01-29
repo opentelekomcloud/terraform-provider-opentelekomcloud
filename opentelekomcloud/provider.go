@@ -693,6 +693,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_swr_domain_v2":                             swr.ResourceSwrDomainV2(),
 			"opentelekomcloud_swr_organization_permissions_v2":           swr.ResourceSwrOrganizationPermissionsV2(),
 			"opentelekomcloud_swr_organization_v2":                       swr.ResourceSwrOrganizationV2(),
+			"opentelekomcloud_swr_policy_v2":                             swr.ResourceSwrPolicyV2(),
 			"opentelekomcloud_swr_repository_v2":                         swr.ResourceSwrRepositoryV2(),
 			"opentelekomcloud_taurusdb_mysql_backup_v3":                  taurusdb.ResourceTaurusDbMysqlBackup(),
 			"opentelekomcloud_taurusdb_mysql_instance_v3":                taurusdb.ResourceTaurusDbV3Instance(),
