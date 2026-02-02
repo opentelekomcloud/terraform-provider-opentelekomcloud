@@ -559,6 +559,14 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf(cceClientError, err)
 	}
 
+	clusterID := d.Get("cluster_id").(string)
+
+	// Get current node pool state from API to preserve values not changed by user
+	currentPool, err := nodepools.Get(client, clusterID, d.Id())
+	if err != nil {
+		return fmterr.Errorf("error getting current CCE Node Pool state: %w", err)
+	}
+
 	var base64PreInstall, base64PostInstall string
 	if v, ok := d.GetOk("preinstall"); ok {
 		base64PreInstall = common.InstallScriptEncode(v.(string))
@@ -579,12 +587,20 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
+	// Use current API value for initial_node_count unless explicitly changed by user.
+	// This prevents unwanted scaling when autoscaler has modified the node count.
+	// Reference: https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/2249
+	initialNodeCount := currentPool.Spec.InitialNodeCount
+	if d.HasChange("initial_node_count") {
+		initialNodeCount = d.Get("initial_node_count").(int)
+	}
+
 	updateOpts := nodepools.UpdateOpts{
 		Metadata: nodepools.UpdateMetaData{
 			Name: d.Get("name").(string),
 		},
 		Spec: nodepools.UpdateSpec{
-			InitialNodeCount: d.Get("initial_node_count").(int),
+			InitialNodeCount: initialNodeCount,
 			Autoscaling: nodepools.UpdateAutoscalingSpec{
 				Enable:                d.Get("scale_enable").(bool),
 				MinNodeCount:          d.Get("min_node_count").(int),
@@ -620,7 +636,6 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 		},
 	}
 
-	clusterID := d.Get("cluster_id").(string)
 	_, err = nodepools.Update(client, clusterID, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating Open Telekom Cloud CCE Node Pool: %w", err)
