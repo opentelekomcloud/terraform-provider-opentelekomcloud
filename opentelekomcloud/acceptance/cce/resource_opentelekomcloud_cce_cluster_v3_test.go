@@ -394,6 +394,41 @@ func TestAccCCEClusterV3_cillium(t *testing.T) {
 	})
 }
 
+// TestAccCCEClusterV3_componentConfigJSONString tests that JSON-like string values
+// in component_configurations are sent as strings, not parsed as JSON objects.
+// This is a regression test for https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3254
+func TestAccCCEClusterV3_componentConfigJSONString(t *testing.T) {
+	var cluster clusters.Clusters
+	rc := common.InitResourceCheck(
+		resourceClusterName,
+		&cluster,
+		getCceClusterResourceFunc,
+	)
+	clusterName := randClusterName()
+	t.Parallel()
+
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCEClusterV3ComponentConfigJSONString(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceClusterName, "name", clusterName),
+					resource.TestCheckResourceAttr(resourceClusterName, "status", "Available"),
+					resource.TestCheckResourceAttr(resourceClusterName, "component_configurations.0.name", "kube-apiserver"),
+					resource.TestCheckResourceAttr(resourceClusterName, "component_configurations.0.configurations.0.name", "oidc-required-claim"),
+					resource.TestCheckResourceAttr(resourceClusterName, "component_configurations.0.configurations.0.value", `{ "aud" : "oidc-test" }`),
+				),
+			},
+		},
+	})
+}
+
 func testAccCCEClusterV3Basic(clusterName string) string {
 	return fmt.Sprintf(`
 %s
@@ -792,6 +827,33 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
     configurations {
       name  = "support-overload"
       value = "true" # will be sent as boolean true
+    }
+  }
+}
+`, common.DataSourceSubnet, clusterName)
+}
+
+func testAccCCEClusterV3ComponentConfigJSONString(clusterName string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  container_network_type  = "eni"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+  ignore_addons           = true
+  eni_subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+  eni_subnet_cidr         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.cidr
+
+  component_configurations {
+    name = "kube-apiserver"
+    configurations {
+      name  = "oidc-required-claim"
+      value = "{ \"aud\" : \"oidc-test\" }"
     }
   }
 }

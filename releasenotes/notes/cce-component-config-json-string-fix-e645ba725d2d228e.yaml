@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[CCE]** Fixed ``component_configurations`` in ``opentelekomcloud_cce_cluster_v3`` sending
+    JSON string values as objects instead of strings
+    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
