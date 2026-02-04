@@ -675,7 +675,7 @@ func TryMapValueAnalysis(v interface{}) map[string]interface{} {
 	return result
 }
 
-// ParseAnyType tries to coerce a string to bool/number/JSON; falls back to the original string.
+// ParseAnyType tries to coerce a string to bool/number; falls back to the original string.
 func ParseAnyType(s string) interface{} {
 	ls := strings.ToLower(strings.TrimSpace(s))
 	if ls == "true" {
@@ -691,11 +691,6 @@ func ParseAnyType(s string) interface{} {
 	// Try float
 	if f, err := strconv.ParseFloat(s, 64); err == nil {
 		return f
-	}
-	// Try JSON object/array/string literal
-	var v interface{}
-	if err := json.Unmarshal([]byte(s), &v); err == nil {
-		return v
 	}
 	return s
 }
