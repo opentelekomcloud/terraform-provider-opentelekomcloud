@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sfs/v2/shares"
 
@@ -43,6 +44,9 @@ func ResourceSFSShareAccessRulesV2() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							Default:  "cert",
+							ValidateFunc: validation.StringInSlice([]string{
+								"cert", "user",
+							}, false),
 						},
 						"access_to": {
 							Type:     schema.TypeString,
