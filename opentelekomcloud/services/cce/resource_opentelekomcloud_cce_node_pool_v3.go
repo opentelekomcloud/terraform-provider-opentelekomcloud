@@ -567,12 +567,20 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error getting current CCE Node Pool state: %w", err)
 	}
 
-	var base64PreInstall, base64PostInstall string
-	if v, ok := d.GetOk("preinstall"); ok {
-		base64PreInstall = common.InstallScriptEncode(v.(string))
+	base64PreInstall := currentPool.Spec.NodeTemplate.ExtendParam.PreInstall
+	base64PostInstall := currentPool.Spec.NodeTemplate.ExtendParam.PostInstall
+
+	if d.HasChange("preinstall") {
+		base64PreInstall = ""
+		if v, ok := d.GetOk("preinstall"); ok {
+			base64PreInstall = common.InstallScriptEncode(v.(string))
+		}
 	}
-	if v, ok := d.GetOk("postinstall"); ok {
-		base64PostInstall = common.InstallScriptEncode(v.(string))
+	if d.HasChange("postinstall") {
+		base64PostInstall = ""
+		if v, ok := d.GetOk("postinstall"); ok {
+			base64PostInstall = common.InstallScriptEncode(v.(string))
+		}
 	}
 	var loginSpec nodes.LoginSpec
 	if common.HasFilledOpt(d, "key_pair") {
