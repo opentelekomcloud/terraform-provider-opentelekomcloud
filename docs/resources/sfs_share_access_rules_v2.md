@@ -16,6 +16,8 @@ Provides a possibility to manage access rules of Scalable File System resource.
 
 ## Example Usage
 
+### VPC-based Access
+
 ```hcl
 variable "share_name" {}
 
@@ -55,6 +57,33 @@ resource "opentelekomcloud_sfs_share_access_rules_v2" "sfs_rules" {
 }
 ```
 
+### IP-based Access within VPC
+
+To grant access to specific IP addresses or CIDR ranges within a VPC, use the extended format for `access_to`:
+
+```hcl
+resource "opentelekomcloud_vpc_v1" "vpc_1" {
+  name = "sfs_share_vpc"
+  cidr = "192.168.0.0/16"
+}
+
+resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
+  name        = "sfs-with-ip-access"
+  size        = 50
+  share_proto = "NFS"
+}
+
+resource "opentelekomcloud_sfs_share_access_rules_v2" "sfs_rules" {
+  share_id = opentelekomcloud_sfs_file_system_v2.sfs_1.id
+
+  access_rule {
+    access_to    = "${opentelekomcloud_vpc_v1.vpc_1.id}#192.168.1.0/24#100#all_squash,root_squash"
+    access_type  = "cert"
+    access_level = "rw"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -68,10 +97,17 @@ The `access_rule` block supports:
 * `access_level` - (Required) The access level of the shared file system. Possible values are `ro` (read-only)
   and `rw` (read-write). The default value is `rw` (read/write).
 
-* `access_type` - (Optional) The type of the share access rule. The value `cert` indicates
-  that the certificate is used to access the storage.
+* `access_type` - (Optional) The type of the share access rule. Valid values are:
+  * `cert` - (Default) VPC-based access using VPC ID and optionally IP address.
+  * `user` - Username-based access using Access Key (AK).
 
-* `access_to` - (Required) The access that the back end grants or denies.
+* `access_to` - (Required) The value that defines the access. The format depends on `access_type`:
+  * When `access_type` is `cert`:
+    * VPC ID only: `<vpc_id>` - grants access to the entire VPC.
+    * VPC ID with IP address: `<vpc_id>#<ip_address>/<mask>#<priority>#<user_permission>` - grants access to specific IP addresses within the VPC.
+      * `priority`: An integer from 0 to 100. A smaller value indicates a higher priority. In case of the same VPC ID, only the rule with the highest priority is delivered.
+      * `user_permission`: Possible values are `all_squash`, `root_squash`, `no_all_squash`, `no_root_squash`.
+  * When `access_type` is `user`: Specify the user's Access Key (AK).
 
 ## Attributes Reference
 
