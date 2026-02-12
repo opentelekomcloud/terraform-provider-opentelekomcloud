@@ -99,7 +99,11 @@ func resourceIdentityMappingV3Read(_ context.Context, d *schema.ResourceData, me
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("rules", string(rules)); err != nil {
+	normalizedRules, err := common.NormalizeJsonString(string(rules))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("rules", normalizedRules); err != nil {
 		return diag.FromErr(err)
 	}
 
