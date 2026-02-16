@@ -888,6 +888,116 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   }
 }`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
+func TestAccCCENodePoolsV3_userTags(t *testing.T) {
+	var nodePool nodepools.NodePool
+	rc := common.InitResourceCheck(
+		nodePoolResourceName,
+		&nodePool,
+		getNodePoolFunc,
+	)
+	t.Parallel()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.Server, Count: 2},
+		{Q: quotas.Volume, Count: 2},
+		{Q: quotas.VolumeSize, Count: 40 + 100},
+	}
+	qts = append(qts, ecs.QuotasForFlavor("s2.large.2")...)
+	quotas.BookMany(t, qts)
+	shared.BookCluster(t)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodePoolV3UserTags_basic,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "name", "opentelekomcloud-cce-node-pool-tags"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "user_tags.env", "dev"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "user_tags.owner", "terraform"),
+				),
+			},
+			{
+				Config: testAccCCENodePoolV3UserTags_update,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "user_tags.env", "prod"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "user_tags.owner", "terraform"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "user_tags.project", "test"),
+				),
+			},
+			{
+				ResourceName:      nodePoolResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccCCENodePoolV3ImportStateIdFunc(),
+				ImportStateVerifyIgnore: []string{
+					"max_node_count", "min_node_count", "priority",
+					"scale_down_cooldown_time", "initial_node_count",
+					"root_volume", "taints",
+				},
+			},
+		},
+	})
+}
+
+var testAccCCENodePoolV3UserTags_basic = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
+  cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
+  name               = "opentelekomcloud-cce-node-pool-tags"
+  os                 = "EulerOS 2.9"
+  flavor             = "s2.large.2"
+  initial_node_count = 1
+  availability_zone  = "%s"
+  key_pair           = "%s"
+
+  root_volume {
+    size       = 40
+    volumetype = "SSD"
+  }
+  data_volumes {
+    size       = 100
+    volumetype = "SSD"
+  }
+
+  user_tags = {
+    "env"   = "dev"
+    "owner" = "terraform"
+  }
+}`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+
+var testAccCCENodePoolV3UserTags_update = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
+  cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
+  name               = "opentelekomcloud-cce-node-pool-tags"
+  os                 = "EulerOS 2.9"
+  flavor             = "s2.large.2"
+  initial_node_count = 1
+  availability_zone  = "%s"
+  key_pair           = "%s"
+
+  root_volume {
+    size       = 40
+    volumetype = "SSD"
+  }
+  data_volumes {
+    size       = 100
+    volumetype = "SSD"
+  }
+
+  user_tags = {
+    "env"     = "prod"
+    "owner"   = "terraform"
+    "project" = "test"
+  }
+}`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+
 var testAccCCENodePoolV3SecurityGroupIds = fmt.Sprintf(`
 %s
 
