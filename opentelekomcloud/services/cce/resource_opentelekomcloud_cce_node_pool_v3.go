@@ -182,7 +182,6 @@ func ResourceCCENodePoolV3() *schema.Resource {
 			"user_tags": {
 				Type:     schema.TypeMap,
 				Optional: true,
-				ForceNew: true,
 			},
 			"taints": {
 				Type:     schema.TypeList,
@@ -528,6 +527,10 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 	}
 	if err := d.Set("k8s_tags", k8sTags); err != nil {
 		return fmterr.Errorf(setError, "k8s_tags", err)
+	}
+
+	if err := d.Set("user_tags", common.TagsToMap(s.Spec.NodeTemplate.UserTags)); err != nil {
+		return fmterr.Errorf(setError, "user_tags", err)
 	}
 
 	var volumes []interface{}

@@ -199,7 +199,7 @@ the AZ based on the AZ sequence. For more details see
 
 * `priority` - (Optional, Int) Weight of a node pool. A node pool with a higher weight has a higher priority during scaling.
 
-* `user_tags` - (Optional, Map, ForceNew) Tag of a VM, key/value pair format. Changing this parameter will create a new resource.
+* `user_tags` - (Optional, Map) Tag of a VM, key/value pair format.
 
 * `k8s_tags` - (Optional, Map) Tags of a Kubernetes node, key/value pair format.
 
