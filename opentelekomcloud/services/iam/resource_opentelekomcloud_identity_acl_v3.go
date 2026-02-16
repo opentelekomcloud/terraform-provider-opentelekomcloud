@@ -350,7 +350,6 @@ func resourceIdentityACLV3CustomizeDiff(
 	d *schema.ResourceDiff,
 	meta interface{},
 ) error {
-
 	if d.Get("type").(string) != "console" {
 		if d.Get("ipv6_cidrs").(*schema.Set).Len() > 0 {
 			return fmt.Errorf(`ipv6_cidrs can only be specified when type = "console"`)
