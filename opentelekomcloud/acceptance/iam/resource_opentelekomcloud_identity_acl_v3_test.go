@@ -12,7 +12,7 @@ import (
 )
 
 func getIdentitACLResourceFunc(c *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
-	client, err := c.IdentityV30Client()
+	client, err := c.IdentityV30AdminClient()
 	if err != nil {
 		return nil, fmt.Errorf("error creating IAM client: %s", err)
 	}
@@ -119,6 +119,37 @@ func TestAccIdentitACL_apiAccess(t *testing.T) {
 	})
 }
 
+func TestAccACLConsoleIPv6_basic(t *testing.T) {
+	var object acl.ACLPolicy
+	resourceName := "opentelekomcloud_identity_acl_v3.test"
+
+	rc := common.InitResourceCheck(
+		resourceName,
+		&object,
+		getIdentitACLResourceFunc,
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIdentityACLIPv6_basic,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceName, "type", "console"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_ranges.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_cidrs.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccIdentityACL_basic(aclType string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_identity_acl_v3" "test" {
@@ -158,3 +189,29 @@ resource "opentelekomcloud_identity_acl_v3" "test" {
 }
 `, aclType)
 }
+
+var testAccIdentityACLIPv6_basic = `
+resource "opentelekomcloud_identity_acl_v3" "test" {
+  type = "console"
+
+  ip_ranges {
+    range       = "172.16.0.0-172.16.255.255"
+    description = "This is a basic ip range for console access"
+  }
+
+  ip_cidrs {
+    cidr        = "192.168.0.1/32"
+    description = "This is a basic ip address for console access"
+  }
+
+  ipv6_ranges {
+    range       = "0000:0000:0000:0000:0000:0000:0000:0000-FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF"
+    description = "This is a basic ipv6 range for console access"
+  }
+
+  ipv6_cidrs {
+    cidr        = "0000:0000:0000:0000:0000:0000:0000:0000/100"
+    description = "This is a basic ipv6 address for console access"
+  }
+}
+`
