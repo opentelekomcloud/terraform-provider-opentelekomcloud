@@ -228,20 +228,20 @@ func resourceIdentityACLV3Delete(_ context.Context, d *schema.ResourceData, meta
 		return diag.Errorf("error creating IAM client: %s", err)
 	}
 
-	netmasksList := make([]acl.AllowAddressNetmasks, 0, 1)
-	netmask := acl.AllowAddressNetmasks{
-		AddressNetmask: "0.0.0.0-255.255.255.255",
+	rangesList := make([]acl.AllowIPRanges, 0, 1)
+	ipRange := acl.AllowIPRanges{
+		IPRange: "0.0.0.0-255.255.255.255",
 	}
-	netmasksList = append(netmasksList, netmask)
+	rangesList = append(rangesList, ipRange)
 
 	deleteOpts := acl.ACLPolicy{
-		AllowAddressNetmasks: netmasksList,
-		DomainId:             d.Id(),
+		AllowIPRanges: rangesList,
+		DomainId:      d.Id(),
 	}
 	if d.Get("type").(string) == "console" {
-		deleteOpts.AllowAddressNetmasksIPv6 = []acl.AllowAddressNetmasks{
+		deleteOpts.AllowIPRangesIPv6 = []acl.AllowIPRanges{
 			{
-				AddressNetmask: "0000:0000:0000:0000:0000:0000:0000:0000-FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF",
+				IPRange: "0000:0000:0000:0000:0000:0000:0000:0000-FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF",
 			},
 		}
 	}
