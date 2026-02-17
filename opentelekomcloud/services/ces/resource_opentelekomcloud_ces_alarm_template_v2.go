@@ -75,9 +75,8 @@ func ResourceAlarmTemplateV2() *schema.Resource {
 							),
 						},
 						"dimension_name": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringLenBetween(0, 32),
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 						"metric_name": {
 							Type:     schema.TypeString,
@@ -116,9 +115,8 @@ func ResourceAlarmTemplateV2() *schema.Resource {
 							Optional: true,
 						},
 						"unit": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringLenBetween(0, 32),
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 						"count": {
 							Type:         schema.TypeInt,

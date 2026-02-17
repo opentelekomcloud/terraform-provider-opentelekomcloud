@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CES]** Remove ``dimension_name`` and ``unit`` length validation for ``resource/opentelekomcloud_ces_alarm_template_v2`` (`#3272 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3272>`_)
