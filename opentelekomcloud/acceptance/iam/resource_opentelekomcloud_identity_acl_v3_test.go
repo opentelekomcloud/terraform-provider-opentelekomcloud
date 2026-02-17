@@ -61,20 +61,23 @@ func TestAccIdentitACL_basic(t *testing.T) {
 		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityACL_basic("console"),
+				Config: testAccIdentityACLConsole_basic,
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceName, "type", "console"),
 					resource.TestCheckResourceAttr(resourceName, "ip_ranges.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "ip_cidrs.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_ranges.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_cidrs.#", "1"),
 				),
 			},
 			{
-				Config: testAccIdentityACL_update("console"),
+				Config: testAccIdentityACLConsole_update,
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceName, "type", "console"),
 					resource.TestCheckResourceAttr(resourceName, "ip_ranges.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_ranges.#", "2"),
 				),
 			},
 		},
@@ -99,7 +102,7 @@ func TestAccIdentitACL_apiAccess(t *testing.T) {
 		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityACL_basic("api"),
+				Config: testAccIdentityACLAPI_basic,
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceName, "type", "api"),
@@ -108,7 +111,7 @@ func TestAccIdentitACL_apiAccess(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIdentityACL_update("api"),
+				Config: testAccIdentityACLAPI_update,
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceName, "type", "api"),
@@ -119,7 +122,7 @@ func TestAccIdentitACL_apiAccess(t *testing.T) {
 	})
 }
 
-func TestAccACLConsoleIPv6_basic(t *testing.T) {
+func TestAccIdentitACL_CIDR(t *testing.T) {
 	var object acl.ACLPolicy
 	resourceName := "opentelekomcloud_identity_acl_v3.test"
 
@@ -138,59 +141,18 @@ func TestAccACLConsoleIPv6_basic(t *testing.T) {
 		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityACLIPv6_basic,
+				Config: testAccIdentityACLConsole_CIDR,
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceName, "type", "console"),
-					resource.TestCheckResourceAttr(resourceName, "ipv6_ranges.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "ipv6_cidrs.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "ip_cidrs.#", "1"),
 				),
 			},
 		},
 	})
 }
 
-func testAccIdentityACL_basic(aclType string) string {
-	return fmt.Sprintf(`
-resource "opentelekomcloud_identity_acl_v3" "test" {
-  type = "%[1]s"
-
-  ip_ranges {
-    range       = "172.16.0.0-172.16.255.255"
-    description = "This is a basic ip range for %[1]s access"
-  }
-
-  ip_cidrs {
-    cidr        = "192.168.0.1/32"
-    description = "This is a basic ip address for %[1]s access"
-  }
-}
-`, aclType)
-}
-
-func testAccIdentityACL_update(aclType string) string {
-	return fmt.Sprintf(`
-resource "opentelekomcloud_identity_acl_v3" "test" {
-  type = "%[1]s"
-
-  ip_ranges {
-    range       = "172.16.0.0-172.16.255.255"
-    description = "This is a update ip range 1 for %[1]s access"
-  }
-  ip_ranges {
-    range       = "192.168.0.0-192.168.255.255"
-    description = "This is a update ip range 2 for %[1]s access"
-  }
-
-  ip_cidrs {
-    cidr        = "192.168.0.1/32"
-    description = "This is a update ip address for %[1]s access"
-  }
-}
-`, aclType)
-}
-
-var testAccIdentityACLIPv6_basic = `
+var testAccIdentityACLConsole_basic = `
 resource "opentelekomcloud_identity_acl_v3" "test" {
   type = "console"
 
@@ -212,6 +174,89 @@ resource "opentelekomcloud_identity_acl_v3" "test" {
   ipv6_cidrs {
     cidr        = "0000:0000:0000:0000:0000:0000:0000:0000/100"
     description = "This is a basic ipv6 address for console access"
+  }
+}
+`
+
+var testAccIdentityACLConsole_update = `
+resource "opentelekomcloud_identity_acl_v3" "test" {
+  type = "console"
+
+  ip_ranges {
+    range       = "172.16.0.0-172.16.255.255"
+    description = "This is a basic ip range for console access"
+  }
+
+  ip_ranges {
+    range       = "192.168.0.0-192.168.255.255"
+    description = "This is a update ip range 2 for console access"
+  }
+
+  ip_cidrs {
+    cidr        = "192.168.0.1/32"
+    description = "This is a basic ip address for console access"
+  }
+
+  ipv6_ranges {
+    range       = "0000:0000:0000:0000:0000:0000:0000:0000-FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF"
+    description = "This is a basic ipv6 range for console access"
+  }
+
+  ipv6_ranges {
+    range       = "0000:0000:0000:FFFF:0000:0000:0000:FFFF-FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF"
+    description = "This is a basic ipv6 range 2 for console access"
+  }
+
+  ipv6_cidrs {
+    cidr        = "0000:0000:0000:0000:0000:0000:0000:0000/100"
+    description = "This is a basic ipv6 address for console access"
+  }
+}
+`
+
+var testAccIdentityACLAPI_basic = `
+resource "opentelekomcloud_identity_acl_v3" "test" {
+  type = "api"
+
+  ip_ranges {
+    range       = "172.16.0.0-172.16.255.255"
+    description = "This is a basic ip range for api access"
+  }
+
+  ip_cidrs {
+    cidr        = "192.168.0.1/32"
+    description = "This is a basic ip address for api access"
+  }
+}
+`
+
+var testAccIdentityACLAPI_update = `
+resource "opentelekomcloud_identity_acl_v3" "test" {
+  type = "api"
+
+  ip_ranges {
+    range       = "172.16.0.0-172.16.255.255"
+    description = "This is a update ip range 1 for api access"
+  }
+  ip_ranges {
+    range       = "192.168.0.0-192.168.255.255"
+    description = "This is a update ip range 2 for api access"
+  }
+
+  ip_cidrs {
+    cidr        = "192.168.0.1/32"
+    description = "This is a update ip address for api access"
+  }
+}
+`
+
+var testAccIdentityACLConsole_CIDR = `
+resource "opentelekomcloud_identity_acl_v3" "test" {
+  type = "console"
+
+  ip_cidrs {
+    cidr        = "192.168.0.1/32"
+    description = "This is a basic ip address for console access"
   }
 }
 `

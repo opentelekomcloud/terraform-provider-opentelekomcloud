@@ -36,9 +36,10 @@ func ResourceIdentityAclV3() *schema.Resource {
 				}, true),
 			},
 			"ip_cidrs": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				MaxItems: 200,
+				Type:         schema.TypeSet,
+				Optional:     true,
+				MaxItems:     200,
+				AtLeastOneOf: []string{"ip_ranges"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"cidr": {
@@ -95,6 +96,7 @@ func ResourceIdentityAclV3() *schema.Resource {
 			"ipv6_ranges": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				Computed: true,
 				MaxItems: 200,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -235,6 +237,13 @@ func resourceIdentityACLV3Delete(_ context.Context, d *schema.ResourceData, meta
 	deleteOpts := acl.ACLPolicy{
 		AllowAddressNetmasks: netmasksList,
 		DomainId:             d.Id(),
+	}
+	if d.Get("type").(string) == "console" {
+		deleteOpts.AllowAddressNetmasksIPv6 = []acl.AllowAddressNetmasks{
+			{
+				AddressNetmask: "0000:0000:0000:0000:0000:0000:0000:0000-FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF",
+			},
+		}
 	}
 
 	switch d.Get("type").(string) {
