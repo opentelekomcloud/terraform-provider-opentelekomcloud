@@ -181,10 +181,8 @@ The `policies` block supports:
   + **4**: warning.
 
 * `unit` - (Optional, String) Specifies the unit string of the alarm threshold.
-  The unit can contain a maximum of `32` characters.
 
 * `dimension_name` - (Optional, String) Specifies the resource dimension.
-  The name can contain a maximum of `32` characters.
   Leave this parameter blank for an event alarm template.
 
 ## Attribute Reference
