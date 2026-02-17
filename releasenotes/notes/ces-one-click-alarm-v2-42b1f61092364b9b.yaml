@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    **[CES]** Added ``resource/opentelekomcloud_ces_one_click_alarm_v2`` (`#3273 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3273>`_)
+other:
+  - |
+    **[CES]** Added multiple dimensions acceptance test for ``resource/opentelekomcloud_ces_alarm_rule_v2`` (`#3273 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3273>`_)
