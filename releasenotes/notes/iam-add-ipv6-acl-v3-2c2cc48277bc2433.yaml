@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[IAM]** Add arguments ``ipv6_cidrs`` and ``ipv6_ranges`` in ``resource/opentelekomcloud_identity_acl_v3`` (`#3268 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3268>`_)

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"bytes"
 	"fmt"
 	"net"
 	"net/mail"
@@ -424,6 +425,79 @@ func ValidateIPRange(v interface{}, k string) (ws []string, errors []error) {
 				return
 			}
 		}
+	}
+
+	return
+}
+
+func ValidateIPv6Range(v interface{}, k string) (ws []string, errors []error) {
+	value, ok := v.(string)
+	if !ok {
+		errors = append(errors, fmt.Errorf("%q must be a string", k))
+		return
+	}
+
+	ipAddresses := strings.Split(value, "-")
+	if len(ipAddresses) != 2 {
+		errors = append(errors, fmt.Errorf(
+			"%q must be a valid IPv6 range like 2001:db8::1-2001:db8::ffff, got %q",
+			k, value))
+		return
+	}
+
+	startStr := strings.TrimSpace(ipAddresses[0])
+	endStr := strings.TrimSpace(ipAddresses[1])
+
+	startIP := net.ParseIP(startStr)
+	endIP := net.ParseIP(endStr)
+
+	if startIP == nil || startIP.To16() == nil || startIP.To4() != nil {
+		errors = append(errors, fmt.Errorf("%q contains invalid IPv6 address %q", k, startStr))
+	}
+
+	if endIP == nil || endIP.To16() == nil || endIP.To4() != nil {
+		errors = append(errors, fmt.Errorf("%q contains invalid IPv6 address %q", k, endStr))
+	}
+
+	if len(errors) > 0 {
+		return
+	}
+
+	startIP = startIP.To16()
+	endIP = endIP.To16()
+
+	// Check equality
+	if startIP.Equal(endIP) {
+		errors = append(errors, fmt.Errorf(
+			"two IPv6 addresses of %q cannot be equal, got %q", k, value))
+		return
+	}
+
+	// Compare lexicographically (byte-wise comparison)
+	if bytes.Compare(startIP, endIP) > 0 {
+		errors = append(errors, fmt.Errorf(
+			"%q starting IPv6 address cannot be greater than ending IPv6 address, got %q",
+			k, value))
+	}
+
+	return
+}
+
+func ValidateIPv6CIDR(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	ip, _, err := net.ParseCIDR(value)
+	if err != nil {
+		errors = append(errors, fmt.Errorf(
+			"%q must contain a valid IPv6 CIDR, got parsing error: %s", k, err))
+		return
+	}
+
+	// Ensure parsed IP is IPv6
+	if ip == nil || ip.To16() == nil || ip.To4() != nil {
+		errors = append(errors, fmt.Errorf(
+			"%q must contain a valid IPv6 CIDR, got %q", k, value))
+		return
 	}
 
 	return
