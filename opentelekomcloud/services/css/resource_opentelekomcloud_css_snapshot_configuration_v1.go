@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/snapshots"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -93,6 +94,14 @@ func ResourceCssSnapshotConfigurationV1() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
+						"frequency": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "DAY",
+							ValidateFunc: validation.StringInSlice([]string{
+								"HOUR", "DAY", "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT",
+							}, false),
+						},
 					},
 				},
 			},
@@ -155,6 +164,7 @@ func readCssSnapshotConfigurationV1(_ context.Context, d *schema.ResourceData, m
 		"keepday":     info.KeepDay,
 		"enable":      info.Enable == "true",
 		"delete_auto": d.Get("creation_policy.0.delete_auto"),
+		"frequency":   info.Frequency,
 	}}
 	mErr := multierror.Append(
 		d.Set("configuration", configuration),
@@ -216,6 +226,7 @@ func updateSnapshotPolicy(client *golangsdk.ServiceClient, d *schema.ResourceDat
 		KeepDay:    d.Get("creation_policy.0.keepday").(int),
 		Enable:     strconv.FormatBool(d.Get("creation_policy.0.enable").(bool)),
 		DeleteAuto: strconv.FormatBool(d.Get("creation_policy.0.delete_auto").(bool)),
+		Frequency:  d.Get("creation_policy.0.frequency").(string),
 	}
 
 	clusterID := d.Get("cluster_id").(string)
