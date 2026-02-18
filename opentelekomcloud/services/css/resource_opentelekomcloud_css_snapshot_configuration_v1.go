@@ -97,7 +97,7 @@ func ResourceCssSnapshotConfigurationV1() *schema.Resource {
 						"frequency": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Default:  "DAY",
+							Computed: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"HOUR", "DAY", "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT",
 							}, false),
