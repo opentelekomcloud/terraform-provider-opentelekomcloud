@@ -785,18 +785,6 @@ func (c *Config) IdentityV30Client() (*golangsdk.ServiceClient, error) {
 	return service, nil
 }
 
-// IdentityV30AdminClient returns a *ServiceClient for making calls to the OpenStack Identity v3 API on a `domain` level with v3.0 IAM endpoint.
-// An error will be returned if authentication or client creation was not possible.
-func (c *Config) IdentityV30AdminClient() (*golangsdk.ServiceClient, error) {
-	client, err := openstack.NewIdentityV3(c.DomainClient, golangsdk.EndpointOpts{})
-	if err != nil {
-		return nil, err
-	}
-
-	client.Endpoint = strings.Replace(client.Endpoint, "v3", "v3.0", 1)
-	return client, err
-}
-
 func (c *Config) RegionIdentityV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewIdentityV3(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,

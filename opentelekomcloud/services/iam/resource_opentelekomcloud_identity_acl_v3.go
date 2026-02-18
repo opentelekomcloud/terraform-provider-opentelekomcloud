@@ -119,7 +119,7 @@ func ResourceIdentityAclV3() *schema.Resource {
 
 func resourceIdentityACLV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	iamClient, err := config.IdentityV30AdminClient()
+	iamClient, err := config.IdentityV30Client()
 	if err != nil {
 		return fmterr.Errorf("error creating client: %s", err)
 	}
@@ -139,7 +139,7 @@ func resourceIdentityACLV3Create(ctx context.Context, d *schema.ResourceData, me
 func resourceIdentityACLV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	mErr := &multierror.Error{}
 	config := meta.(*cfg.Config)
-	iamClient, err := config.IdentityV30AdminClient()
+	iamClient, err := config.IdentityV30Client()
 	if err != nil {
 		return diag.Errorf("error creating IAM client: %s", err)
 	}
@@ -223,7 +223,7 @@ func resourceIdentityACLV3Update(ctx context.Context, d *schema.ResourceData, me
 
 func resourceIdentityACLV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	iamClient, err := config.IdentityV30AdminClient()
+	iamClient, err := config.IdentityV30Client()
 	if err != nil {
 		return diag.Errorf("error creating IAM client: %s", err)
 	}
@@ -262,7 +262,7 @@ func resourceIdentityACLV3Delete(_ context.Context, d *schema.ResourceData, meta
 
 func updateACLPolicy(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	iamClient, err := config.IdentityV30AdminClient()
+	iamClient, err := config.IdentityV30Client()
 	if err != nil {
 		return fmt.Errorf("error creating IAM client: %s", err)
 	}

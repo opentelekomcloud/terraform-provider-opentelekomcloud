@@ -12,7 +12,7 @@ import (
 )
 
 func getIdentitACLResourceFunc(c *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
-	client, err := c.IdentityV30AdminClient()
+	client, err := c.IdentityV30Client()
 	if err != nil {
 		return nil, fmt.Errorf("error creating IAM client: %s", err)
 	}
