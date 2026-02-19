@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[LTS]** Removed invalid ``windows_log_info`` block from ``resource/opentelekomcloud_lts_cce_access_v3`` documentation example (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[LTS]** Removed invalid ``windows_log_info`` block from ``resource/opentelekomcloud_lts_cce_access_v3`` documentation example (`#3275 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3275>`_)
