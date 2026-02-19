@@ -58,6 +58,7 @@ resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
     keepday     = 2
     enable      = true
     delete_auto = true
+    frequency   = "DAY"
   }
 }
 ```
@@ -109,6 +110,9 @@ The `creation_policy` block supports:
 
 * `enable` - (Required) Value `true` indicates that the automatic snapshot creation policy is enabled,
   and value `false` indicates that the automatic snapshot creation policy is disabled.
+
+* `frequency` - (Optional) Snapshot creation frequency. The default value is `DAY`.
+  Available options are: `HOUR`, `DAY`, `SUN`, `MON`, `TUE`, `WED`, `THU`, `FRI`, `SAT`.
 
 * `delete_auto` - (Optional) Whether to delete all automatically created snapshots when the automatic
   snapshot creation policy is disabled. The default value is `false`, indicating that snapshots that have been
