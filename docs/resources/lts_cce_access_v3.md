@@ -32,13 +32,6 @@ resource "opentelekomcloud_lts_cce_access_v3" "container_stdout" {
     path_type = "container_stdout"
     stdout    = true
 
-    windows_log_info {
-      categories       = ["System", "Application"]
-      event_level      = ["warning", "error"]
-      time_offset_unit = "day"
-      time_offset      = 7
-    }
-
     single_log_format {
       mode = "system"
     }
