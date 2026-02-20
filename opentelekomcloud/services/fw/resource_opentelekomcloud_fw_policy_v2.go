@@ -174,18 +174,16 @@ func resourceFWPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 		opts.Description = d.Get("description").(string)
 	}
 
-	if d.HasChange("rules") {
-		v := d.Get("rules").([]interface{})
+	v := d.Get("rules").([]interface{})
 
-		log.Printf("[DEBUG] Rules found : %#v", v)
-		log.Printf("[DEBUG] Rules count : %d", len(v))
+	log.Printf("[DEBUG] Rules found : %#v", v)
+	log.Printf("[DEBUG] Rules count : %d", len(v))
 
-		rules := make([]string, len(v))
-		for i, v := range v {
-			rules[i] = v.(string)
-		}
-		opts.Rules = rules
+	rules := make([]string, len(v))
+	for i, v := range v {
+		rules[i] = v.(string)
 	}
+	opts.Rules = rules
 
 	log.Printf("[DEBUG] Updating firewall policy with id %s: %#v", d.Id(), opts)
 
