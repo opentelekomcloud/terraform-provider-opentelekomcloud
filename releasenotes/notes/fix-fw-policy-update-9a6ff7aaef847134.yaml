@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[FW]** Fix ``resource/opentelekomcloud_fw_policy_v2`` update failing with `firewall_rules` (`#3277 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3277>`_)
