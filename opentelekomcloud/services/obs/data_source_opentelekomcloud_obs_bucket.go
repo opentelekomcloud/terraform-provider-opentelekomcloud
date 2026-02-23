@@ -50,6 +50,10 @@ func DataSourceObsBucket() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"agency": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
