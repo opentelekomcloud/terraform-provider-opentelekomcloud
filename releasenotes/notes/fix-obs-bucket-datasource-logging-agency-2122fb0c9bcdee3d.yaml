@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[OBS]** Fix ``data_source/opentelekomcloud_obs_bucket`` failing with missing ``agency`` attribute (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[OBS]** Fix ``data_source/opentelekomcloud_obs_bucket`` failing with missing ``agency`` attribute (`#3279 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3279>`_)
