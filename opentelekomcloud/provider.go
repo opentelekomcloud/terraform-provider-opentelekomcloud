@@ -286,6 +286,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cce_addon_templates_v3":             cce.DataSourceCceAddonTemplatesV3(),
 			"opentelekomcloud_cce_node_ids_v3":                    cce.DataSourceCceNodeIdsV3(),
 			"opentelekomcloud_cce_node_v3":                        cce.DataSourceCceNodesV3(),
+			"opentelekomcloud_ces_alarm_rules_v2":                 ces.DataSourceCesAlarmRulesV2(),
 			"opentelekomcloud_ces_event_details_v1":               ces.DataSourceCesEventDetailsV1(),
 			"opentelekomcloud_ces_events_v1":                      ces.DataSourceCesEventsV1(),
 			"opentelekomcloud_ces_metrics_v1":                     ces.DataSourceCesMetricsV1(),
