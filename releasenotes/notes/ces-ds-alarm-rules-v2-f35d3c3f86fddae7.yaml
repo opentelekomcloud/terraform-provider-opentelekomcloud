@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CES]** Add new data source ``opentelekomcloud_ces_alarm_rules_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
