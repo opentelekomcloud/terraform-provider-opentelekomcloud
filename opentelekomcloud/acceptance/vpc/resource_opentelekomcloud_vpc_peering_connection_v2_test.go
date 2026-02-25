@@ -31,6 +31,7 @@ func TestAccVpcPeeringConnectionV2_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCVpcPeeringConnectionV2Exists(resourceVPCPeeringName, &peering),
 					resource.TestCheckResourceAttr(resourceVPCPeeringName, "name", "opentelekomcloud_peering"),
+					resource.TestCheckResourceAttr(resourceVPCPeeringName, "description", "test vpc peering"),
 					resource.TestCheckResourceAttr(resourceVPCPeeringName, "status", "ACTIVE"),
 				),
 			},
@@ -38,6 +39,7 @@ func TestAccVpcPeeringConnectionV2_basic(t *testing.T) {
 				Config: testAccVpcPeeringConnectionV2Update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceVPCPeeringName, "name", "opentelekomcloud_peering_1"),
+					resource.TestCheckResourceAttr(resourceVPCPeeringName, "description", "test vpc peering update"),
 				),
 			},
 		},
@@ -151,23 +153,7 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
   name        = "opentelekomcloud_peering"
-  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
-  peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
-}
-`
-const testAccVpcPeeringConnectionV2Import = `
-resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name = "vpc_test_p_imp"
-  cidr = "192.168.0.0/16"
-}
-
-resource "opentelekomcloud_vpc_v1" "vpc_2" {
-  name = "vpc_test_p_imp1"
-  cidr = "192.168.0.0/16"
-}
-
-resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
-  name        = "opentelekomcloud_peering_imp"
+  description = "test vpc peering"
   vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
   peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
@@ -185,10 +171,30 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
   name        = "opentelekomcloud_peering_1"
+  description = "test vpc peering update"
   vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
   peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 `
+
+const testAccVpcPeeringConnectionV2Import = `
+resource "opentelekomcloud_vpc_v1" "vpc_1" {
+  name = "vpc_test_p_imp"
+  cidr = "192.168.0.0/16"
+}
+
+resource "opentelekomcloud_vpc_v1" "vpc_2" {
+  name = "vpc_test_p_imp1"
+  cidr = "192.168.0.0/16"
+}
+
+resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
+  name        = "opentelekomcloud_peering_imp"
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
+  peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
+}
+`
+
 const testAccVpcPeeringConnectionV2Timeout = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name = "vpc_test_p_t"

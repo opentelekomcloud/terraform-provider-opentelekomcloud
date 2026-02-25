@@ -33,6 +33,7 @@ func TestAccVpcPeeringConnectionV2DataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVpcPeeringConnectionV2DataSourceID(dataSourceVpcPeeringNameID),
 					resource.TestCheckResourceAttr(dataSourceVpcPeeringNameID, "name", "opentelekomcloud_peering_ds"),
+					resource.TestCheckResourceAttr(dataSourceVpcPeeringNameID, "description", "test peering"),
 					resource.TestCheckResourceAttr(dataSourceVpcPeeringNameID, "status", "ACTIVE"),
 					testAccCheckVpcPeeringConnectionV2DataSourceID(dataSourceVpcPeeringNameVpcID),
 					resource.TestCheckResourceAttr(dataSourceVpcPeeringNameVpcID, "name", "opentelekomcloud_peering_ds"),
@@ -82,6 +83,7 @@ resource "opentelekomcloud_vpc_v1" "vpc_3" {
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
   name        = "opentelekomcloud_peering_ds"
+  description = "test peering"
   vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
   peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }

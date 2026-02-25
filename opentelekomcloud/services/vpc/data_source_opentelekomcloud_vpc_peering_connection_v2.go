@@ -34,6 +34,10 @@ func DataSourceVpcPeeringConnectionV2() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: common.ValidateName,
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -92,6 +96,7 @@ func dataSourceVpcPeeringConnectionV2Read(_ context.Context, d *schema.ResourceD
 
 	mErr := multierror.Append(
 		d.Set("name", Peering.Name),
+		d.Set("description", Peering.Description),
 		d.Set("status", Peering.Status),
 		d.Set("vpc_id", Peering.RequestVpcInfo.VpcId),
 		d.Set("peer_vpc_id", Peering.AcceptVpcInfo.VpcId),
