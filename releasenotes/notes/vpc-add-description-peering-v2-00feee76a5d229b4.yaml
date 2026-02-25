@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **[VPC]** Add argument `description` to resource ``opentelekomcloud_vpc_peering_connection_v2`` (`#3283 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3283>`_).
+  - |
+    **[VPC]** Add attribute `description` to data source ``opentelekomcloud_vpc_peering_connection_v2`` (`#3283 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3283>`_).
