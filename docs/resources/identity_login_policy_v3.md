@@ -15,7 +15,7 @@ Up-to-date reference of API arguments for IAM provider you can get at
 Manages the account login authentication policy within OpenTelekomCloud.
 
 `Please use it with care!`
--> You _must_ have security admin privileges in your OpenTelekomCloud
+-> You _must_ have `Security Administrator` privileges in your OpenTelekomCloud
 cloud to use this resource. Please refer to [User Management Model](https://docs.otc.t-systems.com/en-us/usermanual/iam/iam_01_0034.html).
 
   During action `terraform destroy` it sets values the same as defaults for this resource.
