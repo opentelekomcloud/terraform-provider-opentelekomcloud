@@ -14,6 +14,9 @@ Up-to-date reference of API arguments for IAM credential you can get at
 
 Manages permanent access key for an OpenTelekomCloud user.
 
+-> **Note:** You _must_ have `Security Administrator` privileges in your OpenTelekomCloud
+cloud to use this resource for managing other users' credentials. Please refer to [User Management Model](https://docs.otc.t-systems.com/en-us/usermanual/iam/iam_01_0034.html).
+
 ## Example Usage
 
 ### Create AK/SK for yourself

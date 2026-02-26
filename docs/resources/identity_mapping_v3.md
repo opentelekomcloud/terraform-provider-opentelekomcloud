@@ -12,7 +12,7 @@ Up-to-date reference of API arguments for IAM mapping you can get at
 
 # opentelekomcloud_identity_mapping_v3
 
--> You _must_ have security admin privileges in your OpenTelekomCloud
+-> You _must_ have `Security Administrator` privileges in your OpenTelekomCloud
 cloud to use this resource. Please refer to [User Management Model](https://docs.otc.t-systems.com/en-us/usermanual/iam/iam_01_0034.html).
 
 

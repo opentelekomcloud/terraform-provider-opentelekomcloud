@@ -16,7 +16,8 @@ Up-to-date reference of API arguments for IAM agency you can get at
 Manages an ACL resource within OpenTelekomCloud IAM service. The ACL allows user access only from specified IP address
 ranges and CIDR blocks. The ACL takes effect for IAM users under the Domain account rather than the account itself.
 
--> **NOTE:** You *must* have admin privileges to use this resource.
+-> **NOTE:** You _must_ have `Security Administrator` privileges in your OpenTelekomCloud
+cloud to use this resource. Please refer to [User Management Model](https://docs.otc.t-systems.com/en-us/usermanual/iam/iam_01_0034.html).
 
 ## Example Usage
 
