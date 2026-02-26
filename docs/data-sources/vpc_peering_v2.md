@@ -52,4 +52,6 @@ The given filters must match exactly one VPC peering connection whose data will 
 
 ## Attributes Reference
 
-All of the argument attributes are exported as result attributes.
+In addition to all arguments above, the following attributes are exported:
+
+* `description` - The description of the VPC peering connection.

@@ -45,6 +45,10 @@ func ResourceVpcPeeringConnectionV2() *schema.Resource {
 				Required:     true,
 				ValidateFunc: common.ValidateName,
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -89,6 +93,7 @@ func resourceVPCPeeringV2Create(ctx context.Context, d *schema.ResourceData, met
 
 	createOpts := peerings.CreateOpts{
 		Name:           d.Get("name").(string),
+		Description:    d.Get("description").(string),
 		RequestVpcInfo: requestvpcinfo,
 		AcceptVpcInfo:  acceptvpcinfo,
 	}
@@ -139,6 +144,7 @@ func resourceVPCPeeringV2Read(ctx context.Context, d *schema.ResourceData, meta 
 
 	mErr := multierror.Append(
 		d.Set("name", n.Name),
+		d.Set("description", n.Description),
 		d.Set("status", n.Status),
 		d.Set("vpc_id", n.RequestVpcInfo.VpcId),
 		d.Set("peer_vpc_id", n.AcceptVpcInfo.VpcId),
@@ -162,7 +168,8 @@ func resourceVPCPeeringV2Update(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	updateOpts := peerings.UpdateOpts{
-		Name: d.Get("name").(string),
+		Name:        d.Get("name").(string),
+		Description: d.Get("description").(string),
 	}
 
 	_, err = peerings.Update(client, d.Id(), updateOpts).Extract()
