@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[VPC]** Add new data source ``opentelekomcloud_vpc_peering_connections_v2`` (`#XXXX <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/XXXX>`_).

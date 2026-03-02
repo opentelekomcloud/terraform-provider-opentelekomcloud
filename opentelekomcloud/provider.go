@@ -432,6 +432,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_vbs_backup_v2":                      vbs.DataSourceVBSBackupV2(),
 			"opentelekomcloud_vbs_backup_policy_v2":               vbs.DataSourceVBSBackupPolicyV2(),
 			"opentelekomcloud_vpc_peering_connection_v2":          vpc.DataSourceVpcPeeringConnectionV2(),
+			"opentelekomcloud_vpc_peering_connections_v2":         vpc.DataSourceVpcPeeringConnectionsV2(),
 			"opentelekomcloud_vpc_route_v2":                       vpc.DataSourceVPCRouteV2(),
 			"opentelekomcloud_vpc_route_ids_v2":                   vpc.DataSourceVPCRouteIdsV2(),
 			"opentelekomcloud_vpc_route_table_v1":                 vpc.DataSourceVPCRouteTableV1(),
