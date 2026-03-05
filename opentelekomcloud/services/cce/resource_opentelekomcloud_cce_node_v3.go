@@ -47,6 +47,7 @@ var (
 		"os.version",
 		"topology.kubernetes.io/region",
 		"topology.kubernetes.io/zone",
+		"cce.cloud.com/cce-nodepool-id",
 	}
 
 	predefinedTaints = []string{
