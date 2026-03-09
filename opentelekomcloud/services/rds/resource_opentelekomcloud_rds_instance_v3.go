@@ -264,6 +264,15 @@ func ResourceRdsInstanceV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"private_domain_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"private_fqdn": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"created": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -629,6 +638,19 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	if period := d.Get("backup_strategy.0.period").(string); period != "" {
 		if err = enableBackupStrategy(ctx, d, client, d.Id()); err != nil {
 			return diag.FromErr(err)
+		}
+	}
+
+	if privateDomainName := d.Get("private_domain_name").(string); privateDomainName != "" {
+		jobId, err := instances.ModifyPrivateDomainName(client, instances.ModifyPrivateDomainNameOpts{
+			InstanceId: d.Id(),
+			DnsName:    privateDomainName,
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if err := instances.WaitForJobCompleted(client, 600, *jobId); err != nil {
+			return fmterr.Errorf("error waiting for domain name to be set: %w", err)
 		}
 	}
 
@@ -1152,6 +1174,19 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(err)
 	}
 
+	if d.HasChange("private_domain_name") {
+		jobId, err := instances.ModifyPrivateDomainName(client, instances.ModifyPrivateDomainNameOpts{
+			InstanceId: d.Id(),
+			DnsName:    d.Get("private_domain_name").(string),
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if err := instances.WaitForJobCompleted(client, 600, *jobId); err != nil {
+			return fmterr.Errorf("error waiting for domain name to be set: %w", err)
+		}
+	}
+
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
 	return resourceRdsInstanceV3Read(clientCtx, d, meta)
 }
@@ -1333,6 +1368,19 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		if err = d.Set("public_ips", []string{publicIp}); err != nil {
 			return diag.FromErr(err)
 		}
+	}
+
+	domain, err := instances.GetPrivateDomainName(client, d.Id(), instances.GetPrivateDomainNameParams{
+		DnsType: "private",
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("private_domain_name", strings.Split(domain.DnsName, ".")[0]); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("private_fqdn", domain.DnsName); err != nil {
+		return diag.FromErr(err)
 	}
 
 	var tagParamName string
