@@ -1,0 +1,12 @@
+---
+deprecations:
+  - |
+    **[DIS]** Deprecation for ``resource/opentelekomcloud_dis_app_v2`` (`#3296 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3296>`_)
+  - |
+    **[DIS]** Deprecation for ``resource/opentelekomcloud_dis_checkpoint_v2`` (`#3296 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3296>`_)
+  - |
+    **[DIS]** Deprecation for ``resource/opentelekomcloud_dis_dump_task_v2`` (`#3296 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3296>`_)
+  - |
+    **[DIS]** Deprecation for ``resource/opentelekomcloud_dis_stream_v2`` (`#3296 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3296>`_)
+  - |
+    **[DIS]** Service discontinued (`#3296 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3296>`_)
