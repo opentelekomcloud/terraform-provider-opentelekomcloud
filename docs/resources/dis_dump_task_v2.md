@@ -10,6 +10,9 @@ description: |-
 Up-to-date reference of API arguments for DIS dump task you can get at
 [documentation portal](https://docs.otc.t-systems.com/data-ingestion-service/api-ref/api_description/dump_task_management/index.html)
 
+## Please note!
+Data Ingestion Service (DIS) has been **discontinued**.
+
 # opentelekomcloud_dis_dump_task_v2
 
 Manages a DIS Dump Task in the OpenTelekomCloud DIS Service.

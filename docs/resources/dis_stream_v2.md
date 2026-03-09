@@ -10,6 +10,9 @@ description: |-
 Up-to-date reference of API arguments for DIS stream you can get at
 [documentation portal](https://docs.otc.t-systems.com/data-ingestion-service/api-ref/api_description/stream_management/index.html)
 
+## Please note!
+Data Ingestion Service (DIS) has been **discontinued**.
+
 # opentelekomcloud_dis_stream_v2
 
 Manages a DIS Stream in the OpenTelekomCloud DIS Service.

@@ -10,6 +10,9 @@ description: |-
 Up-to-date reference of API arguments for DIS checkpoint you can get at
 [documentation portal](https://docs.otc.t-systems.com/data-ingestion-service/api-ref/api_description/checkpoint_management/index.html)
 
+## Please note!
+Data Ingestion Service (DIS) has been **discontinued**.
+
 # opentelekomcloud_dis_checkpoint_v2
 
 Manages a DIS Checkpoints in the OpenTelekomCloud DIS Service.

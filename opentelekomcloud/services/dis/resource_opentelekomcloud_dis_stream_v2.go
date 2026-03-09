@@ -32,6 +32,9 @@ func ResourceDisStreamV2() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Update: schema.DefaultTimeout(2 * time.Minute),
 		},
+
+		DeprecationMessage: "Data Ingestion Service (DIS) has been discontinued.",
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
