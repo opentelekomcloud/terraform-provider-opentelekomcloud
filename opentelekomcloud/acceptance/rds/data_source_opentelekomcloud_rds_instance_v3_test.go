@@ -26,6 +26,7 @@ func TestAccRdsInstanceDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(dataSourceName, "datastore_type", "PostgreSQL"),
 					resource.TestCheckResourceAttr(dataSourceName, "port", "8635"),
 					resource.TestCheckResourceAttr(dataSourceName, "flavor", "rds.pg.c2.large"),
+					resource.TestCheckResourceAttr(dataSourceName, "private_domain_name", "testAccDomain"),
 					resource.TestCheckResourceAttr(dataSourceName, "tags.muh", "value-create"),
 					resource.TestCheckResourceAttr(dataSourceName, "tags.kuh", "value-create"),
 				),
@@ -45,14 +46,15 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "17"
     port     = "8635"
   }
-  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  security_group_id   = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  private_domain_name = "testAccDomain"
   volume {
-    type = "COMMON"
+    type = "CLOUDSSD"
     size = 40
   }
   flavor = "rds.pg.c2.large"
@@ -71,6 +73,7 @@ data "opentelekomcloud_rds_instance_v3" "test" {
   ]
   name = opentelekomcloud_rds_instance_v3.instance.name
 }
+
 
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }

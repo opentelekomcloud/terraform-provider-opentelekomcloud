@@ -42,6 +42,7 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.kuh", "value-create"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "lower_case_table_names", "0"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "ssl_enable", "true"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "private_domain_name", "testAccDomain"),
 				),
 			},
 			{
@@ -55,6 +56,7 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "lower_case_table_names", "0"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.keep_days", "2"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.period", "1,2,3,4"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "private_domain_name", "testAccDomainUpdate"),
 				),
 			},
 		},
@@ -494,12 +496,13 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "15"
+    version  = "17"
     port     = "8635"
   }
-  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  security_group_id   = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  private_domain_name = "testAccDomain"
   volume {
     type = "CLOUDSSD"
     size = 40
@@ -534,12 +537,13 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "15"
+    version  = "17"
     port     = "8636"
   }
-  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  security_group_id   = opentelekomcloud_networking_secgroup_v2.secgroup.id
+  subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  private_domain_name = "testAccDomainUpdate"
   volume {
     type = "CLOUDSSD"
     size = 100
