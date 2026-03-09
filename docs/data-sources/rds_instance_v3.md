@@ -53,6 +53,10 @@ The following attributes are exported:
 
 * `private_ips` - Indicates the private IP address. It is a blank string until an ECS is created.
 
+* `private_domain_name` - Indicates the prefix of the new domain name.
+
+* `private_fqdn` - Indicates the fully qualified domain name of an RDS instance.
+
 * `public_ips` - Indicates the public IP address.
 
 * `port` - Indicates the database port number.

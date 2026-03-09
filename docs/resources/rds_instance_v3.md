@@ -349,6 +349,8 @@ For example, the parameter can be UTC+08:00 rather than UTC+08:30.
 
 * `private_ip` - (Optional, ForceNew) Specifies the private IP address of a DB instance.
 
+* `private_domain_name` - (Optional) Specifies the prefix of the new domain name. The value contains `8` to `63` characters. Only uppercase letters, lowercase letters, and digits are allowed.
+
 * `backup_strategy` - (Optional) Specifies the advanced backup policy. Structure is documented below.
 
 * `ha_replication_mode` - (Optional, ForceNew) Specifies the replication mode for the standby DB instance. For MySQL, the value
@@ -514,6 +516,8 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `private_ips` - Indicates the private IP address list. It is a blank string until an
   ECS is created.
+
+* `private_fqdn` - Indicates the fully qualified domain name of an RDS instance.
 
 * `public_ips` - Indicates the public IP address list.
 
