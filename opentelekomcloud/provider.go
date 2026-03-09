@@ -25,7 +25,6 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ddm"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dds"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/deh"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dis"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dms"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dns"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/drs"
@@ -537,10 +536,6 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_dds_instance_v3":                           dds.ResourceDdsInstanceV3(),
 			"opentelekomcloud_dds_lts_log_v3":                            dds.ResourceDdsLtsLogV3(),
 			"opentelekomcloud_deh_host_v1":                               deh.ResourceDeHHostV1(),
-			"opentelekomcloud_dis_stream_v2":                             dis.ResourceDisStreamV2(),
-			"opentelekomcloud_dis_app_v2":                                dis.ResourceDisAppV2(),
-			"opentelekomcloud_dis_checkpoint_v2":                         dis.ResourceDisCheckpointV2(),
-			"opentelekomcloud_dis_dump_task_v2":                          dis.ResourceDisDumpV2(),
 			"opentelekomcloud_dns_ptrrecord_v2":                          dns.ResourceDNSPtrRecordV2(),
 			"opentelekomcloud_dns_recordset_v2":                          dns.ResourceDNSRecordSetV2(),
 			"opentelekomcloud_dns_zone_v2":                               dns.ResourceDNSZoneV2(),
