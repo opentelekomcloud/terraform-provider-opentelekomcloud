@@ -42,7 +42,6 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.kuh", "value-create"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "lower_case_table_names", "0"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "ssl_enable", "true"),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "private_domain_name", "testAccDomain"),
 				),
 			},
 			{
@@ -56,7 +55,6 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "lower_case_table_names", "0"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.keep_days", "2"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.period", "1,2,3,4"),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "private_domain_name", "testAccDomainUpdate"),
 				),
 			},
 		},
@@ -405,6 +403,26 @@ func TestAccRdsInstanceV3_PrivateIp(t *testing.T) {
 	})
 }
 
+func TestAccRdsInstanceV3_PrivateDNS(t *testing.T) {
+	postfix := acctest.RandString(3)
+	var rdsInstance instances.InstanceResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsInstanceV3PrivateDNS(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "private_domain_name", "testAccDomain"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.RdsV3Client(env.OS_REGION_NAME)
@@ -502,7 +520,6 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   security_group_id   = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  private_domain_name = "testAccDomain"
   volume {
     type = "CLOUDSSD"
     size = 40
@@ -543,7 +560,6 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   security_group_id   = opentelekomcloud_networking_secgroup_v2.secgroup.id
   subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  private_domain_name = "testAccDomainUpdate"
   volume {
     type = "CLOUDSSD"
     size = 100
@@ -1339,6 +1355,46 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   private_ip        = cidrhost(data.opentelekomcloud_vpc_subnet_v1.shared_subnet.cidr, 10)
+  volume {
+    type = "CLOUDSSD"
+    size = 40
+  }
+  flavor = local.available_flavor.name
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccRdsInstanceV3PrivateDNS(postfix string) string {
+	return fmt.Sprintf(`
+%[1]s
+%[2]s
+
+data "opentelekomcloud_rds_flavors_v3" "flavor" {
+  db_type       = "PostgreSQL"
+  db_version    = "15"
+  instance_mode = "single"
+}
+
+locals {
+  available_flavor = [
+    for flavor in data.opentelekomcloud_rds_flavors_v3.flavor.flavors :
+    flavor if lookup(flavor.az_status, "%[4]s", "unsupported") == "normal"
+  ][0]
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%[3]s"
+  availability_zone = ["%[4]s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "15"
+    port     = "8635"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  private_domain_name = "testAccDomain"
   volume {
     type = "CLOUDSSD"
     size = 40
