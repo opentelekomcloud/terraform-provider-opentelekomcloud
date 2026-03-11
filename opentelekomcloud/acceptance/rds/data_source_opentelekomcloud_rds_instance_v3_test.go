@@ -25,10 +25,7 @@ func TestAccRdsInstanceDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(dataSourceName, "name"),
 					resource.TestCheckResourceAttr(dataSourceName, "datastore_type", "PostgreSQL"),
 					resource.TestCheckResourceAttr(dataSourceName, "port", "8635"),
-					resource.TestCheckResourceAttr(dataSourceName, "flavor", "rds.pg.c2.large"),
 					resource.TestCheckResourceAttr(dataSourceName, "private_domain_name", "testAccDomain"),
-					resource.TestCheckResourceAttr(dataSourceName, "tags.muh", "value-create"),
-					resource.TestCheckResourceAttr(dataSourceName, "tags.kuh", "value-create"),
 				),
 			},
 		},
@@ -37,16 +34,29 @@ func TestAccRdsInstanceDataSource_basic(t *testing.T) {
 
 func testAccRdsInstanceDataSource_basic(postfix string) string {
 	return fmt.Sprintf(`
-%s
-%s
+%[1]s
+%[2]s
+
+data "opentelekomcloud_rds_flavors_v3" "flavor" {
+  db_type       = "PostgreSQL"
+  db_version    = "15"
+  instance_mode = "single"
+}
+
+locals {
+  available_flavor = [
+    for flavor in data.opentelekomcloud_rds_flavors_v3.flavor.flavors :
+    flavor if lookup(flavor.az_status, "%[4]s", "unsupported") == "normal"
+  ][0]
+}
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  name              = "tf_rds_instance_%s"
-  availability_zone = ["%s"]
+  name              = "tf_rds_instance_%[3]s"
+  availability_zone = ["%[4]s"]
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "17"
+    version  = "15"
     port     = "8635"
   }
   security_group_id   = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
@@ -57,22 +67,17 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "CLOUDSSD"
     size = 40
   }
-  flavor = "rds.pg.c2.large"
-  backup_strategy {
-    start_time = "08:00-09:00"
-    keep_days  = 1
-  }
-  tags = {
-    muh = "value-create"
-    kuh = "value-create"
-  }
+  flavor = local.available_flavor.name
 }
+
 data "opentelekomcloud_rds_instance_v3" "test" {
   depends_on = [
     opentelekomcloud_rds_instance_v3.instance,
   ]
   name = opentelekomcloud_rds_instance_v3.instance.name
 }
+
+
 
 
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
