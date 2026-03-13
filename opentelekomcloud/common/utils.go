@@ -692,6 +692,17 @@ func ParseAnyType(s string) interface{} {
 	if f, err := strconv.ParseFloat(s, 64); err == nil {
 		return f
 	}
+	if strings.Contains(s, ";") {
+		parts := strings.Split(s, ";")
+		result := make([]interface{}, 0, len(parts))
+		for _, p := range parts {
+			p = strings.TrimSpace(p)
+			if p != "" { // skip empty strings from trailing/double semicolons
+				result = append(result, p)
+			}
+		}
+		return result
+	}
 	return s
 }
 
