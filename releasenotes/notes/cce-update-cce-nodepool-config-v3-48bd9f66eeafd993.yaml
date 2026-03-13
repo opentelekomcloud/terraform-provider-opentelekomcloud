@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CCE]** Allow string array as `value` in `configurations` parameter for ``resource/opentelekomcloud_cce_node_pool_config_v3`` (`#3299 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3299>`_)

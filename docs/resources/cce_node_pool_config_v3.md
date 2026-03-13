@@ -62,6 +62,9 @@ The `packages` block supports:
 
 -> **Note:** Supported values for package names and their corresponding configurable items can be found at this page in [CCE user guide](https://docs.otc.t-systems.com/cloud-container-engine/umn/node_pools/managing_node_pools/modifying_node_pool_configurations.html#containerd-available-only-for-containerd-node-pools)
 
+-> **Note:** For `registry-mirrors` parameter, use the semicolon separated string in `value`, for example, `"example.com=https://my-mirror.example.com;"` or `"example.com=https://my-mirror.example.com;old-mirror.com=https://new-mirror.com;"`. Semicolon `;` is necessary to distinguish the array from strings. The `https` is required for new value after `=` and the trailing `/` must be avoided.
+
+
 ## Attributes Reference
 
 All above argument parameters can be exported as attribute parameters along with attribute reference.
