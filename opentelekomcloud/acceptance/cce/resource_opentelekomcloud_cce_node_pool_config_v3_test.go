@@ -42,6 +42,13 @@ resource "opentelekomcloud_cce_node_pool_config_v3" "node_pool_config" {
   name        = "configuration"
 
   packages {
+    name = "containerd"
+    configurations {
+      name  = "registry-mirrors"
+      value = "example.com=https://my-mirror.example.com;"
+    }
+  }
+  packages {
     name = "kubelet"
     configurations {
       name  = "system-reserved-mem"
