@@ -255,16 +255,18 @@ func dataSourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta
 		d.Set("public_ips", rdsInstance.PublicIps),
 	)
 
-	domain, err := instances.GetPrivateDomainName(client, d.Id(), instances.GetPrivateDomainNameParams{
-		DnsType: "private",
-	})
-	if err != nil {
-		return diag.FromErr(err)
+	if config.GetRegion(d) != "eu-ch2" {
+		domain, err := instances.GetPrivateDomainName(client, d.Id(), instances.GetPrivateDomainNameParams{
+			DnsType: "private",
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		mErr = multierror.Append(mErr,
+			d.Set("private_domain_name", strings.Split(domain.DnsName, ".")[0]),
+			d.Set("private_fqdn", domain.DnsName),
+		)
 	}
-	mErr = multierror.Append(mErr,
-		d.Set("private_domain_name", strings.Split(domain.DnsName, ".")[0]),
-		d.Set("private_fqdn", domain.DnsName),
-	)
 	// backup
 	backup := make([]map[string]interface{}, 1)
 	backup[0] = map[string]interface{}{
