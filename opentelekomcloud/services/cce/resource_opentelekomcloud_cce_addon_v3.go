@@ -235,9 +235,26 @@ func resourceCCEAddonV3Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	clusterID := d.Get("cluster_id").(string)
 	addonID := d.Id()
-	basic, custom, flavor, err := buildAddonValues(d)
+
+	addon, err := addons.Get(client, addonID, clusterID)
+	if err != nil {
+		return diag.Errorf("error reading current CCE add-on (%s) before update: %s", addonID, logHttpError(err))
+	}
+
+	desiredBasic, desiredCustom, desiredFlavor, err := buildAddonValues(d)
 	if err != nil {
 		return diag.Errorf("error getting values for CCE add-on: %s", err)
+	}
+
+	updateValues := addon.Spec.Values
+	if addonValuesFieldChanged(d, "basic", "basic_json") {
+		updateValues.Basic = desiredBasic
+	}
+	if addonValuesFieldChanged(d, "custom", "custom_json") {
+		updateValues.Advanced = desiredCustom
+	}
+	if addonValuesFieldChanged(d, "flavor", "flavor_json") {
+		updateValues.Flavor = desiredFlavor
 	}
 
 	updateOpts := addons.UpdateOpts{
@@ -252,11 +269,7 @@ func resourceCCEAddonV3Update(ctx context.Context, d *schema.ResourceData, meta 
 			Version:           d.Get("template_version").(string),
 			ClusterID:         clusterID,
 			AddonTemplateName: d.Get("template_name").(string),
-			Values: addons.Values{
-				Basic:    basic,
-				Advanced: custom,
-				Flavor:   flavor,
-			},
+			Values:            updateValues,
 		},
 	}
 
@@ -279,6 +292,11 @@ func resourceCCEAddonV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return resourceCCEAddonV3Read(ctx, d, meta)
+}
+
+func addonValuesFieldChanged(d *schema.ResourceData, plainKey, jsonKey string) bool {
+	return d.HasChange(fmt.Sprintf("values.0.%s", plainKey)) ||
+		d.HasChange(fmt.Sprintf("values.0.%s", jsonKey))
 }
 
 func buildAddonValues(d *schema.ResourceData) (basic, custom, flavor map[string]interface{}, err error) {

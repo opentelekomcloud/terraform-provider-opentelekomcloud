@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Fixed unintentionally resetting other value sections when only one part of values is modified in ``resource/opentelekomcloud_cce_addon_v3`` (`#3303 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3303>`_)
