@@ -351,6 +351,8 @@ For example, the parameter can be UTC+08:00 rather than UTC+08:30.
 
 * `private_domain_name` - (Optional) Specifies the prefix of the new domain name. The value contains `8` to `63` characters. Only uppercase letters, lowercase letters, and digits are allowed.
 
+~> **Warning** The argument `private_domain_name` not supported in `eu-ch2` region.
+
 * `backup_strategy` - (Optional) Specifies the advanced backup policy. Structure is documented below.
 
 * `ha_replication_mode` - (Optional, ForceNew) Specifies the replication mode for the standby DB instance. For MySQL, the value
@@ -464,8 +466,8 @@ The `backup_strategy` block supports:
   triggered during the backup time window. It must be a valid value in the &quot;hh:mm-HH:MM&quot;
   format. The current time is in the UTC format. The HH value must
   be 1 greater than the hh value. The values of mm and MM must be
-  the same and must be set to any of the following: 00, 15, 30, or
-  45. Example value: 08:15-09:15 23:00-00:00.
+  the same and must be set to any of the following: 00, 15, 30, or 45.
+  Example value: 08:15-09:15 23:00-00:00.
 
 * `period` - (Optional) Specifies the backup cycle configuration. Data will be automatically backed up on the selected days every week.
   This parameter is mandatory except that the automated backup policy is disabled.
@@ -517,7 +519,7 @@ In addition to the arguments listed above, the following computed attributes are
 * `private_ips` - Indicates the private IP address list. It is a blank string until an
   ECS is created.
 
-* `private_fqdn` - Indicates the fully qualified domain name of an RDS instance.
+* `private_fqdn` - Indicates the fully qualified domain name of an RDS instance (not supported in `eu-ch2` region).
 
 * `public_ips` - Indicates the public IP address list.
 

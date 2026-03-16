@@ -1370,17 +1370,19 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
-	domain, err := instances.GetPrivateDomainName(client, d.Id(), instances.GetPrivateDomainNameParams{
-		DnsType: "private",
-	})
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	if err = d.Set("private_domain_name", strings.Split(domain.DnsName, ".")[0]); err != nil {
-		return diag.FromErr(err)
-	}
-	if err = d.Set("private_fqdn", domain.DnsName); err != nil {
-		return diag.FromErr(err)
+	if region != "eu-ch2" {
+		domain, err := instances.GetPrivateDomainName(client, d.Id(), instances.GetPrivateDomainNameParams{
+			DnsType: "private",
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if err = d.Set("private_domain_name", strings.Split(domain.DnsName, ".")[0]); err != nil {
+			return diag.FromErr(err)
+		}
+		if err = d.Set("private_fqdn", domain.DnsName); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	var tagParamName string

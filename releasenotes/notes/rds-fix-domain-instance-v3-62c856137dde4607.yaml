@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[RDS]** Add region check for domain name in `resource/opentelekomcloud_rds_instance_v3`` (`#3302 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3302>`_)
