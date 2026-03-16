@@ -468,20 +468,21 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
       "tenant_id" : data.opentelekomcloud_identity_project_v3.project.id,
     }
     flavor = <<EOF
-    {
-      "description": "custom resources",
-      "name": "custom-resources",
-      "replicas": 2,
-      "resources": [
-        {
-          "limitsCpu": "8000m",
-          "limitsMem": "4Gi",
-          "name": "autoscaler",
-          "requestsCpu": "4000m",
-          "requestsMem": "2Gi"
-        }
-      ]
-    EOF
+      {
+        "description": "custom resources",
+        "name": "custom-resources",
+        "replicas": 2,
+        "resources": [
+          {
+            "limitsCpu": "8000m",
+            "limitsMem": "4Gi",
+            "name": "autoscaler",
+            "requestsCpu": "4000m",
+            "requestsMem": "2Gi"
+          }
+        ]
+      }
+	EOF
   }
 }
 `, common.DataSourceSubnet, common.DataSourceProject, cName)
@@ -498,7 +499,7 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   flavor_id               = "cce.s1.medium"
   vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  cluster_version         = "v1.29"
+  cluster_version         = "v1.30"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   no_addons               = true
@@ -506,20 +507,23 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
 
 resource "opentelekomcloud_cce_addon_v3" "coredns" {
   template_name    = "coredns"
-  template_version = "1.29.4"
+  template_version = "1.30.33"
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
     basic = {
       "cluster_ip" : "10.247.3.10",
-      "image_version" : "1.29.4",
+      "image_version" : "1.30.33",
       "swr_addr" : "100.125.7.25:20202",
       "swr_user" : "cce-addons"
     }
-    custom = {
-      "stub_domains" : "{\"test\":[\"10.10.40.10\"], \"test2\":[\"10.10.40.20\"]}"
-      "upstream_nameservers" : "[\"8.8.8.8\",\"8.8.4.4\"]"
-    }
+    custom_json = jsonencode({
+      stub_domains = {
+        test  = ["10.10.40.10"]
+        test2 = ["10.10.40.20"]
+      }
+      upstream_nameservers = ["8.8.8.8", "8.8.4.4"]
+    })
   }
 }
 `, common.DataSourceSubnet, common.DataSourceProject, name)
