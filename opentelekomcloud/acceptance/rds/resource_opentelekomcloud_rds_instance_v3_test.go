@@ -1438,9 +1438,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "15"
     port     = "8635"
   }
-  security_group_id   = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-  subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  vpc_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
     type = "ULTRAHIGH"
     size = 40
