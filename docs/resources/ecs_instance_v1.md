@@ -299,6 +299,11 @@ The following arguments are supported:
 
 * `auto_recovery` - (Optional, Boolean) Whether configure automatic recovery of an instance.
 
+* `tpm_enabled` - (Optional, Boolean) Specifies whether to enable vTPM on the ECS. Defaults to `false`.
+  Currently, only `Pi5e` instance types support TPM.
+
+  ~> **NOTE:** Changing this parameter will cause the server to be automatically stopped, updated, and started again.
+
 * `delete_disks_on_termination` - (Optional, Boolean) Delete the data disks upon termination of the instance.
   Defaults to false. Changing this creates a new server.
 
