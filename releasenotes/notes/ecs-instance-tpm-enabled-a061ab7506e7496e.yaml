@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[ECS]** Added ``tpm_enabled`` argument to ``resource/opentelekomcloud_ecs_instance_v1`` to support vTPM for ``Pi5e`` instance types (`#3304 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3304>`_)

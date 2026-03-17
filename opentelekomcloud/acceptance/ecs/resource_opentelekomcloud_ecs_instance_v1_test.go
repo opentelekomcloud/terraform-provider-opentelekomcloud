@@ -393,6 +393,81 @@ func testAccCheckEcsV1InstanceDestroy(s *terraform.State) error {
 	return nil
 }
 
+func TestAccEcsV1InstanceTpmEnabled(t *testing.T) {
+	var instance cloudservers.CloudServer
+
+	const tpmFlavor = "pi5e.2xlarge.4"
+	qts := serverQuotas(10+4, tpmFlavor)
+	t.Parallel()
+	quotas.BookMany(t, qts)
+
+	rc := common.InitResourceCheck(
+		resourceInstanceV1Name,
+		&instance,
+		getEcsInstanceFunc,
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEcsV1InstanceTpmEnabled(true),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tpm_enabled", "true"),
+				),
+			},
+			{
+				Config: testAccEcsV1InstanceTpmEnabled(false),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tpm_enabled", "false"),
+					testAccCheckEcsV1InstanceIsActive(&instance),
+				),
+			},
+			{
+				Config: testAccEcsV1InstanceTpmEnabled(true),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tpm_enabled", "true"),
+					testAccCheckEcsV1InstanceIsActive(&instance),
+				),
+			},
+			{
+				ResourceName:      resourceInstanceV1Name,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"password",
+					"delete_disks_on_termination",
+				},
+			},
+		},
+	})
+}
+
+func testAccCheckEcsV1InstanceIsActive(instance *cloudservers.CloudServer) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := common.TestAccProvider.Meta().(*cfg.Config)
+		client, err := config.ComputeV1Client(env.OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("error creating ComputeV1 client: %w", err)
+		}
+
+		server, err := cloudservers.Get(client, instance.ID).Extract()
+		if err != nil {
+			return fmt.Errorf("error getting CloudServer: %w", err)
+		}
+
+		if server.Status != "ACTIVE" {
+			return fmt.Errorf("CloudServer %s is in status %s, expected ACTIVE (server should be restarted after tpm_enabled update)", instance.ID, server.Status)
+		}
+		return nil
+	}
+}
+
 var testAccEcsV1InstanceBasic = fmt.Sprintf(`
 %s
 
@@ -897,3 +972,30 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   }
 }
 `, common.DataSourceImage, common.DataSourceSubnet, env.OS_TENANT_NAME, env.OS_AVAILABILITY_ZONE)
+
+func testAccEcsV1InstanceTpmEnabled(tpmEnabled bool) string {
+	return fmt.Sprintf(`
+%s
+
+data "opentelekomcloud_images_image_v2" "tpm_image" {
+  name        = "Enterprise_Windows-Server_2022_STD_amd64_uefi_latest"
+  most_recent = true
+}
+
+resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+  name     = "server_tpm"
+  image_id = data.opentelekomcloud_images_image_v2.tpm_image.id
+  flavor   = "pi5e.2xlarge.4"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+
+  nics {
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+
+  password                    = "Password@123"
+  availability_zone           = "%s"
+  delete_disks_on_termination = true
+  tpm_enabled                 = %t
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, tpmEnabled)
+}
