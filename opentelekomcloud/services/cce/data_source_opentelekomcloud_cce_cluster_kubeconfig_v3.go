@@ -29,6 +29,7 @@ func DataSourceCCEClusterKubeConfigV3() *schema.Resource {
 			"duration": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"expiry_date": {
 				Type:          schema.TypeString,
