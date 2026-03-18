@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    **New Resource:** ``opentelekomcloud_vpc_route_table_route_v1``
+    (`#3312 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3312>`_)
+  - |
+    **New Resource:** ``opentelekomcloud_vpc_route_table_subnet_associate_v1``
+    (`#3312 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3312>`_)
+fixes:
+  - |
+    **[VPC]** Handle already-disassociated subnets in ``opentelekomcloud_vpc_route_table_v1`` delete
+    (`#3312 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3312>`_)
