@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -71,6 +72,24 @@ func TestAccVpcRouteTableRouteV1_withRouteTable(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccVpcRouteTableRouteImportStateID(resourceVPCRouteTableRouteName),
+			},
+		},
+	})
+}
+
+func TestAccVpcRouteTableRouteV1_duplicateDestination(t *testing.T) {
+	name := tools.RandomString("rtbr-", 5)
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRouteTableRouteV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVpcRouteTableRoute_basic(name),
+			},
+			{
+				Config:      testAccVpcRouteTableRoute_duplicate(name),
+				ExpectError: regexp.MustCompile(`route with destination .+ already exists in route table .+`),
 			},
 		},
 	})
@@ -184,4 +203,26 @@ resource "opentelekomcloud_vpc_route_table_route_v1" "route" {
   description    = "peering route on custom table"
 }
 `, testAccVpcRouteTableRoute_network(name), name)
+}
+
+func testAccVpcRouteTableRoute_duplicate(name string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_vpc_route_table_route_v1" "route" {
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
+  destination = "172.16.0.0/16"
+  type        = "peering"
+  nexthop     = opentelekomcloud_vpc_peering_connection_v2.peering.id
+  description = "peering route"
+}
+
+resource "opentelekomcloud_vpc_route_table_route_v1" "route_dup" {
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
+  destination = "172.16.0.0/16"
+  type        = "peering"
+  nexthop     = opentelekomcloud_vpc_peering_connection_v2.peering.id
+  description = "duplicate route"
+}
+`, testAccVpcRouteTableRoute_network(name))
 }

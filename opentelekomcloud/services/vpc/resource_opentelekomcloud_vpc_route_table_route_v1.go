@@ -111,6 +111,9 @@ func resourceVpcRouteTableRouteCreate(ctx context.Context, d *schema.ResourceDat
 
 	log.Printf("[DEBUG] OpenTelekomCloud VPC route table route create: rtb=%s, %#v", routeTableID, updateOpts)
 	if err := routetables.Update(client, routeTableID, updateOpts); err != nil {
+		if strings.Contains(err.Error(), "VPC.2812") {
+			return diag.Errorf("route with destination %s already exists in route table %s — use `terraform import` to manage it", destination, routeTableID)
+		}
 		return diag.Errorf("error creating OpenTelekomCloud VPC route table route: %s", err)
 	}
 
