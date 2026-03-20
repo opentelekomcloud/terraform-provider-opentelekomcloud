@@ -294,7 +294,10 @@ func resourceVpcRouteTableDelete(ctx context.Context, d *schema.ResourceData, me
 		subnets := common.ExpandToStringSlice(v.(*schema.Set).List())
 		err = disassociateRouteTableSubnets(client, d.Id(), subnets)
 		if err != nil {
-			return diag.Errorf("error disassociating subnets with OpenTelekomCloud VPC route table %s: %s", d.Id(), err)
+			if _, ok := err.(golangsdk.ErrDefault400); !ok {
+				return diag.Errorf("error disassociating subnets with OpenTelekomCloud VPC route table %s: %s", d.Id(), err)
+			}
+			log.Printf("[WARN] Error disassociating subnets from route table %s (may already be disassociated): %s", d.Id(), err)
 		}
 	}
 
