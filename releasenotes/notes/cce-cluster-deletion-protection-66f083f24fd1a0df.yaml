@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    **[CCE]** Added ``enable_deletion_protection`` parameter to ``resource/opentelekomcloud_cce_cluster_v3``
+    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)

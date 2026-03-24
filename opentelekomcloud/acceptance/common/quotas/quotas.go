@@ -185,12 +185,6 @@ func (q MultipleQuotas) X(multiplier int64) MultipleQuotas {
 	return newOne
 }
 
-// AcquireMultipleQuotas tries to acquire all given quotas, reverting on failure
-// Deprecated: use BookMany in tests instead
-func AcquireMultipleQuotas(e []*ExpectedQuota, interval time.Duration) error {
-	return acquireMultipleQuotas(e, interval)
-}
-
 func acquireMultipleQuotas(e []*ExpectedQuota, interval time.Duration) error {
 	// validate if all Count values of ExpectQuota are correct
 	var mErr *multierror.Error

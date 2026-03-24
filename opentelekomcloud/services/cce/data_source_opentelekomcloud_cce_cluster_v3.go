@@ -85,6 +85,10 @@ func DataSourceCCEClusterV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"enable_deletion_protection": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -197,6 +201,7 @@ func dataSourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("eni_subnet_id", cluster.Spec.EniNetwork.SubnetId),
 		d.Set("eni_subnet_cidr", cluster.Spec.EniNetwork.Cidr),
 		d.Set("authentication_mode", cluster.Spec.Authentication.Mode),
+		d.Set("enable_deletion_protection", cluster.Spec.DeletionProtection),
 		d.Set("status", cluster.Status.Phase),
 		d.Set("internal", cluster.Status.Endpoints[0].Internal),
 		d.Set("external", cluster.Status.Endpoints[0].External),

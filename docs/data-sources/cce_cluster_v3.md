@@ -63,6 +63,8 @@ All above argument parameters can be exported as attribute parameters along with
 
 * `authentication_mode` - (Optional) Authentication mode of the cluster, possible values are `rbac` and `authenticating_proxy`.
 
+* `enable_deletion_protection` - Whether deletion protection is enabled for the cluster.
+
 * `subnet_id` - The ID of the subnet used to create the node.
 
 * `highway_subnet_id` - The ID of the high speed network used to create bare metal nodes.
