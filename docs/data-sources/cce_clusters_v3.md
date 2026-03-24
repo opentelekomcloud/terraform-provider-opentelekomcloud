@@ -84,6 +84,8 @@ The `clusters` block supports:
 
 * `authentication_mode` - The authentication mode of the cluster, possible values are `x509` and `rbac`. Defaults to `rbac`.
 
+* `enable_deletion_protection` - Whether deletion protection is enabled for the cluster.
+
 * `masters` - The advanced configuration of master nodes. Structure is documented below.
 
 * `security_group_id` - The security group ID of the cluster.

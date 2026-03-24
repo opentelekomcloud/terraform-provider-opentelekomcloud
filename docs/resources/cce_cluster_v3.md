@@ -301,6 +301,8 @@ The following arguments are supported:
 
 * `ignore_certificate_clusters_data` - (Optional, Boolean) Skip sensitive cluster data.
 
+* `enable_deletion_protection` - (Optional, Boolean, ForceNew) Enable cluster deletion protection. Only effective during cluster creation. Changing this parameter will create a new cluster resource.
+
 * `custom_san` - (Optional, List) Specifies the custom san to add to certificate (array of string).
 
 * `component_configurations` - (Optional, List) Specifies the kubernetes component configurations.

@@ -294,6 +294,11 @@ func ResourceCCEClusterV3() *schema.Resource {
 					},
 				},
 			},
+			"enable_deletion_protection": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
 			"custom_san": {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -543,6 +548,10 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 			EnableMasterVolumeEncryption: pointerto.Bool(d.Get("enable_volume_encryption").(bool)),
 			CustomSan:                    common.ExpandToStringList(d.Get("custom_san").([]interface{})),
 		},
+	}
+
+	if v, ok := d.GetOk("enable_deletion_protection"); ok {
+		createOpts.Spec.DeletionProtection = pointerto.Bool(v.(bool))
 	}
 
 	if _, ok := d.GetOk("eni_subnet_id"); ok {

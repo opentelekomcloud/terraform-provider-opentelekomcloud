@@ -833,6 +833,58 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 `, common.DataSourceSubnet, clusterName)
 }
 
+// TestAccCCEClusterV3_deletionProtection verifies that a cluster with enable_deletion_protection enabled
+// cannot be deleted. After running this test, the cluster must be deleted manually:
+// disable deletion protection via the console first, then delete the cluster.
+func TestAccCCEClusterV3_deletionProtection(t *testing.T) {
+	t.Skip("this test requires manual cluster cleanup after execution")
+
+	var cluster clusters.Clusters
+	rc := common.InitResourceCheck(
+		resourceClusterName,
+		&cluster,
+		getCceClusterResourceFunc,
+	)
+	clusterName := randClusterName()
+	t.Parallel()
+
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCEClusterV3DeletionProtection(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceClusterName, "name", clusterName),
+					resource.TestCheckResourceAttr(resourceClusterName, "status", "Available"),
+					resource.TestCheckResourceAttr(resourceClusterName, "enable_deletion_protection", "true"),
+				),
+			},
+		},
+	})
+}
+
+func testAccCCEClusterV3DeletionProtection(clusterName string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name                       = "%s"
+  cluster_type               = "VirtualMachine"
+  flavor_id                  = "cce.s1.small"
+  vpc_id                     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  container_network_type     = "overlay_l2"
+  kubernetes_svc_ip_range    = "10.247.0.0/16"
+  ignore_addons              = true
+  enable_deletion_protection = true
+}
+`, common.DataSourceSubnet, clusterName)
+}
+
 func testAccCCEClusterV3ComponentConfigJSONString(clusterName string) string {
 	return fmt.Sprintf(`
 %s
