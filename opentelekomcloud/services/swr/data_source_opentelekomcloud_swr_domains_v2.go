@@ -3,7 +3,6 @@ package swr
 import (
 	"context"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-uuid"
@@ -16,11 +15,7 @@ import (
 
 func DataSourceSwrDomainsV2() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceSwrDomainRead,
-
-		Timeouts: &schema.ResourceTimeout{
-			Default: schema.DefaultTimeout(2 * time.Minute),
-		},
+		ReadContext: dataSourceSwrDomainsRead,
 
 		Schema: map[string]*schema.Schema{
 			"organization": {

@@ -3,7 +3,6 @@ package swr
 import (
 	"context"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -16,10 +15,6 @@ import (
 func DataSourceSwrDomainV2() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceSwrDomainRead,
-
-		Timeouts: &schema.ResourceTimeout{
-			Default: schema.DefaultTimeout(2 * time.Minute),
-		},
 
 		Schema: map[string]*schema.Schema{
 			"organization": {
