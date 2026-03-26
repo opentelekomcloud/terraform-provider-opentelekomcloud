@@ -95,6 +95,7 @@ func DataSourcePolicyStates() *schema.Resource {
 		},
 	}
 }
+
 func dataSourcePolicyStatesRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, rmsClientV1, func() (*golangsdk.ServiceClient, error) {
@@ -104,40 +105,44 @@ func dataSourcePolicyStatesRead(ctx context.Context, d *schema.ResourceData, met
 		return fmterr.Errorf(errCreationRMSV1Client, err)
 	}
 
-	var policyStates []compliance.PolicyState
-	if _, ok := d.GetOk("policy_assignment_id"); ok {
-		policyStates, err = compliance.ListAllRuleCompliance(client, compliance.ListAllComplianceOpts{
-			DomainId: GetRmsDomainId(client, config),
-			PolicyId: d.Get("policy_assignment_id").(string),
-		})
+	domainID := GetRmsDomainId(client, config)
+	complianceState := d.Get("compliance_state").(string)
+	resourceName := d.Get("resource_name").(string)
+	resourceID := d.Get("resource_id").(string)
 
-		if err != nil {
-			return diag.FromErr(err)
-		}
+	var policyStates []compliance.PolicyState
+	if v, ok := d.GetOk("policy_assignment_id"); ok {
+		policyStates, err = compliance.ListAllRuleCompliance(client, compliance.ListAllComplianceOpts{
+			DomainId:        domainID,
+			PolicyId:        v.(string),
+			ComplianceState: complianceState,
+			ResourceName:    resourceName,
+			ResourceId:      resourceID,
+		})
 	} else {
 		policyStates, err = compliance.ListAllUserCompliance(client, compliance.ListAllUserComplianceOpts{
-			DomainId: GetRmsDomainId(client, config),
+			DomainId:        domainID,
+			ComplianceState: complianceState,
+			ResourceName:    resourceName,
+			ResourceId:      resourceID,
 		})
-
-		if err != nil {
-			return diag.FromErr(err)
-		}
+	}
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	filteredStates := filterPolicyStates(policyStates, d)
-
-	if len(filteredStates) == 0 {
+	if len(policyStates) == 0 {
 		return diag.FromErr(fmt.Errorf("policy states not found"))
 	}
 
-	uuid, err := uuid.GenerateUUID()
+	id, err := uuid.GenerateUUID()
 	if err != nil {
 		return diag.Errorf("unable to generate ID: %s", err)
 	}
-	d.SetId(uuid)
+	d.SetId(id)
 
-	states := make([]map[string]interface{}, len(filteredStates))
-	for i, state := range filteredStates {
+	states := make([]map[string]interface{}, len(policyStates))
+	for i, state := range policyStates {
 		states[i] = map[string]interface{}{
 			"domain_id":              state.DomainID,
 			"region_id":              state.RegionID,
@@ -160,30 +165,4 @@ func dataSourcePolicyStatesRead(ctx context.Context, d *schema.ResourceData, met
 	)
 
 	return diag.FromErr(mErr.ErrorOrNil())
-}
-
-func filterPolicyStates(states []compliance.PolicyState, d *schema.ResourceData) []compliance.PolicyState {
-	var filtered []compliance.PolicyState
-
-	for _, state := range states {
-		if v, ok := d.GetOk("compliance_state"); ok && v.(string) != state.ComplianceState {
-			continue
-		}
-
-		if v, ok := d.GetOk("resource_name"); ok && v.(string) != state.ResourceName {
-			continue
-		}
-
-		if v, ok := d.GetOk("resource_id"); ok && v.(string) != state.ResourceID {
-			continue
-		}
-
-		filtered = append(filtered, state)
-	}
-
-	if len(filtered) == 0 {
-		return states
-	}
-
-	return filtered
 }
