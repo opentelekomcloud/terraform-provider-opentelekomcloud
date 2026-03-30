@@ -54,6 +54,8 @@ In addition to all arguments above, the following attributes are exported:
 
   * `vpc_id` - The ID of the requester VPC.
 
+  * `vpc_tenant_id` - The project ID the requester VPC belongs to.
+
   * `peer_vpc_id` - The ID of the accepter/peer VPC.
 
-  * `peer_tenant_id` - The tenant ID of the accepter/peer VPC.
+  * `peer_tenant_id` - The project ID the accepter VPC belongs to.
