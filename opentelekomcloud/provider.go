@@ -486,6 +486,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cce_node_pool_v3":                          cce.ResourceCCENodePoolV3(),
 			"opentelekomcloud_cce_node_pool_config_v3":                   cce.ResourceCCENodePoolConfigV3(),
 			"opentelekomcloud_cci_namespace_v2":                          cci.ResourceCCINamespaceV2(),
+			"opentelekomcloud_cci_network_v2":                            cci.ResourceCCINetworkV2(),
 			"opentelekomcloud_ces_alarmrule":                             ces.ResourceAlarmRule(),
 			"opentelekomcloud_ces_alarm_rule_v2":                         ces.ResourceAlarmRuleV2(),
 			"opentelekomcloud_ces_alarm_template_v2":                     ces.ResourceAlarmTemplateV2(),
