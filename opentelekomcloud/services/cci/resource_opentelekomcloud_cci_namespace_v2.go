@@ -87,11 +87,11 @@ func ResourceCCINamespaceV2() *schema.Resource {
 
 func resourceCciNamespaceV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := common.ClientFromCtx(ctx, cesClientV1, func() (*golangsdk.ServiceClient, error) {
+	client, err := common.ClientFromCtx(ctx, cciClientV2, func() (*golangsdk.ServiceClient, error) {
 		return config.CciV2Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
+		return fmterr.Errorf(errCreationCciClient, err)
 	}
 
 	createOpts := namespace.CreateOpts{
@@ -126,7 +126,7 @@ func waitForCreateNamespaceStatus(ctx context.Context, client *golangsdk.Service
 			return resp, resp.Status.Phase, nil
 		},
 		Timeout:      timeout,
-		PollInterval: 10 * timeout,
+		PollInterval: 10 * time.Second,
 		Delay:        10 * time.Second,
 	}
 	_, err := stateConf.WaitForStateContext(ctx)
@@ -138,11 +138,11 @@ func waitForCreateNamespaceStatus(ctx context.Context, client *golangsdk.Service
 
 func resourceCciNamespaceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := common.ClientFromCtx(ctx, cesClientV1, func() (*golangsdk.ServiceClient, error) {
+	client, err := common.ClientFromCtx(ctx, cciClientV2, func() (*golangsdk.ServiceClient, error) {
 		return config.CciV2Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
+		return fmterr.Errorf(errCreationCciClient, err)
 	}
 
 	resp, err := namespace.Get(client, d.Id())
@@ -169,11 +169,11 @@ func resourceCciNamespaceV2Read(ctx context.Context, d *schema.ResourceData, met
 
 func resourceCciNamespaceV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := common.ClientFromCtx(ctx, cesClientV1, func() (*golangsdk.ServiceClient, error) {
+	client, err := common.ClientFromCtx(ctx, cciClientV2, func() (*golangsdk.ServiceClient, error) {
 		return config.CciV2Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
+		return fmterr.Errorf(errCreationCciClient, err)
 	}
 
 	_, err = namespace.Delete(client, namespace.DeleteOpts{
@@ -207,7 +207,7 @@ func waitForDeleteNamespaceStatus(ctx context.Context, client *golangsdk.Service
 			return resp, resp.Status.Phase, nil
 		},
 		Timeout:      timeout,
-		PollInterval: 10 * timeout,
+		PollInterval: 10 * time.Second,
 		Delay:        10 * time.Second,
 	}
 	_, err := stateConf.WaitForStateContext(ctx)

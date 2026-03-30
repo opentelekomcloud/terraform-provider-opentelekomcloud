@@ -1128,6 +1128,13 @@ func (c *Config) CciV2Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) CciV2NetworkClient(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewCCINetworkServiceV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) DcsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewDCSServiceV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
