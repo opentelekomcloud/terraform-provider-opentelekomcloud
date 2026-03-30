@@ -407,6 +407,8 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_smn_topic_subscription_v2":          smn.DataSourceSmnTopicSubscriptionV2(),
 			"opentelekomcloud_swr_domain_v2":                      swr.DataSourceSwrDomainV2(),
 			"opentelekomcloud_swr_domains_v2":                     swr.DataSourceSwrDomainsV2(),
+			"opentelekomcloud_swr_repository_v2":                  swr.DataSourceSwrRepositoryV2(),
+			"opentelekomcloud_swr_organization_v2":                swr.DataSourceSwrOrganizationV2(),
 			"opentelekomcloud_taurusdb_mysql_backups_v3":          taurusdb.DataSourceTaurusDBV3MysqlBackups(),
 			"opentelekomcloud_taurusdb_mysql_configuration_v3":    taurusdb.DataSourceTaurusDBV3MysqlConfiguration(),
 			"opentelekomcloud_taurusdb_mysql_configurations_v3":   taurusdb.DataSourceTaurusDBV3MysqlConfigurations(),
