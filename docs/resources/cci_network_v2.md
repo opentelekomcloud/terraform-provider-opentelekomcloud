@@ -2,9 +2,13 @@
 subcategory: "Cloud Container Instance (CCI)"
 layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_cci_network_v2"
+sidebar_current: "docs-opentelekomcloud-resource-cci-network-v2"
 description: |-
   Manages a CCI Network resource within OpenTelekomCloud.
 ---
+
+Up-to-date reference of API arguments for CCI network you can get at
+[documentation portal](https://docs.otc.t-systems.com/cloud-container-instance/api-ref/proprietary_apis/index.html)
 
 # opentelekomcloud_cci_network_v2
 
