@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[SWR]** Add new data source ``datasource/opentelekomcloud_swr_policy_v2`` (`#3330 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3330>`_).
