@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **[CCI]** Add new resource ``resource/opentelekomcloud_cci_configmap_v2``  (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_).
+    **[CCI]** Add new resource ``resource/opentelekomcloud_cci_configmap_v2``  (`#3333 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3333>`_).
