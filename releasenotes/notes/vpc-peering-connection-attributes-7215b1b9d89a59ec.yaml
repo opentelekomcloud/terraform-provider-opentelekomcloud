@@ -1,0 +1,6 @@
+---
+enhancements:
+  - |
+    **[VPC]** Data Source: ``opentelekomcloud_vpc_peering_connection_v2`` - export vpc_tenant_id attribute
+  - |
+    **[VPC]** Data Source: ``opentelekomcloud_vpc_peering_connections_v2`` - export connections vpc_tenant_id attribute

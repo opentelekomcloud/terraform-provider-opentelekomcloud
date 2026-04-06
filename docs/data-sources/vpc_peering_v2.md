@@ -7,7 +7,7 @@ description: |-
   Get details about a specific VPC peering connection from OpenTelekomCloud
 ---
 
-Up-to-date reference of API arguments for VPC EIP you can get at
+Up-to-date reference of API arguments for VPC Peering Connections you can get at
 [documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/vpc_peering_connection/querying_vpc_peering_connections.html#vpc-peering-0001)
 
 # opentelekomcloud_vpc_peering_connection_v2
@@ -55,3 +55,5 @@ The given filters must match exactly one VPC peering connection whose data will 
 In addition to all arguments above, the following attributes are exported:
 
 * `description` - The description of the VPC peering connection.
+
+* `vpc_tenant_id` - The project ID the requester VPC belongs to.

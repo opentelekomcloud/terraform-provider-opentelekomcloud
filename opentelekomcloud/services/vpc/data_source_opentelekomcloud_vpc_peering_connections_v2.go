@@ -69,6 +69,10 @@ func DataSourceVpcPeeringConnectionsV2() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"vpc_tenant_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"peer_vpc_id": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -131,6 +135,7 @@ func flattenPeeringConnections(peeringList []peerings.Peering) []interface{} {
 			"description":    p.Description,
 			"status":         p.Status,
 			"vpc_id":         p.RequestVpcInfo.VpcId,
+			"vpc_tenant_id":  p.RequestVpcInfo.TenantId,
 			"peer_vpc_id":    p.AcceptVpcInfo.VpcId,
 			"peer_tenant_id": p.AcceptVpcInfo.TenantId,
 		}
