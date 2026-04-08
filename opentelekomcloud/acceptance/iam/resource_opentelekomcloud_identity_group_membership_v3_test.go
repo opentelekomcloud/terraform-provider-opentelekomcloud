@@ -15,6 +15,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceGMName = "opentelekomcloud_identity_group_membership_v3.membership_1"
+
 func TestAccIdentityV3GroupMembership_basic(t *testing.T) {
 	var groupName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
 	var userName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
@@ -31,23 +33,43 @@ func TestAccIdentityV3GroupMembership_basic(t *testing.T) {
 			{
 				Config: testAccIdentityV3GroupMembership_basic(groupName, userName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3GroupMembershipExists("opentelekomcloud_identity_group_membership_v3.membership_1", []string{userName}),
+					testAccCheckIdentityV3GroupMembershipExists(resourceGMName, []string{userName}),
 				),
 			},
 			{
 				Config: testAccIdentityV3GroupMembership_update(groupName, userName, userName2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3GroupMembershipExists("opentelekomcloud_identity_group_membership_v3.membership_1", []string{userName, userName2}),
+					testAccCheckIdentityV3GroupMembershipExists(resourceGMName, []string{userName, userName2}),
 				),
 			},
 			{
 				Config: testAccIdentityV3GroupMembership_updatedown(groupName, userName2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3GroupMembershipExists("opentelekomcloud_identity_group_membership_v3.membership_1", []string{userName2}),
+					testAccCheckIdentityV3GroupMembershipExists(resourceGMName, []string{userName2}),
 				),
+			},
+			{
+				ResourceName:      resourceGMName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccIdentityV3GroupMembershipImportStateIdFunc(resourceGMName),
 			},
 		},
 	})
+}
+
+func testAccIdentityV3GroupMembershipImportStateIdFunc(name string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[name]
+		if !ok {
+			return "", fmt.Errorf("resource (%s) not found", name)
+		}
+		groupID := rs.Primary.Attributes["group"]
+		if groupID == "" {
+			return "", fmt.Errorf("attribute 'group' not set for resource %s", name)
+		}
+		return groupID, nil
+	}
 }
 
 func testAccCheckIdentityV3GroupMembershipDestroy(s *terraform.State) error {

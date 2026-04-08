@@ -59,3 +59,11 @@ The following attributes are exported:
 * `group` - See Argument Reference above.
 
 * `users` - See Argument Reference above.
+
+## Import
+
+Group memberships can be imported using the group ID, e.g.
+
+```sh
+terraform import opentelekomcloud_identity_group_membership_v3.membership_1 <group_id>
+```

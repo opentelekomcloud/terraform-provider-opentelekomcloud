@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/users"
@@ -22,7 +21,7 @@ func ResourceIdentityGroupMembershipV3() *schema.Resource {
 		UpdateContext: resourceIdentityGroupMembershipV3Update,
 		DeleteContext: resourceIdentityGroupMembershipV3Delete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceIdentityGroupMembershipV3Import,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -57,7 +56,7 @@ func resourceIdentityGroupMembershipV3Create(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	d.SetId(resource.UniqueId())
+	d.SetId(group)
 
 	clientCtx := common.CtxWithClient(ctx, identityClient, keyClientV3)
 	return resourceIdentityGroupMembershipV3Read(clientCtx, d, meta)
@@ -72,6 +71,9 @@ func resourceIdentityGroupMembershipV3Read(ctx context.Context, d *schema.Resour
 		return fmterr.Errorf(clientCreationFail, err)
 	}
 	group := d.Get("group").(string)
+	if group == "" {
+		group = d.Id()
+	}
 	userList := d.Get("users").(*schema.Set)
 	var ul []string
 
@@ -90,11 +92,14 @@ func resourceIdentityGroupMembershipV3Read(ctx context.Context, d *schema.Resour
 	}
 
 	for _, u := range allUsers {
-		if userList.Contains(u.ID) {
+		if userList.Len() == 0 || userList.Contains(u.ID) {
 			ul = append(ul, u.ID)
 		}
 	}
 
+	if err := d.Set("group", group); err != nil {
+		return fmterr.Errorf("error setting group from IAM: %s", err)
+	}
 	if err := d.Set("users", ul); err != nil {
 		return fmterr.Errorf("error setting user list from IAM (%s), error: %s", group, err)
 	}
@@ -178,4 +183,9 @@ func removeUsersFromGroup(identityClient *golangsdk.ServiceClient, group string,
 	return nil
 }
 
-// func checkMembership(identityClient *golangsdk.ServiceClient, group string, user string)  error {
+func resourceIdentityGroupMembershipV3Import(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	if err := d.Set("group", d.Id()); err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
+}
