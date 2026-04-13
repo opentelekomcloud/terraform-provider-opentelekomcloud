@@ -278,6 +278,8 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_asm_service_mesh_v1":                asm.DataSourceASMServiceMeshV1(),
 			"opentelekomcloud_cbr_backup_v3":                      cbr.DataSourceCBRBackupsV3(),
 			"opentelekomcloud_cbr_backup_ids_v3":                  cbr.DataSourceCBRBackupsIdsV3(),
+			"opentelekomcloud_cci_namespaces_v2":                  cci.DataSourceCCINamespacesV2(),
+			"opentelekomcloud_cci_networks_v2":                    cci.DataSourceCCINetworksV2(),
 			"opentelekomcloud_cce_cluster_v3":                     cce.DataSourceCCEClusterV3(),
 			"opentelekomcloud_cce_clusters_v3":                    cce.DataSourceCCEClustersV3(),
 			"opentelekomcloud_cce_cluster_kubeconfig_v3":          cce.DataSourceCCEClusterKubeConfigV3(),
