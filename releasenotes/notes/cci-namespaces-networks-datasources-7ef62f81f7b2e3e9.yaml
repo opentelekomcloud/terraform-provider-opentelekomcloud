@@ -1,6 +1,6 @@
 ---
 features:
   - |
-    **[CCI]** Add new data source ``data_source/opentelekomcloud_cci_namespaces_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_).
+    **[CCI]** Add new data source ``data_source/opentelekomcloud_cci_namespaces_v2`` (`#3337 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3337>`_).
   - |
-    **[CCI]** Add new data source ``data_source/opentelekomcloud_cci_networks_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_).
+    **[CCI]** Add new data source ``data_source/opentelekomcloud_cci_networks_v2`` (`#3337 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3337>`_).
