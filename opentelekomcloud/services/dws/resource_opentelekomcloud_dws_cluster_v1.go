@@ -366,7 +366,7 @@ func resourceDwsClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 			Refresh:      dwsClusterV1StateRefreshFuncUpdate(client, d.Id(), true),
 			Timeout:      d.Timeout(schema.TimeoutUpdate),
 			Delay:        10 * time.Second,
-			PollInterval: 20 * d.Timeout(schema.TimeoutUpdate),
+			PollInterval: 20 * time.Second,
 		}
 
 		_, err = stateConf.WaitForStateContext(ctx)
@@ -393,7 +393,7 @@ func resourceDwsClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 			Refresh:      dwsClusterV1StateRefreshFuncUpdate(client, d.Id(), false),
 			Timeout:      d.Timeout(schema.TimeoutUpdate),
 			Delay:        10 * time.Second,
-			PollInterval: 20 * d.Timeout(schema.TimeoutUpdate),
+			PollInterval: 20 * time.Second,
 		}
 
 		_, err = stateConf.WaitForStateContext(ctx)
@@ -429,7 +429,7 @@ func resourceDwsClusterV1Delete(ctx context.Context, d *schema.ResourceData, met
 	log.Printf("[DEBUG] Waiting for cluster (%s) to delete", d.Id())
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"AVAILABLE"},
+		Pending:    []string{"AVAILABLE", "DELETING"},
 		Target:     []string{"DELETED"},
 		Refresh:    dwsClusterV1StateRefreshFunc(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
