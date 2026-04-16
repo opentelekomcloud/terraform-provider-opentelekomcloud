@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[DWS]** Fix ``resource/opentelekomcloud_dws_cluster_v1`` deletion error with unexpected state ``DELETING`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[DWS]** Fix ``resource/opentelekomcloud_dws_cluster_v1`` deletion error with unexpected state ``DELETING`` (`#3340 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3340>`_)
