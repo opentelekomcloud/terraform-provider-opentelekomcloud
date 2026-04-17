@@ -38,7 +38,11 @@ func TestAccCheckComputeV2InstanceDestroy(s *terraform.State) error {
 }
 
 func getFlavors() (map[string][]*quotas.ExpectedQuota, error) {
-	config := common.TestAccProvider.Meta().(*cfg.Config)
+	meta := common.TestAccProvider.Meta()
+	if meta == nil {
+		return nil, fmt.Errorf("provider meta is nil — ensure provider environment variables are set")
+	}
+	config := meta.(*cfg.Config)
 	client, err := config.ComputeV2Client(env.OS_REGION_NAME)
 	if err != nil {
 		return nil, fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
@@ -74,7 +78,8 @@ func init() {
 	if os.Getenv("TF_ACC") != "" { // this can be done only in acceptance
 		qs, err := getFlavors()
 		if err != nil {
-			panic("failed to get server flavors")
+			fmt.Printf("[WARN] failed to get server flavors: %s\n", err)
+			return
 		}
 		flavorsQuota = qs
 	}

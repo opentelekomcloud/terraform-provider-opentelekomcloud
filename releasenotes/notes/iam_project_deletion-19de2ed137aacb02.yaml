@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IAM]** Fix ``resource/opentelekomcloud_identity_project_v3`` status code during deletion (`#2888 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2888>`_)

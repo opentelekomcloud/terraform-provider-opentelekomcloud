@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[AS]** Fix attributes flattening in ``resource/opentelekomcloud_as_policy_v2`` (`#3232 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3232>`_)

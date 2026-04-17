@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_enterprise_vpn_connection_v5"
 sidebar_current: "docs-opentelekomcloud-resource-enterprise-vpn-connection-v5"
 description: |-
-Manages a Enterprise VPN connection Service resource within OpenTelekomCloud.
+  Manages a Enterprise VPN connection Service resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for EVPN connection you can get at
@@ -84,8 +84,10 @@ The following arguments are supported:
   Changing this parameter will create a new resource.
 
 * `gateway_ip` - (Required, String, ForceNew) The VPN gateway IP ID.
+  * When `network_type` of the VPN gateway is set to `public`, set this parameter to the EIP IDs of the VPN gateway.
+  * When `network_type` of the VPN gateway is set to `private`, set this parameter to the private IP addresses of the VPN gateway.
 
-  Changing this parameter will create a new resource.
+    Changing this parameter will create a new resource.
 
 * `vpn_type` - (Required, String, ForceNew) The connection type. The value can be `policy`, `static` or `bgp`.
 
@@ -205,8 +207,6 @@ The `ipsecpolicy` block supports:
 
 <a name="Connection_PolicyRule"></a>
 The `policy_rules` block supports:
-
-* `rule_index` - (Optional, Int) The rule index.
 
 * `destination` - (Optional, List) The list of destination CIDRs.
 

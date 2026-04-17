@@ -1,0 +1,4 @@
+---
+enhancements:
+  |
+  **[APIGW]** Add `enterprise_project_id` for ``resource/opentelekomcloud_apigw_gateway_v2`` (`#2976 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2976>`_)

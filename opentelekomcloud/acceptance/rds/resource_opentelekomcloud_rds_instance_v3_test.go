@@ -2,8 +2,8 @@ package acceptance
 
 import (
 	"fmt"
+	"net"
 	"os"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -31,7 +31,7 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 				Config: testAccRdsInstanceV3Basic(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.medium"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.n1.large.4"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8635"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "PostgreSQL"),
@@ -47,11 +47,14 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 			{
 				Config: testAccRdsInstanceV3Update(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.medium"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.n1.large.4"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.size", "100"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.muh", "value-update"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_updated_"+postfix),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8636"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "lower_case_table_names", "0"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.keep_days", "2"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.period", "1,2,3,4"),
 				),
 			},
 		},
@@ -71,7 +74,7 @@ func TestAccRdsPostgre13V3ParamsBasic(t *testing.T) {
 				Config: testAccRdsPostrgre13V3ParamsBasic(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.medium"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.n1.large.4"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8635"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "PostgreSQL"),
@@ -85,7 +88,7 @@ func TestAccRdsPostgre13V3ParamsBasic(t *testing.T) {
 				Config: testAccRdsPostrgre13V3ParamsBasicUpdate(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.medium"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.n1.large.4"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8635"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "PostgreSQL"),
@@ -146,14 +149,14 @@ func TestAccRdsInstanceV3ElasticIP(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.version", "10"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.version", "15"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "public_ips.#", "1"),
 				),
 			},
 			{
 				Config: testAccRdsInstanceV3Basic(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.version", "10"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.version", "15"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "public_ips.#", "0"),
 				),
 			},
@@ -181,7 +184,7 @@ func TestAccRdsInstanceV3HA(t *testing.T) {
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "ha_replication_mode", "semisync"),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.type", "ULTRAHIGH"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.type", "CLOUDSSD"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "MySQL"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "availability_zones.#", "2"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "ssl_enable", "false"),
@@ -225,6 +228,7 @@ func TestAccRdsInstanceV3Backup(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.period", "1,2"),
 				),
 			},
 		},
@@ -258,23 +262,6 @@ func TestAccRdsInstanceV3TemplateConfig(t *testing.T) {
 	})
 }
 
-func TestAccRdsInstanceV3InvalidFlavor(t *testing.T) {
-	postfix := acctest.RandString(3)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
-		Steps: []resource.TestStep{
-			{
-				Config:      testAccRdsInstanceV3InvalidFlavor(postfix),
-				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`can't find flavor.+`),
-			},
-		},
-	})
-}
-
 func TestAccRdsInstanceV3_configurationParameters(t *testing.T) {
 	postfix := acctest.RandString(3)
 	var rdsInstance instances.InstanceResponse
@@ -296,9 +283,6 @@ func TestAccRdsInstanceV3_configurationParameters(t *testing.T) {
 }
 
 func TestAccRdsInstanceV3TimeZoneAndSSL(t *testing.T) {
-	// Test is failing on deletion because RDSv3 SSL switchover doesn't change instance `action` status / doesn't
-	// return job_id but still blocks the instance from performing other actions like port_change/instance_deletion
-	// https://jira.tsi-dev.otc-service.com/browse/OTCDB-3026
 	postfix := acctest.RandString(3)
 	var rdsInstance instances.InstanceResponse
 
@@ -313,7 +297,6 @@ func TestAccRdsInstanceV3TimeZoneAndSSL(t *testing.T) {
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "MySQL"),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.mysql.m1.large"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "ssl_enable", "true"),
 				),
 			},
@@ -334,14 +317,12 @@ func TestAccRdsInstanceV3AutoScaling(t *testing.T) {
 				Config: testAccRdsInstanceV3ConfigurationTimeZone(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.mysql.m1.large"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8635"),
 				),
 			},
 			{
 				Config: testAccRdsInstanceV3AutoScaling(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.mysql.m1.large"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.limit_size", "500"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.trigger_threshold", "10"),
 				),
@@ -350,7 +331,7 @@ func TestAccRdsInstanceV3AutoScaling(t *testing.T) {
 	})
 }
 
-func TestAccRdsInstanceV3RestoreToPITR(t *testing.T) {
+func TestAccRdsInstanceV3RestoreToPITR_NewInstance(t *testing.T) {
 	postfix := acctest.RandString(3)
 	var rdsInstance instances.InstanceResponse
 
@@ -368,15 +349,13 @@ func TestAccRdsInstanceV3RestoreToPITR(t *testing.T) {
 			{
 				Config: testAccRdsInstanceV3RestorePITRUpdate(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.large"),
-					resource.TestCheckResourceAttrSet(instanceV3ResourceName, "restored_backup_id"),
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
 				),
 			},
 			{
 				Config: testAccRdsInstanceV3RestorePITRBasic(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
-					resource.TestCheckResourceAttrSet(instanceV3ResourceName, "restored_backup_id"),
 				),
 			},
 		},
@@ -397,6 +376,67 @@ func TestAccRdsInstanceV3_SSLEnable(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "ssl_enable", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccRdsInstanceV3_PrivateIp(t *testing.T) {
+	postfix := acctest.RandString(3)
+	var rdsInstance instances.InstanceResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsInstanceV3PrivateIp(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttrPair(instanceV3ResourceName, "private_ips.0", instanceV3ResourceName, "private_ip"),
+					testAccCheckRdsInstanceV3PrivateIp(),
+				),
+			},
+		},
+	})
+}
+
+func TestAccRdsInstanceV3_PrivateDNS(t *testing.T) {
+	postfix := acctest.RandString(3)
+	var rdsInstance instances.InstanceResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsInstanceV3PrivateDNS(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "private_domain_name", "testAccDomain"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccRdsInstanceV3_Swiss(t *testing.T) {
+	postfix := acctest.RandString(3)
+	var rdsInstance instances.InstanceResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsInstanceV3_Swiss(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.s3.large.2"),
 				),
 			},
 		},
@@ -453,6 +493,36 @@ func testAccCheckRdsInstanceV3Exists(n string, rdsInstance *instances.InstanceRe
 	}
 }
 
+func testAccCheckRdsInstanceV3PrivateIp() resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		subnet, ok := s.RootModule().Resources["data.opentelekomcloud_vpc_subnet_v1.shared_subnet"]
+		if !ok {
+			return fmt.Errorf("subnet not found in state")
+		}
+
+		subnetCIDR := subnet.Primary.Attributes["cidr"]
+
+		rs, ok := s.RootModule().Resources[instanceV3ResourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", instanceV3ResourceName)
+		}
+
+		actualIP := rs.Primary.Attributes["private_ip"]
+
+		_, network, _ := net.ParseCIDR(subnetCIDR)
+		ip := make(net.IP, len(network.IP))
+		copy(ip, network.IP)
+
+		ip[len(ip)-1] += byte(10)
+
+		if actualIP != ip.String() {
+			return fmt.Errorf("expected private_ip %s (from CIDR %s + 10), got %s", ip.String(), subnetCIDR, actualIP)
+		}
+
+		return nil
+	}
+}
+
 func testAccRdsInstanceV3Basic(postfix string) string {
 	return fmt.Sprintf(`
 %s
@@ -464,20 +534,21 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "15"
+    version  = "17"
     port     = "8635"
   }
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.n1.large.4"
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 0
+    period     = "1,2,3"
   }
   tags = {
     muh = "value-create"
@@ -498,25 +569,26 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  name              = "tf_rds_instance_%s"
+  name              = "tf_rds_instance_updated_%s"
   availability_zone = ["%s"]
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "15"
+    version  = "17"
     port     = "8636"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 100
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.n1.large.4"
   backup_strategy {
     start_time = "08:00-09:00"
-    keep_days  = 1
+    keep_days  = 2
+    period     = "1,2,3,4"
   }
   tags = {
     muh = "value-update"
@@ -539,17 +611,17 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "15"
     port     = "8635"
   }
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.n1.large.4"
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
@@ -565,30 +637,43 @@ func testAccRdsInstanceV3HA(postfix string, az2 string) string {
 %s
 %s
 
+data "opentelekomcloud_rds_flavors_v3" "flavor" {
+  db_type       = "MySQL"
+  db_version    = "8.0"
+  instance_mode = "ha"
+}
+
+locals {
+  available_flavor = [
+    for flavor in data.opentelekomcloud_rds_flavors_v3.flavor.flavors :
+    flavor if lookup(flavor.az_status, "%s", "unsupported") == "normal" && lookup(flavor.az_status, "%s", "unsupported") == "normal"
+  ][0]
+}
+
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%s"
   availability_zone = ["%s", "%s"]
   db {
     password = "MySql!120521"
     type     = "MySQL"
-    version  = "5.6"
+    version  = "8.0"
     port     = "8635"
   }
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 100
   }
-  flavor = "rds.mysql.s1.large.ha"
+  flavor = local.available_flavor.name
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
   }
   ha_replication_mode = "semisync"
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE, az2)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, az2, postfix, env.OS_AVAILABILITY_ZONE, az2)
 }
 
 func testAccRdsInstanceV3OptionalParams(postfix string) string {
@@ -602,16 +687,18 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "15"
   }
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 100
   }
-  flavor = "rds.pg.c2.large"
+
+  time_zone = "UTC+04:00"
+  flavor    = "rds.pg.n1.large.4"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
@@ -627,19 +714,20 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "15"
   }
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 100
   }
-  flavor = "rds.pg.c2.large"
+  flavor = "rds.pg.n1.large.4"
   backup_strategy {
     start_time = "10:00-11:00"
     keep_days  = 5
+    period     = "1,2"
   }
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
@@ -658,7 +746,7 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
   }
   datastore {
     type    = "postgresql"
-    version = "12"
+    version = "15"
   }
 }
 
@@ -670,7 +758,7 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg2" {
   }
   datastore {
     type    = "postgresql"
-    version = "12"
+    version = "15"
   }
 }
 
@@ -680,16 +768,16 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "12"
+    version  = "15"
   }
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
-  flavor         = "rds.pg.c2.large"
+  flavor         = "rds.pg.n1.large.4"
   param_group_id = opentelekomcloud_rds_parametergroup_v3.pg.id
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
@@ -708,7 +796,7 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
   }
   datastore {
     type    = "postgresql"
-    version = "10"
+    version = "15"
   }
 }
 
@@ -720,7 +808,7 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg2" {
   }
   datastore {
     type    = "postgresql"
-    version = "12"
+    version = "15"
   }
 }
 
@@ -730,16 +818,16 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "12"
+    version  = "15"
   }
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
-  flavor         = "rds.pg.c2.large"
+  flavor         = "rds.pg.n1.large.4"
   param_group_id = opentelekomcloud_rds_parametergroup_v3.pg2.id
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
@@ -747,68 +835,56 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 
 func testAccRdsInstanceV3ConfigurationOverride(postfix string) string {
 	return fmt.Sprintf(`
-%s
-%s
+%[1]s
+%[2]s
+
+data "opentelekomcloud_rds_flavors_v3" "flavor" {
+  db_type       = "PostgreSQL"
+  db_version    = "15"
+  instance_mode = "single"
+}
+
+locals {
+  available_flavor = [
+    for flavor in data.opentelekomcloud_rds_flavors_v3.flavor.flavors :
+    flavor if lookup(flavor.az_status, "%[4]s", "unsupported") == "normal"
+  ][0]
+}
 
 resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
-  name = "pg-rds-test"
+  name = "pg-rds-test-%[3]s"
   values = {
     autocommit = "OFF"
   }
   datastore {
     type    = "postgresql"
-    version = "10"
+    version = "15"
   }
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  name              = "tf_rds_instance_%s"
-  availability_zone = ["%s"]
+  name              = "tf_rds_instance_%[3]s"
+  availability_zone = ["%[4]s"]
 
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "15"
     port     = "8635"
   }
 
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  flavor            = "rds.pg.c2.large"
+  flavor            = local.available_flavor.name
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
 
   parameters = {
     max_connections = "37",
   }
-}
-`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
-}
-
-func testAccRdsInstanceV3InvalidFlavor(postfix string) string {
-	return fmt.Sprintf(`
-%s
-%s
-
-resource "opentelekomcloud_rds_instance_v3" "instance" {
-  name              = "tf_rds_instance_%s"
-  availability_zone = ["%s"]
-  db {
-    password = "Postgres!120521"
-    type     = "PostgreSQL"
-    version  = "10"
-  }
-  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  volume {
-    type = "ULTRAHIGH"
-    size = 40
-  }
-  flavor = "bla.bla.rds"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
@@ -824,7 +900,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "15"
     port     = "8635"
   }
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
@@ -863,7 +939,7 @@ resource "opentelekomcloud_rds_instance_v3" "from_backup" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "15"
     port     = "8635"
   }
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
@@ -889,11 +965,25 @@ resource "opentelekomcloud_rds_instance_v3" "from_backup" {
 
 func testAccRdsInstanceV3ConfigurationTimeZone(postfix string) string {
 	return fmt.Sprintf(`
-%s
-%s
+%[1]s
+%[2]s
+
+data "opentelekomcloud_rds_flavors_v3" "flavor" {
+  db_type       = "MySQL"
+  db_version    = "8.0"
+  instance_mode = "single"
+}
+
+locals {
+  available_flavor = [
+    for flavor in data.opentelekomcloud_rds_flavors_v3.flavor.flavors :
+    flavor if lookup(flavor.az_status, "%[4]s", "unsupported") == "normal"
+  ][0]
+}
+
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  name              = "tf_rds_instance_%s"
-  availability_zone = ["%s"]
+  name              = "tf_rds_instance_%[3]s"
+  availability_zone = ["%[4]s"]
   db {
     password = "MySql!112822"
     type     = "MySQL"
@@ -905,10 +995,10 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
-  flavor     = "rds.mysql.m1.large"
+  flavor     = local.available_flavor.name
   ssl_enable = true
   backup_strategy {
     start_time = "08:00-09:00"
@@ -922,7 +1012,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 
 
 resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
-  name        = "pg_tmz"
+  name        = "pg_tmz-%[3]s"
   description = "time zone template"
 
   values = {
@@ -957,10 +1047,10 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.n1.large.4"
   tags = {
     muh = "value-create"
     kuh = "value-create"
@@ -992,10 +1082,10 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.n1.large.4"
   tags = {
     muh = "value-create"
     kuh = "value-create"
@@ -1014,23 +1104,36 @@ func testAccRdsInstanceV3RestorePITRBasic(postfix string) string {
 %[1]s
 %[2]s
 
+data "opentelekomcloud_rds_flavors_v3" "flavor" {
+  db_type       = "PostgreSQL"
+  db_version    = "15"
+  instance_mode = "single"
+}
+
+locals {
+  available_flavor = [
+    for flavor in data.opentelekomcloud_rds_flavors_v3.flavor.flavors :
+    flavor if lookup(flavor.az_status, "%[4]s", "unsupported") == "normal"
+  ][0]
+}
+
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%[3]s"
   availability_zone = ["%[4]s"]
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "15"
     port     = "8635"
   }
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
-  flavor = "rds.pg.c2.large"
+  flavor = local.available_flavor.name
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance_2" {
@@ -1039,25 +1142,25 @@ resource "opentelekomcloud_rds_instance_v3" "instance_2" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "15"
     port     = "8635"
   }
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
 
-  flavor = "rds.pg.c2.large"
+  flavor = local.available_flavor.name
 }
 
 resource "opentelekomcloud_rds_backup_v3" "test" {
   instance_id = opentelekomcloud_rds_instance_v3.instance_2.id
-  name        = "tf_rds_backup_%[5]s"
+  name        = "tf_rds_backup_%[3]s"
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE, postfix)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3RestorePITRUpdate(postfix string) string {
@@ -1065,30 +1168,40 @@ func testAccRdsInstanceV3RestorePITRUpdate(postfix string) string {
 %[1]s
 %[2]s
 
+data "opentelekomcloud_rds_flavors_v3" "flavor" {
+  db_type       = "PostgreSQL"
+  db_version    = "15"
+  instance_mode = "single"
+}
+
+locals {
+  available_flavor = [
+    for flavor in data.opentelekomcloud_rds_flavors_v3.flavor.flavors :
+    flavor if lookup(flavor.az_status, "%[4]s", "unsupported") == "normal"
+  ][0]
+}
+
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%[3]s"
   availability_zone = ["%[4]s"]
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "15"
     port     = "8635"
   }
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
-  flavor = "rds.pg.c2.large"
-  restore_from_backup {
-    source_instance_id = opentelekomcloud_rds_backup_v3.test.instance_id
-    backup_id          = opentelekomcloud_rds_backup_v3.test.id
-    type               = "backup"
+  flavor = local.available_flavor.name
+  restore_point {
+    instance_id = opentelekomcloud_rds_backup_v3.test.instance_id
+    backup_id   = opentelekomcloud_rds_backup_v3.test.id
   }
-
-
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance_2" {
@@ -1097,18 +1210,18 @@ resource "opentelekomcloud_rds_instance_v3" "instance_2" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "15"
     port     = "8635"
   }
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type = "ULTRAHIGH"
+    type = "CLOUDSSD"
     size = 40
   }
 
-  flavor = "rds.pg.c2.large"
+  flavor = local.available_flavor.name
 }
 
 resource "opentelekomcloud_rds_backup_v3" "test" {
@@ -1120,11 +1233,25 @@ resource "opentelekomcloud_rds_backup_v3" "test" {
 
 func testAccRdsInstanceV3AutoScaling(postfix string) string {
 	return fmt.Sprintf(`
-%s
-%s
+%[1]s
+%[2]s
+
+data "opentelekomcloud_rds_flavors_v3" "flavor" {
+  db_type       = "MySQL"
+  db_version    = "8.0"
+  instance_mode = "single"
+}
+
+locals {
+  available_flavor = [
+    for flavor in data.opentelekomcloud_rds_flavors_v3.flavor.flavors :
+    flavor if lookup(flavor.az_status, "%[4]s", "unsupported") == "normal"
+  ][0]
+}
+
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  name              = "tf_rds_instance_%s"
-  availability_zone = ["%s"]
+  name              = "tf_rds_instance_%[3]s"
+  availability_zone = ["%[4]s"]
   db {
     password = "MySql!112822"
     type     = "MySQL"
@@ -1136,12 +1263,12 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
-    type              = "ULTRAHIGH"
+    type              = "CLOUDSSD"
     size              = 100
     limit_size        = 500
     trigger_threshold = 10
   }
-  flavor     = "rds.mysql.m1.large"
+  flavor     = local.available_flavor.name
   ssl_enable = true
   backup_strategy {
     start_time = "08:00-09:00"
@@ -1154,7 +1281,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 }
 
 resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
-  name        = "pg_tmz"
+  name        = "pg_tmz-%[3]s"
   description = "time zone template"
 
   values = {
@@ -1171,19 +1298,145 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
 
 func testAccRdsInstanceV3EnableSSL(postfix string) string {
 	return fmt.Sprintf(`
-%s
-%s
+%[1]s
+%[2]s
+
+data "opentelekomcloud_rds_flavors_v3" "flavor" {
+  db_type       = "MySQL"
+  db_version    = "8.0"
+  instance_mode = "single"
+}
+
+locals {
+  available_flavor = [
+    for flavor in data.opentelekomcloud_rds_flavors_v3.flavor.flavors :
+    flavor if lookup(flavor.az_status, "%[4]s", "unsupported") == "normal"
+  ][0]
+}
 
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  name              = "tf_rds_instance_%s"
-  availability_zone = ["%s"]
+  name              = "tf_rds_instance_%[3]s"
+  availability_zone = ["%[4]s"]
   db {
     password = "Postgres!120521"
     type     = "MySQL"
-    version  = "5.7"
+    version  = "8.0"
     port     = "3306"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  volume {
+    type = "CLOUDSSD"
+    size = 40
+  }
+  flavor     = local.available_flavor.name
+  ssl_enable = true
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = 1
+  }
+
+  public_ips = [opentelekomcloud_networking_floatingip_v2.fip_1.address]
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccRdsInstanceV3PrivateIp(postfix string) string {
+	return fmt.Sprintf(`
+%[1]s
+%[2]s
+
+data "opentelekomcloud_rds_flavors_v3" "flavor" {
+  db_type       = "PostgreSQL"
+  db_version    = "15"
+  instance_mode = "single"
+}
+
+locals {
+  available_flavor = [
+    for flavor in data.opentelekomcloud_rds_flavors_v3.flavor.flavors :
+    flavor if lookup(flavor.az_status, "%[4]s", "unsupported") == "normal"
+  ][0]
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%[3]s"
+  availability_zone = ["%[4]s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "15"
+    port     = "8635"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  private_ip        = cidrhost(data.opentelekomcloud_vpc_subnet_v1.shared_subnet.cidr, 10)
+  volume {
+    type = "CLOUDSSD"
+    size = 40
+  }
+  flavor = local.available_flavor.name
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccRdsInstanceV3PrivateDNS(postfix string) string {
+	return fmt.Sprintf(`
+%[1]s
+%[2]s
+
+data "opentelekomcloud_rds_flavors_v3" "flavor" {
+  db_type       = "PostgreSQL"
+  db_version    = "15"
+  instance_mode = "single"
+}
+
+locals {
+  available_flavor = [
+    for flavor in data.opentelekomcloud_rds_flavors_v3.flavor.flavors :
+    flavor if lookup(flavor.az_status, "%[4]s", "unsupported") == "normal"
+  ][0]
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%[3]s"
+  availability_zone = ["%[4]s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "15"
+    port     = "8635"
+  }
+  security_group_id   = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  private_domain_name = "testAccDomain"
+  volume {
+    type = "CLOUDSSD"
+    size = 40
+  }
+  flavor = local.available_flavor.name
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccRdsInstanceV3_Swiss(postfix string) string {
+	return fmt.Sprintf(`
+%[1]s
+%[2]s
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%[3]s"
+  availability_zone = ["%[4]s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "15"
+    port     = "8635"
   }
   security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -1192,18 +1445,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "ULTRAHIGH"
     size = 40
   }
-  flavor     = "rds.mysql.c2.medium"
-  ssl_enable = true
-  backup_strategy {
-    start_time = "08:00-09:00"
-    keep_days  = 1
-  }
-
-  public_ips = [opentelekomcloud_networking_floatingip_v2.fip_1.address]
-
-  parameters = {
-    require_secure_transport = "ON"
-  }
+  flavor = "rds.pg.s3.large.2"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }

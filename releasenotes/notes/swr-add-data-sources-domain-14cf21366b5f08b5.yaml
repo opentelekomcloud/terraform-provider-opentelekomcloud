@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **[SWR]** Add new data source ``datasource/opentelekomcloud_swr_domain_v2`` (`#3321 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3321>`_).
+  - |
+    **[SWR]** Add new data source ``datasource/opentelekomcloud_swr_domains_v2`` (`#3321 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3321>`_).

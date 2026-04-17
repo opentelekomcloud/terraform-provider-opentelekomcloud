@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_enterprise_vpn_gateway_v5"
 sidebar_current: "docs-opentelekomcloud-resource-enterprise-vpn-gateway-v5"
 description: |-
-Manages a Enterprise VPN Gateway Service resource within OpenTelekomCloud.
+  Manages a Enterprise VPN Gateway Service resource within OpenTelekomCloud.
 ---
 
 Up-to-date reference of API arguments for EVPN you can get at
@@ -147,6 +147,9 @@ The following arguments are supported:
   `active-standby`. The default value is `active-active`.
   Changing this parameter will create a new resource.
 
+* `delete_eip` - (Optional, Bool) Specifies whether to delete eips on resource deletion when`network_type` is `public`.
+  Default: `false`.
+
 * `eip1` - (Optional, List) The master 1 IP in active-active VPN gateway or the master IP
   in active-standby VPN gateway. This parameter is mandatory when `network_type` is `public` or left empty.
   The [object](#GwCreateRequestEip) structure is documented below.
@@ -233,6 +236,8 @@ In addition to all arguments above, the following attributes are exported:
 <a name="GatewayGetResponseEip"></a>
 The `eip1` or `eip2` block supports:
 
+* `id` - The public IP ID.
+
 * `bandwidth_id` - The bandwidth ID.
 
 * `ip_address` - The public IP address.
@@ -253,4 +258,22 @@ The gateway can be imported using the `id`, e.g.
 
 ```bash
 $ terraform import opentelekomcloud_enterprise_vpn_gateway_v5.test <id>
+```
+
+Note that the imported state may not be identical to your resource definition, due to `delete_eip` attribute missing from the
+API response.
+It is generally recommended running `terraform plan` after importing an instance.
+You can then decide if changes should be applied to the instance, or the resource definition should be updated to
+align with the instance. Also, you can ignore changes as below.
+
+```
+resource "opentelekomcloud_enterprise_vpn_gateway_v5" "test" {
+    ...
+
+  lifecycle {
+    ignore_changes = [
+      delete_eip
+    ]
+  }
+}
 ```

@@ -265,13 +265,13 @@ The following arguments are supported:
   instance. The nics object structure is documented below. Changing this
   creates a new server.
 
-* `system_disk_type` - (Optional, String, ForceNew) The system disk type of the server. For HANA, HL1, and HL2 ECSs use `co-p1` and `uh-l1` disks.
-  Changing this creates a new server. Options are limited depending on AZ. Available options are:
-  * `SATA`: common I/O disk type. Available for all AZs.
+* `metadata` - (Optional, Map) Metadata key/value pairs to associate with the instance.
+
+* `system_disk_type` - (Optional, String, ForceNew) The system disk type of the server.
+  Changing this creates a new server. Options are limited depending on AZ. Default: `SSD`. Available options are:
   * `SAS`: high I/O disk type. Available for all AZs.
   * `SSD`: ultra-high I/O disk type. Available for all AZs.
-  * `co-p1`: high I/O(performance-optimized) disk type.
-  * `uh-l1`: ultra-high I/O(latency-optimized) disk type.
+  * `GPSSD`: the general purpose SSD type
   * `ESSD`: extreme SSD disk type.
 
 * `system_disk_size` - (Optional, Integer, ForceNew) The system disk size in GB, The value range is 1 to 1024.
@@ -299,6 +299,11 @@ The following arguments are supported:
 
 * `auto_recovery` - (Optional, Boolean) Whether configure automatic recovery of an instance.
 
+* `tpm_enabled` - (Optional, Boolean) Specifies whether to enable vTPM on the ECS. Defaults to `false`.
+  Currently, only `Pi5e` instance types support TPM.
+
+  ~> **NOTE:** Changing this parameter will cause the server to be automatically stopped, updated, and started again.
+
 * `delete_disks_on_termination` - (Optional, Boolean) Delete the data disks upon termination of the instance.
   Defaults to false. Changing this creates a new server.
 
@@ -311,16 +316,27 @@ The `nics` block supports:
 * `ip_address` - (Optional, String, ForceNew) Specifies a fixed IPv4 address to be used on this
   network. Changing this creates a new server.
 
+* `ipv6_enable` - (Optional, Bool, ForceNew) Specifies whether to support IPv6 addresses. If this parameter is set to true, the NIC supports IPv6 addresses.
+
+  -> **NOTE:**
+  IPV6 enable requires the subnet to have IPV6 enabled as well.
+
+The `metadata` block supports:
+
+* `agency_name` - (Optional, String) Association to an [agency](identity_agency_v3.md)
+
 The `data_disks` block supports:
 
-* `type` - (Required, String, ForceNew) The data disk type of the server. For HANA, HL1, and HL2 ECSs use `co-p1` and `uh-l1` disks.
+* `type` - (Required, String, ForceNew) The data disk type of the server.
   Changing this creates a new server. Options are limited depending on AZ. Available options are:
   * `SATA`: common I/O disk type. Available for all AZs.
   * `SAS`: high I/O disk type. Available for all AZs.
   * `SSD`: ultra-high I/O disk type. Available for all AZs.
-  * `co-p1`: high I/O(performance-optimized) disk type.
-  * `uh-l1`: ultra-high I/O(latency-optimized) disk type.
+  * `GPSSD`: the general purpose SSD type
   * `ESSD`: extreme SSD disk type.
+
+  -> **NOTE:**
+  Common I/O (SATA) will reach end of life, end of 2025.
 
 * `size` - (Required, String, ForceNew) The size of the data disk in GB. The value range is 10 to 32768.
   Changing this creates a new server.
@@ -349,6 +365,8 @@ In addition to all arguments above, the following attributes are exported:
 * `nics/type` - (String) The type of the address of the NIC on that network.
 
 * `nics/port_id` - (String) The port ID of the NIC on that network.
+
+* `nics/ipv6_address` - (String) The IPV6 address of the NIC on that network.
 
 * `volumes_attached/id` - (String) The ID of the data disk.
 

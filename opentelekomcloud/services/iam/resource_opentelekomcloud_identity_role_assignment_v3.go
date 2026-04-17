@@ -78,6 +78,10 @@ func resourceIdentityRoleAssignmentV3Create(ctx context.Context, d *schema.Resou
 	projectID := d.Get("project_id").(string)
 	roleID := d.Get("role_id").(string)
 
+	if domainID == "" && projectID == "" {
+		return fmterr.Errorf("Both project_id and domain_id are empty")
+	}
+
 	if !d.Get("all_projects").(bool) {
 		opts := roles.AssignOpts{
 			DomainID:  domainID,

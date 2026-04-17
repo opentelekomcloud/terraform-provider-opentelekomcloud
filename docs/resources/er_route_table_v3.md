@@ -21,6 +21,11 @@ resource "opentelekomcloud_er_route_table_v3" "test" {
   instance_id = var.instance_id
   name        = var.route_table_name
   description = "Route table created by terraform"
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
 }
 ```
 
@@ -53,6 +58,8 @@ In addition to all arguments above, the following attributes are exported:
 * `updated_at` - The latest update time.
 
 * `region` - The region where the ER instance and route table are located.
+
+* `tags` - (Optional, Map) Tags key/value pairs to associate with the instance.
 
 ## Timeouts
 

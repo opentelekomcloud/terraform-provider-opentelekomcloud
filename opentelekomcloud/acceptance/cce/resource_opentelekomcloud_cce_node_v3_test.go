@@ -68,8 +68,30 @@ func TestAccResourceCCENodesV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameNode, "data_volumes.0.extend_params.useType", "docker"),
 				),
 			},
+			{
+				ResourceName:      resourceNameNode,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccCCENodeImportStateIdFunc(),
+				ImportStateVerifyIgnore: []string{
+					"taints", "extend_params",
+				},
+			},
 		},
 	})
+}
+
+func testAccCCENodeImportStateIdFunc() resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		node, ok := s.RootModule().Resources["opentelekomcloud_cce_node_v3.node_1"]
+		if !ok {
+			return "", fmt.Errorf("node not found: %s", node)
+		}
+		if node.Primary.Attributes["cluster_id"] == "" || node.Primary.ID == "" {
+			return "", fmt.Errorf("resource not found: %s/%s", node.Primary.Attributes["cluster_id"], node.Primary.ID)
+		}
+		return fmt.Sprintf("%s/%s", node.Primary.Attributes["cluster_id"], node.Primary.ID), nil
+	}
 }
 
 func TestAccResourceCCENodesV3Agency(t *testing.T) {
@@ -532,12 +554,12 @@ resource "opentelekomcloud_cce_node_v3" "node_2" {
 
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 }
 
@@ -552,12 +574,12 @@ resource "opentelekomcloud_cce_node_v3" "node_3" {
 
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 }
 `, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
@@ -578,7 +600,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   data_volumes {
@@ -608,7 +630,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
   data_volumes {
     size       = 100
@@ -637,12 +659,12 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 }
 `, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
@@ -659,11 +681,11 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
   timeouts {
     create = "10m"
@@ -683,14 +705,14 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   key_pair          = "%s"
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   bandwidth_size = 100
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 }
 `, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
@@ -706,14 +728,14 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   key_pair          = "%s"
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   bandwidth_size = 10
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 }
 `, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
@@ -729,12 +751,12 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   key_pair          = "%s"
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 }
 `, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
@@ -750,7 +772,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   key_pair          = "%s"
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   bandwidth_size = 100
@@ -759,7 +781,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 }
 `, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
@@ -775,7 +797,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   key_pair          = "%s"
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   bandwidth_size = null
@@ -784,7 +806,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 }
 `, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
@@ -803,14 +825,14 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   key_pair          = "%s"
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   eip_ids = [opentelekomcloud_networking_floatingip_v2.fip_1.id]
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 }
 `, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
@@ -828,14 +850,14 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   key_pair          = "%s"
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   eip_ids = [opentelekomcloud_networking_floatingip_v2.fip_2.id]
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 }
 `, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
@@ -851,13 +873,13 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
     kms_id     = "%s"
   }
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
     kms_id     = "%s"
   }
 }
@@ -875,11 +897,11 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   key_pair          = "%s"
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
   taints {
     key    = "dedicated"
@@ -908,12 +930,12 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   max_pods         = 16
@@ -948,7 +970,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   data_volumes {

@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[ER]** Add new resource ``resource/opentelekomcloud_er_flow_log_v3`` (`#2867 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2867>`_)

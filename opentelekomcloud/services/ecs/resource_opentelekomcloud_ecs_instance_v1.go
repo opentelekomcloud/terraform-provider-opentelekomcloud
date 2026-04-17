@@ -14,6 +14,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/startstop"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v3/volumes"
@@ -109,6 +110,15 @@ func ResourceEcsInstanceV1() *schema.Resource {
 							ForceNew: true,
 							Computed: true,
 						},
+						"ipv6_enable": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							ForceNew: true,
+						},
+						"ipv6_address": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"mac_address": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -124,15 +134,30 @@ func ResourceEcsInstanceV1() *schema.Resource {
 					},
 				},
 			},
+			"metadata": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"agency_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
 			"system_disk_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"system_disk_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				Computed:         true,
+				ValidateDiagFunc: common.ValidateDiskType,
 			},
 			"system_disk_size": {
 				Type:     schema.TypeInt,
@@ -158,9 +183,10 @@ func ResourceEcsInstanceV1() *schema.Resource {
 							Computed: true,
 						},
 						"type": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:             schema.TypeString,
+							Required:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: common.ValidateDiskType,
 						},
 						"size": {
 							Type:     schema.TypeInt,
@@ -257,6 +283,11 @@ func ResourceEcsInstanceV1() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"tpm_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 			"delete_disks_on_termination": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -285,7 +316,14 @@ func resourceEcsInstanceV1Create(ctx context.Context, d *schema.ResourceData, me
 		DataVolumes:      resourceInstanceDataVolumesV1(d),
 		AdminPass:        d.Get("password").(string),
 		UserData:         []byte(d.Get("user_data").(string)),
+		MetaData:         resourceInstanceMetadataV1(d),
 		SchedulerHints:   resourceInstanceOsSchedulerHints(d),
+	}
+
+	if v, ok := d.GetOk("tpm_enabled"); ok {
+		createOpts.SecurityOptions = &cloudservers.SecurityOptions{
+			TpmEnabled: pointerto.Bool(v.(bool)),
+		}
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -344,6 +382,11 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 		return nil
 	}
 
+	var tpmEnabled bool
+	if server.SecurityOptions != nil && server.SecurityOptions.TpmEnabled != nil {
+		tpmEnabled = *server.SecurityOptions.TpmEnabled
+	}
+
 	mErr := multierror.Append(
 		d.Set("name", server.Name),
 		d.Set("image_id", server.Image.ID),
@@ -352,6 +395,7 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("key_name", server.KeyName),
 		d.Set("vpc_id", server.Metadata.VpcID),
 		d.Set("availability_zone", server.AvailabilityZone),
+		d.Set("tpm_enabled", tpmEnabled),
 	)
 	var secGrpIDs []string
 	for _, sg := range server.SecurityGroups {
@@ -390,6 +434,15 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 	}
 	mErr = multierror.Append(mErr,
 		d.Set("volumes_attached", volumeList),
+	)
+
+	var metadata []map[string]interface{}
+	md := map[string]interface{}{
+		"agency_name": server.Metadata.AgencyName,
+	}
+	metadata = append(metadata, md)
+	mErr = multierror.Append(mErr,
+		d.Set("metadata", metadata),
 	)
 
 	// Get the instance network and address information
@@ -482,6 +535,55 @@ func resourceEcsInstanceV1Update(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
+	if d.HasChange("metadata") {
+		oldMetadataRaw, newMetadataRaw := d.GetChange("metadata")
+		oldMetadata := oldMetadataRaw.([]interface{})
+		newMetadata := newMetadataRaw.([]interface{})
+
+		var metadataToDelete []string
+
+		// Determine if any metadata keys were removed from the configuration.
+		// Then request those keys to be deleted.
+		if len(oldMetadata) > 0 {
+			for oldKey := range oldMetadata[0].(map[string]interface{}) {
+				var found bool
+				if len(newMetadata) > 0 {
+					for newKey := range newMetadata[0].(map[string]interface{}) {
+						if oldKey == newKey {
+							found = true
+						}
+					}
+				} else {
+					found = true
+				}
+
+				if !found {
+					metadataToDelete = append(metadataToDelete, oldKey)
+				}
+			}
+		}
+
+		for _, key := range metadataToDelete {
+			err := servers.DeleteMetadatum(client, d.Id(), key).ExtractErr()
+			if err != nil {
+				return fmterr.Errorf("error deleting metadata (%s) from server (%s): %s", key, d.Id(), err)
+			}
+		}
+
+		// Update existing metadata and add any new metadata.
+		metadataOpts := make(servers.MetadataOpts)
+		if len(newMetadata) > 0 {
+			for k, v := range newMetadata[0].(map[string]interface{}) {
+				metadataOpts[k] = v.(string)
+			}
+		}
+
+		_, err := servers.UpdateMetadata(client, d.Id(), metadataOpts).Extract()
+		if err != nil {
+			return fmterr.Errorf("error updating OpenTelekomCloud server (%s) metadata: %s", d.Id(), err)
+		}
+	}
+
 	if d.HasChange("flavor") {
 		newFlavorId := d.Get("flavor").(string)
 
@@ -551,7 +653,63 @@ func resourceEcsInstanceV1Update(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	return resourceEcsInstanceV1Read(ctx, d, meta)
+	if d.HasChange("tpm_enabled") {
+		computeV1Client, err := config.ComputeV1Client(config.GetRegion(d))
+		if err != nil {
+			return fmterr.Errorf(errCreateClient, err)
+		}
+
+		log.Printf("[WARN] Updating tpm_enabled requires the CloudServer (%s) to be stopped and restarted", d.Id())
+
+		// Server must be stopped to update security_options
+		if err := startstop.Stop(client, d.Id()).ExtractErr(); err != nil {
+			return fmterr.Errorf("error stopping CloudServer: %w", err)
+		}
+		stopStateConf := &resource.StateChangeConf{
+			Target:     []string{"SHUTOFF"},
+			Refresh:    ServerV2StateRefreshFunc(client, d.Id()),
+			Timeout:    d.Timeout(schema.TimeoutUpdate),
+			Delay:      10 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
+		if _, err := stopStateConf.WaitForStateContext(ctx); err != nil {
+			return fmterr.Errorf("error waiting for CloudServer (%s) to stop: %w", d.Id(), err)
+		}
+
+		tpmEnabled := d.Get("tpm_enabled").(bool)
+		updateOpts := cloudservers.UpdateOpts{
+			SecurityOptions: &cloudservers.SecurityOptions{
+				TpmEnabled: pointerto.Bool(tpmEnabled),
+			},
+		}
+		if _, err := cloudservers.Update(computeV1Client, d.Id(), updateOpts); err != nil {
+			return fmterr.Errorf("error updating tpm_enabled of CloudServer: %w", err)
+		}
+
+		// Start the server back
+		if err := startstop.Start(client, d.Id()).ExtractErr(); err != nil {
+			return fmterr.Errorf("error starting CloudServer: %w", err)
+		}
+		startStateConf := &resource.StateChangeConf{
+			Target:     []string{"ACTIVE"},
+			Refresh:    ServerV2StateRefreshFunc(client, d.Id()),
+			Timeout:    d.Timeout(schema.TimeoutUpdate),
+			Delay:      10 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
+		if _, err := startStateConf.WaitForStateContext(ctx); err != nil {
+			return fmterr.Errorf("error waiting for CloudServer (%s) to start: %w", d.Id(), err)
+		}
+	}
+
+	readDiags := resourceEcsInstanceV1Read(ctx, d, meta)
+	if d.HasChange("tpm_enabled") {
+		readDiags = append(readDiags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "CloudServer was stopped and restarted to update tpm_enabled",
+		})
+	}
+	return readDiags
 }
 
 func resourceEcsInstanceV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -593,8 +751,9 @@ func resourceInstanceNicsV1(d *schema.ResourceData) []cloudservers.Nic {
 	for i := range nics {
 		nic := nics[i].(map[string]interface{})
 		nicRequest := cloudservers.Nic{
-			SubnetId:  nic["network_id"].(string),
-			IpAddress: nic["ip_address"].(string),
+			SubnetId:   nic["network_id"].(string),
+			IpAddress:  nic["ip_address"].(string),
+			Ipv6Enable: nic["ipv6_enable"].(bool),
 		}
 
 		nicRequests = append(nicRequests, nicRequest)
@@ -605,7 +764,7 @@ func resourceInstanceNicsV1(d *schema.ResourceData) []cloudservers.Nic {
 func resourceInstanceRootVolumeV1(d *schema.ResourceData) cloudservers.RootVolume {
 	diskType := d.Get("system_disk_type").(string)
 	if diskType == "" {
-		diskType = "SATA"
+		diskType = "SSD"
 	}
 	volRequest := cloudservers.RootVolume{
 		VolumeType: diskType,
@@ -690,6 +849,19 @@ func resourceInstanceSecGroupsV1(d *schema.ResourceData) []cloudservers.Security
 	return secGroups
 }
 
+func resourceInstanceMetadataV1(d *schema.ResourceData) *cloudservers.MetaData {
+	metaDatas, ok := d.Get("metadata").([]interface{})
+
+	var metaData cloudservers.MetaData
+	if ok && len(metaDatas) == 1 {
+		md := metaDatas[0].(map[string]interface{})
+		metaData = cloudservers.MetaData{
+			AgencyName: md["agency_name"].(string),
+		}
+	}
+	return &metaData
+}
+
 func flattenInstanceNicsV1(d *schema.ResourceData, meta interface{}, addresses map[string][]cloudservers.Address) []map[string]interface{} {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
@@ -715,14 +887,32 @@ func flattenInstanceNicsV1(d *schema.ResourceData, meta interface{}, addresses m
 				network = p.NetworkID
 			}
 
-			v := map[string]interface{}{
-				"network_id":  network,
-				"ip_address":  addr.Addr,
-				"mac_address": addr.MacAddr,
-				"port_id":     addr.PortID,
-				"type":        addr.Type,
+			if addr.Version == "4" {
+				v := map[string]interface{}{
+					"network_id":   network,
+					"ip_address":   addr.Addr,
+					"mac_address":  addr.MacAddr,
+					"port_id":      addr.PortID,
+					"type":         addr.Type,
+					"ipv6_enable":  false,
+					"ipv6_address": "",
+				}
+				nics = append(nics, v)
 			}
-			nics = append(nics, v)
+		}
+		for _, addr := range addrs {
+			// Skip if not fixed ip
+			if addr.Type != "fixed" {
+				continue
+			}
+			if addr.Version == "6" {
+				for _, nic := range nics {
+					if nic["port_id"] == addr.PortID {
+						nic["ipv6_address"] = addr.Addr
+						nic["ipv6_enable"] = true
+					}
+				}
+			}
 		}
 	}
 

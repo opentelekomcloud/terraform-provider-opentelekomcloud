@@ -79,6 +79,11 @@ func ResourceObsBucket() *schema.Resource {
 							Optional: true,
 							Default:  "logs/",
 						},
+						"agency": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -172,6 +177,7 @@ func ResourceObsBucket() *schema.Resource {
 								},
 							},
 						},
+
 						"noncurrent_version_transition": {
 							Type:     schema.TypeList,
 							Optional: true,
@@ -187,6 +193,34 @@ func ResourceObsBucket() *schema.Resource {
 										ValidateFunc: validation.StringInSlice([]string{
 											"WARM", "COLD",
 										}, true),
+									},
+								},
+							},
+						},
+						"abort_incomplete_multipart_upload": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"days": {
+										Type:     schema.TypeInt,
+										Required: true,
+									},
+								},
+							},
+						},
+						"tag": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"value": {
+										Type:     schema.TypeString,
+										Required: true,
 									},
 								},
 							},
@@ -300,6 +334,10 @@ func ResourceObsBucket() *schema.Resource {
 								validation.StringInSlice([]string{"kms"}, false),
 							),
 						},
+						"kms_project_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 					},
 				},
 			},
@@ -372,10 +410,7 @@ func resourceObsBucketCreate(ctx context.Context, d *schema.ResourceData, meta i
 	bucket := d.Get("bucket").(string)
 	acl := d.Get("acl").(string)
 
-	var class string
-	if config.GetRegion(d) != "eu-ch2" {
-		class = d.Get("storage_class").(string)
-	}
+	class := d.Get("storage_class").(string)
 
 	opts := &obs.CreateBucketInput{
 		Bucket:            bucket,
@@ -414,7 +449,7 @@ func resourceObsBucketUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
-	if d.HasChange("storage_class") && !d.IsNewResource() && config.GetRegion(d) != "eu-ch2" {
+	if d.HasChange("storage_class") && !d.IsNewResource() {
 		if err := resourceObsBucketClassUpdate(client, d); err != nil {
 			return diag.FromErr(err)
 		}
@@ -523,10 +558,8 @@ func resourceObsBucketRead(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	// Read storage class
-	if region != "eu-ch2" {
-		if err := setObsBucketStorageClass(client, d); err != nil {
-			return diag.FromErr(err)
-		}
+	if err := setObsBucketStorageClass(client, d); err != nil {
+		return diag.FromErr(err)
 	}
 
 	// Read the versioning
@@ -742,6 +775,10 @@ func resourceObsBucketLoggingUpdate(client *obs.ObsClient, d *schema.ResourceDat
 		if val := c["target_prefix"].(string); val != "" {
 			loggingStatus.TargetPrefix = val
 		}
+
+		if val := c["agency"].(string); val != "" {
+			loggingStatus.Agency = val
+		}
 	}
 	log.Printf("[DEBUG] set logging of OBS bucket %s: %#v", bucket, loggingStatus)
 
@@ -764,8 +801,29 @@ func mapToRule(src map[string]interface{}) (rule obs.LifecycleRule) {
 		rule.Status = obs.RuleStatusDisabled
 	}
 
-	// Prefix
-	rule.Prefix = src["prefix"].(string)
+	prefix := src["prefix"].(string)
+
+	tags := src["tag"].([]interface{})
+
+	// Filter
+	if len(tags) > 0 {
+		filter := obs.LifecycleFilter{
+			Prefix: prefix,
+		}
+		tagList := make([]obs.Tag, len(tags))
+		for i, tag := range tags {
+			tagMap := tag.(map[string]interface{})
+			tagList[i] = obs.Tag{
+				Key:   tagMap["key"].(string),
+				Value: tagMap["value"].(string),
+			}
+		}
+		filter.Tags = tagList
+		rule.Filter = filter
+	} else {
+		// Prefix
+		rule.Prefix = prefix
+	}
 
 	// Expiration
 	expiration := src["expiration"].(*schema.Set).List()
@@ -801,6 +859,17 @@ func mapToRule(src map[string]interface{}) (rule obs.LifecycleRule) {
 
 		if val, ok := raw["days"].(int); ok && val > 0 {
 			ncExp.NoncurrentDays = val
+		}
+	}
+
+	// AbortIncompleteMultipartUpload
+	abortIncompleteMultipartUpload := src["abort_incomplete_multipart_upload"].(*schema.Set).List()
+	if len(abortIncompleteMultipartUpload) > 0 {
+		raw := abortIncompleteMultipartUpload[0].(map[string]interface{})
+		abincomMultipartUpload := &rule.AbortIncompleteMultipartUpload
+
+		if val, ok := raw["days"].(int); ok && val > 0 {
+			abincomMultipartUpload.DaysAfterInitiation = val
 		}
 	}
 
@@ -1067,6 +1136,9 @@ func setObsBucketLogging(client *obs.ObsClient, d *schema.ResourceData) error {
 		if output.TargetPrefix != "" {
 			logging["target_prefix"] = output.TargetPrefix
 		}
+		if output.Agency != "" {
+			logging["agency"] = output.Agency
+		}
 		lcList = append(lcList, logging)
 	}
 	log.Printf("[DEBUG] saving logging configuration of OBS bucket: %s: %#v", bucket, lcList)
@@ -1087,6 +1159,16 @@ func ruleToMap(src obs.LifecycleRule) map[string]interface{} {
 
 	if src.Prefix != "" {
 		rule["prefix"] = src.Prefix
+	} else if src.Filter.Prefix != "" {
+		rule["prefix"] = src.Filter.Prefix
+		tags := make([]interface{}, len(src.Filter.Tags))
+		for i, v := range src.Filter.Tags {
+			tag := make(map[string]interface{})
+			tag["key"] = v.Key
+			tag["value"] = v.Value
+			tags[i] = tag
+		}
+		rule["tag"] = tags
 	}
 
 	// expiration
@@ -1112,6 +1194,13 @@ func ruleToMap(src obs.LifecycleRule) map[string]interface{} {
 		expiration := make(map[string]interface{})
 		expiration["days"] = days
 		rule["noncurrent_version_expiration"] = schema.NewSet(s3.ExpirationHash, []interface{}{expiration})
+	}
+
+	// abort_incomplete_multipart_upload
+	if days := src.AbortIncompleteMultipartUpload.DaysAfterInitiation; days > 0 {
+		a := make(map[string]interface{})
+		a["days"] = days
+		rule["abort_incomplete_multipart_upload"] = schema.NewSet(s3.ExpirationHash, []interface{}{a})
 	}
 
 	// noncurrent_version_transition
@@ -1436,6 +1525,7 @@ func resourceObsBucketEncryptionUpdate(client *obs.ObsClient, d *schema.Resource
 		BucketEncryptionConfiguration: obs.BucketEncryptionConfiguration{
 			SSEAlgorithm:   d.Get("server_side_encryption.0.algorithm").(string),
 			KMSMasterKeyID: d.Get("server_side_encryption.0.kms_key_id").(string),
+			ProjectID:      d.Get("server_side_encryption.0.kms_project_id").(string),
 		},
 	})
 	if err != nil {
@@ -1445,18 +1535,21 @@ func resourceObsBucketEncryptionUpdate(client *obs.ObsClient, d *schema.Resource
 }
 
 func setObsBucketEncryption(client *obs.ObsClient, d *schema.ResourceData) error {
+	var value []map[string]interface{}
+
 	config, err := client.GetBucketEncryption(d.Id())
 	if err != nil {
 		if oErr, ok := err.(obs.ObsError); ok {
 			if oErr.BaseModel.StatusCode == 404 || oErr.Code == "NoSuchEncryptionConfiguration" || oErr.Code == "FsNotSupport" {
-				return nil
+				return d.Set("server_side_encryption", value)
 			}
 		}
 		return fmt.Errorf("error reading bucket encryption: %w", err)
 	}
-	value := []map[string]interface{}{{
-		"kms_key_id": config.KMSMasterKeyID,
-		"algorithm":  config.SSEAlgorithm,
+	value = []map[string]interface{}{{
+		"kms_key_id":     config.KMSMasterKeyID,
+		"algorithm":      config.SSEAlgorithm,
+		"kms_project_id": config.ProjectID,
 	}}
 	return d.Set("server_side_encryption", value)
 }

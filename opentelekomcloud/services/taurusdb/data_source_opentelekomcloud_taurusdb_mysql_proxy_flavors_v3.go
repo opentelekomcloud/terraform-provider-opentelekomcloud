@@ -1,0 +1,140 @@
+package taurusdb
+
+import (
+	"context"
+
+	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/go-uuid"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/taurus/v3/proxy"
+
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+)
+
+func DataSourceTaurusDBV3MysqlProxyFlavors() *schema.Resource {
+	return &schema.Resource{
+		ReadContext: dataSourceTaurusDBV3MysqlProxyFlavorsRead,
+
+		Schema: map[string]*schema.Schema{
+			"instance_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"flavor_groups": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"flavors": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"db_type": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"vcpus": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"ram": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"spec_code": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"az_status": {
+										Type:     schema.TypeMap,
+										Computed: true,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"region": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
+
+func dataSourceTaurusDBV3MysqlProxyFlavorsRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	client, err := config.TaurusDBV3Client(config.GetRegion(d))
+	if err != nil {
+		return diag.Errorf("error creating TaurusDB client: %s", err)
+	}
+
+	instanceId := d.Get("instance_id").(string)
+	flavorGroups, err := proxy.GetFlavors(client, instanceId)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	id, err := uuid.GenerateUUID()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.SetId(id)
+
+	mErr := multierror.Append(nil,
+		d.Set("region", config.GetRegion(d)),
+		d.Set("flavor_groups", flattenProxyFlavorGroups(flavorGroups)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
+}
+
+func flattenProxyFlavorGroups(groups []proxy.ProxyFlavorGroups) []map[string]interface{} {
+	if len(groups) == 0 {
+		return nil
+	}
+
+	result := make([]map[string]interface{}, len(groups))
+	for i, group := range groups {
+		result[i] = map[string]interface{}{
+			"type":    group.GroupType,
+			"flavors": flattenProxyFlavors(group.ProxyFlavors),
+		}
+	}
+	return result
+}
+
+func flattenProxyFlavors(flavors []proxy.MysqlProxyComputeFlavor) []map[string]interface{} {
+	if len(flavors) == 0 {
+		return nil
+	}
+
+	result := make([]map[string]interface{}, len(flavors))
+	for i, flavor := range flavors {
+		result[i] = map[string]interface{}{
+			"id":        flavor.Id,
+			"db_type":   flavor.DbType,
+			"vcpus":     flavor.Vcpus,
+			"ram":       flavor.Ram,
+			"spec_code": flavor.SpecCode,
+			"az_status": flavor.AzStatus,
+		}
+	}
+	return result
+}

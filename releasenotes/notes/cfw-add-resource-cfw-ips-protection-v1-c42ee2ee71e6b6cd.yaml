@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CFW]** Add new resource ``resource/opentelekomcloud_cfw_ips_protection_v1`` (`#2930 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2930>`_).

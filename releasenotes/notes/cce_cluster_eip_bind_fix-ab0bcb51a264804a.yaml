@@ -1,0 +1,4 @@
+---
+fix:
+  - |
+    **[CCE]** Fix eip bind/unbind for ``resource/opentelekomcloud_cce_cluster_v3`` (`#2899 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2899>`_)

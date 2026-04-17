@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CES]** Update ``period`` validation in ``resource/opentelekomcloud_ces_alarmrule`` to trigger alarm immediately (`#2818 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2818>`_)

@@ -18,12 +18,12 @@ Use the `opentelekomcloud_rds_instance_v3` datasource to query DB instances acco
 
 ```hcl
 data "opentelekomcloud_rds_instance_v3" "instance" {
-  name          = "rds_instance_1"
-  id            = "rds_instance_1_id"
-  type          = "single"
-  database_type = "PostgreSQL"
-  vpc_id        = "vpc-id"
-  subnet_id     = "subnet-id"
+  name           = "rds_instance_1"
+  id             = "rds_instance_1_id"
+  type           = "single"
+  datastore_type = "PostgreSQL"
+  vpc_id         = "vpc-id"
+  subnet_id      = "subnet-id"
 }
 ```
 
@@ -34,7 +34,7 @@ data "opentelekomcloud_rds_instance_v3" "instance" {
 * `type` - (Optional) Specifies the instance type based query.
            The value is Single, Ha, or Replica, which correspond to single instance,
            primary/standby instances, and read replica, respectively.
-* `database_type` - (Optional) Specifies the database type.
+* `datastore_type` - (Optional) Specifies the database type.
                     Its value can be any of the following and is case-sensitive:
                     `MySQL`, ` PostgreSQL`, `SQLServer`
 * `vpc_id` - (Optional) Specifies the VPC ID.
@@ -53,6 +53,10 @@ The following attributes are exported:
 
 * `private_ips` - Indicates the private IP address. It is a blank string until an ECS is created.
 
+* `private_domain_name` - Indicates the prefix of the new domain name (not supported in `eu-ch2` region).
+
+* `private_fqdn` - Indicates the fully qualified domain name of an RDS instance (not supported in `eu-ch2` region).
+
 * `public_ips` - Indicates the public IP address.
 
 * `port` - Indicates the database port number.
@@ -67,7 +71,7 @@ The following attributes are exported:
 
 * `datastore_version` - Indicates the database version.
 
-* `database_type` - Indicates the database type.
+* `datastore_type` - Indicates the database type.
 
 * `vpc_id` - Indicates the VPC ID.
 

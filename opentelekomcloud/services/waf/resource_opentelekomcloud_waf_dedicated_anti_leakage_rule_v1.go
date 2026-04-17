@@ -42,6 +42,14 @@ func ResourceWafDedicatedAntiLeakageRuleV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"action": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice(
+					[]string{"block", "log"},
+					false),
+			},
 			"category": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -84,6 +92,9 @@ func resourceWafDedicatedAntiLeakageRuleV1Create(ctx context.Context, d *schema.
 		Category:    d.Get("category").(string),
 		Contents:    getContents(d),
 		Description: d.Get("description").(string),
+		Action: &rules.LeakageAction{
+			Category: d.Get("action").(string),
+		},
 	}
 
 	policyID := d.Get("policy_id").(string)

@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[RDS]** Implement `period` option for `backup_strategy` for ``resource/opentelekomcloud_rds_instance_v3`` (`#2882 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2882>`_)

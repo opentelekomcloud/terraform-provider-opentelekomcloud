@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ces/v1/alarms"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	ecs "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/ecs"
@@ -18,8 +19,29 @@ import (
 
 const resourceAlarmRuleName = "opentelekomcloud_ces_alarmrule.alarmrule_1"
 
+func getAlarmRuleFunc(conf *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
+	c, err := conf.CesV1Client(env.OS_REGION_NAME)
+	if err != nil {
+		return nil, fmt.Errorf("error creating OpenTelekomCloud APIG v2 client: %s", err)
+	}
+	a, err := alarms.ShowAlarm(c, state.Primary.ID)
+	if len(a) < 1 {
+		return nil, golangsdk.ErrDefault404{}
+	}
+	return a[0], err
+}
+
 func TestCESAlarmRule_basic(t *testing.T) {
-	var ar alarms.MetricAlarms
+	var (
+		ar    alarms.MetricAlarms
+		rName = resourceAlarmRuleName
+	)
+
+	rc := common.InitResourceCheck(
+		rName,
+		&ar,
+		getAlarmRuleFunc,
+	)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -33,24 +55,40 @@ func TestCESAlarmRule_basic(t *testing.T) {
 			quotas.BookMany(t, qts)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testCESAlarmRuleDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testCESAlarmRuleBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testCESAlarmRuleExists(resourceAlarmRuleName, &ar),
+					rc.CheckResourceExists(),
 				),
 			},
 			{
 				Config: testCESAlarmRuleUpdate,
-				Check:  resource.ComposeTestCheckFunc(),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+				),
+			},
+			{
+				ResourceName:      resourceAlarmRuleName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
 func TestCESAlarmRule_systemEvents(t *testing.T) {
-	var ar alarms.MetricAlarms
+	var (
+		ar    alarms.MetricAlarms
+		rName = resourceAlarmRuleName
+	)
+
+	rc := common.InitResourceCheck(
+		rName,
+		&ar,
+		getAlarmRuleFunc,
+	)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -64,36 +102,18 @@ func TestCESAlarmRule_systemEvents(t *testing.T) {
 			quotas.BookMany(t, qts)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testCESAlarmRuleDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testCESAlarmRuleSystemEvents,
 				Check: resource.ComposeTestCheckFunc(
-					testCESAlarmRuleExists(resourceAlarmRuleName, &ar),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceAlarmRuleName, "alarm_type", "EVENT.SYS"),
 					resource.TestCheckResourceAttr(resourceAlarmRuleName, "metric.0.namespace", "SYS.CBR"),
 					resource.TestCheckResourceAttr(resourceAlarmRuleName, "metric.0.metric_name", "backupFailed"),
 					resource.TestCheckResourceAttr(resourceAlarmRuleName, "condition.0.alarm_frequency", "300"),
+					resource.TestCheckResourceAttr(resourceAlarmRuleName, "condition.0.period", "0"),
 				),
-			},
-		},
-	})
-}
-
-func TestAccCESAlarmRules_importBasic(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testCESAlarmRuleDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testCESAlarmRuleBasic,
-			},
-
-			{
-				ResourceName:      resourceAlarmRuleName,
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 		},
 	})
@@ -113,8 +133,16 @@ func TestAccCheckCESV1AlarmValidation(t *testing.T) {
 }
 
 func TestCESAlarmRule_slashes(t *testing.T) {
-	var ar alarms.MetricAlarms
-	resourceName := "opentelekomcloud_ces_alarmrule.alarmrule_s"
+	var (
+		ar    alarms.MetricAlarms
+		rName = "opentelekomcloud_ces_alarmrule.alarmrule_s"
+	)
+
+	rc := common.InitResourceCheck(
+		rName,
+		&ar,
+		getAlarmRuleFunc,
+	)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
@@ -127,67 +155,16 @@ func TestCESAlarmRule_slashes(t *testing.T) {
 			quotas.BookMany(t, qts)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testCESAlarmRuleDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testCESAlarmRuleSlashes,
 				Check: resource.ComposeTestCheckFunc(
-					testCESAlarmRuleExists(resourceName, &ar),
+					rc.CheckResourceExists(),
 				),
 			},
 		},
 	})
-}
-
-func testCESAlarmRuleDestroy(s *terraform.State) error {
-	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.CesV1Client(env.OS_REGION_NAME)
-	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud CESv1 client: %w", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_ces_alarmrule" {
-			continue
-		}
-
-		id := rs.Primary.ID
-		_, err := alarms.ShowAlarm(client, id)
-		if err == nil {
-			return fmt.Errorf("alarm rule still exists")
-		}
-	}
-
-	return nil
-}
-
-func testCESAlarmRuleExists(n string, ar *alarms.MetricAlarms) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no ID is set")
-		}
-
-		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.CesV1Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud CESv1 client: %w", err)
-		}
-
-		id := rs.Primary.ID
-		found, err := alarms.ShowAlarm(client, id)
-		if err != nil {
-			return err
-		}
-
-		*ar = found[0]
-
-		return nil
-	}
 }
 
 var testCESAlarmRuleBasic = fmt.Sprintf(`
@@ -378,7 +355,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
     metric_name = "backupFailed"
   }
   condition {
-    period              = 300
+    period              = 0
     filter              = "average"
     comparison_operator = ">"
     value               = 6

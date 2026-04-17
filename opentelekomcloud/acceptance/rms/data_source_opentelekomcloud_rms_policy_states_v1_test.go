@@ -3,6 +3,7 @@ package rms
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -30,6 +31,13 @@ func TestAccDataSourceRmsPolicyStates_basic(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
+				Config: testDataSourceDataSourceRmsPolicyStates_base(rName),
+			},
+			{
+				PreConfig: func() {
+					t.Log("Waiting 30s for policy evaluation to complete...")
+					time.Sleep(30 * time.Second)
+				},
 				Config: testDataSourceDataSourceRmsPolicyStates_basic(rName),
 				Check: resource.ComposeTestCheckFunc(
 					dc1.CheckResourceExists(),
@@ -76,6 +84,10 @@ resource "opentelekomcloud_rms_policy_assignment_v1" "test" {
     listOfAllowedFlavors = "[\"${data.opentelekomcloud_compute_flavor_v2.test.id}\"]"
   }
 }
+
+resource "opentelekomcloud_rms_policy_assignment_evaluate_v1" "test" {
+  policy_assignment_id = opentelekomcloud_rms_policy_assignment_v1.test.id
+}
 `, testAccPolicyAssignment_ecsConfig(name), name, env.OS_REGION_NAME)
 }
 
@@ -83,20 +95,32 @@ func testDataSourceDataSourceRmsPolicyStates_basic(name string) string {
 	return fmt.Sprintf(`
 %[1]s
 
-data "opentelekomcloud_rms_policy_states_v1" "basic" {}
+data "opentelekomcloud_rms_policy_states_v1" "basic" {
+  depends_on = [opentelekomcloud_rms_policy_assignment_evaluate_v1.test]
+}
+
+data "opentelekomcloud_rms_policy_states_v1" "filter_by_compliance_state" {
+  compliance_state = "Compliant"
+
+  depends_on = [opentelekomcloud_rms_policy_assignment_evaluate_v1.test]
+}
 
 data "opentelekomcloud_rms_policy_states_v1" "filter_by_resource_name" {
   resource_name = "%[2]s"
 
-  depends_on = [opentelekomcloud_compute_instance_v2.test]
+  depends_on = [opentelekomcloud_rms_policy_assignment_evaluate_v1.test]
 }
 
 data "opentelekomcloud_rms_policy_states_v1" "filter_by_resource_id" {
   resource_id = opentelekomcloud_compute_instance_v2.test.id
+
+  depends_on = [opentelekomcloud_rms_policy_assignment_evaluate_v1.test]
 }
 
 data "opentelekomcloud_rms_policy_states_v1" "filter_by_assignment_id" {
   policy_assignment_id = opentelekomcloud_rms_policy_assignment_v1.test.id
+
+  depends_on = [opentelekomcloud_rms_policy_assignment_evaluate_v1.test]
 }
 
 locals {

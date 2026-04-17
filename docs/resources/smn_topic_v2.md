@@ -37,8 +37,6 @@ The following arguments are supported:
 * `display_name` - (Optional, String) Topic display name, which is presented as the
   name of the email sender in an email message.
 
-* `project_name` - (Optional, ForceNew, String) The project name for the topic.
-
 * `tags` - (Optional, Map) Tags key/value pairs to associate with the instance.
 
 ## Attributes Reference

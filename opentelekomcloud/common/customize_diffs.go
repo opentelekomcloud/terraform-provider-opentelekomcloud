@@ -7,7 +7,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v1/volumetypes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
@@ -60,7 +62,7 @@ func ValidateVolumeType(argName string) schema.CustomizeDiffFunc {
 			return nil
 		}
 		config := meta.(*cfg.Config)
-		client, err := config.BlockStorageV3Client(config.GetRegion(d))
+		client, err := config.BlockStorageV2Client(config.GetRegion(d))
 		if err != nil {
 			return fmt.Errorf("error creating blockstorage v3 client: %s", err)
 		}
@@ -93,6 +95,9 @@ func ValidateVolumeType(argName string) schema.CustomizeDiffFunc {
 }
 
 func getZonesFromVolumeType(t volumetypes.VolumeType) []string {
+	if t.ExtraSpecs == nil || len(t.ExtraSpecs) == 0 {
+		return []string{}
+	}
 	zonesStr := t.ExtraSpecs["RESKEY:availability_zones"].(string)
 	return strings.Split(zonesStr, ",")
 }
@@ -147,4 +152,56 @@ func MultipleCustomizeDiffs(funcs ...schema.CustomizeDiffFunc) schema.CustomizeD
 		}
 		return mErr.ErrorOrNil()
 	}
+}
+
+func ValidateDiskType(v interface{}, path cty.Path) diag.Diagnostics {
+	diskType := v.(string)
+	if diskType != "SATA" {
+		return nil
+	}
+	return diag.Diagnostics{diag.Diagnostic{
+		Severity:      diag.Warning,
+		Summary:       "[DEPRECATION WARNING]",
+		Detail:        "Common I/O (SATA) will reach end of life, end of 2025.",
+		AttributePath: path,
+	}}
+}
+
+func ValidateVpnRegion(v interface{}, path cty.Path) diag.Diagnostics {
+	region := v.(string)
+	if region != "eu-de" {
+		return nil
+	}
+	return diag.Diagnostics{diag.Diagnostic{
+		Severity:      diag.Warning,
+		Summary:       "[DEPRECATION WARNING]",
+		Detail:        "Classic VPN reach end of life for eu-de region, end of may 2025.",
+		AttributePath: path,
+	}}
+}
+
+func ValidateDcsEngineVersion(v interface{}, path cty.Path) diag.Diagnostics {
+	engine := v.(string)
+	if engine != "3.0" {
+		return nil
+	}
+	return diag.Diagnostics{diag.Diagnostic{
+		Severity:      diag.Warning,
+		Summary:       "[DEPRECATION WARNING]",
+		Detail:        "Redis 3.x versions in DCS have reached their End of Sale status on 21st June 2024.",
+		AttributePath: path,
+	}}
+}
+
+func ValidateDmsEngineVersion(v interface{}, path cty.Path) diag.Diagnostics {
+	engine := v.(string)
+	if !strings.HasPrefix(engine, "1") {
+		return nil
+	}
+	return diag.Diagnostics{diag.Diagnostic{
+		Severity:      diag.Warning,
+		Summary:       "[DEPRECATION WARNING]",
+		Detail:        "Kafka 1.x versions in DMS has reached their End of Sale status on 21st June 2024.",
+		AttributePath: path,
+	}}
 }

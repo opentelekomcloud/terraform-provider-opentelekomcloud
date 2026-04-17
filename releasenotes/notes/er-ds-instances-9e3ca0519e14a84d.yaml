@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **ER** New Data Source: ``opentelekomcloud_er_instances_v3`` (`#3002 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3002>`_)

@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[OBS]** Add `optional_fields` parameter for ``opentelekomcloud_obs_bucket_inventory`` (`#2864 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2864>`_)

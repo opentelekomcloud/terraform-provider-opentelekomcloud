@@ -1,0 +1,10 @@
+---
+other:
+  - |
+    **[RDS]** Change parameter description ``db_version`` for ``PostgreSQL`` and ``type`` note in ``resource/opentelekomcloud_rds_instance_v3`` documentation (`#3032 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3032>`_)
+  - |
+    **[RDS]** Change parameter description ``db_version`` for ``PostgreSQL`` in ``resource/opentelekomcloud_rds_parametergroup_v3`` documentation (`#3032 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3032>`_)
+  - |
+    **[RDS]** Change parameter description ``db_version`` for ``PostgreSQL`` in ``data-source/opentelekomcloud_rds_flavors_v3`` documentation (`#3032 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3032>`_)
+  - |
+    **[RDS]** Remove note for ``type`` in ``resource/opentelekomcloud_rds_read_replica_v3`` documentation (`#3032 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3032>`_)

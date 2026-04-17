@@ -28,6 +28,11 @@ func DataSourceCCEClusterV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"flavor_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -78,6 +83,10 @@ func DataSourceCCEClusterV3() *schema.Resource {
 			},
 			"authentication_mode": {
 				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"enable_deletion_protection": {
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 			"status": {
@@ -143,13 +152,12 @@ func DataSourceCCEClusterV3() *schema.Resource {
 func dataSourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
-
 	if err != nil {
 		return fmterr.Errorf("unable to create opentelekomcloud CCE client : %s", err)
 	}
 
 	listOpts := clusters.ListOpts{
-		ID:    d.Id(),
+		ID:    d.Get("id").(string),
 		Name:  d.Get("name").(string),
 		Type:  d.Get("cluster_type").(string),
 		Phase: d.Get("status").(string),
@@ -193,6 +201,7 @@ func dataSourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("eni_subnet_id", cluster.Spec.EniNetwork.SubnetId),
 		d.Set("eni_subnet_cidr", cluster.Spec.EniNetwork.Cidr),
 		d.Set("authentication_mode", cluster.Spec.Authentication.Mode),
+		d.Set("enable_deletion_protection", cluster.Spec.DeletionProtection),
 		d.Set("status", cluster.Status.Phase),
 		d.Set("internal", cluster.Status.Endpoints[0].Internal),
 		d.Set("external", cluster.Status.Endpoints[0].External),

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -21,6 +22,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/hashicorp/go-cleanhttp"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/jinzhu/copier"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
@@ -63,6 +65,7 @@ type Config struct {
 	MaxRetries          int
 	MaxBackoffRetries   int
 	BackoffRetryTimeout int
+	EnterpriseProjectID string
 
 	UserAgent string
 
@@ -680,6 +683,13 @@ func obsProxyConf() (obs.Configurer, error) {
 	return proxyConfigure, nil
 }
 
+func (c *Config) AsmV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewASMV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) BlockStorageV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewBlockStorageV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
@@ -696,13 +706,6 @@ func (c *Config) BlockStorageV3Client(region string) (*golangsdk.ServiceClient, 
 
 func (c *Config) CbrV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewCBRService(c.HwClient, golangsdk.EndpointOpts{
-		Region:       region,
-		Availability: c.getEndpointType(),
-	})
-}
-
-func (c *Config) DisV2Client(region string) (*golangsdk.ServiceClient, error) {
-	return openstack.NewDISServiceV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
 		Availability: c.getEndpointType(),
 	})
@@ -738,6 +741,20 @@ func (c *Config) DnsV2Client(region string) (*golangsdk.ServiceClient, error) {
 
 func (c *Config) GaussDBV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewGaussDBV3(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) TaurusDBV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewTaurusDBV3(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) GeminiDBV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewGeminiDBV3(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
 		Availability: c.getEndpointType(),
 	})
@@ -828,6 +845,13 @@ func (c *Config) CesV1Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) CesV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewCESV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) getEndpointType() golangsdk.Availability {
 	if c.EndpointType == "internal" || c.EndpointType == "internalURL" {
 		return golangsdk.AvailabilityInternal
@@ -847,6 +871,13 @@ func (c *Config) KmsKeyV1Client(region string) (*golangsdk.ServiceClient, error)
 
 func (c *Config) NatV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewNatV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) NatV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewNatV3(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
 		Availability: c.getEndpointType(),
 	})
@@ -889,6 +920,27 @@ func (c *Config) AutoscalingV1Client(region string) (*golangsdk.ServiceClient, e
 
 func (c *Config) AutoscalingV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewAutoScalingV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) CfwV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewCFWV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) CfwV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewCFWV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) CfwV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewCFWV3(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
 		Availability: c.getEndpointType(),
 	})
@@ -1069,6 +1121,20 @@ func (c *Config) CceV3AddonClient(region string) (*golangsdk.ServiceClient, erro
 	return client, nil
 }
 
+func (c *Config) CciV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewCCIServiceV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) CciV2NetworkClient(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewCCINetworkServiceV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) DcsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewDCSServiceV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
@@ -1139,6 +1205,34 @@ func (c *Config) LtsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) LtsV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewLTSV3(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) LtsV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewLTSV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) LtsV10Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewLTSV10(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) LtsV20Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewLTSV20(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) DdsV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewDDSServiceV3(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
@@ -1201,13 +1295,51 @@ func (c *Config) DwsV2Client(region string) (*golangsdk.ServiceClient, error) {
 }
 
 func (c *Config) TmsV1Client() (*golangsdk.ServiceClient, error) {
-	service, err := c.IdentityV3Client()
+	client, err := c.IdentityV3Client()
 	if err != nil {
 		return nil, err
 	}
-	service.Endpoint = strings.Replace(service.Endpoint, "v3/", "v1.0/", 1)
-	service.Endpoint = strings.Replace(service.Endpoint, "iam", "tms", 1)
-	return service, nil
+
+	parsedURL, err := url.Parse(client.Endpoint)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse IAM endpoint: %w", err)
+	}
+	re := regexp.MustCompile(`^[^.]+`)
+	parsedURL.Host = re.ReplaceAllString(parsedURL.Host, "tms")
+	segments := strings.Split(parsedURL.Path, "/")
+	if len(segments) > 1 {
+		segments[1] = "v1.0"
+	}
+	parsedURL.Path = strings.Join(segments, "/")
+
+	client.Endpoint = parsedURL.String()
+	client.ResourceBase = client.Endpoint
+	client.Type = "tms"
+	return client, nil
+}
+
+func (c *Config) TmsV2Client() (*golangsdk.ServiceClient, error) {
+	client, err := c.IdentityV3Client()
+	if err != nil {
+		return nil, err
+	}
+
+	parsedURL, err := url.Parse(client.Endpoint)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse IAM endpoint: %w", err)
+	}
+	re := regexp.MustCompile(`^[^.]+`)
+	parsedURL.Host = re.ReplaceAllString(parsedURL.Host, "tms")
+	segments := strings.Split(parsedURL.Path, "/")
+	if len(segments) > 1 {
+		segments[1] = "v2.0"
+	}
+	parsedURL.Path = strings.Join(segments, "/")
+
+	client.Endpoint = parsedURL.String()
+	client.ResourceBase = client.Endpoint
+	client.Type = "tms"
+	return client, nil
 }
 
 func (c *Config) EvpnV5Client(region string) (*golangsdk.ServiceClient, error) {
@@ -1283,6 +1415,24 @@ func SetOptionalEndpoint(cfg *aws.Config) string {
 		log.Printf("[INFO] Setting custom metadata endpoint: %q", endpoint)
 		cfg.Endpoint = aws.String(endpoint)
 		return endpoint
+	}
+	return ""
+}
+
+// GetEnterpriseProjectID returns the enterprise_project_id that was specified in the resource.
+// If it was not set, the provider-level value is checked. The provider-level value can
+// either be set by the `enterprise_project_id` argument or by OS_ENTERPRISE_PROJECT_ID.
+// If the provider-level value
+func (c *Config) GetEnterpriseProjectID(d *schema.ResourceData, defaultEps ...string) string {
+	if v, ok := d.GetOk("enterprise_project_id"); ok {
+		return v.(string)
+	}
+
+	if c.EnterpriseProjectID != "" {
+		return c.EnterpriseProjectID
+	}
+	if len(defaultEps) > 0 {
+		return defaultEps[0]
 	}
 	return ""
 }

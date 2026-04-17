@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CSS]** Add public access options for ``resource/opentelekomcloud_css_cluster_v1`` (`#2821 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2821>`_)

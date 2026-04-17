@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CES]** Add new data source ``opentelekomcloud_ces_quotas_v1`` (`#3008 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3008>`_).

@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[PrivateNAT]** Add new resource ``resource/opentelekomcloud_private_nat_transit_ip_v3`` (`#3109 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3109>`_).

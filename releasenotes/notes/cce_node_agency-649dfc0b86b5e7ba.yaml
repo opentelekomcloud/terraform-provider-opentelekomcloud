@@ -1,0 +1,4 @@
+---
+other:
+  |
+  **[CCE]** Update documentation regarding agency permissions for ``resource/opentelekomcloud_cce_node_v3`` (`#2863 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2863>`_)

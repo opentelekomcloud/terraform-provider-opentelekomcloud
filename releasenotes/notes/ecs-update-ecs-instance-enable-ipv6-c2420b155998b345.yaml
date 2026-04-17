@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[ECS]** Added argument `nics/ipv6_enable` and attribute `nics/ipv6_address` in `resource/opentelekomcloud_ecs_instance_v1` (`#2985 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2985>`_)

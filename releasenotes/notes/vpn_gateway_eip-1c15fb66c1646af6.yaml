@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[EVPN]** Add `delete_eip` option to specify whether to delete EIP during resource deletion for ``resource/opentelekomcloud_enterprise_vpn_gateway_v5`` (`#2846 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2846>`_)

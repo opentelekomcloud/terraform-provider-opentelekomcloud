@@ -23,6 +23,9 @@ extensions = [
     'myst_parser'
 ]
 
+# Add Tracking app name
+otcdocs_analytics_app = 'terraform'
+
 otcdocs_auto_name = False
 otcdocs_auto_version = False
 

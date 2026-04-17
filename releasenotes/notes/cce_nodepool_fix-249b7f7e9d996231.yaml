@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Fix `initial_node_count` update for ``resource/opentelekomcloud_cce_node_pool_v3`` (`#3257 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3257>`_)

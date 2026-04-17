@@ -75,6 +75,9 @@ func TestAccCssClusterV1_tags(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCssClusterV1Exists(resourceClusterName, &cluster),
 					resource.TestCheckResourceAttr(resourceClusterName, "nodes.#", "1"),
+					resource.TestCheckResourceAttr(resourceClusterName, "backup_strategy.0.keep_days", "7"),
+					resource.TestCheckResourceAttr(resourceClusterName, "backup_strategy.0.prefix", "snap"),
+					resource.TestCheckResourceAttr(resourceClusterName, "backup_available", "true"),
 					resource.TestCheckResourceAttr(resourceClusterName, "tags.say", "hi"),
 				),
 			},
@@ -84,6 +87,9 @@ func TestAccCssClusterV1_tags(t *testing.T) {
 					testAccCheckCssClusterV1Exists(resourceClusterName, &cluster),
 					resource.TestCheckResourceAttr(resourceClusterName, "nodes.#", "1"),
 					resource.TestCheckResourceAttr(resourceClusterName, "tags.say", "hi"),
+					resource.TestCheckResourceAttr(resourceClusterName, "backup_strategy.0.keep_days", "7"),
+					resource.TestCheckResourceAttr(resourceClusterName, "backup_strategy.0.prefix", "snap"),
+					resource.TestCheckResourceAttr(resourceClusterName, "backup_available", "true"),
 					resource.TestCheckResourceAttr(resourceClusterName, "tags.mao", "nihao"),
 				),
 			},
@@ -309,6 +315,12 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_authority = true
   admin_pass       = "QwertyUI!"
 
+  backup_strategy {
+    keep_days  = 7
+    start_time = "00:00 GMT+08:00"
+    prefix     = "snap"
+  }
+
   tags = {
     say = "hi"
   }
@@ -345,6 +357,12 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_https     = true
   enable_authority = true
   admin_pass       = "QwertyUI!"
+
+  backup_strategy {
+    keep_days  = 7
+    start_time = "00:00 GMT+08:00"
+    prefix     = "snap"
+  }
 
   tags = {
     say = "hi"

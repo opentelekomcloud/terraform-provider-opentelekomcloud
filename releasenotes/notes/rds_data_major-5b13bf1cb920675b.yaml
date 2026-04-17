@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[RDS]** Add new ``data_source/opentelekomcloud_major_versions_v3`` (`#3211 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3211>`_)

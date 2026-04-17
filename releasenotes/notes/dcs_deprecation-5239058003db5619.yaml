@@ -1,0 +1,6 @@
+---
+deprecations:
+  - |
+    **[DCS]** Engine version v3 deprecation for ``resource/opentelekomcloud_dcs_instance_v1`` (`#2928 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2928>`_)
+  - |
+    **[DCS]** Engine version v3 deprecation for ``resource/opentelekomcloud_dcs_instance_v2`` (`#2928 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2928>`_)

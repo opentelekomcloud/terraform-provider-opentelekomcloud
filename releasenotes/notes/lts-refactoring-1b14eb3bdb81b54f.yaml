@@ -1,0 +1,15 @@
+---
+deprecations:
+  - |
+    **[LTS]** ``resource/opentelekomcloud_logtank_group_v2`` deprecated (`#2873 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2873>`_)
+  - |
+    **[LTS]** ``resource/opentelekomcloud_logtank_topic_v2`` deprecated (`#2873 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2873>`_)
+  - |
+    **[LTS]** ``resource/opentelekomcloud_logtank_transfer_v2`` deprecated (`#2873 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2873>`_)
+features:
+  - |
+    **[LTS]** Added new resource ``resource/opentelekomcloud_lts_group_v2`` (`#2873 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2873>`_)
+  - |
+    **[LTS]** Added new resource ``resource/opentelekomcloud_lts_stream_v2`` (`#2873 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2873>`_)
+  - |
+    **[LTS]** Added new resource ``resource/opentelekomcloud_lts_transfer_v2`` (`#2873 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2873>`_)

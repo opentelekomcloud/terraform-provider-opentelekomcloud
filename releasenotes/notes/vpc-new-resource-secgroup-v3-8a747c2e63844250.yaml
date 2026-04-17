@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[VPC]** Add new resource ``resource/opentelekomcloud_vpc_secgroup_v3`` (`#3139 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3139>`_).

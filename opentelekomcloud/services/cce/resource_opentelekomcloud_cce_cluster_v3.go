@@ -19,6 +19,7 @@ import (
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodepools"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
@@ -81,6 +82,12 @@ func ResourceCCEClusterV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"timezone": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
 			"flavor_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -102,6 +109,12 @@ func ResourceCCEClusterV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+			},
+			"ipv6_enable": {
+				Type:     schema.TypeBool,
+				Default:  false,
+				Optional: true,
+				ForceNew: true,
 			},
 			"billing_mode": {
 				Type:     schema.TypeInt,
@@ -165,7 +178,25 @@ func ResourceCCEClusterV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "x509",
+				Default:  "rbac",
+			},
+			"masters": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      true,
+				Computed:      true,
+				MaxItems:      3,
+				ConflictsWith: []string{"multi_az"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"availability_zone": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+							Computed: true,
+						},
+					},
+				},
 			},
 			"authenticating_proxy": {
 				Type:     schema.TypeList,
@@ -198,6 +229,12 @@ func ResourceCCEClusterV3() *schema.Resource {
 				ForceNew:   true,
 				Deprecated: "Please use `authenticating_proxy` instead",
 			},
+			"api_access_trustlist": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+				ForceNew: true,
+			},
 			"kubernetes_svc_ip_range": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -213,9 +250,10 @@ func ResourceCCEClusterV3() *schema.Resource {
 					"ipvs", "iptables"}, true),
 			},
 			"multi_az": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeBool,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"masters"},
 			},
 			"eip": {
 				Type:         schema.TypeString,
@@ -228,8 +266,52 @@ func ResourceCCEClusterV3() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"component_configurations": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"configurations": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"value": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"enable_deletion_protection": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
+			"custom_san": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+				Computed: true,
+			},
 			"status": {
 				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"support_istio": {
+				Type:     schema.TypeBool,
+				Optional: true,
 				Computed: true,
 			},
 			"internal": {
@@ -349,6 +431,31 @@ var associateDeleteSchema *schema.Schema = &schema.Schema{
 	ConflictsWith: []string{"delete_all_storage", "delete_all_network"},
 }
 
+func resourceClusterMasters(d *schema.ResourceData) ([]clusters.MasterSpec, error) {
+	if v, ok := d.GetOk("masters"); ok {
+		flavorId := d.Get("flavor_id").(string)
+		mastersRaw := v.([]interface{})
+		if strings.Contains(flavorId, "s1") && len(mastersRaw) != 1 {
+			return nil, fmt.Errorf("error creating CCE cluster: "+
+				"single-master cluster need 1 az for master node, but got %d", len(mastersRaw))
+		}
+		if strings.Contains(flavorId, "s2") && len(mastersRaw) != 3 {
+			return nil, fmt.Errorf("error creating CCE cluster: "+
+				"high-availability cluster need 3 az for master nodes, but got %d", len(mastersRaw))
+		}
+		masters := make([]clusters.MasterSpec, len(mastersRaw))
+		for i, raw := range mastersRaw {
+			rawMap := raw.(map[string]interface{})
+			masters[i] = clusters.MasterSpec{
+				AvailabilityZone: rawMap["availability_zone"].(string),
+			}
+		}
+		return masters, nil
+	}
+
+	return nil, nil
+}
+
 func resourceClusterLabelsV3(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
 	for key, val := range d.Get("labels").(map[string]interface{}) {
@@ -412,11 +519,13 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 			Name:        d.Get("name").(string),
 			Labels:      resourceClusterLabelsV3(d),
 			Annotations: resourceClusterAnnotationsV3(d),
+			Timezone:    d.Get("timezone").(string),
 		},
 		Spec: clusters.Spec{
 			Type:        d.Get("cluster_type").(string),
 			Flavor:      d.Get("flavor_id").(string),
 			Version:     d.Get("cluster_version").(string),
+			Ipv6Enable:  d.Get("ipv6_enable").(bool),
 			Description: d.Get("description").(string),
 			HostNetwork: clusters.HostNetworkSpec{
 				VpcId:           d.Get("vpc_id").(string),
@@ -437,7 +546,12 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 			KubernetesSvcIpRange:         d.Get("kubernetes_svc_ip_range").(string),
 			KubeProxyMode:                d.Get("kube_proxy_mode").(string),
 			EnableMasterVolumeEncryption: pointerto.Bool(d.Get("enable_volume_encryption").(bool)),
+			CustomSan:                    common.ExpandToStringList(d.Get("custom_san").([]interface{})),
 		},
+	}
+
+	if v, ok := d.GetOk("enable_deletion_protection"); ok {
+		createOpts.Spec.DeletionProtection = pointerto.Bool(v.(bool))
 	}
 
 	if _, ok := d.GetOk("eni_subnet_id"); ok {
@@ -447,6 +561,32 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 		}
 		createOpts.Spec.EniNetwork = &eniNetwork
 	}
+
+	if listRaw, ok := d.GetOk("api_access_trustlist"); ok {
+		rawList := listRaw.([]interface{})
+		cidrs := make([]string, len(rawList))
+
+		for i, v := range rawList {
+			cidrs[i] = v.(string)
+		}
+
+		publicAccess := clusters.PublicAccess{
+			Cidrs: cidrs,
+		}
+		createOpts.Spec.PublicAccess = &publicAccess
+	}
+
+	masters, err := resourceClusterMasters(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	createOpts.Spec.Masters = masters
+	configs := d.Get("component_configurations").([]interface{})
+	componentConfigurations, err := buildResourceClusterConfigurationsOverride(configs)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	createOpts.Spec.ConfigurationsOverride = componentConfigurations
 
 	create, err := clusters.Create(client, createOpts)
 
@@ -523,6 +663,7 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("cluster_type", cluster.Spec.Type),
 		d.Set("cluster_version", cluster.Spec.Version),
 		d.Set("description", cluster.Spec.Description),
+		d.Set("ipv6_enable", cluster.Spec.Ipv6Enable),
 		d.Set("billing_mode", cluster.Spec.BillingMode),
 		d.Set("vpc_id", cluster.Spec.HostNetwork.VpcId),
 		d.Set("subnet_id", cluster.Spec.HostNetwork.SubnetId),
@@ -541,6 +682,10 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("region", config.GetRegion(d)),
 		d.Set("eip", eip),
 		d.Set("enable_volume_encryption", cluster.Spec.EnableMasterVolumeEncryption),
+		d.Set("timezone", cluster.Metadata.Timezone),
+		d.Set("support_istio", cluster.Spec.SupportIstio),
+		d.Set("custom_san", cluster.Spec.CustomSan),
+		// d.Set("component_configurations", flattenResourceClusterConfigurationsOverride(cluster.Spec.ConfigurationsOverride)),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting cce cluster fields: %w", err)
@@ -629,6 +774,16 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
+	// Set masters
+	var masterList []map[string]interface{}
+	for _, masterObj := range cluster.Spec.Masters {
+		master := make(map[string]interface{})
+		master["availability_zone"] = masterObj.AvailabilityZone
+		masterList = append(masterList, master)
+	}
+	if err := d.Set("masters", masterList); err != nil {
+		return diag.FromErr(err)
+	}
 	if err := d.Set("security_group_control", controlSecGroupID); err != nil {
 		return diag.FromErr(err)
 	}
@@ -691,6 +846,17 @@ func resourceCCEClusterV3Update(ctx context.Context, d *schema.ResourceData, met
 			if err != nil {
 				return fmterr.Errorf("error binding EIP to opentelekomcloud CCE: %w", err)
 			}
+		}
+	}
+
+	if d.HasChange("component_configurations") {
+		configOpts, err := buildUpdateClusterConfigurationsBodyParams(d)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		_, err = nodepools.UpdateConfiguration(client, d.Id(), "master", configOpts)
+		if err != nil {
+			return diag.Errorf("error updating CCE cluster configurations: %s", err)
 		}
 	}
 
@@ -980,3 +1146,69 @@ func validateAuthProxy(_ context.Context, d *schema.ResourceDiff, _ interface{})
 	}
 	return nil
 }
+
+func buildResourceClusterConfigurationsOverride(cfgs []interface{}) ([]clusters.PackageConfiguration, error) {
+	result := make([]clusters.PackageConfiguration, 0, len(cfgs))
+	for _, p := range cfgs {
+		pm := p.(map[string]interface{})
+		pkg := clusters.PackageConfiguration{
+			Name: pm["name"].(string),
+		}
+		if v, ok := pm["configurations"]; ok {
+			itemsRaw := v.([]interface{})
+			items := make([]clusters.Configuration, 0, len(itemsRaw))
+			for _, it := range itemsRaw {
+				im := it.(map[string]interface{})
+				name := im["name"].(string)
+				valStr := im["value"].(string)
+				items = append(items, clusters.Configuration{
+					Name:  name,
+					Value: common.ParseAnyType(valStr),
+				})
+			}
+			pkg.Configurations = items
+		}
+		result = append(result, pkg)
+	}
+	return result, nil
+}
+
+func buildUpdateClusterConfigurationsBodyParams(d *schema.ResourceData) (nodepools.UpdateConfigurationOpts, error) {
+	cfgs := d.Get("component_configurations").([]interface{})
+	pkgs, err := buildResourceClusterConfigurationsOverride(cfgs)
+	if err != nil {
+		return nodepools.UpdateConfigurationOpts{}, err
+	}
+	return nodepools.UpdateConfigurationOpts{
+		Kind:       "Configuration",
+		APIVersion: "v3",
+		Metadata: nodepools.ConfigurationMetadata{
+			Name: "configuration",
+		},
+		Spec: nodepools.ClusterConfigurationsSpec{
+			Packages: pkgs,
+		},
+	}, nil
+}
+
+// Get does not return this for now
+// func flattenResourceClusterConfigurationsOverride(pkgs []clusters.PackageConfiguration) []map[string]interface{} {
+// 	out := make([]map[string]interface{}, 0, len(pkgs))
+// 	for _, p := range pkgs {
+// 		entry := map[string]interface{}{
+// 			"name": p.Name,
+// 		}
+// 		if len(p.Configurations) > 0 {
+// 			cfgs := make([]map[string]interface{}, 0, len(p.Configurations))
+// 			for _, ci := range p.Configurations {
+// 				cfgs = append(cfgs, map[string]interface{}{
+// 					"name":  ci.Name,
+// 					"value": common.StringifyAny(ci.Value),
+// 				})
+// 			}
+// 			entry["configurations"] = cfgs
+// 		}
+// 		out = append(out, entry)
+// 	}
+// 	return out
+// }

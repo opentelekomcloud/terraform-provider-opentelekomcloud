@@ -133,6 +133,32 @@ func ResourceCssClusterV1() *schema.Resource {
 				RequiredWith: []string{"enable_authority"},
 				ForceNew:     true,
 			},
+			"public_access": {
+				Type:         schema.TypeList,
+				Optional:     true,
+				MaxItems:     1,
+				RequiredWith: []string{"admin_pass"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"bandwidth": {
+							Type:     schema.TypeInt,
+							Required: true,
+						},
+						"whitelist_enabled": {
+							Type:     schema.TypeBool,
+							Required: true,
+						},
+						"whitelist": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"public_ip": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 			"expect_node_num": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -161,6 +187,30 @@ func ResourceCssClusterV1() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 							Default:  "7.6.2",
+						},
+					},
+				},
+			},
+			"backup_strategy": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"start_time": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"keep_days": {
+							Type:     schema.TypeInt,
+							Required: true,
+							ForceNew: true,
+						},
+						"prefix": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
 						},
 					},
 				},
@@ -199,8 +249,98 @@ func ResourceCssClusterV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"backup_available": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		},
 	}
+}
+
+func resourceCssClusterCreateBackupStrategy(backupRaw []interface{}) *clusters.BackupStrategy {
+	if len(backupRaw) == 0 {
+		return nil
+	}
+	raw := backupRaw[0].(map[string]interface{})
+	opts := clusters.BackupStrategy{
+		Prefix:  raw["prefix"].(string),
+		Period:  raw["start_time"].(string),
+		KeepDay: raw["keep_days"].(int),
+	}
+	return &opts
+}
+
+func updateCssPublicAccess(d *schema.ResourceData, client *golangsdk.ServiceClient) error {
+	o, n := d.GetChange("public_access")
+	oValue := o.([]interface{})
+	nValue := n.([]interface{})
+
+	switch len(nValue) - len(oValue) {
+	case -1: // delete public_access
+		_, err := clusters.DisablePublicAccess(client, clusters.ManagePublicAccessOpts{
+			ClusterId: d.Id(),
+			Size:      oValue[0].(map[string]interface{})["bandwidth"].(int),
+		})
+		if err != nil {
+			return fmt.Errorf("error diabling public access of CSS cluster: %s, err: %s", d.Id(), err)
+		}
+		err = checkClusterOperationCompleted(client, d.Id(), 600)
+		if err != nil {
+			return err
+		}
+
+	case 1:
+		// enable public_access
+		_, err := clusters.EnablePublicAccess(client, clusters.ManagePublicAccessOpts{
+			ClusterId: d.Id(),
+			Size:      d.Get("public_access.0.bandwidth").(int),
+		})
+
+		if err != nil {
+			return fmt.Errorf("error enabling public access of CSS cluster: %s, err: %s", d.Id(), err)
+		}
+
+		err = checkClusterOperationCompleted(client, d.Id(), 600)
+		if err != nil {
+			return err
+		}
+
+		if whitelist, ok := d.GetOk("public_access.0.whitelist"); ok {
+			err := clusters.EnablePublicWhitelist(client, d.Id(), whitelist.(string))
+			if err != nil {
+				return fmt.Errorf("error updating whitelist of public access of CSS cluster: %s, err: %s", d.Id(), err)
+			}
+		}
+
+	case 0:
+		// disable whitelist
+		if d.HasChanges("public_access.0.whitelist", "public_access.0.whitelist_enabled") {
+			if !d.Get("public_access.0.whitelist_enabled").(bool) {
+				err := clusters.DisablePublicWhitelist(client, d.Id())
+				if err != nil {
+					return fmt.Errorf("error disabling whitelist of public access of CSS cluster: %s, err: %s", d.Id(), err)
+				}
+			} else {
+				err := clusters.EnablePublicWhitelist(client, d.Id(), d.Get("public_access.0.whitelist").(string))
+				if err != nil {
+					return fmt.Errorf("error updating whitelist of public access of CSS cluster: %s, err: %s", d.Id(), err)
+				}
+			}
+		}
+
+		// update bandwidth
+		if d.HasChange("public_access.0.bandwidth") {
+			err := clusters.UpdatePublicAccess(client, clusters.ManagePublicAccessOpts{
+				ClusterId: d.Id(),
+				Size:      oValue[0].(map[string]interface{})["bandwidth"].(int),
+			})
+			if err != nil {
+				return fmt.Errorf("error disabling the whitelist of public access of CSS cluster: %s, err: %s", d.Id(), err)
+			}
+		}
+	}
+
+	return nil
 }
 
 func resourceCssClusterV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -231,6 +371,7 @@ func resourceCssClusterV1Create(ctx context.Context, d *schema.ResourceData, met
 		},
 		AuthorityEnabled: d.Get("enable_authority").(bool),
 		AdminPassword:    d.Get("admin_pass").(string),
+		BackupStrategy:   resourceCssClusterCreateBackupStrategy(d.Get("backup_strategy").([]interface{})),
 		Tags:             common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 	}
 	if enable, ok := d.GetOk("enable_https"); ok {
@@ -264,6 +405,11 @@ func resourceCssClusterV1Create(ctx context.Context, d *schema.ResourceData, met
 
 	d.SetId(created.ID)
 
+	err = updateCssPublicAccess(d, client)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	return resourceCssClusterV1Read(ctx, d, meta)
 }
 
@@ -289,6 +435,9 @@ func resourceCssClusterV1Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("nodes", extractNodes(cluster)),
 		d.Set("datastore", extractDatastore(cluster)),
 		d.Set("tags", common.TagsToMap(cluster.Tags)),
+		d.Set("backup_available", cluster.BackupAvailable),
+		d.Set("public_access", flattenPublicAccess(cluster.PublicNetwork, cluster.BandwidthSize,
+			cluster.PublicIp)),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -318,6 +467,20 @@ func extractDatastore(c *clusters.Cluster) []interface{} {
 	}
 }
 
+func flattenPublicAccess(resp *clusters.PublicNetwork, bandwidth int, publicIp string) []interface{} {
+	if resp == nil || publicIp == "" {
+		return nil
+	}
+
+	result := map[string]interface{}{
+		"bandwidth":         bandwidth,
+		"whitelist_enabled": resp.Enabled,
+		"whitelist":         resp.Whitelist,
+		"public_ip":         publicIp,
+	}
+	return []interface{}{result}
+}
+
 func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CssV1Client(config.GetRegion(d))
@@ -328,6 +491,14 @@ func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 	if d.HasChange("tags") {
 		if err := common.UpdateResourceTags(client, d, "css-cluster", d.Id()); err != nil {
 			return fmterr.Errorf("error updating tags of CSS cluster %s: %s", d.Id(), err)
+		}
+	}
+
+	// update public_access
+	if d.HasChange("public_access") {
+		err := updateCssPublicAccess(d, client)
+		if err != nil {
+			return fmterr.Errorf("error updating public access for CSS cluster %s: %s", d.Id(), err)
 		}
 	}
 

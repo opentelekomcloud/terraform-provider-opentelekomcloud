@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v1/others"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
@@ -109,6 +110,13 @@ func ResourceImsImageV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+			},
+			"hw_firmware_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"bios", "uefi",
+				}, true),
 			},
 			// following are additional attributus
 			"visibility": {
@@ -236,6 +244,23 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	log.Printf("[INFO] IMS ID: %s", entity.Entities.ImageId)
 	// Store the ID now
 	d.SetId(entity.Entities.ImageId)
+
+	addonOpts := make([]images.UpdateImageOpts, 0)
+	hwFirmwareType := d.Get("hw_firmware_type").(string)
+	if hwFirmwareType != "" {
+		addonOpts = append(addonOpts, images.UpdateImageOpts{
+			Op:    "add",
+			Path:  "/hw_firmware_type",
+			Value: hwFirmwareType,
+		})
+	}
+	if len(addonOpts) > 0 {
+		_, err = images.UpdateImage(client, d.Id(), addonOpts)
+		if err != nil {
+			return fmterr.Errorf("error updating image: %s", err)
+		}
+	}
+
 	return resourceImsImageV2Read(ctx, d, meta)
 }
 
@@ -269,6 +294,7 @@ func resourceImsImageV2Read(_ context.Context, d *schema.ResourceData, meta inte
 		d.Set("data_origin", img.DataOrigin),
 		d.Set("disk_format", img.DiskFormat),
 		d.Set("image_size", img.ImageSize),
+		d.Set("hw_firmware_type", img.HwFirmwareType),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
@@ -324,16 +350,25 @@ func resourceImsImageV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud image client: %s", err)
 	}
+	updateOpts := make([]images.UpdateImageOpts, 0)
+
+	if d.HasChange("hw_firmware_type") {
+		updateOpts = append(updateOpts, images.UpdateImageOpts{
+			Op:    "replace",
+			Path:  "/hw_firmware_type",
+			Value: d.Get("hw_firmware_type").(string),
+		})
+	}
 
 	if d.HasChange("name") {
-		updateOpts := make([]images.UpdateImageOpts, 0)
-		v := images.UpdateImageOpts{
+		updateOpts = append(updateOpts, images.UpdateImageOpts{
 			Op:    "replace",
 			Path:  "/name",
 			Value: d.Get("name").(string),
-		}
-		updateOpts = append(updateOpts, v)
+		})
+	}
 
+	if len(updateOpts) > 0 {
 		log.Printf("[DEBUG] Update Options: %#v", updateOpts)
 		_, err = images.UpdateImage(client, d.Id(), updateOpts)
 		if err != nil {

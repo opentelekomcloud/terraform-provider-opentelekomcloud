@@ -53,13 +53,6 @@ func ResourceVPCEPServiceV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ValidateFunc: validation.All(
-					validation.StringLenBetween(1, 16),
-					validation.StringMatch(
-						regexp.MustCompile(`\w-`),
-						"The value contains a maximum of 16 characters, including letters, digits, underscores (_), and hyphens (-).",
-					),
-				),
 			},
 			"vpc_id": {
 				Type:     schema.TypeString,

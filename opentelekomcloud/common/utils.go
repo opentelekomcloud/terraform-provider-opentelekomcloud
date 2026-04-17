@@ -2,9 +2,11 @@ package common
 
 import (
 	"bytes"
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"reflect"
 	"regexp"
@@ -12,6 +14,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/GehirnInc/crypt"
+
+	_ "github.com/GehirnInc/crypt/sha512_crypt"
 
 	ver "github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -22,6 +28,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
+
+var letters = []byte("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 func LooksLikeJsonString(s interface{}) bool {
 	return regexp.MustCompile(`^\s*{`).MatchString(s.(string))
@@ -513,6 +521,13 @@ func ValueIgnoreEmpty(v interface{}) interface{} {
 	return v
 }
 
+// SetIfNotEmpty to set key if value is not empty
+func SetIfNotEmpty(target map[string]interface{}, key string, value interface{}) {
+	if value != nil && value != "" {
+		target[key] = value
+	}
+}
+
 // PathSearch evaluates a JMESPath expression against input data and returns the result.
 func PathSearch(expression string, obj interface{}, defaultValue interface{}) interface{} {
 	v, err := jmespath.Search(expression, obj)
@@ -560,4 +575,154 @@ func StrSliceContainsAnother(b []string, s []string) bool {
 		}
 	}
 	return true
+}
+
+// Salt generates a random salt according to given size
+func Salt(size int) ([]byte, error) {
+	salt := make([]byte, size)
+	_, err := io.ReadFull(rand.Reader, salt)
+	if err != nil {
+		return nil, fmt.Errorf("error generating salt: %s", err)
+	}
+
+	max := uint8(len(letters))
+	arc := uint8(0)
+	for i, x := range salt {
+		arc = x % max
+		salt[i] = letters[arc]
+	}
+	return salt, nil
+}
+
+// TryPasswordEncrypt tries to encrypt given password if it's not encrypted
+func TryPasswordEncrypt(password string) (string, error) {
+	if _, err := base64.StdEncoding.DecodeString(password); err != nil {
+		return PasswordEncrypt(password)
+	}
+	return password, nil
+}
+
+// PasswordEncrypt encrypts given password with sha512
+func PasswordEncrypt(password string) (string, error) {
+	saltBytes, err := Salt(16)
+	if err != nil {
+		return "", err
+	}
+	salt := "$6$" + string(saltBytes) + "$"
+
+	sha512crypt := crypt.SHA512.New()
+	passwordEncrypted, err := sha512crypt.Generate([]byte(password), []byte(salt))
+	if err != nil {
+		return "", fmt.Errorf("error encrypting the password: %s", err)
+	}
+	return base64.StdEncoding.EncodeToString([]byte(passwordEncrypted)), nil
+}
+
+func ConvertToMapString(raw interface{}) map[string]string {
+	m := make(map[string]string)
+	if rawMap, ok := raw.(map[string]interface{}); ok {
+		for k, v := range rawMap {
+			if s, ok := v.(string); ok {
+				m[k] = s
+			}
+		}
+	}
+	return m
+}
+
+func StringSliceIgnoreEmpty(e string) []string {
+	if e != "" {
+		return []string{e}
+	}
+	return nil
+}
+
+// Convert String Pointer to string
+func StringPtrToString(p *string) string {
+	if p == nil {
+		return ""
+	}
+	return *p
+}
+
+// StringToJson Try to parse the string value as the JSON format, if the operation failed, returns an empty map result.
+func StringToJson(jsonStrObj string, defaultVal ...interface{}) interface{} {
+	if jsonStrObj == "" {
+		if len(defaultVal) > 0 {
+			return defaultVal[0]
+		}
+		return nil
+	}
+	jsonMap := make(map[string]interface{})
+	err := json.Unmarshal([]byte(jsonStrObj), &jsonMap)
+	if err != nil {
+		log.Printf("[ERROR] Unable to convert the JSON string to the map object: %s", err)
+	}
+	return jsonMap
+}
+
+func TryMapValueAnalysis(v interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	switch cv := v.(type) {
+	case map[string]interface{}:
+		// Valid type, no action required.
+		result = cv
+	case string:
+		result = TryMapValueAnalysis(StringToJson(cv, make(map[string]interface{})))
+	default:
+		log.Printf("[WARN][TryMapValueAnalysis] The value type to be analyzed is not map[string]interface{} or JSON string")
+	}
+	return result
+}
+
+// ParseAnyType tries to coerce a string to bool/number; falls back to the original string.
+func ParseAnyType(s string) interface{} {
+	ls := strings.ToLower(strings.TrimSpace(s))
+	if ls == "true" {
+		return true
+	}
+	if ls == "false" {
+		return false
+	}
+	// Try integer
+	if i, err := strconv.ParseInt(s, 10, 64); err == nil {
+		return i
+	}
+	// Try float
+	if f, err := strconv.ParseFloat(s, 64); err == nil {
+		return f
+	}
+	if strings.Contains(s, ";") {
+		parts := strings.Split(s, ";")
+		result := make([]interface{}, 0, len(parts))
+		for _, p := range parts {
+			p = strings.TrimSpace(p)
+			if p != "" { // skip empty strings from trailing/double semicolons
+				result = append(result, p)
+			}
+		}
+		return result
+	}
+	return s
+}
+
+// StringifyAny renders AnyType into a string for TF state.
+func StringifyAny(v interface{}) string {
+	switch t := v.(type) {
+	case nil:
+		return ""
+	case string:
+		return t
+	case bool:
+		if t {
+			return "true"
+		}
+		return "false"
+	default:
+		b, err := json.Marshal(t)
+		if err != nil {
+			return fmt.Sprintf("%v", t)
+		}
+		return string(b)
+	}
 }

@@ -63,7 +63,7 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
 
 The following arguments are supported:
 
-* `protocol` - (Required) The protocol - can either be `TCP`, `HTTP`, `HTTPS` or `TERMINATED_HTTPS`.
+* `protocol` - (Required) The protocol - can either be `TCP`, `HTTP`, `UDP` or `TERMINATED_HTTPS`.
   Changing this creates a new Listener.
 
 * `protocol_port` - (Required) The port on which to listen for client traffic.

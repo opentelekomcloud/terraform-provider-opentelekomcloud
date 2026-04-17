@@ -66,6 +66,30 @@ func TestAccFWPolicyV2_deleteRules(t *testing.T) {
 	})
 }
 
+func TestAccFWPolicyV2_rename(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWPolicyV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFWPolicyV2_rename_1,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWPolicyV2Exists(
+						"opentelekomcloud_fw_policy_v2.policy_1", "my-policy", "", 2),
+				),
+			},
+			{
+				Config: testAccFWPolicyV2_rename_2,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWPolicyV2Exists(
+						"opentelekomcloud_fw_policy_v2.policy_1", "my-policy-123", "", 2),
+				),
+			},
+		},
+	})
+}
+
 func TestAccFWPolicyV2_timeout(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -213,6 +237,46 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
 resource "opentelekomcloud_fw_rule_v2" "udp_deny" {
   protocol = "udp"
   action   = "deny"
+}
+`
+
+const testAccFWPolicyV2_rename_1 = `
+resource "opentelekomcloud_fw_rule_v2" "rule_1" {
+  protocol = "tcp"
+  action   = "allow"
+}
+
+resource "opentelekomcloud_fw_rule_v2" "rule_2" {
+  protocol = "udp"
+  action   = "deny"
+}
+
+resource "opentelekomcloud_fw_policy_v2" "policy_1" {
+  name = "my-policy"
+  rules = [
+    opentelekomcloud_fw_rule_v2.rule_1.id,
+    opentelekomcloud_fw_rule_v2.rule_2.id,
+  ]
+}
+`
+
+const testAccFWPolicyV2_rename_2 = `
+resource "opentelekomcloud_fw_rule_v2" "rule_1" {
+  protocol = "tcp"
+  action   = "allow"
+}
+
+resource "opentelekomcloud_fw_rule_v2" "rule_2" {
+  protocol = "udp"
+  action   = "deny"
+}
+
+resource "opentelekomcloud_fw_policy_v2" "policy_1" {
+  name = "my-policy-123"
+  rules = [
+    opentelekomcloud_fw_rule_v2.rule_1.id,
+    opentelekomcloud_fw_rule_v2.rule_2.id,
+  ]
 }
 `
 

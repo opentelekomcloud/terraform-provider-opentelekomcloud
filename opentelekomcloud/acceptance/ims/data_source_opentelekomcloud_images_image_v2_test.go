@@ -29,6 +29,7 @@ func TestAccImagesV2ImageDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(dataSourceName, "min_ram", "0"),
 					resource.TestCheckResourceAttr(dataSourceName, "protected", "false"),
 					resource.TestCheckResourceAttr(dataSourceName, "visibility", "private"),
+					resource.TestCheckResourceAttrSet(dataSourceName, "hw_firmware_type"),
 				),
 			},
 		},
@@ -111,6 +112,7 @@ resource "opentelekomcloud_images_image_v2" "image_1" {
   container_format = "bare"
   disk_format      = "qcow2"
   image_source_url = "https://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
+  hw_firmware_type = "uefi"
   tags             = ["cirros-tf"]
 }
 `

@@ -1,0 +1,7 @@
+---
+enhancements:
+  - |
+    **[CBR]** Add ``policy`` attribute to assign multiple policies for ``resource/opentelekomcloud_cbr_vault_v3`` (`#3163 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3163>`_)
+deprecations:
+  - |
+    **[CBR]** ``backup_policy_id`` are marked as deprecated in ``resource/opentelekomcloud_cbr_vault_v3`` (`#3163 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3163>`_)

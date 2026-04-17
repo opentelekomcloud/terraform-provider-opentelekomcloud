@@ -7,6 +7,9 @@ description: |-
   Manages a LTS Log Group resource within OpenTelekomCloud.
 ---
 
+~>
+Deprecated, use `opentelekomcloud_lts_group_v2` resource instead
+
 Up-to-date reference of API arguments for LTS log group you can get at
 [documentation portal](https://docs.otc.t-systems.com/log-tank-service/api-ref/log_group_management_new_version)
 

@@ -1,0 +1,4 @@
+---
+fixes:
+  |
+  **[IAM]** Fix perpetual diff on ``resource/opentelekomcloud_identity_mapping_v3`` rules attribute (`#3264 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3264>`_)

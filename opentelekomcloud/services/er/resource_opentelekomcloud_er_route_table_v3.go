@@ -59,6 +59,7 @@ func ResourceErRouteTableV3() *schema.Resource {
 						"The angle brackets (< and >) are not allowed."),
 				),
 			},
+			"tags": common.TagsSchema(),
 			"is_default_association": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -92,6 +93,7 @@ func buildRouteTableCreateOpts(d *schema.ResourceData) route_table.CreateOpts {
 		RouterID:    d.Get("instance_id").(string),
 		Name:        d.Get("name").(string),
 		Description: pointerto.String(d.Get("description").(string)),
+		Tags:        common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 	}
 }
 
@@ -167,7 +169,10 @@ func resourceRouteTableV3Read(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "ER route table")
 	}
-
+	tagsMap := make(map[string]string)
+	for _, tag := range resp.Tags {
+		tagsMap[tag.Key] = tag.Value
+	}
 	mErr := multierror.Append(nil,
 		d.Set("region", config.GetRegion(d)),
 		d.Set("name", resp.Name),
@@ -177,6 +182,7 @@ func resourceRouteTableV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("status", resp.State),
 		d.Set("created_at", resp.CreatedAt),
 		d.Set("updated_at", resp.UpdatedAt),
+		d.Set("tags", tagsMap),
 	)
 
 	if mErr.ErrorOrNil() != nil {
@@ -227,6 +233,13 @@ func resourceRouteTableV3Update(ctx context.Context, d *schema.ResourceData, met
 	if d.HasChanges("name", "description") {
 		if err = updateRouteTableBasicInfo(ctx, client, d); err != nil {
 			return diag.FromErr(err)
+		}
+	}
+
+	if d.HasChange("tags") {
+		err = UpdateErTags(client, d, "route-table", d.Id())
+		if err != nil {
+			return diag.Errorf("error updating OpenTelekomCloud EnterpriseRouter v3 route table tags: %s", err)
 		}
 	}
 

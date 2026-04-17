@@ -1,0 +1,8 @@
+---
+deprecations:
+  - |
+    **[VBS]** ``resource/opentelekomcloud_vbs_backup_share_v2`` is deprecated in favor of cbr (`#2869 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2869>`_)
+  - |
+    **[VBS]** ``resource/opentelekomcloud_vbs_backup_policy_v2`` is deprecated in favor of cbr (`#2869 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2869>`_)
+  - |
+    **[VBS]** ``resource/opentelekomcloud_vbs_backup_backup_v2`` is deprecated in favor of cbr (`#2869 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2869>`_)

@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPN]** Add ``peer_id`` and ``local_id`` in update function in ``resource/opentelekomcloud_enterprise_vpn_connection_v5`` (`#3151 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3151>`_)

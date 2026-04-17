@@ -14,6 +14,9 @@ Up-to-date reference of API arguments for VBS backup you can get at
 
 Provides an VBS Backup resource within OpenTelekomCloud.
 
+~>
+Deprecated, use `opentelekomcloud_cbr_vault_v3` resource instead.
+
 ## Example Usage
 
 ```hcl

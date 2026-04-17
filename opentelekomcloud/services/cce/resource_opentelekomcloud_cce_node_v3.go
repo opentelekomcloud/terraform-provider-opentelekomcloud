@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -46,6 +47,7 @@ var (
 		"os.version",
 		"topology.kubernetes.io/region",
 		"topology.kubernetes.io/zone",
+		"cce.cloud.com/cce-nodepool-id",
 	}
 
 	predefinedTaints = []string{
@@ -62,7 +64,7 @@ func ResourceCCENodeV3() *schema.Resource {
 		DeleteContext: resourceCCENodeV3Delete,
 
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceNodeImport,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -140,9 +142,10 @@ func ResourceCCENodeV3() *schema.Resource {
 							ForceNew: true,
 						},
 						"volumetype": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:             schema.TypeString,
+							Required:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: common.ValidateDiskType,
 						},
 						"kms_id": {
 							Type:        schema.TypeString,
@@ -177,9 +180,10 @@ func ResourceCCENodeV3() *schema.Resource {
 							ForceNew: true,
 						},
 						"volumetype": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:             schema.TypeString,
+							Required:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: common.ValidateDiskType,
 						},
 						"kms_id": {
 							Type:        schema.TypeString,
@@ -600,16 +604,7 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	node, err := nodes.Create(client, clusterID, createOpts)
-	switch err.(type) {
-	case golangsdk.ErrDefault403:
-		retryNode, err := recursiveCreate(ctx, client, createOpts, clusterID)
-		if err == "fail" {
-			return fmterr.Errorf("error creating OpenTelekomCloud Node")
-		}
-		node = retryNode
-	case nil:
-		break
-	default:
+	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud Node: %s", err)
 	}
 
@@ -670,6 +665,13 @@ func getNodeIDFromJob(ctx context.Context, client *golangsdk.ServiceClient, jobI
 	var nodeID string
 	for _, s := range subJob.Spec.SubJobs {
 		if s.Spec.Type == "CreateNodeVM" {
+			nodeID = s.Spec.ResourceID
+			break
+		}
+	}
+
+	for _, s := range subJob.Spec.SubJobs {
+		if s.Spec.Type == "InstallNode" {
 			nodeID = s.Spec.ResourceID
 			break
 		}
@@ -1158,24 +1160,21 @@ func waitForClusterAvailable(cceClient *golangsdk.ServiceClient, clusterId strin
 	}
 }
 
-func recursiveCreate(ctx context.Context, client *golangsdk.ServiceClient, opts nodes.CreateOpts, clusterID string) (*nodes.Nodes, string) {
-	stateCluster := &resource.StateChangeConf{
-		Target:     []string{"Available"},
-		Refresh:    waitForClusterAvailable(client, clusterID),
-		Timeout:    15 * time.Minute,
-		Delay:      15 * time.Second,
-		MinTimeout: 3 * time.Second,
+func resourceNodeImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 {
+		err := fmt.Errorf("invalid format specified for CCE Node. Format must be <cluster id>/<node id>")
+		return nil, err
 	}
-	_, stateErr := stateCluster.WaitForStateContext(ctx)
-	if stateErr != nil {
-		log.Printf("[INFO] Cluster Unavailable %s.\n", stateErr)
-	}
-	node, err := nodes.Create(client, clusterID, opts)
+
+	clusterID := parts[0]
+	nodeID := parts[1]
+
+	d.SetId(nodeID)
+	err := d.Set("cluster_id", clusterID)
 	if err != nil {
-		if _, ok := err.(golangsdk.ErrDefault403); ok {
-			return recursiveCreate(ctx, client, opts, clusterID)
-		}
-		return node, "fail"
+		return nil, err
 	}
-	return node, "success"
+
+	return []*schema.ResourceData{d}, nil
 }

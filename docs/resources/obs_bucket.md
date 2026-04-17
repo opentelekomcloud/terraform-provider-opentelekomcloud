@@ -271,6 +271,9 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
       days          = 180
       storage_class = "COLD"
     }
+    abort_incomplete_multipart_upload {
+      days = 360
+    }
   }
 
   lifecycle_rule {
@@ -278,6 +281,14 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
     prefix  = "tmp/"
     enabled = true
 
+    tag {
+      key   = "key1"
+      value = "value1"
+    }
+    tag {
+      key   = "key2"
+      value = "value2"
+    }
     noncurrent_version_expiration {
       days = 180
     }
@@ -288,6 +299,9 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
     noncurrent_version_transition {
       days          = 60
       storage_class = "COLD"
+    }
+    abort_incomplete_multipart_upload {
+      days = 180
     }
   }
 }
@@ -431,6 +445,12 @@ The `logging` object supports the following:
 
 * `target_prefix` - (Optional) To specify a key prefix for log objects.
 
+* `agency` - (Optional) Specifies the IAM agency of OBS cloud service.
+
+  -> The IAM agency requires the `PutObject` permission for the target bucket.  If default encryption is enabled for the
+  target bucket, the agency also requires the `KMS Administrator` permission in the region where the target bucket is
+  located.
+
 The `worm_policy` object supports the following:
 
 * `days` - (Optional) Default protection period, in `days`.
@@ -490,6 +510,8 @@ The `lifecycle_rule` object supports the following:
   or end with a slash (/), cannot have consecutive slashes (/), and cannot contain the following
   special characters: \:*?"<>|.
 
+* `tag` - (Optional) A list of tags to filter objects. Maximum 10 tags per rule with unique keys (documented below).
+
 * `expiration` - (Optional) Specifies a period when objects that have been last updated are automatically
   deleted. (documented below).
 
@@ -502,8 +524,17 @@ The `lifecycle_rule` object supports the following:
 * `noncurrent_version_transition` - (Optional) Specifies a period when noncurrent object versions are
   automatically transitioned to `WARM` or `COLD` storage class (documented below).
 
+* `abort_incomplete_multipart_upload` - (Optional) Specifies a period when the not merged parts (fragments) in an
+  incomplete upload are automatically deleted. (documented below).
+
 -> At least one of `expiration`, `transition`, `noncurrent_version_expiration`, `noncurrent_version_transition`
 must be specified.
+
+The `tag` object supports the following:
+
+* `key` - (Required) The tag key. Must be unique within the rule, cannot be blank, maximum 128 characters. Cannot contain: =*<>\,|/?!;
+
+* `value` - (Required) The tag value. Can be blank, maximum 255 characters. Cannot contain: =*<>\,|?!;
 
 The `expiration` object supports the following
 
@@ -528,11 +559,18 @@ The `noncurrent_version_transition` object supports the following
 
 * `storage_class` - (Required) The class of storage used to store the object. Only `WARM` and `COLD` are supported.
 
+The `abort_incomplete_multipart_upload` object supports the following
+
+* `days` - (Required, Int) Specifies the number of days since the initiation of an incomplete multipart upload that OBS
+  will wait before deleting the not merged parts (fragments) of the upload.
+
 The `server_side_encryption` object supports the following
 
 * `algorithm` - (Required) The algorithm used for SSE. Only `kms` is supported.
 
 * `kms_key_id` - (Required) The ID of KMS key used for the encryption.
+
+* `kms_project_id` - (Optional) The ID of the project where the KMS master key belongs.
 
 ~> Only base project (e.g. `eu-de`) KMS keys can be used for the encryption
 

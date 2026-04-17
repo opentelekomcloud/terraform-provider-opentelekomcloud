@@ -1,0 +1,4 @@
+---
+fix:
+  - |
+    **[OBS]** Fix encryption set for ``opentelekomcloud_obs_bucket`` (`#2865 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2865>`_)

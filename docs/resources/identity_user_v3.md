@@ -14,8 +14,8 @@ Up-to-date reference of API arguments for IAM user you can get at
 
 Manages a User resource within OpenTelekomCloud IAM service.
 
--> You need to have admin privileges in your OpenTelekomCloud cloud to use
-this resource.
+-> You _must_ have `Security Administrator` privileges in your OpenTelekomCloud
+cloud to use this resource. Please refer to [User Management Model](https://docs.otc.t-systems.com/en-us/usermanual/iam/iam_01_0034.html).
 
 ## Example Usage
 

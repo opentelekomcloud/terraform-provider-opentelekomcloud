@@ -55,6 +55,8 @@ func TestAccVpcAttachmentsV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(rName, "created_at"),
 					resource.TestCheckResourceAttrSet(rName, "updated_at"),
 					resource.TestCheckOutput("er_route_count", "3"),
+					resource.TestCheckResourceAttr(rName, "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(rName, "tags.key", "value"),
 				),
 			},
 			{
@@ -63,6 +65,8 @@ func TestAccVpcAttachmentsV3_basic(t *testing.T) {
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(rName, "name", updateName),
 					resource.TestCheckResourceAttr(rName, "description", ""),
+					resource.TestCheckResourceAttr(rName, "tags.foo", "baar"),
+					resource.TestCheckResourceAttr(rName, "tags.newkey", "value"),
 				),
 			},
 			{
@@ -128,6 +132,11 @@ resource "opentelekomcloud_er_vpc_attachment_v3" "test" {
   name                   = "%[2]s"
   description            = "Create by acc test"
   auto_create_vpc_routes = true
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
 }
 
 data "opentelekomcloud_vpc_route_table_v1" "test" {
@@ -156,6 +165,11 @@ resource "opentelekomcloud_er_vpc_attachment_v3" "test" {
 
   name                   = "%[2]s"
   auto_create_vpc_routes = true
+
+  tags = {
+    foo    = "baar"
+    newkey = "value"
+  }
 }
 `, testVpcAttachment_base(name, bgpAsNum), name)
 }

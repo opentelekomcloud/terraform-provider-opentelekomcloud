@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/smn/v2/subscriptions"
 
@@ -58,10 +60,10 @@ func ResourceSubscription() *schema.Resource {
 				Computed: true,
 			},
 			"project_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				ForceNew:   true,
+				Deprecated: "Parameter has been deprecated",
 			},
 		},
 	}
@@ -69,10 +71,13 @@ func ResourceSubscription() *schema.Resource {
 
 func resourceSubscriptionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SmnV2Client(config.GetProjectName(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.SmnV2Client(config.GetProjectName(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
+
 	topicUrn := d.Get("topic_urn").(string)
 	createOpts := subscriptions.CreateOpts{
 		Endpoint: d.Get("endpoint").(string),
@@ -81,26 +86,29 @@ func resourceSubscriptionCreate(ctx context.Context, d *schema.ResourceData, met
 	}
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	subscription, err := subscriptions.Create(client, createOpts, topicUrn).Extract()
+	subscription, err := subscriptions.Create(client, createOpts, topicUrn)
 	if err != nil {
 		return fmterr.Errorf("error creating subscription: %w", err)
 	}
 
 	d.SetId(subscription.SubscriptionUrn)
 
-	return resourceSubscriptionRead(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceSubscriptionRead(clientCtx, d, meta)
 }
 
-func resourceSubscriptionRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSubscriptionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SmnV2Client(config.GetProjectName(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.SmnV2Client(config.GetProjectName(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	log.Printf("[DEBUG] Getting subscription %s", d.Id())
 
-	subscriptionsList, err := subscriptions.List(client).Extract()
+	subscriptionsList, err := subscriptions.List(client, subscriptions.ListOpts{})
 	if err != nil {
 		return fmterr.Errorf("error getting subscriptions: %w", err)
 	}
@@ -128,16 +136,18 @@ func resourceSubscriptionRead(_ context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceSubscriptionDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSubscriptionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.SmnV2Client(config.GetProjectName(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.SmnV2Client(config.GetProjectName(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	log.Printf("[DEBUG] Deleting subscription %s", d.Id())
 
-	if err := subscriptions.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := subscriptions.Delete(client, d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 

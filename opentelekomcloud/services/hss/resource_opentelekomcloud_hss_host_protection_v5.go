@@ -237,6 +237,10 @@ func resourceHostProtectionRead(ctx context.Context, d *schema.ResourceData, met
 		return diag.Errorf("error querying OpenTelekomCloud HSS hosts: %s", err)
 	}
 
+	if len(hostList) == 0 {
+		return diag.Errorf("error querying OpenTelekomCloud HSS host (%s) protection: host not found", d.Id())
+	}
+
 	h := hostList[0]
 	mErr := multierror.Append(nil,
 		d.Set("region", config.GetRegion(d)),

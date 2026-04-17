@@ -1,0 +1,6 @@
+---
+deprecations:
+  - |
+    **[VPN]** Classic VPN resource deprecation in favor of enterprise vpn in eu-de region
+    (`#2874 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2874>`_)
+

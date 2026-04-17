@@ -124,7 +124,7 @@ The following arguments are supported:
 * `engine` - (Required) Indicates a message engine. Only `kafka` is supported now.
 
 * `engine_version` - (Required) Indicates the version of a message engine.
-  Options: `1.1.0`, `2.3.0`, `2.7`.
+  Options: `2.3.0`, `2.7`.
 
 * `specification` - (Optional) This parameter is mandatory if the engine is `kafka`.
   Indicates the baseline bandwidth of a Kafka instance, that is, the maximum amount

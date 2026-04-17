@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[DDS]** Add maintenance window options for ``resource/opentelekomcloud_dds_instance_v3`` (`#3143 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3143>`_)

@@ -2,6 +2,8 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -16,6 +18,14 @@ import (
 )
 
 const resourceVaultName = "opentelekomcloud_cbr_vault_v3.vault"
+
+func getVaultResourceFunc(conf *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
+	client, err := conf.CbrV3Client(env.OS_REGION_NAME)
+	if err != nil {
+		return nil, fmt.Errorf("error creating CBR client: %s", err)
+	}
+	return vaults.Get(client, state.Primary.ID)
+}
 
 func TestAccCBRVaultV3_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
@@ -256,6 +266,43 @@ func TestAccCBRVaultV3_bind_rules(t *testing.T) {
 	})
 }
 
+func TestAccVault_locked(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.Volume, Count: 2},
+				{Q: quotas.VolumeSize, Count: 20},
+				{Q: quotas.CBRPolicy, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVault_locked_step("true"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.object_type", "server"),
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.protect_type", "backup"),
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.size", "100"),
+					resource.TestCheckResourceAttr(resourceVaultName, "locked", "true"),
+				),
+			},
+			{
+				Config: testAccVault_locked_step("false"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.object_type", "server"),
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.protect_type", "backup"),
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.size", "100"),
+					resource.TestCheckResourceAttr(resourceVaultName, "locked", "false"),
+				),
+				ExpectError: regexp.MustCompile("vault not support to modify locked attribute from true to false."),
+			},
+		},
+	})
+}
+
 func testAccCheckCBRVaultV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.CbrV3Client(env.OS_REGION_NAME)
@@ -275,6 +322,232 @@ func testAccCheckCBRVaultV3Destroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func TestAccVault_bindPolicies(t *testing.T) {
+	if os.Getenv("OS_DEST_VAULT_ID") == "" {
+		t.Skip("OS_DEST_VAULT_ID is not set; skipping OpenTelekomCloud CBR bind policies test.")
+	}
+	var (
+		vault interface{}
+
+		randName     = tools.RandomString("cbr-pol-", 3)
+		mainRcName   = "opentelekomcloud_cbr_vault_v3.test"
+		legacyRcName = "opentelekomcloud_cbr_vault_v3.legacy"
+
+		mainRc   = common.InitResourceCheck(mainRcName, &vault, getVaultResourceFunc)
+		legacyRc = common.InitResourceCheck(legacyRcName, &vault, getVaultResourceFunc)
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckReplication(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      mainRc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVault_bindPolicies_step1(randName),
+				Check: resource.ComposeTestCheckFunc(
+					mainRc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(mainRcName, "name", randName),
+					resource.TestCheckResourceAttr(mainRcName, "policy.#", "2"),
+					legacyRc.CheckResourceExists(),
+					resource.TestCheckResourceAttrPair(legacyRcName, "backup_policy_id",
+						"opentelekomcloud_cbr_policy_v3.backup.0", "id"),
+				),
+			},
+			{
+				Config: testAccVault_bindPolicies_step2(randName),
+				Check: resource.ComposeTestCheckFunc(
+					mainRc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(mainRcName, "name", randName),
+					resource.TestCheckResourceAttr(mainRcName, "policy.#", "2"),
+					legacyRc.CheckResourceExists(),
+					resource.TestCheckResourceAttrPair(legacyRcName, "backup_policy_id",
+						"opentelekomcloud_cbr_policy_v3.backup.1", "id"),
+				),
+			},
+			{
+				ResourceName:      mainRcName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"billing",
+				},
+			},
+			{
+				ResourceName:      legacyRcName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"billing",
+					"backup_policy_id",
+				},
+			},
+		},
+	})
+}
+
+func TestAccCBRVaultV3_migratePolicyId(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.Volume, Count: 2},
+				{Q: quotas.VolumeSize, Count: 20},
+				{Q: quotas.CBRPolicy, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCBRVaultV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCBRVaultV3MigratePolicyId_old,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceVaultName, "backup_policy_id"),
+				),
+			},
+			{
+				Config: testAccCBRVaultV3MigratePolicyId_new,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceVaultName, "policy.#", "1"),
+					resource.TestCheckResourceAttrSet(resourceVaultName, "policy.0.id"),
+					resource.TestCheckResourceAttr(resourceVaultName, "backup_policy_id", ""),
+				),
+			},
+		},
+	})
+}
+
+func testAccVault_bindPolicies_base(name string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_cbr_policy_v3" "backup" {
+  count = 2
+
+  name           = format("%[1]s_%%d", count.index)
+  operation_type = "backup"
+
+  operation_definition {
+    day_backups   = 1
+    week_backups  = 2
+    year_backups  = 3
+    month_backups = 4
+    max_backups   = 10
+    timezone      = "UTC+03:00"
+  }
+
+  trigger_pattern = [
+    "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYHOUR=14;BYMINUTE=00"
+  ]
+}
+
+resource "opentelekomcloud_cbr_policy_v3" "replication" {
+  count = 2
+
+  name                   = format("%[1]s_%%d", count.index)
+  operation_type         = "replication"
+  destination_region     = "%[2]s"
+  destination_project_id = "%[3]s"
+
+  operation_definition {
+    day_backups   = 1
+    week_backups  = 2
+    year_backups  = 3
+    month_backups = 4
+    max_backups   = 10
+    timezone      = "UTC+03:00"
+  }
+
+  trigger_pattern = [
+    "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYHOUR=14;BYMINUTE=00"
+  ]
+}
+`, name, env.OS_DEST_REGION, env.OS_DEST_PROJECT_ID)
+}
+
+func testAccVault_bindPolicies_step1(name string) string {
+	return fmt.Sprintf(`
+%[1]s
+
+resource "opentelekomcloud_cbr_vault_v3" "legacy" {
+  name             = "%[2]s_legacy"
+  backup_policy_id = opentelekomcloud_cbr_policy_v3.backup[0].id
+
+  billing {
+    size          = 100
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+    period_type   = "month"
+    period_num    = 2
+  }
+}
+
+resource "opentelekomcloud_cbr_vault_v3" "test" {
+  name = "%[2]s"
+
+  billing {
+    size          = 100
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+    period_type   = "month"
+    period_num    = 2
+  }
+
+  policy {
+    id = opentelekomcloud_cbr_policy_v3.backup[0].id
+  }
+  policy {
+    id                   = opentelekomcloud_cbr_policy_v3.replication[0].id
+    destination_vault_id = "%[3]s"
+  }
+}
+`, testAccVault_bindPolicies_base(name), name, env.OS_DEST_VAULT_ID)
+}
+
+func testAccVault_bindPolicies_step2(name string) string {
+	return fmt.Sprintf(`
+%[1]s
+
+resource "opentelekomcloud_cbr_vault_v3" "legacy" {
+  name             = "%[2]s_legacy"
+  backup_policy_id = opentelekomcloud_cbr_policy_v3.backup[1].id
+
+  billing {
+    size          = 100
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+    period_type   = "month"
+    period_num    = 2
+  }
+}
+
+resource "opentelekomcloud_cbr_vault_v3" "test" {
+  name = "%[2]s"
+
+  billing {
+    size          = 100
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+    period_type   = "month"
+    period_num    = 2
+  }
+
+  policy {
+    id = opentelekomcloud_cbr_policy_v3.backup[1].id
+  }
+  policy {
+    id                   = opentelekomcloud_cbr_policy_v3.replication[1].id
+    destination_vault_id = "%[3]s"
+  }
+}
+`, testAccVault_bindPolicies_base(name), name, env.OS_DEST_VAULT_ID)
 }
 
 var (
@@ -581,7 +854,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   }
 
   data_disks {
-    type = "SATA"
+    type = "SAS"
     size = "10"
   }
   data_disks {
@@ -858,3 +1131,103 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   }
 }
 `
+
+func testAccVault_locked_step(locked string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name   = "cbr-vault-test"
+  locked = %s
+
+  billing {
+    size          = 100
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+  }
+}
+`, locked)
+}
+
+var testAccCBRVaultV3MigratePolicyId_old = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_cbr_policy_v3" "policy" {
+  name           = "some-policy"
+  operation_type = "backup"
+  trigger_pattern = [
+    "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYHOUR=14;BYMINUTE=00"
+  ]
+  operation_definition {
+    day_backups   = 1
+    week_backups  = 2
+    month_backups = 3
+    year_backups  = 4
+    max_backups   = 10
+    timezone      = "UTC+03:00"
+  }
+
+  enabled = "false"
+}
+
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test"
+
+  description = "CBR vault for terraform provider test"
+
+  billing {
+    size          = 100
+    object_type   = "disk"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+  }
+
+  backup_policy_id = opentelekomcloud_cbr_policy_v3.policy.id
+
+  tags = {
+    foo = "bar"
+  }
+}
+`, common.DataSourceSubnet)
+
+var testAccCBRVaultV3MigratePolicyId_new = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_cbr_policy_v3" "policy" {
+  name           = "some-policy"
+  operation_type = "backup"
+  trigger_pattern = [
+    "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYHOUR=14;BYMINUTE=00"
+  ]
+  operation_definition {
+    day_backups   = 1
+    week_backups  = 2
+    month_backups = 3
+    year_backups  = 4
+    max_backups   = 10
+    timezone      = "UTC+03:00"
+  }
+
+  enabled = "false"
+}
+
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test"
+
+  description = "CBR vault for terraform provider test"
+
+  billing {
+    size          = 100
+    object_type   = "disk"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+  }
+
+  policy {
+    id = opentelekomcloud_cbr_policy_v3.policy.id
+  }
+
+  tags = {
+    foo = "bar"
+  }
+}
+`, common.DataSourceSubnet)

@@ -49,6 +49,15 @@ func TestAccDdmSchemasV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(ddmSchemaResourceName, "name", "ddm_schema"),
 				),
 			},
+			// Update test to check forceNew does not throw error and new resource is created.
+			{
+				Config: testAccDdmSchemaV1Update,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(ddmSchemaResourceName, "name", "ddm_schema"),
+					resource.TestCheckResourceAttr(ddmSchemaResourceName, "shard_unit", "16"),
+				),
+			},
 			{
 				ResourceName:      ddmSchemaResourceName,
 				ImportState:       true,
@@ -70,6 +79,22 @@ resource "opentelekomcloud_ddm_schema_v1" "schema_1" {
   shard_mode   = "cluster"
   shard_number = 8
   shard_unit   = 8
+  rds {
+    id             = "%s"
+    admin_username = "root"
+    admin_password = "test-acc-password-1"
+  }
+  purge_rds_on_delete = true
+}
+`, env.OS_DDM_ID, env.OS_RDS_ID)
+
+var testAccDdmSchemaV1Update = fmt.Sprintf(`
+resource "opentelekomcloud_ddm_schema_v1" "schema_1" {
+  name         = "ddm_schema"
+  instance_id  = "%s"
+  shard_mode   = "cluster"
+  shard_number = 16
+  shard_unit   = 16
   rds {
     id             = "%s"
     admin_username = "root"

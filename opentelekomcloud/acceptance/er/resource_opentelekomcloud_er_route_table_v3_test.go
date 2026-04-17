@@ -56,6 +56,8 @@ func TestAccRouteTable_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(rName, "status"),
 					resource.TestCheckResourceAttrSet(rName, "created_at"),
 					resource.TestCheckResourceAttrSet(rName, "updated_at"),
+					resource.TestCheckResourceAttr(rName, "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(rName, "tags.key", "value"),
 				),
 			},
 			{
@@ -64,6 +66,8 @@ func TestAccRouteTable_basic(t *testing.T) {
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(rName, "name", updateName),
 					resource.TestCheckResourceAttr(rName, "description", ""),
+					resource.TestCheckResourceAttr(rName, "tags.foo", "baar"),
+					resource.TestCheckResourceAttr(rName, "tags.newkey", "value"),
 				),
 			},
 			{
@@ -131,6 +135,11 @@ resource "opentelekomcloud_er_route_table_v3" "test" {
   instance_id = opentelekomcloud_er_instance_v3.test.id
   name        = "%[2]s"
   description = "Create by acc test"
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
 }
 
 resource "opentelekomcloud_er_vpc_attachment_v3" "test" {
@@ -150,6 +159,11 @@ func testRouteTable_basic_step2(baseConfig, name string) string {
 resource "opentelekomcloud_er_route_table_v3" "test" {
   instance_id = opentelekomcloud_er_instance_v3.test.id
   name        = "%[2]s"
+
+  tags = {
+    foo    = "baar"
+    newkey = "value"
+  }
 }
 
 resource "opentelekomcloud_er_vpc_attachment_v3" "test" {

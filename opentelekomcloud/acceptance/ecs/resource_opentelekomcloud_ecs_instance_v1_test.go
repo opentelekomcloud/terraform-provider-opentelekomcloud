@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"testing"
 
@@ -103,6 +104,40 @@ func TestAccEcsV1InstanceIp(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "security_groups.#", "1"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "data_disks.0.type", "ESSD"),
 					resource.TestCheckResourceAttrSet(resourceInstanceV1Name, "nics.0.port_id"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccEcsV1InstanceIpv6(t *testing.T) {
+	networkId := os.Getenv("OS_IPV6_ENABLED_NETWORK_ID")
+	if networkId == "" {
+		t.Skip("TestAccEcsV1InstanceIpv6 required OS_IPV6_ENABLED_NETWORK_ID to continue.")
+	}
+	var instance cloudservers.CloudServer
+	qts := serverQuotas(10+4, "s2.medium.1")
+	t.Parallel()
+	quotas.BookMany(t, qts)
+
+	rc := common.InitResourceCheck(
+		resourceInstanceV1Name,
+		&instance,
+		getEcsInstanceFunc,
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEcsV1InstanceIpv6(networkId),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttrSet(resourceInstanceV1Name, "nics.0.port_id"),
+					resource.TestCheckResourceAttrSet(resourceInstanceV1Name, "nics.0.ipv6_address"),
 				),
 			},
 		},
@@ -276,6 +311,35 @@ func TestAccEcsV1InstanceVolumeAttach(t *testing.T) {
 	})
 }
 
+func TestAccEcsV1InstanceMetadata(t *testing.T) {
+	var instance cloudservers.CloudServer
+	qts := serverQuotas(10+4, "s2.medium.1")
+	t.Parallel()
+	quotas.BookMany(t, qts)
+
+	rc := common.InitResourceCheck(
+		resourceInstanceV1Name,
+		&instance,
+		getEcsInstanceFunc,
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEcsV1InstanceMetadata,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "metadata.0.agency_name", "test_agency"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccEcsV1InstanceWithoutAZ(t *testing.T) {
 	var instance cloudservers.CloudServer
 	qts := serverQuotas(10+4, "s2.medium.1")
@@ -327,6 +391,81 @@ func testAccCheckEcsV1InstanceDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func TestAccEcsV1InstanceTpmEnabled(t *testing.T) {
+	var instance cloudservers.CloudServer
+
+	const tpmFlavor = "pi5e.2xlarge.4"
+	qts := serverQuotas(10+4, tpmFlavor)
+	t.Parallel()
+	quotas.BookMany(t, qts)
+
+	rc := common.InitResourceCheck(
+		resourceInstanceV1Name,
+		&instance,
+		getEcsInstanceFunc,
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEcsV1InstanceTpmEnabled(true),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tpm_enabled", "true"),
+				),
+			},
+			{
+				Config: testAccEcsV1InstanceTpmEnabled(false),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tpm_enabled", "false"),
+					testAccCheckEcsV1InstanceIsActive(&instance),
+				),
+			},
+			{
+				Config: testAccEcsV1InstanceTpmEnabled(true),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tpm_enabled", "true"),
+					testAccCheckEcsV1InstanceIsActive(&instance),
+				),
+			},
+			{
+				ResourceName:      resourceInstanceV1Name,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"password",
+					"delete_disks_on_termination",
+				},
+			},
+		},
+	})
+}
+
+func testAccCheckEcsV1InstanceIsActive(instance *cloudservers.CloudServer) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := common.TestAccProvider.Meta().(*cfg.Config)
+		client, err := config.ComputeV1Client(env.OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("error creating ComputeV1 client: %w", err)
+		}
+
+		server, err := cloudservers.Get(client, instance.ID).Extract()
+		if err != nil {
+			return fmt.Errorf("error getting CloudServer: %w", err)
+		}
+
+		if server.Status != "ACTIVE" {
+			return fmt.Errorf("CloudServer %s is in status %s, expected ACTIVE (server should be restarted after tpm_enabled update)", instance.ID, server.Status)
+		}
+		return nil
+	}
 }
 
 var testAccEcsV1InstanceBasic = fmt.Sprintf(`
@@ -640,6 +779,37 @@ resource "opentelekomcloud_networking_floatingip_associate_v2" "this" {
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
+func testAccEcsV1InstanceIpv6(networkID string) string {
+	return fmt.Sprintf(`
+	%s
+
+data "opentelekomcloud_vpc_subnet_v1" "sub_1" {
+  id = "%s"
+}
+
+resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+  name     = "server_1"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
+  flavor   = "s3.xlarge.4"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.sub_1.vpc_id
+
+  nics {
+    network_id  = data.opentelekomcloud_vpc_subnet_v1.sub_1.network_id
+    ipv6_enable = true
+  }
+
+  data_disks {
+    size = 10
+    type = "ESSD"
+  }
+
+  password                    = "Password@123"
+  availability_zone           = "%s"
+  delete_disks_on_termination = true
+}
+	`, common.DataSourceImage, networkID, env.OS_AVAILABILITY_ZONE)
+}
+
 var testAccEcsV1InstanceAttachVolume = fmt.Sprintf(`
 %s
 
@@ -744,3 +914,88 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   }
 }
 `, common.DataSourceImage, common.DataSourceSubnet)
+
+var testAccEcsV1InstanceMetadata = fmt.Sprintf(`
+%s
+
+%s
+
+
+resource "opentelekomcloud_compute_servergroup_v2" "sg_1" {
+  name     = "sg_1"
+  policies = ["anti-affinity"]
+}
+
+resource "opentelekomcloud_identity_agency_v3" "agency" {
+  name                  = "test_agency"
+  description           = "test agency"
+  delegated_domain_name = "op_svc_ecs"
+  project_role {
+    project = "%s"
+    roles = [
+      "CES Administrator"
+    ]
+  }
+}
+
+resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+  name     = "server_1"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
+  flavor   = "s2.medium.1"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+
+  nics {
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+
+  data_disks {
+    size = 10
+    type = "SAS"
+  }
+
+  password                    = "Password@123"
+  availability_zone           = "%s"
+  auto_recovery               = true
+  delete_disks_on_termination = true
+  os_scheduler_hints {
+    group   = opentelekomcloud_compute_servergroup_v2.sg_1.id
+    tenancy = "shared"
+  }
+
+  metadata {
+    agency_name = opentelekomcloud_identity_agency_v3.agency.name
+  }
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_TENANT_NAME, env.OS_AVAILABILITY_ZONE)
+
+func testAccEcsV1InstanceTpmEnabled(tpmEnabled bool) string {
+	return fmt.Sprintf(`
+%s
+
+data "opentelekomcloud_images_image_v2" "tpm_image" {
+  name        = "Enterprise_Windows-Server_2022_STD_amd64_uefi_latest"
+  most_recent = true
+}
+
+resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+  name     = "server_tpm"
+  image_id = data.opentelekomcloud_images_image_v2.tpm_image.id
+  flavor   = "pi5e.2xlarge.4"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+
+  nics {
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+
+  password                    = "Password@123"
+  availability_zone           = "%s"
+  delete_disks_on_termination = true
+  tpm_enabled                 = %t
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, tpmEnabled)
+}

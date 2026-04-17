@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -15,6 +16,7 @@ import (
 
 const resourceAddonName = "opentelekomcloud_cce_addon_v3.autoscaler"
 const resourceAddonNameDns = "opentelekomcloud_cce_addon_v3.coredns"
+const resourceAddonNameMS = "opentelekomcloud_cce_addon_v3.ms"
 
 func getCceAddonResourceFunc(cfg *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
 	client, err := cfg.CceV3AddonClient(env.OS_REGION_NAME)
@@ -165,6 +167,40 @@ func TestAccCCEAddonV3Flavor(t *testing.T) {
 	})
 }
 
+func TestAccCCEAddonV3JsonEncoded(t *testing.T) {
+	var addon addons.Addon
+	rc := common.InitResourceCheck(
+		resourceAddonNameMS,
+		&addon,
+		getCceAddonResourceFunc,
+	)
+	clusterName := randClusterName()
+	t.Parallel()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCEAddonV3JsonEncoded(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceAddonNameMS, "template_name", "metrics-server"),
+					resource.TestCheckResourceAttrSet(resourceAddonNameMS, "values.0.custom_json"),
+				),
+			},
+			{
+				Config: testAccCCEAddonV3JsonEncodedUpdate(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceAddonNameMS, "template_name", "metrics-server"),
+					resource.TestCheckResourceAttrSet(resourceAddonNameMS, "values.0.custom_json"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCCEAddonV3ImportStateIdFunc() resource.ImportStateIdFunc {
 	return func(s *terraform.State) (string, error) {
 		var clusterID string
@@ -209,8 +245,27 @@ func checkScaleDownForAutoscaler(name string, enabled bool) resource.TestCheckFu
 			return fmt.Errorf("addon not found")
 		}
 
-		if actual := found.Spec.Values.Advanced["scaleDownEnabled"]; actual != enabled {
-			return fmt.Errorf("invalid `scaleDownEnabled` value: expected %v, got %v", enabled, actual)
+		actual, exists := found.Spec.Values.Advanced["scaleDownEnabled"]
+		if !exists {
+			return fmt.Errorf("scaleDownEnabled parameter not found")
+		}
+
+		var actualBool bool
+		switch v := actual.(type) {
+		case bool:
+			actualBool = v
+		case string:
+			var err error
+			actualBool, err = strconv.ParseBool(v)
+			if err != nil {
+				return fmt.Errorf("failed to parse scaleDownEnabled value: %w", err)
+			}
+		default:
+			return fmt.Errorf("unexpected type for scaleDownEnabled: %T", actual)
+		}
+
+		if actualBool != enabled {
+			return fmt.Errorf("invalid `scaleDownEnabled` value: expected %v, got %v", enabled, actualBool)
 		}
 
 		return nil
@@ -413,20 +468,21 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
       "tenant_id" : data.opentelekomcloud_identity_project_v3.project.id,
     }
     flavor = <<EOF
-    {
-      "description": "custom resources",
-      "name": "custom-resources",
-      "replicas": 2,
-      "resources": [
-        {
-          "limitsCpu": "8000m",
-          "limitsMem": "4Gi",
-          "name": "autoscaler",
-          "requestsCpu": "4000m",
-          "requestsMem": "2Gi"
-        }
-      ]
-    EOF
+      {
+        "description": "custom resources",
+        "name": "custom-resources",
+        "replicas": 2,
+        "resources": [
+          {
+            "limitsCpu": "8000m",
+            "limitsMem": "4Gi",
+            "name": "autoscaler",
+            "requestsCpu": "4000m",
+            "requestsMem": "2Gi"
+          }
+        ]
+      }
+	EOF
   }
 }
 `, common.DataSourceSubnet, common.DataSourceProject, cName)
@@ -443,7 +499,7 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   flavor_id               = "cce.s1.medium"
   vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  cluster_version         = "v1.29"
+  cluster_version         = "v1.30"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   no_addons               = true
@@ -451,20 +507,23 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
 
 resource "opentelekomcloud_cce_addon_v3" "coredns" {
   template_name    = "coredns"
-  template_version = "1.29.4"
+  template_version = "1.30.33"
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
     basic = {
       "cluster_ip" : "10.247.3.10",
-      "image_version" : "1.29.4",
+      "image_version" : "1.30.33",
       "swr_addr" : "100.125.7.25:20202",
       "swr_user" : "cce-addons"
     }
-    custom = {
-      "stub_domains" : "{\"test\":[\"10.10.40.10\"], \"test2\":[\"10.10.40.20\"]}"
-      "upstream_nameservers" : "[\"8.8.8.8\",\"8.8.4.4\"]"
-    }
+    custom_json = jsonencode({
+      stub_domains = {
+        test  = ["10.10.40.10"]
+        test2 = ["10.10.40.20"]
+      }
+      upstream_nameservers = ["8.8.8.8", "8.8.4.4"]
+    })
   }
 }
 `, common.DataSourceSubnet, common.DataSourceProject, name)
@@ -561,14 +620,14 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
 
 resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
   template_name    = "autoscaler"
-  template_version = "1.29.17"
+  template_version = "1.29.101"
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
     basic = {
       "cceEndpoint" : "https://cce.eu-de.otc.t-systems.com",
       "ecsEndpoint" : "https://ecs.eu-de.otc.t-systems.com",
-      "image_version" : "1.29.17",
+      "image_version" : "1.29.101",
       "region" : "eu-de",
       "swr_addr" : "100.125.7.25:20202",
       "swr_user" : "cce-addons"
@@ -611,6 +670,125 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
         ]
       }
 	EOF
+  }
+}
+`, common.DataSourceSubnet, common.DataSourceProject, cName)
+}
+
+func testAccCCEAddonV3JsonEncoded(cName string) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource opentelekomcloud_cce_cluster_v3 cluster_1 {
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  cluster_version         = "v1.29"
+  container_network_type  = "overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+}
+
+data "opentelekomcloud_cce_addon_templates_v3" "ms-template" {
+  cluster_version = opentelekomcloud_cce_cluster_v3.cluster_1.cluster_version
+  addon_name      = "metrics-server"
+}
+
+data "opentelekomcloud_cce_addon_template_v3" "ms" {
+  addon_version = "1.3.102"
+  addon_name    = data.opentelekomcloud_cce_addon_templates_v3.ms-template.addon_name
+}
+
+resource "opentelekomcloud_cce_addon_v3" "ms" {
+  template_name    = data.opentelekomcloud_cce_addon_template_v3.ms.addon_name
+  template_version = data.opentelekomcloud_cce_addon_template_v3.ms.addon_version
+  cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
+
+  values {
+    basic = {
+      "image_version" : data.opentelekomcloud_cce_addon_template_v3.ms.image_version,
+      "swr_addr" : data.opentelekomcloud_cce_addon_template_v3.ms.swr_addr,
+      "swr_user" : data.opentelekomcloud_cce_addon_template_v3.ms.swr_user
+    }
+    custom_json = jsonencode({
+      tolerations = [
+        {
+          key      = "somedomain/somekey"
+          operator = "Equal"
+          value    = "test"
+          effect   = "NoSchedule"
+        }
+      ],
+      node_match_expressions = [
+        {
+          key      = "somedomain/somekey"
+          operator = "In"
+          values = [
+            "test"
+          ]
+        }
+      ],
+      cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+      tenant_id  = data.opentelekomcloud_identity_project_v3.project.id
+      logLevel   = 3
+    })
+  }
+}
+`, common.DataSourceSubnet, common.DataSourceProject, cName)
+}
+
+func testAccCCEAddonV3JsonEncodedUpdate(cName string) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource opentelekomcloud_cce_cluster_v3 cluster_1 {
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  cluster_version         = "v1.29"
+  container_network_type  = "overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+}
+
+data "opentelekomcloud_cce_addon_templates_v3" "ms-template" {
+  cluster_version = opentelekomcloud_cce_cluster_v3.cluster_1.cluster_version
+  addon_name      = "metrics-server"
+}
+
+data "opentelekomcloud_cce_addon_template_v3" "ms" {
+  addon_version = "1.3.102"
+  addon_name    = data.opentelekomcloud_cce_addon_templates_v3.ms-template.addon_name
+}
+
+resource "opentelekomcloud_cce_addon_v3" "ms" {
+  template_name    = data.opentelekomcloud_cce_addon_template_v3.ms.addon_name
+  template_version = data.opentelekomcloud_cce_addon_template_v3.ms.addon_version
+  cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
+
+  values {
+    basic = {
+      "image_version" : data.opentelekomcloud_cce_addon_template_v3.ms.image_version,
+      "swr_addr" : data.opentelekomcloud_cce_addon_template_v3.ms.swr_addr,
+      "swr_user" : data.opentelekomcloud_cce_addon_template_v3.ms.swr_user
+    }
+    custom_json = jsonencode({
+      tolerations = [
+        {
+          key      = "somedomain/somekey"
+          operator = "Equal"
+          value    = "test"
+          effect   = "NoSchedule"
+        }
+      ],
+      cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+      tenant_id  = data.opentelekomcloud_identity_project_v3.project.id
+      logLevel   = 3
+    })
   }
 }
 `, common.DataSourceSubnet, common.DataSourceProject, cName)

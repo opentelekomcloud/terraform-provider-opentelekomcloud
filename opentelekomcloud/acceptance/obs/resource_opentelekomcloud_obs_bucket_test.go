@@ -121,6 +121,14 @@ func TestAccObsBucket_logging(t *testing.T) {
 					testAccCheckObsBucketLogging(resourceName, targetBucket, "log/"),
 				),
 			},
+			{
+				Config: testAccObsBucketConfigWithLoggingUpdated(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(resourceName),
+					testAccCheckObsBucketLogging(resourceName, targetBucket, "log/"),
+					resource.TestCheckResourceAttr(resourceName, "logging.0.agency", "test"),
+				),
+			},
 		},
 	})
 }
@@ -148,6 +156,34 @@ func TestAccObsBucket_lifecycle(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.transition.1.days", "180"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.noncurrent_version_transition.0.days", "60"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.noncurrent_version_transition.1.days", "180"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.abort_incomplete_multipart_upload.0.days", "360"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccObsBucket_lifecycleFilter(t *testing.T) {
+	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_obs_bucket.bucket"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObsBucketConfigWithLifecycleFilter(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.name", "rule1"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.prefix", "path1/"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.name", "rule2"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.prefix", "path2/"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.tag.0.key", "key1"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.tag.0.value", "value1"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.tag.1.key", "key2"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.tag.1.value", "value2"),
 				),
 			},
 		},
@@ -483,6 +519,32 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 `, randInt, randInt)
 }
 
+func testAccObsBucketConfigWithLoggingUpdated(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_identity_agency_v3" "agency_1" {
+  name                  = "test"
+  delegated_domain_name = "op_svc_obs"
+  domain_roles          = ["OBS Administrator"]
+}
+
+resource "opentelekomcloud_obs_bucket" "log_bucket" {
+  bucket        = "tf-test-log-bucket-%d"
+  acl           = "log-delivery-write"
+  force_destroy = "true"
+}
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket = "tf-test-bucket-%d"
+  acl    = "private"
+
+  logging {
+    target_bucket = opentelekomcloud_obs_bucket.log_bucket.id
+    target_prefix = "log/"
+    agency        = opentelekomcloud_identity_agency_v3.agency_1.name
+  }
+}
+`, randInt, randInt)
+}
+
 func testAccObsBucketConfigWithLifecycle(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
@@ -533,6 +595,50 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
     noncurrent_version_transition {
       days          = 180
       storage_class = "COLD"
+    }
+    abort_incomplete_multipart_upload {
+      days = 360
+    }
+  }
+}
+`, randInt)
+}
+
+func testAccObsBucketConfigWithLifecycleFilter(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket     = "tf-test-bucket-%d"
+  acl        = "private"
+  versioning = true
+
+  lifecycle_rule {
+    name    = "rule1"
+    prefix  = "path1/"
+    enabled = true
+
+    expiration {
+      days = 365
+    }
+  }
+  lifecycle_rule {
+    name    = "rule2"
+    prefix  = "path2/"
+    enabled = true
+    tag {
+      key   = "key1"
+      value = "value1"
+    }
+    tag {
+      key   = "key2"
+      value = "value2"
+    }
+    noncurrent_version_expiration {
+      days = 365
+    }
+
+    noncurrent_version_transition {
+      days          = 60
+      storage_class = "WARM"
     }
   }
 }

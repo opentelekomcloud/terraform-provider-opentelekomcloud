@@ -52,6 +52,9 @@ func TestAccFgsV2Function_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "urn"),
 					resource.TestCheckResourceAttrSet(resourceName, "version"),
 					resource.TestCheckResourceAttr(resourceName, "code_type", "inline"),
+					resource.TestCheckResourceAttr(resourceName, "network_controller.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "network_controller.0.trigger_access_vpcs.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "network_controller.0.disable_public_network", "true"),
 				),
 			},
 			{
@@ -63,6 +66,9 @@ func TestAccFgsV2Function_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "tags.newkey", "value"),
 					resource.TestCheckResourceAttrSet(resourceName, "urn"),
 					resource.TestCheckResourceAttrSet(resourceName, "version"),
+					resource.TestCheckResourceAttr(resourceName, "network_controller.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "network_controller.0.trigger_access_vpcs.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "network_controller.0.disable_public_network", "false"),
 				),
 			},
 			{
@@ -70,6 +76,7 @@ func TestAccFgsV2Function_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceName, "code_type", "obs"),
+					resource.TestCheckResourceAttr(resourceName, "network_controller.0.trigger_access_vpcs.#", "0"),
 				),
 			},
 			{
@@ -158,6 +165,9 @@ func TestAccFgsV2Function_createByImage(t *testing.T) {
 					resource.TestCheckResourceAttr(rName1, "runtime", "Custom Image"),
 					resource.TestCheckResourceAttr(rName1, "handler", "-"),
 					resource.TestCheckResourceAttr(rName1, "custom_image.0.url", common.OTC_BUILD_IMAGE_URL),
+					resource.TestCheckResourceAttrSet(rName1, "vpc_id"),
+					resource.TestCheckResourceAttrSet(rName1, "network_id"),
+					resource.TestCheckResourceAttrSet(rName1, "peering_cidr"),
 					rc2.CheckResourceExists(),
 					resource.TestCheckResourceAttr(rName2, "name", randName+"_2"),
 					resource.TestCheckResourceAttr(rName2, "agency", "functiongraph_swr_trust"),
@@ -172,13 +182,16 @@ func TestAccFgsV2Function_createByImage(t *testing.T) {
 				Config: testAccFgsV2Function_createByImage_step_2(randName),
 				Check: resource.ComposeTestCheckFunc(
 					rc1.CheckResourceExists(),
-					resource.TestCheckResourceAttr(rName1, "handler", "index.py"),
+					resource.TestCheckResourceAttr(rName1, "handler", "-"),
 					resource.TestCheckResourceAttr(rName1, "vpc_id", ""),
 					resource.TestCheckResourceAttr(rName1, "network_id", ""),
 					resource.TestCheckResourceAttr(rName1, "custom_image.0.url", common.OTC_BUILD_IMAGE_URL_UPDATED),
 					rc2.CheckResourceExists(),
 					resource.TestCheckResourceAttr(rName2, "handler", "-"),
 					resource.TestCheckResourceAttr(rName2, "custom_image.0.url", common.OTC_BUILD_IMAGE_URL_UPDATED),
+					resource.TestCheckResourceAttrSet(rName2, "vpc_id"),
+					resource.TestCheckResourceAttrSet(rName2, "network_id"),
+					resource.TestCheckResourceAttrSet(rName2, "peering_cidr"),
 				),
 			},
 			{
@@ -281,8 +294,19 @@ resource "opentelekomcloud_obs_bucket_object" "test" {
 func testAccFgsV2Function_basic_step1(rName string) string {
 	//nolint:revive
 	return fmt.Sprintf(`
+
+resource "opentelekomcloud_vpc_v1" "trigger_access_1" {
+  name = "%[1]s-trigger-1"
+  cidr = "192.168.0.0/16"
+}
+
+resource "opentelekomcloud_vpc_v1" "trigger_access_2" {
+  name = "%[1]s-trigger-2"
+  cidr = "192.168.0.0/16"
+}
+
 resource "opentelekomcloud_fgs_function_v2" "test" {
-  name        = "%s"
+  name        = "%[1]s"
   app         = "default"
   description = "function test"
   handler     = "index.handler"
@@ -291,6 +315,18 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
   runtime     = "Python2.7"
   code_type   = "inline"
   func_code   = "aW1wb3J0IGpzb24KZGVmIGhhbmRsZXIgKGV2ZW50LCBjb250ZXh0KToKICAgIG91dHB1dCA9ICdIZWxsbyBtZXNzYWdlOiAnICsganNvbi5kdW1wcyhldmVudCkKICAgIHJldHVybiBvdXRwdXQ="
+
+  network_controller {
+    disable_public_network = true
+
+    trigger_access_vpcs {
+      vpc_id = opentelekomcloud_vpc_v1.trigger_access_1.id
+    }
+
+    trigger_access_vpcs {
+      vpc_id = opentelekomcloud_vpc_v1.trigger_access_2.id
+    }
+  }
 
   tags = {
     foo = "bar"
@@ -304,6 +340,16 @@ func testAccFgsV2Function_basic_step2(rName string) string {
 	return fmt.Sprintf(`
 %[1]s
 
+resource "opentelekomcloud_vpc_v1" "trigger_access_1" {
+  name = "%[2]s-trigger-1"
+  cidr = "192.168.0.0/16"
+}
+
+resource "opentelekomcloud_vpc_v1" "trigger_access_2" {
+  name = "%[2]s-trigger-2"
+  cidr = "192.168.0.0/16"
+}
+
 resource "opentelekomcloud_fgs_function_v2" "test" {
   name        = "%[2]s"
   app         = "default"
@@ -314,9 +360,21 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
   runtime     = "Python2.7"
   code_type   = "inline"
   func_code   = "aW1wb3J0IGpzb24KZGVmIGhhbmRsZXIgKGV2ZW50LCBjb250ZXh0KToKICAgIG91dHB1dCA9ICdIZWxsbyBtZXNzYWdlOiAnICsganNvbi5kdW1wcyhldmVudCkKICAgIHJldHVybiBvdXRwdXQ="
-  agency      = "function_vpc_trust"
+  agency      = "functiongraph_swr_trust"
   vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   network_id  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+
+  network_controller {
+    disable_public_network = false
+
+    trigger_access_vpcs {
+      vpc_id = opentelekomcloud_vpc_v1.trigger_access_1.id
+    }
+
+    trigger_access_vpcs {
+      vpc_id = opentelekomcloud_vpc_v1.trigger_access_2.id
+    }
+  }
 
   tags = {
     foo    = "baar"
@@ -342,7 +400,7 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
   runtime     = "Python2.7"
   code_type   = "obs"
   code_url    = format("https://%%s/%%s", opentelekomcloud_obs_bucket.test.bucket_domain_name, opentelekomcloud_obs_bucket_object.test.key)
-  agency      = "function_vpc_trust"
+  agency      = "functiongraph_swr_trust"
   vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   network_id  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
@@ -390,7 +448,7 @@ func testAccFgsV2Function_createByImage_step_1(rName string) string {
 resource "opentelekomcloud_fgs_function_v2" "create_with_vpc_access" {
   name        = "%[2]s_1"
   app         = "default"
-  handler     = "index.py"
+  handler     = "-"
   memory_size = 128
   runtime     = "Custom Image"
   timeout     = 3
@@ -401,14 +459,15 @@ resource "opentelekomcloud_fgs_function_v2" "create_with_vpc_access" {
     url = "%[3]s"
   }
 
-  vpc_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  peering_cidr = "10.0.1.0/24"
 }
 
 resource "opentelekomcloud_fgs_function_v2" "create_without_vpc_access" {
   name        = "%[2]s_2"
   app         = "default"
-  handler     = "index.py"
+  handler     = "-"
   memory_size = 128
   runtime     = "Custom Image"
   timeout     = 3
@@ -416,7 +475,10 @@ resource "opentelekomcloud_fgs_function_v2" "create_without_vpc_access" {
   code_type   = "Custom-Image-Swr"
 
   custom_image {
-    url = "%[3]s"
+    url         = "%[3]s"
+    command     = "/bin/sh"
+    args        = "-args,value"
+    working_dir = "/"
   }
 }
 `, common.DataSourceSubnet, rName, common.OTC_BUILD_IMAGE_URL)
@@ -430,7 +492,7 @@ func testAccFgsV2Function_createByImage_step_2(rName string) string {
 resource "opentelekomcloud_fgs_function_v2" "create_with_vpc_access" {
   name        = "%[2]s_1"
   app         = "default"
-  handler     = "index.py"
+  handler     = "-"
   memory_size = 128
   runtime     = "Custom Image"
   timeout     = 3
@@ -438,7 +500,10 @@ resource "opentelekomcloud_fgs_function_v2" "create_with_vpc_access" {
   code_type   = "Custom-Image-Swr"
 
   custom_image {
-    url = "%[3]s"
+    url         = "%[3]s"
+    command     = "/bin/sh"
+    args        = "-args,value"
+    working_dir = "/"
   }
 }
 
@@ -446,7 +511,7 @@ resource "opentelekomcloud_fgs_function_v2" "create_with_vpc_access" {
 resource "opentelekomcloud_fgs_function_v2" "create_without_vpc_access" {
   name        = "%[2]s_2"
   app         = "default"
-  handler     = "index.py"
+  handler     = "-"
   memory_size = 128
   runtime     = "Custom Image"
   timeout     = 3
@@ -454,11 +519,13 @@ resource "opentelekomcloud_fgs_function_v2" "create_without_vpc_access" {
   code_type   = "Custom-Image-Swr"
 
   custom_image {
-    url = "%[3]s"
+    url         = "%[3]s"
+    working_dir = "/"
   }
 
-  vpc_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  peering_cidr = "10.0.1.0/24"
 }
 `, common.DataSourceSubnet, rName, common.OTC_BUILD_IMAGE_URL_UPDATED)
 }
@@ -494,6 +561,14 @@ func TestAccFgsV2Function_strategy(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceName, "max_instance_num", "1000"),
+				),
+			},
+			{
+				Config: testAccFunction_strategy_update(name, 1000),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceName, "max_instance_num", "1000"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "60"),
 				),
 			},
 			// UpdateMaxInstances doesn't work when max_instance is set to 0
@@ -557,6 +632,23 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
   handler               = "index.handler"
   memory_size           = 128
   timeout               = 3
+  runtime               = "Python2.7"
+  code_type             = "inline"
+  func_code             = "dCA9ICdIZWxsbyBtZXNzYWdlOiAnICsganN="
+  max_instance_num      = %[2]d
+}
+`, name, maxInstanceNum)
+}
+
+func testAccFunction_strategy_update(name string, maxInstanceNum int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_fgs_function_v2" "test" {
+  functiongraph_version = "v2"
+  name                  = "%[1]s"
+  app                   = "default"
+  handler               = "index.handler"
+  memory_size           = 128
+  timeout               = 60
   runtime               = "Python2.7"
   code_type             = "inline"
   func_code             = "dCA9ICdIZWxsbyBtZXNzYWdlOiAnICsganN="
@@ -781,7 +873,13 @@ func TestAccFgsV2Function_reservedInstance_version(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      rc.CheckResourceDestroy(),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {
+				Source:            "hashicorp/time",
+				VersionConstraint: "0.12.1",
+			},
+		},
+		CheckDestroy: rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFgsV2Function_reservedInstance_step1(name),
@@ -876,6 +974,14 @@ func TestAccFgsV2Function_reservedInstance_alias(t *testing.T) {
 
 func testAccFgsV2Function_reservedInstance_step1(rName string) string {
 	return fmt.Sprintf(`
+# Using the current time as the start time.
+resource "time_static" "test" {}
+
+# Using the current time one day later as the expiration time.
+resource "time_offset" "test" {
+  offset_days = 1
+}
+
 resource "opentelekomcloud_fgs_function_v2" "test" {
   name        = "%[1]s"
   app         = "default"
@@ -895,8 +1001,8 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
       cron_configs {
         name         = "scheme-waekcy"
         cron         = "0 */10 * * * ?"
-        start_time   = "1708342889"
-        expired_time = "1739878889"
+        start_time   = time_static.test.unix
+        expired_time = time_offset.test.unix
         count        = 2
       }
     }
@@ -955,7 +1061,7 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
 `, rName, aliasName)
 }
 
-func TestAccFgsV2Function_concurrencyNum(t *testing.T) {
+func TestAccFgsV2Function_EnableDynamicMemory(t *testing.T) {
 	var (
 		f function.FuncGraph
 
@@ -975,45 +1081,31 @@ func TestAccFgsV2Function_concurrencyNum(t *testing.T) {
 		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFunction_strategy_default(name),
+				Config: testAccFunction_EnableDynamicMemory(name),
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
-					resource.TestCheckResourceAttr(resourceName, "concurrency_num", "1"),
+					resource.TestCheckResourceAttr(resourceName, "enable_dynamic_memory", "true"),
+					resource.TestCheckResourceAttr(resourceName, "enable_class_isolation", "true"),
 				),
-			},
-			{
-				Config: testAccFunction_concurrencyNum(name, 1000),
-				Check: resource.ComposeTestCheckFunc(
-					rc.CheckResourceExists(),
-					resource.TestCheckResourceAttr(resourceName, "concurrency_num", "1000"),
-				),
-			},
-			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"app",
-					"func_code",
-				},
 			},
 		},
 	})
 }
 
-func testAccFunction_concurrencyNum(name string, concurrencyNum int) string {
+func testAccFunction_EnableDynamicMemory(name string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_fgs_function_v2" "test" {
-  functiongraph_version = "v2"
-  name                  = "%[1]s"
-  app                   = "default"
-  handler               = "index.handler"
-  memory_size           = 128
-  timeout               = 3
-  runtime               = "Python2.7"
-  code_type             = "inline"
-  func_code             = "dCA9ICdIZWxsbyBtZXNzYWdlOiAnICsganN="
-  concurrency_num       = %[2]d
+  functiongraph_version  = "v2"
+  name                   = "%[1]s"
+  app                    = "default"
+  handler                = "index.handler"
+  memory_size            = 128
+  timeout                = 3
+  runtime                = "Python2.7"
+  code_type              = "inline"
+  func_code              = "dCA9ICdIZWxsbyBtZXNzYWdlOiAnICsganN="
+  enable_dynamic_memory  = true
+  enable_class_isolation = true
 }
-`, name, concurrencyNum)
+`, name)
 }

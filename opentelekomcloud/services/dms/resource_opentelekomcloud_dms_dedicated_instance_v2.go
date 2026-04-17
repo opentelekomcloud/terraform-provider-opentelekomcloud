@@ -52,9 +52,10 @@ func ResourceDmsDedicatedInstanceV2() *schema.Resource {
 				Optional: true,
 			},
 			"engine_version": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: common.ValidateDmsEngineVersion,
 			},
 			"storage_spec_code": {
 				Type:     schema.TypeString,

@@ -74,6 +74,14 @@ func ResourceObsBucketInventory() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"optional_fields": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"region": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -120,6 +128,16 @@ func resourceObsBucketInventoryPut(ctx context.Context, d *schema.ResourceData, 
 		}
 	}
 
+	if rawArray, ok := d.Get("optional_fields").([]interface{}); ok && len(rawArray) > 0 {
+		fields := make([]string, len(rawArray))
+		for i, rawField := range rawArray {
+			fields[i] = rawField.(string)
+		}
+		params.OptionalFields = obs.InventoryOptionalFields{
+			Field: fields,
+		}
+	}
+
 	_, err = client.SetBucketInventory(params)
 	if err != nil {
 		return fmterr.Errorf("error putting OBS inventory: %s", err)
@@ -159,6 +177,12 @@ func resourceObsBucketInventoryRead(_ context.Context, d *schema.ResourceData, m
 
 	if inv.Filter.Prefix != "" {
 		mErr = multierror.Append(mErr, d.Set("filter_prefix", inv.Filter.Prefix))
+	}
+
+	if len(inv.OptionalFields.Field) > 0 {
+		mErr = multierror.Append(mErr, d.Set("optional_fields", inv.OptionalFields.Field))
+	} else {
+		mErr = multierror.Append(mErr, d.Set("optional_fields", []string{}))
 	}
 
 	if err := mErr.ErrorOrNil(); err != nil {

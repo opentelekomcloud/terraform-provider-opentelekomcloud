@@ -14,6 +14,9 @@ Up-to-date reference of API arguments for VBS backup policy you can get at
 
 Provides an VBS Backup Policy resource within OpenTelekomCloud.
 
+~>
+Deprecated, use `opentelekomcloud_cbr_policy_v3` resource instead.
+
 ## Example Usage
 
 ### Basic Backup Policy

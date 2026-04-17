@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[LTS]** Fix id check in read for all resources (`#2886 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2886>`_)

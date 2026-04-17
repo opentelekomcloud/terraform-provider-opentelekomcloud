@@ -55,8 +55,6 @@ The following arguments are supported:
 * `remark` - (Optional) Specifies the remark information. The remarks must be a UTF-8-coded
   character string containing 128 bytes.
 
-* `project_name` - (Optional) The project name for the subscription.
-
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:

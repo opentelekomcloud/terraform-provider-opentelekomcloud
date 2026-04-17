@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CCI]** Add new resource ``resource/opentelekomcloud_cci_network_v2`` (`#3325 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3325>`_).

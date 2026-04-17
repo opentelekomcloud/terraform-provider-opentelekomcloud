@@ -90,6 +90,8 @@ func TestAccDDSV3Instance_Cluster(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.1.num", "4"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.1.spec_code", "dds.mongodb.s2.large.4.shard"),
 					resource.TestCheckResourceAttr(resourceInstanceName, "flavor.1.size", "60"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "maintain_begin", "19:00"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "maintain_end", "23:00"),
 				),
 			},
 		},
@@ -450,6 +452,8 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
     start_time = "08:00-09:00"
     keep_days  = "8"
   }
+  maintain_begin = "19:00"
+  maintain_end   = "23:00"
 }`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
 var TestAccDDSInstanceRocksDBV3ConfigBasic = fmt.Sprintf(`

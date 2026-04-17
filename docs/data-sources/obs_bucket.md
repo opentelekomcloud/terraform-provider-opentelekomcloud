@@ -62,6 +62,8 @@ The `logging` object supports the following:
 
 * `target_prefix` - To specify a key prefix for log objects.
 
+* `agency` - The agency name for logging.
+
 The `website` object supports the following:
 
 * `index_document` - Specifies the default homepage of the static website, only HTML web pages are supported.

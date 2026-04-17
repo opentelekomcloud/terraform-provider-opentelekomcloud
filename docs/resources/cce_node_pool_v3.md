@@ -146,15 +146,21 @@ the AZ based on the AZ sequence. For more details see
 * `key_pair` - (Optional, ForceNew, String) Key pair name when logging in to select the key pair mode.
   This parameter and password are alternative. Changing this parameter will create a new resource.
 
-* `password` - (Optional, ForceNew, String) Key pair name when logging in to select the key pair mode.
+* `password` - (Optional, ForceNew, String) Password used for node login.
   This parameter and password are alternative. Changing this parameter will create a new resource.
+  -> **NOTE:** This field is not supported for the current version.
 
 * `os` - (Optional, ForceNew, String) Node OS. Changing this parameter will create a new resource.
+
   Supported OS depends on kubernetes version of the cluster.
-  * Clusters of Kubernetes `v1.13` or later support `EulerOS 2.5`.
-  * Clusters of Kubernetes `v1.17` or later support `EulerOS 2.5` and `CentOS 7.7`.
-  * Clusters of Kubernetes `v1.21` or later support `EulerOS 2.5`, `EulerOS 2.9`, and `CentOS 7.7`.
-  * Clusters of Kubernetes `v1.25` or later support `EulerOS 2.5`, `EulerOS 2.9`, `CentOS 7.7` and `Ubuntu 22.04`.
+  | OS           | Kubernetes version |
+  | :----------- | :----------------- |
+  | HCE OS 2.0   | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
+  | Ubuntu 22.04 | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
+  | EulerOS release 2.9 | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
+
+  For detailed information, visit the CCE node operating systems [reference document](https://docs.otc.t-systems.com/cloud-container-engine/umn/nodes/node_oss.html).
+
 
 * `name` - (Required, String) Node Pool Name.
 
@@ -162,10 +168,10 @@ the AZ based on the AZ sequence. For more details see
 
 * `subnet_id` - (Optional, String, ForceNew) The ID of the subnet to which the NIC belongs. Changing this parameter will create a new resource.
 
-* `preinstall` - (Optional, String, ForceNew) Script required before installation. The input value can be a Base64 encoded string or not.
+* `preinstall` - (Optional, String) Script required before installation. The input value can be a Base64 encoded string or not.
   Changing this parameter will create a new resource.
 
-* `postinstall` - (Optional, String, ForceNew) Script required after installation. The input value can be a Base64 encoded string or not.
+* `postinstall` - (Optional, String) Script required after installation. The input value can be a Base64 encoded string or not.
   Changing this parameter will create a new resource.
 
 * `max_pods` - (Optional, Int, ForceNew) The maximum number of instances a node is allowed to create.
@@ -193,7 +199,7 @@ the AZ based on the AZ sequence. For more details see
 
 * `priority` - (Optional, Int) Weight of a node pool. A node pool with a higher weight has a higher priority during scaling.
 
-* `user_tags` - (Optional, Map, ForceNew) Tag of a VM, key/value pair format. Changing this parameter will create a new resource.
+* `user_tags` - (Optional, Map) Tag of a VM, key/value pair format.
 
 * `k8s_tags` - (Optional, Map) Tags of a Kubernetes node, key/value pair format.
 
@@ -220,6 +226,7 @@ the AZ based on the AZ sequence. For more details see
   * `extend_param` **DEPRECATED** - (Optional, String, ForceNew) Disk expansion parameters.
   Please use alternative parameter `extend_params`.
   * `kms_id` - (Optional, String, ForceNew) The Encryption KMS ID of the system volume. By default, it tries to get from env by `OS_KMS_ID`.
+  -> **NOTE:** Common I/O (SATA) will reach end of life, end of 2025.
 
 * `data_volumes` - (Required, List, ForceNew) Represents the data disk to be created. Changing this parameter will create a new resource.
   * `size` - (Required, Int, ForceNew) Disk size in GB.
@@ -228,6 +235,7 @@ the AZ based on the AZ sequence. For more details see
   * `extend_param` **DEPRECATED** - (Optional, String, ForceNew) Disk expansion parameters.
     Please use alternative parameter `extend_params`.
   * `kms_id` - (Optional, String, ForceNew) The Encryption KMS ID of the data volume. By default, it tries to get from env by `OS_KMS_ID`.
+  -> **NOTE:** Common I/O (SATA) will reach end of life, end of 2025.
 
 -> To enable encryption with the KMS. Firstly, you need to create the agency to grant KMS rights to EVS.
 The agency has to be created for a new project first with a user who has security `admin` permissions.

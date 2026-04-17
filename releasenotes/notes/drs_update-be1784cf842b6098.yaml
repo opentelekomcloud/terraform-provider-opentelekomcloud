@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[DRS]** New parameters introduced for ``resource/opentelekomcloud_drs_task_v3`` (`#3101 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3101>`_)

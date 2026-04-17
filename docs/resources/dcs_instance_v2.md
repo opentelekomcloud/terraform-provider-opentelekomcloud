@@ -16,47 +16,6 @@ Manages a DCSv2 instance in the OpenTelekomCloud DCS Service.
 
 ## Example Usage
 
-### Engine version 3.0 (`security_group_id` is required):
-
-```hcl
-variable "network_id" {}
-variable "vpc_id" {}
-
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name        = "secgroup_1"
-  description = "secgroup_1"
-}
-
-data "opentelekomcloud_dcs_az_v1" "az_1" {
-  name = "eu-de-01"
-}
-
-resource "opentelekomcloud_dcs_instance_v2" "instance_1" {
-  name               = "test_dcs_instance"
-  engine_version     = "3.0"
-  password           = "0TCTestP@ssw0rd"
-  engine             = "Redis"
-  capacity           = 2
-  vpc_id             = var.vpc_id
-  security_group_id  = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-  subnet_id          = var.network_id
-  availability_zones = ["eu-de-01"]
-  flavor             = "dcs.master_standby"
-
-  backup_policy {
-    save_days   = 1
-    backup_type = "manual"
-    begin_at    = "00:00-01:00"
-    period_type = "weekly"
-    backup_at   = [1, 2, 4, 6]
-  }
-  tags = {
-    environment = "basic"
-    managed_by  = "terraform"
-  }
-}
-```
-
 ### Engine version 5.0 (please pay attention of proper selection of flavor):
 
 ```hcl
@@ -97,7 +56,7 @@ The following arguments are supported:
   Changing this creates a new instance.
 
 * `engine_version` - (Optional, String, ForceNew) Specifies the version of a cache engine.
-  It is mandatory when the engine is *Redis*, the value can be 3.0, 4.0, 5.0 or 6.0.
+  It is mandatory when the engine is *Redis*, the value can be 4.0, 5.0, 6.0 or 7.0.
   Changing this creates a new instance.
 
 * `capacity` - (Required, Float) Specifies the cache capacity. Unit: GB.
@@ -117,7 +76,7 @@ The following arguments are supported:
 * `vpc_id` - (Required, String, ForceNew) The ID of VPC which the instance belongs to.
   Changing this creates a new instance resource.
 
-* `subnet_id` - (Required, String, ForceNew) The ID of subnet which the instance belongs to.
+* `subnet_id` - (Required, String, ForceNew) The ID of subnet (Network ID) which the instance belongs to.
   Changing this creates a new instance resource.
 
 * `security_group_id` - (Optional, String) The ID of the security group which the instance belongs to.
@@ -145,7 +104,7 @@ The following arguments are supported:
     + The new password cannot be the same as the old password.
 
 * `whitelist` - (Optional, List) Specifies the IP addresses which can access the instance.
-  This parameter is valid for Redis 4.0 and 5.0 versions. The structure is described below.
+  This parameter is valid for Redis 4.0 and 5.0 versions. The structure is described below. Required if `enable_whitelist` is used.
 
 * `enable_whitelist` - (Optional, Bool) Enable or disable the IP address whitelists. Defaults to true.
   If the whitelist is disabled, all IP addresses connected to the VPC can access the instance.
@@ -184,7 +143,7 @@ The following arguments are supported:
 
 * `access_user` - (Optional, String, ForceNew) Specifies the username used for accessing a DCS instance.
   The username starts with a letter, consists of 1 to 64 characters, and supports only letters, digits, and
-  hyphens (-). Changing this creates a new instance.
+  hyphens (-). Changing this creates a new instance. If the cache engine is Redis, leave this parameter empty.
 
 * `description` - (Optional, String) Specifies the description of an instance.
   It is a string that contains a maximum of 1024 characters.

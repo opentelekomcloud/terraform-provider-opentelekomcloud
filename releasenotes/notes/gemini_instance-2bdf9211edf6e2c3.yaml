@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Resource:** ``opentelekomcloud_gemini_instance_v3`` (`#3198 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3198>`_)

@@ -3,13 +3,16 @@ package cbr
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cbr/v3/policies"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cbr/v3/vaults"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -31,6 +34,10 @@ func ResourceCBRVaultV3() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"description": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -140,25 +147,19 @@ func ResourceCBRVaultV3() *schema.Resource {
 						"charging_mode": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"post_paid", "pre_paid",
-							}, false),
-							Default: "post_paid",
+							Computed: true,
 						},
 						"period_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"year", "month",
-							}, false),
-							Default: "month",
+							Type:       schema.TypeString,
+							Optional:   true,
+							Computed:   true,
+							Deprecated: "This parameter is no longer available after an API update",
 						},
 						"period_num": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							ForceNew: true,
+							Type:       schema.TypeInt,
+							Optional:   true,
+							Computed:   true,
+							Deprecated: "This parameter is no longer available after an API update",
 						},
 						"is_auto_renew": {
 							Type:     schema.TypeBool,
@@ -217,12 +218,38 @@ func ResourceCBRVaultV3() *schema.Resource {
 				},
 			},
 			"backup_policy_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Deprecated:    "Use parameter 'policy' instead.",
+				ConflictsWith: []string{"policy"},
+			},
+			"policy": {
+				Type:          schema.TypeSet,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"backup_policy_id"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"destination_vault_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+				Description: "The policy details to associate with the CBR vault.",
 			},
 			"tags": common.TagsSchema(),
 			"enterprise_project_id": {
 				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"locked": {
+				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
 			},
@@ -325,6 +352,8 @@ func resourceCBRVaultV3Read(_ context.Context, d *schema.ResourceData, meta inte
 		d.Set("bind_rules", bindRules),
 		d.Set("user_id", vault.UserID),
 		d.Set("created_at", vault.CreatedAt),
+		d.Set("locked", vault.Locked),
+		d.Set("policy", flattenPolicies(client, d.Id())),
 
 		setVaultBilling(d, &vault.Billing),
 	)
@@ -333,6 +362,37 @@ func resourceCBRVaultV3Read(_ context.Context, d *schema.ResourceData, meta inte
 	}
 
 	return nil
+}
+
+func flattenPolicies(client *golangsdk.ServiceClient, vaultID string) []map[string]interface{} {
+	policyList, err := policies.List(client, policies.ListOpts{
+		VaultID: vaultID,
+	})
+	if err != nil {
+		log.Printf("[ERROR] error querying CBR policies by vault ID (%s): %v", vaultID, err)
+		return nil
+	}
+	if len(policyList) < 1 {
+		return nil
+	}
+	results := make([]map[string]interface{}, 0, len(policyList))
+	for _, val := range policyList {
+		policy := map[string]interface{}{
+			"id": val.ID,
+		}
+		var destVaultID string
+		for _, av := range val.AssociatedVaults {
+			if av.VaultID == vaultID {
+				destVaultID = av.DestinationVaultID
+				break
+			}
+		}
+		if destVaultID != "" {
+			policy["destination_vault_id"] = destVaultID
+		}
+		results = append(results, policy)
+	}
+	return results
 }
 
 func resourceCBRVaultV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -357,6 +417,7 @@ func resourceCBRVaultV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		AutoBind:       d.Get("auto_bind").(bool),
 		BindRules:      cbrVaultBindRules(d),
 		AutoExpand:     d.Get("auto_expand").(bool),
+		Locked:         pointerto.Bool(d.Get("locked").(bool)),
 	}
 
 	vault, err := vaults.Create(client, opts)
@@ -372,7 +433,58 @@ func resourceCBRVaultV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
+	// Bind backup(/replication) policy to the vault, not batch bind.
+	if pol, ok := d.GetOk("policy"); ok {
+		err := updatePoliciesBinding(client, d.Id(), schema.NewSet(schema.HashString, nil), pol)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return resourceCBRVaultV3Read(ctx, d, meta)
+}
+
+func updatePoliciesBinding(client *golangsdk.ServiceClient, vaultID string, oPolicies, nPolicies interface{}) error {
+	rmSet, ok := oPolicies.(*schema.Set)
+	if !ok {
+		return fmt.Errorf("oPolicies is not *schema.Set")
+	}
+	newSet, ok := nPolicies.(*schema.Set)
+	if !ok {
+		return fmt.Errorf("nPolicies is not *schema.Set")
+	}
+
+	rmRaw := rmSet.Difference(newSet)
+	newRaw := newSet.Difference(rmSet)
+
+	for _, item := range rmRaw.List() {
+		p, ok := item.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected policy type in removal set: %T", item)
+		}
+		policyID, _ := p["id"].(string)
+		if _, err := vaults.UnbindPolicy(client, vaultID, vaults.BindPolicyOpts{
+			PolicyID: policyID,
+		}); err != nil {
+			return fmt.Errorf("error unbinding policy from vault (%s): %w", vaultID, err)
+		}
+	}
+
+	for _, item := range newRaw.List() {
+		p, ok := item.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected policy type in addition set: %T", item)
+		}
+		policyID, _ := p["id"].(string)
+		destVaultID, _ := p["destination_vault_id"].(string)
+		if _, err := vaults.BindPolicy(client, vaultID, vaults.BindPolicyOpts{
+			PolicyID:           policyID,
+			DestinationVaultId: destVaultID,
+		}); err != nil {
+			return fmt.Errorf("error binding policy to vault (%s): %w", vaultID, err)
+		}
+	}
+	return nil
 }
 
 func resourceExtraMapToExtra(src map[string]interface{}) (*vaults.ResourceExtraInfo, error) {
@@ -620,6 +732,12 @@ func resourceCBRVaultV3Update(ctx context.Context, d *schema.ResourceData, meta 
 		needsUpdate = true
 	}
 
+	if d.HasChange("locked") {
+		locked := d.Get("locked").(bool)
+		opts.Locked = &locked
+		needsUpdate = true
+	}
+
 	if needsUpdate {
 		_, err := vaults.Update(client, d.Id(), opts)
 		if err != nil {
@@ -633,7 +751,17 @@ func resourceCBRVaultV3Update(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	if d.HasChange("backup_policy_id") {
+	oldPolicyId, _ := d.GetChange("backup_policy_id")
+	isMigration := oldPolicyId.(string) != "" && d.Get("backup_policy_id").(string) == ""
+
+	if isMigration || d.HasChange("policy") {
+		oPolicies, nPolicies := d.GetChange("policy")
+		if err := updatePoliciesBinding(client, d.Id(), oPolicies, nPolicies); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	if !isMigration && d.HasChange("backup_policy_id") {
 		if err := updatePolicy(d, client); err != nil {
 			return diag.FromErr(err)
 		}

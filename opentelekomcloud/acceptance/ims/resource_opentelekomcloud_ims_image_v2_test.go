@@ -33,6 +33,7 @@ func TestAccImsImageV2_basic(t *testing.T) {
 					testAccCheckImsImageV2Tags(resourceImageName, "foo", "bar"),
 					testAccCheckImsImageV2Tags(resourceImageName, "key", "value"),
 					resource.TestCheckResourceAttr(resourceImageName, "name", "TFTest_image"),
+					resource.TestCheckResourceAttr(resourceImageName, "hw_firmware_type", "uefi"),
 				),
 			},
 			{
@@ -43,6 +44,7 @@ func TestAccImsImageV2_basic(t *testing.T) {
 					testAccCheckImsImageV2Tags(resourceImageName, "key", "value1"),
 					testAccCheckImsImageV2Tags(resourceImageName, "key2", "value2"),
 					resource.TestCheckResourceAttr(resourceImageName, "name", "TFTest_image_update"),
+					resource.TestCheckResourceAttr(resourceImageName, "hw_firmware_type", "bios"),
 				),
 			},
 		},
@@ -175,9 +177,10 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 }
 
 resource "opentelekomcloud_ims_image_v2" "image_1" {
-  name        = "TFTest_image"
-  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
-  description = "created by TerraformAccTest"
+  name             = "TFTest_image"
+  instance_id      = opentelekomcloud_compute_instance_v2.instance_1.id
+  description      = "created by TerraformAccTest"
+  hw_firmware_type = "uefi"
   tags = {
     foo = "bar"
     key = "value"
@@ -202,9 +205,10 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 }
 
 resource "opentelekomcloud_ims_image_v2" "image_1" {
-  name        = "TFTest_image_update"
-  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
-  description = "created by TerraformAccTest"
+  name             = "TFTest_image_update"
+  instance_id      = opentelekomcloud_compute_instance_v2.instance_1.id
+  description      = "created by TerraformAccTest"
+  hw_firmware_type = "bios"
   tags = {
     foo  = "bar"
     key  = "value1"

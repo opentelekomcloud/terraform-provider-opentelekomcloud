@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix: Remove depreciated arguments in ``resource/opentelekomcloud_networking_port_v2`` (`#2897 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2897>`_)

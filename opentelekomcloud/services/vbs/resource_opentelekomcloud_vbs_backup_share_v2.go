@@ -24,6 +24,8 @@ func ResourceVBSBackupShareV2() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
+		DeprecationMessage: "Please use `opentelekomcloud_cbr_vault_v3` resource instead.",
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(3 * time.Minute),

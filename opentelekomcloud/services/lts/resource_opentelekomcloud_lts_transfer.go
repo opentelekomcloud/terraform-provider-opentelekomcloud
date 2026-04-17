@@ -24,6 +24,8 @@ func ResourceLTSTransferV2() *schema.Resource {
 		UpdateContext: resourceTransferV2Update,
 		DeleteContext: resourceTransferV2Delete,
 
+		DeprecationMessage: "Please use `opentelekomcloud_lts_transfer_v2` resource instead",
+
 		CustomizeDiff: validatePeriods,
 
 		Schema: map[string]*schema.Schema{
@@ -163,7 +165,7 @@ func resourceTransferV2Read(_ context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
-	allTransfers, err := transfers.ListTransfers(client, transfers.ListTransfersOpts{})
+	allTransfers, err := transfers.List(client, transfers.ListTransfersOpts{})
 	if err != nil {
 		return fmterr.Errorf("error getting OpenTelekomCloud log transfer %s: %s", d.Id(), err)
 	}
@@ -228,9 +230,9 @@ func resourceTransferV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	updateOpts := transfers.UpdateTransferOpts{
 		TransferId: d.Id(),
-		TransferInfo: transfers.TransferInfo{
+		TransferInfo: &transfers.TransferInfoUpdate{
 			StorageFormat: d.Get("storage_format").(string),
-			TransferDetail: transfers.TransferDetail{
+			TransferDetail: &transfers.TransferDetail{
 				ObsPeriod:        d.Get("period").(int),
 				ObsPeriodUnit:    d.Get("period_unit").(string),
 				ObsBucketName:    d.Get("obs_bucket_name").(string),
@@ -250,7 +252,7 @@ func resourceTransferV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	log.Printf("[DEBUG]  Options: %#v", updateOpts)
 
-	_, err = transfers.UpdateTransfer(client, updateOpts)
+	_, err = transfers.Update(client, updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating log transfer: %s", err)
 	}
@@ -265,7 +267,7 @@ func resourceTransferV2Delete(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
-	err = transfers.DeleteTransfer(client, d.Id())
+	err = transfers.Delete(client, d.Id())
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault400); ok {
 			d.SetId("")

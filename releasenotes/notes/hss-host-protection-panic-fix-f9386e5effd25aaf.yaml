@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixed panic in ``opentelekomcloud_hss_host_protection_v5`` resource when host is not found
+    (`#3259 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3259>`_)

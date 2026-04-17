@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[OBS]** Add option to specify logging agency for ``opentelekomcloud_obs_bucket`` (`#2815 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2815>`_)

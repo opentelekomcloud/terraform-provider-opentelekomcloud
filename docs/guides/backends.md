@@ -6,6 +6,8 @@ description: |-
   Additional documentation about s3 backend configuration within OpenTelekomCloud.
 ---
 
+> Starting with Terraform v1.11.2, an issue affects all third-party S3 implementations, causing potential `.tfstate` corruption. If you encounter this problem, manually repair the state file and roll back to an earlier Terraform version. [Issue](https://github.com/hashicorp/terraform/issues/37130)
+
 A `backend` defines where Terraform stores its [state](https://developer.hashicorp.com/terraform/language/state) data files.
 
 The main terraform reference you can get at:

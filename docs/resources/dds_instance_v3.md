@@ -29,6 +29,9 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
     storage_engine = "wiredTiger"
   }
 
+  maintain_begin = "02:00"
+  maintain_end   = "03:00"
+
   availability_zone = var.availability_zone
   vpc_id            = var.vpc_id
   subnet_id         = var.subnet_id
@@ -165,6 +168,14 @@ The following arguments are supported:
 * `ssl` - (Optional, Bool) Specifies whether to enable or disable SSL. Defaults to true.
 -> The instance will be restarted in the background when switching SSL. Please operate with caution.
 
+* `maintain_begin` - (Optional, String) Specifies maintenance window start time. The value must be a valid value in the "HH:MM" format.
+  The current time is the UTC time. The value cannot be the same as the maintenance end time.
+  Gap between `maintain_begin` and `maintain_end` must be at least 1h.
+
+* `maintain_end` - (Optional, String) Specifies maintenance window end time. The value must be a valid value in the "HH:MM" format.
+  The current time is the UTC time. The value cannot be the same as the maintenance start time.
+  Gap between `maintain_begin` and `maintain_end` must be at least 1h.
+
 * `tags` - (Optional, Map) Tags key/value pairs to associate with the volume.
   Changing this updates the existing volume tags.
 
@@ -188,10 +199,10 @@ The `flavor` block supports:
   * For a single node instance, the value is `single`.
 
 * `num` - (Required, Int) Specifies the node quantity. Valid value:
-  * `mongos`: The value ranges from `2` to `16`.
-  * `shard`: The value ranges from `2` to `16`.
+  * `mongos`: The value ranges from `2` to `32`.
+  * `shard`: The value ranges from `2` to `32`.
   * `config`: The value is `1`.
-  * `replica`: The value is `1`.
+  * `replica`: The number of nodes can be `3`, `5`, or `7`.
   * `single`: The value is `1`.
 
 * `storage` - (Optional, String, ForceNew) Specifies the disk type. Valid value: `ULTRAHIGH` which indicates the type SSD.
@@ -282,4 +293,21 @@ DDSv3 Instance can be imported using the `id`, e.g.
 
 ```shell
 terraform import opentelekomcloud_dds_instance_v3.instance_1 c1851195-cdcb-4d23-96cb-032e6a3ee667
+```
+
+Note that the imported state may not be identical to your resource definition, due to some attributes missing from the
+API response or in a different data structures. The missing attributes include: `flavor`, `password` and `availability_zone`.
+It is generally recommended running `terraform plan` after importing an instance.
+You can then decide if changes should be applied to the instance, or the resource definition should be updated to
+align with the instance. Also, you can ignore changes as below.
+
+```hcl
+resource "opentelekomcloud_dds_instance_v3" "instance_1" {
+
+  lifecycle {
+    ignore_changes = [
+      flavor, password, availability_zone,
+    ]
+  }
+}
 ```

@@ -14,7 +14,7 @@ Up-to-date reference of API arguments for IAM protocol you can get at
 
 Manages identity protocol resource providing binding between identity provider and identity mappings.
 
--> You _must_ have security admin privileges in your OpenTelekomCloud cloud to use this resource. Please refer
+-> You _must_ have `Security Administrator` privileges in your OpenTelekomCloud cloud to use this resource. Please refer
 to [User Management Model](https://docs.otc.t-systems.com/en-us/usermanual/iam/iam_01_0034.html).
 
 ## Example Usage

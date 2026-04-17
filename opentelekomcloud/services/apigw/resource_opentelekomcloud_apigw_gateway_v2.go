@@ -16,9 +16,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/apigw/v2/gateway"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/apigw/v2/group"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceAPIGWv2() *schema.Resource {
@@ -134,6 +137,11 @@ func ResourceAPIGWv2() *schema.Resource {
 					"The start-time format of maintenance window is not 'xx:00:00' or "+
 						"the hour is not 02, 06, 10, 14, 18 or 22."),
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"maintain_end": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -159,6 +167,10 @@ func ResourceAPIGWv2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"default_group_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"private_egress_addresses": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -168,6 +180,7 @@ func ResourceAPIGWv2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"tags": common.TagsSchema(),
 		},
 	}
 }
@@ -192,6 +205,16 @@ func buildInstanceAvailabilityZones(d *schema.ResourceData) ([]string, error) {
 }
 
 func buildInstanceCreateOpts(d *schema.ResourceData) (gateway.CreateOpts, error) {
+	var tagList []tags.ResourceTag
+
+	gwTags := d.Get("tags").(map[string]interface{})
+	for key, val := range gwTags {
+		tagRequest := tags.ResourceTag{
+			Key:   key,
+			Value: val.(string),
+		}
+		tagList = append(tagList, tagRequest)
+	}
 	result := gateway.CreateOpts{
 		InstanceName:                 d.Get("name").(string),
 		SpecID:                       d.Get("spec_id").(string),
@@ -204,6 +227,8 @@ func buildInstanceCreateOpts(d *schema.ResourceData) (gateway.CreateOpts, error)
 		LoadBalancerProvider:         d.Get("loadbalancer_provider").(string),
 		IngressBandwidthSize:         pointerto.Int(d.Get("ingress_bandwidth_size").(int)),
 		IngressBandwidthChargingMode: d.Get("ingress_bandwidth_charging_mode").(string),
+		EnterpriseProjectId:          d.Get("enterprise_project_id").(string),
+		Tags:                         tagList,
 	}
 
 	azList, err := buildInstanceAvailabilityZones(d)
@@ -284,6 +309,15 @@ func resourceGatewayRead(_ context.Context, d *schema.ResourceData, meta interfa
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, fmt.Sprintf("error getting instance (%s) details form server", instanceId))
 	}
+
+	groups, err := group.List(client, group.ListOpts{
+		GatewayID: instanceId,
+		Name:      "DEFAULT",
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	log.Printf("[DEBUG] Retrieved the dedicated instance (%s): %#v", instanceId, resp)
 
 	mErr := multierror.Append(nil,
@@ -306,6 +340,7 @@ func resourceGatewayRead(_ context.Context, d *schema.ResourceData, meta interfa
 		d.Set("vpc_ingress_address", resp.IngressIp),
 		d.Set("public_egress_address", resp.NatEipAddress),
 		d.Set("vpcep_service_name", resp.EndpointService.ServiceName),
+		d.Set("enterprise_project_id", resp.EnterpriseProjectId),
 		// d.Set("bandwidth_charging_mode", resp.BandwidthChargingMode),
 		// d.Set("ingress_bandwidth_charging_mode", resp.IngressBandwidthChargingMode),
 	)
@@ -316,10 +351,28 @@ func resourceGatewayRead(_ context.Context, d *schema.ResourceData, meta interfa
 	if len(resp.NodeIps.Shubao) > 0 {
 		mErr = multierror.Append(mErr, d.Set("private_egress_addresses", resp.NodeIps.Shubao))
 	}
+
+	if len(groups) > 0 {
+		mErr = multierror.Append(mErr, d.Set("default_group_id", groups[0].ID))
+	}
+
 	if mErr.ErrorOrNil() != nil {
 		return diag.Errorf("error saving resource fields of the dedicated instance: %s", mErr)
 	}
 
+	// Set tags
+	tagList, err := gateway.GetTags(client, d.Id())
+	if err != nil {
+		return fmterr.Errorf("error fetching OpenTelekomCloud image tags: %s", err)
+	}
+
+	tagmap := make(map[string]string)
+	for _, val := range tagList {
+		tagmap[val.Key] = val.Value
+	}
+	if err := d.Set("tags", tagmap); err != nil {
+		return fmterr.Errorf("[DEBUG] Error saving tags for OpenTelekomCloud APIGW Instance (%s): %s", d.Id(), err)
+	}
 	return nil
 }
 
@@ -395,6 +448,12 @@ func resourceGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	if d.HasChange("bandwidth_size") {
 		if err = updateApigInstanceEgressAccess(d, client); err != nil {
 			return diag.Errorf("update egress access failed: %s", err)
+		}
+	}
+
+	if d.HasChange("tags") {
+		if err = updateApigInstanceTags(client, d); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
@@ -495,4 +554,58 @@ func InstanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceId string
 
 		return resp, "PENDING", nil
 	}
+}
+
+func updateApigInstanceTags(client *golangsdk.ServiceClient, d *schema.ResourceData) error {
+	var (
+		err            error
+		oldVal, newVal = d.GetChange("tags")
+	)
+
+	rmTagsMap := map[string]interface{}{}
+	if oldVal != nil {
+		rmTagsMap = oldVal.(map[string]interface{})
+	}
+	addTagsMap := map[string]interface{}{}
+	if newVal != nil {
+		addTagsMap = newVal.(map[string]interface{})
+	}
+
+	rmTags := make([]tags.ResourceTag, 0, len(rmTagsMap))
+	for k, v := range rmTagsMap {
+		rmTags = append(rmTags, tags.ResourceTag{
+			Key:   k,
+			Value: fmt.Sprintf("%v", v),
+		})
+	}
+
+	addTags := make([]tags.ResourceTag, 0, len(addTagsMap))
+	for k, v := range addTagsMap {
+		addTags = append(addTags, tags.ResourceTag{
+			Key:   k,
+			Value: fmt.Sprintf("%v", v),
+		})
+	}
+
+	if len(rmTags) > 0 {
+		err = gateway.UpdateTags(client, &gateway.TagsUpdateOpts{
+			InstanceId: d.Id(),
+			Action:     "delete",
+			Tags:       rmTags,
+		})
+		if err != nil {
+			return fmt.Errorf("unable to remove the instance tags: %s", err)
+		}
+	}
+	if len(addTags) > 0 {
+		err = gateway.UpdateTags(client, &gateway.TagsUpdateOpts{
+			InstanceId: d.Id(),
+			Action:     "create",
+			Tags:       addTags,
+		})
+		if err != nil {
+			return fmt.Errorf("unable to add the instance tags: %s", err)
+		}
+	}
+	return nil
 }

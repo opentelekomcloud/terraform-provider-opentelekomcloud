@@ -31,6 +31,10 @@ resource "opentelekomcloud_apigw_gateway_v2" "gateway" {
   ingress_bandwidth_size          = 5
   ingress_bandwidth_charging_mode = "bandwidth"
   maintain_begin                  = "22:00:00"
+
+  tags = {
+    foo = "bar"
+  }
 }
 ```
 
@@ -61,6 +65,9 @@ The following arguments are supported:
   access is enabled for the gateway. After you configure the bandwidth for the gateway,
   users can access resources on public networks.
 
+* `enterprise_project_id` - (Optional, String) Specifies the enterprise project ID to which the dedicated
+  instance belongs. This parameter is required for enterprise users.
+
 * `bandwidth_charging_mode` - (Optional, String, ForceNew) Billing type of the public outbound access bandwidth.
   The valid values are as follows:
   + **bandwidth**: Billed by bandwidth.
@@ -82,12 +89,16 @@ The following arguments are supported:
 * `maintain_begin` - (Optional, String) Specifies start time of the maintenance time window.
   It must be in the format "xx:00:00". The value of xx can be 02, 06, 10, 14, 18, or 22.
 
+* `tags` - (Optional, Map) Specifies the key/value pairs to associate with the dedicated instance.
+
 ## Attributes Reference
 
 All above argument parameters can be exported as attribute parameters along with attribute reference.
 
 * `maintain_end` - End time of the maintenance time window. It must be in the format "xx:00:00".
   There is a 4-hour difference between the start time and end time.
+
+* `default_group_id` - The ID of `DEFAULT` group.
 
 * `vpc_ingress_address` - VPC ingress address.
 

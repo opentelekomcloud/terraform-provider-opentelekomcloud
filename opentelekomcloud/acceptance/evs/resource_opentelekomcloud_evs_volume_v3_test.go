@@ -18,42 +18,72 @@ import (
 
 const resourceVolumeV3Name = "opentelekomcloud_evs_volume_v3.volume_1"
 
+func getVolumeResourceFunc(conf *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
+	c, err := conf.BlockStorageV3Client(env.OS_REGION_NAME)
+	if err != nil {
+		return nil, fmt.Errorf("error creating OpenTelekomCloud BlockStorage V3 client: %s", err)
+	}
+	return volumes.Get(c, state.Primary.ID).Extract()
+}
+
 func TestAccEvsStorageV3Volume_basic(t *testing.T) {
 	var volume volumes.Volume
+
+	rc := common.InitResourceCheck(
+		resourceVolumeV3Name,
+		&volume,
+		getVolumeResourceFunc,
+	)
+
 	t.Parallel()
 	quotas.BookMany(t, volumeQuotas(12))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEvsStorageV3VolumeBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeExists(resourceVolumeV3Name, &volume),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceVolumeV3Name, "name", "volume_1"),
 				),
 			},
 			{
 				Config: testAccEvsStorageV3VolumeUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeExists(resourceVolumeV3Name, &volume),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceVolumeV3Name, "name", "volume_1-updated"),
 				),
+			},
+			{
+				ResourceName:      resourceVolumeV3Name,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"cascade",
+				},
 			},
 		},
 	})
 }
 
 func TestAccEvsStorageV3Volume_tags(t *testing.T) {
+	var volume volumes.Volume
+
+	rc := common.InitResourceCheck(
+		resourceVolumeV3Name,
+		&volume,
+		getVolumeResourceFunc,
+	)
 	t.Parallel()
 	quotas.BookMany(t, volumeQuotas(12))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEvsStorageV3VolumeTags,
@@ -73,18 +103,24 @@ func TestAccEvsStorageV3Volume_tags(t *testing.T) {
 
 func TestAccEvsStorageV3Volume_image(t *testing.T) {
 	var volume volumes.Volume
+
+	rc := common.InitResourceCheck(
+		resourceVolumeV3Name,
+		&volume,
+		getVolumeResourceFunc,
+	)
 	t.Parallel()
 	quotas.BookMany(t, volumeQuotas(12))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEvsStorageV3VolumeImage,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeExists(resourceVolumeV3Name, &volume),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceVolumeV3Name, "name", "volume_1"),
 				),
 			},
@@ -94,18 +130,24 @@ func TestAccEvsStorageV3Volume_image(t *testing.T) {
 
 func TestAccEvsStorageV3Volume_timeout(t *testing.T) {
 	var volume volumes.Volume
+
+	rc := common.InitResourceCheck(
+		resourceVolumeV3Name,
+		&volume,
+		getVolumeResourceFunc,
+	)
 	t.Parallel()
 	quotas.BookMany(t, volumeQuotas(12))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEvsStorageV3VolumeTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeExists(resourceVolumeV3Name, &volume),
+					rc.CheckResourceExists(),
 				),
 			},
 		},
@@ -113,13 +155,20 @@ func TestAccEvsStorageV3Volume_timeout(t *testing.T) {
 }
 
 func TestAccEvsStorageV3Volume_volumeType(t *testing.T) {
+	var volume volumes.Volume
+
+	rc := common.InitResourceCheck(
+		resourceVolumeV3Name,
+		&volume,
+		getVolumeResourceFunc,
+	)
 	t.Parallel()
 	quotas.BookMany(t, volumeQuotas(12))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccEvsStorageV3VolumeVolumeType,
@@ -132,6 +181,12 @@ func TestAccEvsStorageV3Volume_volumeType(t *testing.T) {
 
 func TestAccEvsStorageV3Volume_resize(t *testing.T) {
 	var volume volumes.Volume
+
+	rc := common.InitResourceCheck(
+		resourceVolumeV3Name,
+		&volume,
+		getVolumeResourceFunc,
+	)
 	var volumeUpScaled volumes.Volume
 	t.Parallel()
 	quotas.BookMany(t, volumeQuotas(20))
@@ -139,12 +194,12 @@ func TestAccEvsStorageV3Volume_resize(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEvsStorageV3VolumeBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeExists(resourceVolumeV3Name, &volume),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceVolumeV3Name, "name", "volume_1"),
 				),
 			},
@@ -159,58 +214,6 @@ func TestAccEvsStorageV3Volume_resize(t *testing.T) {
 	})
 }
 
-func testAccCheckEvsStorageV3VolumeDestroy(s *terraform.State) error {
-	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.BlockStorageV3Client(env.OS_REGION_NAME)
-	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud BlockStorageV3 client: %s", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_evs_volume_v3" {
-			continue
-		}
-
-		_, err := volumes.Get(client, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("volume still exists")
-		}
-	}
-
-	return nil
-}
-
-func testAccCheckEvsStorageV3VolumeExists(n string, volume *volumes.Volume) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no ID is set")
-		}
-
-		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.BlockStorageV3Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud BlockStorageV3 client: %s", err)
-		}
-
-		found, err := volumes.Get(client, rs.Primary.ID).Extract()
-		if err != nil {
-			return err
-		}
-
-		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("volume not found")
-		}
-
-		*volume = *found
-
-		return nil
-	}
-}
 func testAccCheckEvsStorageV3VolumePersists(n string, volume, oldVolume *volumes.Volume) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -253,7 +256,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_1"
   description       = "first test volume"
   availability_zone = "%s"
-  volume_type       = "SATA"
+  volume_type       = "SSD"
   size              = 12
 }
 `, env.OS_AVAILABILITY_ZONE)
@@ -262,7 +265,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_1-updated"
   description       = "first test volume"
   availability_zone = "%s"
-  volume_type       = "SATA"
+  volume_type       = "SSD"
   size              = 12
 }
 `, env.OS_AVAILABILITY_ZONE)
@@ -271,7 +274,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_tags"
   description       = "test volume with tags"
   availability_zone = "%s"
-  volume_type       = "SATA"
+  volume_type       = "SSD"
   tags = {
     muh = "value-create"
     kuh = "value-create"
@@ -284,7 +287,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_tags-updated"
   description       = "test volume with tags"
   availability_zone = "%s"
-  volume_type       = "SATA"
+  volume_type       = "SSD"
   tags = {
     muh = "value-update"
   }
@@ -297,7 +300,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_1"
   availability_zone = "%s"
-  volume_type       = "SATA"
+  volume_type       = "SSD"
   size              = 12
   image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
 }
@@ -308,7 +311,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   description       = "first test volume"
   availability_zone = "%s"
   size              = 12
-  volume_type       = "SATA"
+  volume_type       = "SSD"
   device_type       = "SCSI"
   timeouts {
     create = "10m"
@@ -331,7 +334,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_1"
   description       = "first test volume"
   availability_zone = "%s"
-  volume_type       = "SATA"
+  volume_type       = "SSD"
   size              = 20
 }
 `, env.OS_AVAILABILITY_ZONE)

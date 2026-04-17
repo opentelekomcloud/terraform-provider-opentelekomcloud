@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[IAM]** Clarify ``Security Administrator`` role requirement in IAM resources documentation (`#3284 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3284>`_)

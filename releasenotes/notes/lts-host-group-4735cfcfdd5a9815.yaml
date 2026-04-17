@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[LTS]** New LTS host group resource ``resource/opentelekomcloud_lts_host_group_v3`` (`#2876 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2876>`_)

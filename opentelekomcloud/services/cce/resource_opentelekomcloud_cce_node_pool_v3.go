@@ -93,9 +93,10 @@ func ResourceCCENodePoolV3() *schema.Resource {
 							ValidateFunc: validation.IntBetween(0xa, 0x8000),
 						},
 						"volumetype": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:             schema.TypeString,
+							Required:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: common.ValidateDiskType,
 						},
 						"kms_id": {
 							Type:        schema.TypeString,
@@ -130,9 +131,10 @@ func ResourceCCENodePoolV3() *schema.Resource {
 							ValidateFunc: validation.IntBetween(0x64, 0x8000),
 						},
 						"volumetype": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:             schema.TypeString,
+							Required:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: common.ValidateDiskType,
 						},
 						"kms_id": {
 							Type:        schema.TypeString,
@@ -180,7 +182,6 @@ func ResourceCCENodePoolV3() *schema.Resource {
 			"user_tags": {
 				Type:     schema.TypeMap,
 				Optional: true,
-				ForceNew: true,
 			},
 			"taints": {
 				Type:     schema.TypeList,
@@ -235,13 +236,13 @@ func ResourceCCENodePoolV3() *schema.Resource {
 			"preinstall": {
 				Type:      schema.TypeString,
 				Optional:  true,
-				ForceNew:  true,
+				Computed:  true,
 				StateFunc: common.GetHashOrEmpty,
 			},
 			"postinstall": {
 				Type:      schema.TypeString,
 				Optional:  true,
-				ForceNew:  true,
+				Computed:  true,
 				StateFunc: common.GetHashOrEmpty,
 			},
 			"max_pods": {
@@ -484,6 +485,8 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("key_pair", s.Spec.NodeTemplate.Login.SshKey),
 		d.Set("scale_enable", s.Spec.Autoscaling.Enable),
 		d.Set("max_pods", s.Spec.NodeTemplate.ExtendParam.MaxPods),
+		d.Set("postinstall", common.GetHashOrEmpty(s.Spec.NodeTemplate.ExtendParam.PostInstall)),
+		d.Set("preinstall", common.GetHashOrEmpty(s.Spec.NodeTemplate.ExtendParam.PreInstall)),
 		d.Set("subnet_id", s.Spec.NodeTemplate.NodeNicSpec.PrimaryNic.SubnetId),
 		d.Set("security_group_ids", s.Spec.CustomSecurityGroupIds),
 		d.Set("root_volume", rootVolume),
@@ -526,6 +529,10 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf(setError, "k8s_tags", err)
 	}
 
+	if err := d.Set("user_tags", common.TagsToMap(s.Spec.NodeTemplate.UserTags)); err != nil {
+		return fmterr.Errorf(setError, "user_tags", err)
+	}
+
 	var volumes []interface{}
 	for _, pairObject := range s.Spec.NodeTemplate.DataVolumes {
 		volume := map[string]interface{}{
@@ -555,12 +562,56 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf(cceClientError, err)
 	}
 
+	clusterID := d.Get("cluster_id").(string)
+
+	// Get current node pool state from API to preserve values not changed by user
+	currentPool, err := nodepools.Get(client, clusterID, d.Id())
+	if err != nil {
+		return fmterr.Errorf("error getting current CCE Node Pool state: %w", err)
+	}
+
+	base64PreInstall := currentPool.Spec.NodeTemplate.ExtendParam.PreInstall
+	base64PostInstall := currentPool.Spec.NodeTemplate.ExtendParam.PostInstall
+
+	if d.HasChange("preinstall") {
+		base64PreInstall = ""
+		if v, ok := d.GetOk("preinstall"); ok {
+			base64PreInstall = common.InstallScriptEncode(v.(string))
+		}
+	}
+	if d.HasChange("postinstall") {
+		base64PostInstall = ""
+		if v, ok := d.GetOk("postinstall"); ok {
+			base64PostInstall = common.InstallScriptEncode(v.(string))
+		}
+	}
+	var loginSpec nodes.LoginSpec
+	if common.HasFilledOpt(d, "key_pair") {
+		loginSpec = nodes.LoginSpec{SshKey: d.Get("key_pair").(string)}
+	}
+	if common.HasFilledOpt(d, "password") {
+		loginSpec = nodes.LoginSpec{
+			UserPassword: nodes.UserPassword{
+				Username: "root",
+				Password: d.Get("password").(string),
+			},
+		}
+	}
+
+	// Use current API value for initial_node_count unless explicitly changed by user.
+	// This prevents unwanted scaling when autoscaler has modified the node count.
+	// Reference: https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/2249
+	initialNodeCount := currentPool.Spec.InitialNodeCount
+	if d.HasChange("initial_node_count") {
+		initialNodeCount = d.Get("initial_node_count").(int)
+	}
+
 	updateOpts := nodepools.UpdateOpts{
 		Metadata: nodepools.UpdateMetaData{
 			Name: d.Get("name").(string),
 		},
 		Spec: nodepools.UpdateSpec{
-			InitialNodeCount: d.Get("initial_node_count").(int),
+			InitialNodeCount: initialNodeCount,
 			Autoscaling: nodepools.UpdateAutoscalingSpec{
 				Enable:                d.Get("scale_enable").(bool),
 				MinNodeCount:          d.Get("min_node_count").(int),
@@ -568,14 +619,34 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 				ScaleDownCooldownTime: d.Get("scale_down_cooldown_time").(int),
 				Priority:              d.Get("priority").(int),
 			},
-			NodeTemplate: nodepools.UpdateNodeTemplate{
-				K8sTags: resourceCCENodeK8sTags(d),
-				Taints:  resourceCCENodeTaints(d),
+			NodeTemplate: nodes.Spec{
+				Flavor:      d.Get("flavor").(string),
+				Az:          d.Get("availability_zone").(string),
+				Os:          d.Get("os").(string),
+				Login:       loginSpec,
+				RootVolume:  resourceCCERootVolume(d),
+				DataVolumes: resourceCCEDataVolume(d),
+				Count:       1,
+				NodeNicSpec: nodes.NodeNicSpec{
+					PrimaryNic: nodes.PrimaryNic{
+						SubnetId: d.Get("subnet_id").(string),
+					},
+				},
+				ExtendParam: nodes.ExtendParam{
+					MaxPods:                 d.Get("max_pods").(int),
+					PreInstall:              base64PreInstall,
+					PostInstall:             base64PostInstall,
+					DockerBaseSize:          d.Get("docker_base_size").(int),
+					DockerLVMConfigOverride: d.Get("docker_lvm_config_override").(string),
+					AgencyName:              d.Get("agency_name").(string),
+				},
+				Taints:   resourceCCENodeTaints(d),
+				K8sTags:  resourceCCENodeK8sTags(d),
+				UserTags: resourceCCENodePoolUserTags(d),
 			},
 		},
 	}
 
-	clusterID := d.Get("cluster_id").(string)
 	_, err = nodepools.Update(client, clusterID, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating Open Telekom Cloud CCE Node Pool: %w", err)

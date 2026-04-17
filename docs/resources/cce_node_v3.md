@@ -36,12 +36,12 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
 
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
   data_volumes {
     size       = 100
@@ -69,10 +69,11 @@ The following arguments are supported:
   Supported OS depends on kubernetes version of the cluster.
   | OS           | Kubernetes version |
   | :----------- | :----------------- |
-  | HCE OS 2.0   | `v1.29`, `v1.28`, `v1.27`, `v1.25` |
-  | Ubuntu 22.04 | `v1.29`, `v1.28`, `v1.27`, `v1.25` |
-  | EulerOS release 2.9 | `v1.29`, `v1.28`, `v1.27`, `v1.25`, `v1.23`, `v1.21`, `V1.19` |
-  | EulerOS release 2.5 | `v1.25`, `v1.23`, `v1.21`, `V1.19` |
+  | HCE OS 2.0   | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
+  | Ubuntu 22.04 | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
+  | EulerOS release 2.9 | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
+
+  For detailed information, visit the CCE node operating systems [reference document](https://docs.otc.t-systems.com/cloud-container-engine/umn/nodes/node_oss.html).
 
 * `billing_mode` - (Optional, ForceNew, Int) Node's billing mode: The value is `0` (on demand). Changing this parameter will create a new resource.
 
@@ -94,6 +95,7 @@ The following arguments are supported:
               `containerd` - Containerd
 
 * `agency_name` - (Optional) IAM agency name. Changing this parameter will create a new resource.
+  -> **NOTE:** The IAM agency requires `tms:resourceTags:list` in order to properly read resource state.
 
 * `taints` - (Optional, ForceNew, List) Taints to created nodes to configure anti-affinity.
   * `key` - (Required, String) A key must contain 1 to 63 characters starting with a letter or digit. Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed. A DNS subdomain name can be used as the prefix of a key.
@@ -167,6 +169,7 @@ The following arguments are supported:
   * `extend_param` **DEPRECATED** - (Optional, ForceNew, String) Disk expansion parameters.
   Please use alternative parameter `extend_params`.
   * `kms_id` - (Optional, ForceNew, String) The Encryption KMS ID of the system volume. By default, it tries to get from env by `OS_KMS_ID`.
+  -> **NOTE:** Common I/O (SATA) will reach end of life, end of 2025.
 
 * `data_volumes` - (Required, ForceNew, List) Represents the data disk to be created. Changing this parameter will create a new resource.
   * `size` - (Required, ForceNew, Int) Disk size in GB.
@@ -175,6 +178,7 @@ The following arguments are supported:
   * `extend_param` **DEPRECATED** - (Optional, ForceNew, String) Disk expansion parameters.
   Please use alternative parameter `extend_params`.
   * `kms_id` - (Optional, ForceNew, String) The Encryption KMS ID of the data volume. By default, it tries to get from env by `OS_KMS_ID`.
+  -> **NOTE:** Common I/O (SATA) will reach end of life, end of 2025.
 
 -> To enable encryption with the KMS. Firstly, you need to create the agency to grant KMS rights to EVS.
 The agency has to be created for a new project first with a user who has security `admin` permissions.
@@ -197,3 +201,30 @@ This resource provides the following timeouts configuration options:
 - `create` - Default is 10 minutes.
 
 - `delete` - Default is 10 minutes.
+
+## Import
+
+CCE node can be imported using the cluster ID and node ID separated by a slash, e.g.:
+
+```bash
+$ terraform import opentelekomcloud_cce_node_v3.my_node 5c20fdad-7288-11eb-b817-0255ac10158b/e9287dff-7288-11eb-b817-0255ac10158b
+```
+
+Note that the imported state may not be identical to your resource definition, due to some attributes missing from the
+API response, security or some other reason. The missing attributes include:
+`key_pair`, `private_ip`, `eip_id`, `iptype`, `bandwidth_charge_mode`,
+`bandwidth_size`, `share_type`, `extend_params`, `dedicated_host_id`, `labels`, `taints`
+and arguments for pre-paid. It is generally recommended running `terraform plan` after importing a node.
+You can then decide if changes should be applied to the node, or the resource definition should be updated to align
+with the node. Also you can ignore changes as below.
+
+```hcl
+resource "opentelekomcloud_cce_node_v3" "my_node" {
+
+  lifecycle {
+    ignore_changes = [
+      extend_params, labels,
+    ]
+  }
+}
+```

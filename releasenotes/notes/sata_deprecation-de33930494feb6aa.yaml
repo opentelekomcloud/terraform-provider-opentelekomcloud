@@ -1,0 +1,4 @@
+---
+deprecations:
+  - |
+    **[SATA]** Disk type deprecation warning for various resources  (`#2831 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2831>`_)

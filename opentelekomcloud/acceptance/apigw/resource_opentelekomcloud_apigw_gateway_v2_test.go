@@ -48,6 +48,10 @@ func TestAccAPIGWv2Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceGwName, "spec_id", "BASIC"),
 					resource.TestCheckResourceAttr(resourceGwName, "description", "test gateway"),
 					resource.TestCheckResourceAttr(resourceGwName, "maintain_begin", "22:00:00"),
+					resource.TestCheckResourceAttrSet(resourceGwName, "default_group_id"),
+					resource.TestCheckResourceAttr(resourceGwName, "tags.%", "2"),
+					resource.TestCheckResourceAttr(resourceGwName, "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceGwName, "tags.key", "value"),
 				),
 			},
 			{
@@ -58,6 +62,9 @@ func TestAccAPIGWv2Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceGwName, "description", "test gateway 2"),
 					resource.TestCheckResourceAttr(resourceGwName, "bandwidth_size", "0"),
 					resource.TestCheckResourceAttr(resourceGwName, "maintain_begin", "02:00:00"),
+					resource.TestCheckResourceAttr(resourceGwName, "tags.%", "2"),
+					resource.TestCheckResourceAttr(resourceGwName, "tags.foo", "baar"),
+					resource.TestCheckResourceAttr(resourceGwName, "tags.newKey", "value"),
 				),
 			},
 			{
@@ -90,6 +97,11 @@ resource "opentelekomcloud_apigw_gateway_v2" "gateway"{
   ingress_bandwidth_size          = 5
   ingress_bandwidth_charging_mode = "bandwidth"
   maintain_begin                  = "22:00:00"
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
 }
 `, common.DataSourceSubnet, common.DataSourceSecGroupDefault, gatewayName)
 }
@@ -111,6 +123,11 @@ resource "opentelekomcloud_apigw_gateway_v2" "gateway"{
   ingress_bandwidth_size          = 5
   ingress_bandwidth_charging_mode = "bandwidth"
   maintain_begin                  = "02:00:00"
+
+  tags = {
+    foo    = "baar"
+    newKey = "value"
+  }
 }
 `, common.DataSourceSubnet, common.DataSourceSecGroupDefault, gatewayName)
 }

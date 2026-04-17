@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[RMS]** Fix pagination and filter bugs in ``datasource/opentelekomcloud_rms_policy_states_v1`` where only the first page of results was returned and filtering by ``compliance_state`` could return unfiltered data
+    (`#3315 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3315>`_)

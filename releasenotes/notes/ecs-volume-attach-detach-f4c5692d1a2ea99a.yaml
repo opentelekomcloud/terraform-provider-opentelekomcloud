@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ECS]** Add `force_detach` in ``resource/opentelekomcloud_compute_volume_attach_v2`` (`#3203 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3203>`_)

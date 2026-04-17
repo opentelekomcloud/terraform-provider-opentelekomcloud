@@ -67,12 +67,6 @@ func ResourceSFSTurboShareV1() *schema.Resource {
 				ForceNew: true,
 				Default:  "STANDARD",
 			},
-			"enhanced": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
-			},
 			"availability_zone": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -92,10 +86,29 @@ func ResourceSFSTurboShareV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"enhanced": {
+				Type:       schema.TypeBool,
+				Optional:   true,
+				ForceNew:   true,
+				Computed:   true,
+				Deprecated: "Use field expand_type instead for standard-enhanced or performance-enhanced fileshare",
+			},
 			"crypt_key_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+			},
+			"expand_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
+			"hpc_bw": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
 			},
 			"version": {
 				Type:     schema.TypeString,
@@ -106,10 +119,6 @@ func ResourceSFSTurboShareV1() *schema.Resource {
 				Computed: true,
 			},
 			"available_capacity": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"expand_type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -137,15 +146,13 @@ func resourceSFSTurboShareV1Create(ctx context.Context, d *schema.ResourceData, 
 		AvailabilityZone: d.Get("availability_zone").(string),
 		Metadata: shares.Metadata{
 			CryptKeyID: d.Get("crypt_key_id").(string),
+			ExpandType: d.Get("expand_type").(string),
+			HpcBW:      d.Get("hpc_bw").(string),
 		},
 	}
 
-	if _, ok := d.GetOk("enhanced"); ok {
-		createOpts.Metadata.ExpandType = "bandwidth"
-	}
-
 	log.Printf("[DEBUG] Create SFS turbo with option: %+v", createOpts)
-	share, err := shares.Create(client, createOpts).Extract()
+	share, err := shares.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud SFS Turbo: %s", err)
 	}
@@ -179,25 +186,33 @@ func resourceSFSTurboShareV1Read(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	share, err := shares.Get(client, d.Id()).Extract()
+	share, err := shares.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "Error deleting SFS Turbo")
+	}
+
+	var shareType string
+	if share.ExpandType == "hpc" {
+		shareType = "STANDARD"
+	} else {
+		shareType = share.ShareType
 	}
 
 	mErr := multierror.Append(nil,
 		d.Set("name", share.Name),
 		d.Set("share_proto", share.ShareProto),
-		d.Set("share_type", share.ShareType),
+		d.Set("share_type", shareType),
 		d.Set("vpc_id", share.VpcID),
 		d.Set("subnet_id", share.SubnetID),
 		d.Set("security_group_id", share.SecurityGroupID),
 		d.Set("version", share.Version),
-		d.Set("expand_type", share.ExpandType),
 		d.Set("region", config.GetRegion(d)),
 		d.Set("availability_zone", share.AvailabilityZone),
 		d.Set("available_capacity", share.AvailCapacity),
 		d.Set("export_location", share.ExportLocation),
 		d.Set("crypt_key_id", share.CryptKeyID),
+		d.Set("expand_type", share.ExpandType),
+		d.Set("hpc_bw", share.HpcBW),
 	)
 
 	if mErr.ErrorOrNil() != nil {
@@ -233,7 +248,7 @@ func resourceSFSTurboShareV1Update(ctx context.Context, d *schema.ResourceData, 
 			Extend: shares.ExtendOpts{NewSize: newSize.(int)},
 		}
 
-		if err := shares.Expand(client, d.Id(), expandOpts).ExtractErr(); err != nil {
+		if err := shares.Expand(client, d.Id(), expandOpts); err != nil {
 			return fmterr.Errorf("error expanding OpenTelekomCloud Share File size: %s", err)
 		}
 
@@ -261,7 +276,7 @@ func resourceSFSTurboShareV1Update(ctx context.Context, d *schema.ResourceData, 
 			},
 		}
 
-		if err := shares.ChangeSG(client, d.Id(), changeSGOpts).ExtractErr(); err != nil {
+		if err := shares.ChangeSG(client, d.Id(), changeSGOpts); err != nil {
 			return fmterr.Errorf("error changing security group OpenTelekomCloud Share File size: %s", err)
 		}
 
@@ -294,7 +309,7 @@ func resourceSFSTurboShareV1Delete(ctx context.Context, d *schema.ResourceData, 
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	if err := shares.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := shares.Delete(client, d.Id()); err != nil {
 		return common.CheckDeletedDiag(d, err, "Error deleting SFS Turbo")
 	}
 
@@ -319,7 +334,7 @@ func resourceSFSTurboShareV1Delete(ctx context.Context, d *schema.ResourceData, 
 
 func waitForSFSTurboStatus(client *golangsdk.ServiceClient, shareID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		share, err := shares.Get(client, shareID).Extract()
+		share, err := shares.Get(client, shareID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[INFO] Successfully deleted OpenTelekomCloud Shared File System: %s", shareID)
@@ -336,7 +351,7 @@ func waitForSFSTurboStatus(client *golangsdk.ServiceClient, shareID string) reso
 
 func waitForSFSTurboSubStatus(client *golangsdk.ServiceClient, shareID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		share, err := shares.Get(client, shareID).Extract()
+		share, err := shares.Get(client, shareID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[INFO] Successfully deleted OpenTelekomCloud Shared File System: %s", shareID)

@@ -23,7 +23,6 @@ import (
 	tag "github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/backups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/configurations"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/flavors"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/security"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -48,7 +47,6 @@ func ResourceRdsInstanceV3() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-			// validateRDSv3Flavor("flavor"),
 			common.ValidateSubnet("subnet_id"),
 			common.ValidateVPC("vpc_id"),
 		),
@@ -65,35 +63,32 @@ func ResourceRdsInstanceV3() *schema.Resource {
 			"restore_point": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"instance_id": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: true,
 						},
 						"restore_time": {
 							Type:         schema.TypeInt,
 							Optional:     true,
 							ExactlyOneOf: []string{"restore_point.0.backup_id"},
-							ForceNew:     true,
 						},
 						"backup_id": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ExactlyOneOf: []string{"restore_point.0.restore_time"},
-							ForceNew:     true,
 						},
 					},
 				},
 			},
 			"restore_from_backup": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
-				Computed: false,
+				Type:       schema.TypeList,
+				Optional:   true,
+				MaxItems:   1,
+				Computed:   false,
+				Deprecated: "Use `restore_point` instead",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"source_instance_id": {
@@ -162,11 +157,15 @@ func ResourceRdsInstanceV3() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"security_group_id": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"time_zone": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"subnet_id": {
 				Type:     schema.TypeString,
@@ -213,6 +212,11 @@ func ResourceRdsInstanceV3() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"private_ip": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"backup_strategy": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -228,6 +232,11 @@ func ResourceRdsInstanceV3() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 							Optional: true,
+						},
+						"period": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
 						},
 					},
 				},
@@ -254,6 +263,15 @@ func ResourceRdsInstanceV3() *schema.Resource {
 			"param_group_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"private_domain_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"private_fqdn": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"created": {
 				Type:     schema.TypeString,
@@ -309,6 +327,7 @@ func ResourceRdsInstanceV3() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Computed: true,
 			},
 			"ssl_enable": {
 				Type:     schema.TypeBool,
@@ -444,6 +463,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			AvailabilityZone: resourceRDSAvailabilityZones(d),
 			VpcId:            d.Get("vpc_id").(string),
 			SubnetId:         d.Get("subnet_id").(string),
+			DataVip:          d.Get("private_ip").(string),
 			SecurityGroupId:  d.Get("security_group_id").(string),
 			RestorePoint:     resourceRestorePoint(d),
 		}
@@ -474,7 +494,9 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 			AvailabilityZone: resourceRDSAvailabilityZones(d),
 			VpcId:            d.Get("vpc_id").(string),
 			SubnetId:         d.Get("subnet_id").(string),
+			DataVip:          d.Get("private_ip").(string),
 			SecurityGroupId:  d.Get("security_group_id").(string),
+			TimeZone:         d.Get("time_zone").(string),
 			ChargeInfo:       resourceRDSChangeMode(),
 		}
 		if ok := d.Get("lower_case_table_names").(string); ok != "" {
@@ -555,11 +577,6 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	templateRestart, err := assureTemplateApplied(d, client)
-	if err != nil {
-		return fmterr.Errorf("error making sure configuration template is applied: %w", err)
-	}
-
 	paramRestart := false
 	if _, ok := d.GetOk("parameters"); ok {
 		stateConf := &resource.StateChangeConf{
@@ -577,7 +594,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		paramRestart = result.(bool)
 	}
 
-	if templateRestart || paramRestart {
+	if paramRestart {
 		if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
 			return fmterr.Errorf("error waiting for instance to become available: %w", err)
 		}
@@ -618,6 +635,25 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
+	if period := d.Get("backup_strategy.0.period").(string); period != "" {
+		if err = enableBackupStrategy(ctx, d, client, d.Id()); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	if privateDomainName := d.Get("private_domain_name").(string); privateDomainName != "" {
+		jobId, err := instances.ModifyPrivateDomainName(client, instances.ModifyPrivateDomainNameOpts{
+			InstanceId: d.Id(),
+			DnsName:    privateDomainName,
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if err := instances.WaitForJobCompleted(client, 600, *jobId); err != nil {
+			return fmterr.Errorf("error waiting for domain name to be set: %w", err)
+		}
+	}
+
 	return resourceRdsInstanceV3Read(ctx, d, meta)
 }
 
@@ -635,45 +671,6 @@ func resourceRestorePoint(d *schema.ResourceData) backups.RestorePoint {
 	return restorePoint
 }
 
-func assureTemplateApplied(d *schema.ResourceData, client *golangsdk.ServiceClient) (bool, error) {
-	templateID := d.Get("param_group_id").(string)
-	if templateID == "" {
-		return false, nil
-	}
-
-	applied, err := configurations.Get(client, templateID)
-	if err != nil {
-		return false, fmt.Errorf("error getting parameter template %s: %w", templateID, err)
-	}
-	// convert to the map
-	appliedParams := make(map[string]configurations.Parameter, len(applied.Parameters))
-	for _, param := range applied.Parameters {
-		appliedParams[param.Name] = param
-	}
-
-	current, err := configurations.GetForInstance(client, d.Id())
-	if err != nil {
-		return false, fmt.Errorf("error getting configuration of instance %s: %w", d.Id(), err)
-	}
-
-	needsReapply := false
-	for _, val := range current.Parameters {
-		param, ok := appliedParams[val.Name]
-		if !ok { // Then it's not from the template
-			continue
-		}
-		if val.Value != param.Value {
-			needsReapply = true
-			break // that's enough
-		}
-	}
-	if !needsReapply {
-		return false, nil
-	}
-
-	return applyTemplate(d, client)
-}
-
 func restartInstance(d *schema.ResourceData, client *golangsdk.ServiceClient) error {
 	job, err := instances.Restart(client, instances.RestartOpts{
 		InstanceId: d.Id(),
@@ -688,6 +685,8 @@ func restartInstance(d *schema.ResourceData, client *golangsdk.ServiceClient) er
 	if err := instances.WaitForStateAvailable(client, int(timeout.Seconds()), d.Id()); err != nil {
 		return fmt.Errorf("error waiting for instance to become available: %w", err)
 	}
+	// sleep is required after restart to get consistent results for configurations.GetForInstance
+	time.Sleep(20 * time.Second)
 	return nil
 }
 
@@ -844,6 +843,16 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf(errCreateClient, err)
 	}
 
+	if d.HasChange("name") {
+		err = instances.UpdateInstanceName(client, instances.UpdateInstanceNameOpts{
+			Name:       d.Get("name").(string),
+			InstanceId: d.Id(),
+		})
+		if err != nil {
+			return fmterr.Errorf("error changing instance name: %s ", err)
+		}
+	}
+
 	if d.HasChange("restore_from_backup") {
 		rawPitr := d.Get("restore_from_backup").([]interface{})
 		if len(rawPitr) > 0 {
@@ -869,6 +878,41 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
+	if d.HasChange("restore_point") {
+		rawPitr := d.Get("restore_point").([]interface{})
+		if len(rawPitr) > 0 {
+			pitr := rawPitr[0].(map[string]interface{})
+			pitrOpts := backups.RestorePITROpts{
+				Source: backups.Source{
+					BackupID:    pitr["backup_id"].(string),
+					InstanceID:  pitr["instance_id"].(string),
+					RestoreTime: int64(pitr["restore_time"].(int)),
+				},
+				Target: backups.Target{
+					InstanceID: d.Id(),
+				},
+			}
+			if pitrOpts.Source.BackupID != "" {
+				pitrOpts.Source.Type = "backup"
+			} else {
+				pitrOpts.Source.Type = "timestamp"
+			}
+
+			_, err = backups.RestorePITR(client, pitrOpts)
+			if err != nil {
+				return fmterr.Errorf("error in point in time restoration: %s ", err)
+			}
+
+			// Additional sleep is required to handle state transitions during PITR operations.
+			// During PITR application, the backend may undergo 2 sequential state changes instead of 1.
+			// Current waitForStateAvailable function terminates after detecting the first "Available" state.
+			time.Sleep(20 * time.Second)
+			if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
+
 	if d.HasChange("security_group_id") {
 		updateOpts := security.SetSecurityGroupOpts{
 			InstanceId:      d.Id(),
@@ -880,19 +924,29 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	var updateBackupOpts backups.UpdateOpts
-
 	if d.HasChange("backup_strategy") {
-		backupRaw := resourceRDSBackupStrategy(d)
-		updateBackupOpts.InstanceId = d.Id()
-		if backupRaw.KeepDays != 0 {
-			updateBackupOpts.KeepDays = &backupRaw.KeepDays
-			updateBackupOpts.StartTime = backupRaw.StartTime
-			updateBackupOpts.Period = "1,2,3,4,5,6,7"
-			log.Printf("[DEBUG] updateOpts: %#v", updateBackupOpts)
-		} else {
-			updateBackupOpts.KeepDays = pointerto.Int(0)
+		var updateBackupOpts = backups.UpdateOpts{
+			InstanceId: d.Id(),
 		}
+
+		backupStrategyRaw := d.Get("backup_strategy").([]interface{})
+		updateBackupOpts.KeepDays = pointerto.Int(0)
+
+		if len(backupStrategyRaw) > 0 {
+			backupStrategyInfo := backupStrategyRaw[0].(map[string]interface{})
+			keepDays := backupStrategyInfo["keep_days"].(int)
+
+			if keepDays != 0 {
+				period := backupStrategyInfo["period"].(string)
+				startTime := backupStrategyInfo["start_time"].(string)
+
+				updateBackupOpts.KeepDays = &keepDays
+				updateBackupOpts.StartTime = startTime
+				updateBackupOpts.Period = period
+				log.Printf("[DEBUG] updateOpts: %#v", updateBackupOpts)
+			}
+		}
+
 		if err = backups.Update(client, updateBackupOpts); err != nil {
 			return fmterr.Errorf("error updating OpenTelekomCloud RDSv3 Instance: %s", err)
 		}
@@ -1048,7 +1102,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		if err != nil {
 			return fmterr.Errorf("error applying parameter template: %w", err)
 		}
-		restartRequired = restartRequired || templateRestart
+		restartRequired = templateRestart
 	}
 
 	if d.HasChange("parameters") {
@@ -1056,7 +1110,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		if err != nil {
 			return fmterr.Errorf("error applying parameters to the instance: %w", err)
 		}
-		restartRequired = restartRequired || paramRestart
+		restartRequired = restartRequired || paramRestart.RestartRequired
 	}
 
 	if d.HasChange("db.0.port") {
@@ -1118,6 +1172,19 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 
 	if err = updateVolumeAutoExpand(ctx, d, client, d.Id()); err != nil {
 		return diag.FromErr(err)
+	}
+
+	if d.HasChange("private_domain_name") {
+		jobId, err := instances.ModifyPrivateDomainName(client, instances.ModifyPrivateDomainNameOpts{
+			InstanceId: d.Id(),
+			DnsName:    d.Get("private_domain_name").(string),
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if err := instances.WaitForJobCompleted(client, 600, *jobId); err != nil {
+			return fmterr.Errorf("error waiting for domain name to be set: %w", err)
+		}
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
@@ -1219,17 +1286,27 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(err)
 	}
 
+	strategy, err := backups.ShowBackupPolicy(client, d.Id())
+	if err != nil {
+		return fmterr.Errorf("error retrieving backup strategy: %s", err)
+	}
+
 	var backupStrategyList []map[string]interface{}
 	backupStrategy := make(map[string]interface{})
-	backupStrategy["keep_days"] = rdsInstance.BackupStrategy.KeepDays
-	// if `keep_days` is set to 0 backend returns empty `start_time`
-	// which forces instance update
-	if backupStrategy["keep_days"] != 0 {
-		backupStrategy["start_time"] = rdsInstance.BackupStrategy.StartTime
+	backupStrategy["keep_days"] = strategy.KeepDays
+
+	if strategy.KeepDays != 0 {
+		backupStrategy["period"] = strategy.Period
+		backupStrategy["start_time"] = strategy.StartTime
 	} else {
-		backupRaw := resourceRDSBackupStrategy(d)
-		backupStrategy["start_time"] = backupRaw.StartTime
+		if period, ok := d.GetOk("backup_strategy.0.period"); ok {
+			backupStrategy["period"] = period.(string)
+		}
+		if period, ok := d.GetOk("backup_strategy.0.start_time"); ok {
+			backupStrategy["start_time"] = period.(string)
+		}
 	}
+
 	backupStrategyList = append(backupStrategyList, backupStrategy)
 	if err := d.Set("backup_strategy", backupStrategyList); err != nil {
 		return fmterr.Errorf("error setting backup strategy: %s", err)
@@ -1293,6 +1370,21 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
+	if region != "eu-ch2" {
+		domain, err := instances.GetPrivateDomainName(client, d.Id(), instances.GetPrivateDomainNameParams{
+			DnsType: "private",
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if err = d.Set("private_domain_name", strings.Split(domain.DnsName, ".")[0]); err != nil {
+			return diag.FromErr(err)
+		}
+		if err = d.Set("private_fqdn", domain.DnsName); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	var tagParamName string
 	// set instance tags
 	if _, ok := d.GetOk("tags"); ok {
@@ -1337,6 +1429,10 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
+	if diags := setRdsInstanceParameters(d, client); diags != nil {
+		return diags
+	}
+
 	return nil
 }
 
@@ -1360,44 +1456,27 @@ func resourceRdsInstanceV3Delete(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-//nolint:all
-func validateRDSv3Flavor(argName string) schema.CustomizeDiffFunc {
-	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-		config, ok := meta.(*cfg.Config)
-		if !ok {
-			return fmt.Errorf("error retreiving configuration: can't convert %v to Config", meta)
-		}
-
-		client, err := config.RdsV3Client(config.GetRegion(d))
-		if err != nil {
-			return fmt.Errorf(errCreateClient, err)
-		}
-		dataStoreInfo := d.Get("db").([]interface{})[0].(map[string]interface{})
-		flavor := d.Get(argName).(string)
-
-		listOpts := flavors.ListOpts{
-			VersionName:  dataStoreInfo["version"].(string),
-			DatabaseName: dataStoreInfo["type"].(string),
-		}
-		flavorList, err := flavors.ListFlavors(client, listOpts)
-		if err != nil {
-			return fmt.Errorf("unable to get flavor pages: %w", err)
-		}
-
-		var matches = false
-		for _, flavorItem := range flavorList {
-			if flavorItem.SpecCode == flavor {
-				matches = true
-				break
-			}
-		}
-
-		if !matches {
-			return fmt.Errorf("can't find flavor `%s`", flavor)
-		}
-
+func setRdsInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceClient) diag.Diagnostics {
+	configuration, err := configurations.GetForInstance(client, d.Id())
+	if err != nil {
+		log.Printf("[WARN] error fetching parameters of instance (%s): %s", d.Id(), err)
 		return nil
 	}
+
+	rawParameters := d.Get("parameters").(map[string]interface{})
+	params := make(map[string]interface{})
+
+	for _, configParam := range configuration.Parameters {
+		if _, exists := rawParameters[configParam.Name]; exists {
+			params[configParam.Name] = configParam.Value
+		}
+	}
+
+	if err = d.Set("parameters", params); err != nil {
+		log.Printf("error saving parameters to RDS instance (%s): %s", d.Id(), err)
+	}
+
+	return nil
 }
 
 func updateVolumeAutoExpand(ctx context.Context, d *schema.ResourceData, client *golangsdk.ServiceClient,
@@ -1443,16 +1522,16 @@ func disableVolumeAutoExpand(ctx context.Context, timeout time.Duration, client 
 	return nil
 }
 
-func updateInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceClient) (bool, error) {
+func updateInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceClient) (*configurations.UpdateInstanceConfigurationResponse, error) {
 	opts := configurations.UpdateInstanceConfigurationOpts{
 		Values:     d.Get("parameters").(map[string]interface{}),
 		InstanceId: d.Id(),
 	}
-	_, err := configurations.UpdateInstanceConfiguration(client, opts)
+	rawConf, err := configurations.UpdateInstanceConfiguration(client, opts)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	return true, err
+	return rawConf, err
 }
 
 func rdsInstanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
@@ -1475,12 +1554,20 @@ func waitForParameterApply(d *schema.ResourceData, client *golangsdk.ServiceClie
 
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault403); ok {
-				return r, "PENDING", nil
+				return false, "PENDING", nil
 			}
 			return nil, "", fmt.Errorf("error applying configuration parameters: %w", err)
 		}
 
-		return r, "SUCCESS", nil
+		if err := instances.WaitForJobCompleted(client, 60, r.JobId); err != nil {
+			// sometimes `task not found` error message is returned
+			// with 400 status which is fine
+			if _, ok := err.(golangsdk.ErrDefault400); ok {
+				return r.RestartRequired, "SUCCESS", nil
+			}
+		}
+
+		return r.RestartRequired, "SUCCESS", nil
 	}
 }
 
@@ -1508,6 +1595,37 @@ func enableVolumeAutoExpand(ctx context.Context, d *schema.ResourceData, client 
 	}
 	retryFunc := func() (interface{}, bool, error) {
 		err := instances.ManageAutoScaling(client, d.Id(), opts)
+		retry, err := handleMultiOperationsError(err)
+		return nil, retry, err
+	}
+	_, err := common.RetryContextWithWaitForState(&common.RetryContextWithWaitForStateParam{
+		Ctx:          ctx,
+		RetryFunc:    retryFunc,
+		WaitFunc:     rdsInstanceStateRefreshFunc(client, instanceID),
+		WaitTarget:   []string{"ACTIVE"},
+		Timeout:      d.Timeout(schema.TimeoutUpdate),
+		DelayTimeout: 10 * time.Second,
+		PollInterval: 10 * time.Second,
+	})
+	if err != nil {
+		return fmt.Errorf("an error occurred while enable automatic expansion of instance storage: %v", err)
+	}
+	return nil
+}
+
+func enableBackupStrategy(ctx context.Context, d *schema.ResourceData, client *golangsdk.ServiceClient,
+	instanceID string) error {
+	backupStrategyRaw := d.Get("backup_strategy").([]interface{})
+	backupStrategyInfo := backupStrategyRaw[0].(map[string]interface{})
+	backupOpts := backups.UpdateOpts{
+		InstanceId: instanceID,
+		StartTime:  backupStrategyInfo["start_time"].(string),
+		KeepDays:   pointerto.Int(backupStrategyInfo["keep_days"].(int)),
+		Period:     backupStrategyInfo["period"].(string),
+	}
+
+	retryFunc := func() (interface{}, bool, error) {
+		err := backups.Update(client, backupOpts)
 		retry, err := handleMultiOperationsError(err)
 		return nil, retry, err
 	}

@@ -1,0 +1,6 @@
+---
+enhancements:
+  - |
+    **[RDS]** Add `private_domain_name` and `private_fqdn` parameters in ``resource/opentelekomcloud_rds_instance_v3`` (`#3295 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3295>`_)
+  - |
+    **[RDS]** Add `private_domain_name` and `private_fqdn` parameters in ``datasource/opentelekomcloud_rds_instance_v3`` (`#3295 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3295>`_)

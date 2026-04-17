@@ -243,10 +243,7 @@ func funcGraphSchemaResource() *schema.Resource {
 			"network_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  NetworkTypeV1,
-				ValidateFunc: validation.StringInSlice([]string{
-					string(NetworkTypeV2), string(NetworkTypeV1),
-				}, false),
+				Computed: true,
 			},
 			"authorizer_id": {
 				Type:     schema.TypeString,

@@ -98,6 +98,8 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 
   description = "CBR vault for terraform provider test"
 
+  locked = false
+
   billing {
     size          = 100
     object_type   = "disk"
@@ -187,6 +189,29 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 }
 ```
 
+### Vault with backup and replication policies
+```hcl
+resource "opentelekomcloud_cbr_vault_v3" "policies" {
+  name = "multipolicy"
+
+  billing {
+    size          = 100
+    object_type   = "server"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+    period_type   = "month"
+    period_num    = 2
+  }
+
+  policy {
+    id = opentelekomcloud_cbr_policy_v3.backup[1].id
+  }
+  policy {
+    id                   = var.replication_policy_id
+    destination_vault_id = var.destination_vault
+  }
+}
+```
 ### Vault with auto bind and bind rule
 
 ```hcl
@@ -227,14 +252,7 @@ The following arguments are supported:
 
     * `size` - Capacity, in GB. Minimum `1`, maximum `10485760`
 
-    * `charging_mode` - Billing mode. Possible values are `post_paid` (pay-per-use) or `pre_paid`
-      (yearly/monthly packages). The value defaults to `post_paid`.
-
-    * `period_type` - (Optional) Package type. This parameter is mandatory if `charging_mode` is set to `pre_paid`.
-      Possible values are `year` (yearly) or `month` (monthly).
-
-    * `period_num` - (Optional) Required duration for the package. This parameter is mandatory if
-      `charging_mode` is set to `pre_paid`.
+    * `charging_mode` - Billing mode. Possible value is `post_paid` (pay-per-use).
 
     * `is_auto_renew` - (Optional) Whether to automatically renew the subscription after expiration. By default, it is
       not renewed.
@@ -259,7 +277,7 @@ The following arguments are supported:
     * `include_volumes` - (Optional) List of included volumes.
 
 * `backup_policy_id` - (Optional) Backup policy ID. If the value of this parameter is empty, automatic backup is not
-  performed.
+  performed. Deprecated use `policy` instead.
 
 * `description` - (Optional) User-defined vault description.
 
@@ -274,6 +292,22 @@ The following arguments are supported:
 
 * `auto_expand` - (Optional) Whether to automatically expand the vault capacity. Only pay-per-use vaults support this
   function.
+
+* `locked` - (Optional) Specifies whether the vault is locked. A locked vault cannot be unlocked.
+  Defaults to **false**.
+
+* `policy` - (Optional, List) Specifies the policy details to associate with the CBR vault.
+  The [object](#vault_policies) structure is documented below.
+
+<a name="vault_policies"></a>
+The `policy` block supports:
+
+* `id` - (Required, String) Specifies the policy ID.
+
+* `destination_vault_id` - (Optional, String) Specifies the ID of destination vault to which the replication policy
+  will be associated.
+
+-> Only one policy of each type (backup and replication) can be associated.
 
 ## Attributes Reference
 

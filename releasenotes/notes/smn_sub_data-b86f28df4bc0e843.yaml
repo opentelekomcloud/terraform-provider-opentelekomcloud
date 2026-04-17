@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **New Data Source:** ``resource/opentelekomcloud_smn_subscription_v2`` (`#3004 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3004>`_)
+  - |
+    **New Data Source:** ``resource/opentelekomcloud_smn_topic_subscription_v2`` (`#3004 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3004>`_)

@@ -93,10 +93,11 @@ func ResourceBlockStorageVolumeV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"volume_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				Computed:         true,
+				ValidateDiagFunc: common.ValidateDiskType,
 			},
 			"device_type": {
 				Type:         schema.TypeString,

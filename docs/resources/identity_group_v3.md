@@ -14,7 +14,8 @@ Up-to-date reference of API arguments for IAM group you can get at
 
 Manages a User Group resource within OpenTelekomCloud IAM service.
 
--> **Note:** You _must_ have admin privileges in your OpenTelekomCloud cloud to use this resource.
+-> **Note:** You _must_ have `Security Administrator` privileges in your OpenTelekomCloud
+cloud to use this resource. Please refer to [User Management Model](https://docs.otc.t-systems.com/en-us/usermanual/iam/iam_01_0034.html).
 
 ## Example Usage
 
@@ -29,7 +30,7 @@ resource "opentelekomcloud_identity_group_v3" "group_1" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the group.The length is less than or equal to 64 bytes.
+* `name` - (Required) The name of the group. The length is less than or equal to 64 bytes.
 
 * `description` - (Optional) A description of the group.
 
@@ -37,9 +38,9 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `domain_id` - See Argument Reference above.
+* `id` - The resource ID
 
 ## Import
 

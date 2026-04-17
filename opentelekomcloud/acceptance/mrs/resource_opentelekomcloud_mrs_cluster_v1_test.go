@@ -103,62 +103,20 @@ resource "opentelekomcloud_mrs_cluster_v1" "this" {
   billing_type          = 12
   master_node_num       = 2
   core_node_num         = 3
-  master_node_size      = "c3.xlarge.4.linux.mrs"
-  core_node_size        = "c3.xlarge.4.linux.mrs"
+  master_node_size      = "c4.xlarge.4.linux.mrs"
+  core_node_size        = "c4.xlarge.4.linux.mrs"
   available_zone_id     = "%s"
   vpc_id                = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id             = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
-  cluster_version       = "MRS 2.1.0"
-  volume_type           = "SATA"
+  cluster_version       = "MRS 3.1.2-LTS.6"
+  volume_type           = "SAS"
   volume_size           = 100
   cluster_type          = 0
   safe_mode             = 1
   node_public_cert_name = "%s"
   cluster_admin_secret  = "SuperQwerty!123"
   component_list {
-    component_name = "Presto"
-  }
-  component_list {
     component_name = "Hadoop"
-  }
-  component_list {
-    component_name = "Spark"
-  }
-  component_list {
-    component_name = "HBase"
-  }
-  component_list {
-    component_name = "Hive"
-  }
-  component_list {
-    component_name = "Hue"
-  }
-  component_list {
-    component_name = "Loader"
-  }
-  component_list {
-    component_name = "Tez"
-  }
-  component_list {
-    component_name = "Flink"
-  }
-
-  bootstrap_scripts {
-    name       = "Modify os config"
-    uri        = "s3a://bootstrap/modify_os_config.sh"
-    parameters = "param1 param2"
-    nodes = [
-      "master",
-      "core",
-      "task",
-    ]
-    active_master          = true
-    before_component_start = true
-    fail_action            = "continue"
-  }
-  tags = {
-    foo = "bar"
-    key = "value"
   }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)

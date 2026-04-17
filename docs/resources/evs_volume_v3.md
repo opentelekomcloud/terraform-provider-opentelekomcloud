@@ -57,7 +57,16 @@ The following arguments are supported:
   Changing this creates a new volume.
 
 * `volume_type` - (Required) The type of volume to create.
-  Currently, the value can be `SSD`, `SAS`, `SATA`, `co-p1`, or `uh-l1`.
+  Currently, the value can be:
+  * `SATA`: common I/O disk type. Available for all AZs.
+  * `SAS`: high I/O disk type. Available for all AZs.
+  * `SSD`: ultra-high I/O disk type. Available for all AZs.
+  * `GPSSD`: the general purpose SSD type
+  * `ESSD`: extreme SSD disk type.
+
+  -> **NOTE:**
+  Common I/O (SATA) will reach end of life, end of 2025.
+
   Changing this creates a new volume.
 
 * `name` - (Optional) A unique name for the volume. Changing this updates the volume's name.

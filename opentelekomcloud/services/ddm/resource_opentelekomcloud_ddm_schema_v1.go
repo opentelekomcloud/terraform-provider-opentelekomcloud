@@ -43,10 +43,9 @@ func ResourceDdmSchemaV1() *schema.Resource {
 				ValidateFunc: common.ValidateDDMSchemaName,
 			},
 			"instance_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: common.ValidateDDMSchemaName,
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"shard_mode": {
 				Type:     schema.TypeString,
@@ -206,7 +205,7 @@ func resourceDdmSchemaV1Create(ctx context.Context, d *schema.ResourceData, meta
 	instanceId := d.Get("instance_id").(string)
 	ddmSchema, err := schemas.CreateSchema(client, instanceId, createOpts)
 	if err != nil {
-		return fmterr.Errorf("error getting OpenTelekomCloud DDM instance from result: %w", err)
+		return fmterr.Errorf("error getting OpenTelekomCloud DDM schema from result: %w", err)
 	}
 	schemaName := ddmSchema.Databases[0].Name
 	id := fmt.Sprintf("%s/%s", instanceId, schemaName)
@@ -244,10 +243,10 @@ func resourceDdmSchemaV1Read(ctx context.Context, d *schema.ResourceData, meta i
 	ddmInstanceId := d.Get("instance_id").(string)
 	sc, err := schemas.QuerySchemaDetails(client, ddmInstanceId, schemaName)
 	if err != nil {
-		return fmterr.Errorf("error fetching DDM instance: %w", err)
+		return fmterr.Errorf("error fetching DDM schema: %w", err)
 	}
 
-	log.Printf("[DEBUG] Retrieved instance %s: %#v", schemaName, sc.Database)
+	log.Printf("[DEBUG] Retrieved schema %s: %#v", schemaName, sc.Database)
 
 	mErr := multierror.Append(nil,
 		d.Set("region", config.GetRegion(d)),
@@ -322,6 +321,11 @@ func resourceDdmSchemaV1Delete(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf("error deleting OpenTelekomCloud DDM schema: %s", err)
 	}
 
+	err = WaitForDeleteSchema(client, 600, 5, ddmInstanceId, schemaName)
+	if err != nil {
+		return fmterr.Errorf("error waiting for OpenTelekomCloudDDM schema (%s) to be deleted: %w", schemaName, err)
+	}
+
 	d.SetId("")
 	return nil
 }
@@ -341,4 +345,31 @@ func resourceDDMSchemaRDSV1(d *schema.ResourceData) []schemas.DatabaseInstancesP
 		rdsInstances = append(rdsInstances, rdsInstance)
 	}
 	return rdsInstances
+}
+
+func WaitForDeleteSchema(client *golangsdk.ServiceClient, waitTime int, interval time.Duration, ddmInstanceId, schemaName string) error {
+	jobClient := *client
+	jobClient.ResourceBase = jobClient.Endpoint
+
+	return golangsdk.WaitFor(waitTime, func() (bool, error) {
+		schemasList, err := schemas.QuerySchemas(client, ddmInstanceId, schemas.QuerySchemasOpts{
+			Limit: 128,
+		})
+		if err != nil {
+			return false, err
+		}
+		found := false
+
+		for _, schema := range schemasList {
+			if schema.Name == schemaName {
+				found = true
+			}
+		}
+		if !found {
+			return true, nil
+		}
+
+		time.Sleep(interval * time.Second)
+		return false, nil
+	})
 }

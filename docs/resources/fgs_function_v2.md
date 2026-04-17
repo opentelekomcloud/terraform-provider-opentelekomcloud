@@ -145,6 +145,43 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
 }
 ```
 
+### Create function with advanced configuration
+
+```hcl
+variable "function_name" {}
+variable "function_codes" {}
+variable "agency_name" {}
+variable "trigger_access_vpc_ids" {
+  type = list(string)
+}
+
+resource "opentelekomcloud_fgs_function_v2" "test" {
+  name                  = var.function_name
+  app                   = "default"
+  agency                = var.agency_name
+  description           = "fuction test"
+  handler               = "test.handler"
+  memory_size           = 128
+  timeout               = 3
+  runtime               = "Python2.7"
+  code_type             = "inline"
+  func_code             = base64encode(var.function_codes)
+  functiongraph_version = "v2"
+
+  network_controller {
+    disable_public_network = true
+
+    dynamic "trigger_access_vpcs" {
+      for_each = var.trigger_access_vpc_ids
+
+      content {
+        vpc_id = trigger_access_vpcs.value
+      }
+    }
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -165,17 +202,19 @@ The following arguments are supported:
     + **Node.js10.16**
     + **Node.js12.13**
     + **Node.js14.18**
+    + **Node.js16.17**
+    + **Node.js18.15**
     + **Python2.7**
     + **Python3.6**
     + **Python3.9**
-    + **Go1.8**
+    + **Python3.10**
     + **Go1.x**
-    + **C#(.NET Core 2.0)**
     + **C#(.NET Core 2.1)**
     + **C#(.NET Core 3.1)**
     + **PHP7.3**
     + **Custom**
     + **http**
+    + **Custom Image**
 
 * `timeout` - (Required, Int) Specifies the timeout interval of the function, in seconds.
   The value ranges from `3` to `900`.
@@ -237,8 +276,9 @@ The following arguments are supported:
 * `func_mounts` - (Optional, List) Specifies the file system list. The `func_mounts` object structure is documented
   below.
 
-* `custom_image` - (Optional, List) Specifies the custom image configuration for creating function.
+* `custom_image` - (Optional, List) Specifies the custom image configuration of the function.
   The `custom_image` structure is documented below.
+  Required if the parameter `code_type` is **Custom-Image-Swr**.
 
 * `max_instance_num` - (Optional, String) Specifies the maximum number of instances of the function.
   The valid value ranges from `-1` to `1,000`, defaults to `400`.
@@ -268,6 +308,67 @@ The following arguments are supported:
   The valid value ranges form `1,024` to `16,384`, the value must be a multiple of `1,024`.
   If not specified, the GPU function is disabled.
 
+* `pre_stop_handler` - (Optional, String) Specifies the pre-stop handler of a function. The value must contain a period (.)
+ in the format of xx.xx. For example, for Node.js function myfunction.pre_stop_handler, the file name is myfunction.js,
+ and the initialization function is pre_stop_handler.
+
+* `pre_stop_timeout` - (Optional, Int) Specifies the maximum duration the function can be initialized. Value range: 1s-90s.
+
+* `network_controller` - (Optional, List) Specifies the network configuration of the function.
+  The [network_controller](#function_network_controller) structure is documented below.
+
+* `peering_cidr` - (Optional, String) Specifies the VPC cidr blocks used in the function code to detect whether it
+  conflicts with the VPC cidr blocks used by the service.
+  The cidr blocks are separated by semicolons and cannot exceed `5`.
+
+* `enable_dynamic_memory` - (Optional, Boolean) Specifies whether to enable dynamic memory allocation.
+
+* `enable_class_isolation` - (Optional, Boolean) Specifies whether to enable class isolation.
+
+* `enterprise_project_id` - (Optional, String) Specifies the ID of the enterprise project to which the
+  function belongs.
+
+* `dns_list` - (Optional, String) Specifies the private DNS configuration of the function network.
+  Private DNS list is associated to the function by a string in the following format:
+  `[{\"id\":\"ff8080828a07ffea018a17184aa310f5\","domain_name":"functiondebug.example1.com."}]`
+
+  -> Ensure the agency with DNS management permissions specified before using this parameter.
+
+* `enable_lts_log` - (Optional, Bool) Specifies whether to enable the LTS logging feature.
+  The valid values are as follows:
+  + **null** or omit this parameter definition: Using the default value configured on the FunctionGraph service to
+    configure the LTS logging feature.
+  + **true**: Explicitly enable the LTS logging feature.
+  + **false**: Explicitly disable the LTS logging feature.
+
+* `concurrency_num` - (Optional, Int) Specifies the number of concurrent requests of the function.
+  The valid value is range from `1` to `1,000`, the default value is `1`.
+
+  -> 1. This parameter is only supported by the `v2` version of the function.
+  <br>2. This parameter is available only when the `runtime` parameter is set to **http** or **Custom Image**.
+
+* `is_stateful_function` - (Optional, Bool) Specifies whether the function is a stateful function.
+  Defaults to **false**.
+
+* `enable_auth_in_header` - (Optional, Bool) Specifies whether the authentication in the request header is enabled.
+  Defaults to **false**.
+
+* `ephemeral_storage` - (Optional, Int) Specifies the size of the function ephemeral storage.
+  The valid values are as follows:
+  + **512**
+  + **10240**
+
+  Defaults to `512`. Only custom image or http runtime supported.
+
+* `heartbeat_handler` - (Optional, String) Specifies the heartbeat handler of the function.
+  The rule is **xx.xx**, such as **com.huawei.demo.TriggerTests.heartBeat**, it must contain periods (.).
+  The heartbeat function entry must be in the same file as the function execution entry.
+
+* `lts_custom_tag` - (Optional, Map) Specifies the custom tags configuration that used to filter the LTS logs.
+  This parameter is available only when `enable_lts_log` is set to **true**.
+
+  -> This parameter is only supported by the `v2` version of the function.
+
 The `func_mounts` block supports:
 
 * `mount_type` - (Required, String) Specifies the mount type.
@@ -281,14 +382,21 @@ The `func_mounts` block supports:
 
 * `local_mount_path` - (Required, String) Specifies the function access path.
 
-* `concurrency_num` - (Optional, Int) Specifies the number of concurrent requests of the function.
-  The valid value ranges from `1` to `1,000`, the default value is `1`.
-
-  -> This parameter is only supported by the `v2` version of the function.
-
 The `custom_image` block supports:
 
 * `url` - (Required, String) Specifies the URL of SWR image, the URL must start with `swr.`.
+
+* `command` - (Optional, String) Specifies the startup commands of the SWR image.
+  Multiple commands are separated by commas (,). e.g. `/bin/sh`.
+  If this parameter is not specified, the entrypoint or CMD in the image configuration will be used by default.
+
+* `args` - (Optional, String) Specifies the command line arguments used to start the SWR image.
+  If multiple arguments are separated by commas (,). e.g. `-args,value`.
+  If this parameter is not specified, the CMD in the image configuration will be used by default.
+
+* `working_dir` - (Optional, String) Specifies the working directory of the SWR image.
+  If not specified, the default value is `/`.
+  Currently, the folder path can only be set to `/` and it cannot be created or modified.
 
 The `versions` block supports:
 
@@ -350,6 +458,21 @@ The `cron_configs` block supports:
 
 * `expired_time` - (Required, Int) Specifies the expiration timestamp of the policy. The unit is `s`, e.g. **1740560074**.
 
+<a name="function_network_controller"></a>
+The `network_controller` block supports:
+
+* `trigger_access_vpcs` - (Optional, List) Specifies the configuration of the VPCs that can trigger the function.
+  The [trigger_access_vpcs](#function_network_controller_trigger_access_vpcs) structure is documented below.
+
+* `disable_public_network` - (Optional, Bool) Specifies whether to disable the public network access.
+
+<a name="function_network_controller_trigger_access_vpcs"></a>
+The `trigger_access_vpcs` block supports:
+
+* `vpc_id` - (Optional, String) Specifies the ID of the VPC that can trigger the function.
+
+* `vpc_name` - (Optional, String) Specifies the name of the VPC that can trigger the function.
+
 ## Attribute Reference
 
 In addition to all arguments above, the following attributes are exported:
@@ -358,11 +481,15 @@ In addition to all arguments above, the following attributes are exported:
 
 * `region` - The region in which function graph resource is created.
 
+* `extend_config` - The extended configuration.
+
+* `apig_route_enable` - Whether to configure gateway routing rules.
+
+* `allow_ephemeral_storage` - Indicates whether ephemeral storage can be configured.
+
 * `func_mounts/status` - The status of file system.
 
 * `urn` - Uniform Resource Name.
-
-* `dns_list` - The private DNS configuration of the function network.
 
 * `version` - The version of the function.
 

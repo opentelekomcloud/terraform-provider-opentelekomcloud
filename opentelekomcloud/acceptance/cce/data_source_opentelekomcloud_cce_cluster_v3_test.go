@@ -6,16 +6,22 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 )
 
 func TestAccCCEClusterV3DataSource_basic(t *testing.T) {
 	var cceName = fmt.Sprintf("cce-test-%s", acctest.RandString(5))
-	dataSourceName := "data.opentelekomcloud_cce_cluster_v3.clusters"
 	t.Parallel()
 	quotas.BookOne(t, quotas.CCEClusterQuota)
+
+	var (
+		byName   = "data.opentelekomcloud_cce_cluster_v3.by_name"
+		dcByName = common.InitDataSourceCheck(byName)
+
+		byId   = "data.opentelekomcloud_cce_cluster_v3.by_id"
+		dcById = common.InitDataSourceCheck(byName)
+	)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -24,29 +30,18 @@ func TestAccCCEClusterV3DataSource_basic(t *testing.T) {
 			{
 				Config: testAccCCEClusterV3DataSourceBasic(cceName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCEClusterV3DataSourceID(dataSourceName),
-					resource.TestCheckResourceAttr(dataSourceName, "name", cceName),
-					resource.TestCheckResourceAttr(dataSourceName, "status", "Available"),
-					resource.TestCheckResourceAttr(dataSourceName, "cluster_type", "VirtualMachine"),
+					dcByName.CheckResourceExists(),
+					resource.TestCheckResourceAttr(byName, "name", cceName),
+					resource.TestCheckResourceAttr(byName, "status", "Available"),
+					resource.TestCheckResourceAttr(byName, "cluster_type", "VirtualMachine"),
+					dcById.CheckResourceExists(),
+					resource.TestCheckResourceAttr(byId, "name", cceName),
+					resource.TestCheckResourceAttr(byId, "status", "Available"),
+					resource.TestCheckResourceAttr(byId, "cluster_type", "VirtualMachine"),
 				),
 			},
 		},
 	})
-}
-
-func testAccCheckCCEClusterV3DataSourceID(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("can't find cluster data source: %s ", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("cluster data source ID not set ")
-		}
-
-		return nil
-	}
 }
 
 func testAccCCEClusterV3DataSourceBasic(cceName string) string {
@@ -62,8 +57,12 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   container_network_type = "overlay_l2"
 }
 
-data "opentelekomcloud_cce_cluster_v3" "clusters" {
+data "opentelekomcloud_cce_cluster_v3" "by_name" {
   name = opentelekomcloud_cce_cluster_v3.cluster_1.name
+}
+
+data "opentelekomcloud_cce_cluster_v3" "by_id" {
+  id = opentelekomcloud_cce_cluster_v3.cluster_1.id
 }
 `, common.DataSourceSubnet, cceName)
 }

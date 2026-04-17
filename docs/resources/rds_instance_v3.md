@@ -31,14 +31,14 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "P@ssw0rd1!9851"
     type     = "PostgreSQL"
-    version  = "9.5"
+    version  = "16"
     port     = "8635"
   }
 
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
   subnet_id         = var.subnet_id
   vpc_id            = var.vpc_id
-  flavor            = "rds.pg.c2.medium"
+  flavor            = "rds.pg.n1.large.4"
 
   volume {
     type = "CLOUDSSD"
@@ -48,6 +48,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
+    period     = "1,2,3,4,5"
   }
 
   tags = {
@@ -72,13 +73,13 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "P@ssw0rd1!9851"
     type     = "PostgreSQL"
-    version  = "9.5"
+    version  = "16"
     port     = "8635"
   }
   security_group_id   = opentelekomcloud_networking_secgroup_v2.secgroup.id
   subnet_id           = var.subnet_id
   vpc_id              = var.vpc_id
-  flavor              = "rds.pg.s1.medium.ha"
+  flavor              = "rds.pg.x1.8xlarge.4.ha"
   ha_replication_mode = "async"
 
   volume {
@@ -116,7 +117,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Telekom!120521"
     type     = "PostgreSQL"
-    version  = "9.5"
+    version  = "16"
     port     = "8635"
   }
   name              = "terraform_test_rds_instance"
@@ -127,7 +128,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "CLOUDSSD"
     size = 100
   }
-  flavor              = "rds.pg.s1.medium.ha"
+  flavor              = "rds.pg.x1.8xlarge.4.ha"
   ha_replication_mode = "async"
   backup_strategy {
     start_time = "08:00-09:00"
@@ -164,12 +165,12 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
   subnet_id         = var.subnet_id
   vpc_id            = var.vpc_id
-  flavor            = "rds.pg.c2.medium"
+  flavor            = "rds.pg.n1.xlarge.2"
 
   db {
     password = "P@ssw0rd1!9851"
     type     = "PostgreSQL"
-    version  = "9.5"
+    version  = "16"
     port     = "8635"
   }
 
@@ -199,7 +200,7 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
   }
   datastore {
     type    = "postgresql"
-    version = "10"
+    version = "16"
   }
 }
 
@@ -210,14 +211,14 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "16"
     port     = "8635"
   }
 
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
   subnet_id         = var.subnet_id
   vpc_id            = var.vpc_id
-  flavor            = "rds.pg.c2.medium"
+  flavor            = "rds.pg.n1.xlarge.2"
   volume {
     type = "CLOUDSSD"
     size = 40
@@ -240,7 +241,7 @@ data "opentelekomcloud_rds_backup_v3" "backup" {
 resource "opentelekomcloud_rds_instance_v3" "from_backup" {
   name              = "instance-restored"
   availability_zone = opentelekomcloud_rds_instance_v3.instance.availability_zone
-  flavor            = "rds.pg.c2.medium"
+  flavor            = "rds.pg.n1.xlarge.2"
 
   restore_point {
     instance_id = data.opentelekomcloud_rds_backup_v3.backup.instance_id
@@ -250,7 +251,7 @@ resource "opentelekomcloud_rds_instance_v3" "from_backup" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "16"
     port     = "8635"
   }
   security_group_id = var.security_group_id
@@ -287,7 +288,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "CLOUDSSD"
     size = 40
   }
-  flavor = "rds.mysql.c2.medium"
+  flavor = "rds.mysql.s1.medium"
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = 1
@@ -324,16 +325,21 @@ The following arguments are supported:
 
 * `flavor` - (Required) Specifies the specification code.
   Use data source [opentelekomcloud_rds_flavors_v3](../data-sources/rds_flavors_v3.md) to get a list of available flavor names.
-  Examples could be `rds.pg.c2.medium` or   `rds.pg.c2.medium.ha` for HA clusters.
+  Examples could be `rds.pg.n1.large.4` or `rds.pg.x1.8xlarge.4.ha` for HA clusters.
 
-* `name` - (Required, ForceNew) Specifies the DB instance name. The DB instance name of the same type
+* `name` - (Required) Specifies the DB instance name. The DB instance name of the same type
   must be unique for the same tenant. The value must be 4 to 64
   characters in length and start with a letter. It is case-sensitive
   and can contain only letters, digits, hyphens (-), and underscores
-  (_).  Changing this parameter will create a new resource.
+  (_).
 
 * `security_group_id` - (Required) Specifies the security group which the RDS DB instance belongs to.
   Changing this parameter will create a new resource.
+
+* `time_zone` - (Optional, ForceNew) Specifies the UTC time zone. Changing this parameter will create a new resource.
+If this parameter is not specified, the time zone of each engine uses UTC by default.
+If this parameter is specified, the value range is from UTC-12:00 to UTC+12:00 on the hour.
+For example, the parameter can be UTC+08:00 rather than UTC+08:30.
 
 * `subnet_id` - (Required, ForceNew) Specifies the subnet id. Changing this parameter will create a new resource.
 
@@ -341,14 +347,20 @@ The following arguments are supported:
 
 * `vpc_id` - (Required, ForceNew) Specifies the VPC ID. Changing this parameter will create a new resource.
 
+* `private_ip` - (Optional, ForceNew) Specifies the private IP address of a DB instance.
+
+* `private_domain_name` - (Optional) Specifies the prefix of the new domain name. The value contains `8` to `63` characters. Only uppercase letters, lowercase letters, and digits are allowed.
+
+~> **Warning** The argument `private_domain_name` not supported in `eu-ch2` region.
+
 * `backup_strategy` - (Optional) Specifies the advanced backup policy. Structure is documented below.
 
 * `ha_replication_mode` - (Optional, ForceNew) Specifies the replication mode for the standby DB instance. For MySQL, the value
   is async or semisync. For PostgreSQL, the value is async or sync. For Microsoft SQL Server, the value is sync.
   Parameter is required for HA clusters.
 
--> Async indicates the asynchronous replication mode. `semisync` indicates the
-  semi-synchronous replication mode. sync indicates the synchronous
+-> `async` indicates the asynchronous replication mode. `semisync` indicates the
+  semi-synchronous replication mode. `sync` indicates the synchronous
   replication mode.  Changing this parameter will create a new resource.
 
 * `param_group_id` - (Optional) Specifies the parameter group ID.
@@ -374,11 +386,12 @@ The following arguments are supported:
 
 * `tags` - (Optional) Tags key/value pairs to associate with the instance.
 
-* `restore_point` - (Optional, ForceNew) Specifies the restoration information. By selecting this option a new RDS
-  instance will be created from separate instance backup. Structure is documented below.
+* `restore_point` - (Optional, ForceNew) Specifies the restoration information. By selecting this option you can either
+  create a new RDS instance or restore backup from existing one. Structure is documented below.
 
-* `restore_from_backup` - (Optional) Specifies whether to restore database to an instance described in current resource.
+* `restore_from_backup` **DEPRECATED**  - (Optional) Specifies whether to restore database to an instance described in current resource.
   Structure is documented below.
+  Please use alternative parameter `restore_point`.
 
 * `ssl_enable` - (Optional) Specifies whether SSL should be enabled for MySql instances.
 
@@ -403,9 +416,10 @@ The `db` block supports:
 
 * `type` - (Required, ForceNew) Specifies the DB engine. Value: MySQL, PostgreSQL, SQLServer. Changing this parameter will create a new resource.
 
-* `version` - (Required, ForceNew) Specifies the database version. MySQL databases support MySQL 5.6
-  and above. PostgreSQL databases support PostgreSQL 9.5 and above. Microsoft SQL Server
-  databases support 2014 SE, 2016 SE, and above.
+* `version` - (Required, ForceNew) Specifies the database version.
+  * MySQL: 8.0, 5.7, and 5.6
+  * PostgreSQL: 12 through 16
+  * Microsoft SQL Server: 2017 (Enterprise/Standard) through 2022 (Enterprise/Standard)
   Changing this parameter will create a new resource.
 
 The `volume` block supports:
@@ -417,14 +431,12 @@ The `volume` block supports:
 
 * `type` - (Required, ForceNew) Specifies the volume type. Changing this resize the volume. Its value can be any of the following
   and is case-sensitive:
-  * COMMON: SATA storage.
-  * ULTRAHIGH: ultra-high I/O storage.
-  * CLOUDSSD: cloud SSD storage.
-  * ESSD: extreme SSD storage.
+  * `CLOUDSSD`: indicates cloud SSD storage.
+  * `ESSD`: indicates the extreme SSD type.
 
 -> Note
-  The MySQL and PostgreSQL DB engines support the following volume types: CLOUDSSD and ESSD. ESSD is not supported for Single instance types for MySQL and PostgreSQL.
-  The SQL Server engine supports the following volume types: COMMON, ULTRAHIGH, and ESSD.
+  The MySQL, PostgreSQL and SQLServer DB engines support the following volume types: CLOUDSSD and ESSD.
+  However, ESSD is not supported for MySQL DB Single instances and PostgreSQL DB Single instances.
 
 ~> **Warning** Specifying both `limit_size` and `trigger_threshold` will enable autoscaling for RDS instance.
   Once autoscaling is activated, the `size` parameter for the volume will be ignored to prevent discrepancies
@@ -454,8 +466,13 @@ The `backup_strategy` block supports:
   triggered during the backup time window. It must be a valid value in the &quot;hh:mm-HH:MM&quot;
   format. The current time is in the UTC format. The HH value must
   be 1 greater than the hh value. The values of mm and MM must be
-  the same and must be set to any of the following: 00, 15, 30, or
-  45. Example value: 08:15-09:15 23:00-00:00.
+  the same and must be set to any of the following: 00, 15, 30, or 45.
+  Example value: 08:15-09:15 23:00-00:00.
+
+* `period` - (Optional) Specifies the backup cycle configuration. Data will be automatically backed up on the selected days every week.
+  This parameter is mandatory except that the automated backup policy is disabled.
+  Value range: The value is digits separated by commas (,), indicating the day of the week and starting from Monday.
+  For example, the value `1,2,3,4` indicates that the backup period is Monday, Tuesday, Wednesday, and Thursday.
 
 The `restore_point` block supports:
 
@@ -501,6 +518,8 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `private_ips` - Indicates the private IP address list. It is a blank string until an
   ECS is created.
+
+* `private_fqdn` - Indicates the fully qualified domain name of an RDS instance (not supported in `eu-ch2` region).
 
 * `public_ips` - Indicates the public IP address list.
 

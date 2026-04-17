@@ -140,6 +140,37 @@ func TestAccImagesImageV2_visibility(t *testing.T) {
 	})
 }
 
+func TestAccImagesImageV2_hwFirmwareType(t *testing.T) {
+	var image ims.ImageInfo
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccImagesImageV2_hw_firmware_type_1,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImagesImageV2Exists("opentelekomcloud_images_image_v2.image_1", &image),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_images_image_v2.image_1", "hw_firmware_type", "uefi"),
+				),
+			},
+			{
+				Config: testAccImagesImageV2_hw_firmware_type_2,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImagesImageV2Exists("opentelekomcloud_images_image_v2.image_1", &image),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_images_image_v2.image_1", "hw_firmware_type", "bios"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccImagesImageV2_timeout(t *testing.T) {
 	var image ims.ImageInfo
 
@@ -348,6 +379,24 @@ resource "opentelekomcloud_images_image_v2" "image_1" {
   container_format = "bare"
   disk_format      = "qcow2"
   visibility       = "public"
+}`
+
+var testAccImagesImageV2_hw_firmware_type_1 = `
+resource "opentelekomcloud_images_image_v2" "image_1" {
+  name             = "Rancher TerraformAccTest"
+  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format = "bare"
+  disk_format      = "qcow2"
+  hw_firmware_type = "uefi"
+}`
+
+var testAccImagesImageV2_hw_firmware_type_2 = `
+resource "opentelekomcloud_images_image_v2" "image_1" {
+  name             = "Rancher TerraformAccTest"
+  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format = "bare"
+  disk_format      = "qcow2"
+  hw_firmware_type = "bios"
 }`
 
 var testAccImagesImageV2_timeout = `

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -14,102 +15,65 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+func getLtsStreamResourceFunc(config *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
+	client, err := config.LtsV2Client(env.OS_REGION_NAME)
+	if err != nil {
+		return nil, fmt.Errorf("error creating LTS v2 client: %s", err)
+	}
+
+	requestResp, err := streams.List(client, state.Primary.Attributes["group_id"])
+	if err != nil {
+		return nil, err
+	}
+	if len(requestResp) < 1 {
+		return nil, golangsdk.ErrDefault404{}
+	}
+	var streamResult streams.LogStream
+	for _, stream := range requestResp {
+		if stream.LogStreamId == state.Primary.ID {
+			streamResult = stream
+		}
+	}
+	if streamResult.LogStreamId == "" {
+		return nil, golangsdk.ErrDefault404{}
+	}
+	return streamResult, nil
+}
+
 func TestAccLogTankTopicV2_basic(t *testing.T) {
-	var topic streams.LogStream
+	var (
+		topic        streams.LogStream
+		resourceName = "opentelekomcloud_logtank_topic_v2.topic"
+		rName        = fmt.Sprintf("lts_topic%s", acctest.RandString(3))
+		rc           = common.InitResourceCheck(resourceName, &topic, getLtsStreamResourceFunc)
+	)
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckLogTankTopicV2Destroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLogTankTopicV2_basic,
+				Config: testAccLogTankTopicV2_basic(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLogTankTopicV2Exists(
-						"opentelekomcloud_logtank_topic_v2.testacc_topic", &topic),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_logtank_topic_v2.testacc_topic", "topic_name", "testacc_topic"),
+						resourceName, "topic_name", rName),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckLogTankTopicV2Destroy(s *terraform.State) error {
-	config := common.TestAccProvider.Meta().(*cfg.Config)
-	ltsclient, err := config.LtsV2Client(env.OS_REGION_NAME)
-	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_logtank_topic_v2" {
-			continue
-		}
-
-		groupId := rs.Primary.Attributes["group_id"]
-		allStreams, err := streams.ListLogStream(ltsclient, groupId)
-		if err != nil {
-			if _, ok := err.(golangsdk.ErrDefault400); ok {
-				return nil
-			} else {
-				return err
-			}
-		}
-		for _, stream := range allStreams {
-			if stream.LogStreamId == rs.Primary.ID {
-				return fmt.Errorf("log topic (%s) still exists", rs.Primary.ID)
-			}
-		}
-
-		if _, ok := err.(golangsdk.ErrDefault400); !ok {
-			return err
-		}
-	}
-	return nil
-}
-
-func testAccCheckLogTankTopicV2Exists(n string, topic *streams.LogStream) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no ID is set")
-		}
-
-		config := common.TestAccProvider.Meta().(*cfg.Config)
-		ltsclient, err := config.LtsV2Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
-		}
-
-		group_id := rs.Primary.Attributes["group_id"]
-
-		allStreams, err := streams.ListLogStream(ltsclient, group_id)
-		if err != nil {
-			return err
-		}
-
-		for _, stream := range allStreams {
-			if stream.LogStreamId == rs.Primary.ID {
-				*topic = stream
-				break
-			}
-		}
-
-		return nil
-	}
-}
-
-const testAccLogTankTopicV2_basic = `
-resource "opentelekomcloud_logtank_group_v2" "testacc_group" {
-  group_name  = "testacc_group"
+func testAccLogTankTopicV2_basic(name string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_logtank_group_v2" "group" {
+  group_name  = "%[1]s"
   ttl_in_days = 7
 }
-resource "opentelekomcloud_logtank_topic_v2" "testacc_topic" {
-  group_id   = opentelekomcloud_logtank_group_v2.testacc_group.id
-  topic_name = "testacc_topic"
+
+resource "opentelekomcloud_logtank_topic_v2" "topic" {
+  group_id   = opentelekomcloud_logtank_group_v2.group.id
+  topic_name = "%[1]s"
 }
-`
+`, name)
+}

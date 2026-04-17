@@ -14,6 +14,9 @@ Up-to-date reference of API arguments for VPNAAS endpoint group you can get at
 
 Manages a V2 Endpoint Group resource within OpenTelekomCloud.
 
+~>
+Resource is deprecated for `eu-de` region, use `enterprise vpn` solution instead
+
 ## Example Usage
 
 ```hcl

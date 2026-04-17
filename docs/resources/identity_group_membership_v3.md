@@ -14,7 +14,8 @@ Up-to-date reference of API arguments for IAM group membership you can get at
 
 Manages a Group Membership resource within OpenTelekomCloud IAM service.
 
--> **Note:** You _must_ have admin privileges in your OpenTelekomCloud cloud to use this resource.
+-> **Note:** You _must_ have `Security Administrator` privileges in your OpenTelekomCloud
+cloud to use this resource. Please refer to [User Management Model](https://docs.otc.t-systems.com/en-us/usermanual/iam/iam_01_0034.html).
 
 ## Example Usage
 
@@ -58,3 +59,11 @@ The following attributes are exported:
 * `group` - See Argument Reference above.
 
 * `users` - See Argument Reference above.
+
+## Import
+
+Group memberships can be imported using the group ID, e.g.
+
+```sh
+terraform import opentelekomcloud_identity_group_membership_v3.membership_1 <group_id>
+```

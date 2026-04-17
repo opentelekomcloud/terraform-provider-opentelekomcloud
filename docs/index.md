@@ -46,6 +46,16 @@ This provider offers 5 means for authentication.
 ### User name + Password
 
 ```hcl
+variable tenant_name {
+  type    = string
+  default = "eu-xx_project"
+}
+
+variable domain_name {
+  type    = string
+  default = "OTC000000000010000XXXXXX"
+}
+
 provider "opentelekomcloud" {
   user_name   = var.user_name
   password    = var.password
@@ -299,6 +309,9 @@ The following arguments are supported:
   It can be set using the `OS_BACKOFF_RETRY_TIMEOUT` environment
   variable. If not set, default value is used.
   Default: `60` seconds.
+
+* `enterprise_project_id` - (Optional) Default Enterprise Project ID for supported resources.
+  If omitted, the `OS_ENTERPRISE_PROJECT_ID` environment variable is used.
 
 ## Additional Logging
 

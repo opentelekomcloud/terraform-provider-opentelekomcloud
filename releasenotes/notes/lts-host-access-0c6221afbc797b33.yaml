@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[LTS]** New LTS host access resource ``resource/opentelekomcloud_lts_host_access_v3`` (`#2880 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2880>`_)

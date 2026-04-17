@@ -24,6 +24,8 @@ func ResourceIdentityAclV3() *schema.Resource {
 		UpdateContext: resourceIdentityACLV3Update,
 		DeleteContext: resourceIdentityACLV3Delete,
 
+		CustomizeDiff: resourceIdentityACLV3CustomizeDiff,
+
 		Schema: map[string]*schema.Schema{
 			"type": {
 				Type:     schema.TypeString,
@@ -63,6 +65,45 @@ func ResourceIdentityAclV3() *schema.Resource {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: common.ValidateIPRange,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+				Set: resourceACLPolicyRangeHash,
+			},
+			"ipv6_cidrs": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 200,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"cidr": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: common.ValidateIPv6CIDR,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+				Set: resourceACLPolicyCIDRHash,
+			},
+			"ipv6_ranges": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true,
+				MaxItems: 200,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"range": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: common.ValidateIPv6Range,
 						},
 						"description": {
 							Type:     schema.TypeString,
@@ -140,6 +181,28 @@ func resourceIdentityACLV3Read(_ context.Context, d *schema.ResourceData, meta i
 		}
 		mErr = multierror.Append(mErr, d.Set("ip_ranges", ipRanges))
 	}
+	if len(res.AllowAddressNetmasksIPv6) > 0 {
+		addressNetmasks := make([]map[string]string, 0, len(res.AllowAddressNetmasksIPv6))
+		for _, v := range res.AllowAddressNetmasksIPv6 {
+			addressNetmask := map[string]string{
+				"cidr":        v.AddressNetmask,
+				"description": v.Description,
+			}
+			addressNetmasks = append(addressNetmasks, addressNetmask)
+		}
+		mErr = multierror.Append(mErr, d.Set("ipv6_cidrs", addressNetmasks))
+	}
+	if len(res.AllowIPRangesIPv6) > 0 {
+		ipRanges := make([]map[string]string, 0, len(res.AllowIPRangesIPv6))
+		for _, v := range res.AllowIPRangesIPv6 {
+			ipRange := map[string]string{
+				"range":       v.IPRange,
+				"description": v.Description,
+			}
+			ipRanges = append(ipRanges, ipRange)
+		}
+		mErr = multierror.Append(mErr, d.Set("ipv6_ranges", ipRanges))
+	}
 
 	if err = mErr.ErrorOrNil(); err != nil {
 		return diag.Errorf("error setting identity ACL fields: %s", err)
@@ -149,7 +212,7 @@ func resourceIdentityACLV3Read(_ context.Context, d *schema.ResourceData, meta i
 }
 
 func resourceIdentityACLV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if d.HasChanges("ip_cidrs", "ip_ranges") {
+	if d.HasChanges("ip_cidrs", "ip_ranges", "ipv6_cidrs", "ipv6_ranges") {
 		if err := updateACLPolicy(d, meta); err != nil {
 			return diag.Errorf("error updating identity ACL: %s", err)
 		}
@@ -165,15 +228,22 @@ func resourceIdentityACLV3Delete(_ context.Context, d *schema.ResourceData, meta
 		return diag.Errorf("error creating IAM client: %s", err)
 	}
 
-	netmasksList := make([]acl.AllowAddressNetmasks, 0, 1)
-	netmask := acl.AllowAddressNetmasks{
-		AddressNetmask: "0.0.0.0-255.255.255.255",
+	rangesList := make([]acl.AllowIPRanges, 0, 1)
+	ipRange := acl.AllowIPRanges{
+		IPRange: "0.0.0.0-255.255.255.255",
 	}
-	netmasksList = append(netmasksList, netmask)
+	rangesList = append(rangesList, ipRange)
 
 	deleteOpts := acl.ACLPolicy{
-		AllowAddressNetmasks: netmasksList,
-		DomainId:             d.Id(),
+		AllowIPRanges: rangesList,
+		DomainId:      d.Id(),
+	}
+	if d.Get("type").(string) == "console" {
+		deleteOpts.AllowIPRangesIPv6 = []acl.AllowIPRanges{
+			{
+				IPRange: "0000:0000:0000:0000:0000:0000:0000:0000-FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF",
+			},
+		}
 	}
 
 	switch d.Get("type").(string) {
@@ -195,6 +265,13 @@ func updateACLPolicy(d *schema.ResourceData, meta interface{}) error {
 	iamClient, err := config.IdentityV30Client()
 	if err != nil {
 		return fmt.Errorf("error creating IAM client: %s", err)
+	}
+
+	t := d.Get("type").(string)
+	if t != "console" {
+		if d.Get("ipv6_cidrs").(*schema.Set).Len() > 0 || d.Get("ipv6_ranges").(*schema.Set).Len() > 0 {
+			return fmt.Errorf(`ipv6_cidrs and ipv6_ranges can only be set when type = "console"`)
+		}
 	}
 
 	updateOpts := acl.ACLPolicy{
@@ -221,6 +298,28 @@ func updateACLPolicy(d *schema.ResourceData, meta interface{}) error {
 			rangeList = append(rangeList, ipRange)
 		}
 		updateOpts.AllowIPRanges = rangeList
+	}
+	if addressNetmasksv6, ok := d.GetOk("ipv6_cidrs"); ok {
+		netmasksList := make([]acl.AllowAddressNetmasks, 0, addressNetmasksv6.(*schema.Set).Len())
+		for _, v := range addressNetmasksv6.(*schema.Set).List() {
+			netmask := acl.AllowAddressNetmasks{
+				AddressNetmask: v.(map[string]interface{})["cidr"].(string),
+				Description:    v.(map[string]interface{})["description"].(string),
+			}
+			netmasksList = append(netmasksList, netmask)
+		}
+		updateOpts.AllowAddressNetmasksIPv6 = netmasksList
+	}
+	if ipRangesv6, ok := d.GetOk("ipv6_ranges"); ok {
+		rangeList := make([]acl.AllowIPRanges, 0, ipRangesv6.(*schema.Set).Len())
+		for _, v := range ipRangesv6.(*schema.Set).List() {
+			ipRange := acl.AllowIPRanges{
+				IPRange:     v.(map[string]interface{})["range"].(string),
+				Description: v.(map[string]interface{})["description"].(string),
+			}
+			rangeList = append(rangeList, ipRange)
+		}
+		updateOpts.AllowIPRangesIPv6 = rangeList
 	}
 
 	switch d.Get("type").(string) {
@@ -253,4 +352,22 @@ func resourceACLPolicyRangeHash(v interface{}) int {
 	}
 
 	return hashcode.String(buf.String())
+}
+
+func resourceIdentityACLV3CustomizeDiff(
+	ctx context.Context,
+	d *schema.ResourceDiff,
+	meta interface{},
+) error {
+	if d.Get("type").(string) != "console" {
+		if d.Get("ipv6_cidrs").(*schema.Set).Len() > 0 {
+			return fmt.Errorf(`ipv6_cidrs can only be specified when type = "console"`)
+		}
+
+		if d.Get("ipv6_ranges").(*schema.Set).Len() > 0 {
+			return fmt.Errorf(`ipv6_ranges can only be specified when type = "console"`)
+		}
+	}
+
+	return nil
 }

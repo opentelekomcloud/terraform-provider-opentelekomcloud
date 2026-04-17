@@ -1,0 +1,4 @@
+---
+features:
+  - |
+     Add ``frequency`` option for ``resource/opentelekomcloud_css_snapshot_configuration_v1`` (`#3274 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3274>`_)

@@ -33,6 +33,11 @@ resource "opentelekomcloud_obs_bucket_inventory" "inventory" {
   }
   filter_prefix            = "test-filter-prefix"
   included_object_versions = "Current"
+  optional_fields = [
+    "Size",
+    "LastModifiedDate",
+    "ReplicationStatus"
+  ]
 }
 ```
 
@@ -62,6 +67,17 @@ The following arguments are supported:
     * `Current`
 
 * `filter_prefix` - (Optional, String) Filtering by name prefix. Only objects with the specified name prefix are included in the inventory.
+
+* `optional_fields` - (Optional, List) Extra metadata fields that can be added to an inventory. If this parameter is configured,
+fields specified in this parameter are contained in the inventory.
+  Possible values:
+    * `Size`
+    * `LastModifiedDate`
+    * `ETag`
+    * `StorageClass`
+    * `IsMultipartUploaded`
+    * `ReplicationStatus`
+    * `EncryptionStatus`
 
 The `destination` block supports:
 
