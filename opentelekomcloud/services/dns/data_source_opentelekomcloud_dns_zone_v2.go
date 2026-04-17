@@ -124,7 +124,15 @@ func dataSourceDNSZoneV2Read(_ context.Context, d *schema.ResourceData, meta int
 
 	pages, err := zones.List(client, listOpts).AllPages()
 	if err != nil {
-		return fmterr.Errorf("unable to retrieve zones: %w", err)
+		if config.GetRegion(d) == "eu-nl" {
+			replaceNlEndpoint(client)
+			pages, err = zones.List(client, listOpts).AllPages()
+			if err != nil {
+				return fmterr.Errorf("unable to retrieve zones: %w", err)
+			}
+		} else {
+			return fmterr.Errorf("unable to retrieve zones: %w", err)
+		}
 	}
 
 	allZones, err := zones.ExtractZones(pages)
