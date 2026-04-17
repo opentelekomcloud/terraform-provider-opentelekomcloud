@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DNS]** Added NL-region DNS fallback handling (`#2786 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/2786>`_)
