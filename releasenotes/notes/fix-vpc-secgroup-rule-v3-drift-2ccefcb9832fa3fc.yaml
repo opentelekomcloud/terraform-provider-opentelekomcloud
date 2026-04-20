@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix ``opentelekomcloud_vpc_secgroup_rule_v3`` so a rule deleted or replaced out-of-band (e.g. edited via the OTC portal) no longer causes ``terraform plan`` to error. The resource is now marked for re-creation on the next plan. (`#3343 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3343>`_)
