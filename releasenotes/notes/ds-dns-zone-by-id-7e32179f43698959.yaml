@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[DNS]** Add lookup by `id` in ``data-source/opentelekomcloud_dns_zone_v2`` (`#3348 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3348>`_)
