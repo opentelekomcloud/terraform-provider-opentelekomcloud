@@ -19,6 +19,11 @@ func DataSourceDNSZoneV2() *schema.Resource {
 		ReadContext: dataSourceDNSZoneV2Read,
 
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -91,6 +96,25 @@ func dataSourceDNSZoneV2Read(_ context.Context, d *schema.ResourceData, meta int
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
+	if v, ok := d.GetOk("id"); ok {
+		zoneID := v.(string)
+
+		zone, err := zones.Get(client, zoneID).Extract()
+		if err != nil {
+			if config.GetRegion(d) == "eu-nl" {
+				replaceNlEndpoint(client)
+				zone, err = zones.Get(client, zoneID).Extract()
+				if err != nil {
+					return fmterr.Errorf("unable to retrieve zone %s: %w", zoneID, err)
+				}
+			} else {
+				return fmterr.Errorf("unable to retrieve zone %s: %w", zoneID, err)
+			}
+		}
+
+		return setDNSZoneV2DataSourceAttributes(d, zone)
+	}
+
 	listOpts := zones.ListOpts{}
 
 	if v, ok := d.GetOk("name"); ok {
@@ -152,10 +176,15 @@ func dataSourceDNSZoneV2Read(_ context.Context, d *schema.ResourceData, meta int
 
 	zone := allZones[0]
 
+	return setDNSZoneV2DataSourceAttributes(d, &zone)
+}
+
+func setDNSZoneV2DataSourceAttributes(d *schema.ResourceData, zone *zones.Zone) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieved DNS Zone %s: %+v", zone.ID, zone)
 	d.SetId(zone.ID)
 
 	mErr := multierror.Append(
+		d.Set("id", zone.ID),
 		d.Set("name", zone.Name),
 		d.Set("pool_id", zone.PoolID),
 		d.Set("email", zone.Email),
