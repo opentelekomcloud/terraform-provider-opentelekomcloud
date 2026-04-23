@@ -25,6 +25,9 @@ data "opentelekomcloud_dns_zone_v2" "zone_1" {
 
 ## Argument Reference
 
+* `id` - (Optional) The ID of the zone. If specified, the zone is retrieved
+  directly by ID and other lookup arguments are ignored.
+
 * `zone_type` - (Optional) The type of the zone: `private` or `public`.
   This argument is **required** to match `private` zones.
 
@@ -45,6 +48,8 @@ data "opentelekomcloud_dns_zone_v2" "zone_1" {
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
+
+* `id` - The ID of the zone.
 
 * `masters` - An array of master DNS servers.
 

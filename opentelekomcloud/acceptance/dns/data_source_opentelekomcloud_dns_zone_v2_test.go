@@ -8,9 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
 const dataZoneName = "data.opentelekomcloud_dns_zone_v2.z1"
+const dataPrivateZoneName = "data.opentelekomcloud_dns_zone_v2.private"
 
 func TestAccOpenStackDNSZoneV2DataSource_basic(t *testing.T) {
 	zone := randomZoneName()
@@ -66,6 +68,36 @@ func TestAccOpenStackDNSZoneV2DataSource_byTag(t *testing.T) {
 	})
 }
 
+func TestAccOpenStackDNSZoneV2DataSource_byID(t *testing.T) {
+	zone := randomZoneName()
+	randZoneTag := fmt.Sprintf("value-%s", acctest.RandString(5))
+	dc := common.InitDataSourceCheck(dataZoneName)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      dc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccOpenStackDNSZoneV2DataSourceZone(zone, randZoneTag),
+			},
+			{
+				Config: testAccOpenStackDNSZoneV2DataSourceByID(zone, randZoneTag),
+				Check: resource.ComposeTestCheckFunc(
+					dc.CheckResourceExists(),
+					testAccCheckDNSZoneV2DataSourceID(dataZoneName),
+					resource.TestCheckResourceAttrPair(
+						dataZoneName, "id",
+						"opentelekomcloud_dns_zone_v2.zone_1", "id",
+					),
+					resource.TestCheckResourceAttr(dataZoneName, "name", zone),
+					resource.TestCheckResourceAttr(dataZoneName, "zone_type", "public"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccOpenStackDNSZoneV2DataSource_private(t *testing.T) {
 	zone1 := randomZoneName()
 	dc := common.InitDataSourceCheck(dataZoneName)
@@ -82,6 +114,31 @@ func TestAccOpenStackDNSZoneV2DataSource_private(t *testing.T) {
 				Config: testAccOpenStackDNSZoneV2DataSourcePrivate(zone1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSZoneV2DataSourceID(dataZoneName),
+				),
+			},
+		},
+	})
+}
+
+func TestAccOpenStackDNSZoneV2DataSource_privateByTag(t *testing.T) {
+	zone1 := "otc.dev.local."
+	dc := common.InitDataSourceCheck(dataPrivateZoneName)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      dc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccOpenStackDNSZoneV2DataSourcePrivateZone(zone1),
+			},
+			{
+				Config: testAccOpenStackDNSZoneV2DataSourcePrivateByTag(zone1),
+				Check: resource.ComposeTestCheckFunc(
+					dc.CheckResourceExists(),
+					testAccCheckDNSZoneV2DataSourceID(dataPrivateZoneName),
+					resource.TestCheckResourceAttr(dataPrivateZoneName, "name", zone1),
+					resource.TestCheckResourceAttr(dataPrivateZoneName, "zone_type", "private"),
 				),
 			},
 		},
@@ -162,6 +219,16 @@ data "opentelekomcloud_dns_zone_v2" "z1" {
 `, base, zoneTagValue)
 }
 
+func testAccOpenStackDNSZoneV2DataSourceByID(zoneName, zoneTagValue string) string {
+	base := testAccOpenStackDNSZoneV2DataSourceZone(zoneName, zoneTagValue)
+	return fmt.Sprintf(`
+%s
+data "opentelekomcloud_dns_zone_v2" "z1" {
+  id = opentelekomcloud_dns_zone_v2.zone_1.id
+}
+`, base)
+}
+
 func testAccOpenStackDNSZoneV2DataSourcePrivate(zoneName string) string {
 	base := testAccDNSV2ZonePrivate(zoneName)
 	return fmt.Sprintf(`
@@ -169,6 +236,43 @@ func testAccOpenStackDNSZoneV2DataSourcePrivate(zoneName string) string {
 
 data "opentelekomcloud_dns_zone_v2" "z1" {
   name      = "%s"
+  zone_type = "private"
+}
+`, base, zoneName)
+}
+
+func testAccOpenStackDNSZoneV2DataSourcePrivateZone(zoneName string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name        = "%s"
+  email       = "email1@example.com"
+  description = "a private zone"
+  ttl         = 3000
+  type        = "private"
+
+  router {
+    router_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+    router_region = "%s"
+  }
+
+  tags = {
+    Name = "%s"
+  }
+}
+`, common.DataSourceSubnet, zoneName, env.OS_REGION_NAME, zoneName)
+}
+
+func testAccOpenStackDNSZoneV2DataSourcePrivateByTag(zoneName string) string {
+	base := testAccOpenStackDNSZoneV2DataSourcePrivateZone(zoneName)
+	return fmt.Sprintf(`
+%s
+
+data "opentelekomcloud_dns_zone_v2" "private" {
+  tags = {
+    Name = "%s"
+  }
   zone_type = "private"
 }
 `, base, zoneName)
