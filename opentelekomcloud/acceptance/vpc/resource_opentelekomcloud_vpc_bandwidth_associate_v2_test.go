@@ -237,8 +237,8 @@ resource "opentelekomcloud_vpc_bandwidth_v2" "band_test" {
 resource "opentelekomcloud_vpc_bandwidth_associate_v2" "associate" {
   depends_on = [opentelekomcloud_vpc_eip_v1.eip]
 
-  bandwidth      = opentelekomcloud_vpc_bandwidth_v2.band_test.id
-  floating_ips   = [opentelekomcloud_ecs_instance_v1.instance_1.nics.0.port_id]
+  bandwidth    = opentelekomcloud_vpc_bandwidth_v2.band_test.id
+  floating_ips = [opentelekomcloud_ecs_instance_v1.instance_1.nics.0.port_id]
 }
 `, common.DataSourceImage, networkID, env.OS_AVAILABILITY_ZONE)
 }
