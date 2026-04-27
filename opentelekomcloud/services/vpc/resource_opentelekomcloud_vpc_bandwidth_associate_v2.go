@@ -10,10 +10,13 @@ import (
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/bandwidths"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
+
+const dualStackPublicIPType = "5_dualStack"
 
 func ResourceBandwidthAssociateV2() *schema.Resource {
 	return &schema.Resource{
@@ -138,20 +141,37 @@ func resourceBandwidthAssociateV2Delete(ctx context.Context, d *schema.ResourceD
 }
 
 func addIPsToBandwidth(client *golangsdk.ServiceClient, d *schema.ResourceData, ips *schema.Set) error {
-	ips, err := filterExistingFloatingIPs(client, ips)
+	fips, failedIDs, err := filterExistingFloatingIPs(client, ips)
 	if err != nil {
 		return err
 	}
-	if ips.Len() == 0 {
+	if fips.Len() == 0 && len(failedIDs) == 0 {
 		return nil
 	}
 
-	ipOpts := make([]bandwidths.PublicIpInfoInsertOpts, ips.Len())
-	for i, ip := range ips.List() {
-		ipOpts[i] = bandwidths.PublicIpInfoInsertOpts{
+	ipOpts := make([]bandwidths.PublicIpInfoInsertOpts, 0, fips.Len()+len(failedIDs))
+	for _, ip := range fips.List() {
+		ipOpts = append(ipOpts, bandwidths.PublicIpInfoInsertOpts{
 			PublicIpID: ip.(string),
-		}
+		})
 	}
+
+	for _, id := range failedIDs {
+		_, err := ports.Get(client, id).Extract()
+		if err != nil {
+			continue
+		}
+
+		ipOpts = append(ipOpts, bandwidths.PublicIpInfoInsertOpts{
+			PublicIpID:   id,
+			PublicIpType: dualStackPublicIPType,
+		})
+	}
+
+	if len(ipOpts) == 0 {
+		return nil
+	}
+
 	opts := bandwidths.InsertOpts{PublicIpInfo: ipOpts}
 
 	if _, err := bandwidths.Insert(client, d.Id(), opts).Extract(); err != nil {
@@ -161,19 +181,35 @@ func addIPsToBandwidth(client *golangsdk.ServiceClient, d *schema.ResourceData, 
 }
 
 func removeIPsFromBandwidth(client *golangsdk.ServiceClient, d *schema.ResourceData, ips *schema.Set) error {
-	ips, err := filterExistingFloatingIPs(client, ips)
+	fips, failedIDs, err := filterExistingFloatingIPs(client, ips)
 	if err != nil {
 		return err
 	}
-	if ips.Len() == 0 {
+	if fips.Len() == 0 && len(failedIDs) == 0 {
 		return nil
 	}
 
-	ipInfo := make([]bandwidths.PublicIpInfoID, ips.Len())
-	for i, ip := range ips.List() {
-		ipInfo[i] = bandwidths.PublicIpInfoID{
+	ipInfo := make([]bandwidths.PublicIpInfoRemove, 0, fips.Len()+len(failedIDs))
+	for _, ip := range fips.List() {
+		ipInfo = append(ipInfo, bandwidths.PublicIpInfoRemove{
 			PublicIpID: ip.(string),
+		})
+	}
+
+	for _, id := range failedIDs {
+		_, err := ports.Get(client, id).Extract()
+		if err != nil {
+			continue
 		}
+
+		ipInfo = append(ipInfo, bandwidths.PublicIpInfoRemove{
+			PublicIpID:   id,
+			PublicIpType: dualStackPublicIPType,
+		})
+	}
+
+	if len(ipInfo) == 0 {
+		return nil
 	}
 
 	opts := bandwidths.RemoveOpts{
@@ -188,23 +224,35 @@ func removeIPsFromBandwidth(client *golangsdk.ServiceClient, d *schema.ResourceD
 	return nil
 }
 
-// filterExistingFloatingIPs returns only existing IPs from given slice
-func filterExistingFloatingIPs(clientV2 *golangsdk.ServiceClient, ipIDs *schema.Set) (*schema.Set, error) {
+// filterExistingFloatingIPs returns existing floating IP IDs and unresolved IDs from the given set.
+func filterExistingFloatingIPs(clientV2 *golangsdk.ServiceClient, ipIDs *schema.Set) (*schema.Set, []string, error) {
 	filtered := schema.NewSet(schema.HashString, []interface{}{})
+	unresolved := make(map[string]struct{}, ipIDs.Len())
+
+	for _, raw := range ipIDs.List() {
+		unresolved[raw.(string)] = struct{}{}
+	}
 
 	// check IPs in v2:
 	pages, err := floatingips.List(clientV2, floatingips.ListOpts{}).AllPages()
 	if err != nil {
-		return nil, fmt.Errorf("error listing floating IPs: %w", err)
+		return nil, nil, fmt.Errorf("error listing floating IPs: %w", err)
 	}
 	fips, err := floatingips.ExtractFloatingIPs(pages)
 	if err != nil {
-		return nil, fmt.Errorf("error extracting floating IPs: %w", err)
+		return nil, nil, fmt.Errorf("error extracting floating IPs: %w", err)
 	}
 	for _, ip := range fips {
 		if id := ip.ID; ipIDs.Contains(id) {
 			filtered.Add(id)
+			delete(unresolved, id)
 		}
 	}
-	return filtered, nil
+
+	failedIDs := make([]string, 0, len(unresolved))
+	for id := range unresolved {
+		failedIDs = append(failedIDs, id)
+	}
+
+	return filtered, failedIDs, nil
 }

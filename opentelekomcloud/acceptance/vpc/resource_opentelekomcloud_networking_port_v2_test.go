@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/networks"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/subnets"
@@ -16,11 +15,6 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
-
-type testPortWithExtensions struct {
-	ports.Port
-	portsecurity.PortSecurityExt
-}
 
 const resourceNwPortName = "opentelekomcloud_networking_port_v2.port_1"
 
@@ -130,7 +124,7 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 }
 
 func TestAccNetworkingV2Port_portSecurity_enabled(t *testing.T) {
-	var port testPortWithExtensions
+	var port ports.Port
 	resourceName := "opentelekomcloud_networking_port_v2.port_1"
 	t.Parallel()
 	qts := subnetQuotas()
@@ -162,7 +156,7 @@ func TestAccNetworkingV2Port_portSecurity_enabled(t *testing.T) {
 }
 
 func TestAccNetworkingV2Port_extendedDhcpOpts(t *testing.T) {
-	var port testPortWithExtensions
+	var port ports.Port
 	resourceName := "opentelekomcloud_networking_port_v2.port_1"
 	t.Parallel()
 	qts := subnetQuotas()
@@ -196,7 +190,7 @@ func TestAccNetworkingV2Port_extendedDhcpOpts(t *testing.T) {
 }
 
 func TestAccNetworkingV2Port_noPortSecurityNoSecurityGroups(t *testing.T) {
-	var port testPortWithExtensions
+	var port ports.Port
 	resourceName := "opentelekomcloud_networking_port_v2.port_1"
 	t.Parallel()
 	qts := subnetQuotas()
@@ -298,7 +292,7 @@ func testAccCheckNetworkingV2PortExists(n string, port *ports.Port) resource.Tes
 	}
 }
 
-func testAccCheckNetworkingV2PortWithExtensionsExists(n string, port *testPortWithExtensions) resource.TestCheckFunc {
+func testAccCheckNetworkingV2PortWithExtensionsExists(n string, port *ports.Port) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -315,7 +309,7 @@ func testAccCheckNetworkingV2PortWithExtensionsExists(n string, port *testPortWi
 			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 		}
 
-		var found testPortWithExtensions
+		var found ports.Port
 		err = ports.Get(client, rs.Primary.ID).ExtractInto(&found)
 		if err != nil {
 			return err
@@ -341,7 +335,7 @@ func testAccCheckNetworkingV2PortCountFixedIPs(port *ports.Port, expected int) r
 	}
 }
 
-func testAccCheckNetworkingV2PortPortSecurity(port *testPortWithExtensions, expected bool) resource.TestCheckFunc {
+func testAccCheckNetworkingV2PortPortSecurity(port *ports.Port, expected bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if port.PortSecurityEnabled != expected {
 			return fmt.Errorf("port has wrong port_security_enabled. Expected %t, got %t", expected, port.PortSecurityEnabled)
