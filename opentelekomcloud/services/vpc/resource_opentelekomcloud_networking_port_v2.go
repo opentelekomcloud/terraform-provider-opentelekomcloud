@@ -263,8 +263,7 @@ func resourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData, m
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	var port portWithPortSecurityExtensions
-	err = ports.Get(client, d.Id()).ExtractInto(&port)
+	port, err := ports.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "port")
 	}
@@ -284,12 +283,12 @@ func resourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData, m
 		d.Set("device_id", port.DeviceID),
 		d.Set("port_security_enabled", port.PortSecurityEnabled),
 		d.Set("region", config.GetRegion(d)),
-		d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDHCPOptsExt)),
+		d.Set("extra_dhcp_option", flattenNetworkingPortDHCPOptsV2(port.ExtraDhcpOpts)),
 	)
 
 	// Create a slice of all returned Fixed IPs.
 	// This will be in the order returned by the API,
-	// which is usually alpha-numeric.
+	// which is usually alphanumeric.
 	var ips []string
 	for _, ipObject := range port.FixedIPs {
 		ips = append(ips, ipObject.IPAddress)
@@ -465,7 +464,7 @@ func ResourcePortSecurityGroupsV2(d *schema.ResourceData) []string {
 	return groups
 }
 
-func resourcePortFixedIpsV2(d *schema.ResourceData) interface{} {
+func resourcePortFixedIpsV2(d *schema.ResourceData) []ports.IP {
 	rawIP := d.Get("fixed_ip").([]interface{})
 
 	if len(rawIP) == 0 {
@@ -557,12 +556,6 @@ func waitForNetworkPortDelete(client *golangsdk.ServiceClient, portID string) re
 	}
 }
 
-type portWithPortSecurityExtensions struct {
-	ports.Port
-	portsecurity.PortSecurityExt
-	extradhcpopts.ExtraDHCPOptsExt
-}
-
 func expandNetworkingPortDHCPOptsV2Create(dhcpOpts *schema.Set) []extradhcpopts.CreateExtraDHCPOpt {
 	var extraDHCPOpts []extradhcpopts.CreateExtraDHCPOpt
 
@@ -582,10 +575,10 @@ func expandNetworkingPortDHCPOptsV2Create(dhcpOpts *schema.Set) []extradhcpopts.
 	return extraDHCPOpts
 }
 
-func flattenNetworkingPortDHCPOptsV2(dhcpOpts extradhcpopts.ExtraDHCPOptsExt) []map[string]interface{} {
-	dhcpOptsSet := make([]map[string]interface{}, len(dhcpOpts.ExtraDHCPOpts))
+func flattenNetworkingPortDHCPOptsV2(dhcpOpts []ports.ExtraDhcpOpt) []map[string]interface{} {
+	dhcpOptsSet := make([]map[string]interface{}, len(dhcpOpts))
 
-	for i, dhcpOpt := range dhcpOpts.ExtraDHCPOpts {
+	for i, dhcpOpt := range dhcpOpts {
 		dhcpOptsSet[i] = map[string]interface{}{
 			"name":  dhcpOpt.OptName,
 			"value": dhcpOpt.OptValue,

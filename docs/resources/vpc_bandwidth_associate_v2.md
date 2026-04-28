@@ -13,6 +13,7 @@ Up-to-date reference of API arguments for VPC bandwidth association you can get 
 # opentelekomcloud_vpc_bandwidth_associate_v2
 
 Provides a resource to associate floating IP with a shared bandwidth within Open Telekom Cloud.
+The resource can also associate an ECS NIC `port_id` when it represents the IPv6 public path.
 
 ## Example Usage
 
@@ -34,13 +35,27 @@ resource "opentelekomcloud_vpc_bandwidth_associate_v2" "associate" {
 }
 ```
 
+For an IPv6 ECS NIC port:
+
+```hcl
+resource "opentelekomcloud_vpc_bandwidth_associate_v2" "associate" {
+  bandwidth = opentelekomcloud_vpc_bandwidth_v2.band20m.id
+  floating_ips = [
+    opentelekomcloud_ecs_instance_v1.instance_1.nics[0].port_id,
+  ]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
 * `bandwidth` - (Required) Specifies ID of the bandwidth to be assigned.
 
-* `floating_ips` - (Required) Specifies IDs of floating IPs to be added to the bandwidth.
+* `floating_ips` - (Required) Specifies IDs to be added to the bandwidth.
+  The values can be floating IP IDs or ECS NIC `port_id` values.
+  When a value is a `port_id`, the provider verifies that the port exists and
+  sends the association as a dual-stack public IP path.
 
 ->
 After an EIP is removed from a shared bandwidth, a dedicated bandwidth will be allocated to the EIP, and you will be
