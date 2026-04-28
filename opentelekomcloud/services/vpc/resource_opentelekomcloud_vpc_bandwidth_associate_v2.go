@@ -157,15 +157,10 @@ func addIPsToBandwidth(client *golangsdk.ServiceClient, d *schema.ResourceData, 
 	}
 
 	for _, id := range failedIDs {
-		_, err := ports.Get(client, id).Extract()
+		err := insertPortToBandwidth(client, d.Id(), id)
 		if err != nil {
 			continue
 		}
-
-		ipOpts = append(ipOpts, bandwidths.PublicIpInfoInsertOpts{
-			PublicIpID:   id,
-			PublicIpType: dualStackPublicIPType,
-		})
 	}
 
 	if len(ipOpts) == 0 {
@@ -197,15 +192,9 @@ func removeIPsFromBandwidth(client *golangsdk.ServiceClient, d *schema.ResourceD
 	}
 
 	for _, id := range failedIDs {
-		_, err := ports.Get(client, id).Extract()
-		if err != nil {
+		if err := removePortFromBandwidth(client, d.Id(), id, d.Get("backup_charge_mode").(string), d.Get("backup_size").(int)); err != nil {
 			continue
 		}
-
-		ipInfo = append(ipInfo, bandwidths.PublicIpInfoRemove{
-			PublicIpID:   id,
-			PublicIpType: dualStackPublicIPType,
-		})
 	}
 
 	if len(ipInfo) == 0 {
@@ -221,6 +210,60 @@ func removeIPsFromBandwidth(client *golangsdk.ServiceClient, d *schema.ResourceD
 	if err := bandwidths.Remove(client, d.Id(), opts).ExtractErr(); err != nil {
 		return fmt.Errorf("error removing IPs from the bandwidth: %w", err)
 	}
+	return nil
+}
+
+func insertPortToBandwidth(client *golangsdk.ServiceClient, bwID, portID string) error {
+	associatedPort, err := ports.Get(client, portID).Extract()
+	if err != nil {
+		return fmt.Errorf("error fetching port %s: %w", portID, err)
+	}
+	if associatedPort.Ipv6BandwidthId != "" {
+		if associatedPort.Ipv6BandwidthId == bwID {
+			return nil
+		}
+
+		if err := removePortFromBandwidth(client, associatedPort.Ipv6BandwidthId, portID, "bandwidth", 1); err != nil {
+			return err
+		}
+	}
+
+	insertOpts := bandwidths.InsertOpts{
+		PublicIpInfo: []bandwidths.PublicIpInfoInsertOpts{
+			{
+				PublicIpID:   portID,
+				PublicIpType: dualStackPublicIPType,
+			},
+		},
+	}
+
+	if _, err := bandwidths.Insert(client, bwID, insertOpts).Extract(); err != nil {
+		return fmt.Errorf("error inserting %s into bandwidth %s: %w", portID, bwID, err)
+	}
+
+	return nil
+}
+
+func removePortFromBandwidth(client *golangsdk.ServiceClient, bwID, portID, chargeMode string, size int) error {
+	if _, err := ports.Get(client, portID).Extract(); err != nil {
+		return fmt.Errorf("error fetching port %s: %w", portID, err)
+	}
+
+	removeOpts := bandwidths.RemoveOpts{
+		ChargeMode: chargeMode,
+		Size:       size,
+		PublicIpInfo: []bandwidths.PublicIpInfoRemove{
+			{
+				PublicIpID:   portID,
+				PublicIpType: dualStackPublicIPType,
+			},
+		},
+	}
+
+	if err := bandwidths.Remove(client, bwID, removeOpts).ExtractErr(); err != nil {
+		return fmt.Errorf("error removing %s from bandwidth %s: %w", portID, bwID, err)
+	}
+
 	return nil
 }
 
