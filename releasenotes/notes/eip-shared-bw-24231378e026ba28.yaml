@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix creation with an existing shared bandwidth by allowing ``bandwidth.id`` to be used in the ``bandwidth`` block in ``opentelekomcloud_vpc_eip_v1`` (`#3355 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3355>`_)
