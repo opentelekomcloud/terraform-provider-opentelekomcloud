@@ -47,6 +47,26 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
 }
 ```
 
+## EIP with shared bandwidth
+
+```hcl
+resource "opentelekomcloud_vpc_bandwidth_v2" "shared" {
+  name = "shared-bandwidth"
+  size = 50
+}
+
+resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
+  publicip {
+    type = "5_bgp"
+  }
+
+  bandwidth {
+    id         = opentelekomcloud_vpc_bandwidth_v2.shared.id
+    share_type = "WHOLE"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -74,10 +94,15 @@ The `publicip` block supports:
 
 The `bandwidth` block supports:
 
-* `name` - (Required) The bandwidth name, which is a string of 1 to 64 characters
-  that contain letters, digits, underscores (_), and hyphens (-).
+* `id` - (Optional) An existing shared bandwidth ID to attach the EIP to. This
+  conflicts with `name`.
 
-* `size` - (Required) The bandwidth size. The value ranges from 1 to 300 Mbit/s.
+* `name` - (Optional) The bandwidth name, which is a string of 1 to 64 characters
+  that contain letters, digits, underscores (_), and hyphens (-). Required with
+  `size` when creating a new bandwidth.
+
+* `size` - (Optional) The bandwidth size. The value ranges from 1 to 300 Mbit/s.
+  Required with `name` when creating a new bandwidth.
 
 * `share_type` - (Required) Whether the bandwidth is shared or exclusive. Changing
   this creates a new eip.
@@ -106,6 +131,8 @@ The following attributes are exported:
 * `publicip/port_id` - See Argument Reference above.
 
 * `publicip/name` - See Argument Reference above.
+
+* `bandwidth/id` - See Argument Reference above.
 
 * `bandwidth/name` - See Argument Reference above.
 

@@ -94,9 +94,10 @@ func ResourceVpcEIPV1() *schema.Resource {
 							RequiredWith: []string{"bandwidth.0.size"},
 						},
 						"size": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Computed: true,
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Computed:     true,
+							RequiredWith: []string{"bandwidth.0.name"},
 						},
 						"share_type": {
 							Type:     schema.TypeString,
@@ -107,6 +108,7 @@ func ResourceVpcEIPV1() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
+							ForceNew: true,
 						},
 					},
 				},
