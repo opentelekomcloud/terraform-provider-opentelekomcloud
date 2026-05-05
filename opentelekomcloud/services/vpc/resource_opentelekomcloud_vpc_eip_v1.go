@@ -80,13 +80,23 @@ func ResourceVpcEIPV1() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							Computed:     true,
+							ExactlyOneOf: []string{"bandwidth.0.name"},
+						},
 						"name": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							RequiredWith: []string{"bandwidth.0.size"},
 						},
 						"size": {
 							Type:     schema.TypeInt,
-							Required: true,
+							Optional: true,
+							Computed: true,
 						},
 						"share_type": {
 							Type:     schema.TypeString,
@@ -97,7 +107,6 @@ func ResourceVpcEIPV1() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
-							ForceNew: true,
 						},
 					},
 				},
@@ -193,6 +202,7 @@ func resourceVpcEIPV1Read(ctx context.Context, d *schema.ResourceData, meta inte
 	// Set bandwidth
 	bw := []map[string]interface{}{
 		{
+			"id":          bandWidth.ID,
 			"name":        bandWidth.Name,
 			"size":        eip.BandwidthSize,
 			"share_type":  eip.BandwidthShareType,
@@ -332,6 +342,7 @@ func resourceBandWidth(d *schema.ResourceData) eips.BandwidthOpts {
 	bandwidthRaw := d.Get("bandwidth").([]interface{})[0].(map[string]interface{})
 
 	bandwidthOpts := eips.BandwidthOpts{
+		Id:         bandwidthRaw["id"].(string),
 		Name:       bandwidthRaw["name"].(string),
 		Size:       bandwidthRaw["size"].(int),
 		ShareType:  bandwidthRaw["share_type"].(string),

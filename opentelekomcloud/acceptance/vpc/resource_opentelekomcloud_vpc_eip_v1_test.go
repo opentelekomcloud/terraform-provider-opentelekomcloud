@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
@@ -90,6 +91,29 @@ func TestAccVpcV1EIP_timeout(t *testing.T) {
 				Config: testAccVpcV1EIPTimeouts,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVpcV1EIPExists(resourceVPCEIPName, &eip),
+				),
+			},
+		},
+	})
+}
+
+func TestAccVpcV1EIP_shared(t *testing.T) {
+	var eip eips.PublicIp
+	t.Parallel()
+	quotas.BookOne(t, quotas.FloatingIP)
+	const resourceVPCEIPSharedName = "opentelekomcloud_vpc_eip_v1.shared_1"
+	name := fmt.Sprintf("eip-shared-%s", acctest.RandString(5))
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckVpcV1EIPDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVpcV1EIPShare(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckVpcV1EIPExists(resourceVPCEIPSharedName, &eip),
+					resource.TestCheckResourceAttr(resourceVPCEIPSharedName, "bandwidth.0.size", "50"),
+					resource.TestCheckResourceAttr(resourceVPCEIPSharedName, "publicip.0.type", "5_bgp"),
 				),
 			},
 		},
@@ -262,3 +286,23 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
 
 }
 `, common.DataSourceSubnet)
+
+func testAccVpcV1EIPShare(rName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_vpc_bandwidth_v2" "test" {
+  name = "%s"
+  size = 50
+}
+
+resource "opentelekomcloud_vpc_eip_v1" "shared_1" {
+  publicip {
+    type = "5_bgp"
+  }
+
+  bandwidth {
+    share_type = "WHOLE"
+    id         = opentelekomcloud_vpc_bandwidth_v2.test.id
+  }
+}
+`, rName)
+}
