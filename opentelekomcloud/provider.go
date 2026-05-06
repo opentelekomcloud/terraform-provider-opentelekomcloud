@@ -750,6 +750,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_enterprise_vpn_connection_monitor_v5":      vpn.ResourceEnterpriseConnectionMonitor(),
 			"opentelekomcloud_waf_alarm_notification_v1":                 waf.ResourceWafAlarmNotificationV1(),
 			"opentelekomcloud_waf_certificate_v1":                        waf.ResourceWafCertificateV1(),
+			"opentelekomcloud_waf_cloud_instance_v1":                     waf.ResourceWafCloudInstanceV1(),
 			"opentelekomcloud_waf_domain_v1":                             waf.ResourceWafDomainV1(),
 			"opentelekomcloud_waf_policy_v1":                             waf.ResourceWafPolicyV1(),
 			"opentelekomcloud_waf_whiteblackip_rule_v1":                  waf.ResourceWafWhiteBlackIpRuleV1(),
