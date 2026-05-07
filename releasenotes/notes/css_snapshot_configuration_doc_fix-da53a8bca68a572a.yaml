@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    kms_id is css_snapshot_configuration_v1 resource is currently supported only in the main project and is planned for future deprecation, new usage is not recommended.
