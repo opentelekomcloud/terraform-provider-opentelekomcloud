@@ -78,7 +78,7 @@ func testAccWafCloudInstanceV1Basic() string {
 	return `
 resource "opentelekomcloud_waf_cloud_instance_v1" "cloud_1" {
   charging_mode = "postPaid"
-  website = "dt"
+  website       = "dt"
 }
 `
 }
