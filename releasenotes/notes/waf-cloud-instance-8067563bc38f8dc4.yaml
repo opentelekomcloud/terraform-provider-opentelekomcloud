@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[WAF]** Add new resource ``resource/opentelekomcloud_waf_cloud_instance_v1`` (`#3357 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3357>`_)
