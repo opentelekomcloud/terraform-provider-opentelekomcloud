@@ -76,7 +76,7 @@ func TestAccHostGroup_basic(t *testing.T) {
 				Config: testHostGroup_update(name),
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
-					resource.TestCheckResourceAttr(rName, "name", name+"-update"),
+					resource.TestCheckResourceAttr(rName, "name", name),
 					resource.TestCheckResourceAttr(rName, "type", "linux"),
 					resource.TestCheckResourceAttr(rName, "tags.foo", "bar_update"),
 					resource.TestCheckResourceAttr(rName, "tags.key_update", "value"),
@@ -176,7 +176,7 @@ set -o history
 }
 
 resource "opentelekomcloud_lts_host_group_v3" "hg" {
-  name     = "%[3]s-update"
+  name     = "%[3]s"
   type     = "linux"
   host_ids = [opentelekomcloud_compute_instance_v2.instance.id]
 
