@@ -557,6 +557,10 @@ func resourceObsBucketRead(_ context.Context, d *schema.ResourceData, meta inter
 		return fmterr.Errorf("error setting OBS bucket fields: %s", err)
 	}
 
+	if err := setObsBucketAcl(client, d); err != nil {
+		return diag.FromErr(err)
+	}
+
 	// Read storage class
 	if err := setObsBucketStorageClass(client, d); err != nil {
 		return diag.FromErr(err)
@@ -687,9 +691,110 @@ func resourceObsBucketAclUpdate(client *obs.ObsClient, d *schema.ResourceData) e
 		return GetObsError("error updating acl of OBS bucket", bucket, err)
 	}
 
-	// acl policy can not be retrieved by obsClient.GetBucketAcl method
 	err = d.Set("acl", acl)
 	return err
+}
+
+func setObsBucketAcl(client *obs.ObsClient, d *schema.ResourceData) error {
+	output, err := client.GetBucketAcl(d.Id())
+	if err != nil {
+		return GetObsError("error reading acl of OBS bucket", d.Id(), err)
+	}
+
+	acl, ok := flattenObsBucketCannedACL(output)
+	if !ok {
+		log.Printf("[WARN] OBS bucket %s ACL does not match a supported canned ACL", d.Id())
+		return nil
+	}
+
+	return d.Set("acl", string(acl))
+}
+
+type obsBucketGrantSignature struct {
+	granteeType obs.GranteeType
+	granteeID   string
+	granteeURI  string
+	permission  obs.PermissionType
+	delivered   bool
+}
+
+func flattenObsBucketCannedACL(output *obs.GetBucketAclOutput) (obs.AclType, bool) {
+	if output == nil || output.Owner.ID == "" {
+		return "", false
+	}
+
+	ownerGrant := obsBucketGrantSignature{
+		granteeType: obs.GranteeUser,
+		granteeID:   output.Owner.ID,
+		permission:  obs.PermissionFullControl,
+	}
+	publicReadGrant := obsBucketGrantSignature{
+		granteeType: obs.GranteeGroup,
+		granteeURI:  string(obs.GroupAllUsers),
+		permission:  obs.PermissionRead,
+	}
+	publicWriteGrant := obsBucketGrantSignature{
+		granteeType: obs.GranteeGroup,
+		granteeURI:  string(obs.GroupAllUsers),
+		permission:  obs.PermissionWrite,
+	}
+	logDeliveryWriteGrant := obsBucketGrantSignature{
+		granteeType: obs.GranteeGroup,
+		granteeURI:  string(obs.GroupLogDelivery),
+		permission:  obs.PermissionWrite,
+	}
+	logDeliveryReadACPGrant := obsBucketGrantSignature{
+		granteeType: obs.GranteeGroup,
+		granteeURI:  string(obs.GroupLogDelivery),
+		permission:  obs.PermissionReadAcp,
+	}
+
+	switch {
+	case obsBucketACLMatches(output.Grants, ownerGrant):
+		return obs.AclPrivate, true
+	case obsBucketACLMatches(output.Grants, ownerGrant, publicReadGrant):
+		return obs.AclPublicRead, true
+	case obsBucketACLMatches(output.Grants, ownerGrant, publicReadGrant, publicWriteGrant):
+		return obs.AclPublicReadWrite, true
+	case obsBucketACLMatches(output.Grants, ownerGrant, logDeliveryWriteGrant, logDeliveryReadACPGrant):
+		return obs.AclLogDeliveryWrite, true
+	default:
+		return "", false
+	}
+}
+
+func obsBucketACLMatches(actual []obs.Grant, expected ...obsBucketGrantSignature) bool {
+	if len(actual) != len(expected) {
+		return false
+	}
+
+	actualSet := make(map[obsBucketGrantSignature]struct{}, len(actual))
+	for _, grant := range actual {
+		signature := obsBucketGrantSignature{
+			granteeType: grant.Grantee.Type,
+			granteeID:   grant.Grantee.ID,
+			granteeURI:  normalizeObsBucketGrantURI(grant.Grantee.Type, grant.Grantee.URI),
+			permission:  grant.Permission,
+			delivered:   grant.Delivered,
+		}
+		actualSet[signature] = struct{}{}
+	}
+
+	for _, grant := range expected {
+		if _, ok := actualSet[grant]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
+func normalizeObsBucketGrantURI(granteeType obs.GranteeType, granteeURI obs.GroupUriType) string {
+	if granteeType == obs.GranteeUser {
+		return ""
+	}
+
+	return parseGranteeURI(granteeURI)
 }
 
 func resourceObsBucketClassUpdate(client *obs.ObsClient, d *schema.ResourceData) error {

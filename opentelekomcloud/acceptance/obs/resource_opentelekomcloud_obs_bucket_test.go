@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -51,6 +52,39 @@ func TestAccObsBucket_basic(t *testing.T) {
 				Config: testAccObsBucketUpdate(rInt),
 				Check: resource.ComposeTestCheckFunc(testAccCheckObsBucketExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "server_side_encryption.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccObsBucket_aclDrift(t *testing.T) {
+	rInt := acctest.RandInt()
+	rName := "opentelekomcloud_obs_bucket.bucket"
+	bucketName := testAccObsBucketName(rInt)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObsBucketBasic(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(rName),
+					resource.TestCheckResourceAttr(rName, "acl", "private"),
+					testAccCheckObsBucketACL(rName, obs.AclPrivate),
+				),
+			},
+			{
+				PreConfig: func() {
+					testAccSetObsBucketACL(t, bucketName, obs.AclPublicRead)
+				},
+				Config: testAccObsBucketBasic(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(rName),
+					resource.TestCheckResourceAttr(rName, "acl", "private"),
+					testAccCheckObsBucketACL(rName, obs.AclPrivate),
 				),
 			},
 		},
@@ -418,6 +452,123 @@ func testAccCheckObsBucketLogging(name, target, prefix string) resource.TestChec
 
 		return nil
 	}
+}
+
+func testAccCheckObsBucketACL(name string, expected obs.AclType) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[name]
+		if !ok {
+			return fmt.Errorf("not found: %s", name)
+		}
+
+		config := common.TestAccProvider.Meta().(*cfg.Config)
+		client, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("error creating OpenTelekomCloud OBS client: %s", err)
+		}
+
+		output, err := client.GetBucketAcl(rs.Primary.ID)
+		if err != nil {
+			return fmt.Errorf("error getting acl configuration of OBS bucket: %s", err)
+		}
+
+		actual, ok := flattenTestAccObsBucketACL(output)
+		if !ok {
+			return fmt.Errorf("bucket %s acl does not match a supported canned acl: owner=%q grants=%s",
+				rs.Primary.ID, output.Owner.ID, formatTestAccObsBucketGrants(output.Grants))
+		}
+		if actual != expected {
+			return fmt.Errorf("%s.acl: expected %s, got %s (owner=%q grants=%s)",
+				name, expected, actual, output.Owner.ID, formatTestAccObsBucketGrants(output.Grants))
+		}
+
+		return nil
+	}
+}
+
+func testAccSetObsBucketACL(t *testing.T, bucketName string, acl obs.AclType) {
+	t.Helper()
+
+	config := common.TestAccProvider.Meta().(*cfg.Config)
+	client, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
+	if err != nil {
+		t.Fatalf("error creating OpenTelekomCloud OBS client: %s", err)
+	}
+
+	_, err = client.SetBucketAcl(&obs.SetBucketAclInput{
+		Bucket: bucketName,
+		ACL:    acl,
+	})
+	if err != nil {
+		t.Fatalf("error updating acl of OBS bucket: %s", err)
+	}
+}
+
+func flattenTestAccObsBucketACL(output *obs.GetBucketAclOutput) (obs.AclType, bool) {
+	if output == nil || output.Owner.ID == "" {
+		return "", false
+	}
+
+	ownerID := output.Owner.ID
+	has := func(granteeType obs.GranteeType, granteeID string, granteeURI obs.GroupUriType, permission obs.PermissionType) bool {
+		for _, grant := range output.Grants {
+			actualURI := grant.Grantee.URI
+			if grant.Grantee.Type == obs.GranteeUser {
+				actualURI = ""
+			}
+			if grant.Grantee.Type == granteeType &&
+				grant.Grantee.ID == granteeID &&
+				actualURI == granteeURI &&
+				grant.Permission == permission {
+				return true
+			}
+		}
+		return false
+	}
+
+	switch {
+	case len(output.Grants) == 1 &&
+		has(obs.GranteeUser, ownerID, "", obs.PermissionFullControl):
+		return obs.AclPrivate, true
+	case len(output.Grants) == 2 &&
+		has(obs.GranteeUser, ownerID, "", obs.PermissionFullControl) &&
+		has(obs.GranteeGroup, "", obs.GroupAllUsers, obs.PermissionRead):
+		return obs.AclPublicRead, true
+	case len(output.Grants) == 3 &&
+		has(obs.GranteeUser, ownerID, "", obs.PermissionFullControl) &&
+		has(obs.GranteeGroup, "", obs.GroupAllUsers, obs.PermissionRead) &&
+		has(obs.GranteeGroup, "", obs.GroupAllUsers, obs.PermissionWrite):
+		return obs.AclPublicReadWrite, true
+	case len(output.Grants) == 3 &&
+		has(obs.GranteeUser, ownerID, "", obs.PermissionFullControl) &&
+		has(obs.GranteeGroup, "", obs.GroupLogDelivery, obs.PermissionWrite) &&
+		has(obs.GranteeGroup, "", obs.GroupLogDelivery, obs.PermissionReadAcp):
+		return obs.AclLogDeliveryWrite, true
+	default:
+		return "", false
+	}
+}
+
+func formatTestAccObsBucketGrants(grants []obs.Grant) string {
+	if len(grants) == 0 {
+		return "[]"
+	}
+
+	out := "["
+	for i, grant := range grants {
+		if i > 0 {
+			out += ", "
+		}
+		out += fmt.Sprintf("{type=%q id=%q uri=%q permission=%q delivered=%t}",
+			grant.Grantee.Type,
+			grant.Grantee.ID,
+			grant.Grantee.URI,
+			grant.Permission,
+			grant.Delivered,
+		)
+	}
+	out += "]"
+	return out
 }
 
 // These need a bit of randomness as the name can only be used once globally

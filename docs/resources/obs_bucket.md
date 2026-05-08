@@ -15,6 +15,11 @@ Up-to-date reference of API arguments for OBS bucket you can get at
 Provides an OBS bucket resource within OpenTelekomCloud.
 Now respects HTTP_PROXY, HTTPS_PROXY environment variables.
 
+-> **NOTE:** The `acl` argument manages supported canned ACLs only: `private`, `public-read`,
+`public-read-write`, and `log-delivery-write`. Drift for those canned ACLs is detected on refresh.
+If the bucket is managed with a custom ACL grant set, use [`opentelekomcloud_obs_bucket_acl`](obs_bucket_acl.md)
+instead of the inline `acl` argument.
+
 ## Example Usage
 
 ### Private Bucket with Tags
@@ -400,8 +405,10 @@ The following arguments are supported:
 
 * `parallel_fs` - (Optional) Whether enable a bucket as a parallel file system.
 
-* `acl` - (Optional) Specifies the ACL policy for a bucket. The predefined common policies are as follows:
+* `acl` - (Optional) Specifies the canned ACL policy for a bucket. Supported values are:
   `private`, `public-read`, `public-read-write` and `log-delivery-write`. Defaults to `private`.
+  Drift is detected for these canned ACLs during refresh. For custom ACL grants, use
+  `opentelekomcloud_obs_bucket_acl`.
 
 * `tags` - (Optional) A mapping of tags to assign to the bucket. Each tag is represented by one key-value pair.
 
