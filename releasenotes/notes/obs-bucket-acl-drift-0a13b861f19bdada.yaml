@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[OBS]** Fix `acl` set for ``resource/opentelekomcloud_obs_bucket`` (`#3361 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3361>`_)
