@@ -89,12 +89,17 @@ The `configuration` block supports:
 * `kms_id` - (Options) Key ID used for snapshot encryption.
 
 ~>
+  Deprecated:
+    The `kms_id` parameter is currently only supported within the main project.
+    Its usage is expected to become obsolete and is not recommended for new integrations,
+    as support may be removed or replaced in a future release.
+
+~>
   If the key used for encryption is in the Pending deletion or disable state,
   you cannot perform backup and restoration operations on the cluster.
   Specifically, new snapshots cannot be created for the cluster, and existing snapshots cannot be used for restoration.
   In this case, switch to the KMS management console and change the state of the target key to enable so that backup
-  and restore operations are allowed on the cluster. For more details
-  see https://docs.otc.t-systems.com/api/css/css_03_0030.html
+  and restore operations are allowed on the cluster.
 
 The `creation_policy` block supports:
 
