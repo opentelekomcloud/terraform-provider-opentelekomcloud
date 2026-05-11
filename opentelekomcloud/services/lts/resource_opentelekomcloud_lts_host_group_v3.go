@@ -222,13 +222,16 @@ func resourceHostGroupV3Update(ctx context.Context, d *schema.ResourceData, meta
 			tagSlice = []tags.ResourceTag{}
 		}
 		l := common.ExpandToStringListBySet(d.Get("labels").(*schema.Set))
-		_, err = hg.Update(client, hg.UpdateLogGroupOpts{
+		updateOpts := hg.UpdateLogGroupOpts{
 			ID:         d.Id(),
-			Name:       d.Get("name").(string),
 			HostIdList: &h,
 			Labels:     &l,
 			Tags:       &tagSlice,
-		})
+		}
+		if d.HasChange("name") {
+			updateOpts.Name = d.Get("name").(string)
+		}
+		_, err = hg.Update(client, updateOpts)
 		if err != nil {
 			return diag.FromErr(err)
 		}
