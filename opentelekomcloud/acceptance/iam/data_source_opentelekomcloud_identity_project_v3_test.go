@@ -101,3 +101,44 @@ data "opentelekomcloud_identity_project_v3" "project_1" {
 }
 `, testAccOpenStackIdentityProjectV3DataSource_project(name, description))
 }
+
+func testAccOpenStackIdentityProjectV3DataSource_byID(name, description string) string {
+	return fmt.Sprintf(`
+     %s
+ 
+ data "opentelekomcloud_identity_project_v3" "project_1" {
+   id = opentelekomcloud_identity_project_v3.project_1.id
+ }
+ `, testAccOpenStackIdentityProjectV3DataSource_project(name, description))
+}
+
+func TestAccOpenStackIdentityV3ProjectDataSource_byID(t *testing.T) {
+	projectName := fmt.Sprintf("tf_test_%s", acctest.RandString(5))
+	projectDescription := acctest.RandString(20)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccOpenStackIdentityProjectV3DataSource_project(projectName, projectDescription),
+			},
+			{
+				Config: testAccOpenStackIdentityProjectV3DataSource_byID(projectName, projectDescription),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3ProjectDataSourceID("data.opentelekomcloud_identity_project_v3.project_1"),
+					resource.TestCheckResourceAttr(
+						"data.opentelekomcloud_identity_project_v3.project_1", "name", projectName),
+					resource.TestCheckResourceAttr(
+						"data.opentelekomcloud_identity_project_v3.project_1", "description", projectDescription),
+					resource.TestCheckResourceAttrPair(
+						"data.opentelekomcloud_identity_project_v3.project_1", "id",
+						"opentelekomcloud_identity_project_v3.project_1", "id"),
+				),
+			},
+		},
+	})
+}
