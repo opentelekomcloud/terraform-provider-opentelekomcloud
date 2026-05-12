@@ -81,18 +81,18 @@ func testAccOpenStackIdentityProjectV3DataSource_basic(name, description string)
 data "opentelekomcloud_identity_projects_v3" "all" {}
 
 locals {
-	has_existing_project = length(data.opentelekomcloud_identity_projects_v3.all.projects) > 0
-	selected_project_name = local.has_existing_project ? data.opentelekomcloud_identity_projects_v3.all.projects[0].name : opentelekomcloud_identity_project_v3.project_1[0].name
+  has_existing_project  = length(data.opentelekomcloud_identity_projects_v3.all.projects) > 0
+  selected_project_name = local.has_existing_project ? data.opentelekomcloud_identity_projects_v3.all.projects[0].name : opentelekomcloud_identity_project_v3.project_1[0].name
 }
 
 resource "opentelekomcloud_identity_project_v3" "project_1" {
-	count       = local.has_existing_project ? 0 : 1
-	name        = "%s"
-	description = "%s"
+  count       = local.has_existing_project ? 0 : 1
+  name        = "%s"
+  description = "%s"
 }
 
 data "opentelekomcloud_identity_project_v3" "project_1" {
-	name = local.selected_project_name
+  name = local.selected_project_name
 }
 `, name, description)
 }
@@ -102,20 +102,20 @@ func testAccOpenStackIdentityProjectV3DataSource_byID(name, description string) 
 data "opentelekomcloud_identity_projects_v3" "all" {}
 
 locals {
-	has_existing_project = length(data.opentelekomcloud_identity_projects_v3.all.projects) > 0
-	selected_project_id  = local.has_existing_project ? data.opentelekomcloud_identity_projects_v3.all.projects[0].project_id : opentelekomcloud_identity_project_v3.project_1[0].id
+  has_existing_project = length(data.opentelekomcloud_identity_projects_v3.all.projects) > 0
+  selected_project_id  = local.has_existing_project ? data.opentelekomcloud_identity_projects_v3.all.projects[0].project_id : opentelekomcloud_identity_project_v3.project_1[0].id
 }
 
 resource "opentelekomcloud_identity_project_v3" "project_1" {
-	count       = local.has_existing_project ? 0 : 1
-	name        = "%s"
-	description = "%s"
+  count       = local.has_existing_project ? 0 : 1
+  name        = "%s"
+  description = "%s"
 }
- 
- data "opentelekomcloud_identity_project_v3" "project_1" {
-	 id = local.selected_project_id
- }
- `, name, description)
+
+data "opentelekomcloud_identity_project_v3" "project_1" {
+  id = local.selected_project_id
+}
+`, name, description)
 }
 
 func TestAccOpenStackIdentityV3ProjectDataSource_byID(t *testing.T) {
