@@ -94,6 +94,10 @@ func ResourceFgsFunctionV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"source_code_hash": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"code_filename": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -1254,7 +1258,7 @@ func resourceFgsFunctionV2Update(ctx context.Context, d *schema.ResourceData, me
 	urn := resourceFgsFunctionUrn(d.Id())
 
 	// lintignore:R019
-	if d.HasChanges("code_type", "code_url", "code_filename", "depend_list", "func_code") {
+	if d.HasChanges("code_type", "code_url", "code_filename", "depend_list", "func_code", "source_code_hash") {
 		err := resourceFgsFunctionCodeUpdate(fgsClient, urn, d)
 		if err != nil {
 			return diag.FromErr(err)
