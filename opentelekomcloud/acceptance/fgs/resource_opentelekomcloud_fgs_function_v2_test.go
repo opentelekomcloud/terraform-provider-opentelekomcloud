@@ -87,6 +87,7 @@ func TestAccFgsV2Function_basic(t *testing.T) {
 					"app",
 					"func_code",
 					"agency",
+					"source_code_hash",
 					"tags",
 				},
 			},
@@ -360,7 +361,7 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
   runtime     = "Python2.7"
   code_type   = "inline"
   func_code   = "aW1wb3J0IGpzb24KZGVmIGhhbmRsZXIgKGV2ZW50LCBjb250ZXh0KToKICAgIG91dHB1dCA9ICdIZWxsbyBtZXNzYWdlOiAnICsganNvbi5kdW1wcyhldmVudCkKICAgIHJldHVybiBvdXRwdXQ="
-  agency      = "functiongraph_swr_trust"
+  agency      = "fg_agency"
   vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   network_id  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
@@ -400,9 +401,11 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
   runtime     = "Python2.7"
   code_type   = "obs"
   code_url    = format("https://%%s/%%s", opentelekomcloud_obs_bucket.test.bucket_domain_name, opentelekomcloud_obs_bucket_object.test.key)
-  agency      = "functiongraph_swr_trust"
+  agency      = "fg_agency"
   vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   network_id  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+
+  source_code_hash = opentelekomcloud_obs_bucket_object.test.etag
 
   tags = {
     foo    = "baar"

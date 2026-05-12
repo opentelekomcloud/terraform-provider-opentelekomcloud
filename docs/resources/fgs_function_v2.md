@@ -37,6 +37,37 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
 }
 ```
 
+### Create function using code stored in OBS
+
+```hcl
+resource "opentelekomcloud_obs_bucket" "codebucket" {
+  bucket = "mycodebucket"
+  acl    = "private"
+}
+
+resource "opentelekomcloud_obs_bucket_object" "code_object" {
+  bucket       = opentelekomcloud_obs_bucket.codebucket.bucket
+  key          = "code.zip"
+  source       = "code.zip"
+  etag         = filemd5("code.zip")
+  content_type = "application/zip"
+}
+
+resource "opentelekomcloud_fgs_function_v2" "test" {
+  name        = "my-function"
+  app         = "default"
+  handler     = "index.handler"
+  memory_size = 128
+  timeout     = 3
+  runtime     = "Python3.9"
+  code_type   = "obs"
+  code_url    = format("https://%s/%s", opentelekomcloud_obs_bucket.codebucket.bucket_domain_name, opentelekomcloud_obs_bucket_object.code_object.key)
+
+  # Triggers a FunctionGraph code update when the OBS object content changes.
+  source_code_hash = opentelekomcloud_obs_bucket_object.code_object.etag
+}
+```
+
 ### With text code
 
 ```hcl
@@ -239,6 +270,11 @@ The following arguments are supported:
 
 * `code_url` - (Optional, String) Specifies the code url.
   Required if the `code_type` is set to **obs**.
+
+* `source_code_hash` - (Optional, String) Terraform-only value used to trigger a code update when the code source
+  changes but `code_url` stays the same. This is especially useful with `code_type = "obs"`, for example by setting
+  it to `opentelekomcloud_obs_bucket_object.example.etag`. If omitted, changes to the OBS object content alone will
+  not trigger a FunctionGraph code update.
 
 * `code_filename` - (Optional, String) Specifies the name of a function file.
   Required if the `code_type` is set to **jar** or **zip**.
