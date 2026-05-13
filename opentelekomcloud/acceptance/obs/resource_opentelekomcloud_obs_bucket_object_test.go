@@ -87,6 +87,28 @@ func TestAccObsBucketObject_content(t *testing.T) {
 	})
 }
 
+func TestAccObsBucketObject_emptyContent(t *testing.T) {
+	rInt := acctest.RandInt()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketObjectDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObsBucketObject_configEmptyContent(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketObjectExists("opentelekomcloud_obs_bucket_object.object"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_obs_bucket_object.object", "key", "test-key"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_obs_bucket_object.object", "size", "0"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccObsBucketObject_withVersionedContent(t *testing.T) {
 	rInt := acctest.RandInt()
 
@@ -243,6 +265,19 @@ resource "opentelekomcloud_obs_bucket_object" "object" {
   bucket  = opentelekomcloud_obs_bucket.object_bucket.bucket
   key     = "test-key"
   content = "some_bucket_content"
+}
+`, randInt)
+}
+
+func testAccObsBucketObject_configEmptyContent(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "object_bucket" {
+  bucket = "tf-object-test-bucket-%d"
+}
+resource "opentelekomcloud_obs_bucket_object" "object" {
+  bucket  = opentelekomcloud_obs_bucket.object_bucket.bucket
+  key     = "test-key"
+  content = ""
 }
 `, randInt)
 }

@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[OBS]** Fix empty string `content` put for ``resource/opentelekomcloud_obs_bucket_object`` (`#3369 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3369>`_)

@@ -509,22 +509,6 @@ func buildCustomImage(imageConfig []interface{}) *function.CustomImage {
 	}
 }
 
-// isAttrSet returns true if an attribute was explicitly set in configuration.
-func isAttrSet(d *schema.ResourceData, key string) bool {
-	rc := d.GetRawConfig()
-	// If raw config is unknown or null, nothing is set.
-	if !rc.IsKnown() || rc.IsNull() {
-		return false
-	}
-	// Ensure the attribute exists on the object type before accessing it.
-	t := rc.Type()
-	if !t.HasAttribute(key) {
-		return false
-	}
-	attr := rc.GetAttr(key)
-	return attr.IsKnown() && !attr.IsNull()
-}
-
 func buildFgsFunctionParameters(config *cfg.Config, d *schema.ResourceData) (function.CreateOpts, error) {
 	// check app
 	app, appOk := d.GetOk("app")
@@ -576,7 +560,7 @@ func buildFgsFunctionParameters(config *cfg.Config, d *schema.ResourceData) (fun
 		LtsCustomTag:        ltsTags,
 		EnterpriseProjectId: config.GetEnterpriseProjectID(d),
 	}
-	if isAttrSet(d, "enable_lts_log") {
+	if common.IsAttrSet(d, "enable_lts_log") {
 		result.EnableLtsLog = pointerto.Bool(d.Get("enable_lts_log").(bool))
 	}
 	if v, ok := d.GetOk("func_code"); ok {
@@ -1406,7 +1390,7 @@ func resourceFgsFunctionMetadataUpdate(config *cfg.Config, fgsClient *golangsdk.
 		}
 		updateMetadateOpts.LogConfig = &logConfig
 	}
-	if isAttrSet(d, "enable_lts_log") {
+	if common.IsAttrSet(d, "enable_lts_log") {
 		updateMetadateOpts.EnableLtsLog = pointerto.Bool(d.Get("enable_lts_log").(bool))
 	}
 

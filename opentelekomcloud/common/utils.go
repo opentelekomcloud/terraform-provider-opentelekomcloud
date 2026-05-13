@@ -726,3 +726,19 @@ func StringifyAny(v interface{}) string {
 		return string(b)
 	}
 }
+
+// IsAttrSet returns true if an attribute was explicitly set in configuration.
+func IsAttrSet(d *schema.ResourceData, key string) bool {
+	rc := d.GetRawConfig()
+	// If raw config is unknown or null, nothing is set.
+	if !rc.IsKnown() || rc.IsNull() {
+		return false
+	}
+	// Ensure the attribute exists on the object type before accessing it.
+	t := rc.Type()
+	if !t.HasAttribute(key) {
+		return false
+	}
+	attr := rc.GetAttr(key)
+	return attr.IsKnown() && !attr.IsNull()
+}
