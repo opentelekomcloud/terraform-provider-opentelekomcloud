@@ -7,11 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/projects"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
 func TestAccOpenStackIdentityV3ProjectDataSource_basic(t *testing.T) {
@@ -20,7 +17,7 @@ func TestAccOpenStackIdentityV3ProjectDataSource_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckIdentityProjectV3DataSource(t)
+			common.TestAccPreCheck(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -124,7 +121,7 @@ func TestAccOpenStackIdentityV3ProjectDataSource_byID(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckIdentityProjectV3DataSource(t)
+			common.TestAccPreCheck(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -138,34 +135,4 @@ func TestAccOpenStackIdentityV3ProjectDataSource_byID(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccPreCheckIdentityProjectV3DataSource(t *testing.T) {
-	common.TestAccPreCheck(t)
-
-	if testAccHasAnyIdentityProject(t) {
-		return
-	}
-
-	common.TestAccPreCheckAdminOnly(t)
-}
-
-func testAccHasAnyIdentityProject(t *testing.T) bool {
-	config := common.TestAccProvider.Meta().(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
-	if err != nil {
-		t.Fatalf("error creating OpenStack identity client: %s", err)
-	}
-
-	allPages, err := projects.List(identityClient, projects.ListOpts{}).AllPages()
-	if err != nil {
-		t.Fatalf("unable to query projects: %s", err)
-	}
-
-	allProjects, err := projects.ExtractProjects(allPages)
-	if err != nil {
-		t.Fatalf("unable to retrieve projects: %s", err)
-	}
-
-	return len(allProjects) > 0
 }
