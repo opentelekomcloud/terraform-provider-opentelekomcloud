@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -117,7 +118,7 @@ func resourceObsBucketObjectPut(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 
-	if _, ok := d.GetOk("content"); ok {
+	if common.IsAttrSet(d, "content") {
 		// put content
 		resp, err = putContentToObject(client, d)
 		if err != nil {
@@ -129,6 +130,9 @@ func resourceObsBucketObjectPut(ctx context.Context, d *schema.ResourceData, met
 	key := d.Get("key").(string)
 	if err != nil {
 		return diag.FromErr(GetObsError("error putting object to OBS bucket", bucket, err))
+	}
+	if resp == nil {
+		return fmterr.Errorf("either `source` or `content` must be configured for OBS object upload")
 	}
 
 	log.Printf("[DEBUG] Response of putting %s to OBS Bucket %s: %#v", key, bucket, resp)
