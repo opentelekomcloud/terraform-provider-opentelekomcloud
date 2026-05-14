@@ -118,7 +118,7 @@ var (
 	// Compute
 
 	// Server - shared compute instance quota (number of instances only)
-	Server = FromEnv("OS_SERVER_QUOTA", 10)
+	Server = FromEnv("OS_SERVER_QUOTA", 5)
 	CPU    = FromEnv("OS_CPU_QUOTA", 40)
 	RAM    = FromEnv("OS_RAM_QUOTA", 160*1024)
 

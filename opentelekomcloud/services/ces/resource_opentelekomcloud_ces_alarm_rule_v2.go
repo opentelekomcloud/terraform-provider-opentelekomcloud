@@ -145,7 +145,7 @@ func ResourceAlarmRuleV2() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"dimensions": {
 							Type:     schema.TypeList,
-							Required: true,
+							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
@@ -317,13 +317,22 @@ func buildPoliciesOptsV2(d *schema.ResourceData) []alarms.Policy {
 func buildResourcesOptsV2(d *schema.ResourceData) [][]alarms.Dimension {
 	rawResources := d.Get("resources").(*schema.Set).List()
 	if len(rawResources) == 0 {
+		resourceType := d.Get("type").(string)
+		if resourceType == "EVENT.SYS" || resourceType == "EVENT.CUSTOM" || resourceType == "RESOURCE_GROUP" {
+			return [][]alarms.Dimension{}
+		}
 		return nil
 	}
 
 	resourcesOpts := make([][]alarms.Dimension, len(rawResources))
 	for i, v := range rawResources {
 		resource := v.(map[string]interface{})
-		dimensionsRaw := resource["dimensions"].([]interface{})
+		dimensionsRaw, ok := resource["dimensions"].([]interface{})
+		if !ok || len(dimensionsRaw) == 0 {
+			resourcesOpts[i] = []alarms.Dimension{}
+			continue
+		}
+
 		dimensions := make([]alarms.Dimension, len(dimensionsRaw))
 		for j, dim := range dimensionsRaw {
 			dimension := dim.(map[string]interface{})
