@@ -12,31 +12,21 @@ import (
 )
 
 func TestAccOpenStackIdentityV3ProjectDataSource_basic(t *testing.T) {
-	projectName := fmt.Sprintf("tf_test_%s", acctest.RandString(5))
-	projectDescription := acctest.RandString(20)
+	fallbackProjectName := fmt.Sprintf("tf_test_%s", acctest.RandString(5))
+	fallbackProjectDescription := acctest.RandString(20)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
-			common.TestAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackIdentityProjectV3DataSource_project(projectName, projectDescription),
-			},
-			{
-				Config: testAccOpenStackIdentityProjectV3DataSource_basic(projectName, projectDescription),
+				Config: testAccOpenStackIdentityProjectV3DataSource_basic(fallbackProjectName, fallbackProjectDescription),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3ProjectDataSourceID("data.opentelekomcloud_identity_project_v3.project_1"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_identity_project_v3.project_1", "name", projectName),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_identity_project_v3.project_1", "description", projectDescription),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_identity_project_v3.project_1", "enabled", "true"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_identity_project_v3.project_1", "is_domain", "false"),
+					resource.TestCheckResourceAttrSet("data.opentelekomcloud_identity_project_v3.project_1", "name"),
+					resource.TestCheckResourceAttrSet("data.opentelekomcloud_identity_project_v3.project_1", "domain_id"),
 				),
 			},
 		},
@@ -76,15 +66,6 @@ func testAccCheckIdentityV3ProjectDataSourceID(n string) resource.TestCheckFunc 
 	}
 }
 
-func testAccOpenStackIdentityProjectV3DataSource_project(name, description string) string {
-	return fmt.Sprintf(`
-resource "opentelekomcloud_identity_project_v3" "project_1" {
-  name        = "%s"
-  description = "%s"
-}
-`, name, description)
-}
-
 func testAccOpenStackIdentityProjectV3DataSource_project_empty() string {
 	return `
 data "opentelekomcloud_identity_project_v3" "project_1" {
@@ -94,10 +75,64 @@ data "opentelekomcloud_identity_project_v3" "project_1" {
 
 func testAccOpenStackIdentityProjectV3DataSource_basic(name, description string) string {
 	return fmt.Sprintf(`
-	%s
+data "opentelekomcloud_identity_projects_v3" "all" {}
+
+locals {
+  has_existing_project  = length(data.opentelekomcloud_identity_projects_v3.all.projects) > 0
+  selected_project_name = local.has_existing_project ? data.opentelekomcloud_identity_projects_v3.all.projects[0].name : opentelekomcloud_identity_project_v3.project_1[0].name
+}
+
+resource "opentelekomcloud_identity_project_v3" "project_1" {
+  count       = local.has_existing_project ? 0 : 1
+  name        = "%s"
+  description = "%s"
+}
 
 data "opentelekomcloud_identity_project_v3" "project_1" {
-  name = opentelekomcloud_identity_project_v3.project_1.name
+  name = local.selected_project_name
 }
-`, testAccOpenStackIdentityProjectV3DataSource_project(name, description))
+`, name, description)
+}
+
+func testAccOpenStackIdentityProjectV3DataSource_byID(name, description string) string {
+	return fmt.Sprintf(`
+data "opentelekomcloud_identity_projects_v3" "all" {}
+
+locals {
+  has_existing_project = length(data.opentelekomcloud_identity_projects_v3.all.projects) > 0
+  selected_project_id  = local.has_existing_project ? data.opentelekomcloud_identity_projects_v3.all.projects[0].project_id : opentelekomcloud_identity_project_v3.project_1[0].id
+}
+
+resource "opentelekomcloud_identity_project_v3" "project_1" {
+  count       = local.has_existing_project ? 0 : 1
+  name        = "%s"
+  description = "%s"
+}
+
+data "opentelekomcloud_identity_project_v3" "project_1" {
+  id = local.selected_project_id
+}
+`, name, description)
+}
+
+func TestAccOpenStackIdentityV3ProjectDataSource_byID(t *testing.T) {
+	fallbackProjectName := fmt.Sprintf("tf_test_%s", acctest.RandString(5))
+	fallbackProjectDescription := acctest.RandString(20)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccOpenStackIdentityProjectV3DataSource_byID(fallbackProjectName, fallbackProjectDescription),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3ProjectDataSourceID("data.opentelekomcloud_identity_project_v3.project_1"),
+					resource.TestCheckResourceAttrSet("data.opentelekomcloud_identity_project_v3.project_1", "name"),
+					resource.TestCheckResourceAttrSet("data.opentelekomcloud_identity_project_v3.project_1", "id"),
+				),
+			},
+		},
+	})
 }

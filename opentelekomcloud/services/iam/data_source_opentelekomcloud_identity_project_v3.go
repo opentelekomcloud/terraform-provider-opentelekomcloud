@@ -18,6 +18,11 @@ func DataSourceIdentityProjectV3() *schema.Resource {
 		ReadContext: dataSourceIdentityProjectV3Read,
 
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -61,70 +66,79 @@ func dataSourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, 
 		return fmterr.Errorf(clientCreationFail, err)
 	}
 
-	var domainID string
-	rawDomainID, ok := d.GetOk("domain_id")
-	if ok {
-		domainID = rawDomainID.(string)
-	} else {
-		domainID = client.DomainID
-	}
-
-	listOpts := projects.ListOpts{
-		DomainID: domainID,
-		Name:     d.Get("name").(string),
-		ParentID: d.Get("parent_id").(string),
-	}
-
-	log.Printf("[DEBUG] List Options: %#v", listOpts)
-
 	var project projects.Project
-	allPages, err := projects.List(client, listOpts).AllPages()
-	if err != nil {
-		return fmterr.Errorf("unable to query projects: %s", err)
-	}
 
-	allProjects, err := projects.ExtractProjects(allPages)
-	if err != nil {
-		return fmterr.Errorf("unable to retrieve projects: %s", err)
-	}
-
-	var filteredProjects []projects.Project
-	var enabled bool
-	rawEnabled, eOk := d.GetOk("enabled")
-	if eOk {
-		enabled = rawEnabled.(bool)
-	}
-	var isDomain bool
-	rawIsDomain, dOk := d.GetOk("is_domain")
-	if dOk {
-		isDomain = rawIsDomain.(bool)
-	}
-	for _, v := range allProjects {
-		if eOk && v.Enabled != enabled {
-			continue
+	if v, ok := d.GetOk("id"); ok {
+		p, err := projects.Get(client, v.(string)).Extract()
+		if err != nil {
+			return fmterr.Errorf("unable to retrieve project %s: %s", v.(string), err)
 		}
-		if dOk && v.IsDomain != isDomain {
-			continue
+		project = *p
+	} else {
+		var domainID string
+		rawDomainID, ok := d.GetOk("domain_id")
+		if ok {
+			domainID = rawDomainID.(string)
+		} else {
+			domainID = client.DomainID
 		}
-		filteredProjects = append(filteredProjects, v)
-	}
 
-	if len(filteredProjects) < 1 {
-		return fmterr.Errorf("your query returned no results. " +
-			"Please change your search criteria and try again.")
-	}
+		listOpts := projects.ListOpts{
+			DomainID: domainID,
+			Name:     d.Get("name").(string),
+			ParentID: d.Get("parent_id").(string),
+		}
 
-	if len(filteredProjects) > 1 {
-		projectID := config.HwClient.ProjectID
-		for _, p := range filteredProjects {
-			if p.ID == projectID {
-				filteredProjects = []projects.Project{p}
-				break
+		log.Printf("[DEBUG] List Options: %#v", listOpts)
+
+		allPages, err := projects.List(client, listOpts).AllPages()
+		if err != nil {
+			return fmterr.Errorf("unable to query projects: %s", err)
+		}
+
+		allProjects, err := projects.ExtractProjects(allPages)
+		if err != nil {
+			return fmterr.Errorf("unable to retrieve projects: %s", err)
+		}
+
+		var filteredProjects []projects.Project
+		var enabled bool
+		rawEnabled, eOk := d.GetOk("enabled")
+		if eOk {
+			enabled = rawEnabled.(bool)
+		}
+		var isDomain bool
+		rawIsDomain, dOk := d.GetOk("is_domain")
+		if dOk {
+			isDomain = rawIsDomain.(bool)
+		}
+		for _, v := range allProjects {
+			if eOk && v.Enabled != enabled {
+				continue
+			}
+			if dOk && v.IsDomain != isDomain {
+				continue
+			}
+			filteredProjects = append(filteredProjects, v)
+		}
+
+		if len(filteredProjects) < 1 {
+			return fmterr.Errorf("your query returned no results. " +
+				"Please change your search criteria and try again.")
+		}
+
+		if len(filteredProjects) > 1 {
+			projectID := config.HwClient.ProjectID
+			for _, p := range filteredProjects {
+				if p.ID == projectID {
+					filteredProjects = []projects.Project{p}
+					break
+				}
 			}
 		}
-	}
 
-	project = filteredProjects[0]
+		project = filteredProjects[0]
+	}
 
 	log.Printf("[DEBUG] Single project found: %s", project.ID)
 

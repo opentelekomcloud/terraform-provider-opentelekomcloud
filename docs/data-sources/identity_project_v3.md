@@ -12,9 +12,19 @@ Up-to-date reference of API arguments for IAM project you can get at
 
 # opentelekomcloud_identity_project_v3
 
-Use this data source to get the ID of an OpenTelekomCloud project.
+Use this data source to get information about an OpenTelekomCloud project by ID or by filter arguments.
 
 ## Example Usage
+
+### Query Project by ID
+
+```hcl
+data "opentelekomcloud_identity_project_v3" "project_1" {
+  id = "<project_id>"
+}
+```
+
+### Query Project by Name
 
 ```hcl
 data "opentelekomcloud_identity_project_v3" "project_1" {
@@ -24,7 +34,7 @@ data "opentelekomcloud_identity_project_v3" "project_1" {
 
 ### Query Current Project details
 
-If `name` or `domain_id` are not provided, data source gets info about current project.
+If no filter arguments are provided, the data source gets information about the current project.
 
 ```hcl
 data "opentelekomcloud_identity_project_v3" "project_1" {
@@ -35,6 +45,8 @@ data "opentelekomcloud_identity_project_v3" "project_1" {
 ## Argument Reference
 
 The following arguments are supported:
+
+* `id` - (Optional) The ID of the project. When specified, the project is looked up directly by ID.
 
 * `domain_id` - (Optional) The domain this project belongs to.
 
