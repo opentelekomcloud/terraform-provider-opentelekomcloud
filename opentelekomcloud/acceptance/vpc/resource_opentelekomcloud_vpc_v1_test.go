@@ -211,10 +211,10 @@ resource "opentelekomcloud_vpc_v1" "vpc_1" {
 
 const testAccVpcV3RemoveCidr = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name           = "tf_acc_test_v3"
-  description    = "simple description updated"
-  cidr           = "192.168.0.0/16"
-  shared         = false
+  name        = "tf_acc_test_v3"
+  description = "simple description updated"
+  cidr        = "192.168.0.0/16"
+  shared      = false
 
   tags = {
     foo = "bar"
