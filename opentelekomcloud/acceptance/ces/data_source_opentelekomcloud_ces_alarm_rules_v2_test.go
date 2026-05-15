@@ -51,13 +51,6 @@ resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   namespace = "SYS.ECS"
   type      = "EVENT.SYS"
 
-  resources {
-    dimensions {
-      name  = "resource_id"
-      value = "all_instance"
-    }
-  }
-
   policies {
     metric_name         = "stopServer"
     period              = 0

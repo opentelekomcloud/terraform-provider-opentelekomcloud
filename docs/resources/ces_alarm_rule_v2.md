@@ -128,13 +128,6 @@ resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   notification_enabled = false
   alarm_enabled        = true
 
-  resources {
-    dimensions {
-      name  = "resource_id"
-      value = "all_instance"
-    }
-  }
-
   policies {
     metric_name         = "stopServer"
     period              = 0
@@ -160,13 +153,6 @@ resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   type                 = "EVENT.SYS"
   notification_enabled = true
   alarm_enabled        = true
-
-  resources {
-    dimensions {
-      name  = "resource_id"
-      value = "all_instance"
-    }
-  }
 
   policies {
     metric_name         = "stopServer"
@@ -378,8 +364,10 @@ The `policies` block supports:
 <a name="resources_struct"></a>
 The `resources` block supports:
 
-* `dimensions` - (Required, List) Specifies the list of metric dimensions.
+* `dimensions` - (Optional, List) Specifies the list of metric dimensions.
   The [dimensions](#dimensions_struct) structure is documented below.
+  This block can be omitted when the alarm scope applies to all resources, for example
+  project-wide `EVENT.SYS` or `EVENT.CUSTOM` alarms.
 
 <a name="dimensions_struct"></a>
 The `dimensions` block supports:
@@ -389,7 +377,7 @@ The `dimensions` block supports:
 
 * `value` - (Optional, String) Specifies the dimension value. The value can be a string of `1` to `64` characters
   that must start with a letter or a number and contain only letters, digits, underscores (_), and hyphens (-).
-  For **ALL_INSTANCE** type alarms, this field can be left empty.
+  This field can be left empty when the alarm scope applies to all resources.
 
 <a name="actions_struct"></a>
 The `alarm_actions` block supports:
