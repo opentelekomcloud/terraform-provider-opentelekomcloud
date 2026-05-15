@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix removal if ``secondary_cidr`` in resource/opentelekomcloud_vpc_v1`` (`#3373 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3373>`_)
