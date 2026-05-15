@@ -94,35 +94,6 @@ func addSecondaryCidr(d *schema.ResourceData, config *cfg.Config) error {
 	return nil
 }
 
-func updateSecondaryCidr(d *schema.ResourceData, config *cfg.Config) error {
-	vpcV3Client, err := config.NetworkingV3Client(config.GetRegion(d))
-	if err != nil {
-		return fmt.Errorf(errCreationV3Client, err)
-	}
-	vpcV3Get, err := VpcV3.Get(vpcV3Client, d.Id())
-	if err != nil {
-		return fmt.Errorf("error fetching vpc: %s", err)
-	}
-	cidrOpts := VpcV3.CidrOpts{
-		Vpc: &VpcV3.AddExtendCidrOption{
-			ExtendCidrs: []string{vpcV3Get.SecondaryCidrs[0]}},
-	}
-	_, err = VpcV3.RemoveSecondaryCidr(vpcV3Client, d.Id(), cidrOpts)
-	if err != nil {
-		return fmt.Errorf("error removing old secondary cidr of VirtualPrivateCloud %s: %s", d.Id(), vpcV3Get.SecondaryCidrs[0])
-	}
-	cidr := d.Get("secondary_cidr").(string)
-	cidrAddOpts := VpcV3.CidrOpts{
-		Vpc: &VpcV3.AddExtendCidrOption{
-			ExtendCidrs: []string{cidr}},
-	}
-	_, err = VpcV3.AddSecondaryCidr(vpcV3Client, d.Id(), cidrAddOpts)
-	if err != nil {
-		return fmt.Errorf("error setting new secondary cidr of VirtualPrivateCloud %s: %s", d.Id(), cidr)
-	}
-	return nil
-}
-
 func readSecondaryCidr(d *schema.ResourceData, config *cfg.Config) error {
 	vpcV3Client, err := config.NetworkingV3Client(config.GetRegion(d))
 	if err != nil {
@@ -323,8 +294,30 @@ func resourceVirtualPrivateCloudV1Update(ctx context.Context, d *schema.Resource
 
 	// update secondary cidr
 	if d.HasChange("secondary_cidr") {
-		if err := updateSecondaryCidr(d, config); err != nil {
-			return diag.FromErr(err)
+		vpcV3Client, err := config.NetworkingV3Client(config.GetRegion(d))
+		if err != nil {
+			return fmterr.Errorf(errCreationV3Client, err)
+		}
+		oldValue, newValue := d.GetChange("secondary_cidr")
+		preExtendCidr := oldValue.(string)
+		newExtendCidr := newValue.(string)
+		if preExtendCidr != "" {
+			cidrRemoveOpts := VpcV3.CidrOpts{
+				Vpc: &VpcV3.AddExtendCidrOption{
+					ExtendCidrs: []string{preExtendCidr}},
+			}
+			if _, err := VpcV3.RemoveSecondaryCidr(vpcV3Client, d.Id(), cidrRemoveOpts); err != nil {
+				return diag.Errorf("error deleting VPC secondary CIDR: %s", err)
+			}
+		}
+		if newExtendCidr != "" {
+			cidrAddOpts := VpcV3.CidrOpts{
+				Vpc: &VpcV3.AddExtendCidrOption{
+					ExtendCidrs: []string{newExtendCidr}},
+			}
+			if _, err := VpcV3.AddSecondaryCidr(vpcV3Client, d.Id(), cidrAddOpts); err != nil {
+				return diag.Errorf("error adding VPC secondary CIDR: %s", err)
+			}
 		}
 	}
 
