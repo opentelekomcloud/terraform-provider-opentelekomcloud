@@ -95,6 +95,10 @@ func addSecondaryCidr(d *schema.ResourceData, config *cfg.Config) error {
 }
 
 func readSecondaryCidr(d *schema.ResourceData, config *cfg.Config) error {
+	if d.Get("secondary_cidr").(string) == "" {
+		return nil
+	}
+
 	vpcV3Client, err := config.NetworkingV3Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf(errCreationV3Client, err)
