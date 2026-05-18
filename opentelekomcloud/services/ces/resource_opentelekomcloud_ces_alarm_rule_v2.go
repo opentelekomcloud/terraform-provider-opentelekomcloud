@@ -182,9 +182,6 @@ func ResourceAlarmRuleV2() *schema.Resource {
 						"type": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"notification", "autoscaling",
-							}, false),
 						},
 						"notification_list": {
 							Type:     schema.TypeList,
@@ -205,9 +202,6 @@ func ResourceAlarmRuleV2() *schema.Resource {
 						"type": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"notification", "autoscaling",
-							}, false),
 						},
 						"notification_list": {
 							Type:     schema.TypeList,
