@@ -1,0 +1,10 @@
+---
+fixes:
+  - |
+    **[VPC]** Fixed ``readSecondaryCidr`` on ``resource/opentelekomcloud_vpc_v1``
+    so it no longer claims out-of-band secondary CIDRs into state when the
+    ``secondary_cidr`` attribute is unset in HCL. Previously, any secondary CIDR
+    added to the VPC by another tool (console, module, or
+    ``opentelekomcloud_vpc_secondary_cidr_v3``) would be written into ``vpc_v1``
+    state on refresh and then proposed for removal on the next plan.
+    (`#3375 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3375>`_)

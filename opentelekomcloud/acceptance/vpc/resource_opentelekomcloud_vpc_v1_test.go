@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
+	VpcV3 "github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v3/vpcs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -118,6 +119,54 @@ func TestAccVpcV1_secondaryCidr(t *testing.T) {
 	})
 }
 
+func TestAccVpcV1_readIgnoresExternalCidrs(t *testing.T) {
+	const injectedCidr = "23.9.0.0/16"
+
+	var vpc vpcs.Vpc
+	t.Parallel()
+	quotas.BookOne(t, quotas.Router)
+	rc := common.InitResourceCheck(resourceVPCName, &vpc, getVpcV1ResourceFunc)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVpcV1ReadIsolation,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					injectSecondaryCidr(resourceVPCName, injectedCidr),
+				),
+			},
+			{
+				Config:   testAccVpcV1ReadIsolation,
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
+func injectSecondaryCidr(resourceName, cidr string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found in state: %s", resourceName)
+		}
+		client, err := common.TestAccProvider.Meta().(*cfg.Config).NetworkingV3Client(env.OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("error creating NetworkingV3 client: %w", err)
+		}
+		_, err = VpcV3.AddSecondaryCidr(client, rs.Primary.ID, VpcV3.CidrOpts{
+			Vpc: &VpcV3.AddExtendCidrOption{ExtendCidrs: []string{cidr}},
+		})
+		if err != nil {
+			return fmt.Errorf("error injecting secondary CIDR %s on VPC %s: %w", cidr, rs.Primary.ID, err)
+		}
+		return nil
+	}
+}
+
 func TestAccVpcV1_timeout(t *testing.T) {
 	var vpc vpcs.Vpc
 	t.Parallel()
@@ -220,5 +269,12 @@ resource "opentelekomcloud_vpc_v1" "vpc_1" {
     foo = "bar"
     key = "value_update"
   }
+}
+`
+
+const testAccVpcV1ReadIsolation = `
+resource "opentelekomcloud_vpc_v1" "vpc_1" {
+  name = "tf_acc_test_read_isolation"
+  cidr = "192.168.0.0/16"
 }
 `
