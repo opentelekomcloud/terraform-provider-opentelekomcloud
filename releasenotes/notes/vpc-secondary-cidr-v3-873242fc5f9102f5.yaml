@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **New Resource:** ``opentelekomcloud_vpc_secondary_cidr_v3`` for managing
+    up to 5 secondary CIDR blocks on a VPC via the v3 API
+    (`#3371 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3371>`_)
