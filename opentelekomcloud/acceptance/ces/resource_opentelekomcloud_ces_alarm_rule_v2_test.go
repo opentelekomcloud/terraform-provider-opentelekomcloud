@@ -122,7 +122,7 @@ func TestCESAlarmRuleV2_withNotification(t *testing.T) {
 					resource.TestCheckResourceAttr(rName, "name", "alarm_rule_v2_1"),
 					resource.TestCheckResourceAttr(rName, "notification_enabled", "true"),
 					resource.TestCheckResourceAttr(rName, "alarm_actions.#", "1"),
-					resource.TestCheckResourceAttr(rName, "alarm_actions.0.type", "notification"),
+					resource.TestCheckResourceAttr(rName, "alarm_actions.0.type", "contact"),
 				),
 			},
 		},
@@ -224,11 +224,6 @@ resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   }
 }
 
-resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name         = "topic_1"
-  display_name = "The display name of topic_1"
-}
-
 resource "opentelekomcloud_ces_alarm_rule_v2" "alarmrule_1" {
   name      = "alarm_rule_v2_1"
   namespace = "SYS.ECS"
@@ -256,10 +251,8 @@ resource "opentelekomcloud_ces_alarm_rule_v2" "alarmrule_1" {
   alarm_enabled        = true
 
   alarm_actions {
-    type = "notification"
-    notification_list = [
-      opentelekomcloud_smn_topic_v2.topic_1.topic_urn
-    ]
+    type              = "contact"
+    notification_list = []
   }
 }
 `, common.DataSourceSubnet)
@@ -1067,9 +1060,9 @@ func TestCESAlarmRuleV2_withOkActions(t *testing.T) {
 					resource.TestCheckResourceAttr(rName, "name", name),
 					resource.TestCheckResourceAttr(rName, "notification_enabled", "true"),
 					resource.TestCheckResourceAttr(rName, "alarm_actions.#", "1"),
-					resource.TestCheckResourceAttr(rName, "alarm_actions.0.type", "notification"),
+					resource.TestCheckResourceAttr(rName, "alarm_actions.0.type", "contact"),
 					resource.TestCheckResourceAttr(rName, "ok_actions.#", "1"),
-					resource.TestCheckResourceAttr(rName, "ok_actions.0.type", "notification"),
+					resource.TestCheckResourceAttr(rName, "ok_actions.0.type", "contact"),
 				),
 			},
 			{
@@ -1093,11 +1086,6 @@ resource "opentelekomcloud_compute_instance_v2" "test" {
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
-}
-
-resource "opentelekomcloud_smn_topic_v2" "test" {
-  name         = "smn-%[2]s"
-  display_name = "The display name of smn topic"
 }
 
 resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
@@ -1127,17 +1115,13 @@ resource "opentelekomcloud_ces_alarm_rule_v2" "test" {
   alarm_enabled        = true
 
   alarm_actions {
-    type = "notification"
-    notification_list = [
-      opentelekomcloud_smn_topic_v2.test.topic_urn
-    ]
+    type              = "contact"
+    notification_list = []
   }
 
   ok_actions {
-    type = "notification"
-    notification_list = [
-      opentelekomcloud_smn_topic_v2.test.topic_urn
-    ]
+    type              = "contact"
+    notification_list = []
   }
 }
 `, common.DataSourceSubnet, name)
