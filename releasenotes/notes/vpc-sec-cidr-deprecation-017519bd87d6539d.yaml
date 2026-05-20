@@ -1,0 +1,4 @@
+---
+deprecations:
+  - |
+    **[VPC]** ``resource/opentelekomcloud_vpc_v1`` `secondary_cidr` marked as deprecated (`#3378 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3378>`_)
