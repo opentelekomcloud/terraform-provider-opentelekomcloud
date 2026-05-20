@@ -47,22 +47,6 @@ resource "opentelekomcloud_vpc_v1" "vpc_with_tags" {
 }
 ```
 
-### VPC with secondary cidr block
-
-```hcl
-resource "opentelekomcloud_vpc_v1" "vpc_sec_cidr" {
-  name           = "tf_vpc"
-  description    = "description"
-  cidr           = "192.168.0.0/16"
-  secondary_cidr = "23.9.0.0/16"
-
-  tags = {
-    foo = "bar"
-    key = "value"
-  }
-}
-```
-
 ## Argument Reference
 
 The following arguments are supported:
@@ -71,10 +55,10 @@ The following arguments are supported:
   `10.0.0.0/8` to `10.255.255.0/24`, `172.16.0.0/12` to `172.31.255.0/24`,
   or `192.168.0.0/16` to `192.168.255.0/24`.
 
-* `secondary_cidr` - (Optional) Secondary CIDR block that can be added to VPCs.
+* `secondary_cidr` - **DEPRECATED** (Optional) Secondary CIDR block that can be added to VPCs.
   The value cannot contain the following: `100.64.0.0/1`, `214.0.0.0/7`, `198.18.0.0/15`, `169.254.0.0/16`,
   `0.0.0.0/8`, `127.0.0.0/8`, `240.0.0.0/4`, `172.31.0.0/16`, `192.168.0.0/16`.
-  Currently, only one secondary CIDR block can be added to each VPC.
+  Please use resource `opentelekomcloud_vpc_secondary_cidr_v3` instead.
 
 * `name` - (Required) The name of the VPC. The name must be unique for a tenant. The value is a string of
   no more than `64` characters and can contain digits, letters, underscores (`_`), and hyphens (`-`).

@@ -61,6 +61,7 @@ func ResourceVirtualPrivateCloudV1() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.IsCIDR,
+				Deprecated:   "Use the `opentelekomcloud_vpc_secondary_cidr_v3` resource instead",
 			},
 			"shared": {
 				Type:       schema.TypeBool,
