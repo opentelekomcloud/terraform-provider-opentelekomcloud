@@ -385,6 +385,7 @@ The `alarm_actions` block supports:
 * `type` - (Required, String) Specifies the type of action triggered by an alarm. The value can be:
   + **notification**: indicates that a notification will be sent to the user.
   + **autoscaling**: indicates that a scaling action will be triggered.
+  + **contact**: indicates that a notification will be sent to the mobile number and email address registered for your account.
 
 * `notification_list` - (Required, List) Specifies the list of objects to be notified if the alarm status changes.
   The maximum length is `5`. If `type` is set to **notification**, the value of `notification_list` cannot be empty.
@@ -399,6 +400,7 @@ The `ok_actions` block supports:
   The value can be:
   + **notification**: indicates that a notification will be sent to the user.
   + **autoscaling**: indicates that a scaling action will be triggered.
+  + **contact**: indicates that a notification will be sent to the mobile number and email address registered for your account.
 
 * `notification_list` - (Required, List) Specifies the list of objects to be notified if the alarm status changes.
   The maximum length is `5`.
