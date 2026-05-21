@@ -261,8 +261,13 @@ func TestAccComputeV2Instance_metadata(t *testing.T) {
 				Config: testAccComputeV2InstanceMetadata,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
+					// verify keys are present on the API-side server object
 					testAccCheckComputeV2InstanceMetadata(&instance, "foo", "bar"),
 					testAccCheckComputeV2InstanceMetadata(&instance, "abc", "def"),
+					// verify Read syncs user-configured keys into metadata state
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "metadata.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "metadata.abc", "def"),
+					// verify all_metadata still reflects the full API response
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "all_metadata.foo", "bar"),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "all_metadata.abc", "def"),
 				),
@@ -271,12 +276,29 @@ func TestAccComputeV2Instance_metadata(t *testing.T) {
 				Config: testAccComputeV2InstanceMetadataUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
+					// verify API-side: abc deleted, ghi added
 					testAccCheckComputeV2InstanceMetadata(&instance, "foo", "bar"),
 					testAccCheckComputeV2InstanceMetadata(&instance, "ghi", "jkl"),
 					testAccCheckComputeV2InstanceNoMetadataKey(&instance, "abc"),
+					// verify state-side: metadata reflects the update
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "metadata.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "metadata.ghi", "jkl"),
+					// verify deleted key is removed from state, not just from the API
+					resource.TestCheckNoResourceAttr(resourceInstanceV2Name, "metadata.abc"),
+					// verify all_metadata backward-compatibility is unchanged
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "all_metadata.foo", "bar"),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "all_metadata.ghi", "jkl"),
 				),
+			},
+			{
+				ResourceName:      resourceInstanceV2Name,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"stop_before_destroy", // local-only destroy behavior, not returned by API
+					"force_delete",        // local-only flag, not returned by API
+					"image_name",          // API returns image_id only; name lookup returns "Not Found" on import
+				},
 			},
 		},
 	})

@@ -183,6 +183,7 @@ func ResourceComputeInstanceV2() *schema.Resource {
 			"metadata": {
 				Type:     schema.TypeMap,
 				Optional: true,
+				Computed: true,
 				ForceNew: false,
 			},
 			"config_drive": {
@@ -609,6 +610,14 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 	if err := d.Set("all_metadata", server.Metadata); err != nil {
 		return fmterr.Errorf("[DEBUG] Error saving all_metadata to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
 	}
+	// Get the user metadata using API call and sync it with state
+	// If there are any out-of-band changes to user metadata e.g. through Telekom API or console
+	// this syncing will fix it and prevent it from being overwritten on next apply
+	userMetadata, err := servers.Metadata(client, d.Id()).Extract()
+	if err != nil {
+		return fmterr.Errorf("error reading metadata of instance (%s): %w", d.Id(), err)
+	}
+	mErr = multierror.Append(mErr, d.Set("metadata", userMetadata))
 
 	var secGrpNames []string
 	for _, sg := range server.SecurityGroups {
@@ -1284,15 +1293,6 @@ func resourceComputeInstanceV2ImportState(ctx context.Context, d *schema.Resourc
 	results := make([]*schema.ResourceData, 1)
 	if diagRead := resourceComputeInstanceV2Read(ctx, d, meta); diagRead.HasError() {
 		return nil, fmt.Errorf("error reading opentelekomcloud_compute_instance_v2 %s: %s", d.Id(), diagRead[0].Summary)
-	}
-
-	metadata, err := servers.Metadata(client, d.Id()).Extract()
-	if err != nil {
-		return nil, fmt.Errorf("unable to read metadata for opentelekomcloud_compute_instance_v2 %s: %s", d.Id(), err)
-	}
-
-	if err := d.Set("metadata", metadata); err != nil {
-		return nil, fmt.Errorf("error setting metadata")
 	}
 
 	results[0] = d
