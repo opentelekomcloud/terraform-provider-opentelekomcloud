@@ -3,6 +3,7 @@ package ecs
 import (
 	"context"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -147,6 +148,15 @@ func ResourceEcsInstanceV1() *schema.Resource {
 						},
 					},
 				},
+			},
+			"power_state": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "active",
+				ValidateFunc: validation.StringInSlice([]string{
+					"active", "shutoff",
+				}, true),
+				DiffSuppressFunc: suppressPowerStateDiffs,
 			},
 			"system_disk_id": {
 				Type:     schema.TypeString,
@@ -363,6 +373,27 @@ func resourceEcsInstanceV1Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
+	vmState := d.Get("power_state").(string)
+	if strings.ToLower(vmState) == "shutoff" {
+		clientV2, err := config.ComputeV2Client(config.GetRegion(d))
+		if err != nil {
+			return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %w", err)
+		}
+		if err := startstop.Stop(clientV2, d.Id()).ExtractErr(); err != nil {
+			return fmterr.Errorf("error stopping CloudServer: %w", err)
+		}
+		stopStateConf := &resource.StateChangeConf{
+			Target:     []string{"SHUTOFF"},
+			Refresh:    ServerV2StateRefreshFunc(clientV2, d.Id()),
+			Timeout:    d.Timeout(schema.TimeoutUpdate),
+			Delay:      10 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
+		if _, err := stopStateConf.WaitForStateContext(ctx); err != nil {
+			return fmterr.Errorf("error waiting for CloudServer (%s) to stop: %w", d.Id(), err)
+		}
+	}
+
 	return resourceEcsInstanceV1Read(ctx, d, meta)
 }
 
@@ -397,6 +428,16 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("availability_zone", server.AvailabilityZone),
 		d.Set("tpm_enabled", tpmEnabled),
 	)
+
+	// Set the current power_state
+	currentStatus := strings.ToLower(server.Status)
+	switch currentStatus {
+	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved":
+		mErr = multierror.Append(mErr, d.Set("power_state", currentStatus))
+	default:
+		return fmterr.Errorf("invalid power_state for instance %s: %s", d.Id(), server.Status)
+	}
+
 	var secGrpIDs []string
 	for _, sg := range server.SecurityGroups {
 		secGrpIDs = append(secGrpIDs, sg.ID)
@@ -650,6 +691,50 @@ func resourceEcsInstanceV1Update(ctx context.Context, d *schema.ResourceData, me
 		log.Printf("[DEBUG] Update auto recovery of instance to %t", ar)
 		if err := setAutoRecoveryForInstance(ctx, d, meta, d.Id(), ar); err != nil {
 			return fmterr.Errorf("error updating auto recovery of CloudServer: %w", err)
+		}
+	}
+
+	if d.HasChange("power_state") {
+		powerStateNew := d.Get("power_state").(string)
+		if strings.ToLower(powerStateNew) == "shutoff" {
+			err = startstop.Stop(client, d.Id()).ExtractErr()
+			if err != nil {
+				return fmterr.Errorf("error stopping compute instance: %w", err)
+			}
+			stopStateConf := &resource.StateChangeConf{
+				Target:       []string{"SHUTOFF"},
+				Refresh:      ServerV2StateRefreshFunc(client, d.Id()),
+				Timeout:      d.Timeout(schema.TimeoutUpdate),
+				Delay:        10 * time.Second,
+				MinTimeout:   3 * time.Second,
+				PollInterval: 2 * time.Second,
+			}
+
+			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
+			_, err = stopStateConf.WaitForStateContext(ctx)
+			if err != nil {
+				return fmterr.Errorf("error waiting for instance (%s) to become inactive(shutoff): %s", d.Id(), err)
+			}
+		}
+		if strings.ToLower(powerStateNew) == "active" {
+			err = startstop.Start(client, d.Id()).ExtractErr()
+			if err != nil {
+				return fmterr.Errorf("error starting compute instance: %w", err)
+			}
+			startStateConf := &resource.StateChangeConf{
+				Target:       []string{"ACTIVE"},
+				Refresh:      ServerV2StateRefreshFunc(client, d.Id()),
+				Timeout:      d.Timeout(schema.TimeoutUpdate),
+				Delay:        10 * time.Second,
+				MinTimeout:   3 * time.Second,
+				PollInterval: 2 * time.Second,
+			}
+
+			log.Printf("[DEBUG] Waiting for instance (%s) to start/unshelve", d.Id())
+			_, err = startStateConf.WaitForStateContext(ctx)
+			if err != nil {
+				return fmterr.Errorf("error waiting for instance (%s) to become active: %s", d.Id(), err)
+			}
 		}
 	}
 

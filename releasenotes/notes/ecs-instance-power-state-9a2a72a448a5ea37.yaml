@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[ECS]** Add new attribute ``power_state`` to ``resource/opentelekomcloud_ecs_instance_v1`` (`#3381 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3381>`_)
