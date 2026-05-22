@@ -424,7 +424,7 @@ func TestAccEcsV1InstanceTpmEnabled(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tpm_enabled", "false"),
-					testAccCheckEcsV1InstanceIsActive(&instance),
+					testAccCheckEcsV1InstanceIsActive(&instance, "ACTIVE"),
 				),
 			},
 			{
@@ -432,7 +432,7 @@ func TestAccEcsV1InstanceTpmEnabled(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tpm_enabled", "true"),
-					testAccCheckEcsV1InstanceIsActive(&instance),
+					testAccCheckEcsV1InstanceIsActive(&instance, "ACTIVE"),
 				),
 			},
 			{
@@ -448,7 +448,54 @@ func TestAccEcsV1InstanceTpmEnabled(t *testing.T) {
 	})
 }
 
-func testAccCheckEcsV1InstanceIsActive(instance *cloudservers.CloudServer) resource.TestCheckFunc {
+func TestAccEcsV1Instance_initialStateShutoff(t *testing.T) {
+	var instance cloudservers.CloudServer
+	qts := serverQuotas(4, env.OsFlavorID)
+	t.Parallel()
+	quotas.BookMany(t, qts)
+
+	rc := common.InitResourceCheck(
+		resourceInstanceV1Name,
+		&instance,
+		getEcsInstanceFunc,
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEcsV1InstanceShutoff,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "power_state", "shutoff"),
+					testAccCheckEcsV1InstanceIsActive(&instance, "SHUTOFF"),
+				),
+			},
+			{
+				Config: testAccEcsV1InstanceActive,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "power_state", "active"),
+					testAccCheckEcsV1InstanceIsActive(&instance, "ACTIVE"),
+				),
+			},
+			{
+				Config: testAccEcsV1InstanceShutoff,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "power_state", "shutoff"),
+					testAccCheckEcsV1InstanceIsActive(&instance, "SHUTOFF"),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckEcsV1InstanceIsActive(instance *cloudservers.CloudServer, state string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.ComputeV1Client(env.OS_REGION_NAME)
@@ -461,8 +508,8 @@ func testAccCheckEcsV1InstanceIsActive(instance *cloudservers.CloudServer) resou
 			return fmt.Errorf("error getting CloudServer: %w", err)
 		}
 
-		if server.Status != "ACTIVE" {
-			return fmt.Errorf("CloudServer %s is in status %s, expected ACTIVE (server should be restarted after tpm_enabled update)", instance.ID, server.Status)
+		if server.Status != state {
+			return fmt.Errorf("CloudServer %s is in status %s, expected %s (server should be restarted after tpm_enabled update)", instance.ID, server.Status, state)
 		}
 		return nil
 	}
@@ -999,3 +1046,89 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, tpmEnabled)
 }
+
+var testAccEcsV1InstanceShutoff = fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_compute_servergroup_v2" "sg_1" {
+  name     = "sg_1"
+  policies = ["anti-affinity"]
+}
+
+resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+  name     = "server_1"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
+  flavor   = "s2.medium.1"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+
+  power_state = "shutoff"
+
+  nics {
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+
+  data_disks {
+    size = 10
+    type = "SAS"
+  }
+
+  password                    = "Password@123"
+  availability_zone           = "%s"
+  auto_recovery               = true
+  delete_disks_on_termination = true
+  os_scheduler_hints {
+    group   = opentelekomcloud_compute_servergroup_v2.sg_1.id
+    tenancy = "shared"
+  }
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccEcsV1InstanceActive = fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_compute_servergroup_v2" "sg_1" {
+  name     = "sg_1"
+  policies = ["anti-affinity"]
+}
+
+resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+  name     = "server_1"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
+  flavor   = "s2.medium.1"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+
+  power_state = "active"
+
+  nics {
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+
+  data_disks {
+    size = 10
+    type = "SAS"
+  }
+
+  password                    = "Password@123"
+  availability_zone           = "%s"
+  auto_recovery               = true
+  delete_disks_on_termination = true
+  os_scheduler_hints {
+    group   = opentelekomcloud_compute_servergroup_v2.sg_1.id
+    tenancy = "shared"
+  }
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

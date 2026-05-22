@@ -354,6 +354,12 @@ The `os_scheduler_hints` block supports:
 
 * `dedicated_host_id` - (Optional, String, ForceNew) Specifies the dedicated host ID. A Dedicated Host ID takes effect only when `tenancy` is set to `dedicated`.
 
+* `power_state` - (Optional) Provide the VM state. Only `active` and `shutoff` are supported values.
+
+  ->
+  If the initial `power_state` is the `shutoff` the VM will be stopped immediately after build, and the provisioners
+  like remote-exec or files are not supported.
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
