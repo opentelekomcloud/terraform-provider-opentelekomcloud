@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ELB]** `tag-only` changes no longer send empty request body during update in ``resource/opentelekomcloud_lb_loadbalancer_v3`` (`#3385 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3385>`_)

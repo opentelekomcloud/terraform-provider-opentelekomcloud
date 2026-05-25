@@ -47,6 +47,13 @@ func TestAccLBV3LoadBalancer_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceLBName, "tags.kuh", "value-update"),
 				),
 			},
+			{
+				Config: testAccLBV3LoadBalancerTagsOnlyUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceLBName, "tags.muh", "tags-only-muh-update"),
+					resource.TestCheckResourceAttr(resourceLBName, "tags.kuh", "tags-only-kuh-update"),
+				),
+			},
 		},
 	})
 }
@@ -223,6 +230,32 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   tags = {
     muh = "value-update"
     kuh = "value-update"
+  }
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3LoadBalancerTagsOnlyUpdate = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name        = "loadbalancer_1_updated"
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+
+  public_ip {
+    ip_type              = "5_bgp"
+    bandwidth_name       = "lb_band"
+    bandwidth_size       = 10
+    bandwidth_share_type = "PER"
+  }
+
+  deletion_protection = false
+
+  tags = {
+    muh = "tags-only-muh-update"
+    kuh = "tags-only-kuh-update"
   }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
