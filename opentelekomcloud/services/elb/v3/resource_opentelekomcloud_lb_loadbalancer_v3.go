@@ -287,46 +287,59 @@ func resourceLoadBalancerV3Update(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	var updateOpts loadbalancers.UpdateOpts
+	updateRequired := false
 	if d.HasChange("name") {
 		updateOpts.Name = d.Get("name").(string)
+		updateRequired = true
 	}
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
+		updateRequired = true
 	}
 	if d.HasChange("admin_state_up") {
 		adminStateUp := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &adminStateUp
+		updateRequired = true
 	}
 	if d.HasChange("network_ids") {
 		updateOpts.ElbSubnetIDs = common.ExpandToStringSlice(d.Get("network_ids").(*schema.Set).List())
+		updateRequired = true
 	}
 	if d.HasChange("vip_address") {
 		updateOpts.VipAddress = d.Get("vip_address").(string)
+		updateRequired = true
 	}
 	if d.HasChange("l7_flavor") {
 		updateOpts.L7Flavor = d.Get("l7_flavor").(string)
+		updateRequired = true
 	}
 	if d.HasChange("l4_flavor") {
 		updateOpts.L4Flavor = d.Get("l4_flavor").(string)
+		updateRequired = true
 	}
 	if d.HasChange("subnet_id") {
 		subnetID := d.Get("subnet_id").(string)
 		updateOpts.VipSubnetCidrID = &subnetID
+		updateRequired = true
 	}
 	if d.HasChange("ip_target_enable") {
 		ipTargetEnable := d.Get("ip_target_enable").(bool)
 		updateOpts.IpTargetEnable = &ipTargetEnable
+		updateRequired = true
 	}
 	if d.HasChange("deletion_protection") {
 		deletionProtection := d.Get("deletion_protection").(bool)
 		updateOpts.DeletionProtectionEnable = &deletionProtection
+		updateRequired = true
 	}
 
-	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
-	_, err = loadbalancers.Update(client, d.Id(), updateOpts).Extract()
-	if err != nil {
-		return fmterr.Errorf("unable to update LoadBalancerV3 %s: %s", d.Id(), err)
+	if updateRequired {
+		log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
+		_, err = loadbalancers.Update(client, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmterr.Errorf("unable to update LoadBalancerV3 %s: %s", d.Id(), err)
+		}
 	}
 
 	// update tags by calling v2 api
