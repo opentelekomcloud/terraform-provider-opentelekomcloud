@@ -43,6 +43,18 @@ resource "opentelekomcloud_identity_user_v3" "user_1" {
 }
 ```
 
+## Example with external identity
+
+```hcl
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  name       = "user_external"
+  password   = "password123@!"
+  enabled    = true
+  xuser_type = "TenantIdp"
+  xuser_id   = "external-system-user-id"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -83,6 +95,12 @@ The following arguments are supported:
   + `enabled` - (Required, Bool) Indicates whether login protection has been enabled for the user. The value can be `true` or `false`.
   + `verification_method` - (Required, String) Login authentication method of the user. Options: `sms`, `email`, and `vmfa`.
 
+* `xuser_type` - (Optional, String) Specifies the type of the IAM user in the external system.
+  Must be used together with `xuser_id`. Currently, the only supported value is `TenantIdp`.
+
+* `xuser_id` - (Optional, String) Specifies the ID of the IAM user in the external system.
+  Must be used together with `xuser_type`. The ID can contain a maximum of 128 characters.
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
@@ -96,10 +114,6 @@ In addition to all arguments above, the following attributes are exported:
 * `last_login` - The time when the IAM user last login.
 
 * `domain_id` - The domain user belongs to.
-
-* `xuser_type` - Type of the user in the external system.
-
-* `xuser_id` - ID of the user in the external system.
 
 ## Import
 

@@ -1,0 +1,7 @@
+---
+enhancements:
+  - |
+    **[IAM]** Added ``xuser_type`` and ``xuser_id`` arguments to
+    ``resource/opentelekomcloud_identity_user_v3`` to support external identity
+    provider user mapping
+    (`#3388 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3388>`_)
