@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[EVS]** Add new resource ``resource/opentelekomcloud_evs_snapshot_v2`` (`#3389 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3389>`_)
