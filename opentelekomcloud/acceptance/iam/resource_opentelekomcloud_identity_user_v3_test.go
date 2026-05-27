@@ -294,3 +294,62 @@ resource "opentelekomcloud_identity_user_v3" "user_1" {
 }
   `, userName)
 }
+
+func TestAccIdentityV3User_externalIdentity(t *testing.T) {
+	var user users.User
+	userName := acctest.RandomWithPrefix("tf-user")
+	xuserID := acctest.RandString(16)
+	xuserIDUpdated := acctest.RandString(16)
+	rc := common.InitResourceCheck(
+		resourceName,
+		&user,
+		getIdentityUserResourceFunc,
+	)
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIdentityV3UserExternalIdentity(userName, xuserID),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceName, "xuser_type", "TenantIdp"),
+					resource.TestCheckResourceAttr(resourceName, "xuser_id", xuserID),
+				),
+			},
+			{
+				Config: testAccIdentityV3UserExternalIdentity(userName, xuserIDUpdated),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceName, "xuser_type", "TenantIdp"),
+					resource.TestCheckResourceAttr(resourceName, "xuser_id", xuserIDUpdated),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"password",
+					"send_welcome_email",
+				},
+			},
+		},
+	})
+}
+
+func testAccIdentityV3UserExternalIdentity(userName, xuserID string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  name       = "%s"
+  password   = "password123@!"
+  enabled    = true
+  xuser_type = "TenantIdp"
+  xuser_id   = "%s"
+}
+  `, userName, xuserID)
+}

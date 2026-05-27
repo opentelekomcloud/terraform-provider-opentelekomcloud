@@ -128,12 +128,18 @@ func ResourceIdentityUserV3() *schema.Resource {
 				Computed: true,
 			},
 			"xuser_type": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				RequiredWith: []string{"xuser_id"},
+				ValidateFunc: validation.StringInSlice([]string{"TenantIdp"}, false),
 			},
 			"xuser_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				RequiredWith: []string{"xuser_type"},
+				ValidateFunc: validation.StringLenBetween(1, 128),
 			},
 		},
 	}
@@ -165,6 +171,8 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 		Enabled:       &enabled,
 		PasswordReset: &reset,
 		DomainID:      domainId,
+		XuserType:     d.Get("xuser_type").(string),
+		XuserID:       d.Get("xuser_id").(string),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -362,6 +370,17 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 	_, err = users.ModifyUser(client, d.Id(), updateOpts)
 	if err != nil {
 		return diag.Errorf("error updating IAM user: %s", err)
+	}
+
+	if d.HasChanges("xuser_type", "xuser_id") {
+		_, err = users.ModifyUserAdmin(client, users.UpdateAdminOpts{
+			XuserType: d.Get("xuser_type").(string),
+			XuserId:   d.Get("xuser_id").(string),
+			Id:        d.Id(),
+		})
+		if err != nil {
+			return diag.Errorf("error updating xuser fields for IAM user: %s", err)
+		}
 	}
 
 	if hasChange {
