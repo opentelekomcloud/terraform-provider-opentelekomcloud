@@ -25,9 +25,9 @@ The local backend configuration is different and entirely separate from the `ter
 
 When you change backends, Terraform gives you the option to migrate your state to the new backend. This lets you adopt backends without losing any existing state.
 
-## Using a OpenTelekomCloud S3 Backend Block
+## Using a T-Cloud Public (former OpenTelekomCloud) S3 Backend Block
 To configure a backend, add a nested backend block within the top-level terraform block. The following example configures the remote backend for S3.
-OpenTelekomCloud S3 endpoints:
+T-Cloud Public (former OpenTelekomCloud) S3 endpoints:
  - `https://obs.eu-de.otc.t-systems.com/`
  - `https://obs.eu-nl.otc.t-systems.com/`
  - `https://obs.eu-ch2.sc.otc.t-systems.com/`

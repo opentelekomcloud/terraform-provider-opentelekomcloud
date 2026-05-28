@@ -186,9 +186,10 @@ func ResourceComputeInstanceV2() *schema.Resource {
 				ForceNew: false,
 			},
 			"config_drive": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
+				Type:       schema.TypeBool,
+				Optional:   true,
+				ForceNew:   true,
+				Deprecated: "This parameter is no longer available after an API update.",
 			},
 			"password": {
 				Type:      schema.TypeString,

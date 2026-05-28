@@ -3,13 +3,13 @@ layout: "opentelekomcloud"
 page_title: "Provider: OpenTelekomCloud"
 sidebar_current: "docs-opentelekomcloud-index"
 description: |-
-  The OpenTelekomCloud provider is used to interact with the many resources supported by OpenTelekomCloud. The provider needs to be configured with the proper credentials before it can be used.
+  The T-Cloud Public (former OpenTelekomCloud) provider is used to interact with the many resources supported by T-Cloud Public (former OpenTelekomCloud). The provider needs to be configured with the proper credentials before it can be used.
 ---
 
-# Open Telekom Cloud Provider
+# T-Cloud Public (former OpenTelekomCloud) Provider
 
-The Open Telekom Cloud provider is used to interact with the
-many resources supported by OpenTelekomCloud. The provider needs to be configured
+The T-Cloud Public (former OpenTelekomCloud) provider is used to interact with the
+many resources supported by T-Cloud Public (former OpenTelekomCloud). The provider needs to be configured
 with the proper credentials before it can be used.
 
 Use the navigation to the left to read about the available resources.
@@ -17,7 +17,7 @@ Use the navigation to the left to read about the available resources.
 ## Example Usage
 
 ```hcl
-# Configure the OpenTelekomCloud Provider
+# Configure the T-Cloud Public (former OpenTelekomCloud) Provider
 provider "opentelekomcloud" {
   user_name   = var.user_name
   password    = var.password
@@ -207,10 +207,10 @@ See [OpenStack configuration documentation](https://docs.openstack.org/python-op
 
 The following arguments are supported:
 
-* `access_key` - (Optional) The access key of the OpenTelekomCloud cloud to use.
+* `access_key` - (Optional) The access key of the T-Cloud Public (former OpenTelekomCloud) cloud to use.
   If omitted, the `OS_ACCESS_KEY` environment variable is used.
 
-* `secret_key` - (Optional) The secret key of the OpenTelekomCloud cloud to use.
+* `secret_key` - (Optional) The secret key of the T-Cloud Public (former OpenTelekomCloud) cloud to use.
   If omitted, the `OS_SECRET_KEY` environment variable is used.
 
 * `auth_url` - (Optional; required if `cloud` is not specified) The Identity
@@ -283,7 +283,7 @@ The following arguments are supported:
   such as `username:project`. Set the `password` to the Swauth/Swift key.
   Finally, set `auth_url` as the location of the Swift service.
 
--> This will only work when used with the OpenTelekomCloud Object Storage resources.
+-> This will only work when used with the T-Cloud Public (former OpenTelekomCloud) Object Storage resources.
 
 * `agency_name` - (Optional) if authorized by assume role, it must be set. The
   name of agency.
@@ -350,7 +350,7 @@ variables must also be set:
 
 * `OS_EXTGW_ID` - The UUID of the external gateway.
 
-You should be able to use any OpenTelekomCloud environment to develop on as long as the
+You should be able to use any T-Cloud Public (former OpenTelekomCloud) environment to develop on as long as the
 above environment variables are set.
 
 <div style="visibility:hidden">

@@ -1,0 +1,5 @@
+other:
+  - |
+    **[DOC]** Deprecate ``config_drive`` in ``resource/opentelekomcloud_compute_instance_v2`` (`#3394 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3394>`_)
+  - |
+    **[DOC]** Rebranding changes in documentation (`#3394 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3394>`_)
