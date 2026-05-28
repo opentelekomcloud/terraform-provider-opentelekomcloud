@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_evs_snapshot_v2"
 sidebar_current: "docs-opentelekomcloud-resource-evs-snapshot-v2"
 description: |-
-Manages an EVS snapshot resource within OpenTelekomCloud.
+  Manages an EVS snapshot resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud_evs_snapshot_v2
