@@ -2,13 +2,13 @@
     <img src=".github/terraform_logo.svg" alt="Terraform logo" title="Terraform" align="right" height="50" />
 </a>
 
-Terraform Open Telekom Cloud Provider
+Terraform T-Cloud Public (former OpenTelekomCloud) Provider
 =====================================
 [![Documentation](https://img.shields.io/badge/documentation-blue)](https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs)
 
 Quick Start
 -----------
-> When using the OpenTelekomCloud Provider with Terraform 0.13 and later, the recommended approach is to declare Provider versions in the root module Terraform configuration, using a `required_providers` block as per the following example. For previous versions, please continue to pin the version within the provider block.
+> When using the T-Cloud Public (former OpenTelekomCloud) Provider with Terraform 0.13 and later, the recommended approach is to declare Provider versions in the root module Terraform configuration, using a `required_providers` block as per the following example. For previous versions, please continue to pin the version within the provider block.
 
 1. Add [opentelekomcloud/opentelekomcloud](https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs) to your `required_providers`.
 ```hcl
@@ -27,7 +27,7 @@ terraform {
 ```hcl
 # provider.tf
 provider "opentelekomcloud" {
-   # OpenTelekomCloud Provider Documentation:
+   # T-Cloud Public (former OpenTelekomCloud) Provider Documentation:
    # https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs
    # domain_name = "..."
    # tenant_name = "..."
