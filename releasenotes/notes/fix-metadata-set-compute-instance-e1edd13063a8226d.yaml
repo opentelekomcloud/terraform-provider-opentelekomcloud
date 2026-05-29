@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix sync metadata to state in ``resource/opentelekomcloud_compute_instance_v2`` (`#3382 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3382>`_)
