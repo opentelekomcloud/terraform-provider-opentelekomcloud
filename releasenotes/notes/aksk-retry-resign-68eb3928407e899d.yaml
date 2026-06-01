@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Re-sign AKSK requests on HTTP retry to prevent signature expired errors (`#3399 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3399>`_)
+enhancements:
+  - |
+    Improve HTTP retry backoff strategy: reduce max timeout from 10 minutes to 20 seconds and add jitter (`#3399 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3399>`_)
