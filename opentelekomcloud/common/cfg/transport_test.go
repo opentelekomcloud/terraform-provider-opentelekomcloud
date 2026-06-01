@@ -58,10 +58,10 @@ const tokenOutput = `
 `
 
 type recordingTransport struct {
-	failCount    int
-	maxFailures  int
-	sdkDates     []string
-	authHeaders  []string
+	failCount   int
+	maxFailures int
+	sdkDates    []string
+	authHeaders []string
 }
 
 func (rt *recordingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
