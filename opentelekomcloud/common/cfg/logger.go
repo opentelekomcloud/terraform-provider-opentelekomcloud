@@ -8,31 +8,34 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"math/rand"
 	"net/http"
 	"sort"
 	"strings"
 	"time"
 
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/unknwon/com"
 )
 
-var maxTimeout = 10 * time.Minute
+var maxTimeout = 20 * time.Second
 
 // RoundTripper satisfies the http.RoundTripper interface and is used to
 // customize the default http client RoundTripper to allow for logging.
 type RoundTripper struct {
-	Rt         http.RoundTripper
-	OsDebug    bool
-	MaxRetries int
+	Rt          http.RoundTripper
+	OsDebug     bool
+	MaxRetries  int
+	SignOptions *golangsdk.SignOptions
 }
 
 func retryTimeout(count int) time.Duration {
-	seconds := math.Pow(2, float64(count))
-	timeout := time.Duration(seconds) * time.Second
-	if timeout > maxTimeout { // won't wait more than maxTimeout
+	timeout := time.Duration(math.Pow(2, float64(count))) * time.Second
+	if timeout > maxTimeout {
 		timeout = maxTimeout
 	}
-	return timeout
+	half := timeout / 2
+	return half + time.Duration(rand.Float64()*float64(half))
 }
 
 // RoundTrip performs a round-trip HTTP request and logs relevant information about it.
@@ -76,6 +79,9 @@ func (lrt *RoundTripper) RoundTrip(request *http.Request) (*http.Response, error
 			log.Printf("[DEBUG] OpenTelecomCloud connection error, retry number %d: %s", retry, err)
 		}
 		time.Sleep(retryTimeout(retry))
+		if lrt.SignOptions != nil {
+			golangsdk.ReSign(request, *lrt.SignOptions)
+		}
 		response, err = lrt.Rt.RoundTrip(request)
 		retry += 1
 	}

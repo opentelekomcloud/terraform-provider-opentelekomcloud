@@ -57,6 +57,66 @@ const tokenOutput = `
 }
 `
 
+type recordingTransport struct {
+	failCount    int
+	maxFailures  int
+	sdkDates     []string
+	authHeaders  []string
+}
+
+func (rt *recordingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	rt.sdkDates = append(rt.sdkDates, req.Header.Get("X-Sdk-Date"))
+	rt.authHeaders = append(rt.authHeaders, req.Header.Get("Authorization"))
+
+	if rt.failCount < rt.maxFailures {
+		rt.failCount++
+		return nil, fmt.Errorf("connection refused")
+	}
+	return &http.Response{
+		StatusCode: 200,
+		Body:       http.NoBody,
+	}, nil
+}
+
+func TestRoundTripperRetryResign(t *testing.T) {
+	inner := &recordingTransport{maxFailures: 1}
+
+	signOpts := golangsdk.SignOptions{
+		AccessKey: "test-ak",
+		SecretKey: "test-sk",
+	}
+
+	req, err := http.NewRequest("GET", "https://example.com/v1/resource", nil)
+	th.CheckNoErr(t, err)
+
+	// Set stale signature headers so that ReSign is guaranteed to produce different ones
+	staleDate := "20200101T000000Z"
+	staleAuth := "SDK-HMAC-SHA256 stale-signature"
+	req.Header.Set("Host", req.URL.Host)
+	req.Header.Set("X-Sdk-Date", staleDate)
+	req.Header.Set("Authorization", staleAuth)
+
+	rt := &RoundTripper{
+		Rt:          inner,
+		MaxRetries:  1,
+		SignOptions: &signOpts,
+	}
+
+	resp, err := rt.RoundTrip(req)
+	th.CheckNoErr(t, err)
+	th.AssertEquals(t, 200, resp.StatusCode)
+
+	th.AssertEquals(t, 2, len(inner.sdkDates))
+	th.AssertEquals(t, staleDate, inner.sdkDates[0])
+
+	if inner.sdkDates[1] == staleDate {
+		t.Error("X-Sdk-Date should be updated on retry, but was still stale")
+	}
+	if inner.authHeaders[1] == staleAuth {
+		t.Error("Authorization should be updated on retry, but was still stale")
+	}
+}
+
 func TestRoundTripperRetry(t *testing.T) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()

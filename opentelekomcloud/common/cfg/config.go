@@ -530,18 +530,24 @@ func (c *Config) genClient(ao golangsdk.AuthOptionsProvider) (*golangsdk.Provide
 	defaultBackoffTimeout := time.Duration(c.BackoffRetryTimeout) * time.Second
 	client.BackoffRetryTimeout = &defaultBackoffTimeout
 
+	rt := &RoundTripper{
+		Rt:         transport,
+		OsDebug:    osDebug,
+		MaxRetries: c.MaxRetries,
+	}
+	if client.AKSKAuthOptions.AccessKey != "" {
+		signOpts := golangsdk.SignOptions{
+			AccessKey: client.AKSKAuthOptions.AccessKey,
+			SecretKey: client.AKSKAuthOptions.SecretKey,
+		}
+		rt.SignOptions = &signOpts
+	}
+
 	client.HTTPClient = http.Client{
-		Transport: &RoundTripper{
-			Rt:         transport,
-			OsDebug:    osDebug,
-			MaxRetries: c.MaxRetries,
-		},
+		Transport: rt,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if client.AKSKAuthOptions.AccessKey != "" {
-				golangsdk.ReSign(req, golangsdk.SignOptions{
-					AccessKey: client.AKSKAuthOptions.AccessKey,
-					SecretKey: client.AKSKAuthOptions.SecretKey,
-				})
+			if rt.SignOptions != nil {
+				golangsdk.ReSign(req, *rt.SignOptions)
 			}
 			return nil
 		},
