@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **OBS:** Enable SSL verification for internal OBS client based on provider ``insecure`` setting (`#3404 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3404>`_)
