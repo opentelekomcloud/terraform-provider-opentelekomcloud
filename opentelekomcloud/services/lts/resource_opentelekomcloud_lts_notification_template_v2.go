@@ -2,7 +2,6 @@ package lts
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -130,7 +129,7 @@ func resourceNotificationTemplateV2Read(ctx context.Context, d *schema.ResourceD
 
 	requestResp, err := message_template.List(client, client.DomainID)
 	if err != nil {
-		return diag.FromErr(err)
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud LTS v2 notification template")
 	}
 	var tempResult message_template.MessageTemplateResponse
 	for _, t := range requestResp {
@@ -140,7 +139,8 @@ func resourceNotificationTemplateV2Read(ctx context.Context, d *schema.ResourceD
 		}
 	}
 	if tempResult.Name == "" {
-		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 notification template by its ID (%s)", d.Id()))
+		d.SetId("")
+		return nil
 	}
 
 	mErr := multierror.Append(nil,

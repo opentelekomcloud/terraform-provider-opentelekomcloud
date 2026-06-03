@@ -2,7 +2,6 @@ package lts
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -330,6 +329,9 @@ func resourceLtsTransferV2Read(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	requestResp, err := transfers.List(client, transfers.ListTransfersOpts{})
+	if err != nil {
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud LTS v2 log transfer")
+	}
 	var transferResult transfers.Transfer
 
 	for _, tr := range requestResp {
@@ -339,7 +341,8 @@ func resourceLtsTransferV2Read(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 	if transferResult.LogTransferId == "" {
-		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 log transfer by its ID (%s)", d.Id()))
+		d.SetId("")
+		return nil
 	}
 	mErr := multierror.Append(nil,
 		d.Set("region", config.GetRegion(d)),

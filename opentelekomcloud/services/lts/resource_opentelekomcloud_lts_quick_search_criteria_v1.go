@@ -102,7 +102,7 @@ func resourceQuickSearchCriteriaV1Read(ctx context.Context, d *schema.ResourceDa
 		},
 	)
 	if err != nil {
-		return diag.FromErr(err)
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud LTS v1.0 search criteria")
 	}
 	var searchResult quick_search.SearchCriteria
 	for _, sq := range requestResp {
@@ -112,7 +112,8 @@ func resourceQuickSearchCriteriaV1Read(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 	if searchResult.ID == "" {
-		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud v1.0 search criteria by its ID (%s)", d.Id()))
+		d.SetId("")
+		return nil
 	}
 
 	mErr := multierror.Append(nil,
