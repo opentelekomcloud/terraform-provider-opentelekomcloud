@@ -65,8 +65,7 @@ resource "opentelekomcloud_compute_instance_v2" "debian_ecs" {
 
 ### Full Examples
 
- - [Have a look here for basic examples](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/devel/examples/basic-examples/modules)
- - [and here for more advanced examples](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/master/examples)
+ - [Have a look here for examples](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/devel/examples)
 
 Don't forget to fill in the required variables.
 
