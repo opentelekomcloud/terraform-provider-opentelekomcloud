@@ -325,7 +325,7 @@ func ResourceObsBucket() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"kms_key_id": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 						},
 						"algorithm": {
 							Type:     schema.TypeString,

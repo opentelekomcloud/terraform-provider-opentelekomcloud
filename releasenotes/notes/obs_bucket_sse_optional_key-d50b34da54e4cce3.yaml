@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[OBS]** Make ``kms_key_id`` optional in ``server_side_encryption`` for ``resource/opentelekomcloud_obs_bucket`` to allow using the default master key (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
