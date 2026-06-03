@@ -138,7 +138,20 @@ resource "opentelekomcloud_obs_bucket" "b" {
 }
 ```
 
-### Using server side encryption for the bucket
+### Using server side encryption with default KMS key
+
+```hcl
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket = "my-bucket"
+  acl    = "private"
+
+  server_side_encryption {
+    algorithm = "kms"
+  }
+}
+```
+
+### Using server side encryption with custom KMS key
 
 ```hcl
 resource "opentelekomcloud_obs_bucket" "bucket" {
@@ -575,7 +588,7 @@ The `server_side_encryption` object supports the following
 
 * `algorithm` - (Required) The algorithm used for SSE. Only `kms` is supported.
 
-* `kms_key_id` - (Required) The ID of KMS key used for the encryption.
+* `kms_key_id` - (Optional) The ID of KMS key used for the encryption. If not specified, the default master key will be used.
 
 * `kms_project_id` - (Optional) The ID of the project where the KMS master key belongs.
 
