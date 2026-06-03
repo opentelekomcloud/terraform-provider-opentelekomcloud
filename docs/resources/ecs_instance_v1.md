@@ -245,6 +245,9 @@ The following arguments are supported:
 
 * `name` - (Required, String) A unique name for the instance.
 
+* `description` - (Optional, String) A description of the instance.
+  The value consists of 0 to 85 characters. Angle brackets (`<>`) are not allowed.
+
 * `image_id` - (Required, String, ForceNew) The ID of the desired image for the server. Changing this creates a new server.
 
 * `flavor` - (Required, String) The name of the desired flavor for the server.

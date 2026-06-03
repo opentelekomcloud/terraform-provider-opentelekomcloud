@@ -53,6 +53,12 @@ func ResourceEcsInstanceV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"description": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringLenBetween(0, 85),
+			},
 			"image_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -330,6 +336,10 @@ func resourceEcsInstanceV1Create(ctx context.Context, d *schema.ResourceData, me
 		SchedulerHints:   resourceInstanceOsSchedulerHints(d),
 	}
 
+	if v, ok := d.GetOk("description"); ok {
+		createOpts.Description = pointerto.String(v.(string))
+	}
+
 	if v, ok := d.GetOk("tpm_enabled"); ok {
 		createOpts.SecurityOptions = &cloudservers.SecurityOptions{
 			TpmEnabled: pointerto.Bool(v.(bool)),
@@ -420,6 +430,7 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 
 	mErr := multierror.Append(
 		d.Set("name", server.Name),
+		d.Set("description", server.Description),
 		d.Set("image_id", server.Image.ID),
 		d.Set("flavor", server.Flavor.ID),
 		d.Set("password", d.Get("password")),
@@ -533,14 +544,21 @@ func resourceEcsInstanceV1Update(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %w", err)
 	}
 
-	var updateOpts servers.UpdateOpts
-	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
-	}
-
-	if updateOpts != (servers.UpdateOpts{}) {
-		_, err := servers.Update(client, d.Id(), updateOpts).Extract()
+	if d.HasChanges("name", "description") {
+		computeV1Client, err := config.ComputeV1Client(config.GetRegion(d))
 		if err != nil {
+			return fmterr.Errorf(errCreateClient, err)
+		}
+
+		updateOpts := cloudservers.UpdateOpts{}
+		if d.HasChange("name") {
+			updateOpts.Name = d.Get("name").(string)
+		}
+		if d.HasChange("description") {
+			updateOpts.Description = pointerto.String(d.Get("description").(string))
+		}
+
+		if _, err := cloudservers.Update(computeV1Client, d.Id(), updateOpts); err != nil {
 			return fmterr.Errorf("error updating OpenTelekomCloud server: %w", err)
 		}
 	}
