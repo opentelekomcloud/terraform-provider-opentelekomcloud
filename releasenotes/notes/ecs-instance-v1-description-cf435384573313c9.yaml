@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[ECS]** Add ``description`` attribute to ``resource/opentelekomcloud_ecs_instance_v1`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
