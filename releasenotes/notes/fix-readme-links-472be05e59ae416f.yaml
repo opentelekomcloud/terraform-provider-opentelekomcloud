@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    Fix broken links to examples in ``README.md`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
