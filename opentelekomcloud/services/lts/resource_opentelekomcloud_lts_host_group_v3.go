@@ -2,7 +2,6 @@ package lts
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -152,7 +151,7 @@ func resourceHostGroupV3Read(ctx context.Context, d *schema.ResourceData, meta i
 
 	requestResp, err := hg.List(client, hg.ListOpts{})
 	if err != nil {
-		return diag.FromErr(err)
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud LTS v3 host group")
 	}
 	var groupResult hg.HostGroupResponse
 
@@ -163,7 +162,8 @@ func resourceHostGroupV3Read(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 	if groupResult.ID == "" {
-		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 host group by its ID (%s)", d.Id()))
+		d.SetId("")
+		return nil
 	}
 	tagsMap := make(map[string]string)
 	for _, tag := range groupResult.Tags {

@@ -2,7 +2,6 @@ package lts
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -379,7 +378,7 @@ func resourceKeywordsAlarmRuleV2Read(ctx context.Context, d *schema.ResourceData
 
 	requestResp, err := alarm.ListKeywordRules(client)
 	if err != nil {
-		return diag.FromErr(err)
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud LTS v2 alarm keyword rule")
 	}
 	var keywordResult alarm.KeywordRule
 	for _, kw := range requestResp {
@@ -389,7 +388,8 @@ func resourceKeywordsAlarmRuleV2Read(ctx context.Context, d *schema.ResourceData
 		}
 	}
 	if keywordResult.ID == "" {
-		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 alarm keyword rule by its ID (%s)", d.Id()))
+		d.SetId("")
+		return nil
 	}
 
 	mErr := multierror.Append(nil,

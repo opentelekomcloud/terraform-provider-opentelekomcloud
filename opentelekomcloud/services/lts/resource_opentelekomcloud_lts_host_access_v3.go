@@ -325,7 +325,7 @@ func resourceHostAccessConfigV3Read(ctx context.Context, d *schema.ResourceData,
 
 	requestResp, err := ac.List(client, ac.ListOpts{})
 	if err != nil {
-		return diag.FromErr(err)
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud LTS v3 host access config")
 	}
 	var configResult ac.AccessConfigInfo
 	for _, acc := range requestResp.Result {
@@ -335,7 +335,8 @@ func resourceHostAccessConfigV3Read(ctx context.Context, d *schema.ResourceData,
 		}
 	}
 	if configResult.ID == "" {
-		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 host access config by its ID (%s)", d.Id()))
+		d.SetId("")
+		return nil
 	}
 	tagsMap := make(map[string]string)
 	for _, tag := range configResult.Tags {
