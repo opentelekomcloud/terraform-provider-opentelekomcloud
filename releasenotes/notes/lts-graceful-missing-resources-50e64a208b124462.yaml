@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[LTS]** Handle missing LTS resources gracefully for LTS resources (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[LTS]** Handle missing LTS resources gracefully for LTS resources (`#3410 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3410>`_)
