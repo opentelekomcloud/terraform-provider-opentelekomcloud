@@ -96,6 +96,10 @@ func DataSourceVpcSubnetV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"subnet_id_v6": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"network_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -153,6 +157,7 @@ func dataSourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("availability_zone", subnet.AvailabilityZone),
 		d.Set("vpc_id", subnet.VpcID),
 		d.Set("subnet_id", subnet.SubnetID),
+		d.Set("subnet_id_v6", subnet.SubnetIDV6),
 		d.Set("network_id", subnet.NetworkID),
 		d.Set("ipv6_enable", subnet.EnableIpv6),
 		d.Set("cidr_ipv6", subnet.CidrV6),
