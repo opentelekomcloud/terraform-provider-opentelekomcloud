@@ -67,4 +67,6 @@ the selected subnet.
 
 * `subnet_id` - Specifies the OpenStack subnet ID.
 
+* `subnet_id_v6` - Specifies the OpenStack IPv6 subnet ID. Only returned if subnet is IPV6 enabled.
+
 * `network_id` - Specifies the OpenStack network ID.
