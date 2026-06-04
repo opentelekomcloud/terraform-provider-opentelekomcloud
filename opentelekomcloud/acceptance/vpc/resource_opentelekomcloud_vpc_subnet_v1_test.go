@@ -115,6 +115,7 @@ func TestAccVpcSubnetV1Ipv6(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVpcSubnetV1Exists(resourceVPCSubnetName, &subnet),
 					resource.TestCheckResourceAttr(resourceVPCSubnetName, "ipv6_enable", "true"),
+					resource.TestCheckResourceAttrSet(resourceVPCSubnetName, "subnet_id_v6"),
 				),
 			},
 		},
