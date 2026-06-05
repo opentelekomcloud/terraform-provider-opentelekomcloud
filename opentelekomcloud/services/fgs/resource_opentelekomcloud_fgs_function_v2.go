@@ -130,12 +130,10 @@ func ResourceFgsFunctionV2() *schema.Resource {
 			"initializer_handler": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 			},
 			"initializer_timeout": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
 			},
 			"enterprise_project_id": {
 				Type:     schema.TypeString,

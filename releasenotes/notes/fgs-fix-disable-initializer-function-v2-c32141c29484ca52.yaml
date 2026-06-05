@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[FGS]** Allow disabling function initialization by removing the `initializer_handler` and `initializer_timeout` arguments from
+    ``resource/opentelekomcloud_fgs_function_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)

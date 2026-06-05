@@ -295,6 +295,7 @@ The following arguments are supported:
 * `description` - (Optional, String) Specifies the description of the function.
 
 * `initializer_handler` - (Optional, String) Specifies the initializer of the function.
+  Removing this argument (together with `initializer_timeout`) disables the function initialization.
 
 * `initializer_timeout` - (Optional, Int) Specifies the maximum duration the function can be initialized. Value range:
   1s to 300s.

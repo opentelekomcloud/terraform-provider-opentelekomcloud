@@ -162,7 +162,7 @@ func TestAccFgsV2Function_createByImage(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					rc1.CheckResourceExists(),
 					resource.TestCheckResourceAttr(rName1, "name", randName+"_1"),
-					resource.TestCheckResourceAttr(rName1, "agency", "functiongraph_swr_trust"),
+					resource.TestCheckResourceAttr(rName1, "agency", "fg_agency"),
 					resource.TestCheckResourceAttr(rName1, "runtime", "Custom Image"),
 					resource.TestCheckResourceAttr(rName1, "handler", "-"),
 					resource.TestCheckResourceAttr(rName1, "custom_image.0.url", common.OTC_BUILD_IMAGE_URL),
@@ -171,7 +171,7 @@ func TestAccFgsV2Function_createByImage(t *testing.T) {
 					resource.TestCheckResourceAttrSet(rName1, "peering_cidr"),
 					rc2.CheckResourceExists(),
 					resource.TestCheckResourceAttr(rName2, "name", randName+"_2"),
-					resource.TestCheckResourceAttr(rName2, "agency", "functiongraph_swr_trust"),
+					resource.TestCheckResourceAttr(rName2, "agency", "fg_agency"),
 					resource.TestCheckResourceAttr(rName2, "runtime", "Custom Image"),
 					resource.TestCheckResourceAttr(rName2, "handler", "-"),
 					resource.TestCheckResourceAttr(rName2, "custom_image.0.url", common.OTC_BUILD_IMAGE_URL),
@@ -455,7 +455,7 @@ resource "opentelekomcloud_fgs_function_v2" "create_with_vpc_access" {
   memory_size = 128
   runtime     = "Custom Image"
   timeout     = 3
-  agency      = "functiongraph_swr_trust"
+  agency      = "fg_agency"
   code_type   = "Custom-Image-Swr"
 
   custom_image {
@@ -474,7 +474,7 @@ resource "opentelekomcloud_fgs_function_v2" "create_without_vpc_access" {
   memory_size = 128
   runtime     = "Custom Image"
   timeout     = 3
-  agency      = "functiongraph_swr_trust"
+  agency      = "fg_agency"
   code_type   = "Custom-Image-Swr"
 
   custom_image {
@@ -499,7 +499,7 @@ resource "opentelekomcloud_fgs_function_v2" "create_with_vpc_access" {
   memory_size = 128
   runtime     = "Custom Image"
   timeout     = 3
-  agency      = "functiongraph_swr_trust"
+  agency      = "fg_agency"
   code_type   = "Custom-Image-Swr"
 
   custom_image {
@@ -518,7 +518,7 @@ resource "opentelekomcloud_fgs_function_v2" "create_without_vpc_access" {
   memory_size = 128
   runtime     = "Custom Image"
   timeout     = 3
-  agency      = "functiongraph_swr_trust"
+  agency      = "fg_agency"
   code_type   = "Custom-Image-Swr"
 
   custom_image {
@@ -1111,4 +1111,116 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
   enable_class_isolation = true
 }
 `, name)
+}
+
+func TestAccFgsV2Function_initializer(t *testing.T) {
+	var f function.FuncGraph
+	randName := fmt.Sprintf("fgs-acc-%s", acctest.RandString(5))
+	resourceName := "opentelekomcloud_fgs_function_v2.test"
+
+	rc := common.InitResourceCheck(
+		resourceName,
+		&f,
+		getResourceObj,
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFgsV2Function_initializer(randName),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceName, "initializer_handler", "index.initializer"),
+					resource.TestCheckResourceAttr(resourceName, "initializer_timeout", "30"),
+				),
+			},
+			{
+				// Removing the initializer arguments must disable the function initialization.
+				Config: testAccFgsV2Function_initializerDisabled(randName),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceName, "initializer_handler", ""),
+					resource.TestCheckResourceAttr(resourceName, "initializer_timeout", "0"),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"app",
+					"func_code",
+				},
+			},
+		},
+	})
+}
+
+func testAccFgsV2Function_initializer(rName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_fgs_function_v2" "test" {
+  name                = "%s"
+  app                 = "default"
+  description         = "function initializer test"
+  handler             = "index.handler"
+  memory_size         = 128
+  timeout             = 3
+  runtime             = "Python2.7"
+  code_type           = "inline"
+  initializer_handler = "index.initializer"
+  initializer_timeout = 30
+
+  func_code = <<EOF
+# -*- coding:utf-8 -*-
+import json
+def initializer(context):
+    return
+
+def handler (event, context):
+    return {
+        "statusCode": 200,
+        "isBase64Encoded": False,
+        "body": json.dumps(event),
+        "headers": {
+            "Content-Type": "application/json"
+        }
+    }
+EOF
+}
+`, rName)
+}
+
+func testAccFgsV2Function_initializerDisabled(rName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_fgs_function_v2" "test" {
+  name        = "%s"
+  app         = "default"
+  description = "function initializer test"
+  handler     = "index.handler"
+  memory_size = 128
+  timeout     = 3
+  runtime     = "Python2.7"
+  code_type   = "inline"
+
+  func_code = <<EOF
+# -*- coding:utf-8 -*-
+import json
+def initializer(context):
+    return
+
+def handler (event, context):
+    return {
+        "statusCode": 200,
+        "isBase64Encoded": False,
+        "body": json.dumps(event),
+        "headers": {
+            "Content-Type": "application/json"
+        }
+    }
+EOF
+}
+`, rName)
 }
