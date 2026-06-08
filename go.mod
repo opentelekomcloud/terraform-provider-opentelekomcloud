@@ -68,3 +68,7 @@ require (
 	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 )
+
+// DEV SHIM: build against the local SDK checkout until the sso_type change
+// is released upstream. Replace with a proper version bump before merging.
+replace github.com/opentelekomcloud/gophertelekomcloud => ../gophertelekomcloud

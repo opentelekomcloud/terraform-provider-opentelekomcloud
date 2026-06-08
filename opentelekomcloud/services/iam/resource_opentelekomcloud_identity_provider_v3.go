@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/federation/providers"
 
@@ -39,6 +40,15 @@ func ResourceIdentityProviderV3() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"sso_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					ssoTypeVirtualUser, ssoTypeIAMUser,
+				}, false),
+			},
 
 			"remote_ids": {
 				Type:     schema.TypeSet,
@@ -66,6 +76,7 @@ func resourceIdentityProviderV3Create(ctx context.Context, d *schema.ResourceDat
 		ID:          d.Get("name").(string),
 		Description: d.Get("description").(string),
 		Enabled:     d.Get("enabled").(bool),
+		SSOType:     d.Get("sso_type").(string),
 	}
 
 	p, err := providers.Create(client, opts).Extract()
@@ -98,6 +109,7 @@ func resourceIdentityProviderV3Read(_ context.Context, d *schema.ResourceData, m
 		d.Set("name", p.ID),
 		d.Set("description", p.Description),
 		d.Set("enabled", p.Enabled),
+		d.Set("sso_type", p.SSOType),
 		d.Set("remote_ids", p.RemoteIDs),
 		d.Set("links", p.Links),
 	)
@@ -150,3 +162,8 @@ func resourceIdentityProviderV3Delete(_ context.Context, d *schema.ResourceData,
 }
 
 const providerError = "error %s identity provider v3: %w"
+
+const (
+	ssoTypeVirtualUser = "virtual_user_sso"
+	ssoTypeIAMUser     = "iam_user_sso"
+)
