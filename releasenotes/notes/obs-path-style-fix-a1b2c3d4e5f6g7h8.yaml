@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **OBS:** Use path-style addressing for OBS client to fix TLS certificate validation for bucket names containing dots (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
