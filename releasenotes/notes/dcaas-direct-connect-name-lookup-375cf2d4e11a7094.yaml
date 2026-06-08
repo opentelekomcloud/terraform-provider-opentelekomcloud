@@ -1,0 +1,8 @@
+---
+enhancements:
+  - |
+    **[DCAAS]** Data source ``opentelekomcloud_direct_connect_v2`` now supports
+    looking up a connection by ``name`` as an alternative to ``id``. Exactly one
+    of the two must be specified, and the lookup returns an error when no
+    connection matches the name or when more than one connection shares it.
+    (`#3402 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3402>`_)

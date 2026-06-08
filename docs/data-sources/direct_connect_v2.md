@@ -18,15 +18,26 @@ Example usage
 -----------------
 
 ```hcl
+# Look up by ID
 data "opentelekomcloud_direct_connect_v2" "direct_connect" {
   id = "direct_connect_id"
+}
+
+# Look up by name
+data "opentelekomcloud_direct_connect_v2" "direct_connect" {
+  name = "direct_connect_name"
 }
 ```
 
 
 ## Argument Reference
 
-- `id` (String) - Specifies the direct connection ID.
+The following arguments are supported. Exactly one of `id` or `name` must be specified.
+
+* `id` - (Optional, String) Specifies the direct connection ID.
+* `name` - (Optional, String) Specifies the connection name. The lookup fails if the name does not
+  match exactly one connection: an error is returned when no connection matches and when more than
+  one connection shares the name.
 
 ## Attributes Reference
 * `bandwidth` (Number) - Specifies the bandwidth of the connection in Mbit/s.
@@ -39,7 +50,6 @@ data "opentelekomcloud_direct_connect_v2" "direct_connect" {
 * `device_id` (String) - Specifies the gateway device ID of the connection.
 * `hosting_id` (String) - Specifies the ID of the operations connection on which the hosted connection is created.
 * `interface_name` (String) - Specifies the name of the interface accessed by the connection.
-* `name` (String) - Specifies the connection name.
 * `order_id` (String) - Specifies the connection order ID, which is used to support duration-based billing and identify user orders.
 * `peer_location` (String) - Specifies the physical location of the peer device accessed by the connection, specific to the street or data center name.
 * `product_id` (String) - Specifies the product ID corresponding to the connection's order, which is used to custom billing policies such as duration-based packages.
@@ -57,7 +67,6 @@ data "opentelekomcloud_direct_connect_v2" "direct_connect" {
 * `create_time` (String) - Specifies the time when the connection is created.
 * `delete_time` (String) - Specifies the time when the connection was deleted.
 * `email` (String) - This is a reserved field, which is not used currently.
-* `id` (String) - Specifies the connection ID.
 * `lag_id` (String) - This is a reserved field, which is not used currently.
 * `last_onestop_product_id` (String) - This is a reserved field, which is not used currently.
 * `mobile` (String) - This is a reserved field, which is not used currently.
