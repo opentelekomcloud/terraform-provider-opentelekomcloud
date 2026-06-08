@@ -71,10 +71,9 @@ func ResourceNatSnatRuleV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"floating_ip_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IsUUID,
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 		},
 	}
