@@ -976,6 +976,73 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 `, randInt)
 }
 
+func TestAccObsBucket_dotBucketName(t *testing.T) {
+	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_obs_bucket.bucket"
+	bucketName := testAccObsBucketDotBucketName(rInt)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObsBucketDotName(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "bucket", bucketName),
+					resource.TestCheckResourceAttr(resourceName, "acl", "private"),
+					resource.TestCheckResourceAttr(resourceName, "storage_class", "STANDARD"),
+				),
+			},
+			{
+				Config: testAccObsBucketDotNameUpdate(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "bucket", bucketName),
+					resource.TestCheckResourceAttr(resourceName, "acl", "public-read"),
+					resource.TestCheckResourceAttr(resourceName, "storage_class", "WARM"),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+				},
+			},
+		},
+	})
+}
+
+func testAccObsBucketDotBucketName(randInt int) string {
+	return fmt.Sprintf("tf-test.bucket.%d", randInt)
+}
+
+func testAccObsBucketDotName(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket        = "tf-test.bucket.%d"
+  storage_class = "STANDARD"
+  acl           = "private"
+  force_destroy = true
+}
+`, randInt)
+}
+
+func testAccObsBucketDotNameUpdate(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket        = "tf-test.bucket.%d"
+  storage_class = "WARM"
+  acl           = "public-read"
+  force_destroy = true
+  versioning    = true
+}
+`, randInt)
+}
+
 func testAccObsBucketUserDomainNamesUpdate(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
