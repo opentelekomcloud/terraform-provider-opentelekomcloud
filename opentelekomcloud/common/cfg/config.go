@@ -664,7 +664,7 @@ func (c *Config) NewObjectStorageClient(region string) (*obs.ObsClient, error) {
 
 	return obs.New(
 		cred.AccessKey, cred.SecretKey, client.Endpoint,
-		obs.WithSecurityToken(cred.SecurityToken), obs.WithSignature(obs.SignatureObs), obs.WithSslVerify(!c.Insecure), obs.WithPathStyle(!c.Insecure), proxyConfigure,
+		obs.WithSecurityToken(cred.SecurityToken), obs.WithSignature(obs.SignatureObs), obs.WithSslVerify(!c.Insecure), proxyConfigure,
 	)
 }
 
