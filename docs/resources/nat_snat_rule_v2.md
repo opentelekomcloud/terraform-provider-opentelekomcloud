@@ -57,7 +57,7 @@ The following arguments are supported:
   the value of `source_type` is `1`, the CIDR block must be a CIDR block of Direct Connect
   and cannot conflict with the VPC CIDR blocks. Changing this creates a new snat rule.
 
-* `floating_ip_id` - (Required) ID of the floating ip this snat rule connects to.
+* `floating_ip_id` - (Required) ID of the floating ip this snat rule connects to. Multiple IDs can be passed separated by commas, for e.g., `"id_1,id_2"`. Maximum number of IDs: 20. Maximum length: 4096.
   Changing this creates a new snat rule.
 
 * `description` - (Optional) Provides supplementary information about the SNAT rule.
