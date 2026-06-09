@@ -141,11 +141,11 @@ func testHostGroup_labelWithHosts(name, clusterID, env string) string {
 variable "tags" {
   type = map(string)
   default = {
-    Environment  = "%[3]s"
-    ManagedBy    = "terraform"
-    Project      = "test"
-    Purpose      = "development"
-    Team         = "terraform"
+    Environment = "%[3]s"
+    ManagedBy   = "terraform"
+    Project     = "test"
+    Purpose     = "development"
+    Team        = "terraform"
   }
 }
 
