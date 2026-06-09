@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -94,6 +95,72 @@ func TestAccHostGroup_basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccHostGroup_labelUpdateTags(t *testing.T) {
+	clusterID := os.Getenv("OS_CLUSTER_ID")
+	if clusterID == "" {
+		t.Skip("OS_CLUSTER_ID must be set for this acceptance test")
+	}
+	var (
+		group hg.HostGroupResponse
+		rName = "opentelekomcloud_lts_host_group_v3.hg"
+		name  = fmt.Sprintf("lts_group%s", acctest.RandString(3))
+		rc    = common.InitResourceCheck(rName, &group, getHostGroupResourceFunc)
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testHostGroup_labelWithHosts(name, clusterID, "dev"),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(rName, "type", "linux"),
+					resource.TestCheckResourceAttr(rName, "agent_access_type", "LABEL"),
+					resource.TestCheckResourceAttr(rName, "tags.Environment", "dev"),
+				),
+			},
+			{
+				Config: testHostGroup_labelWithHosts(name, clusterID, "prod"),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(rName, "tags.Environment", "prod"),
+				),
+			},
+		},
+	})
+}
+
+func testHostGroup_labelWithHosts(name, clusterID, env string) string {
+	return fmt.Sprintf(`
+variable "tags" {
+  type = map(string)
+  default = {
+    Environment  = "%[3]s"
+    ManagedBy    = "terraform"
+    Project      = "test"
+    Purpose      = "development"
+    Team         = "terraform"
+  }
+}
+
+resource "opentelekomcloud_lts_host_group_v3" "hg" {
+  name              = "k8s-log-%[2]s"
+  type              = "linux"
+  agent_access_type = "LABEL"
+  labels            = toset(["k8s-log-%[2]s"])
+  tags              = var.tags
+
+  lifecycle {
+    ignore_changes = [host_ids]
+  }
+}
+`, name, clusterID, env)
 }
 
 func testHostGroup_basic(name string) string {

@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[LTS]** Fix tags update for ``resource/opentelekomcloud_lts_host_group_v3`` when ``agent_access_type`` is ``LABEL`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
