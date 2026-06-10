@@ -2,7 +2,6 @@ package lts
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -152,7 +151,7 @@ func resourceHostGroupV3Read(ctx context.Context, d *schema.ResourceData, meta i
 
 	requestResp, err := hg.List(client, hg.ListOpts{})
 	if err != nil {
-		return diag.FromErr(err)
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud LTS v3 host group")
 	}
 	var groupResult hg.HostGroupResponse
 
@@ -163,7 +162,8 @@ func resourceHostGroupV3Read(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 	if groupResult.ID == "" {
-		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 host group by its ID (%s)", d.Id()))
+		d.SetId("")
+		return nil
 	}
 	tagsMap := make(map[string]string)
 	for _, tag := range groupResult.Tags {
@@ -202,34 +202,40 @@ func resourceHostGroupV3Update(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if d.HasChanges(updateHostGroupChanges...) {
-		if v, ok := d.GetOk("host_ids"); ok {
-			stateConf := &resource.StateChangeConf{
-				Pending: []string{"pending"},
-				Target:  []string{"running"},
-				Refresh: waitForHostActive(client, common.ExpandToStringListBySet(v.(*schema.Set))),
-				Timeout: d.Timeout(schema.TimeoutCreate),
-				Delay:   10 * time.Second,
-			}
-
-			_, err := stateConf.WaitForStateContext(ctx)
-			if err != nil {
-				return fmterr.Errorf("error waiting for OpenTelekomCloud ECS host icagent to be active: %w", err)
-			}
-		}
-		h := common.ExpandToStringListBySet(d.Get("host_ids").(*schema.Set))
-		tagSlice := ltsTags(d)
-		if tagSlice == nil {
-			tagSlice = []tags.ResourceTag{}
-		}
-		l := common.ExpandToStringListBySet(d.Get("labels").(*schema.Set))
 		updateOpts := hg.UpdateLogGroupOpts{
-			ID:         d.Id(),
-			HostIdList: &h,
-			Labels:     &l,
-			Tags:       &tagSlice,
+			ID: d.Id(),
+		}
+		if d.HasChange("host_ids") {
+			if v, ok := d.GetOk("host_ids"); ok {
+				stateConf := &resource.StateChangeConf{
+					Pending: []string{"pending"},
+					Target:  []string{"running"},
+					Refresh: waitForHostActive(client, common.ExpandToStringListBySet(v.(*schema.Set))),
+					Timeout: d.Timeout(schema.TimeoutCreate),
+					Delay:   10 * time.Second,
+				}
+
+				_, err := stateConf.WaitForStateContext(ctx)
+				if err != nil {
+					return fmterr.Errorf("error waiting for OpenTelekomCloud ECS host icagent to be active: %w", err)
+				}
+			}
+			h := common.ExpandToStringListBySet(d.Get("host_ids").(*schema.Set))
+			updateOpts.HostIdList = &h
 		}
 		if d.HasChange("name") {
 			updateOpts.Name = d.Get("name").(string)
+		}
+		if d.HasChange("tags") {
+			tagSlice := ltsTags(d)
+			if tagSlice == nil {
+				tagSlice = []tags.ResourceTag{}
+			}
+			updateOpts.Tags = &tagSlice
+		}
+		if d.HasChange("labels") || d.Get("agent_access_type").(string) == "LABEL" {
+			l := common.ExpandToStringListBySet(d.Get("labels").(*schema.Set))
+			updateOpts.Labels = &l
 		}
 		_, err = hg.Update(client, updateOpts)
 		if err != nil {

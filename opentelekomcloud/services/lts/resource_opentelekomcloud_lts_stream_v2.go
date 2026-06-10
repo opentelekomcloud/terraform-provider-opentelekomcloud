@@ -116,7 +116,7 @@ func resourceStreamV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 
 	requestResp, err := streams.List(client, d.Get("group_id").(string))
 	if err != nil {
-		return diag.FromErr(err)
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud LTS v2 log stream")
 	}
 	var streamResult streams.LogStream
 
@@ -127,7 +127,8 @@ func resourceStreamV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 	if streamResult.LogStreamId == "" {
-		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 log stream by its ID (%s)", d.Id()))
+		d.SetId("")
+		return nil
 	}
 
 	mErr := multierror.Append(nil,

@@ -3,7 +3,9 @@ package nat
 import (
 	"context"
 	"log"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -71,10 +73,22 @@ func ResourceNatSnatRuleV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"floating_ip_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IsUUID,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					oldIds := strings.Split(old, ",")
+					newIds := strings.Split(new, ",")
+					for i, id := range oldIds {
+						oldIds[i] = strings.TrimSpace(id)
+					}
+					for i, id := range newIds {
+						newIds[i] = strings.TrimSpace(id)
+					}
+					sort.Strings(oldIds)
+					sort.Strings(newIds)
+					return strings.Join(oldIds, ",") == strings.Join(newIds, ",")
+				},
 			},
 		},
 	}
@@ -140,10 +154,17 @@ func resourceNatSnatRuleV2Read(_ context.Context, d *schema.ResourceData, meta i
 		return common.CheckDeletedDiag(d, err, "Snat Rule")
 	}
 
+	ids := strings.Split(snatRule.FloatingIPID, ",")
+	for i, id := range ids {
+		ids[i] = strings.TrimSpace(id)
+	}
+	sort.Strings(ids)
+	fipId := strings.Join(ids, ",")
+
 	mErr := multierror.Append(
 		d.Set("nat_gateway_id", snatRule.NatGatewayID),
 		d.Set("network_id", snatRule.NetworkID),
-		d.Set("floating_ip_id", snatRule.FloatingIPID),
+		d.Set("floating_ip_id", fipId),
 		d.Set("cidr", snatRule.Cidr),
 		d.Set("region", config.GetRegion(d)),
 		d.Set("description", snatRule.Description),

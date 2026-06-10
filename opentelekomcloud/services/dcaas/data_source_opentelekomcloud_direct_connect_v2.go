@@ -3,6 +3,7 @@ package dcaas
 import (
 	"context"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -200,20 +201,58 @@ func DataSourceDirectConnectV2() *schema.Resource {
 }
 
 func dataSourceDirectConnectV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	idVal, idSet := d.GetOk("id")
+	nameVal, nameSet := d.GetOk("name")
+	switch {
+	case idSet && nameSet:
+		return fmterr.Errorf("only one of `id` or `name` can be specified")
+	case !idSet && !nameSet:
+		return fmterr.Errorf("one of `id` or `name` must be specified")
+	}
+
 	config := meta.(*cfg.Config)
 	client, err := config.DCaaSV2Client(config.GetRegion(d))
 	if err != nil {
 		return fmterr.Errorf(errCreateClientV2, err)
 	}
 
-	var ID string
-	if v, ok := d.GetOk("id"); ok {
-		ID = v.(string)
-	}
+	var directConnect *dcaas.DirectConnect
+	if idSet {
+		directConnect, err = dcaas.Get(client, idVal.(string))
+		if err != nil {
+			return fmterr.Errorf("error reading direct connect: %s", err)
+		}
+	} else {
+		name := nameVal.(string)
+		// dcaas.List hardcodes a `?id=` query parameter; calling it with an empty
+		// id filters on id == "" and returns nothing. Query the collection endpoint
+		// without that filter so the name match below sees every direct connect.
+		var listResp struct {
+			DirectConnects []dcaas.DirectConnect `json:"direct_connects"`
+		}
+		if _, err = client.Get(client.ServiceURL("dcaas", "direct-connects"), &listResp, nil); err != nil {
+			return fmterr.Errorf("error listing direct connects: %s", err)
+		}
 
-	directConnect, err := dcaas.Get(client, ID)
-	if err != nil {
-		return fmterr.Errorf("error reading direct connect: %s", err)
+		var filtered []dcaas.DirectConnect
+		for _, connection := range listResp.DirectConnects {
+			if connection.Name == name {
+				filtered = append(filtered, connection)
+			}
+		}
+
+		if len(filtered) < 1 {
+			return fmterr.Errorf("your query returned no results. Please change your search criteria and try again")
+		}
+		if len(filtered) > 1 {
+			ids := make([]string, len(filtered))
+			for i, connection := range filtered {
+				ids[i] = connection.ID
+			}
+			return fmterr.Errorf("your query returned more than one result: %d direct connects match name %q (IDs: %s). "+
+				"Please query by `id` to select a specific one", len(filtered), name, strings.Join(ids, ", "))
+		}
+		directConnect = &filtered[0]
 	}
 	log.Printf("[DEBUG] Direct Connect read result: %#v", directConnect)
 

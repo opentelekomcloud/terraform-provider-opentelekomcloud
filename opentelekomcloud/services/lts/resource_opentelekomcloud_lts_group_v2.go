@@ -2,7 +2,6 @@ package lts
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -103,7 +102,8 @@ func resourceLtsGroupV2Read(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 	if groupResult.LogGroupId == "" {
-		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 log group by its ID (%s)", d.Id()))
+		d.SetId("")
+		return nil
 	}
 
 	mErr := multierror.Append(nil,

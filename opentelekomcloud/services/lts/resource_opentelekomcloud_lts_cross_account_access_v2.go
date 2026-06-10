@@ -2,7 +2,6 @@ package lts
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -158,7 +157,7 @@ func resourceCrossAccountAccessV2Read(ctx context.Context, d *schema.ResourceDat
 
 	requestResp, err := ac.List(client, ac.ListOpts{})
 	if err != nil {
-		return diag.FromErr(err)
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud LTS v3 cross account access config")
 	}
 	var configResult ac.AccessConfigInfo
 	for _, acc := range requestResp.Result {
@@ -167,7 +166,8 @@ func resourceCrossAccountAccessV2Read(ctx context.Context, d *schema.ResourceDat
 		}
 	}
 	if configResult.ID == "" {
-		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v3 cross account access config by its ID (%s)", d.Id()))
+		d.SetId("")
+		return nil
 	}
 	tagsMap := make(map[string]string)
 	for _, tag := range configResult.Tags {

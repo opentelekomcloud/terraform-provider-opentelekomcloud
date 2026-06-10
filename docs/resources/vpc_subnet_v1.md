@@ -127,6 +127,8 @@ All the argument attributes are also exported as result attributes:
 
 * `subnet_id` - Specifies the OpenStack subnet ID.
 
+* `subnet_id_v6` - Specifies the OpenStack IPv6 subnet ID. Only returned if subnet is IPV6 enabled.
+
 * `network_id` - Specifies the OpenStack network ID.
 
 * `cidr_v6` - Specifies the IPv6 subnet CIDR block. If the subnet is an IPv4 subnet, this parameter is not returned.

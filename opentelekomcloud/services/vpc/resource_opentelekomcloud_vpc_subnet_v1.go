@@ -78,7 +78,6 @@ func ResourceVpcSubnetV1() *schema.Resource {
 			"ipv6_enable": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: true,
 			},
 			"primary_dns": {
 				Type:         schema.TypeString,
@@ -114,6 +113,10 @@ func ResourceVpcSubnetV1() *schema.Resource {
 				Optional: true,
 			},
 			"subnet_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"subnet_id_v6": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -234,6 +237,7 @@ func resourceVpcSubnetV1Read(ctx context.Context, d *schema.ResourceData, meta i
 		d.Set("availability_zone", subnet.AvailabilityZone),
 		d.Set("vpc_id", subnet.VpcID),
 		d.Set("subnet_id", subnet.SubnetID),
+		d.Set("subnet_id_v6", subnet.SubnetIDV6),
 		d.Set("network_id", subnet.NetworkID),
 		d.Set("status", subnet.Status),
 		d.Set("region", config.GetRegion(d)),
@@ -287,6 +291,10 @@ func resourceVpcSubnetV1Update(ctx context.Context, d *schema.ResourceData, meta
 	if d.HasChange("dhcp_enable") {
 		enableDHCP := d.Get("dhcp_enable").(bool)
 		updateOpts.EnableDHCP = &enableDHCP
+	}
+	if d.HasChange("ipv6_enable") {
+		enableIPV6 := d.Get("ipv6_enable").(bool)
+		updateOpts.EnableIpv6 = &enableIPV6
 	}
 	if d.HasChange("ntp_addresses") {
 		var extraDhcpRequests []subnets.ExtraDHCPOpt

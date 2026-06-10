@@ -1,0 +1,6 @@
+---
+enhancements:
+  - |
+    **[VPC]** Add `subnet_id_v6` attribute in ``resource/opentelekomcloud_vpc_subnet_v1`` (`#3412 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3412>`_)
+  - |
+    **[VPC]** Add `subnet_id_v6` attribute in ``data/opentelekomcloud_vpc_subnet_v1`` (`#3412 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3412>`_)

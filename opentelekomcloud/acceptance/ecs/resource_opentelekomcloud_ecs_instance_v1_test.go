@@ -48,6 +48,7 @@ func TestAccEcsV1InstanceBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "description", "ECS instance created by acc test"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "auto_recovery", "true"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "security_groups.#", "1"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tags.muh", "value-create"),
@@ -58,6 +59,7 @@ func TestAccEcsV1InstanceBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "description", "ECS instance updated by acc test"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "auto_recovery", "false"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "security_groups.#", "1"),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tags.muh", "value-update"),
@@ -527,10 +529,11 @@ resource "opentelekomcloud_compute_servergroup_v2" "sg_1" {
 }
 
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
-  name     = "server_1"
-  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
-  flavor   = "s2.medium.1"
-  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  name        = "server_1"
+  description = "ECS instance created by acc test"
+  image_id    = data.opentelekomcloud_images_image_v2.latest_image.id
+  flavor      = "s2.medium.1"
+  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
     network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -570,10 +573,11 @@ resource "opentelekomcloud_compute_servergroup_v2" "sg_1" {
 }
 
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
-  name     = "server_updated"
-  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
-  flavor   = "s2.medium.1"
-  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  name        = "server_updated"
+  description = "ECS instance updated by acc test"
+  image_id    = data.opentelekomcloud_images_image_v2.latest_image.id
+  flavor      = "s2.medium.1"
+  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
     network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id

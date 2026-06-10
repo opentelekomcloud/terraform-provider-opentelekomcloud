@@ -2,7 +2,6 @@ package lts
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -277,7 +276,7 @@ func resourceCceAccessConfigV3Read(ctx context.Context, d *schema.ResourceData, 
 
 	requestResp, err := ac.List(client, ac.ListOpts{})
 	if err != nil {
-		return diag.FromErr(err)
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud LTS v3 cce access config")
 	}
 	var configResult ac.AccessConfigInfo
 	for _, acc := range requestResp.Result {
@@ -287,7 +286,8 @@ func resourceCceAccessConfigV3Read(ctx context.Context, d *schema.ResourceData, 
 		}
 	}
 	if configResult.ID == "" {
-		return common.CheckDeletedDiag(d, err, fmt.Sprintf("unable to find OpenTelekomCloud LTS v2 cce access config by its ID (%s)", d.Id()))
+		d.SetId("")
+		return nil
 	}
 	tagsMap := make(map[string]string)
 	for _, tag := range configResult.Tags {
