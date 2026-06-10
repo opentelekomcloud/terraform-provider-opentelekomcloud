@@ -49,6 +49,7 @@ func TestAccCFWDomainNameGroupV1_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(domainNameResourceName, "name", "test-acc-tf-domain-group-updated"),
+					resource.TestCheckResourceAttr(domainNameResourceName, "domain_names.0.domain_name", "www.testaccupdated.com"),
 				),
 			},
 			{
@@ -115,7 +116,7 @@ resource "opentelekomcloud_cfw_domain_name_group_v1" "group_1" {
   object_id   = opentelekomcloud_cfw_firewall_v1.firewall_1.protect_objects.0.object_id
   name        = "test-acc-tf-domain-group-updated"
   domain_names {
-    domain_name = "www.testacctf.com"
+    domain_name = "www.testaccupdated.com"
   }
 }
 `
