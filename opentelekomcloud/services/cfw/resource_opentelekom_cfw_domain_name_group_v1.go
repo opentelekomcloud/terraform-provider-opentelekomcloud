@@ -2,6 +2,7 @@ package cfw
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -59,19 +60,16 @@ func ResourceCfwDomainNameGroupV1() *schema.Resource {
 			"domain_names": {
 				Type:     schema.TypeList,
 				Required: true,
-				ForceNew: true,
 				MinItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"domain_name": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: true,
 						},
 						"description": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 						},
 						"domain_address_id": {
 							Type:     schema.TypeString,
@@ -196,6 +194,12 @@ func resourceCFWDomainNameGroupV1Update(ctx context.Context, d *schema.ResourceD
 		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
+	if d.HasChange("domain_names") {
+		if err := updateDomainNames(client, d); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	firewallId := d.Get("firewall_id").(string)
 	updateOpts := group.UpdateOpts{
 		Name:        d.Get("name").(string),
@@ -271,4 +275,67 @@ func setRules(rulesInResp []group.UseRuleVO) []map[string]interface{} {
 		rules = append(rules, rule)
 	}
 	return rules
+}
+
+func updateDomainNames(client *golangsdk.ServiceClient, d *schema.ResourceData) error {
+	old, new := d.GetChange("domain_names")
+	firewallId := d.Get("firewall_id").(string)
+	oldList := old.([]interface{})
+	newList := new.([]interface{})
+
+	oldDomains := make(map[string]bool)
+	for _, v := range oldList {
+		domain := v.(map[string]interface{})
+		oldDomains[domain["domain_name"].(string)] = true
+	}
+
+	newDomains := make(map[string]bool)
+	for _, v := range newList {
+		domain := v.(map[string]interface{})
+		newDomains[domain["domain_name"].(string)] = true
+	}
+
+	var domainsToAdd []group.DomainSetInfoDto
+	for _, v := range newList {
+		domain := v.(map[string]interface{})
+		name := domain["domain_name"].(string)
+		if !oldDomains[name] {
+			domainName := group.DomainSetInfoDto{
+				DomainName:  name,
+				Description: domain["description"].(string),
+			}
+			domainsToAdd = append(domainsToAdd, domainName)
+		}
+	}
+	if len(domainsToAdd) > 0 {
+		if _, err := group.AddDomainNames(client, d.Id(), group.AddDomainNameListOpts{
+			FwInstanceID: firewallId,
+			ObjectID:     d.Get("object_id").(string),
+			DomainNames:  domainsToAdd,
+		}); err != nil {
+			return fmt.Errorf("error adding domains \n%#v\n: %w", domainsToAdd, err)
+		}
+	}
+
+	currentDomains, err := group.ListDomainNames(client, d.Id(), firewallId)
+	if err != nil {
+		return fmt.Errorf("error listing domains: %w", err)
+	}
+
+	var idsToDelete []string
+	for _, dom := range currentDomains {
+		if !newDomains[dom.DomainName] {
+			idsToDelete = append(idsToDelete, dom.DomainAddressID)
+		}
+	}
+
+	if len(idsToDelete) > 0 {
+		if err := group.DeleteDomainNames(client, d.Id(), firewallId, group.DeleteDomainNameListOpts{
+			ObjectID:         d.Get("object_id").(string),
+			DomainAddressIDs: idsToDelete,
+		}); err != nil {
+			return fmt.Errorf("error deleting domains: %w", err)
+		}
+	}
+	return nil
 }
