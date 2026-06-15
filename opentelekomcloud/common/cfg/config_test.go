@@ -199,3 +199,37 @@ func TestRequestRetry(t *testing.T) {
 	t.Run("TestRequestSingleRetry", func(t *testing.T) { testRequestRetry(t, 1) })
 	t.Run("TestRequestZeroRetry", func(t *testing.T) { testRequestRetry(t, 0) })
 }
+
+// TestGenClientAKSKReSignOptions checks that SignOptions is set after AK/SK
+// authentication, so retried requests are re-signed instead of reusing a stale
+// signature (#3392).
+func TestGenClientAKSKReSignOptions(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	// AK/SK authentication lists the service catalog; an empty catalog is enough.
+	th.Mux.HandleFunc("/v3/auth/catalog", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprint(w, `{"catalog": []}`)
+	})
+
+	cfg := &Config{MaxRetries: 1}
+	// Ending the endpoint with /v3/ lets ChooseVersion skip version negotiation.
+	client, err := cfg.genClient(golangsdk.AKSKAuthOptions{
+		IdentityEndpoint: fmt.Sprintf("%sv3/", th.Endpoint()),
+		AccessKey:        "test-ak",
+		SecretKey:        "test-sk",
+		ProjectId:        "test-project-id",
+	})
+	th.CheckNoErr(t, err)
+
+	rt, ok := client.HTTPClient.Transport.(*RoundTripper)
+	th.AssertEquals(t, true, ok)
+
+	if rt.SignOptions == nil {
+		t.Fatal("expected RoundTripper.SignOptions to be set for AK/SK auth, got nil")
+	}
+	th.AssertEquals(t, "test-ak", rt.SignOptions.AccessKey)
+	th.AssertEquals(t, "test-sk", rt.SignOptions.SecretKey)
+}
