@@ -51,6 +51,7 @@ func TestAccDependencyVersion_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "runtime", "Python3.9"),
 					resource.TestCheckResourceAttrSet(resourceName, "link"),
 					resource.TestCheckResourceAttrSet(resourceName, "dependency_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "version_id"),
 				),
 			},
 			{
