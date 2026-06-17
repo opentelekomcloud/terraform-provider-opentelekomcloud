@@ -89,6 +89,10 @@ func ResourceDependencyVersionV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"version_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -167,6 +171,7 @@ func resourceDependencyVersionV2Read(ctx context.Context, d *schema.ResourceData
 		d.Set("owner", getResp.Owner),
 		d.Set("version", getResp.Version),
 		d.Set("dependency_id", getResp.DepId),
+		d.Set("version_id", getResp.Id),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.Errorf("error setting resource fields of custom dependency package version (%s): %s",
