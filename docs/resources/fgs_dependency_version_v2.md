@@ -106,6 +106,9 @@ In addition to all arguments above, the following attributes are exported:
 
 * `dependency_id` - The ID of the dependency package corresponding to the version.
 
+* `version_id` - The ID of the dependency package version.
+
+
 ## Import
 
 Dependency version can be imported using `name` and the `version` number, separated by a slash (/), e.g.

@@ -535,13 +535,6 @@ func (c *Config) genClient(ao golangsdk.AuthOptionsProvider) (*golangsdk.Provide
 		OsDebug:    osDebug,
 		MaxRetries: c.MaxRetries,
 	}
-	if client.AKSKAuthOptions.AccessKey != "" {
-		signOpts := golangsdk.SignOptions{
-			AccessKey: client.AKSKAuthOptions.AccessKey,
-			SecretKey: client.AKSKAuthOptions.SecretKey,
-		}
-		rt.SignOptions = &signOpts
-	}
 
 	client.HTTPClient = http.Client{
 		Transport: rt,
@@ -558,6 +551,15 @@ func (c *Config) genClient(ao golangsdk.AuthOptionsProvider) (*golangsdk.Provide
 		err = openstack.Authenticate(client, ao)
 		if err != nil {
 			return nil, err
+		}
+	}
+
+	// AK/SK credentials are populated by openstack.Authenticate, so SignOptions
+	// must be set after it to re-sign requests on retry/redirect (#3392).
+	if client.AKSKAuthOptions.AccessKey != "" {
+		rt.SignOptions = &golangsdk.SignOptions{
+			AccessKey: client.AKSKAuthOptions.AccessKey,
+			SecretKey: client.AKSKAuthOptions.SecretKey,
 		}
 	}
 

@@ -40,15 +40,15 @@ The following arguments are supported:
 
 * `description` - (Optional, String) Specifies the description of the domain name group.
 
-* `domain_names` - (Required, List, ForceNew) Specifies the domain name information list. The [domain_names](#domainnames) structure is documented below.
+* `domain_names` - (Required, List) Specifies the domain name information list. The [domain_names](#domainnames) structure is documented below.
 
 * `domain_set_type` - (Optional, Integer, ForceNew) Specifies the domain name group typ: `0` (application domain name group), `1` (network domain name group).
 
 <a name="domainnames"></a>
 The `domain_names` block supports:
 
-* `domain_name` - (Required, String, ForceNew) Specifies the domain name, for example, www.test.com.
-* `description` - (Optional, String, ForceNew) Specifies the domain name description.
+* `domain_name` - (Required, String) Specifies the domain name, for example, www.test.com.
+* `description` - (Optional, String) Specifies the domain name description.
 
 ## Attributes Reference
 

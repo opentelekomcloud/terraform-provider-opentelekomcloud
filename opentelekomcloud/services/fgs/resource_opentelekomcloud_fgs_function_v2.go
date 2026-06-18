@@ -567,6 +567,9 @@ func buildFgsFunctionParameters(config *cfg.Config, d *schema.ResourceData) (fun
 		}
 		result.FuncCode = &funcCode
 	}
+	if dependList := expandFgsFunctionDependList(d); len(dependList) > 0 {
+		result.DependVersionList = dependList
+	}
 	if v, ok := d.GetOk("log_group_id"); ok {
 		logConfig := function.FuncLogConfig{
 			GroupID:    v.(string),
@@ -654,13 +657,12 @@ func resourceFgsFunctionV2Create(ctx context.Context, d *schema.ResourceData, me
 			return diag.FromErr(err)
 		}
 	}
-	if d.HasChange("depend_list") {
-		err := resourceFgsFunctionCodeUpdate(fgsClient, urn, d)
+	if dependList := expandFgsFunctionDependList(d); len(dependList) > 0 {
+		err := resourceFgsFunctionDependListUpdate(fgsClient, urn, d)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 	}
-
 	if strNum, ok := d.GetOk("max_instance_num"); ok {
 		// The integer string of the maximum instance number has been already checked in the schema validation.
 		maxInstanceNum, _ := strconv.Atoi(strNum.(string))
@@ -966,7 +968,7 @@ func resourceFgsFunctionV2Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("version", f.Version),
 		d.Set("urn", functionUrn),
 		d.Set("app_agency", f.AppXrole),
-		d.Set("depend_list", f.DependVersionList),
+		d.Set("depend_list", flattenFgsFunctionDependList(f.DependVersionList, f.Dependencies)),
 		d.Set("initializer_handler", f.InitHandler),
 		d.Set("initializer_timeout", f.InitTimeout),
 		d.Set("functiongraph_version", f.Type),
@@ -1239,9 +1241,15 @@ func resourceFgsFunctionV2Update(ctx context.Context, d *schema.ResourceData, me
 
 	urn := resourceFgsFunctionUrn(d.Id())
 
-	// lintignore:R019
-	if d.HasChanges("code_type", "code_url", "code_filename", "depend_list", "func_code", "source_code_hash") {
+	hasCodeChanges := d.HasChanges("code_type", "code_url", "code_filename", "func_code", "source_code_hash")
+	if hasCodeChanges {
 		err := resourceFgsFunctionCodeUpdate(fgsClient, urn, d)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+	if d.HasChange("depend_list") && !hasCodeChanges {
+		err := resourceFgsFunctionDependListUpdate(fgsClient, urn, d)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -1417,18 +1425,10 @@ func buildFunctionStrategyConfig(concurrencyNum int) *function.StrategyConfig {
 
 func resourceFgsFunctionCodeUpdate(fgsClient *golangsdk.ServiceClient, urn string, d *schema.ResourceData) error {
 	updateCodeOpts := function.UpdateFuncCodeOpts{
-		CodeType:     d.Get("code_type").(string),
-		CodeURL:      d.Get("code_url").(string),
-		CodeFilename: d.Get("code_filename").(string),
-	}
-
-	if v, ok := d.GetOk("depend_list"); ok {
-		dependListRaw := v.(*schema.Set)
-		dependList := make([]string, 0, dependListRaw.Len())
-		for _, depend := range dependListRaw.List() {
-			dependList = append(dependList, depend.(string))
-		}
-		updateCodeOpts.DependVersionList = dependList
+		CodeType:          d.Get("code_type").(string),
+		CodeURL:           d.Get("code_url").(string),
+		CodeFilename:      d.Get("code_filename").(string),
+		DependVersionList: expandFgsFunctionDependList(d),
 	}
 
 	if v, ok := d.GetOk("func_code"); ok {
@@ -1446,6 +1446,48 @@ func resourceFgsFunctionCodeUpdate(fgsClient *golangsdk.ServiceClient, urn strin
 	}
 
 	return nil
+}
+
+func resourceFgsFunctionDependListUpdate(fgsClient *golangsdk.ServiceClient, urn string, d *schema.ResourceData) error {
+	updateCodeOpts := function.UpdateFuncCodeOpts{
+		FuncUrn:           urn,
+		CodeType:          d.Get("code_type").(string),
+		DependVersionList: expandFgsFunctionDependList(d),
+	}
+
+	log.Printf("[DEBUG] Depend List Update Options: %#v", updateCodeOpts)
+	_, err := function.UpdateFuncCode(fgsClient, updateCodeOpts)
+	if err != nil {
+		return fmt.Errorf("error updating dependency list of function: %s", err)
+	}
+
+	return nil
+}
+
+func flattenFgsFunctionDependList(dependVersionList []string, dependencies []function.Dependency) []string {
+	if len(dependVersionList) > 0 {
+		return dependVersionList
+	}
+
+	result := make([]string, 0, len(dependencies))
+	for _, dependency := range dependencies {
+		if dependency.ID == "" {
+			continue
+		}
+		result = append(result, dependency.ID)
+	}
+
+	return result
+}
+
+func expandFgsFunctionDependList(d *schema.ResourceData) []string {
+	dependListRaw := d.Get("depend_list").(*schema.Set)
+	dependList := make([]string, 0, dependListRaw.Len())
+	for _, depend := range dependListRaw.List() {
+		dependList = append(dependList, depend.(string))
+	}
+
+	return dependList
 }
 
 func resourceFgsFunctionFuncVpc(d *schema.ResourceData) *function.FuncVpc {

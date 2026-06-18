@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    Fix AK/SK requests not being re-signed on retry, which caused ``signature expired`` errors when a request was retried after a connection timeout (`#3422 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3422>`_)

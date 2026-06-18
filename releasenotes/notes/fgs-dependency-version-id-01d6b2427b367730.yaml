@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[FGS]** Add new attribute ``version_id`` in ``resource/opentelekomcloud_fgs_dependency_version_v2`` (`#3424 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3424>`_)
