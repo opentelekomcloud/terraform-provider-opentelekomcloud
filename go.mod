@@ -17,7 +17,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0
 	github.com/keybase/go-crypto v0.0.0-20200123153347-de78d2cb44f4
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/opentelekomcloud/gophertelekomcloud v0.9.8-0.20260618095924-48f27ecae7a5
+	github.com/opentelekomcloud/gophertelekomcloud v0.9.8-0.20260618151655-33da4d75fff6
 	github.com/unknwon/com v1.0.1
 	golang.org/x/crypto v0.46.0
 	golang.org/x/sync v0.19.0
@@ -68,7 +68,3 @@ require (
 	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 )
-
-// DEV SHIM: build against the local SDK checkout until the sso_type change
-// is released upstream. Replace with a proper version bump before merging.
-// replace github.com/opentelekomcloud/gophertelekomcloud => ../gophertelekomcloud
