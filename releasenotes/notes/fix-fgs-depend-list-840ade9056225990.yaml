@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[FGS]** Fix `depend_list` updates, including removal of all dependencies, for resource ``resource/opentelekomcloud_fgs_function_v2`` (`#3430 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3430>`_)
