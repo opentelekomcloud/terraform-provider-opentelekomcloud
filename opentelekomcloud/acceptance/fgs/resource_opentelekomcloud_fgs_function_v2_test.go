@@ -130,6 +130,50 @@ func TestAccFgsV2Function_text(t *testing.T) {
 	})
 }
 
+func TestAccFgsV2Function_dependList(t *testing.T) {
+	var f function.FuncGraph
+	randName := fmt.Sprintf("fgs-acc-%s", acctest.RandString(5))
+	resourceName := "opentelekomcloud_fgs_function_v2.test"
+
+	rc := common.InitResourceCheck(
+		resourceName,
+		&f,
+		getResourceObj,
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFgsV2Function_dependList(randName, "function dependency test", "opentelekomcloud_fgs_dependency_version_v2.test.version_id"),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceName, "description", "function dependency test"),
+					resource.TestCheckResourceAttr(resourceName, "depend_list.#", "1"),
+				),
+			},
+			{
+				Config: testAccFgsV2Function_dependList(randName, "function dependency test update", "opentelekomcloud_fgs_dependency_version_v2.test.version_id"),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceName, "description", "function dependency test update"),
+					resource.TestCheckResourceAttr(resourceName, "depend_list.#", "1"),
+				),
+			},
+			{
+				Config: testAccFgsV2Function_dependList(randName, "function dependency test update", ""),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceName, "description", "function dependency test update"),
+					resource.TestCheckResourceAttr(resourceName, "depend_list.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccFgsV2Function_createByImage(t *testing.T) {
 	var f function.FuncGraph
 	randName := fmt.Sprintf("fgs-acc-%s", acctest.RandString(5))
@@ -442,6 +486,36 @@ def handler (event, context):
 EOF
 }
 `, rName)
+}
+
+func testAccFgsV2Function_dependList(rName, description, dependList string) string {
+	dependListConfig := "depend_list = []"
+	if dependList != "" {
+		dependListConfig = fmt.Sprintf("depend_list = [%s]", dependList)
+	}
+
+	return fmt.Sprintf(`
+resource "opentelekomcloud_fgs_dependency_version_v2" "test" {
+  name        = "%[1]s"
+  description = "Created by terraform script"
+  runtime     = "Python3.9"
+  link        = "https://regr-func-graph.obs.eu-de.otc.t-systems.com/requirements.zip"
+}
+
+resource "opentelekomcloud_fgs_function_v2" "test" {
+  name        = "%[1]s"
+  app         = "default"
+  description = "%[2]s"
+  handler     = "index.handler"
+  memory_size = 128
+  timeout     = 3
+  runtime     = "Python3.9"
+  code_type   = "inline"
+  func_code   = "ZGVmIGhhbmRsZXIoZXZlbnQsIGNvbnRleHQpOgogICAgcmV0dXJuICJIZWxsbyBXb3JsZCIK"
+
+  %[3]s
+}
+`, rName, description, dependListConfig)
 }
 
 func testAccFgsV2Function_createByImage_step_1(rName string) string {
