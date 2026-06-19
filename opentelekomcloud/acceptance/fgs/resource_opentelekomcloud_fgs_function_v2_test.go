@@ -174,6 +174,40 @@ func TestAccFgsV2Function_dependList(t *testing.T) {
 	})
 }
 
+func TestAccFgsV2Function_enableAuthInHeader(t *testing.T) {
+	var f function.FuncGraph
+	randName := fmt.Sprintf("fgs-acc-%s", acctest.RandString(5))
+	resourceName := "opentelekomcloud_fgs_function_v2.test"
+
+	rc := common.InitResourceCheck(
+		resourceName,
+		&f,
+		getResourceObj,
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFgsV2Function_enableAuthInHeader(randName, true),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceName, "enable_auth_in_header", "true"),
+				),
+			},
+			{
+				Config: testAccFgsV2Function_enableAuthInHeader(randName, false),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceName, "enable_auth_in_header", "false"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccFgsV2Function_createByImage(t *testing.T) {
 	var f function.FuncGraph
 	randName := fmt.Sprintf("fgs-acc-%s", acctest.RandString(5))
@@ -516,6 +550,27 @@ resource "opentelekomcloud_fgs_function_v2" "test" {
   %[3]s
 }
 `, rName, description, dependListConfig)
+}
+
+func testAccFgsV2Function_enableAuthInHeader(rName string, enabled bool) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_fgs_function_v2" "test" {
+  name                  = "%[1]s"
+  app                   = "default"
+  description           = "function auth in header test"
+  handler               = "-"
+  memory_size           = 128
+  timeout               = 3
+  runtime               = "Custom Image"
+  agency                = "fg_agency"
+  code_type             = "Custom-Image-Swr"
+  enable_auth_in_header = %[2]t
+
+  custom_image {
+    url = "%[3]s"
+  }
+}
+`, rName, enabled, common.OTC_BUILD_IMAGE_URL)
 }
 
 func testAccFgsV2Function_createByImage_step_1(rName string) string {
