@@ -38,16 +38,13 @@ The following arguments are supported:
 * `enabled` - (Optional) Whether an identity provider is enabled. Default value is `false`.
 
 * `sso_type` - (Optional) The single sign-on (SSO) type of the identity provider. Possible values
-  are `virtual_user_sso` and `iam_user_sso`. If omitted, the API default (`virtual_user_sso`) is
-  used. Each account can have only one identity provider of the `iam_user_sso` type, and creating
-  an `iam_user_sso` provider requires an existing IAM user. Changing this creates a new provider.
+  are `virtual_user_sso` and `iam_user_sso`. Defaults to `virtual_user_sso`. Each account can have
+  only one identity provider of the `iam_user_sso` type, and creating an `iam_user_sso` provider
+  requires an existing IAM user. Changing this creates a new provider.
 
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
-
-`sso_type` - The SSO type of the identity provider, as returned by the API. When `sso_type` is not
-set, this reflects the API default (`virtual_user_sso`).
 
 `links` - Resource links of an identity provider, including `protocols` and `self`.
 

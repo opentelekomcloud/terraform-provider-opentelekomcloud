@@ -43,8 +43,8 @@ func ResourceIdentityProviderV3() *schema.Resource {
 			"sso_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 				ForceNew: true,
+				Default:  ssoTypeVirtualUser,
 				ValidateFunc: validation.StringInSlice([]string{
 					ssoTypeVirtualUser, ssoTypeIAMUser,
 				}, false),
@@ -72,16 +72,11 @@ func resourceIdentityProviderV3Create(ctx context.Context, d *schema.ResourceDat
 		return fmterr.Errorf(clientCreationFail, err)
 	}
 
-	ssoType := d.Get("sso_type").(string)
-	if ssoType == "" {
-		ssoType = ssoTypeVirtualUser
-	}
-
 	opts := providers.CreateOpts{
 		ID:          d.Get("name").(string),
 		Description: d.Get("description").(string),
 		Enabled:     d.Get("enabled").(bool),
-		SSOType:     ssoType,
+		SSOType:     d.Get("sso_type").(string),
 	}
 
 	p, err := providers.Create(client, opts).Extract()
