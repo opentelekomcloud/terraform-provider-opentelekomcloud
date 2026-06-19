@@ -72,11 +72,16 @@ func resourceIdentityProviderV3Create(ctx context.Context, d *schema.ResourceDat
 		return fmterr.Errorf(clientCreationFail, err)
 	}
 
+	ssoType := d.Get("sso_type").(string)
+	if ssoType == "" {
+		ssoType = ssoTypeVirtualUser
+	}
+
 	opts := providers.CreateOpts{
 		ID:          d.Get("name").(string),
 		Description: d.Get("description").(string),
 		Enabled:     d.Get("enabled").(bool),
-		SSOType:     d.Get("sso_type").(string),
+		SSOType:     ssoType,
 	}
 
 	p, err := providers.Create(client, opts).Extract()
