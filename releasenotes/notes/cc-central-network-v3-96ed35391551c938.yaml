@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[Cloud Connect]** Added new resource ``opentelekomcloud_cc_central_network_v3``

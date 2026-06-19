@@ -1290,6 +1290,38 @@ func (c *Config) ErV3Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) CcV3Client(_ string) (*golangsdk.ServiceClient, error) {
+	client, err := c.IdentityV3Client()
+	if err != nil {
+		return nil, err
+	}
+
+	parsedURL, err := url.Parse(client.Endpoint)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse IAM endpoint: %w", err)
+	}
+	re := regexp.MustCompile(`^[^.]+`)
+	parsedURL.Host = re.ReplaceAllString(parsedURL.Host, "cc")
+
+	client.Endpoint = parsedURL.String()
+	client.ResourceBase = client.Endpoint
+	client.Type = "cc"
+
+	domainID := c.DomainID
+	if domainID == "" {
+		domainID = c.DomainClient.DomainID
+	}
+	if domainID == "" {
+		domainID = c.DomainClient.AKSKAuthOptions.DomainID
+	}
+	if domainID == "" {
+		domainID = c.HwClient.DomainID
+	}
+	client.DomainID = domainID
+
+	return client, nil
+}
+
 func (c *Config) DwsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	service, err := openstack.NewDWSV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
