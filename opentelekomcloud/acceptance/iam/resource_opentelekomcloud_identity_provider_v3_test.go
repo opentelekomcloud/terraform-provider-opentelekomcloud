@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -34,6 +35,9 @@ func TestAccIdentityV3ProviderBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(fullName, "enabled", "true"),
 					resource.TestCheckResourceAttr(fullName, "description", providerDescription),
 					resource.TestCheckResourceAttr(fullName, "links.%", "2"),
+					// sso_type is omitted from the config, so the computed value must
+					// reflect the API default rather than an empty string.
+					resource.TestCheckResourceAttr(fullName, "sso_type", "virtual_user_sso"),
 				),
 			},
 			{
@@ -42,6 +46,58 @@ func TestAccIdentityV3ProviderBasic(t *testing.T) {
 					testAccCheckIdentityV3ProviderDestroy,
 					resource.TestCheckResourceAttr(fullName, "enabled", "false"),
 					resource.TestCheckResourceAttr(fullName, "description", providerDescriptionUpdated),
+				),
+			},
+		},
+	})
+}
+
+func TestAccIdentityV3ProviderSSOType(t *testing.T) {
+	fullName := fmt.Sprintf("%s.%s", providerResource, "provider")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityV3ProviderDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIdentityV3ProviderSSOType,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3ProviderDestroy,
+					resource.TestCheckResourceAttr(fullName, "sso_type", "virtual_user_sso"),
+				),
+			},
+		},
+	})
+}
+
+// TestAccIdentityV3ProviderIAMUserSSO verifies that an explicit non-default
+// sso_type ("iam_user_sso") is actually transmitted and overrides the API
+// default ("virtual_user_sso"). It is opt-in: iam_user_sso requires a
+// pre-existing IAM user and is limited to one provider of this type per
+// account, so it must not run in the default acceptance suite.
+func TestAccIdentityV3ProviderIAMUserSSO(t *testing.T) {
+	fullName := fmt.Sprintf("%s.%s", providerResource, "provider")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckAdminOnly(t)
+			if os.Getenv("OS_IAM_USER_SSO") == "" {
+				t.Skip("OS_IAM_USER_SSO must be set (account has an IAM user and a free iam_user_sso slot) to run this test")
+			}
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityV3ProviderDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIdentityV3ProviderIAMUserSSO,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityV3ProviderDestroy,
+					resource.TestCheckResourceAttr(fullName, "sso_type", "iam_user_sso"),
 				),
 			},
 		},
@@ -90,4 +146,22 @@ resource "opentelekomcloud_identity_provider_v3" "provider" {
   enabled     = false
 }
 `, providerName, providerDescriptionUpdated)
+
+	testAccIdentityV3ProviderSSOType = fmt.Sprintf(`
+resource "opentelekomcloud_identity_provider_v3" "provider" {
+  name        = "%s"
+  description = "%s"
+  enabled     = true
+  sso_type    = "virtual_user_sso"
+}
+`, providerName, providerDescription)
+
+	testAccIdentityV3ProviderIAMUserSSO = fmt.Sprintf(`
+resource "opentelekomcloud_identity_provider_v3" "provider" {
+  name        = "%s"
+  description = "%s"
+  enabled     = true
+  sso_type    = "iam_user_sso"
+}
+`, providerName, providerDescription)
 )
