@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[FGS]** Update for attribute `enable_auth_in_header` in ``resource/opentelekomcloud_fgs_function_v2`` (`#3432 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3432>`_)

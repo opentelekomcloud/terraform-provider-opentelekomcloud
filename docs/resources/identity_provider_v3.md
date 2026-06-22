@@ -23,6 +23,7 @@ resource "opentelekomcloud_identity_provider_v3" "provider" {
   name        = "ACME"
   description = "This is simple identity provider"
   enabled     = true
+  sso_type    = "iam_user_sso"
 }
 ```
 
@@ -35,6 +36,11 @@ The following arguments are supported:
 * `description` - (Optional) A description of the provider.
 
 * `enabled` - (Optional) Whether an identity provider is enabled. Default value is `false`.
+
+* `sso_type` - (Optional) The single sign-on (SSO) type of the identity provider. Possible values
+  are `virtual_user_sso` and `iam_user_sso`. Defaults to `virtual_user_sso`. Each account can have
+  only one identity provider of the `iam_user_sso` type, and creating an `iam_user_sso` provider
+  requires an existing IAM user. Changing this creates a new provider.
 
 ## Attributes Reference
 

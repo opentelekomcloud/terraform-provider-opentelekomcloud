@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[IAM]** Add argument ``sso_type`` to ``resource/opentelekomcloud_identity_provider_v3`` (`#3421 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3421>`_)
