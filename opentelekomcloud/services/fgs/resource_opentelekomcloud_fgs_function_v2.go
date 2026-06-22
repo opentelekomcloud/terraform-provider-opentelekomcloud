@@ -651,7 +651,7 @@ func resourceFgsFunctionV2Create(ctx context.Context, d *schema.ResourceData, me
 	urn := resourceFgsFunctionUrn(d.Id())
 	if d.HasChanges("vpc_id", "network_id", "peering_cidr", "func_mounts", "app_agency", "initializer_handler",
 		"initializer_timeout", "enable_class_isolation", "concurrency_num", "ephemeral_storage", "lts_custom_tag",
-		"restore_hook_timeout", "restore_hook_handler", "heartbeat_handler") {
+		"restore_hook_timeout", "restore_hook_handler", "heartbeat_handler", "enable_auth_in_header") {
 		err := resourceFgsFunctionMetadataUpdate(config, fgsClient, urn, d)
 		if err != nil {
 			return diag.FromErr(err)
@@ -1259,7 +1259,8 @@ func resourceFgsFunctionV2Update(ctx context.Context, d *schema.ResourceData, me
 		"user_data", "agency", "app_agency", "description", "initializer_handler", "initializer_timeout",
 		"vpc_id", "network_controller", "network_id", "mount_user_id", "mount_user_group_id", "func_mounts", "custom_image",
 		"log_group_id", "log_topic_id", "log_group_name", "log_topic_name", "gpu_memory", "gpu_type",
-		"pre_stop_handler", "pre_stop_timeout", "enable_dynamic_memory", "enable_lts_log", "concurrency_num") {
+		"pre_stop_handler", "pre_stop_timeout", "enable_dynamic_memory", "enable_lts_log", "concurrency_num",
+		"enable_auth_in_header") {
 		err := resourceFgsFunctionMetadataUpdate(config, fgsClient, urn, d)
 		if err != nil {
 			return diag.FromErr(err)
