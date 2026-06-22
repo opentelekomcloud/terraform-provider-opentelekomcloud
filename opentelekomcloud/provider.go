@@ -13,6 +13,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/asm"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/bms"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/cbr"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/cc"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/cce"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/cci"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ces"
@@ -487,6 +488,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_blockstorage_volume_v2":                    evs.ResourceBlockStorageVolumeV2(),
 			"opentelekomcloud_cbr_policy_v3":                             cbr.ResourceCBRPolicyV3(),
 			"opentelekomcloud_cbr_vault_v3":                              cbr.ResourceCBRVaultV3(),
+			"opentelekomcloud_cc_central_network_v3":                     cc.ResourceCcCentralNetworkV3(),
 			"opentelekomcloud_cce_addon_v3":                              cce.ResourceCCEAddonV3(),
 			"opentelekomcloud_cce_cluster_v3":                            cce.ResourceCCEClusterV3(),
 			"opentelekomcloud_cce_node_attach_v3":                        cce.ResourceCCENodeV3Attach(),
