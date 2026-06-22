@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CFW]** Add new resource ``resource/opentelekomcloud_cfw_log_configuration_v1`` (`#3435 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3435>`_).
