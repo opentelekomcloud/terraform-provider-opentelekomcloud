@@ -119,19 +119,16 @@ func ResourceCssClusterV1() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 				Optional: true,
-				ForceNew: true,
 			},
 			"enable_authority": {
 				Type:     schema.TypeBool,
 				Computed: true,
 				Optional: true,
-				ForceNew: true,
 			},
 			"admin_pass": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				RequiredWith: []string{"enable_authority"},
-				ForceNew:     true,
 			},
 			"public_access": {
 				Type:         schema.TypeList,
@@ -499,6 +496,32 @@ func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 		err := updateCssPublicAccess(d, client)
 		if err != nil {
 			return fmterr.Errorf("error updating public access for CSS cluster %s: %s", d.Id(), err)
+		}
+	}
+
+	// update security mode (enable_https, enable_authority, admin_pass)
+	if d.HasChanges("enable_https", "enable_authority", "admin_pass") {
+		if d.Get("enable_authority").(bool) {
+			if adminPass, ok := d.GetOk("admin_pass"); !ok || adminPass.(string) == "" {
+				return fmterr.Errorf("admin_pass is required when enable_authority is true")
+			}
+		}
+
+		httpsEnabled := d.Get("enable_https").(bool)
+		authorityEnabled := d.Get("enable_authority").(bool)
+
+		err = clusters.UpdateSecurityMode(client, d.Id(), clusters.SecurityModeOpts{
+			AuthorityEnabled: &authorityEnabled,
+			AdminPassword:    d.Get("admin_pass").(string),
+			HttpsEnabled:     &httpsEnabled,
+		})
+		if err != nil {
+			return fmterr.Errorf("error updating security mode for CSS cluster %s: %s", d.Id(), err)
+		}
+
+		secondsWait := int(math.Round(d.Timeout(schema.TimeoutUpdate).Seconds()))
+		if err = checkClusterOperationCompleted(client, d.Id(), secondsWait); err != nil {
+			return fmterr.Errorf("error waiting for CSS cluster security mode update: %s", d.Id(), err)
 		}
 	}
 
