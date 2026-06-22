@@ -33,10 +33,9 @@ func ResourceCfwLogConfigurationV1() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"fw_instance_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IsUUID,
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"lts_enable": {
 				Type:     schema.TypeInt,
