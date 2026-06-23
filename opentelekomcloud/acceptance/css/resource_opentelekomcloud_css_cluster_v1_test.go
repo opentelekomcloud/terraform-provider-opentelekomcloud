@@ -114,7 +114,29 @@ func TestAccCssClusterV1_Opensearch(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCssClusterV1Exists(resourceClusterName, &cluster),
 					resource.TestCheckResourceAttr(resourceClusterName, "nodes.#", "1"),
-					resource.TestCheckResourceAttr(resourceClusterName, "datastore.0.version", "Opensearch_1.3.6"),
+					resource.TestCheckResourceAttr(resourceClusterName, "datastore.0.version", "2.19.0"),
+					resource.TestCheckResourceAttr(resourceClusterName, "enable_authority", "false"),
+					resource.TestCheckResourceAttr(resourceClusterName, "enable_https", "false"),
+				),
+			},
+			{
+				Config: testAccCssClusterV1Opensearch_update(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCssClusterV1Exists(resourceClusterName, &cluster),
+					resource.TestCheckResourceAttr(resourceClusterName, "nodes.#", "1"),
+					resource.TestCheckResourceAttr(resourceClusterName, "datastore.0.version", "2.19.0"),
+					resource.TestCheckResourceAttr(resourceClusterName, "enable_authority", "true"),
+					resource.TestCheckResourceAttr(resourceClusterName, "enable_https", "true"),
+				),
+			},
+			{
+				Config: testAccCssClusterV1Opensearch_update2(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCssClusterV1Exists(resourceClusterName, &cluster),
+					resource.TestCheckResourceAttr(resourceClusterName, "nodes.#", "1"),
+					resource.TestCheckResourceAttr(resourceClusterName, "datastore.0.version", "2.19.0"),
+					resource.TestCheckResourceAttr(resourceClusterName, "enable_authority", "true"),
+					resource.TestCheckResourceAttr(resourceClusterName, "enable_https", "false"),
 				),
 			},
 		},
@@ -264,14 +286,14 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   expect_node_num = 1
   name            = "%s"
   node_config {
-    flavor = "css.medium.8"
+    flavor = "css.xlarge.2"
     network_info {
       security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
       network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
       vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
     }
     volume {
-      volume_type = "COMMON"
+      volume_type = "HIGH"
       size        = 40
     }
 
@@ -295,21 +317,21 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   expect_node_num = 1
   name            = "%s"
   node_config {
-    flavor = "css.medium.8"
+    flavor = "css.xlarge.2"
     network_info {
       security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
       network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
       vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
     }
     volume {
-      volume_type = "COMMON"
+      volume_type = "HIGH"
       size        = 40
     }
 
     availability_zone = "%s"
   }
   datastore {
-    version = "7.6.2"
+    version = "7.10.2"
   }
   enable_https     = true
   enable_authority = true
@@ -338,21 +360,21 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   expect_node_num = 1
   name            = "%s"
   node_config {
-    flavor = "css.medium.8"
+    flavor = "css.xlarge.2"
     network_info {
       security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
       network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
       vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
     }
     volume {
-      volume_type = "COMMON"
+      volume_type = "HIGH"
       size        = 40
     }
 
     availability_zone = "%s"
   }
   datastore {
-    version = "7.6.2"
+    version = "7.10.2"
   }
   enable_https     = true
   enable_authority = true
@@ -382,21 +404,21 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   expect_node_num = 1
   name            = "%s"
   node_config {
-    flavor = "css.medium.8"
+    flavor = "css.xlarge.2"
     network_info {
       security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
       network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
       vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
     }
     volume {
-      volume_type = "COMMON"
+      volume_type = "HIGH"
       size        = 1
     }
 
     availability_zone = "%s"
   }
   datastore {
-    version = "7.6.2"
+    version = "7.10.2"
   }
   enable_https     = true
   enable_authority = true
@@ -415,21 +437,21 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   expect_node_num = 1
   name            = "%s"
   node_config {
-    flavor = "css.medium.8"
+    flavor = "css.xlarge.2"
     network_info {
       security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
       network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
       vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
     }
     volume {
-      volume_type = "COMMON"
+      volume_type = "HIGH"
       size        = 10000000
     }
 
     availability_zone = "%s"
   }
   datastore {
-    version = "7.6.2"
+    version = "7.10.2"
   }
   enable_https     = true
   enable_authority = true
@@ -455,14 +477,14 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
       vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
     }
     volume {
-      volume_type = "COMMON"
+      volume_type = "HIGH"
       size        = 20
     }
 
     availability_zone = "%s"
   }
   datastore {
-    version = "7.6.2"
+    version = "7.10.2"
   }
   enable_https     = true
   enable_authority = true
@@ -481,21 +503,22 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   expect_node_num = 2
   name            = "%s"
   node_config {
-    flavor = "css.medium.8"
+    flavor = "css.xlarge.2"
     network_info {
       security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
       network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
       vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
     }
     volume {
-      volume_type = "COMMON"
+      volume_type = "HIGH"
       size        = 40
     }
 
     availability_zone = "%s"
   }
   datastore {
-    version = "7.6.2"
+    type    = "elasticsearch"
+    version = "7.10.2"
   }
   enable_https     = true
   enable_authority = true
@@ -514,21 +537,22 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   expect_node_num = 2
   name            = "%s"
   node_config {
-    flavor = "css.medium.8"
+    flavor = "css.xlarge.2"
     network_info {
       security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
       network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
       vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
     }
     volume {
-      volume_type = "COMMON"
+      volume_type = "HIGH"
       size        = 200
     }
 
     availability_zone = "%s"
   }
   datastore {
-    version = "7.6.2"
+    type    = "elasticsearch"
+    version = "7.10.2"
   }
   enable_https     = true
   enable_authority = true
@@ -554,7 +578,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
       vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
     }
     volume {
-      volume_type    = "COMMON"
+      volume_type    = "HIGH"
       size           = 40
       encryption_key = "%s"
     }
@@ -562,7 +586,8 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
     availability_zone = "%s"
   }
   datastore {
-    version = "7.6.2"
+    type    = "elasticsearch"
+    version = "7.10.2"
   }
   enable_https     = true
   enable_authority = true
@@ -581,23 +606,89 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   expect_node_num = 1
   name            = "%s"
   node_config {
-    flavor = "css.medium.8"
+    flavor = "css.xlarge.2"
     network_info {
       security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
       network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
       vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
     }
     volume {
-      volume_type = "COMMON"
+      volume_type = "HIGH"
       size        = 40
     }
 
     availability_zone = "%s"
   }
   datastore {
-    version = "Opensearch_1.3.6"
+    type    = "opensearch"
+    version = "2.19.0"
+  }
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccCssClusterV1Opensearch_update(name string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_css_cluster_v1" "cluster" {
+  expect_node_num = 1
+  name            = "%s"
+  node_config {
+    flavor = "css.xlarge.2"
+    network_info {
+      security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+      network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+      vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+    }
+    volume {
+      volume_type = "HIGH"
+      size        = 40
+    }
+
+    availability_zone = "%s"
+  }
+  datastore {
+    type    = "opensearch"
+    version = "2.19.0"
   }
   enable_https     = true
+  enable_authority = true
+  admin_pass       = "QwertyUI!"
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccCssClusterV1Opensearch_update2(name string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_css_cluster_v1" "cluster" {
+  expect_node_num = 1
+  name            = "%s"
+  node_config {
+    flavor = "css.xlarge.2"
+    network_info {
+      security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+      network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+      vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+    }
+    volume {
+      volume_type = "HIGH"
+      size        = 40
+    }
+
+    availability_zone = "%s"
+  }
+  datastore {
+    type    = "opensearch"
+    version = "2.19.0"
+  }
+  enable_https     = false
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
