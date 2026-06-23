@@ -515,6 +515,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cfw_domain_name_group_v1":                  cfw.ResourceCfwDomainNameGroupV1(),
 			"opentelekomcloud_cfw_eip_protection_v1":                     cfw.ResourceCfwEipProtectionV1(),
 			"opentelekomcloud_cfw_firewall_v1":                           cfw.ResourceCfwFirewallV1(),
+			"opentelekomcloud_cfw_log_configuration_v1":                  cfw.ResourceCfwLogConfigurationV1(),
 			"opentelekomcloud_cfw_ips_protection_v1":                     cfw.ResourceCfwIpsProtectionV1(),
 			"opentelekomcloud_cfw_service_group_v1":                      cfw.ResourceCfwServiceGroupV1(),
 			"opentelekomcloud_cfw_service_group_member_v1":               cfw.ResourceCfwServiceGroupMemberV1(),
