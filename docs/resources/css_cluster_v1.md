@@ -102,12 +102,10 @@ The following arguments are supported:
   By default, communication encryption is disabled.
   Value `true` indicates that communication encryption is performed on the cluster.
   Value `false` indicates that communication encryption is not performed on the cluster.
-  Changing this parameter will create a new resource.
 
 * `enable_authority` - (Optional, Bool) Whether to enable authentication.
   Authentication is disabled by default.
   When authentication is enabled, `enable_https` must be set to `true`.
-  Changing this parameter will create a new resource.
 
 * `admin_pass` - (Optional, String) Password of the cluster user admin in security mode.
   This parameter is mandatory only when `enable_authority` is set to `true`.

@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    **[CSS]** Updating the `enable_https` or `enable_authority` attributes in `resource/opentelekomcloud_css_cluster_v1` no longer forces cluster recreation.
+    (`#3437 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3437>`_)
