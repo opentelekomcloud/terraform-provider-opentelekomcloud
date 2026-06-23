@@ -499,8 +499,8 @@ func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 
-	// update security mode (enable_https, enable_authority, admin_pass)
-	if d.HasChanges("enable_https", "enable_authority", "admin_pass") {
+	// update security mode (enable_https, enable_authority)
+	if d.HasChanges("enable_https", "enable_authority") {
 		if d.Get("enable_authority").(bool) {
 			if adminPass, ok := d.GetOk("admin_pass"); !ok || adminPass.(string) == "" {
 				return fmterr.Errorf("admin_pass is required when enable_authority is true")
@@ -521,7 +521,7 @@ func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 
 		secondsWait := int(math.Round(d.Timeout(schema.TimeoutUpdate).Seconds()))
 		if err = checkClusterOperationCompleted(client, d.Id(), secondsWait); err != nil {
-			return fmterr.Errorf("error waiting for CSS cluster security mode update: %s", d.Id(), err)
+			return fmterr.Errorf("error waiting for CSS cluster %s security mode update: %s", d.Id(), err)
 		}
 	}
 
