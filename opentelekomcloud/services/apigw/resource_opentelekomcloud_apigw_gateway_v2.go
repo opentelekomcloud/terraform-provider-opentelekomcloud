@@ -204,7 +204,7 @@ func buildInstanceAvailabilityZones(d *schema.ResourceData) ([]string, error) {
 	return nil, fmt.Errorf("the parameter 'availability_zones' must be specified")
 }
 
-func buildInstanceCreateOpts(d *schema.ResourceData) (gateway.CreateOpts, error) {
+func buildInstanceCreateOpts(d *schema.ResourceData, config *cfg.Config) (gateway.CreateOpts, error) {
 	var tagList []tags.ResourceTag
 
 	gwTags := d.Get("tags").(map[string]interface{})
@@ -227,7 +227,7 @@ func buildInstanceCreateOpts(d *schema.ResourceData) (gateway.CreateOpts, error)
 		LoadBalancerProvider:         d.Get("loadbalancer_provider").(string),
 		IngressBandwidthSize:         pointerto.Int(d.Get("ingress_bandwidth_size").(int)),
 		IngressBandwidthChargingMode: d.Get("ingress_bandwidth_charging_mode").(string),
-		EnterpriseProjectId:          d.Get("enterprise_project_id").(string),
+		EnterpriseProjectId:          config.GetEnterpriseProjectID(d, "0"),
 		Tags:                         tagList,
 	}
 
@@ -258,7 +258,7 @@ func resourceGatewayCreate(ctx context.Context, d *schema.ResourceData, meta int
 		return diag.Errorf("error creating APIGW v2 client: %s", err)
 	}
 
-	opts, err := buildInstanceCreateOpts(d)
+	opts, err := buildInstanceCreateOpts(d, config)
 	if err != nil {
 		return diag.Errorf("error creating the dedicated instance options: %s", err)
 	}
@@ -494,9 +494,6 @@ func resourceGatewayDelete(ctx context.Context, d *schema.ResourceData, meta int
 	}
 	if err = gateway.Delete(client, d.Id()); err != nil {
 		return diag.Errorf("error deleting the dedicated instance (%s): %s", d.Id(), err)
-	}
-	if err != nil {
-		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{

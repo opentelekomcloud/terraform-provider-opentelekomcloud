@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[APIGW]** Fixed ``resource/opentelekomcloud_apigw_gateway_v2`` creation for
+    enterprise accounts by defaulting ``enterprise_project_id`` to ``"0"`` when it
+    is not set.

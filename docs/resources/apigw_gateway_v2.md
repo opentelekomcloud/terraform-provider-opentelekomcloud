@@ -66,7 +66,8 @@ The following arguments are supported:
   users can access resources on public networks.
 
 * `enterprise_project_id` - (Optional, String) Specifies the enterprise project ID to which the dedicated
-  instance belongs. This parameter is required for enterprise users.
+  instance belongs. This parameter is required for enterprise ("eps") users. If it is not set here or at the
+  provider level (`OS_ENTERPRISE_PROJECT_ID`), the default enterprise project `0` is used.
 
 * `bandwidth_charging_mode` - (Optional, String, ForceNew) Billing type of the public outbound access bandwidth.
   The valid values are as follows:
