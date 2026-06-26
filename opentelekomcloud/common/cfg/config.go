@@ -1464,8 +1464,10 @@ func SetOptionalEndpoint(cfg *aws.Config) string {
 // either be set by the `enterprise_project_id` argument or by OS_ENTERPRISE_PROJECT_ID.
 // If the provider-level value
 func (c *Config) GetEnterpriseProjectID(d *schema.ResourceData, defaultEps ...string) string {
-	if v, ok := d.GetOk("enterprise_project_id"); ok {
-		return v.(string)
+	if d != nil {
+		if v, ok := d.GetOk("enterprise_project_id"); ok {
+			return v.(string)
+		}
 	}
 
 	if c.EnterpriseProjectID != "" {
