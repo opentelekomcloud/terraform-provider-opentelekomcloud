@@ -1,6 +1,6 @@
 ---
 features:
   - |
-    **[Cloud Connect]** Added new resource ``opentelekomcloud_cc_central_network_policy_v3``
+    **[Cloud Connect]** Added new resource ``opentelekomcloud_cc_central_network_policy_v3`` (`#3443 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3443>`_)
   - |
-    **[Cloud Connect]** Added new resource ``opentelekomcloud_cc_central_network_policy_apply_v3``
+    **[Cloud Connect]** Added new resource ``opentelekomcloud_cc_central_network_policy_apply_v3`` (`#3443 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3443>`_)
