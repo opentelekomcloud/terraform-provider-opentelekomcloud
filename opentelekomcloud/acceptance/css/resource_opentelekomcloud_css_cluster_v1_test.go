@@ -690,7 +690,8 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   }
   enable_https     = false
   enable_authority = true
-  admin_pass       = "QwertyUI!"
+  // Update Password
+  admin_pass       = "QwertyUI!2"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
 }

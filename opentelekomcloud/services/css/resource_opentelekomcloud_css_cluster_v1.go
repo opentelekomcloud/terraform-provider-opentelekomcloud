@@ -525,6 +525,17 @@ func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 
+	// Update the admin password only when it has changed and
+	// authority is already enabled (i.e. not being enabled in this update).
+	if d.HasChange("admin_pass") &&
+		!d.HasChange("enable_authority") &&
+		d.Get("enable_authority").(bool) {
+
+		err = clusters.ChangePassword(client, d.Id(), clusters.ChangePasswordOpts{
+			NewPassword: d.Get("admin_pass").(string),
+		})
+	}
+
 	if !d.HasChange("expect_node_num") && !d.HasChange("node_config.0.volume.0.size") {
 		return nil
 	}

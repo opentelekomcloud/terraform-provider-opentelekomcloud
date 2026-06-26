@@ -98,14 +98,17 @@ The following arguments are supported:
 * `node_config` - (Required) Instance object. Structure is documented below.
   Changing this parameter will create a new resource.
 
-* `enable_https` - (Optional, Bool) Whether communication encryption is performed on the cluster.
-  By default, communication encryption is disabled.
-  Value `true` indicates that communication encryption is performed on the cluster.
-  Value `false` indicates that communication encryption is not performed on the cluster.
+* `enable_https` - (Optional, Bool) Whether communication encryption is enabled for the cluster.
+  Communication encryption is disabled by default.
+  - `true` enables communication encryption.
+  - `false` disables communication encryption.
+
+  **Note:** When `enable_https` is set to `true`, `enable_authority` must also be set to `true`.
 
 * `enable_authority` - (Optional, Bool) Whether to enable authentication.
   Authentication is disabled by default.
-  When authentication is enabled, `enable_https` must be set to `true`.
+
+  **Note:** `enable_authority` can be enabled without enabling `enable_https`.
 
 * `admin_pass` - (Optional, String) Password of the cluster user admin in security mode.
   This parameter is mandatory only when `enable_authority` is set to `true`.
