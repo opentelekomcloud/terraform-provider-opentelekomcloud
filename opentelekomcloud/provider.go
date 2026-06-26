@@ -489,6 +489,8 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cbr_policy_v3":                             cbr.ResourceCBRPolicyV3(),
 			"opentelekomcloud_cbr_vault_v3":                              cbr.ResourceCBRVaultV3(),
 			"opentelekomcloud_cc_central_network_v3":                     cc.ResourceCcCentralNetworkV3(),
+			"opentelekomcloud_cc_central_network_policy_v3":              cc.ResourceCcCentralNetworkPolicyV3(),
+			"opentelekomcloud_cc_central_network_policy_apply_v3":        cc.ResourceCcCentralNetworkPolicyApplyV3(),
 			"opentelekomcloud_cce_addon_v3":                              cce.ResourceCCEAddonV3(),
 			"opentelekomcloud_cce_cluster_v3":                            cce.ResourceCCEClusterV3(),
 			"opentelekomcloud_cce_node_attach_v3":                        cce.ResourceCCENodeV3Attach(),
