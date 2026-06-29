@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -65,6 +66,7 @@ type Config struct {
 	MaxRetries          int
 	MaxBackoffRetries   int
 	BackoffRetryTimeout int
+	RequestTimeout      int
 	EnterpriseProjectID string
 
 	UserAgent string
@@ -80,6 +82,9 @@ type Config struct {
 func (c *Config) LoadAndValidate() error {
 	if c.MaxRetries < 0 {
 		return fmt.Errorf("max_retries should be a positive value")
+	}
+	if c.RequestTimeout < 0 {
+		return fmt.Errorf("request_timeout should be a positive value")
 	}
 
 	if err := c.Load(); err != nil {
@@ -518,7 +523,18 @@ func (c *Config) genClient(ao golangsdk.AuthOptionsProvider) (*golangsdk.Provide
 	if err != nil {
 		return nil, err
 	}
-	transport := &http.Transport{Proxy: http.ProxyFromEnvironment, TLSClientConfig: config}
+	requestTimeout := time.Duration(c.RequestTimeout) * time.Second
+	dialer := &net.Dialer{
+		Timeout:   requestTimeout,
+		KeepAlive: 30 * time.Second,
+	}
+	transport := &http.Transport{
+		Proxy:                 http.ProxyFromEnvironment,
+		DialContext:           dialer.DialContext,
+		TLSClientConfig:       config,
+		TLSHandshakeTimeout:   requestTimeout,
+		ResponseHeaderTimeout: requestTimeout,
+	}
 
 	// if OS_DEBUG is set, log the requests and responses
 	var osDebug bool

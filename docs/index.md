@@ -310,6 +310,12 @@ The following arguments are supported:
   variable. If not set, default value is used.
   Default: `60` seconds.
 
+* `request_timeout` - (Optional) Timeout in seconds for HTTP connection setup,
+  TLS handshake, and response headers. This is not a total request deadline, so
+  large request bodies such as image uploads are not interrupted while streaming.
+  It can be set using the `OS_REQUEST_TIMEOUT` environment variable.
+  Default: `60` seconds.
+
 * `enterprise_project_id` - (Optional) Default Enterprise Project ID for supported resources.
   If omitted, the `OS_ENTERPRISE_PROJECT_ID` environment variable is used.
 

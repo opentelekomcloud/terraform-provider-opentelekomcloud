@@ -107,13 +107,17 @@ func TestRoundTripperRetryResign(t *testing.T) {
 	th.AssertEquals(t, 200, resp.StatusCode)
 
 	th.AssertEquals(t, 2, len(inner.sdkDates))
-	th.AssertEquals(t, staleDate, inner.sdkDates[0])
-
-	if inner.sdkDates[1] == staleDate {
-		t.Error("X-Sdk-Date should be updated on retry, but was still stale")
+	if inner.sdkDates[0] == staleDate {
+		t.Error("X-Sdk-Date should be updated before the first attempt, but was still stale")
 	}
-	if inner.authHeaders[1] == staleAuth {
-		t.Error("Authorization should be updated on retry, but was still stale")
+	if inner.authHeaders[0] == staleAuth {
+		t.Error("Authorization should be updated before the first attempt, but was still stale")
+	}
+	if inner.sdkDates[0] == "" || inner.sdkDates[0] == inner.sdkDates[1] {
+		t.Errorf("X-Sdk-Date should be updated on retry, got %q then %q", inner.sdkDates[0], inner.sdkDates[1])
+	}
+	if inner.authHeaders[0] == "" || inner.authHeaders[0] == inner.authHeaders[1] {
+		t.Error("Authorization should be updated on retry")
 	}
 }
 

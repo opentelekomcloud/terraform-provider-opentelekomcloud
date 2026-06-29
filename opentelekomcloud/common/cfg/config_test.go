@@ -2,10 +2,11 @@ package cfg
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"reflect"
+	"strings"
 	"sync"
 	"testing"
 	"text/template"
@@ -171,7 +172,7 @@ func testRequestRetry(t *testing.T, count int) {
 
 	th.Mux.HandleFunc("/route/", func(w http.ResponseWriter, r *http.Request) {
 		defer func() { _ = r.Body.Close() }()
-		_, err := ioutil.ReadAll(r.Body)
+		_, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Errorf("error hadling test request")
 		}
@@ -198,6 +199,96 @@ func TestRequestRetry(t *testing.T) {
 	t.Run("TestRequestMultipleRetries", func(t *testing.T) { testRequestRetry(t, 2) })
 	t.Run("TestRequestSingleRetry", func(t *testing.T) { testRequestRetry(t, 1) })
 	t.Run("TestRequestZeroRetry", func(t *testing.T) { testRequestRetry(t, 0) })
+}
+
+type retryCaptureRoundTripper struct {
+	calls          int
+	xSdkDates      []string
+	authorizations []string
+	bodies         []string
+}
+
+func (rt *retryCaptureRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	rt.calls += 1
+	if req.Body != nil {
+		body, err := io.ReadAll(req.Body)
+		if err != nil {
+			return nil, err
+		}
+		rt.bodies = append(rt.bodies, string(body))
+	}
+	rt.xSdkDates = append(rt.xSdkDates, req.Header.Get("X-Sdk-Date"))
+	rt.authorizations = append(rt.authorizations, req.Header.Get("Authorization"))
+
+	if rt.calls == 1 {
+		return nil, fmt.Errorf("temporary connection error")
+	}
+
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     make(http.Header),
+		Body:       io.NopCloser(strings.NewReader("{}")),
+		Request:    req,
+	}, nil
+}
+
+func TestRoundTripperReSignsAndRestoresBodyOnRetry(t *testing.T) {
+	signOptions := golangsdk.SignOptions{
+		AccessKey: "test-ak",
+		SecretKey: "test-sk",
+	}
+	req, err := http.NewRequest(http.MethodPost, "https://example.com/v1/resource", strings.NewReader(`{"name":"test"}`))
+	th.CheckNoErr(t, err)
+	req.Header.Set("Content-Type", "application/json")
+	golangsdk.Sign(req, signOptions)
+
+	capture := &retryCaptureRoundTripper{}
+	rt := &RoundTripper{
+		Rt:          capture,
+		MaxRetries:  1,
+		SignOptions: &signOptions,
+	}
+
+	resp, err := rt.RoundTrip(req)
+	th.CheckNoErr(t, err)
+	th.AssertEquals(t, http.StatusOK, resp.StatusCode)
+	th.AssertEquals(t, 2, capture.calls)
+	th.AssertDeepEquals(t, []string{`{"name":"test"}`, `{"name":"test"}`}, capture.bodies)
+
+	if capture.xSdkDates[0] == "" || capture.xSdkDates[0] == capture.xSdkDates[1] {
+		t.Fatalf("expected retry to use a fresh X-Sdk-Date, got %q then %q", capture.xSdkDates[0], capture.xSdkDates[1])
+	}
+	if capture.authorizations[0] == "" || capture.authorizations[0] == capture.authorizations[1] {
+		t.Fatalf("expected retry to use a fresh Authorization header")
+	}
+}
+
+func TestRoundTripperDoesNotRetryNonReplayableBody(t *testing.T) {
+	signOptions := golangsdk.SignOptions{
+		AccessKey: "test-ak",
+		SecretKey: "test-sk",
+	}
+	req, err := http.NewRequest(http.MethodPut, "https://example.com/v2/images/id/file", io.NopCloser(strings.NewReader("image-bytes")))
+	th.CheckNoErr(t, err)
+	req.Header.Set("Content-Type", "application/octet-stream")
+	req.Header.Set("X-Sdk-Date", "20200101T000000Z")
+	req.Header.Set("Authorization", "SDK-HMAC-SHA256 stale-signature")
+
+	capture := &retryCaptureRoundTripper{}
+	rt := &RoundTripper{
+		Rt:          capture,
+		OsDebug:     true,
+		MaxRetries:  2,
+		SignOptions: &signOptions,
+	}
+
+	_, err = rt.RoundTrip(req)
+	if err == nil {
+		t.Fatal("expected first transport error")
+	}
+	th.AssertEquals(t, 1, capture.calls)
+	th.AssertDeepEquals(t, []string{"image-bytes"}, capture.bodies)
+	th.AssertDeepEquals(t, []string{"20200101T000000Z"}, capture.xSdkDates)
 }
 
 // TestGenClientAKSKReSignOptions checks that SignOptions is set after AK/SK
