@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Re-sign AK/SK HTTP requests before every transport attempt and restore request bodies for retries, preventing stale signatures after connection failures (`#3445 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3445>`_)
+  - |
+    Add provider-level ``request_timeout`` / ``OS_REQUEST_TIMEOUT`` to bound HTTP connection setup, TLS handshake, and response-header waits without interrupting large request body uploads (`#3445 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3445>`_)
