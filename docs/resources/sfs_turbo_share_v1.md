@@ -56,7 +56,7 @@ resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
 }
 ```
 
-### SFS Turbo share with 20, 40, 125 or 250 MB/s/TiB file system
+### SFS Turbo share with 20, 40, 125, 250, 500 or 1000 MB/s/TiB file system
 
 ```hcl
 variable "vpc_id" {}
@@ -86,14 +86,24 @@ The following arguments are supported:
 * `name` - (Required, String, ForceNew) Specifies the name of an SFS Turbo file system. The value contains 4 to 64
   characters and must start with a letter. Changing this will create a new resource.
 
-* `size` - (Required, Int) Specifies the capacity of a common file system, in GB. The value ranges
-  from `500` to `32768`.For an SFS Turbo Enhanced file system, if expand_type is set to bandwidth in the metadata field, the capacity ranges from 10240 to 327680, in GiB. If `expand_type` is set to `hpc` and `hpc_bw` is set to `20M` (20MB/s/TiB), `40M` (40MB/s/TiB:), `125M` (125MB/s/TiB), or `250M` (250MB/s/TiB), the capacity ranges from 3686 to 1048576, in GiB. The capacity must be a **multiple of 1.2 TiB**. The value must be rounded down after being converted to GiB. For example, 3.6TiB->3686GiB, 4.8TiB->4915GiB, 8.4TiB->8601GiB.
+* `size` - (Required, Int) Specifies the capacity of a file system, in GiB.
+For a previous-generation SFS Turbo file system, the capacity ranges from `500` to `32768`, in GiB.
+For a previous-generation SFS Turbo file system with `expand_type` set to `bandwidth` in metadata, the capacity ranges from `10240` to `327680`, in GiB.
+For a `20 MB/s/TiB` file system with `expand_type` set to `hpc` and `hpc_bw` set to `20M` in metadata, the capacity ranges from `3686` to `1048576`, in GiB, and must be a multiple of `1.2 TiB`.
+For a `40 MB/s/TiB` file system with `expand_type` set to `hpc` and `hpc_bw` set to `40M` in metadata, the capacity ranges from `1228` to `1048576`, in GiB, and must be a multiple of `1.2 TiB`.
+For a `125 MB/s/TiB` file system with `expand_type` set to `hpc` and `hpc_bw` set to `125M` in metadata, the capacity ranges from `1228` to `1048576`, in GiB, and must be a multiple of `1.2 TiB`.
+For a `250 MB/s/TiB` file system with `expand_type` set to `hpc` and `hpc_bw` set to `250M` in metadata, the capacity ranges from `1228` to `1048576`, in GiB, and must be a multiple of `1.2 TiB`.
+For a `500 MB/s/TiB` file system with `expand_type` set to `hpc` and `hpc_bw` set to `500M` in metadata, the capacity ranges from `1228` to `1048576`, in GiB, and must be a multiple of `1.2 TiB`.
+For a `1,000 MB/s/TiB` file system with `expand_type` set to `hpc` and `hpc_bw` set to `1000M` in metadata, the capacity ranges from `1228` to `1048576`, in GiB, and must be a multiple of `1.2 TiB`.
+The desired capacity must be converted to GiB and rounded down to the nearest integer. For example, specify 3686 GiB for a 3.6 TiB file system, 4915 GiB for a 4.8 TiB file system, and 8601 GiB for an 8.4 TiB file system.
 
 
 * `share_proto` - (Optional, String, ForceNew) Specifies the protocol for sharing file systems. The valid value is `NFS`.
   Changing this will create a new resource.
 
-* `share_type` - (Optional, String, ForceNew) Specifies the file system type. The valid values are `STANDARD` and `PERFORMANCE`.
+* `share_type` - (Optional, String, ForceNew) Specifies the file system type. 
+  For a previous-generation SFS Turbo file system, specify `STANDARD` for a Standard or Standard-Enhanced file system, and `PERFORMANCE` for a Performance or Performance-Enhanced file system.
+  For a `1,000 MB/s/TiB`, `500 MB/s/TiB`, `250 MB/s/TiB`, `125 MB/s/TiB`, `40 MB/s/TiB`, or `20 MB/s/TiB` file system, this field **is not verified**. Specify either `STANDARD` or `PERFORMANCE`.
   Changing this will create a new resource.
 
 * `availability_zone` - (Required, String, ForceNew) Specifies the availability zone where the file system is located.
@@ -108,11 +118,11 @@ The following arguments are supported:
 * `crypt_key_id` - (Optional, String, ForceNew) Specifies the ID of a KMS key to encrypt the file system.
   Changing this will create a new resource.
 
-* `expand_type` - (Optional, String, ForceNew) Specifies the extension type. This parameter is mandatory when you are creating an SFS Turbo 250 MB/s/TiB, 125 MB/s/TiB, 40 MB/s/TiB, 20 MB/s/TiB, or Enhanced file system. Accepted values: 
+* `expand_type` - (Optional, String, ForceNew) Specifies the extension type. This parameter is mandatory when you are creating an SFS Turbo `1,000 MB/s/TiB`, `500 MB/s/TiB`, `250 MB/s/TiB`, `125 MB/s/TiB`, `40 MB/s/TiB`, `20 MB/s/TiB`, or Enhanced file system. Accepted values: 
     * `bandwidth`: To create a `Standard - Enhanced` or `Performance - Enhanced` file system.
-    * `hpc`: To create a 250 MB/s/TiB, 125 MB/s/TiB, 40 MB/s/TiB, or 20 MB/s/TiB file system.
+    * `hpc`: To create a 1,000 MB/s/TiB, 500 MB/s/TiB, 250 MB/s/TiB, 125 MB/s/TiB, 40 MB/s/TiB, or 20 MB/s/TiB file system.
 
-* `hpc_bw` - (Optional, String, ForceNew) Specifies the file system bandwidth. This parameter is mandatory when you are creating an SFS Turbo 250 MB/s/TiB, 125 MB/s/TiB, 40 MB/s/TiB, 20 MB/s/TiB file system. Accepted values: `20M` (for a 20 MB/s/TiB file system), `40M` (for a 40 MB/s/TiB file system), `125M` (for a 125 MB/s/TiB file system), and `250M` (for a 250 MB/s/TiB file system).
+* `hpc_bw` - (Optional, String, ForceNew) Specifies the file system bandwidth. This parameter is mandatory when you are creating an SFS Turbo 1,000 MB/s/TiB, 500 MB/s/TiB, 250 MB/s/TiB, 125 MB/s/TiB, 40 MB/s/TiB, 20 MB/s/TiB file system. Accepted values: `20M` (for a 20 MB/s/TiB file system), `40M` (for a 40 MB/s/TiB file system), `125M` (for a 125 MB/s/TiB file system), `250M` (for a 250 MB/s/TiB file system), `500M` (for a 500 MB/s/TiB file system), and `1000M` (for a 1000 MB/s/TiB file system).
 
 -> SFS Turbo will create two private IP addresses and one virtual IP address under the subnet you specified.
 To ensure normal use, SFS Turbo will enable the inbound rules for ports `111`, `445`, `2049`, `2051`, `2052`,
