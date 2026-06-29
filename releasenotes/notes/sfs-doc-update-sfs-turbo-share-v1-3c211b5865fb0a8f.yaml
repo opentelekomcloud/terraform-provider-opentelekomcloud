@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[SFS]** Update documentation for ``resource/opentelekomcloud_sfs_turbo_share_v1`` (`#3444 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3444>`_)
