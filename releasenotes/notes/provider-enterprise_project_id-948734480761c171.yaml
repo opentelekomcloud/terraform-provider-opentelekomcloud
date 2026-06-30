@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[Provider]** Fix to include enterprise_project_id setting (`#3427 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3427>`_)

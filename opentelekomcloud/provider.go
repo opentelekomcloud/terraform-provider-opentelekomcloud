@@ -827,6 +827,7 @@ func providerConfigure(_ context.Context, d *schema.ResourceData, p *schema.Prov
 		MaxRetries:          d.Get("max_retries").(int),
 		MaxBackoffRetries:   d.Get("max_backoff_retries").(int),
 		BackoffRetryTimeout: d.Get("backoff_retry_timeout").(int),
+		EnterpriseProjectID: d.Get("enterprise_project_id").(string),
 		RequestTimeout:      d.Get("request_timeout").(int),
 		UserAgent:           p.UserAgent("terraform-provider-opentelekomcloud", version.ProviderVersion),
 	}
