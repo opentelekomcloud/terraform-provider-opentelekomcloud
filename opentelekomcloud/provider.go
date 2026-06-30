@@ -262,6 +262,12 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("OS_BACKOFF_RETRY_TIMEOUT", 60),
 				Description: common.Descriptions["backoff_retry_timeout"],
 			},
+			"request_timeout": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_REQUEST_TIMEOUT", 60),
+				Description: common.Descriptions["request_timeout"],
+			},
 			"enterprise_project_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -821,6 +827,7 @@ func providerConfigure(_ context.Context, d *schema.ResourceData, p *schema.Prov
 		MaxRetries:          d.Get("max_retries").(int),
 		MaxBackoffRetries:   d.Get("max_backoff_retries").(int),
 		BackoffRetryTimeout: d.Get("backoff_retry_timeout").(int),
+		RequestTimeout:      d.Get("request_timeout").(int),
 		UserAgent:           p.UserAgent("terraform-provider-opentelekomcloud", version.ProviderVersion),
 	}
 
