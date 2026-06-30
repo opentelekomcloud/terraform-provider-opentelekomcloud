@@ -1,4 +1,4 @@
 ---
 fixes:
   |
-  **[DCS]** Fix ``resource/opentelekomcloud_dcs_instance_v2`` failing to create a Redis Cluster instance with ``ssl_enable = true`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  **[DCS]** Fix ``resource/opentelekomcloud_dcs_instance_v2`` failing to create a Redis Cluster instance with ``ssl_enable = true`` (`#3448 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3448>`_)
