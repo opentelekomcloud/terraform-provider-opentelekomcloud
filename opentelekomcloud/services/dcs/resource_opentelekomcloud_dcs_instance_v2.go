@@ -572,17 +572,9 @@ func resourceDcsInstancesV2Create(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	if sslEnabled := d.Get("ssl_enable").(bool); sslEnabled {
-		sslOpts := buildSslParam(sslEnabled)
-		sslOpts.InstanceId = id
-		_, err := ssl.Update(client, sslOpts)
-		if err != nil {
-			return diag.Errorf("error updating SSL for the instance (%s): %s", id, err)
-		}
-
-		err = waitForSslCompleted(ctx, client, d)
-		if err != nil {
-			return diag.Errorf("error waiting for updating SSL to complete: %s", err)
+	if d.Get("ssl_enable").(bool) {
+		if err := updateInstanceSsl(ctx, client, d, d.Timeout(schema.TimeoutCreate)); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
@@ -949,17 +941,8 @@ func resourceDcsInstancesV2Update(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if d.HasChange("ssl_enable") {
-		sslOpts := buildSslParam(d.Get("ssl_enable").(bool))
-		sslOpts.InstanceId = d.Id()
-		_, err = ssl.Update(client, sslOpts)
-		if err != nil {
-			return diag.Errorf("error updating SSL for the instance (%s): %s", d.Id(), err)
-		}
-
-		// wait for SSL updated
-		err = waitForSslCompleted(ctx, client, d)
-		if err != nil {
-			return diag.Errorf("error waiting for updating SSL to complete: %s", err)
+		if err = updateInstanceSsl(ctx, client, d, d.Timeout(schema.TimeoutUpdate)); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
@@ -1118,19 +1101,31 @@ func handleOperationError(err error) (bool, error) {
 	if err == nil {
 		return false, nil
 	}
-	if errCode, ok := err.(golangsdk.ErrDefault400); ok {
-		var apiError interface{}
-		if jsonErr := json.Unmarshal(errCode.Body, &apiError); jsonErr != nil {
-			return false, jsonErr
-		}
-		errorCode, errorCodeErr := jmespath.Search("error_code", apiError)
-		if errorCodeErr != nil {
-			return false, fmt.Errorf("error parse errorCode from response body: %s", errorCodeErr)
-		}
-		// CBC.99003651: Another operation is being performed.
-		if operateErrorCode[errorCode.(string)] || errorCode == "CBC.99003651" {
-			return true, err
-		}
+
+	var body []byte
+	switch e := err.(type) {
+	case golangsdk.ErrDefault400:
+		body = e.Body
+	case golangsdk.ErrDefault409:
+		body = e.Body
+	case golangsdk.ErrDefault500:
+		body = e.Body
+	case golangsdk.ErrDefault503:
+		body = e.Body
+	default:
+		return false, err
+	}
+	var apiError interface{}
+	if jsonErr := json.Unmarshal(body, &apiError); jsonErr != nil {
+		return false, jsonErr
+	}
+	errorCode, errorCodeErr := jmespath.Search("error_code", apiError)
+	if errorCodeErr != nil {
+		return false, fmt.Errorf("error parse errorCode from response body: %s", errorCodeErr)
+	}
+	// CBC.99003651: Another operation is being performed.
+	if code, ok := errorCode.(string); ok && (operateErrorCode[code] || code == "CBC.99003651") {
+		return true, err
 	}
 	return false, err
 }
@@ -1180,6 +1175,34 @@ func getAzCode(d *schema.ResourceData, client *golangsdk.ServiceClient) ([]strin
 	azCodes = common.ExpandToStringList(availabilityZones.([]interface{}))
 
 	return azCodes, nil
+}
+
+func updateInstanceSsl(ctx context.Context, client *golangsdk.ServiceClient, d *schema.ResourceData,
+	timeout time.Duration) error {
+	sslOpts := buildSslParam(d.Get("ssl_enable").(bool))
+	sslOpts.InstanceId = d.Id()
+	retryFunc := func() (interface{}, bool, error) {
+		_, err := ssl.Update(client, sslOpts)
+		retry, err := handleOperationError(err)
+		return nil, retry, err
+	}
+	_, err := common.RetryContextWithWaitForState(&common.RetryContextWithWaitForStateParam{
+		Ctx:          ctx,
+		RetryFunc:    retryFunc,
+		WaitFunc:     refreshDcsInstanceState(client, d.Id()),
+		WaitTarget:   []string{"RUNNING"},
+		Timeout:      timeout,
+		DelayTimeout: 1 * time.Second,
+		PollInterval: 10 * time.Second,
+	})
+	if err != nil {
+		return fmt.Errorf("error updating SSL for the instance (%s): %s", d.Id(), err)
+	}
+
+	if err := waitForSslCompleted(ctx, client, d); err != nil {
+		return fmt.Errorf("error waiting for updating SSL to complete: %s", err)
+	}
+	return nil
 }
 
 func waitForSslCompleted(ctx context.Context, c *golangsdk.ServiceClient, d *schema.ResourceData) error {
