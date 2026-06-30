@@ -1,0 +1,4 @@
+upgrade:
+  - |
+    **[CSS]** Updating the `admin_pass` parameter in `resource/opentelekomcloud_css_cluster_v1` now updates the cluster password without recreating the cluster. The `enable_https` and `enable_authority` parameter documentation has also been updated.
+    (`#3442 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3442>`_)

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math"
 	"math/rand"
@@ -49,24 +48,14 @@ func (lrt *RoundTripper) RoundTrip(request *http.Request) (*http.Response, error
 	// for future reference, this is how to access the Transport struct:
 	// tlsconfig := lrt.Rt.(*http.Transport).TLSClientConfig
 
-	var err error
+	canReplay := request.Body == nil || request.GetBody != nil
 
-	if lrt.OsDebug {
-		log.Printf("[DEBUG] OpenTelekomCloud Request URL: %s %s", request.Method, request.URL)
-		log.Printf("[DEBUG] OpenTelekomCloud Request Headers:\n%s", formatHeaders(request.Header, "\n"))
-
-		if request.Body != nil {
-			request.Body, err = lrt.logRequest(request.Body, request.Header.Get("Content-Type"))
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	response, err := lrt.Rt.RoundTrip(request)
-	// Retrying connection
+	response, err := lrt.roundTrip(request, canReplay)
 	retry := 1
 	for response == nil {
+		if !canReplay {
+			return nil, err
+		}
 		if retry > lrt.MaxRetries {
 			if lrt.OsDebug {
 				log.Printf("[DEBUG] OpenTelecomCloud connection error, retries exhausted. Aborting")
@@ -78,11 +67,9 @@ func (lrt *RoundTripper) RoundTrip(request *http.Request) (*http.Response, error
 		if lrt.OsDebug {
 			log.Printf("[DEBUG] OpenTelecomCloud connection error, retry number %d: %s", retry, err)
 		}
+
 		time.Sleep(retryTimeout(retry))
-		if lrt.SignOptions != nil {
-			golangsdk.ReSign(request, *lrt.SignOptions)
-		}
-		response, err = lrt.Rt.RoundTrip(request)
+		response, err = lrt.roundTrip(request, canReplay)
 		retry += 1
 	}
 
@@ -96,9 +83,58 @@ func (lrt *RoundTripper) RoundTrip(request *http.Request) (*http.Response, error
 	return response, err
 }
 
+func cloneRequest(request *http.Request, canReplay bool) (*http.Request, error) {
+	cloned := request.Clone(request.Context())
+	cloned.Header = request.Header.Clone()
+
+	if request.Body != nil {
+		if canReplay {
+			body, err := request.GetBody()
+			if err != nil {
+				return nil, err
+			}
+			cloned.Body = body
+		} else {
+			cloned.Body = request.Body
+		}
+	}
+
+	return cloned, nil
+}
+
+func (lrt *RoundTripper) roundTrip(request *http.Request, canReplay bool) (*http.Response, error) {
+	req, err := cloneRequest(request, canReplay)
+	if err != nil {
+		return nil, err
+	}
+	if lrt.SignOptions != nil && canReplay {
+		golangsdk.ReSign(req, *lrt.SignOptions)
+	}
+
+	if lrt.OsDebug {
+		log.Printf("[DEBUG] OpenTelekomCloud Request URL: %s %s", req.Method, req.URL)
+		log.Printf("[DEBUG] OpenTelekomCloud Request Headers:\n%s", formatHeaders(req.Header, "\n"))
+
+		if req.Body != nil {
+			var err error
+			req.Body, err = lrt.logRequest(req.Body, req.Header.Get("Content-Type"))
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return lrt.Rt.RoundTrip(req)
+}
+
 // logRequest will log the HTTP Request details.
 // If the body is JSON, it will attempt to be pretty-formatted.
 func (lrt *RoundTripper) logRequest(original io.ReadCloser, contentType string) (io.ReadCloser, error) {
+	if strings.HasPrefix(contentType, "application/octet-stream") {
+		log.Printf("[DEBUG] OpenTelekomCloud Request Body: not logging binary request body")
+		return original, nil
+	}
+
 	defer func() { _ = original.Close() }()
 
 	var bs bytes.Buffer
@@ -115,7 +151,7 @@ func (lrt *RoundTripper) logRequest(original io.ReadCloser, contentType string) 
 		log.Printf("[DEBUG] OpenTelekomCloud Request Body: %s", bs.String())
 	}
 
-	return ioutil.NopCloser(strings.NewReader(bs.String())), nil
+	return io.NopCloser(strings.NewReader(bs.String())), nil
 }
 
 // logResponse will log the HTTP Response details.
@@ -132,7 +168,7 @@ func (lrt *RoundTripper) logResponse(original io.ReadCloser, contentType string)
 		if debugInfo != "" {
 			log.Printf("[DEBUG] OpenTelekomCloud Response Body: %s", debugInfo)
 		}
-		return ioutil.NopCloser(strings.NewReader(bs.String())), nil
+		return io.NopCloser(strings.NewReader(bs.String())), nil
 	}
 
 	var buf bytes.Buffer
@@ -142,7 +178,7 @@ func (lrt *RoundTripper) logResponse(original io.ReadCloser, contentType string)
 	}
 	log.Printf("[DEBUG] the response is: %s", buf.String())
 	log.Printf("[DEBUG] Not logging because OpenTelekomCloud response body isn't JSON")
-	return ioutil.NopCloser(strings.NewReader(buf.String())), nil
+	return io.NopCloser(strings.NewReader(buf.String())), nil
 }
 
 // formatJSON will try to pretty-format a JSON body.

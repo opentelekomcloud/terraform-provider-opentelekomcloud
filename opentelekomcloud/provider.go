@@ -262,6 +262,12 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("OS_BACKOFF_RETRY_TIMEOUT", 60),
 				Description: common.Descriptions["backoff_retry_timeout"],
 			},
+			"request_timeout": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_REQUEST_TIMEOUT", 60),
+				Description: common.Descriptions["request_timeout"],
+			},
 			"enterprise_project_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -489,6 +495,8 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cbr_policy_v3":                             cbr.ResourceCBRPolicyV3(),
 			"opentelekomcloud_cbr_vault_v3":                              cbr.ResourceCBRVaultV3(),
 			"opentelekomcloud_cc_central_network_v3":                     cc.ResourceCcCentralNetworkV3(),
+			"opentelekomcloud_cc_central_network_policy_v3":              cc.ResourceCcCentralNetworkPolicyV3(),
+			"opentelekomcloud_cc_central_network_policy_apply_v3":        cc.ResourceCcCentralNetworkPolicyApplyV3(),
 			"opentelekomcloud_cce_addon_v3":                              cce.ResourceCCEAddonV3(),
 			"opentelekomcloud_cce_cluster_v3":                            cce.ResourceCCEClusterV3(),
 			"opentelekomcloud_cce_node_attach_v3":                        cce.ResourceCCENodeV3Attach(),
@@ -820,6 +828,7 @@ func providerConfigure(_ context.Context, d *schema.ResourceData, p *schema.Prov
 		MaxBackoffRetries:   d.Get("max_backoff_retries").(int),
 		BackoffRetryTimeout: d.Get("backoff_retry_timeout").(int),
 		EnterpriseProjectID: d.Get("enterprise_project_id").(string),
+		RequestTimeout:      d.Get("request_timeout").(int),
 		UserAgent:           p.UserAgent("terraform-provider-opentelekomcloud", version.ProviderVersion),
 	}
 
