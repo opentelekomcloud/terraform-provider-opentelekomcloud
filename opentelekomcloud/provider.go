@@ -497,6 +497,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cc_central_network_v3":                     cc.ResourceCcCentralNetworkV3(),
 			"opentelekomcloud_cc_central_network_policy_v3":              cc.ResourceCcCentralNetworkPolicyV3(),
 			"opentelekomcloud_cc_central_network_policy_apply_v3":        cc.ResourceCcCentralNetworkPolicyApplyV3(),
+			"opentelekomcloud_cc_global_connection_bandwidth_v3":         cc.ResourceCcGlobalConnectionBandwidthV3(),
 			"opentelekomcloud_cce_addon_v3":                              cce.ResourceCCEAddonV3(),
 			"opentelekomcloud_cce_cluster_v3":                            cce.ResourceCCEClusterV3(),
 			"opentelekomcloud_cce_node_attach_v3":                        cce.ResourceCCENodeV3Attach(),
