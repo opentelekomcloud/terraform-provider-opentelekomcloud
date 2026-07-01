@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **[Cloud Connect]** Added new resource ``opentelekomcloud_cc_global_connection_bandwidth_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[Cloud Connect]** Added new resource ``opentelekomcloud_cc_global_connection_bandwidth_v3`` (`#3449 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3449>`_)
