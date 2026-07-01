@@ -126,36 +126,6 @@ func TestAccDcsInstancesV2_basicSingleInstance(t *testing.T) {
 	})
 }
 
-func TestAccDcsInstancesV2_basicEngineV3Instance(t *testing.T) {
-	var (
-		dcsInstance  instance.DcsInstance
-		instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
-
-		rc = common.InitResourceCheck(
-			dcsV2InstanceName,
-			&dcsInstance,
-			getFunctionTriggerFunc,
-		)
-	)
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      rc.CheckResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDcsV2InstanceEngineV3(instanceName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDcsV2InstanceExists(dcsV2InstanceName, dcsInstance),
-					resource.TestCheckResourceAttr(dcsV2InstanceName, "name", instanceName),
-					resource.TestCheckResourceAttr(dcsV2InstanceName, "engine", "Redis"),
-					resource.TestCheckResourceAttr(dcsV2InstanceName, "flavor", "dcs.master_standby"),
-				),
-			},
-		},
-	})
-}
-
 func TestAccDcsInstancesV2_Whitelist(t *testing.T) {
 	var (
 		dcsInstance  instance.DcsInstance
@@ -252,6 +222,41 @@ func TestAccDcsInstancesV2_SSL(t *testing.T) {
 					resource.TestCheckResourceAttr(dcsV2InstanceName, "engine_version", "6.0"),
 					resource.TestCheckResourceAttr(dcsV2InstanceName, "capacity", "0.125"),
 					resource.TestCheckResourceAttr(dcsV2InstanceName, "ssl_enable", "false"),
+					resource.TestCheckResourceAttrSet(dcsV2InstanceName, "private_ip"),
+					resource.TestCheckResourceAttrSet(dcsV2InstanceName, "port"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDcsInstancesV2_SSLCluster(t *testing.T) {
+	var (
+		dcsInstance  instance.DcsInstance
+		instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+
+		rc = common.InitResourceCheck(
+			dcsV2InstanceName,
+			&dcsInstance,
+			getFunctionTriggerFunc,
+		)
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDcsV2InstanceSSLCluster(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDcsV2InstanceExists(dcsV2InstanceName, dcsInstance),
+					resource.TestCheckResourceAttr(dcsV2InstanceName, "name", instanceName),
+					resource.TestCheckResourceAttr(dcsV2InstanceName, "engine", "Redis"),
+					resource.TestCheckResourceAttr(dcsV2InstanceName, "engine_version", "6.0"),
+					resource.TestCheckResourceAttr(dcsV2InstanceName, "capacity", "4"),
+					resource.TestCheckResourceAttr(dcsV2InstanceName, "flavor", "redis.cluster.xu1.large.r2.4"),
+					resource.TestCheckResourceAttr(dcsV2InstanceName, "ssl_enable", "true"),
 					resource.TestCheckResourceAttrSet(dcsV2InstanceName, "private_ip"),
 					resource.TestCheckResourceAttrSet(dcsV2InstanceName, "port"),
 				),
@@ -419,27 +424,6 @@ resource "opentelekomcloud_dcs_instance_v2" "instance_1" {
   subnet_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   availability_zones = [data.opentelekomcloud_compute_availability_zones_v2.zones.names[0]]
   flavor             = "redis.single.xu1.tiny.128"
-}
-`, testBase, instanceName)
-}
-
-func testAccDcsV2InstanceEngineV3(instanceName string) string {
-	return fmt.Sprintf(`
-
-
-%s
-
-resource "opentelekomcloud_dcs_instance_v2" "instance_1" {
-  name               = "%s"
-  engine_version     = "3.0"
-  password           = "Hungarian_rapsody"
-  engine             = "Redis"
-  capacity           = 2
-  vpc_id             = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  security_group_id  = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
-  availability_zones = [data.opentelekomcloud_compute_availability_zones_v2.zones.names[0]]
-  flavor             = "dcs.master_standby"
 }
 `, testBase, instanceName)
 }
@@ -633,6 +617,25 @@ resource "opentelekomcloud_dcs_instance_v2" "instance_1" {
   flavor             = "redis.ha.xu1.tiny.r2.128"
   ssl_enable         = true
 
+}
+`, testBase, instanceName)
+}
+
+func testAccDcsV2InstanceSSLCluster(instanceName string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_dcs_instance_v2" "instance_1" {
+  name               = "%s"
+  engine_version     = "6.0"
+  password           = "Hungarian_rapsody"
+  engine             = "Redis"
+  capacity           = 4
+  vpc_id             = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id          = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  availability_zones = [data.opentelekomcloud_compute_availability_zones_v2.zones.names[0]]
+  flavor             = "redis.cluster.xu1.large.r2.4"
+  ssl_enable         = true
 }
 `, testBase, instanceName)
 }

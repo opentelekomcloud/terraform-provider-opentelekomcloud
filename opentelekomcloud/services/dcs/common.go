@@ -38,6 +38,8 @@ var (
 		"DCS.4118": true,
 		// freeze
 		"DCS.4120": true,
+		// instance is recovering from an internal fault, retry later
+		"DCS.4104": true,
 		// creating/restarting
 		"DCS.4975": true,
 	}
