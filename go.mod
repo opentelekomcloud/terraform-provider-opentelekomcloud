@@ -68,3 +68,5 @@ require (
 	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 )
+
+replace github.com/opentelekomcloud/gophertelekomcloud => github.com/DKSR-Data-Competence-for-Cities-Regions/gophertelekomcloud v0.0.0-20260702185825-f56b69a6f110
