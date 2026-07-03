@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Updating go mod fixes ``resource/opentelekomcloud_cce_cluster_v3`` error caused by api change (`#3453 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3453>`_)
