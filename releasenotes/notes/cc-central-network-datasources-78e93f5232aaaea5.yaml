@@ -1,0 +1,17 @@
+---
+features:
+  - |
+    **[Cloud Connect]** Added new data source ``opentelekomcloud_cc_central_networks_v3``
+    (`#3456 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3456>`_)
+  - |
+    **[Cloud Connect]** Added new data source ``opentelekomcloud_cc_central_network_capabilities_v3``
+    (`#3456 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3456>`_)
+  - |
+    **[Cloud Connect]** Added new data source ``opentelekomcloud_cc_central_network_quotas_v3``
+    (`#3456 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3456>`_)
+  - |
+    **[Cloud Connect]** Added new data source ``opentelekomcloud_cc_central_network_connections_v3``
+    (`#3456 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3456>`_)
+  - |
+    **[Cloud Connect]** Added new data source ``opentelekomcloud_cc_central_network_policies_v3``
+    (`#3456 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3456>`_)
