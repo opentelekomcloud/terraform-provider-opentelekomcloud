@@ -1,0 +1,14 @@
+---
+security:
+  - |
+    **[ELB]** Mark ``private_key`` as ``sensitive`` in
+    ``resource/opentelekomcloud_lb_certificate_v2`` so the TLS private key is no
+    longer exposed in ``plan``/``apply`` output
+  - |
+    **[ELB]** Mark ``private_key`` as ``sensitive`` in
+    ``resource/opentelekomcloud_lb_certificate_v3`` so the TLS private key is no
+    longer exposed in ``plan``/``apply`` output
+  - |
+    **[ELB]** Mark ``private_key`` as ``sensitive`` in
+    ``data/opentelekomcloud_lb_certificate_v3`` so the TLS private key is no
+    longer exposed in ``plan``/``apply`` output
