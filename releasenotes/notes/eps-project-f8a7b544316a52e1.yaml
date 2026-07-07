@@ -1,0 +1,6 @@
+---
+enhancements:
+  - |
+    **[EPS]** New resource ``resource/opentelekomcloud_enterprise_project_v1`` (`#3457 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3457>`_)
+  - |
+    **[EPS]** New data-source ``data-source/opentelekomcloud_enterprise_project_v1`` (`#3457 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3457>`_)
