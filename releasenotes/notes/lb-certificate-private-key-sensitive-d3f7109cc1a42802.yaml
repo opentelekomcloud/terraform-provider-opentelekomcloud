@@ -3,12 +3,12 @@ security:
   - |
     **[ELB]** Mark ``private_key`` as ``sensitive`` in
     ``resource/opentelekomcloud_lb_certificate_v2`` so the TLS private key is no
-    longer exposed in ``plan``/``apply`` output
+    longer exposed in ``plan``/``apply`` output (`#3459 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3459>`_)
   - |
     **[ELB]** Mark ``private_key`` as ``sensitive`` in
     ``resource/opentelekomcloud_lb_certificate_v3`` so the TLS private key is no
-    longer exposed in ``plan``/``apply`` output
+    longer exposed in ``plan``/``apply`` output (`#3459 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3459>`_)
   - |
     **[ELB]** Mark ``private_key`` as ``sensitive`` in
     ``data/opentelekomcloud_lb_certificate_v3`` so the TLS private key is no
-    longer exposed in ``plan``/``apply`` output
+    longer exposed in ``plan``/``apply`` output (`#3459 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3459>`_)
