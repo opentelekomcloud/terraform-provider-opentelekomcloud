@@ -1,0 +1,115 @@
+---
+subcategory: "Enterprise Project Management Service (EPS)"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_enterprise_project_v1"
+sidebar_current: "docs-opentelekomcloud-resource-enterprise-project-v1"
+description: |-
+  Use this resource to manage an enterprise project within T-Cloud Public (former OpenTelekomCloud).
+---
+
+Up-to-date reference of API arguments for ECS instance you can get at
+[documentation portal](https://docs.otc.t-systems.com/enterprise-project-service/api-ref/enterprise_project_management_apis/enterprise_project_management/index.html#en-us-topic-0133321992)
+
+# opentelekomcloud_enterprise_project_v1
+
+Use this resource to manage an enterprise project within T-Cloud Public (former OpenTelekomCloud).
+
+-> **NOTE:** This resource can be used in three ways during the destroy operation, please read the examples and field
+  descriptions in the documentation carefully before use. As follows:
+  <br/> 1. No operations are performed on the project during deletion.
+  <br/> 2. Disable the project during deletion.
+
+## Example Usage
+
+### No operations are performed on the project during deletion
+
+```hcl
+variable "name" {}
+variable "description" {}
+
+resource "opentelekomcloud_enterprise_project_v1" "test" {
+  name                    = var.name
+  description             = var.description
+  skip_disable_on_destroy = true
+}
+```
+
+### Disable the project during deletion
+
+```hcl
+variable "name" {}
+variable "description" {}
+
+resource "opentelekomcloud_enterprise_project_v1" "test" {
+  name        = var.name
+  description = var.description
+}
+```
+
+## Argument Reference
+
+* `name` - (Required, String) Specifies the name of the enterprise project.
+  This parameter can contain `1` to `64` characters. Only English letters, Chinese characters, digits, underscores (_),
+  and hyphens (-) are allowed.
+  The name must be unique in the domain and cannot include any form of the word "default" ("deFaulT", for instance).
+
+* `description` - (Optional, String) Specifies the description of the enterprise project.
+
+* `type` - (Optional, String) Specifies the type of the enterprise project.
+  The valid values are **poc** and **prod**, defaults to **prod**.
+
+* `enable` - (Optional, Bool) Specifies whether to enable the enterprise project. Defaults to **true**.
+
+  -> The **poc** type enterprise project does not support disabling operation.
+
+* `skip_disable_on_destroy` - (Optional, Bool) Specifies whether to skip disable the enterprise project on destroy.
+  Defaults to **false**.
+
+## Attribute Reference
+
+In addition to all arguments above, the following attributes are exported:
+
+* `id` - Indicates the ID of the enterprise project.
+
+* `status` - Indicates the status of an enterprise project.
+  + **1**: Indicates enabled.
+  + **2**: Indicates disabled.
+
+* `created_at` - Indicates the time (UTC) when the enterprise project was created. Example: **2018-05-18T06:49:06Z**.
+
+* `updated_at` - Indicates the time (UTC) when the enterprise project was modified. Example: **2018-05-28T02:21:36Z**.
+
+## Timeouts
+
+This resource provides the following timeouts configuration options:
+
+* `create` - Default is 5 minutes.
+* `update` - Default is 5 minutes.
+* `delete` - Default is 5 minutes.
+
+## Import
+
+Enterprise projects can be imported using their `id`, e.g.
+
+```bash
+$ terraform import opentelekomcloud_enterprise_project_v1.test <id>
+```
+
+Note that the imported state may not be identical to your resource definition, due to some attributes missing from the
+API response, security or some other reason. The missing attributes include: `skip_disable_on_destroy`.
+It is generally recommended running **terraform plan** after importing an enterprise project. You can then decide if
+changes should be applied to the enterprise project, or the resource definition should be updated to align with the
+enterprise project.
+Also you can ignore changes as below.
+
+```hcl
+resource "opentelekomcloud_enterprise_project_v1" "test" {
+    ...
+
+  lifecycle {
+    ignore_changes = [
+      skip_disable_on_destroy
+    ]
+  }
+}
+```

@@ -33,6 +33,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ecs"
 	elbv2 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v2"
 	elbv3 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v3"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/eps"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/er"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/evs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/fgs"
@@ -343,6 +344,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_dns_nameservers_v2":                 dns.DataSourceDNSNameserversV2(),
 			"opentelekomcloud_dns_zone_v2":                        dns.DataSourceDNSZoneV2(),
 			"opentelekomcloud_dws_flavors_v2":                     dws.DataSourceDwsFlavorsV2(),
+			"opentelekomcloud_enterprise_project_v1":              eps.DataSourceEnterpriseProject(),
 			"opentelekomcloud_er_associations_v3":                 er.DataSourceAssociationsV3(),
 			"opentelekomcloud_er_instances_v3":                    er.DataSourceErInstancesV3(),
 			"opentelekomcloud_er_availability_zones_v3":           er.DataSourceErAvailabilityZonesV3(),
@@ -585,6 +587,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_drs_task_v3":                               drs.ResourceDrsTaskV3(),
 			"opentelekomcloud_dws_cluster_v1":                            dws.ResourceDcsInstanceV1(),
 			"opentelekomcloud_ecs_instance_v1":                           ecs.ResourceEcsInstanceV1(),
+			"opentelekomcloud_enterprise_project_v1":                     eps.ResourceEnterpriseProjectV1(),
 			"opentelekomcloud_er_association_v3":                         er.ResourceErAssociationV3(),
 			"opentelekomcloud_er_instance_v3":                            er.ResourceErInstanceV3(),
 			"opentelekomcloud_er_flow_log_v3":                            er.ResourceErFlowLogV3(),

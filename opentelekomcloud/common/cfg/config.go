@@ -1412,6 +1412,38 @@ func (c *Config) HssV5Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) EpsV1Client(_ string) (*golangsdk.ServiceClient, error) {
+	client, err := c.IdentityV3Client()
+	if err != nil {
+		return nil, err
+	}
+
+	parsedURL, err := url.Parse(strings.Replace(client.Endpoint, "v3/", "v1.0/", 1))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse IAM endpoint: %w", err)
+	}
+	re := regexp.MustCompile(`^[^.]+`)
+	parsedURL.Host = re.ReplaceAllString(parsedURL.Host, "eps")
+
+	client.Endpoint = parsedURL.String()
+	client.ResourceBase = client.Endpoint
+	client.Type = "eps"
+
+	domainID := c.DomainID
+	if domainID == "" {
+		domainID = c.DomainClient.DomainID
+	}
+	if domainID == "" {
+		domainID = c.DomainClient.AKSKAuthOptions.DomainID
+	}
+	if domainID == "" {
+		domainID = c.HwClient.DomainID
+	}
+	client.DomainID = domainID
+
+	return client, nil
+}
+
 func reconfigProjectName(src Config, projectName ProjectName) (*Config, error) {
 	config := &Config{}
 	if err := copier.Copy(config, &src); err != nil {
