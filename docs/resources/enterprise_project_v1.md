@@ -104,8 +104,6 @@ Also you can ignore changes as below.
 
 ```hcl
 resource "opentelekomcloud_enterprise_project_v1" "test" {
-    ...
-
   lifecycle {
     ignore_changes = [
       skip_disable_on_destroy
