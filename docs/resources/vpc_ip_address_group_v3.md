@@ -8,7 +8,7 @@ description: |-
 ---
 
 Up-to-date reference of API arguments for VPC IP address group v3 you can get at
-[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/api_v3/ip_address_group/index.html)
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/vpc_apis_v3/ip_address_group/index.html)
 
 # opentelekomcloud_vpc_ip_address_group_v3
 
