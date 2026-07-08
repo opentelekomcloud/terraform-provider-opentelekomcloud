@@ -19,7 +19,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/opentelekomcloud/gophertelekomcloud v0.9.8-0.20260706111523-58370e7e0a2a
 	github.com/unknwon/com v1.0.1
-	golang.org/x/crypto v0.51.0
+	golang.org/x/crypto v0.52.0
 	golang.org/x/sync v0.20.0
 	gopkg.in/yaml.v2 v2.4.0
 )
