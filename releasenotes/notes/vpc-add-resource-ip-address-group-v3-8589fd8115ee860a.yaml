@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **[VPC]** Add new resource ``resource/opentelekomcloud_vpc_ip_address_group_v3`` (`#3461 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3461>`_)
+  - |
+    **[VPC]** Update argument `remote_address_group_id` ``resource/opentelekomcloud_vpc_secgroup_rule_v3`` (`#3461 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3461>`_)
