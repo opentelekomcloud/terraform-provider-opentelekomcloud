@@ -44,6 +44,7 @@ func ResourceVpcIPAddressGroupV3() *schema.Resource {
 			"ip_version": {
 				Type:     schema.TypeInt,
 				Required: true,
+				ForceNew: true,
 			},
 			"enterprise_project_id": {
 				Type:     schema.TypeString,
@@ -54,6 +55,7 @@ func ResourceVpcIPAddressGroupV3() *schema.Resource {
 			"max_capacity": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				ForceNew: true,
 				Computed: true,
 			},
 			"ip_set": {
