@@ -39,8 +39,9 @@ func DataSourceCertificateV3() *schema.Resource {
 				Computed: true,
 			},
 			"private_key": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"certificate": {
 				Type:     schema.TypeString,

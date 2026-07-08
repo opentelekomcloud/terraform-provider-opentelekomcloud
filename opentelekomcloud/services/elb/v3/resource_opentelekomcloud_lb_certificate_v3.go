@@ -51,6 +51,7 @@ func ResourceCertificateV3() *schema.Resource {
 			"private_key": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Sensitive:        true,
 				DiffSuppressFunc: common.SuppressStrippedNewLines,
 			},
 			"certificate": {
