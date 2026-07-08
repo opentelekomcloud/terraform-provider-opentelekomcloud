@@ -54,6 +54,7 @@ func ResourceVpcIPAddressGroupV3() *schema.Resource {
 			"max_capacity": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"ip_set": {
 				Type:     schema.TypeList,
