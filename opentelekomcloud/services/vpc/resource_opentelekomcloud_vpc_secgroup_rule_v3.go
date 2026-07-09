@@ -74,6 +74,12 @@ func ResourceVpcSecGroupRuleV3() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
+			"remote_address_group_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
 			"action": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -96,10 +102,6 @@ func ResourceVpcSecGroupRuleV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"remote_address_group_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -115,16 +117,17 @@ func resourceVpcSecGroupRuleV3Create(ctx context.Context, d *schema.ResourceData
 
 	opts := rules.CreateOpts{
 		SecurityGroupRule: rules.SecurityGroupRuleOptions{
-			SecurityGroupID: d.Get("security_group_id").(string),
-			Description:     d.Get("description").(string),
-			Direction:       d.Get("direction").(string),
-			Ethertype:       d.Get("ether_type").(string),
-			Protocol:        d.Get("protocol").(string),
-			Multiport:       d.Get("multi_port").(string),
-			RemoteGroupID:   d.Get("remote_group_id").(string),
-			RemoteIPPrefix:  d.Get("remote_ip_prefix").(string),
-			Action:          d.Get("action").(string),
-			Priority:        d.Get("priority").(int),
+			SecurityGroupID:      d.Get("security_group_id").(string),
+			Description:          d.Get("description").(string),
+			Direction:            d.Get("direction").(string),
+			Ethertype:            d.Get("ether_type").(string),
+			Protocol:             d.Get("protocol").(string),
+			Multiport:            d.Get("multi_port").(string),
+			RemoteGroupID:        d.Get("remote_group_id").(string),
+			RemoteIPPrefix:       d.Get("remote_ip_prefix").(string),
+			RemoteAddressGroupID: d.Get("remote_address_group_id").(string),
+			Action:               d.Get("action").(string),
+			Priority:             d.Get("priority").(int),
 		},
 	}
 

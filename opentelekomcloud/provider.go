@@ -753,6 +753,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_vpc_subnet_v1":                             vpc.ResourceVpcSubnetV1(),
 			"opentelekomcloud_vpc_secgroup_v3":                           vpc.ResourceVpcSecGroupV3(),
 			"opentelekomcloud_vpc_secgroup_rule_v3":                      vpc.ResourceVpcSecGroupRuleV3(),
+			"opentelekomcloud_vpc_ip_address_group_v3":                   vpc.ResourceVpcIPAddressGroupV3(),
 			"opentelekomcloud_vpc_flow_log_v1":                           vpc.ResourceVpcFlowLogV1(),
 			"opentelekomcloud_vbs_backup_policy_v2":                      vbs.ResourceVBSBackupPolicyV2(),
 			"opentelekomcloud_vbs_backup_v2":                             vbs.ResourceVBSBackupV2(),

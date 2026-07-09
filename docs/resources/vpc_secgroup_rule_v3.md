@@ -47,9 +47,12 @@ The following arguments are supported:
 
 * `multiport` - (Optional, String, ForceNew) Specifies the port or port range. The value can be a single port, e.g. `80`, a port range, e.g. `1-30`, or inconsecutive ports separated by commas, e.g. `22,3389,80`.
 
-* `remote_ip_prefix` - (Optional, String, ForceNew) Specifies the remote IP address. If `direction` is set to `egress`, the parameter specifies the source IP address. If `direction` is set to `ingress`, the parameter specifies the destination IP address. The value is an `IP address` or a `CIDR block`. The parameter is mutually exclusive with parameter `remote_group_id`. If this parameter is left blank, the remote IP address is not limited, and the traffic from all remote IP addresses is allowed or rejected.
+* `remote_ip_prefix` - (Optional, String, ForceNew) Specifies the remote IP address. If `direction` is set to `egress`, the parameter specifies the source IP address. If `direction` is set to `ingress`, the parameter specifies the destination IP address. The value is an `IP address` or a `CIDR block`. The parameter is mutually exclusive with parameter `remote_group_id` and `remote_address_group_id`. If this parameter is left blank, the remote IP address is not limited, and the traffic from all remote IP addresses is allowed or rejected.
 
-* `remote_group_id` - (Optional, String, ForceNew) Specifies the ID of the remote security group, which allows or denies traffic to and from the security group. The value has to be the ID of an existing security group. The parameter is mutually exclusive with parameter `remote_ip_prefix`.
+* `remote_group_id` - (Optional, String, ForceNew) Specifies the ID of the remote security group, which allows or denies traffic to and from the security group. The value has to be the ID of an existing security group. The parameter is mutually exclusive with parameter `remote_ip_prefix` and `remote_address_group_id`.
+
+* `remote_address_group_id` - (Optional, String, ForceNew) Specifies the ID of an existing IP address group. The parameter value is mutually exclusive with parameters `remote_ip_prefix` and `remote_group_id`.
+
 
 * `action` - (Optional, String, ForceNew) Specifies the action of the security group rule. Supported values: `allow`, `deny`. Default value: `allow`.
 
@@ -67,8 +70,6 @@ In addition to the arguments mentioned above, the following attributes are expor
 * `created_at` - Indicates the time when the security group rule was created. It is a UTC time in yyyy-MM-ddTHH:mm:ssZ format.
 
 * `updated_at` - Indicates the time when the security group rule was updated. It is a UTC time in yyyy-MM-ddTHH:mm:ssZ format.
-
-* `remote_address_group_id` - Indicates the ID of the remote IP address group. The parameter value is mutually exclusive with parameters `remote_ip_prefix` and `remote_group_id`.
 
 ## Import
 
