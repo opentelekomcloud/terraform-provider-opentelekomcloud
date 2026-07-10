@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[VPC]** Add new data source ``opentelekomcloud_vpc_ip_address_group_v3`` (`#3463 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3463>`_)
