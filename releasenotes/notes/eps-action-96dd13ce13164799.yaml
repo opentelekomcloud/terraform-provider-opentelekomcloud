@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[EPS]** Add new ``resource/opentelekomcloud_enterprise_project_action_v1`` (`#3465 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3465>`_)
