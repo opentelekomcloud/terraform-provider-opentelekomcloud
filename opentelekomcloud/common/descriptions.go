@@ -63,4 +63,6 @@ var Descriptions = map[string]string{
 	"passcode": "One-time MFA passcode",
 
 	"enterprise_project_id": "enterprise project id",
+
+	"enable_force_new": "Whether to enable ForceNew",
 }

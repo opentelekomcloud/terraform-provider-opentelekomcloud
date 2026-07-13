@@ -275,6 +275,12 @@ func Provider() *schema.Provider {
 				Description: common.Descriptions["enterprise_project_id"],
 				DefaultFunc: schema.EnvDefaultFunc("OS_ENTERPRISE_PROJECT_ID", ""),
 			},
+			"enable_force_new": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: common.Descriptions["enable_force_new"],
+				DefaultFunc: schema.EnvDefaultFunc("OS_ENABLE_FORCE_NEW", false),
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -588,6 +594,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_dws_cluster_v1":                            dws.ResourceDcsInstanceV1(),
 			"opentelekomcloud_ecs_instance_v1":                           ecs.ResourceEcsInstanceV1(),
 			"opentelekomcloud_enterprise_project_v1":                     eps.ResourceEnterpriseProjectV1(),
+			"opentelekomcloud_enterprise_project_action_v1":              eps.ResourceEnterpriseProjectActionV1(),
 			"opentelekomcloud_er_association_v3":                         er.ResourceErAssociationV3(),
 			"opentelekomcloud_er_instance_v3":                            er.ResourceErInstanceV3(),
 			"opentelekomcloud_er_flow_log_v3":                            er.ResourceErFlowLogV3(),
@@ -838,6 +845,7 @@ func providerConfigure(_ context.Context, d *schema.ResourceData, p *schema.Prov
 		MaxBackoffRetries:   d.Get("max_backoff_retries").(int),
 		BackoffRetryTimeout: d.Get("backoff_retry_timeout").(int),
 		EnterpriseProjectID: d.Get("enterprise_project_id").(string),
+		EnableForceNew:      d.Get("enable_force_new").(bool),
 		RequestTimeout:      d.Get("request_timeout").(int),
 		UserAgent:           p.UserAgent("terraform-provider-opentelekomcloud", version.ProviderVersion),
 	}

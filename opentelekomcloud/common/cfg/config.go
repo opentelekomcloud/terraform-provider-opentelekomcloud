@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -68,6 +69,7 @@ type Config struct {
 	BackoffRetryTimeout int
 	RequestTimeout      int
 	EnterpriseProjectID string
+	EnableForceNew      bool
 
 	UserAgent string
 
@@ -1523,4 +1525,19 @@ func (c *Config) GetEnterpriseProjectID(d *schema.ResourceData, defaultEps ...st
 		return defaultEps[0]
 	}
 	return ""
+}
+
+// GetForceNew returns the enable_force_new that was specified in the resource.
+// If it was not set, the provider-level value is checked. The provider-level value can
+// either be set by the `enable_force_new` argument or by OS_ENABLE_FORCE_NEW.
+func (c *Config) GetForceNew(d *schema.ResourceDiff) bool {
+	if v, ok := d.GetOk("enable_force_new"); ok {
+		res, err := strconv.ParseBool(v.(string))
+		if err != nil {
+			return false
+		}
+		return res
+	}
+
+	return c.EnableForceNew
 }

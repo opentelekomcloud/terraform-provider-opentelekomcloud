@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strconv"
 	"strings"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -204,4 +206,79 @@ func ValidateDmsEngineVersion(v interface{}, path cty.Path) diag.Diagnostics {
 		Detail:        "Kafka 1.x versions in DMS has reached their End of Sale status on 21st June 2024.",
 		AttributePath: path,
 	}}
+}
+
+// FlexibleForceNew make the ForceNew of parameters configurable
+// this func accepts a list of non-updatable parameters
+// when non-updatable parameters are changed
+// if ForceNew is enabled, the resource will be recreated
+// if ForceNew is not enabled, an error will be raised
+// if there is DiffSuppressFunc in the schema, this func need resource schema to make DiffSuppressFunc work
+func FlexibleForceNew(keys []string, resourceSchemas ...map[string]*schema.Schema) schema.CustomizeDiffFunc {
+	return func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+		var resourceSchema map[string]*schema.Schema
+		if len(resourceSchemas) > 0 {
+			resourceSchema = resourceSchemas[0]
+		}
+
+		c := meta.(*cfg.Config)
+		var err error
+		forceNew := c.GetForceNew(d)
+		keysExpand := expandKeys(keys, d)
+
+		if forceNew {
+			for _, k := range keysExpand {
+				if err := d.ForceNew(k); err != nil {
+					log.Printf("[WARN] unable to require attribute replacement of %s: %s", k, err)
+				}
+			}
+		} else {
+			for _, k := range keysExpand {
+				if d.Id() != "" && d.HasChange(k) {
+					oldValue, newValue := d.GetChange(k)
+					if cmp.Equal(oldValue, newValue) {
+						continue
+					}
+
+					schemaAttr, schemaOk := resourceSchema[k]
+					if schemaOk && schemaAttr != nil && schemaAttr.DiffSuppressFunc != nil &&
+						schemaAttr.DiffSuppressFunc(k, oldValue.(string), newValue.(string), nil) {
+						if schemaAttr.Sensitive {
+							log.Printf("[DEBUG] ignoring change of %s due to DiffSuppressFunc, %v", k, "(sensitive value)")
+						} else {
+							log.Printf("[DEBUG] ignoring change of %s due to DiffSuppressFunc, %v -> %v", k, oldValue, newValue)
+						}
+					} else {
+						if schemaOk && schemaAttr != nil && schemaAttr.Sensitive {
+							err = multierror.Append(err, fmt.Errorf("%s can't be updated, %v", k, "(sensitive value)"))
+						} else {
+							err = multierror.Append(err, fmt.Errorf("%s can't be updated, %v -> %v", k, oldValue, newValue))
+						}
+					}
+				}
+			}
+		}
+
+		return err
+	}
+}
+
+func expandKeys(keys []string, d *schema.ResourceDiff) []string {
+	res := []string{}
+	for _, k := range keys {
+		if strings.Contains(k, "*") {
+			parts := strings.SplitN(k, ".*.", 2)
+			l := len(d.Get(parts[0]).([]interface{}))
+			i := 0
+			var tempKeys []string
+			for i < l {
+				tempKeys = append(tempKeys, strings.Join([]string{parts[0], parts[1]}, fmt.Sprintf(".%s.", strconv.Itoa(i))))
+				i++
+			}
+			res = append(res, expandKeys(tempKeys, d)...)
+		} else {
+			res = append(res, k)
+		}
+	}
+	return res
 }

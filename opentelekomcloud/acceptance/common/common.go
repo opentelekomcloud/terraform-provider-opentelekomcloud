@@ -222,6 +222,12 @@ func TestAccPreCheckKmsKeyID(t *testing.T) {
 	}
 }
 
+func TestAccPreCheckEpsID(t *testing.T) {
+	if env.OS_ENTERPRISE_PROJECT_ID == "" {
+		t.Skip("The environment variables does not support Enterprise Project ID for acc tests")
+	}
+}
+
 func GenerateRootCA(privateKeyPEM string) (string, error) {
 	block, _ := pem.Decode([]byte(privateKeyPEM))
 	if block == nil {
