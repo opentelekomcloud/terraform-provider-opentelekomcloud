@@ -126,6 +126,9 @@ func resourceDdsPublicIpAssociateV3Read(ctx context.Context, d *schema.ResourceD
 		return nil
 	}
 
+	if err = d.Set("node_id", nodeId); err != nil {
+		return diag.FromErr(err)
+	}
 	if publicIp != "" {
 		if err = d.Set("public_ip", publicIp); err != nil {
 			return diag.FromErr(err)
