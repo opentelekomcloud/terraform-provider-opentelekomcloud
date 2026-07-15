@@ -3,9 +3,11 @@ package dds
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/jmespath/go-jmespath"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dds/v3/job"
 )
 
 const (
@@ -68,4 +70,27 @@ func handleMultiOperationsError(err error) (bool, error) {
 	}
 	// Operation execution failed due to some resource or server issues, no need to try again.
 	return false, err
+}
+
+func waitForJobCompleted(client *golangsdk.ServiceClient, secs int, jobID string) error {
+	jobClient := *client
+	jobClient.ResourceBase = jobClient.Endpoint
+
+	return golangsdk.WaitFor(secs, func() (bool, error) {
+		job, err := job.Get(client, jobID)
+		if err != nil {
+			return false, err
+		}
+
+		if job.Status == "Completed" {
+			return true, nil
+		}
+		if job.Status == "Failed" {
+			err = fmt.Errorf("Job failed %s.\n", job.Status)
+			return false, err
+		}
+
+		time.Sleep(5 * time.Second)
+		return false, nil
+	})
 }
