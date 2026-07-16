@@ -350,6 +350,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_dns_nameservers_v2":                 dns.DataSourceDNSNameserversV2(),
 			"opentelekomcloud_dns_zone_v2":                        dns.DataSourceDNSZoneV2(),
 			"opentelekomcloud_dws_flavors_v2":                     dws.DataSourceDwsFlavorsV2(),
+			"opentelekomcloud_enterprise_project_quotas_v1":       eps.DataSourceEnterpriseProjectQuotasV1(),
 			"opentelekomcloud_enterprise_project_v1":              eps.DataSourceEnterpriseProject(),
 			"opentelekomcloud_er_associations_v3":                 er.DataSourceAssociationsV3(),
 			"opentelekomcloud_er_instances_v3":                    er.DataSourceErInstancesV3(),
