@@ -22,6 +22,11 @@ func DataSourceIdentityUserV3() *schema.Resource {
 		ReadContext: dataSourceIdentityUserV3Read,
 
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"domain_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -56,36 +61,49 @@ func dataSourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, met
 		return fmterr.Errorf("error creating identity client: %s", err)
 	}
 
-	enabled := d.Get("enabled").(bool)
-	listOpts := users.ListOpts{
-		DomainID: d.Get("domain_id").(string),
-		Enabled:  &enabled,
-		Name:     d.Get("name").(string),
+	var user users.User
+	if userID := d.Get("id").(string); userID != "" {
+		userDetails, err := users.Get(client, userID).Extract()
+		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
+				return fmterr.Errorf("your query returned no results. " +
+					"Please change your search criteria and try again.")
+			}
+			return fmterr.Errorf("unable to get user %s: %s", userID, err)
+		}
+		user = *userDetails
+	} else {
+		enabled := d.Get("enabled").(bool)
+		listOpts := users.ListOpts{
+			DomainID: d.Get("domain_id").(string),
+			Enabled:  &enabled,
+			Name:     d.Get("name").(string),
+		}
+
+		log.Printf("[DEBUG] List Options: %#v", listOpts)
+
+		allPages, err := users.List(client, listOpts).AllPages()
+		if err != nil {
+			return fmterr.Errorf("unable to query users: %s", err)
+		}
+
+		allUsers, err := users.ExtractUsers(allPages)
+		if err != nil {
+			return fmterr.Errorf("unable to retrieve users: %s", err)
+		}
+
+		if len(allUsers) < 1 {
+			return fmterr.Errorf("your query returned no results. " +
+				"Please change your search criteria and try again.")
+		}
+
+		if len(allUsers) > 1 {
+			log.Printf("[DEBUG] Multiple results found: %#v", allUsers)
+			return fmterr.Errorf("your query returned more than one result")
+		}
+
+		user = allUsers[0]
 	}
-
-	log.Printf("[DEBUG] List Options: %#v", listOpts)
-
-	allPages, err := users.List(client, listOpts).AllPages()
-	if err != nil {
-		return fmterr.Errorf("unable to query users: %s", err)
-	}
-
-	allUsers, err := users.ExtractUsers(allPages)
-	if err != nil {
-		return fmterr.Errorf("unable to retrieve users: %s", err)
-	}
-
-	if len(allUsers) < 1 {
-		return fmterr.Errorf("your query returned no results. " +
-			"Please change your search criteria and try again.")
-	}
-
-	if len(allUsers) > 1 {
-		log.Printf("[DEBUG] Multiple results found: %#v", allUsers)
-		return fmterr.Errorf("your query returned more than one result")
-	}
-
-	user := allUsers[0]
 
 	log.Printf("[DEBUG] Single user found: %s", user.ID)
 

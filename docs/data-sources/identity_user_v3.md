@@ -16,15 +16,28 @@ Use this data source to get the ID of an OpenTelekomCloud user.
 
 ## Example Usage
 
+### Query by name
+
 ```hcl
 data "opentelekomcloud_identity_user_v3" "user_1" {
   name = "user_1"
 }
 ```
 
+### Query by ID
+
+```hcl
+data "opentelekomcloud_identity_user_v3" "user_1" {
+  id = "0a54c86a-0b3c-4762-92cc-bdfb63c572e1"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
+
+* `id` - (Optional) The ID of the user. If set, it takes precedence over the arguments below
+  and the user is looked up by ID directly.
 
 * `domain_id` - (Optional) The domain this user belongs to.
 
@@ -36,6 +49,10 @@ The following arguments are supported:
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
+
+* `id` - The ID of the user.
+
+* `name` - The name of the user.
 
 * `password_expires_at` - Password expiration date of the user.
 
