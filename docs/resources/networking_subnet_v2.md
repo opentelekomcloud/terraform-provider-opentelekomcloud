@@ -25,6 +25,11 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   network_id = opentelekomcloud_networking_network_v2.network_1.id
   cidr       = "192.168.199.0/24"
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
 }
 ```
 
@@ -73,6 +78,8 @@ The following arguments are supported:
   for the existing subnet.
 
 * `value_specs` - (Optional) Map of additional options.
+
+* `tags` - (Optional) The key/value pairs to associate with the subnet.
 
 The `allocation_pools` block supports:
 

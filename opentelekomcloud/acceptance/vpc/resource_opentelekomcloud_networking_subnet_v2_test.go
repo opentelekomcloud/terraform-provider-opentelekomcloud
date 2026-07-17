@@ -32,6 +32,8 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SubnetExists(resourceNwSubnetName, &subnet),
 					resource.TestCheckResourceAttr("opentelekomcloud_networking_subnet_v2.subnet_1", "allocation_pools.0.start", "192.168.199.100"),
+					resource.TestCheckResourceAttr(resourceNwSubnetName, "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceNwSubnetName, "tags.key", "value"),
 				),
 			},
 			{
@@ -41,25 +43,9 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNwSubnetName, "gateway_ip", "192.168.199.1"),
 					resource.TestCheckResourceAttr(resourceNwSubnetName, "enable_dhcp", "true"),
 					resource.TestCheckResourceAttr(resourceNwSubnetName, "allocation_pools.0.start", "192.168.199.150"),
+					resource.TestCheckResourceAttr(resourceNwSubnetName, "tags.key", "value_update"),
 				),
 			},
-		},
-	})
-}
-
-func TestAccNetworkingV2Subnet_import(t *testing.T) {
-	t.Parallel()
-	quotas.BookMany(t, subnetQuotas())
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccNetworkingV2SubnetImport,
-			},
-
 			{
 				ResourceName:      resourceNwSubnetName,
 				ImportState:       true,
@@ -187,21 +173,10 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
     start = "192.168.199.100"
     end   = "192.168.199.200"
   }
-}
-`
-const testAccNetworkingV2SubnetImport = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name           = "network_1_i"
-  admin_state_up = "true"
-}
 
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  cidr       = "192.168.199.0/24"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-
-  allocation_pools {
-    start = "192.168.199.100"
-    end   = "192.168.199.200"
+  tags = {
+    foo = "bar"
+    key = "value"
   }
 }
 `
@@ -221,6 +196,11 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   allocation_pools {
     start = "192.168.199.150"
     end   = "192.168.199.200"
+  }
+
+  tags = {
+    foo = "bar"
+    key = "value_update"
   }
 }
 `
