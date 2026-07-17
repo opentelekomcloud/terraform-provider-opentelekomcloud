@@ -257,9 +257,6 @@ func resourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData,
 		d.Set("network_id", s.NetworkID),
 		d.Set("region", config.GetRegion(d)),
 	)
-	if mErr.ErrorOrNil() != nil {
-		return fmterr.Errorf("error setting subnet fields: %w", mErr)
-	}
 
 	// Set the allocation_pools
 	var allocationPools []map[string]interface{}
@@ -279,6 +276,10 @@ func resourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData,
 		mErr = multierror.Append(mErr, d.Set("tags", tagmap))
 	} else {
 		log.Printf("[WARN] Error fetching tags of Subnet (%s): %s", d.Id(), err)
+	}
+
+	if mErr.ErrorOrNil() != nil {
+		return fmterr.Errorf("error setting subnet fields: %w", mErr)
 	}
 
 	return nil
