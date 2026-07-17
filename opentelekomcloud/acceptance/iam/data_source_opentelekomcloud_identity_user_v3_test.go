@@ -34,6 +34,19 @@ func TestAccOpenStackIdentityV3UserDataSource_basic(t *testing.T) {
 						"data.opentelekomcloud_identity_user_v3.user_1", "mfa_device", ""),
 					resource.TestCheckResourceAttr(
 						"data.opentelekomcloud_identity_user_v3.user_1", "enabled", "true"),
+					resource.TestCheckResourceAttrPair(
+						"data.opentelekomcloud_identity_user_v3.user_1", "id",
+						"opentelekomcloud_identity_user_v3.user_1", "id"),
+				),
+			},
+			{
+				Config: testAccOpenStackIdentityUserV3DataSource_byID(userName, userPassword),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityUserV3DataSourceID("data.opentelekomcloud_identity_user_v3.user_1"),
+					resource.TestCheckResourceAttr(
+						"data.opentelekomcloud_identity_user_v3.user_1", "name", userName),
+					resource.TestCheckResourceAttr(
+						"data.opentelekomcloud_identity_user_v3.user_1", "enabled", "true"),
 				),
 			},
 		},
@@ -70,6 +83,16 @@ func testAccOpenStackIdentityUserV3DataSource_basic(name, password string) strin
 
 data "opentelekomcloud_identity_user_v3" "user_1" {
   name = opentelekomcloud_identity_user_v3.user_1.name
+}
+`, testAccOpenStackIdentityUserV3DataSource_user(name, password))
+}
+
+func testAccOpenStackIdentityUserV3DataSource_byID(name, password string) string {
+	return fmt.Sprintf(`
+	%s
+
+data "opentelekomcloud_identity_user_v3" "user_1" {
+  id = opentelekomcloud_identity_user_v3.user_1.id
 }
 `, testAccOpenStackIdentityUserV3DataSource_user(name, password))
 }
