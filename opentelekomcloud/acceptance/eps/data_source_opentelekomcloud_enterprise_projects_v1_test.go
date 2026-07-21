@@ -45,7 +45,7 @@ data "opentelekomcloud_enterprise_projects_v1" "enterprise_project_id_filter" {
 }
 output "enterprise_project_id_filter_is_useful" {
   value = length(data.opentelekomcloud_enterprise_projects_v1.enterprise_project_id_filter.enterprise_projects) > 0 && alltrue(
-	[for v in data.opentelekomcloud_enterprise_projects_v1.enterprise_project_id_filter.enterprise_projects[*].id : v == local.enterprise_project_id]
+    [for v in data.opentelekomcloud_enterprise_projects_v1.enterprise_project_id_filter.enterprise_projects[*].id : v == local.enterprise_project_id]
   )
 }
 
@@ -57,7 +57,7 @@ data "opentelekomcloud_enterprise_projects_v1" "name_filter" {
 }
 output "name_filter_is_useful" {
   value = length(data.opentelekomcloud_enterprise_projects_v1.name_filter.enterprise_projects) > 0 && alltrue(
-	[for v in data.opentelekomcloud_enterprise_projects_v1.name_filter.enterprise_projects[*].name : v == local.name]
+    [for v in data.opentelekomcloud_enterprise_projects_v1.name_filter.enterprise_projects[*].name : v == local.name]
   )
 }
 
@@ -69,7 +69,7 @@ data "opentelekomcloud_enterprise_projects_v1" "status_filter" {
 }
 output "status_filter_is_useful" {
   value = length(data.opentelekomcloud_enterprise_projects_v1.status_filter.enterprise_projects) > 0 && alltrue(
-	[for v in data.opentelekomcloud_enterprise_projects_v1.status_filter.enterprise_projects[*].status : v == local.status]
+    [for v in data.opentelekomcloud_enterprise_projects_v1.status_filter.enterprise_projects[*].status : v == local.status]
   )
 }`
 }
