@@ -155,7 +155,7 @@ func TestAccNetworkingV2Port_portSecurity_enabled(t *testing.T) {
 	})
 }
 
-func TestAccNetworkingV2Port_extendedDhcpOpts(t *testing.T) {
+func TestAccNetworkingV2Port_ntpDhcpOption(t *testing.T) {
 	var port ports.Port
 	resourceName := "opentelekomcloud_networking_port_v2.port_1"
 	t.Parallel()
@@ -168,21 +168,31 @@ func TestAccNetworkingV2Port_extendedDhcpOpts(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2PortExtendedDHCPOpts,
+				Config: testAccNetworkingV2PortNTPDHCPOption,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortWithExtensionsExists(resourceName, &port),
 					resource.TestCheckResourceAttr(resourceName, "extra_dhcp_option.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "extra_dhcp_option.0.name", "A"),
-					resource.TestCheckResourceAttr(resourceName, "extra_dhcp_option.0.value", "MY_VAL"),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "extra_dhcp_option.*", map[string]string{
+						"name":  "ntp-server",
+						"value": "10.100.0.33",
+					}),
+					resource.TestCheckResourceAttr(resourceName, "port_security_enabled", "false"),
+					testAccCheckNetworkingV2PortPortSecurity(&port, false),
+					testAccCheckNetworkingV2PortDHCPOption(&port, "ntp-server", "10.100.0.33"),
 				),
 			},
 			{
-				Config: testAccNetworkingV2PortExtendedDHCPOptsUpdate,
+				Config: testAccNetworkingV2PortNTPDHCPOptionUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2PortWithExtensionsExists(resourceName, &port),
 					resource.TestCheckResourceAttr(resourceName, "extra_dhcp_option.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "extra_dhcp_option.0.name", "B"),
-					resource.TestCheckResourceAttr(resourceName, "extra_dhcp_option.0.value", "MY_VAL_UPDATED"),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "extra_dhcp_option.*", map[string]string{
+						"name":  "ntp-server",
+						"value": "10.100.0.34",
+					}),
+					resource.TestCheckResourceAttr(resourceName, "port_security_enabled", "false"),
+					testAccCheckNetworkingV2PortPortSecurity(&port, false),
+					testAccCheckNetworkingV2PortDHCPOption(&port, "ntp-server", "10.100.0.34"),
 				),
 			},
 		},
@@ -342,6 +352,18 @@ func testAccCheckNetworkingV2PortPortSecurity(port *ports.Port, expected bool) r
 		}
 
 		return nil
+	}
+}
+
+func testAccCheckNetworkingV2PortDHCPOption(port *ports.Port, name, value string) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
+		for _, option := range port.ExtraDhcpOpts {
+			if option.OptName == name && option.OptValue == value {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("port DHCP option %q with value %q not found", name, value)
 	}
 }
 
@@ -543,7 +565,7 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2PortExtendedDHCPOpts = `
+const testAccNetworkingV2PortNTPDHCPOption = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -555,20 +577,22 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name       = "port_1"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  name                  = "port_1"
+  network_id            = opentelekomcloud_networking_network_v2.network_1.id
+  port_security_enabled = false
+  no_security_groups    = true
   fixed_ip {
     subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
   extra_dhcp_option {
-    name  = "A"
-    value = "MY_VAL"
+    name  = "ntp-server"
+    value = "10.100.0.33"
   }
 }
 `
 
-const testAccNetworkingV2PortExtendedDHCPOptsUpdate = `
+const testAccNetworkingV2PortNTPDHCPOptionUpdate = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -580,15 +604,17 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name       = "port_1"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  name                  = "port_1"
+  network_id            = opentelekomcloud_networking_network_v2.network_1.id
+  port_security_enabled = false
+  no_security_groups    = true
   fixed_ip {
     subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
   extra_dhcp_option {
-    name  = "B"
-    value = "MY_VAL_UPDATED"
+    name  = "ntp-server"
+    value = "10.100.0.34"
   }
 }
 `

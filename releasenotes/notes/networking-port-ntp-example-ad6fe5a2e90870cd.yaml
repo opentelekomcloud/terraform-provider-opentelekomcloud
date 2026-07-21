@@ -1,0 +1,7 @@
+---
+other:
+  - |
+    **[VPC]** NTP server example for ``resource/opentelekomcloud_networking_port_v2`` (`#3477 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3477>`_)
+fixes:
+  - |
+    **[VPC]** fix ``extra_dhcp_option`` setup while create for ``resource/opentelekomcloud_networking_port_v2`` (`#3477 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3477>`_)

@@ -220,7 +220,7 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 	dhcpOpts := d.Get("extra_dhcp_option").(*schema.Set)
 	if dhcpOpts.Len() > 0 {
 		extendedCreateOpts = extradhcpopts.CreateOptsExt{
-			CreateOptsBuilder: createOpts,
+			CreateOptsBuilder: extendedCreateOpts,
 			ExtraDHCPOpts:     expandNetworkingPortDHCPOptsV2Create(dhcpOpts),
 		}
 	}

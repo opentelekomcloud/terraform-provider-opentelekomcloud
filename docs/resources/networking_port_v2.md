@@ -41,6 +41,28 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 }
 ```
 
+### Configure NTP for a Port
+
+Use the Neutron `ntp-server` extra DHCP option to configure an NTP server for a specific port:
+
+```hcl
+resource "opentelekomcloud_networking_port_v2" "port_ntp" {
+  name       = "port_ntp"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
+
+  fixed_ip {
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
+  }
+
+  extra_dhcp_option {
+    name  = "ntp-server"
+    value = "10.100.0.33"
+  }
+}
+```
+
+The option applies only to this port. Existing guests may need to renew their DHCP lease to receive the updated NTP configuration.
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -92,7 +114,7 @@ The following arguments are supported:
   * `ip_address` - (Required, String) The additional IP address.
   * `mac_address` - (Optional, String) The additional MAC address.
 
-* `extra_dhcp_option` - (Optional, Map) Specifies the extended DHCP option. This is an extended attribute.
+* `extra_dhcp_option` - (Optional, Set) Specifies the extended DHCP option. This is an extended attribute.
   The `extra_dhcp_option` block supports:
   * `name` - (Required, String) Specifies the option name.
   * `value` - (Required, String) Specifies the option value.
