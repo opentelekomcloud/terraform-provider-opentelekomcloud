@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **ER** New Data Source: ``opentelekomcloud_enterprise_project_services_v1`` (`#3481 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3481>`_)

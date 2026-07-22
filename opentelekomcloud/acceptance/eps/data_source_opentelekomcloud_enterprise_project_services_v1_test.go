@@ -45,7 +45,7 @@ output "opentelekomcloud_enterprise_project_services_v1" {
 }
 
 data "opentelekomcloud_enterprise_project_services_v1" "test_locale" {
-  locale  = "en-us"
+  locale = "en-us"
 }
 
 output "opentelekomcloud_enterprise_project_services_v1_locale" {
@@ -53,7 +53,7 @@ output "opentelekomcloud_enterprise_project_services_v1_locale" {
 }
 
 data "opentelekomcloud_enterprise_project_services_v1" "test_service" {
-  service  = "vpc"
+  service = "vpc"
 }
 
 output "opentelekomcloud_enterprise_project_services_v1_service" {
