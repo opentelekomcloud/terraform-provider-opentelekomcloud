@@ -3,6 +3,7 @@ package acceptance
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -66,6 +67,38 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 					"force_delete",
 					"image_name",
 				},
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_createErrorRetainsState(t *testing.T) {
+	flavorID := os.Getenv("OS_COMPUTE_BUILD_ERROR_FLAVOR_ID")
+	if flavorID == "" {
+		t.Skip("OS_COMPUTE_BUILD_ERROR_FLAVOR_ID must identify a non-abandoned flavor that is accepted by the create API but enters ERROR during scheduling")
+	}
+
+	var instance servers.Server
+	quotas.BookMany(t, serverQuotas(4, flavorID))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeV2InstanceCreateError(flavorID),
+				ExpectError: regexp.MustCompile(`error waiting for instance \(.+\) to become ready`),
+			},
+			{
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
+					resource.TestCheckResourceAttrSet(resourceInstanceV2Name, "id"),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "power_state", "error"),
+					testAccCheckComputeV2InstanceState(&instance, "error"),
+				),
 			},
 		},
 	})
@@ -584,6 +617,23 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   stop_before_destroy = true
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+func testAccComputeV2InstanceCreateError(flavorID string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name              = "tf_acc_compute_instance_create_error"
+  availability_zone = %q
+  image_name        = %q
+  flavor_id         = %q
+
+  network {
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsImageName, flavorID)
+}
 
 var testAccComputeV2InstanceImageByName = fmt.Sprintf(`
 %s

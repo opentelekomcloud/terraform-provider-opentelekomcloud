@@ -475,6 +475,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		return fmterr.Errorf("error creating OpenTelekomCloud server: %w", err)
 	}
 	log.Printf("[INFO] Instance ID: %s", server.ID)
+	d.SetId(server.ID)
 
 	// Wait for the instance to become running so we can get some attributes
 	// that aren't available until later.
@@ -494,9 +495,6 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return fmterr.Errorf("error waiting for instance (%s) to become ready: %s", server.ID, err)
 	}
-
-	// Store the ID now
-	d.SetId(server.ID)
 
 	vmState := d.Get("power_state").(string)
 	if strings.ToLower(vmState) == "shutoff" {
