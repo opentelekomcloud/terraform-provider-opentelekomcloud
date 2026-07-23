@@ -353,6 +353,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_enterprise_project_quotas_v1":       eps.DataSourceEnterpriseProjectQuotasV1(),
 			"opentelekomcloud_enterprise_project_v1":              eps.DataSourceEnterpriseProject(),
 			"opentelekomcloud_enterprise_projects_v1":             eps.DataSourceEnterpriseProjectsV1(),
+			"opentelekomcloud_enterprise_project_services_v1":     eps.DataSourceEpsServicesV1(),
 			"opentelekomcloud_er_associations_v3":                 er.DataSourceAssociationsV3(),
 			"opentelekomcloud_er_instances_v3":                    er.DataSourceErInstancesV3(),
 			"opentelekomcloud_er_availability_zones_v3":           er.DataSourceErAvailabilityZonesV3(),
