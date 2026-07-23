@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ECS]** Fixed ``id`` set during creation in ``resource/opentelekomcloud_compute_instance_v2`` (`#3483 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3483>`_)
