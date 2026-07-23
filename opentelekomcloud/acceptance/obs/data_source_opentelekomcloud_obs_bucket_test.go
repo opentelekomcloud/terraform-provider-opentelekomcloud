@@ -35,6 +35,14 @@ func TestAccDataSourceObsBucket_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObsBucketDataSourceExists(dataSourceName, bucket),
 					resource.TestCheckResourceAttr(dataSourceName, "bucket", randomName),
+					resource.TestCheckResourceAttr(dataSourceName, "lifecycle_rule.#", "1"),
+					resource.TestCheckResourceAttr(dataSourceName, "lifecycle_rule.0.noncurrent_version_expiration.#", "1"),
+					resource.TestCheckResourceAttr(dataSourceName, "lifecycle_rule.0.abort_incomplete_multipart_upload.#", "1"),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						dataSourceName,
+						"lifecycle_rule.0.abort_incomplete_multipart_upload.*",
+						map[string]string{"days": "7"},
+					),
 				),
 			},
 		},
@@ -74,6 +82,21 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket        = "%s"
   storage_class = "STANDARD"
   acl           = "public-read"
+  region        = "eu-de"
+  versioning    = true
+  force_destroy = true
+
+  lifecycle_rule {
+    name    = "purge1y"
+    enabled = true
+
+    noncurrent_version_expiration {
+      days = 365
+    }
+    abort_incomplete_multipart_upload {
+      days = 7
+    }
+  }
 }
 `, name)
 }
@@ -84,10 +107,25 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket        = "%[1]s"
   storage_class = "STANDARD"
   acl           = "public-read"
+  region        = "eu-de"
+  versioning    = true
+  force_destroy = true
+
+  lifecycle_rule {
+    name    = "purge1y"
+    enabled = true
+
+    noncurrent_version_expiration {
+      days = 365
+    }
+    abort_incomplete_multipart_upload {
+      days = 7
+    }
+  }
 }
 
 data "opentelekomcloud_obs_bucket" "bucket" {
-  bucket = "%[1]s"
+  bucket = opentelekomcloud_obs_bucket.bucket.bucket
 }
 `, name)
 }

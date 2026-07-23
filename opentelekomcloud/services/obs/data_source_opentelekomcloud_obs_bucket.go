@@ -116,7 +116,7 @@ func DataSourceObsBucket() *schema.Resource {
 						},
 						"noncurrent_version_transition": {
 							Type:     schema.TypeList,
-							Optional: true,
+							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"days": {
@@ -124,6 +124,34 @@ func DataSourceObsBucket() *schema.Resource {
 										Computed: true,
 									},
 									"storage_class": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
+						"abort_incomplete_multipart_upload": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"days": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+								},
+							},
+						},
+						"tag": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"value": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
