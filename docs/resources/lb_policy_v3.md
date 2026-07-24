@@ -168,12 +168,11 @@ The following arguments are supported:
   A smaller value indicates a higher priority. The value must be unique for forwarding policies of the same listener.
   This parameter will take effect only when `advanced_forwarding` is set to `true`.
   If this parameter is passed and `advanced_forwarding` is set to `false`, an error will be returned.
-  This parameter is unsupported for shared load balancers and not available in `eu-nl`.
+  This parameter is unsupported for shared load balancers.
 
 * `fixed_response_config` - (Optional) Specifies the configuration of the page that will be returned.
   This parameter will take effect when `advanced_forwarding` is set to `true`.
   If this parameter is passed and `advanced_forwarding` is set to `false`, an error will be returned.
-  Not available in `eu-nl`.
   * `status_code` - (Required) Specifies the fixed HTTP status code configured in the forwarding rule.
     The value can be any integer in the range of `200-299`, `400-499`, or `500-599`.
   * `content_type` - (Optional) - Specifies the format of the response body.
@@ -183,7 +182,7 @@ The following arguments are supported:
 
 * `redirect_url_config` - (Optional) Specifies the URL to which requests are forwarded.
   For dedicated load balancers, This parameter will take effect when `advanced_forwarding` is set to `true`.
-  If it is passed when `advanced_forwarding` is set to `false`, an error will be returned. Not available in `eu-nl`.
+  If it is passed when `advanced_forwarding` is set to `false`, an error will be returned.
   * `protocol` - (Optional) - Specifies the protocol for redirection. The value can be `HTTP`, `HTTPS`,
     or `${protocol}`.
     The default value is `${protocol}`, indicating that the protocol of the request will be used.
