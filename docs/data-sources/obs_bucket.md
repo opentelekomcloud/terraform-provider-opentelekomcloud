@@ -40,6 +40,8 @@ The following attributes are exported:
 * `storage_class` - Specifies the storage class of the bucket. OBS provides three storage classes:
   `STANDARD`, `WARM` (Infrequent Access) and `COLD` (Archive).
 
+* `versioning` - Indicates whether bucket versioning is enabled.
+
 * `tags` - A mapping of tags to assign to the bucket. Each tag is represented by one key-value pair.
 
 * `logging` - A settings of bucket logging (documented below).
@@ -49,8 +51,6 @@ The following attributes are exported:
 * `website` - A website object (documented below).
 
 * `cors_rule` - A rule of Cross-Origin Resource Sharing (documented below).
-
-* `lifecycle_rule` - A configuration of object lifecycle management (documented below).
 
 * `server_side_encryption` - A configuration of server side encryption (documented below).
 
@@ -83,6 +83,8 @@ The `lifecycle_rule` object supports the following:
 
 * `prefix` - Object key prefix identifying one or more objects to which the rule applies.
 
+* `tag` - A list of tags used to filter objects covered by the lifecycle rule (documented below).
+
 * `expiration` - Specifies a period when objects that have been last updated are automatically
   deleted. (documented below).
 
@@ -94,6 +96,15 @@ The `lifecycle_rule` object supports the following:
 
 * `noncurrent_version_transition` - Specifies a period when noncurrent object versions are
   automatically transitioned to `WARM` or `COLD` storage class (documented below).
+
+* `abort_incomplete_multipart_upload` - Specifies when parts from incomplete multipart uploads are
+  automatically deleted (documented below).
+
+The `tag` object supports the following:
+
+* `key` - The lifecycle filter tag key.
+
+* `value` - The lifecycle filter tag value.
 
 The `expiration` object supports the following
 
@@ -117,3 +128,8 @@ The `noncurrent_version_transition` object supports the following
   transitioned to the specified storage class.
 
 * `storage_class` - The class of storage used to store the object.
+
+The `abort_incomplete_multipart_upload` object supports the following:
+
+* `days` - The number of days after an incomplete multipart upload is initiated before OBS deletes
+  its unmerged parts.
