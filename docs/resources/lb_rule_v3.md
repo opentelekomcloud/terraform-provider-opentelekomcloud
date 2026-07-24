@@ -81,7 +81,6 @@ a slash `/` and can contain only letters, digits, and special characters `_~';@^
 
 * `conditions` - (Optional) Specifies the matching conditions of the forwarding rule.
   This parameter is available only when `advanced_forwarding` is set to `true`.
-  Not available in `eu-nl`.
   * `key` - (Optional) Specifies the key of match item.
 
 ->If type is set to `HOST_NAME`, `PATH`, `METHOD`, or `SOURCE_IP`, this parameter is left blank.
