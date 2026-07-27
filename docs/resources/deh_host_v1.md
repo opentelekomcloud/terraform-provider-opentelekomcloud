@@ -41,8 +41,8 @@ The following arguments are supported:
 
 * `host_type` - (Required, String, ForceNew) The Dedicated Host type.
   Expected values are:
-  * in `eu-de`: `c4`, `s2-medium`, `m3`, `c3` and `s2`.
-  * in `eu-nl`: `i3_pro`, `i3`, `m4`, `s3` and `c4`.
+  * in `eu-de`: `s2`, `s2-medium`, `c4`, `m4`, `s7n`, `c7n`, `m7n`, `c9`, `c9_pro`, `m9`.
+  * in `eu-nl`: `s3`, `c4`, `m4`, `s7n`, `c7n`, `m7n`, `c9`, `c9_pro`, `m9`, `i3`, `i3m`, `i3_pro`.
   * in `eu-ch2`: `s3`.
 
 * `tags` - (Optional, Map) Tags key/value pairs to associate with Host.
