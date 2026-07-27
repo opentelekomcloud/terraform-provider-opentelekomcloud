@@ -39,6 +39,33 @@ resource "opentelekomcloud_waf_dedicated_cc_rule_v1" "rule_1" {
 }
 ```
 
+### Advanced Mode with Logging
+
+```hcl
+resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
+  name = "policy_cc_advanced_log"
+}
+
+resource "opentelekomcloud_waf_dedicated_cc_rule_v1" "rule_1" {
+  policy_id    = opentelekomcloud_waf_dedicated_policy_v1.policy_1.id
+  mode         = 1
+  limit_num    = 10
+  limit_period = 60
+  tag_type     = "ip"
+  description  = "advanced log rule"
+
+  conditions {
+    category        = "url"
+    logic_operation = "contain"
+    contents        = ["/url"]
+  }
+
+  action {
+    category = "log"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -49,9 +76,11 @@ The following arguments are supported:
   * `0` - Standard. Only the protected paths of domain names can be specified.
   * `1` - The path, IP address, cookie, header, and params fields can all be set.
 
-* `url` - (Required, ForceNew, String) Path to be protected in the CC attack protection rule. Changing this creates a new rule.
+* `url` - (Optional, ForceNew, String) Path to be protected in the CC attack protection rule. This parameter is required
+  when `mode` is set to `0`. Changing this creates a new rule.
 
-* `conditions` - (Optional, ForceNew, List) Rate limit conditions of the CC protection rule. Changing this creates a new rule.
+* `conditions` - (Optional, ForceNew, List) Rate limit conditions of the CC protection rule. At least one block is required
+  when `mode` is set to `1`. Changing this creates a new rule.
     The `conditions` block supports:
 
   + `category` - (Required, ForceNew, String) Field type. The value can be `url`, `ip`, `params`, `cookie`, or `header`.

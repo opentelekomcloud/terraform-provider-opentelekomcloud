@@ -2,6 +2,7 @@ package waf
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -22,6 +23,7 @@ func ResourceWafDedicatedCcRuleV1() *schema.Resource {
 		CreateContext: resourceWafDedicatedCcRuleV1Create,
 		ReadContext:   resourceWafDedicatedCcRuleV1Read,
 		DeleteContext: resourceWafDedicatedCcRuleV1Delete,
+		CustomizeDiff: validateWafDedicatedCcRuleV1Mode,
 		Importer: &schema.ResourceImporter{
 			StateContext: common.ImportByPath("policy_id", "id"),
 		},
@@ -38,13 +40,14 @@ func ResourceWafDedicatedCcRuleV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"mode": {
-				Type:     schema.TypeInt,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeInt,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntInSlice([]int{0, 1}),
 			},
 			"url": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"conditions": {
@@ -194,6 +197,20 @@ func ResourceWafDedicatedCcRuleV1() *schema.Resource {
 	}
 }
 
+func validateWafDedicatedCcRuleV1Mode(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	switch d.Get("mode").(int) {
+	case 0:
+		if d.Get("url").(string) == "" {
+			return fmt.Errorf("url must be configured when mode is 0")
+		}
+	case 1:
+		if len(d.Get("conditions").([]interface{})) == 0 {
+			return fmt.Errorf("at least one conditions block must be configured when mode is 1")
+		}
+	}
+	return nil
+}
+
 func resourceWafDedicatedCcRuleV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
@@ -220,12 +237,14 @@ func resourceWafDedicatedCcRuleV1Create(ctx context.Context, d *schema.ResourceD
 		rawAction := rawActionList[0].(map[string]interface{})
 		action = rules.CcActionObject{
 			Category: rawAction["category"].(string),
-			Detail: &rules.CcDetailObject{
+		}
+		if rawAction["content_type"].(string) != "" || rawAction["content"].(string) != "" {
+			action.Detail = &rules.CcDetailObject{
 				Response: &rules.CcResponseObject{
 					ContentType: rawAction["content_type"].(string),
 					Content:     rawAction["content"].(string),
 				},
-			},
+			}
 		}
 	}
 
@@ -242,10 +261,12 @@ func resourceWafDedicatedCcRuleV1Create(ctx context.Context, d *schema.ResourceD
 
 		condition := rules.CcConditionsObject{
 			Category:       cond["category"].(string),
-			Index:          cond["index"].(string),
 			LogicOperation: cond["logic_operation"].(string),
 			ValueListId:    cond["value_list_id"].(string),
 			Contents:       contents,
+		}
+		if index := cond["index"].(string); index != "" {
+			condition.Index = pointerto.String(index)
 		}
 		conditionList = append(conditionList, condition)
 	}
@@ -321,21 +342,24 @@ func resourceWafDedicatedCcRuleV1Read(ctx context.Context, d *schema.ResourceDat
 	for _, conditionObj := range rule.Conditions {
 		condition := map[string]interface{}{
 			"category":        conditionObj.Category,
-			"index":           conditionObj.Index,
 			"contents":        conditionObj.Contents,
 			"logic_operation": conditionObj.LogicOperation,
 			"value_list_id":   conditionObj.ValueListId,
 		}
+		if conditionObj.Index != nil {
+			condition["index"] = *conditionObj.Index
+		}
 		conditions = append(conditions, condition)
 	}
 
-	action := []map[string]interface{}{
-		{
-			"category":     rule.Action.Category,
-			"content_type": rule.Action.Detail.Response.ContentType,
-			"content":      rule.Action.Detail.Response.Content,
-		},
+	actionValue := map[string]interface{}{
+		"category": rule.Action.Category,
 	}
+	if rule.Action.Detail != nil && rule.Action.Detail.Response != nil {
+		actionValue["content_type"] = rule.Action.Detail.Response.ContentType
+		actionValue["content"] = rule.Action.Detail.Response.Content
+	}
+	action := []map[string]interface{}{actionValue}
 	mErr = multierror.Append(mErr,
 		d.Set("conditions", conditions),
 		d.Set("action", action),
