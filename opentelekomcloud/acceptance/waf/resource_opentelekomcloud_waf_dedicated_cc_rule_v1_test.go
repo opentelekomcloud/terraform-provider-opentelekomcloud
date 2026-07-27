@@ -40,6 +40,38 @@ func TestAccWafDedicatedCcAttackProtectionRuleV1_basic(t *testing.T) {
 	})
 }
 
+func TestAccWafDedicatedCcAttackProtectionRuleV1_advancedLog(t *testing.T) {
+	var rule rules.CcRule
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafDedicatedCcRuleV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWafDedicatedCcAttackProtectionRuleV1AdvancedLog,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckWafDedicatedCcRuleV1Exists(wafdCCRuleName, &rule),
+					resource.TestCheckResourceAttr(wafdCCRuleName, "mode", "1"),
+					resource.TestCheckResourceAttr(wafdCCRuleName, "url", ""),
+					resource.TestCheckResourceAttr(wafdCCRuleName, "conditions.#", "1"),
+					resource.TestCheckResourceAttr(wafdCCRuleName, "conditions.0.category", "url"),
+					resource.TestCheckResourceAttr(wafdCCRuleName, "conditions.0.logic_operation", "contain"),
+					resource.TestCheckResourceAttr(wafdCCRuleName, "conditions.0.contents.0", "/url"),
+					resource.TestCheckResourceAttr(wafdCCRuleName, "action.#", "1"),
+					resource.TestCheckResourceAttr(wafdCCRuleName, "action.0.category", "log"),
+				),
+			},
+			{
+				ResourceName:      wafdCCRuleName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: dedicatedRuleImportStateIDFunc(wafdCCRuleName, wafdPolicyResourceName),
+			},
+		},
+	})
+}
+
 func testAccCheckWafDedicatedCcRuleV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.WafDedicatedV1Client(env.OS_REGION_NAME)
@@ -112,6 +144,31 @@ resource "opentelekomcloud_waf_dedicated_cc_rule_v1" "rule_1" {
     category     = "block"
     content_type = "application/json"
     content      = "{\"error\":\"forbidden\"}"
+  }
+}
+`
+
+const testAccWafDedicatedCcAttackProtectionRuleV1AdvancedLog = `
+resource "opentelekomcloud_waf_dedicated_policy_v1" "policy_1" {
+  name = "policy_cc_advanced_log"
+}
+
+resource "opentelekomcloud_waf_dedicated_cc_rule_v1" "rule_1" {
+  policy_id    = opentelekomcloud_waf_dedicated_policy_v1.policy_1.id
+  mode         = 1
+  limit_num    = 10
+  limit_period = 60
+  tag_type     = "ip"
+  description  = "advanced log rule"
+
+  conditions {
+    category        = "url"
+    logic_operation = "contain"
+    contents        = ["/url"]
+  }
+
+  action {
+    category = "log"
   }
 }
 `

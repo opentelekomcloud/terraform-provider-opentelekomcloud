@@ -1,0 +1,4 @@
+---
+features:
+  |
+  **[WAF]** Advanced mode support in ``resource/opentelekomcloud_waf_dedicated_cc_rule_v1`` (`#3491 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3491>`_)
