@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DEH]** Update accepted values for ``host_type`` in ``docs/deh_host_v1`` (`#3490 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3490>`_)
