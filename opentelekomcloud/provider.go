@@ -11,7 +11,6 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/apigw"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/as"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/asm"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/bms"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/cbr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/cc"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/cce"
@@ -318,10 +317,6 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_ces_quotas_v1":                      ces.DataSourceCesQuotasV1(),
 			"opentelekomcloud_cfw_firewall_v1":                    cfw.DataSourceCfwFirewallV1(),
 			"opentelekomcloud_compute_availability_zones_v2":      ecs.DataSourceComputeAvailabilityZonesV2(),
-			"opentelekomcloud_compute_bms_flavors_v2":             bms.DataSourceBMSFlavorV2(),
-			"opentelekomcloud_compute_bms_keypairs_v2":            bms.DataSourceBMSKeyPairV2(),
-			"opentelekomcloud_compute_bms_nic_v2":                 bms.DataSourceBMSNicV2(),
-			"opentelekomcloud_compute_bms_server_v2":              bms.DataSourceBMSServersV2(),
 			"opentelekomcloud_compute_flavor_v2":                  ecs.DataSourceComputeFlavorV2(),
 			"opentelekomcloud_compute_keypair_v2":                 ecs.DataSourceComputeKeypairV2(),
 			"opentelekomcloud_compute_instance_v2":                ecs.DataSourceComputeInstanceV2(),
@@ -545,8 +540,6 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_cfw_ips_protection_v1":                     cfw.ResourceCfwIpsProtectionV1(),
 			"opentelekomcloud_cfw_service_group_v1":                      cfw.ResourceCfwServiceGroupV1(),
 			"opentelekomcloud_cfw_service_group_member_v1":               cfw.ResourceCfwServiceGroupMemberV1(),
-			"opentelekomcloud_compute_bms_server_v2":                     bms.ResourceComputeBMSInstanceV2(),
-			"opentelekomcloud_compute_bms_tags_v2":                       bms.ResourceBMSTagsV2(),
 			"opentelekomcloud_compute_secgroup_v2":                       ecs.ResourceComputeSecGroupV2(),
 			"opentelekomcloud_compute_servergroup_v2":                    ecs.ResourceComputeServerGroupV2(),
 			"opentelekomcloud_compute_floatingip_v2":                     ecs.ResourceComputeFloatingIPV2(),

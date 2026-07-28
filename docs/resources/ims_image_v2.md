@@ -109,7 +109,7 @@ The following arguments are supported:
 * `cmk_id` - (Optional, String, ForceNew) The master key used for encrypting an image.
   Changing this creates a new image.
 
-* `type` - (Optional, String, ForceNew) The image type. Must be one of `ECS`, `FusionCompute`, `BMS`,
+* `type` - (Optional, String, ForceNew) The image type. Must be one of `ECS`, `FusionCompute`,
   `Ironic` or `IsoImage`. Changing this creates a new image.
 
 * `hw_firmware_type` - (Optional, String) Specifies the boot mode. The value can be `bios` or `uefi`.
