@@ -38,7 +38,7 @@ The following arguments are supported:
 * `floating_ip_id` - (Required) Specifies the ID of the floating IP address.
   Changing this creates a new resource.
 
-* `internal_service_port` - (Required) Specifies port used by ECSs or BMSs
+* `internal_service_port` - (Required) Specifies port used by ECSs
   to provide services for external systems. Changing this creates a new resource.
 
 * `nat_gateway_id` - (Required) ID of the NAT gateway this DNAT rule belongs to.
@@ -47,7 +47,7 @@ The following arguments are supported:
 -> You can create a DNAT rule only when status of the NAT gateway is set to `ACTIVE`
 and `admin_state_up` of the NAT gateway administrator to `True`.
 
-* `port_id` - (Optional) Specifies the port ID of an ECS or a BMS.
+* `port_id` - (Optional) Specifies the port ID of an ECS.
   This parameter and `private_ip` are alternative. Changing this creates a
   new DNAT rule.
 
@@ -67,8 +67,7 @@ When the DNAT rule is used in the **Direct Connect** scenario, use `private_ip` 
 -> If you create a rule that applies to all port types, set `internal_service_port` to `0`,
 `external_service_port` to `0`, and `protocol` to `any`.
 
-* `external_service_port` - (Required) Specifies port used by ECSs or
-  BMSs to provide services for external systems. Changing this creates a new DNAT rule.
+* `external_service_port` - (Required) Specifies port used by ECSs to provide services for external systems. Changing this creates a new DNAT rule.
 
 * `description` - (Optional) Provides supplementary information about the DNAT rule.
   Changing this creates a new DNAT rule.

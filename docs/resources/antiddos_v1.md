@@ -12,7 +12,7 @@ Up-to-date reference of API arguments for Anti-DDoS service you can get at
 
 # opentelekomcloud_antiddos_v1
 
-Anti-DDoS monitors the service traffic from the Internet to ECSs, ELB instances, and BMSs to detect attack traffic in real time. It then cleans attack traffic according to user-configured defense policies so that services run as normal.
+Anti-DDoS monitors the service traffic from the Internet to ECSs, ELB instances to detect attack traffic in real time. It then cleans attack traffic according to user-configured defense policies so that services run as normal.
 
 ~>
 AntiDDoS protection for Elastic IP is provided by default and shouldn't be created manually.
