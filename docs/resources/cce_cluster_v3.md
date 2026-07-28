@@ -132,6 +132,34 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 }
 ```
 
+### Cluster with custom IAM agency
+
+```hcl
+variable "vpc_id" {}
+variable "subnet_id" {}
+
+resource "opentelekomcloud_identity_agency_v3" "cce_agency" {
+  name                  = "my_cce_agency"
+  description           = "Custom CCE agency"
+  delegated_domain_name = "op_svc_cce"
+
+  project_role {
+    project = "eu-de"
+    roles   = ["CCE Administrator"]
+  }
+}
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name                   = "cluster-custom-agency"
+  cluster_type           = "VirtualMachine"
+  flavor_id              = "cce.s1.small"
+  vpc_id                 = var.vpc_id
+  subnet_id              = var.subnet_id
+  container_network_type = "overlay_l2"
+  agency_name            = opentelekomcloud_identity_agency_v3.cce_agency.name
+}
+```
+
 ### CCE HA cluster
 
 ```hcl
@@ -223,6 +251,12 @@ The following arguments are supported:
 * `cluster_type` - (Required, String, ForceNew) Cluster Type, possible values are `VirtualMachine` and `BareMetal`. Changing this parameter will create a new cluster resource.
 
 * `description` - (Optional, String) Cluster description.
+
+* `agency_name` - (Optional, String) Name of the custom IAM agency to use for this cluster.
+  The agency must be of the cloud service type, delegated to `op_svc_cce`,
+  and have any [available role](../data-sources/identity_role_v3.md) assigned for the target project.
+  Custom agencies are supported only in clusters of v1.27 or later (CCE Standard only).
+  Changing this updates the agency on the running cluster without recreation.
 
 * `ipv6_enable` - (Optional, Boolean, ForceNew) Specifies whether the cluster supports IPv6 addresses. This field is supported in clusters of v1.25 and later versions. Default: `false`. If `ipv6_enable` is true, subnet should have ipv6 enabled and `kube_proxy_mode` value can only be `ipvs`.
 
@@ -408,6 +442,8 @@ All above argument parameters can be exported as attribute parameters along with
 This resource provides the following timeouts configuration options:
 
 - `create` - Default is 30 minutes.
+
+- `update` - Default is 10 minutes.
 
 - `delete` - Default is 30 minutes.
 

@@ -80,6 +80,86 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 	})
 }
 
+func TestAccCCEClusterV3_agencyName(t *testing.T) {
+	var cluster clusters.Clusters
+	rc := common.InitResourceCheck(
+		resourceClusterName,
+		&cluster,
+		getCceClusterResourceFunc,
+	)
+	clusterName := randClusterName()
+	agencyNameA := fmt.Sprintf("cce-agency-a-%s", acctest.RandString(5))
+	agencyNameB := fmt.Sprintf("cce-agency-b-%s", acctest.RandString(5))
+	t.Parallel()
+
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckAdminOnly(t)
+			if env.OS_TENANT_NAME == "" {
+				t.Skip("OS_TENANT_NAME or OS_PROJECT_NAME must be set for CCE agency acceptance tests")
+			}
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCEClusterV3AgencyName(clusterName, agencyNameA, agencyNameB, "agency_a"),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceClusterName, "agency_name", agencyNameA),
+					checkCCEClusterAgencyName(agencyNameA),
+				),
+			},
+			{
+				Config: testAccCCEClusterV3AgencyName(clusterName, agencyNameA, agencyNameB, "agency_b"),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceClusterName, "agency_name", agencyNameB),
+					checkCCEClusterAgencyName(agencyNameB),
+				),
+			},
+			{
+				Config:   testAccCCEClusterV3AgencyName(clusterName, agencyNameA, agencyNameB, "agency_b"),
+				PlanOnly: true,
+			},
+			{
+				ResourceName:      resourceClusterName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"cluster_version", "installed_addons", "ignore_addons",
+				},
+			},
+		},
+	})
+}
+
+func checkCCEClusterAgencyName(expected string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		state, ok := s.RootModule().Resources[resourceClusterName]
+		if !ok {
+			return fmt.Errorf("CCE cluster not found in state")
+		}
+
+		config := common.TestAccProvider.Meta().(*cfg.Config)
+		client, err := config.CceV3Client(env.OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("error creating CCE v3 client: %s", err)
+		}
+		cluster, err := clusters.Get(client, state.Primary.ID)
+		if err != nil {
+			return fmt.Errorf("error retrieving CCE cluster: %s", err)
+		}
+		if cluster.Spec.AgencyName != expected {
+			return fmt.Errorf("expected CCE cluster agency name %q, got %q", expected, cluster.Spec.AgencyName)
+		}
+		return nil
+	}
+}
+
 func TestAccCCEClusterV3_turbo_basic(t *testing.T) {
 	var cluster clusters.Clusters
 	rc := common.InitResourceCheck(
@@ -450,6 +530,44 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   }
 }
 `, common.DataSourceSubnet, clusterName)
+}
+
+func testAccCCEClusterV3AgencyName(clusterName, agencyNameA, agencyNameB, selectedAgency string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_identity_agency_v3" "agency_a" {
+  name                  = "%s"
+  delegated_domain_name = "op_svc_cce"
+
+  project_role {
+    project = "%s"
+    roles   = ["CCE Administrator"]
+  }
+}
+
+resource "opentelekomcloud_identity_agency_v3" "agency_b" {
+  name                  = "%s"
+  delegated_domain_name = "op_svc_cce"
+
+  project_role {
+    project = "%s"
+    roles   = ["CCE Administrator"]
+  }
+}
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  container_network_type  = "overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+  ignore_addons           = true
+  agency_name             = opentelekomcloud_identity_agency_v3.%s.name
+}
+`, common.DataSourceSubnet, agencyNameA, env.OS_TENANT_NAME, agencyNameB, env.OS_TENANT_NAME, clusterName, selectedAgency)
 }
 
 func testAccCCEClusterV3BasicSG(clusterName string) string {
