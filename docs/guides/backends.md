@@ -6,7 +6,18 @@ description: |-
   Additional documentation about s3 backend configuration within OpenTelekomCloud.
 ---
 
-> Starting with Terraform v1.11.2, an issue affects all third-party S3 implementations, causing potential `.tfstate` corruption. If you encounter this problem, manually repair the state file and roll back to an earlier Terraform version. [Issue](https://github.com/hashicorp/terraform/issues/37130)
+> Starting with Terraform v1.11.2, changes in the bundled AWS SDK can cause state uploads to fail with some third-party S3 implementations, potentially resulting in divergent `.tfstate` files. The SDK defaults to calculating and validating checksums whenever an S3 API operation supports them. This can add optional CRC32 checksums to uploads and request checksum validation for downloads, even when `skip_s3_checksum = true`. Some S3-compatible APIs do not fully support these newer checksum headers and can reject the request with errors such as `XAmzContentSHA256Mismatch`.
+>
+> Configure the SDK to use checksums only when an operation requires them:
+>
+> ```shell
+> export AWS_REQUEST_CHECKSUM_CALCULATION=when_required
+> export AWS_RESPONSE_CHECKSUM_VALIDATION=when_required
+> ```
+>
+> `AWS_REQUEST_CHECKSUM_CALCULATION=when_required` prevents the SDK from automatically adding an optional CRC32 checksum to requests such as `PutObject`. `AWS_RESPONSE_CHECKSUM_VALIDATION=when_required` prevents automatic response-checksum negotiation and validation unless Terraform explicitly enables it. These settings do not disable checksums required by an API; they avoid optional checksum behavior that an S3-compatible implementation might not support.
+>
+> If a state upload has already failed, do not run another apply because it can create divergent state histories. Recover the state from `errored.tfstate` as instructed by Terraform, or manually repair the state and roll back to an earlier Terraform version. For more details, see the [Terraform issue](https://github.com/hashicorp/terraform/issues/37130) and [AWS checksum configuration](https://docs.aws.amazon.com/sdkref/latest/guide/feature-dataintegrity.html).
 
 A `backend` defines where Terraform stores its [state](https://developer.hashicorp.com/terraform/language/state) data files.
 
