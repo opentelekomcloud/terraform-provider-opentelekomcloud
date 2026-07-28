@@ -49,6 +49,7 @@ func ResourceCCEClusterV3() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
@@ -106,6 +107,11 @@ func ResourceCCEClusterV3() *schema.Resource {
 				ForceNew: true,
 			},
 			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"agency_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -527,6 +533,7 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 			Version:     d.Get("cluster_version").(string),
 			Ipv6Enable:  d.Get("ipv6_enable").(bool),
 			Description: d.Get("description").(string),
+			AgencyName:  d.Get("agency_name").(string),
 			HostNetwork: clusters.HostNetworkSpec{
 				VpcId:           d.Get("vpc_id").(string),
 				SubnetId:        d.Get("subnet_id").(string),
@@ -663,6 +670,7 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("cluster_type", cluster.Spec.Type),
 		d.Set("cluster_version", cluster.Spec.Version),
 		d.Set("description", cluster.Spec.Description),
+		d.Set("agency_name", cluster.Spec.AgencyName),
 		d.Set("ipv6_enable", cluster.Spec.Ipv6Enable),
 		d.Set("billing_mode", cluster.Spec.BillingMode),
 		d.Set("vpc_id", cluster.Spec.HostNetwork.VpcId),
@@ -805,11 +813,29 @@ func resourceCCEClusterV3Update(ctx context.Context, d *schema.ResourceData, met
 
 	var updateOpts clusters.UpdateOpts
 
-	if d.HasChange("description") {
-		updateOpts.Spec.Description = d.Get("description").(string)
+	if d.HasChange("description") || d.HasChange("agency_name") {
+		if d.HasChange("description") {
+			updateOpts.Spec.Description = d.Get("description").(string)
+		}
+		if d.HasChange("agency_name") {
+			updateOpts.Spec.AgencyName = d.Get("agency_name").(string)
+		}
 		_, err = clusters.Update(client, d.Id(), updateOpts)
 		if err != nil {
 			return fmterr.Errorf("error updating opentelekomcloud CCE: %w", err)
+		}
+		if d.HasChange("agency_name") {
+			stateConf := &resource.StateChangeConf{
+				Pending:    []string{"pending"},
+				Target:     []string{"updated"},
+				Refresh:    waitForCCEClusterAgencyName(client, d.Id(), d.Get("agency_name").(string)),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      5 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
+			if _, err = stateConf.WaitForStateContext(ctx); err != nil {
+				return fmterr.Errorf("error waiting for opentelekomcloud CCE agency name update: %w", err)
+			}
 		}
 	}
 
@@ -930,6 +956,19 @@ func WaitForCCEClusterActive(cceClient *golangsdk.ServiceClient, clusterId strin
 		}
 
 		return n, n.Status.Phase, nil
+	}
+}
+
+func waitForCCEClusterAgencyName(client *golangsdk.ServiceClient, clusterID, agencyName string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		cluster, err := clusters.Get(client, clusterID)
+		if err != nil {
+			return nil, "", fmt.Errorf("error retrieving CCE cluster: %w", err)
+		}
+		if cluster.Spec.AgencyName == agencyName {
+			return cluster, "updated", nil
+		}
+		return cluster, "pending", nil
 	}
 }
 
