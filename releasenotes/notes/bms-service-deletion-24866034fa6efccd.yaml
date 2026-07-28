@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[BMS]** EOL of service (`#3494 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3494>`_)
