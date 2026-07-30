@@ -8,7 +8,7 @@ description: |-
 ---
 
 Up-to-date reference of API arguments for IAM user group membership you can get at
-[documentation portal](https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/user_group_management)
+[documentation portal](https://docs.otc.t-systems.com/identity-access-management/api-ref/apis/user_management/index.html)
 
 # opentelekomcloud_identity_user_group_membership_v3
 
@@ -37,4 +37,8 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `groups` - IDs of the groups of which the user is a member.
+* `groups` - Groups of which the user is a member. The structure is documented below:
+    * `id` - Group ID.
+    * `name` - Group name.
+    * `description` - Group description.
+    * `domain_id` - Domain ID.
