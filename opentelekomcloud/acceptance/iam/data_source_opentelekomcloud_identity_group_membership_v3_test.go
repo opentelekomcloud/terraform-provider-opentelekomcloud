@@ -27,6 +27,7 @@ func TestAccIdentityV3GroupMembershipDS_basic(t *testing.T) {
 				Config: testAccIdentityV3GroupMembershipDS_basic(groupName, userName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3GroupMembershipExists(dataSourceGMName, []string{userName}),
+					resource.TestCheckResourceAttr(dataSourceGMName, "users.0.name", userName),
 				),
 			},
 		},
@@ -51,7 +52,8 @@ resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
 }
 
 data "opentelekomcloud_identity_group_membership_v3" "membership_1" {
-  group = opentelekomcloud_identity_group_v3.group_1.id
+  group      = opentelekomcloud_identity_group_v3.group_1.id
+  depends_on = [opentelekomcloud_identity_group_membership_v3.membership_1]
 }
 `, groupName, userName)
 }

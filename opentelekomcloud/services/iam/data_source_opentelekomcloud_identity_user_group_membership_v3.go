@@ -23,10 +23,27 @@ func DataSourceIdentityUserGroupMembershipV3() *schema.Resource {
 				Required: true,
 			},
 			"groups": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"domain_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
 				},
 			},
 		},
@@ -53,11 +70,17 @@ func dataSourceIdentityUserGroupMembershipV3Read(ctx context.Context, d *schema.
 		return fmterr.Errorf("error extracting group list: %w", err)
 	}
 
-	groupIDs := make([]string, len(gps))
-	for i, g := range gps {
-		groupIDs[i] = g.ID
+	var groups []map[string]interface{}
+	for _, g := range gps {
+		group := map[string]interface{}{
+			"id":          g.ID,
+			"name":        g.Name,
+			"description": g.Description,
+			"domain_id":   g.DomainID,
+		}
+		groups = append(groups, group)
 	}
-	if err := d.Set("groups", groupIDs); err != nil {
+	if err := d.Set("groups", groups); err != nil {
 		return fmterr.Errorf("error setting group IDs: %w", err)
 	}
 

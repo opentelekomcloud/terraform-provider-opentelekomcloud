@@ -23,9 +23,40 @@ func DataSourceIdentityGroupMembershipV3() *schema.Resource {
 				Required: true,
 			},
 			"users": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"domain_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"email": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"xuser_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"xuser_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
 			},
 		},
 	}
@@ -40,7 +71,6 @@ func dataSourceIdentityGroupMembershipV3Read(ctx context.Context, d *schema.Reso
 		return fmterr.Errorf(clientCreationFail, err)
 	}
 	d.SetId(d.Get("group").(string))
-	var ul []string
 
 	allPages, err := users.ListInGroup(identityClient, d.Id(), users.ListOpts{}).AllPages()
 	if err != nil {
@@ -55,8 +85,18 @@ func dataSourceIdentityGroupMembershipV3Read(ctx context.Context, d *schema.Reso
 		return fmterr.Errorf("unable to retrieve users: %s", err)
 	}
 
+	var ul []map[string]interface{}
 	for _, u := range allUsers {
-		ul = append(ul, u.ID)
+		user := map[string]interface{}{
+			"id":          u.ID,
+			"name":        u.Name,
+			"description": u.Description,
+			"domain_id":   u.DomainID,
+			"email":       u.Email,
+			"xuser_type":  u.XUserType,
+			"xuser_id":    u.XUserID,
+		}
+		ul = append(ul, user)
 	}
 
 	if err := d.Set("users", ul); err != nil {

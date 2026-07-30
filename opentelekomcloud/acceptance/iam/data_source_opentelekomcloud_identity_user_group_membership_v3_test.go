@@ -10,7 +10,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-const dataSourceUGMName = "opentelekomcloud_identity_user_group_membership_v3.membership_1"
+const dataSourceUGMName = "data.opentelekomcloud_identity_user_group_membership_v3.membership_1"
 
 func TestAccIdentityUserGroupMembershipV3DS_basic(t *testing.T) {
 	var groupName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
@@ -27,6 +27,7 @@ func TestAccIdentityUserGroupMembershipV3DS_basic(t *testing.T) {
 				Config: testAccIdentityUserGroupMembershipV3DSBasic(userName, groupName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3UserGroupMembershipExists(dataSourceUGMName, []string{groupName}),
+					resource.TestCheckResourceAttr(dataSourceUGMName, "groups.0.name", groupName),
 				),
 			},
 		},
@@ -54,7 +55,8 @@ resource "opentelekomcloud_identity_user_group_membership_v3" "membership_1" {
 }
 
 data "opentelekomcloud_identity_user_group_membership_v3" "membership_1" {
-  user = opentelekomcloud_identity_user_v3.user_1.id
+  user       = opentelekomcloud_identity_user_v3.user_1.id
+  depends_on = [opentelekomcloud_identity_user_group_membership_v3.membership_1]
 }
 `, userName, groupName)
 }
