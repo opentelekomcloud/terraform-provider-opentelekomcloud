@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **[IAM]** Add new data source ``opentelekomcloud_identity_group_membership_v3`` (`#3496 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3496>`_)
+  - |
+    **[IAM]** Add new data source ``opentelekomcloud_identity_user_group_membership_v3`` (`#3496 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3496>`_)
