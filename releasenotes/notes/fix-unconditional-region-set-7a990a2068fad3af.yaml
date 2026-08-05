@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[Provider]** Removed unconditional c.Region = client.RegionID from config (`#3501 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3501>`_)
