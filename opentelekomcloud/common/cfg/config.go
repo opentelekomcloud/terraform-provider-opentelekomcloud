@@ -503,6 +503,10 @@ func (c *Config) genClients(pao, dao golangsdk.AuthOptionsProvider) error {
 		return fmt.Errorf("error generating project client: %w", err)
 	}
 	c.HwClient = client
+	// Preserve a region configured by the user and use the project client's
+	// IAM-derived region only as a fallback (for example, with tokenized
+	// clouds.yaml configurations that omit region_name).
+	setIfEmpty(&c.Region, client.RegionID)
 
 	client, err = c.genClient(dao)
 	if err != nil {
@@ -580,8 +584,6 @@ func (c *Config) genClient(ao golangsdk.AuthOptionsProvider) (*golangsdk.Provide
 			SecretKey: client.AKSKAuthOptions.SecretKey,
 		}
 	}
-
-	c.Region = client.RegionID
 
 	return client, nil
 }
