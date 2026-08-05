@@ -97,6 +97,52 @@ clouds:
 	}
 }
 
+func TestGenClientsRegionPrecedence(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	th.Mux.HandleFunc("/v3/auth/tokens", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Subject-Token", "test-token")
+		_, _ = fmt.Fprint(w, `{
+			"token": {
+				"project": {
+					"id": "test-project-id",
+					"name": "eu-de_test-project",
+					"domain": {"id": "test-domain-id"}
+				},
+				"user": {
+					"id": "test-user-id",
+					"domain": {"id": "test-domain-id"}
+				},
+				"catalog": []
+			}
+		}`)
+	})
+
+	projectAuth := golangsdk.AuthOptions{
+		IdentityEndpoint: fmt.Sprintf("%sv3/", th.Endpoint()),
+		TokenID:          "test-token",
+		TenantName:       "eu-de_test-project",
+	}
+	domainAuth := golangsdk.AuthOptions{
+		IdentityEndpoint: fmt.Sprintf("%sv3/", th.Endpoint()),
+		TokenID:          "test-token",
+	}
+
+	t.Run("IAM region is used as fallback", func(t *testing.T) {
+		cfg := &Config{}
+		th.CheckNoErr(t, cfg.genClients(projectAuth, domainAuth))
+		th.AssertEquals(t, "eu-de", cfg.Region)
+	})
+
+	t.Run("configured region is preserved", func(t *testing.T) {
+		cfg := &Config{Region: "eu-nl"}
+		th.CheckNoErr(t, cfg.genClients(projectAuth, domainAuth))
+		th.AssertEquals(t, "eu-nl", cfg.Region)
+	})
+}
+
 func genTemplate(def, attr, option, name string) string {
 	return fmt.Sprintf(`
 clouds:
