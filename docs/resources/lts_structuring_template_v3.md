@@ -149,7 +149,6 @@ with the resource. Also, you can ignore changes as below.
 
 ```hcl
 resource "opentelekomcloud_lts_structuring_template_v3" "test" {
-  ...
   lifecycle {
     ignore_changes = [
       template_type,
