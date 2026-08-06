@@ -10,7 +10,7 @@ description: |-
 Up-to-date reference of API arguments for LTS log Structuring templates you can get at
 [documentation portal](https://docs.otc.t-systems.com/log-tank-service/api-ref/apis/cloud_structuring/index.html)
 
-# opentelekomcloud_lts_structing_template_v3
+# opentelekomcloud_lts_structuring_template_v3
 
 Manages an LTS structuring configuration resource within T-Cloud Public.
 
@@ -22,7 +22,7 @@ Manages an LTS structuring configuration resource within T-Cloud Public.
 variable "log_group_id" {}
 variable "log_stream_id" {}
 
-resource "huaweicloud_lts_structing_template" "test" {
+resource "opentelekomcloud_lts_structuring_template_v3" "test" {
   log_group_id  = var.log_group_id
   log_stream_id = var.log_stream_id
   template_name = "CTS"
@@ -38,7 +38,7 @@ variable "log_stream_id" {}
 variable "template_name" {}
 variable "template_id" {}
 
-resource "huaweicloud_lts_structing_template" "test" {
+resource "opentelekomcloud_lts_structuring_template_v3" "test" {
   log_group_id  = var.log_group_id
   log_stream_id = var.log_stream_id
   template_name = var.template_name
