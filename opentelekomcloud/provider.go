@@ -675,6 +675,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_lts_host_group_v3":                         lts.ResourceHostGroupV3(),
 			"opentelekomcloud_lts_keywords_alarm_rule_v2":                lts.ResourceKeywordsAlarmRuleV2(),
 			"opentelekomcloud_lts_stream_v2":                             lts.ResourceLTSStreamV2(),
+			"opentelekomcloud_lts_structuring_template_v3":               lts.ResourceLtsStructuringTemplateV3(),
 			"opentelekomcloud_lts_notification_template_v2":              lts.ResourceNotificationTemplate(),
 			"opentelekomcloud_lts_transfer_v2":                           lts.ResourceLTSNewTransferV2(),
 			"opentelekomcloud_lts_quick_search_criteria_v1":              lts.ResourceQuickSearchCriteriaV1(),
