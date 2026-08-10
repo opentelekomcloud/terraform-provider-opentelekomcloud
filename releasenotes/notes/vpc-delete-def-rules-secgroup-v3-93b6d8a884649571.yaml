@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[VPC]** Add argument `delete_default_rules` to ``resource/opentelekomcloud_vpc_secgroup_v3`` (`#3506 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3506>`_)

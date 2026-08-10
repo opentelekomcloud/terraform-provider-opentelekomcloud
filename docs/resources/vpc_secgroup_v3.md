@@ -35,6 +35,8 @@ The following arguments are supported:
 
 * `tags` - (Optional, Map, ForceNew) Specifies the tags.
 
+* `delete_default_rules` - (Optional, Boolean, ForceNew) Specify whether to delete all default rules when security group is created. Default: `false`.
+
 ## Attributes Reference
 
 In addition to the arguments mentioned above, the following attributes are exported:
@@ -53,4 +55,20 @@ VPC Security Group V3 can be imported using the `id`, e.g.
 
 ```sh
 terraform import opentelekomcloud_vpc_secgroup_v3.secgroup_1 <id>
+```
+
+## Notes
+
+It is required to ignore changes as below:
+
+```hcl
+resource "opentelekomcloud_vpc_secgroup_v3" "group_1" {
+  # ...
+
+  lifecycle {
+    ignore_changes = [
+      delete_default_rules,
+    ]
+  }
+}
 ```
