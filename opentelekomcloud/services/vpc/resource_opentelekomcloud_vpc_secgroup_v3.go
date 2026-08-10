@@ -12,6 +12,7 @@ import (
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v3/security/group"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v3/security/rules"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -54,6 +55,12 @@ func ResourceVpcSecGroupV3() *schema.Resource {
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"delete_default_rules": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  false,
+			},
 			"project_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -94,6 +101,15 @@ func resourceVpcSecGroupV3Create(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	d.SetId(securityGroup.ID)
+
+	if d.Get("delete_default_rules").(bool) {
+		for _, rule := range securityGroup.SecurityGroupRules {
+			err = rules.Delete(client, rule.ID)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
 
 	log.Printf("[DEBUG] OpenTelekomCloud VPC Security Group `%s` created: %#v", d.Id(), securityGroup)
 
