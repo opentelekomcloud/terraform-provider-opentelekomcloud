@@ -56,6 +56,9 @@ func TestAccVpcSecGroupV3_basic(t *testing.T) {
 				ResourceName:      vpcSecGroupResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"delete_default_rules",
+				},
 			},
 		},
 	})
@@ -63,14 +66,16 @@ func TestAccVpcSecGroupV3_basic(t *testing.T) {
 
 var testAccVpcSecGroupV3Basic = `
 resource "opentelekomcloud_vpc_secgroup_v3" "group_1" {
-  name        = "test-acc-sec-group-v3"
-  description = "created"
+  name                 = "test-acc-sec-group-v3"
+  description          = "created"
+  delete_default_rules = true
 }
 `
 
 var testAccVpcSecGroupV3Update = `
 resource "opentelekomcloud_vpc_secgroup_v3" "group_1" {
-  name        = "test-acc-sec-group-v3"
-  description = "updated"
+  name                 = "test-acc-sec-group-v3"
+  description          = "updated"
+  delete_default_rules = true
 }
 `
