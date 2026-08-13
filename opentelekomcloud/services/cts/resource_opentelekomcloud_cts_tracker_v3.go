@@ -38,6 +38,11 @@ func ResourceCTSTrackerV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"is_support_validate": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 			"bucket_name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -118,9 +123,10 @@ func resourceCTSTrackerV3Create(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	createOpts := tracker.CreateOpts{
-		IsLtsEnabled: d.Get("is_lts_enabled").(bool),
-		TrackerName:  trackerName,
-		TrackerType:  trackerName,
+		IsLtsEnabled:      d.Get("is_lts_enabled").(bool),
+		TrackerName:       trackerName,
+		TrackerType:       trackerName,
+		IsSupportValidate: pointerto.Bool(d.Get("is_support_validate").(bool)),
 		ObsInfo: tracker.ObsInfo{
 			BucketName:      d.Get("bucket_name").(string),
 			FilePrefixName:  d.Get("file_prefix_name").(string),
@@ -169,6 +175,7 @@ func resourceCTSTrackerV3Read(_ context.Context, d *schema.ResourceData, meta in
 
 	mErr := multierror.Append(
 		d.Set("id", ctsTracker[0].Id),
+		d.Set("is_support_validate", ctsTracker[0].IsSupportValidate),
 		d.Set("tracker_name", ctsTracker[0].TrackerName),
 		d.Set("tracker_type", ctsTracker[0].TrackerType),
 		d.Set("domain_id", ctsTracker[0].DomainId),
@@ -220,6 +227,9 @@ func resourceCTSTrackerV3Update(ctx context.Context, d *schema.ResourceData, met
 	}
 	if d.HasChange("is_lts_enabled") {
 		updateOpts.IsLtsEnabled = pointerto.Bool(d.Get("is_lts_enabled").(bool))
+	}
+	if d.HasChange("is_support_validate") {
+		updateOpts.IsSupportValidate = pointerto.Bool(d.Get("is_support_validate").(bool))
 	}
 	if d.HasChange("bucket_name") {
 		updateOpts.ObsInfo.BucketName = d.Get("bucket_name").(string)
