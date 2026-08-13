@@ -33,6 +33,7 @@ func TestAccCTSTrackerV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(trackerV3Resource, "bucket_name", bucketName),
 					resource.TestCheckResourceAttr(trackerV3Resource, "file_prefix_name", "yO8Q"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "is_lts_enabled", "false"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "is_support_validate", "false"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "is_sort_by_service", "true"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "status", "disabled"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "compress_type", "json"),
@@ -44,6 +45,7 @@ func TestAccCTSTrackerV3_basic(t *testing.T) {
 					testAccCheckCTSTrackerV3Exists(trackerV3Resource, &ctsTracker, env.OS_TENANT_NAME),
 					resource.TestCheckResourceAttr(trackerV3Resource, "file_prefix_name", "yO8Q1"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "is_lts_enabled", "true"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "is_support_validate", "true"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "is_sort_by_service", "false"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "status", "enabled"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "compress_type", "gzip"),
@@ -143,11 +145,12 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 }
 
 resource "opentelekomcloud_cts_tracker_v3" "tracker_v3" {
-  bucket_name        = opentelekomcloud_obs_bucket.bucket.bucket
-  file_prefix_name   = "yO8Q"
-  status             = "disabled"
-  compress_type      = "json"
-  is_sort_by_service = true
+  bucket_name         = opentelekomcloud_obs_bucket.bucket.bucket
+  file_prefix_name    = "yO8Q"
+  status              = "disabled"
+  compress_type       = "json"
+  is_sort_by_service  = true
+  is_support_validate = false
 }
 `, bucketName)
 }
@@ -161,12 +164,13 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 }
 
 resource "opentelekomcloud_cts_tracker_v3" "tracker_v3" {
-  bucket_name        = opentelekomcloud_obs_bucket.bucket.bucket
-  file_prefix_name   = "yO8Q1"
-  is_lts_enabled     = true
-  status             = "enabled"
-  compress_type      = "gzip"
-  is_sort_by_service = false
+  bucket_name         = opentelekomcloud_obs_bucket.bucket.bucket
+  file_prefix_name    = "yO8Q1"
+  is_lts_enabled      = true
+  status              = "enabled"
+  compress_type       = "gzip"
+  is_sort_by_service  = false
+  is_support_validate = true
 }
 `, bucketName)
 }
