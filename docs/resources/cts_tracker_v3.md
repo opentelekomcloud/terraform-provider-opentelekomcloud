@@ -4,7 +4,7 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_cts_tracker_v3"
 sidebar_current: "docs-opentelekomcloud-resource-cts-tracker-v3"
 description: |-
-  Manages a CTS Tracker v3 resource within OpenTelekomCloud.
+  Manages a CTS Tracker v3 resource within T Cloud Public (formerly OpenTelekomCloud).
 ---
 
 Up-to-date reference of API arguments for CTS tracker you can get at
@@ -33,20 +33,22 @@ resource "opentelekomcloud_cts_tracker_v3" "tracker_v3" {
 
 The following arguments are supported:
 
-* `status` - (Required) Specifies whether tracker is `enabled` or `disabled`.
+* `status` - (Required, String) Specifies whether tracker is `enabled` or `disabled`.
 
-* `is_lts_enabled` - (Optional) Specifies whether to enable trace analysis.
+* `is_lts_enabled` - (Optional, Boolean) Specifies whether to enable trace analysis.
 
-* `bucket_name` - (Optional) The OBS bucket name for a tracker.
+* `is_support_validate` (Optional, Boolean) Specifies Whether trace file verification is enabled for trace transfer. When this function is enabled, integrity verification will be performed to check whether trace files in OBS buckets have been tampered with.
 
-* `file_prefix_name` - (Optional) The prefix of a log that needs to be stored in an OBS bucket.
+* `bucket_name` - (Optional, String) The OBS bucket name for a tracker.
 
-* `is_obs_created` - (Optional) Specifies whether the OBS bucket is automatically created by the tracker.
+* `file_prefix_name` - (Optional, String) The prefix of a log that needs to be stored in an OBS bucket.
 
-* `is_sort_by_service` - (Optional) Specifies whether to sort the path by cloud service. If this option is enabled,
+* `is_obs_created` - (Optional, Boolean) Specifies whether the OBS bucket is automatically created by the tracker.
+
+* `is_sort_by_service` - (Optional, Boolean) Specifies whether to sort the path by cloud service. If this option is enabled,
   the cloud service name is added to the transfer file path. Default: `true`.
 
-* `compress_type` - (Optional) Specifies the compression type. Default value is `gzip`.
+* `compress_type` - (Optional, String) Specifies the compression type. Default value is `gzip`.
   The valid values are as follows:
     + **gzip**: compression.
     + **json**: no compression.

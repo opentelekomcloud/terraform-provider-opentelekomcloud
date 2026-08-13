@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CTS]** Add argument `is_support_validate` to ``resource/opentelekomcloud_cts_tracker_v3`` (`#3511 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3511>`_)
