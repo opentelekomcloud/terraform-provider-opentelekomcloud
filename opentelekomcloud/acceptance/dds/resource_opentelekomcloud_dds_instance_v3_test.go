@@ -58,6 +58,23 @@ func TestAccDDSV3Instance_basic(t *testing.T) {
 	})
 }
 
+func TestAccDDSV3Instance_minimal(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDDSV3InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: TestAccDDSInstanceV3ConfigBasic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDDSV3InstanceExists(resourceInstanceName),
+					resource.TestCheckResourceAttr(resourceInstanceName, "name", "dds-instance"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDDSV3Instance_Cluster(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -190,17 +207,17 @@ func testAccCheckDDSV3InstanceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		opts := instances.ListInstanceOpts{
-			Id: rs.Primary.ID,
-		}
-		ddsInstances, err := instances.List(client, opts)
+		ddsInstances, err := instances.List(client, instances.ListInstanceOpts{})
 		if err != nil {
 			return err
 		}
 
-		if ddsInstances.TotalCount > 0 {
-			return fmt.Errorf("instance still exists")
+		for _, ddsInstance := range ddsInstances.Instances {
+			if ddsInstance.Id == rs.Primary.ID {
+				return fmt.Errorf("instance still exists")
+			}
 		}
+
 	}
 
 	return nil
@@ -247,7 +264,7 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
   availability_zone = "%s"
   datastore {
     type           = "DDS-Community"
-    version        = "3.4"
+    version        = "4.0"
     storage_engine = "wiredTiger"
   }
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
@@ -284,7 +301,7 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
   port              = 8800
   datastore {
     type           = "DDS-Community"
-    version        = "3.4"
+    version        = "4.0"
     storage_engine = "wiredTiger"
   }
   vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
