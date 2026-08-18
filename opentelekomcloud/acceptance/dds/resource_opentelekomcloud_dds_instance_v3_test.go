@@ -217,7 +217,6 @@ func testAccCheckDDSV3InstanceDestroy(s *terraform.State) error {
 				return fmt.Errorf("instance still exists")
 			}
 		}
-
 	}
 
 	return nil
