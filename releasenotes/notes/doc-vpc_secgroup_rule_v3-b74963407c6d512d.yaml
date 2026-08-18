@@ -1,0 +1,5 @@
+
+---
+other:
+  - |
+    **[VPC]** Fix for `multi_port` argument for resource `vpc_secgroup_rule_v3` in documentation (`#3509 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3509>`_)

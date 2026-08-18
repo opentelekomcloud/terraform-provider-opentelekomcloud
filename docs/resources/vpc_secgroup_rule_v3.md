@@ -45,7 +45,7 @@ The following arguments are supported:
 
 * `protocol` - (Optional, String, ForceNew) Specifies the protocol type. The value can be `icmp`, `tcp`, `udp`, `icmpv6` or an `IP number (0 to 255)`. If the parameter is left blank, **all** protocols are supported. When the protocol is `icmpv6`, IP version should be `IPv6`. When the protocol is `icmp`, IP version should be `IPv4`.
 
-* `multiport` - (Optional, String, ForceNew) Specifies the port or port range. The value can be a single port, e.g. `80`, a port range, e.g. `1-30`, or inconsecutive ports separated by commas, e.g. `22,3389,80`.
+* `multi_port` - (Optional, String, ForceNew) Specifies the port or port range. The value can be a single port, e.g. `80`, a port range, e.g. `1-30`, or inconsecutive ports separated by commas, e.g. `22,3389,80`.
 
 * `remote_ip_prefix` - (Optional, String, ForceNew) Specifies the remote IP address. If `direction` is set to `egress`, the parameter specifies the source IP address. If `direction` is set to `ingress`, the parameter specifies the destination IP address. The value is an `IP address` or a `CIDR block`. The parameter is mutually exclusive with parameter `remote_group_id` and `remote_address_group_id`. If this parameter is left blank, the remote IP address is not limited, and the traffic from all remote IP addresses is allowed or rejected.
 
