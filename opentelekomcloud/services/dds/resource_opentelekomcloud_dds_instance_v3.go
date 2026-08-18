@@ -714,20 +714,12 @@ func resourceDdsInstanceV3Delete(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf(errCreationV3Client, err)
 	}
 
-	_, err = instances.Delete(client, d.Id())
+	jobId, err := instances.Delete(client, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"normal", "abnormal", "frozen", "createfail", "enlargefail", "data_disk_full"},
-		Target:     []string{"deleted"},
-		Refresh:    instanceStateRefreshFunc(client, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      15 * time.Second,
-		MinTimeout: 10 * time.Second,
-	}
 
-	_, err = stateConf.WaitForStateContext(ctx)
+	err = waitForJobCompleted(client, 600, *jobId)
 	if err != nil {
 		return fmterr.Errorf("error waiting for instance (%s) to be deleted: %w", d.Id(), err)
 	}
