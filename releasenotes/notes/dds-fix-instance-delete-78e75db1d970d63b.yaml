@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DDS]** Fix waiting for deletion in ``resource/opentelekomcloud_dds_instance_v3`` (`#3515 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3515>`_)
