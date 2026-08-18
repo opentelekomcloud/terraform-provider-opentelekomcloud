@@ -1,10 +1,13 @@
 package vpc
 
 import (
+	"bytes"
 	"context"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -24,6 +27,10 @@ func ResourceVpcSecondaryCidrV3() *schema.Resource {
 
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
+		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -145,14 +152,49 @@ func resourceVpcSecondaryCidrV3Delete(ctx context.Context, d *schema.ResourceDat
 		return nil
 	}
 
-	if _, err := VpcV3.RemoveSecondaryCidr(client, d.Id(), VpcV3.CidrOpts{
-		Vpc: &VpcV3.AddExtendCidrOption{ExtendCidrs: cidrs},
-	}); err != nil {
-		if _, ok := err.(golangsdk.ErrDefault404); ok {
-			return nil
-		}
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"IN_USE"},
+		Target:     []string{"REMOVED"},
+		Refresh:    waitForVpcSecondaryCidrRemoved(client, d.Id(), cidrs),
+		Timeout:    d.Timeout(schema.TimeoutDelete),
+		Delay:      5 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+
+	if _, err := stateConf.WaitForStateContext(ctx); err != nil {
 		return fmterr.Errorf("error removing secondary CIDRs from VPC %s: %w", d.Id(), err)
 	}
 
 	return nil
+}
+
+// cidrInUseErrCode is returned by OTC while a subnet carved from the secondary CIDR is
+// still being released. It arrives as HTTP 400, not 409.
+const cidrInUseErrCode = "VPC.0602"
+
+// waitForVpcSecondaryCidrRemoved retries the removal while OTC reports the CIDR as still
+// in use, which happens while a subnet carved from it is still being released.
+func waitForVpcSecondaryCidrRemoved(client *golangsdk.ServiceClient, vpcID string, cidrs []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		vpc, err := VpcV3.RemoveSecondaryCidr(client, vpcID, VpcV3.CidrOpts{
+			Vpc: &VpcV3.AddExtendCidrOption{ExtendCidrs: cidrs},
+		})
+		if err != nil {
+			switch e := err.(type) {
+			case golangsdk.ErrDefault404:
+				return struct{}{}, "REMOVED", nil
+			case golangsdk.ErrDefault400:
+				if bytes.Contains(e.Body, []byte(cidrInUseErrCode)) {
+					return struct{}{}, "IN_USE", nil
+				}
+				return nil, "", err
+			case golangsdk.ErrDefault409:
+				return struct{}{}, "IN_USE", nil
+			default:
+				return nil, "", err
+			}
+		}
+
+		return vpc, "REMOVED", nil
+	}
 }

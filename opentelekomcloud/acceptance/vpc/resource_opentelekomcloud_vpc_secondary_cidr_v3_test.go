@@ -88,6 +88,34 @@ func TestAccVpcSecondaryCidrV3_basic(t *testing.T) {
 	})
 }
 
+func TestAccVpcSecondaryCidrV3_subnetOnSecondaryCidr(t *testing.T) {
+	t.Parallel()
+	quotas.BookOne(t, quotas.Router)
+	vpcName := tools.RandomString("tf-acc-sec-cidr-sub-", 5)
+
+	var vpc VpcV3.Vpc
+	rc := common.InitResourceCheck(resourceVpcSecondaryCidrV3Name, &vpc, getVpcSecondaryCidrFunc)
+
+	// The destroy is the assertion: removing the secondary CIDR while the subnet carved
+	// from it is still draining returns 409, which the delete must wait out.
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVpcSecondaryCidrV3WithSubnet(vpcName),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceVpcSecondaryCidrV3Name, "cidrs.#", "1"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_subnet_v1.test", "cidr", "23.9.0.0/24"),
+				),
+			},
+		},
+	})
+}
+
 func testAccVpcSecondaryCidrV3OneCidr(vpcName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "test" {
@@ -100,6 +128,29 @@ resource "opentelekomcloud_vpc_secondary_cidr_v3" "test" {
   cidrs  = ["23.9.0.0/16"]
 }
 `, vpcName)
+}
+
+func testAccVpcSecondaryCidrV3WithSubnet(vpcName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_vpc_v1" "test" {
+  name = "%s"
+  cidr = "192.168.0.0/16"
+}
+
+resource "opentelekomcloud_vpc_secondary_cidr_v3" "test" {
+  vpc_id = opentelekomcloud_vpc_v1.test.id
+  cidrs  = ["23.9.0.0/16"]
+}
+
+resource "opentelekomcloud_vpc_subnet_v1" "test" {
+  name       = "%s-sub"
+  cidr       = "23.9.0.0/24"
+  gateway_ip = "23.9.0.1"
+  vpc_id     = opentelekomcloud_vpc_v1.test.id
+
+  depends_on = [opentelekomcloud_vpc_secondary_cidr_v3.test]
+}
+`, vpcName, vpcName)
 }
 
 func testAccVpcSecondaryCidrV3ThreeCidrs(vpcName string) string {

@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix ``resource/opentelekomcloud_vpc_secondary_cidr_v3`` failing to delete
+    with ``cidr is used by subnets`` (``VPC.0602``) when a subnet carved from the
+    secondary CIDR is still being released. The removal is now retried until it succeeds
+    or the delete timeout expires
+    (`#3513 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3513>`_)
