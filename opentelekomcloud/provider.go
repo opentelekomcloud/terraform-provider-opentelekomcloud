@@ -66,6 +66,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/version"
 )
 
+const ltsCustomTemplatesV3DataSourceName = "opentelekomcloud_lts_structuring_custom_templates_v3"
+
 // Provider returns a schema.Provider for OpenTelekomCloud.
 func Provider() *schema.Provider {
 	provider := &schema.Provider{
@@ -391,6 +393,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_lts_groups_v2":                      lts.DataSourceLtsGroupsV2(),
 			"opentelekomcloud_lts_host_group_v3":                  lts.DataSourceHostGroupV3(),
 			"opentelekomcloud_lts_streams_v2":                     lts.DataSourceLtsStreamsV2(),
+			ltsCustomTemplatesV3DataSourceName:                    lts.DataSourceLtsStructuringCustomTemplatesV3(),
 			"opentelekomcloud_nat_gateway_v2":                     nat.DataSourceNatGatewayV2(),
 			"opentelekomcloud_nat_dnat_rules_v2":                  nat.DataSourceDnatRulesV2(),
 			"opentelekomcloud_nat_snat_rules_v2":                  nat.DataSourceSnatRulesV2(),

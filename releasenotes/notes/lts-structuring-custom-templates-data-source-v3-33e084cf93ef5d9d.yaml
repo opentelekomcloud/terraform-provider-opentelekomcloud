@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[LTS]** Add new data source ``data-source/opentelekomcloud_lts_structuring_custom_templates_v3`` for querying custom structuring templates
