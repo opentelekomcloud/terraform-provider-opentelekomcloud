@@ -1,6 +1,7 @@
 package acceptance
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -53,7 +54,9 @@ func testDataSourceLtsStructuringCustomTemplatesV3(templateID string) string {
 	if templateID == "" {
 		return `data "opentelekomcloud_lts_structuring_custom_templates_v3" "test" {}`
 	}
-	return `data "opentelekomcloud_lts_structuring_custom_templates_v3" "test" {
-  id = "` + templateID + `"
-}`
+	return fmt.Sprintf(`
+data "opentelekomcloud_lts_structuring_custom_templates_v3" "test" {
+  id = %q
+}
+`, templateID)
 }
