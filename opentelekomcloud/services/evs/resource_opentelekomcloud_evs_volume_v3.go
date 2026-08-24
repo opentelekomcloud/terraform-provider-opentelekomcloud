@@ -290,7 +290,7 @@ func resourceEvsVolumeV3Update(ctx context.Context, d *schema.ResourceData, meta
 		Description: d.Get("description").(string),
 	}
 
-	_, err = cinderV3.Update(client, d.Id(), updateOpts).Extract()
+	_, err = cinderV3.Update(client, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud volume: %s", err)
 	}
@@ -337,7 +337,7 @@ func resourceVolumeAttachmentHash(v interface{}) int {
 
 func volumeV3StateRefreshFunc(client *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		v, err := cinderV3.Get(client, id).Extract()
+		v, err := cinderV3.Get(client, id)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return v, "deleted", nil

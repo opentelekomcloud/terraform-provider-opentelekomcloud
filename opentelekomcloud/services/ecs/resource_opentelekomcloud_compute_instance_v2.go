@@ -17,7 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v2/volumes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/availabilityzones"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/bootfromvolume"
@@ -1328,17 +1327,21 @@ func setBlockDevice(d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 			return fmterr.Errorf("error creating volume v2 client: %w", err)
 		}
 
-		var volMetaData = struct {
-			VolumeImageMetadata map[string]interface{} `json:"volume_image_metadata"`
-			ID                  string                 `json:"id"`
-			Size                int                    `json:"size"`
-			Bootable            string                 `json:"bootable"`
-		}{}
 		for i, b := range serverWithAttachments.VolumesAttached {
-			rawVolume := volumes.Get(blockStorageClient, b["id"].(string))
-			if err := rawVolume.ExtractInto(&volMetaData); err != nil {
-				log.Printf("[DEBUG] unable to unmarshal raw struct to volume metadata: %s", err)
+			volumeID := b["id"].(string)
+			var response struct {
+				Volume struct {
+					VolumeImageMetadata map[string]interface{} `json:"volume_image_metadata"`
+					ID                  string                 `json:"id"`
+					Size                int                    `json:"size"`
+					Bootable            string                 `json:"bootable"`
+				} `json:"volume"`
 			}
+			_, err := blockStorageClient.Get(blockStorageClient.ServiceURL("volumes", volumeID), &response, nil)
+			if err != nil {
+				return fmterr.Errorf("error retrieving volume %s attached to compute instance %s: %w", volumeID, d.Id(), err)
+			}
+			volMetaData := response.Volume
 
 			log.Printf("[DEBUG] retrieved volume%+v", volMetaData)
 			v := map[string]interface{}{

@@ -233,7 +233,7 @@ func testAccCheckBlockStorageV2VolumeDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
+		_, err := volumes.Get(blockStorageClient, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("volume still exists")
 		}
@@ -259,7 +259,7 @@ func testAccCheckBlockStorageV2VolumeExists(n string, volume *volumes.Volume) re
 			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
 
-		found, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
+		found, err := volumes.Get(blockStorageClient, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -314,7 +314,7 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
 
-		found, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
+		found, err := volumes.Get(blockStorageClient, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
