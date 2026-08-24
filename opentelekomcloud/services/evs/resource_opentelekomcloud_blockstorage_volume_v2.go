@@ -184,7 +184,7 @@ func resourceBlockStorageVolumeV2Create(ctx context.Context, d *schema.ResourceD
 		metadata["hw:passthrough"] = "true"
 	}
 
-	createOpts := &volumes.CreateOpts{
+	createOpts := volumes.CreateOpts{
 		AvailabilityZone:   d.Get("availability_zone").(string),
 		ConsistencyGroupID: d.Get("consistency_group_id").(string),
 		Description:        d.Get("description").(string),
@@ -199,7 +199,7 @@ func resourceBlockStorageVolumeV2Create(ctx context.Context, d *schema.ResourceD
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	v, err := volumes.Create(client, createOpts).Extract()
+	v, err := volumes.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud volume: %s", err)
 	}
@@ -247,7 +247,7 @@ func resourceBlockStorageVolumeV2Read(ctx context.Context, d *schema.ResourceDat
 		return fmterr.Errorf(errCreationClientV2, err)
 	}
 
-	v, err := volumes.Get(client, d.Id()).Extract()
+	v, err := volumes.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "volume")
 	}
@@ -347,7 +347,7 @@ func resourceBlockStorageVolumeV2Update(ctx context.Context, d *schema.ResourceD
 		updateOpts.Metadata = resourceVolumeMetadataV2(d)
 	}
 
-	_, err = volumes.Update(client, d.Id(), updateOpts).Extract()
+	_, err = volumes.Update(client, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud volume: %s", err)
 	}
@@ -405,7 +405,7 @@ func resourceBlockStorageVolumeV2Delete(ctx context.Context, d *schema.ResourceD
 		return fmterr.Errorf(errCreationClientV2, err)
 	}
 
-	v, err := volumes.Get(client, d.Id()).Extract()
+	v, err := volumes.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "volume")
 	}
@@ -450,7 +450,7 @@ func resourceBlockStorageVolumeV2Delete(ctx context.Context, d *schema.ResourceD
 	// in a "deleting" state from when the instance was terminated.
 	// If this is true, just move on. It'll eventually delete.
 	if v.Status != "deleting" {
-		if err := volumes.Delete(client, d.Id(), deleteOpts).ExtractErr(); err != nil {
+		if err := volumes.Delete(client, d.Id(), deleteOpts); err != nil {
 			return common.CheckDeletedDiag(d, err, "volume")
 		}
 	}
@@ -491,7 +491,7 @@ func resourceVolumeMetadataV2(d *schema.ResourceData) map[string]string {
 // an OpenTelekomCloud volume.
 func VolumeV2StateRefreshFunc(client *golangsdk.ServiceClient, volumeID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		v, err := volumes.Get(client, volumeID).Extract()
+		v, err := volumes.Get(client, volumeID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return v, "deleted", nil
