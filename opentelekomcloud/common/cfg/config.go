@@ -513,7 +513,22 @@ func (c *Config) genClients(pao, dao golangsdk.AuthOptionsProvider) error {
 		return fmt.Errorf("error generating domain client: %w", err)
 	}
 	c.DomainClient = client
+	c.setDomainIDFromClient(client)
 	return nil
+}
+
+// setDomainIDFromClient stores an authentication-derived domain ID and makes it
+// available to project-scoped service clients. With AK/SK authentication, a
+// domain name is resolved by the SDK and retained in the client's auth options.
+func (c *Config) setDomainIDFromClient(client *golangsdk.ProviderClient) {
+	if client == nil {
+		return
+	}
+	setIfEmpty(&c.DomainID, client.DomainID)
+	setIfEmpty(&c.DomainID, client.AKSKAuthOptions.DomainID)
+	if c.HwClient != nil {
+		setIfEmpty(&c.HwClient.DomainID, c.DomainID)
+	}
 }
 
 func (c *Config) genClient(ao golangsdk.AuthOptionsProvider) (*golangsdk.ProviderClient, error) {
@@ -1483,6 +1498,27 @@ func (c *Config) GetRegion(d SchemaOrDiff) string {
 	}
 
 	return strings.Split(c.IdentityEndpoint, ".")[1]
+}
+
+// GetDomainID returns the configured or authentication-derived account domain ID.
+// AK/SK authentication keeps the resolved domain ID on the domain client's auth
+// options, while token and password authentication expose it directly on a client.
+func (c *Config) GetDomainID() string {
+	if c.DomainID != "" {
+		return c.DomainID
+	}
+	if c.DomainClient != nil {
+		if c.DomainClient.DomainID != "" {
+			return c.DomainClient.DomainID
+		}
+		if c.DomainClient.AKSKAuthOptions.DomainID != "" {
+			return c.DomainClient.AKSKAuthOptions.DomainID
+		}
+	}
+	if c.HwClient != nil {
+		return c.HwClient.DomainID
+	}
+	return ""
 }
 
 type ProjectName string
