@@ -642,6 +642,18 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	if privateDomainName := d.Get("private_domain_name").(string); privateDomainName != "" {
+		if dbType := d.Get("db.0.type").(string); strings.ToLower(dbType) == "mysql" {
+			jobId, err := instances.ApplyForPrivateDomain(client, instances.ApplyForPrivateDomainOpts{
+				InstanceId: d.Id(),
+				DnsType:    "private",
+			})
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			if err := instances.WaitForJobCompleted(client, 600, *jobId); err != nil {
+				return fmterr.Errorf("error waiting while applying for private domain: %w", err)
+			}
+		}
 		jobId, err := instances.ModifyPrivateDomainName(client, instances.ModifyPrivateDomainNameOpts{
 			InstanceId: d.Id(),
 			DnsName:    privateDomainName,
