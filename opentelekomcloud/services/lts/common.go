@@ -20,6 +20,7 @@ const (
 	errCreationV3Client  = "error creating OpenTelekomCloud LTS V3 client: %w"
 	errCreationV20Client = "error creating OpenTelekomCloud LTS V2.0 client: %w"
 	errCreationV10Client = "error creating OpenTelekomCloud LTS V1.0 client: %w"
+	errMissingDomainID   = "unable to determine the account domain ID; configure domain_id or domain_name in the provider"
 )
 
 func ltsTags(d *schema.ResourceData) []rt.ResourceTag {

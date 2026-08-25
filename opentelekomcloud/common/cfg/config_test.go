@@ -202,6 +202,60 @@ func TestDomain(t *testing.T) {
 	defer func() { _ = os.Remove(fileName) }()
 }
 
+func TestGetDomainID(t *testing.T) {
+	tests := []struct {
+		name     string
+		config   *Config
+		expected string
+	}{
+		{
+			name: "configured domain ID",
+			config: &Config{
+				DomainID:     "configured-domain-id",
+				DomainClient: &golangsdk.ProviderClient{DomainID: "domain-client-id"},
+				HwClient:     &golangsdk.ProviderClient{DomainID: "project-client-id"},
+			},
+			expected: "configured-domain-id",
+		},
+		{
+			name: "domain client ID",
+			config: &Config{
+				DomainClient: &golangsdk.ProviderClient{DomainID: "domain-client-id"},
+				HwClient:     &golangsdk.ProviderClient{DomainID: "project-client-id"},
+			},
+			expected: "domain-client-id",
+		},
+		{
+			name: "AK/SK resolved domain ID",
+			config: &Config{
+				DomainClient: &golangsdk.ProviderClient{
+					AKSKAuthOptions: golangsdk.AKSKAuthOptions{DomainID: "aksk-domain-id"},
+				},
+				HwClient: &golangsdk.ProviderClient{DomainID: "project-client-id"},
+			},
+			expected: "aksk-domain-id",
+		},
+		{
+			name: "project client fallback",
+			config: &Config{
+				HwClient: &golangsdk.ProviderClient{DomainID: "project-client-id"},
+			},
+			expected: "project-client-id",
+		},
+		{
+			name:     "missing domain ID",
+			config:   &Config{},
+			expected: "",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			th.AssertEquals(t, test.expected, test.config.GetDomainID())
+		})
+	}
+}
+
 func testRequestRetry(t *testing.T, count int) {
 	th.SetupHTTP()
 	defer th.TeardownHTTP()

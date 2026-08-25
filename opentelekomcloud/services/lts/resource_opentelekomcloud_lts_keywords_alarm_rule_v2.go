@@ -251,6 +251,10 @@ func resourceKeywordsAlarmRuleV2Create(ctx context.Context, d *schema.ResourceDa
 	if err != nil {
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
+	domainID := config.GetDomainID()
+	if domainID == "" {
+		return diag.Errorf(errMissingDomainID)
+	}
 	opts := alarm.CreateOpts{
 		Name:                      d.Get("name").(string),
 		Description:               d.Get("description").(string),
@@ -258,7 +262,7 @@ func resourceKeywordsAlarmRuleV2Create(ctx context.Context, d *schema.ResourceDa
 		Frequency:                 buildFrequency(d.Get("frequency")),
 		Severity:                  d.Get("severity").(string),
 		Send:                      pointerto.Bool(d.Get("send_notifications").(bool)),
-		DomainId:                  client.DomainID,
+		DomainId:                  domainID,
 		TriggerConditionCount:     d.Get("trigger_condition_count").(int),
 		TriggerConditionFrequency: d.Get("trigger_condition_frequency").(int),
 		EnableRecoveryPolicy:      pointerto.Bool(d.Get("send_recovery_notifications").(bool)),
@@ -474,6 +478,10 @@ func resourceKeywordsAlarmRuleV2Update(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if d.HasChanges(updateKeywordsAlarmRuleChanges...) {
+		domainID := config.GetDomainID()
+		if domainID == "" {
+			return diag.Errorf(errMissingDomainID)
+		}
 		_, err = alarm.UpdateKeywordRule(client, alarm.UpdateOpts{
 			ID:                        d.Id(),
 			Name:                      d.Get("name").(string),
@@ -482,7 +490,7 @@ func resourceKeywordsAlarmRuleV2Update(ctx context.Context, d *schema.ResourceDa
 			Frequency:                 buildFrequency(d.Get("frequency")),
 			Severity:                  d.Get("severity").(string),
 			Send:                      pointerto.Bool(d.Get("send_notifications").(bool)),
-			DomainId:                  client.DomainID,
+			DomainId:                  domainID,
 			TriggerConditionCount:     d.Get("trigger_condition_count").(int),
 			TriggerConditionFrequency: d.Get("trigger_condition_frequency").(int),
 			EnableRecoveryPolicy:      pointerto.Bool(d.Get("send_recovery_notifications").(bool)),

@@ -1485,6 +1485,27 @@ func (c *Config) GetRegion(d SchemaOrDiff) string {
 	return strings.Split(c.IdentityEndpoint, ".")[1]
 }
 
+// GetDomainID returns the configured or authentication-derived account domain ID.
+// AK/SK authentication keeps the resolved domain ID on the domain client's auth
+// options, while token and password authentication expose it directly on a client.
+func (c *Config) GetDomainID() string {
+	if c.DomainID != "" {
+		return c.DomainID
+	}
+	if c.DomainClient != nil {
+		if c.DomainClient.DomainID != "" {
+			return c.DomainClient.DomainID
+		}
+		if c.DomainClient.AKSKAuthOptions.DomainID != "" {
+			return c.DomainClient.AKSKAuthOptions.DomainID
+		}
+	}
+	if c.HwClient != nil {
+		return c.HwClient.DomainID
+	}
+	return ""
+}
+
 type ProjectName string
 
 // GetProjectName returns the project name that was specified in the resource.
