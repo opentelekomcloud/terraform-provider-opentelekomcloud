@@ -716,6 +716,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_rds_maintenance_v3":                        rds.ResourceRdsMaintenanceV3(),
 			"opentelekomcloud_rds_instance_minor_version_upgrade_v3":     rds.ResourceRdsInstanceMinorVersionUpgrade(),
 			"opentelekomcloud_rds_parametergroup_v3":                     rds.ResourceRdsConfigurationV3(),
+			"opentelekomcloud_rds_postgres_extension_v3":                 rds.ResourceRdsPostgresExtensionV3(),
 			"opentelekomcloud_rds_read_replica_v3":                       rds.ResourceRdsReadReplicaV3(),
 			"opentelekomcloud_rms_advanced_query_v1":                     rms.ResourceRmsAdvancedQueryV1(),
 			"opentelekomcloud_rms_resource_recorder_v1":                  rms.ResourceRmsResourceRecorderV1(),
