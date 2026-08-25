@@ -351,7 +351,7 @@ For example, the parameter can be UTC+08:00 rather than UTC+08:30.
 
 * `private_domain_name` - (Optional) Specifies the prefix of the new domain name. The value contains `8` to `63` characters. Only uppercase letters, lowercase letters, and digits are allowed.
 
-~> **Warning** The argument `private_domain_name` not supported in `eu-ch2` region.
+~> **Warning** The argument `private_domain_name` not supported in `eu-ch2` region. The argument `private_domain_name` is only supported for `MySQL` and `PostgreSQL` database types.
 
 * `backup_strategy` - (Optional) Specifies the advanced backup policy. Structure is documented below.
 
