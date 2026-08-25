@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[LTS]** Fixed automatic account domain ID resolution using AK/SK authentication (`#3526 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3526>`_)

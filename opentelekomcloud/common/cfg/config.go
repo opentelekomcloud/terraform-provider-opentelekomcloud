@@ -513,7 +513,22 @@ func (c *Config) genClients(pao, dao golangsdk.AuthOptionsProvider) error {
 		return fmt.Errorf("error generating domain client: %w", err)
 	}
 	c.DomainClient = client
+	c.setDomainIDFromClient(client)
 	return nil
+}
+
+// setDomainIDFromClient stores an authentication-derived domain ID and makes it
+// available to project-scoped service clients. With AK/SK authentication, a
+// domain name is resolved by the SDK and retained in the client's auth options.
+func (c *Config) setDomainIDFromClient(client *golangsdk.ProviderClient) {
+	if client == nil {
+		return
+	}
+	setIfEmpty(&c.DomainID, client.DomainID)
+	setIfEmpty(&c.DomainID, client.AKSKAuthOptions.DomainID)
+	if c.HwClient != nil {
+		setIfEmpty(&c.HwClient.DomainID, c.DomainID)
+	}
 }
 
 func (c *Config) genClient(ao golangsdk.AuthOptionsProvider) (*golangsdk.ProviderClient, error) {

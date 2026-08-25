@@ -134,12 +134,49 @@ func TestGenClientsRegionPrecedence(t *testing.T) {
 		cfg := &Config{}
 		th.CheckNoErr(t, cfg.genClients(projectAuth, domainAuth))
 		th.AssertEquals(t, "eu-de", cfg.Region)
+		th.AssertEquals(t, "test-domain-id", cfg.DomainID)
 	})
 
 	t.Run("configured region is preserved", func(t *testing.T) {
 		cfg := &Config{Region: "eu-nl"}
 		th.CheckNoErr(t, cfg.genClients(projectAuth, domainAuth))
 		th.AssertEquals(t, "eu-nl", cfg.Region)
+	})
+}
+
+func TestSetDomainIDFromClient(t *testing.T) {
+	t.Run("AK/SK resolved domain ID is stored", func(t *testing.T) {
+		config := &Config{HwClient: &golangsdk.ProviderClient{}}
+		config.setDomainIDFromClient(&golangsdk.ProviderClient{
+			AKSKAuthOptions: golangsdk.AKSKAuthOptions{DomainID: "aksk-domain-id"},
+		})
+		th.AssertEquals(t, "aksk-domain-id", config.DomainID)
+		th.AssertEquals(t, "aksk-domain-id", config.HwClient.DomainID)
+		serviceClient := &golangsdk.ServiceClient{ProviderClient: config.HwClient}
+		th.AssertEquals(t, "aksk-domain-id", serviceClient.DomainID)
+	})
+
+	t.Run("configured domain ID is preserved", func(t *testing.T) {
+		config := &Config{DomainID: "configured-domain-id"}
+		config.setDomainIDFromClient(&golangsdk.ProviderClient{
+			DomainID:        "authenticated-domain-id",
+			AKSKAuthOptions: golangsdk.AKSKAuthOptions{DomainID: "aksk-domain-id"},
+		})
+		th.AssertEquals(t, "configured-domain-id", config.DomainID)
+	})
+
+	t.Run("authenticated project client domain ID is preserved", func(t *testing.T) {
+		config := &Config{HwClient: &golangsdk.ProviderClient{DomainID: "project-domain-id"}}
+		config.setDomainIDFromClient(&golangsdk.ProviderClient{
+			AKSKAuthOptions: golangsdk.AKSKAuthOptions{DomainID: "aksk-domain-id"},
+		})
+		th.AssertEquals(t, "project-domain-id", config.HwClient.DomainID)
+	})
+
+	t.Run("nil client is ignored", func(t *testing.T) {
+		config := &Config{}
+		config.setDomainIDFromClient(nil)
+		th.AssertEquals(t, "", config.DomainID)
 	})
 }
 

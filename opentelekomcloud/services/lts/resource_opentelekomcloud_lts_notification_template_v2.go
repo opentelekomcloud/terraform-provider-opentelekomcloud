@@ -79,13 +79,9 @@ func resourceNotificationTemplateV2Create(ctx context.Context, d *schema.Resourc
 	if err != nil {
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
-	domainID := config.GetDomainID()
-	if domainID == "" {
-		return diag.Errorf(errMissingDomainID)
-	}
 
 	messageTemplate, err := message_template.Create(client, message_template.CreateOpts{
-		DomainId:    domainID,
+		DomainId:    client.DomainID,
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
 		Source:      d.Get("source").(string),
@@ -130,12 +126,8 @@ func resourceNotificationTemplateV2Read(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
-	domainID := config.GetDomainID()
-	if domainID == "" {
-		return diag.Errorf(errMissingDomainID)
-	}
 
-	requestResp, err := message_template.List(client, domainID)
+	requestResp, err := message_template.List(client, client.DomainID)
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud LTS v2 notification template")
 	}
@@ -185,13 +177,9 @@ func resourceNotificationTemplateV2Update(ctx context.Context, d *schema.Resourc
 	if err != nil {
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
-	domainID := config.GetDomainID()
-	if domainID == "" {
-		return diag.Errorf(errMissingDomainID)
-	}
 
 	_, err = message_template.Update(client, message_template.CreateOpts{
-		DomainId:    domainID,
+		DomainId:    client.DomainID,
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
 		Source:      d.Get("source").(string),
@@ -214,13 +202,9 @@ func resourceNotificationTemplateV2Delete(ctx context.Context, d *schema.Resourc
 	if err != nil {
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
-	domainID := config.GetDomainID()
-	if domainID == "" {
-		return diag.Errorf(errMissingDomainID)
-	}
 
 	err = message_template.Delete(client, message_template.DeleteOpts{
-		DomainId:      domainID,
+		DomainId:      client.DomainID,
 		TemplateNames: []string{d.Id()},
 	})
 	if err != nil {
