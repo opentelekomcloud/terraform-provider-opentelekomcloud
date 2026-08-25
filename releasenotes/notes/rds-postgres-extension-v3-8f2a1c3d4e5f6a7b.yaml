@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[RDS]** Add new resource ``resource/opentelekomcloud_rds_postgres_extension_v3`` (`#3525 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3525>`_)
