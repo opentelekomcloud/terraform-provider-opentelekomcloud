@@ -1390,8 +1390,8 @@ func testAccRdsInstanceV3PrivateDNS(postfix string) string {
 %[2]s
 
 data "opentelekomcloud_rds_flavors_v3" "flavor" {
-  db_type       = "PostgreSQL"
-  db_version    = "15"
+  db_type       = "MySQL"
+  db_version    = "8.0"
   instance_mode = "single"
 }
 
@@ -1407,9 +1407,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   availability_zone = ["%[4]s"]
   db {
     password = "Postgres!120521"
-    type     = "PostgreSQL"
-    version  = "15"
-    port     = "8635"
+    type     = "MySQL"
+    version  = "8.0"
+    port     = "3306"
   }
   security_group_id   = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id

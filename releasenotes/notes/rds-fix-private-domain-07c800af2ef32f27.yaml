@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[RDS]** Add db type check for private domain in `resource/opentelekomcloud_rds_instance_v3`` (`#3527 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3527>`_)
