@@ -469,6 +469,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_vpc_route_ids_v2":                    vpc.DataSourceVPCRouteIdsV2(),
 			"opentelekomcloud_vpc_route_table_v1":                  vpc.DataSourceVPCRouteTableV1(),
 			"opentelekomcloud_vpc_route_tables_v1":                 vpc.DataSourceVpcRouteTablesV1(),
+			"opentelekomcloud_vpc_flow_logs_v1":                    vpc.DataSourceVpcFlowLogsV1(),
 			"opentelekomcloud_vpc_subnet_v1":                       vpc.DataSourceVpcSubnetV1(),
 			"opentelekomcloud_vpc_subnet_ids_v1":                   vpc.DataSourceVpcSubnetIdsV1(),
 			"opentelekomcloud_vpnaas_service_v2":                   vpn.DataSourceVpnServiceV2(),

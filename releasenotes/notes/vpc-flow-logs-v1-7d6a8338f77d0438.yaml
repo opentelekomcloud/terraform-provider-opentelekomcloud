@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    **[VPC]** Add ``data_source/opentelekomcloud_vpc_flow_logs_v1``.
+enhancements:
+  - |
+    **[VPC]** Migrate ``resource/opentelekomcloud_vpc_flow_log_v1`` to the modern SDK API and add
+    ``index_enabled``, ``enabled``, ``tenant_id``, ``created_at``, and ``updated_at`` attributes.
