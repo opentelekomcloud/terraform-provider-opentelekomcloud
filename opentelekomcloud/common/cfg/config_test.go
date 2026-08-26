@@ -134,12 +134,49 @@ func TestGenClientsRegionPrecedence(t *testing.T) {
 		cfg := &Config{}
 		th.CheckNoErr(t, cfg.genClients(projectAuth, domainAuth))
 		th.AssertEquals(t, "eu-de", cfg.Region)
+		th.AssertEquals(t, "test-domain-id", cfg.DomainID)
 	})
 
 	t.Run("configured region is preserved", func(t *testing.T) {
 		cfg := &Config{Region: "eu-nl"}
 		th.CheckNoErr(t, cfg.genClients(projectAuth, domainAuth))
 		th.AssertEquals(t, "eu-nl", cfg.Region)
+	})
+}
+
+func TestSetDomainIDFromClient(t *testing.T) {
+	t.Run("AK/SK resolved domain ID is stored", func(t *testing.T) {
+		config := &Config{HwClient: &golangsdk.ProviderClient{}}
+		config.setDomainIDFromClient(&golangsdk.ProviderClient{
+			AKSKAuthOptions: golangsdk.AKSKAuthOptions{DomainID: "aksk-domain-id"},
+		})
+		th.AssertEquals(t, "aksk-domain-id", config.DomainID)
+		th.AssertEquals(t, "aksk-domain-id", config.HwClient.DomainID)
+		serviceClient := &golangsdk.ServiceClient{ProviderClient: config.HwClient}
+		th.AssertEquals(t, "aksk-domain-id", serviceClient.DomainID)
+	})
+
+	t.Run("configured domain ID is preserved", func(t *testing.T) {
+		config := &Config{DomainID: "configured-domain-id"}
+		config.setDomainIDFromClient(&golangsdk.ProviderClient{
+			DomainID:        "authenticated-domain-id",
+			AKSKAuthOptions: golangsdk.AKSKAuthOptions{DomainID: "aksk-domain-id"},
+		})
+		th.AssertEquals(t, "configured-domain-id", config.DomainID)
+	})
+
+	t.Run("authenticated project client domain ID is preserved", func(t *testing.T) {
+		config := &Config{HwClient: &golangsdk.ProviderClient{DomainID: "project-domain-id"}}
+		config.setDomainIDFromClient(&golangsdk.ProviderClient{
+			AKSKAuthOptions: golangsdk.AKSKAuthOptions{DomainID: "aksk-domain-id"},
+		})
+		th.AssertEquals(t, "project-domain-id", config.HwClient.DomainID)
+	})
+
+	t.Run("nil client is ignored", func(t *testing.T) {
+		config := &Config{}
+		config.setDomainIDFromClient(nil)
+		th.AssertEquals(t, "", config.DomainID)
 	})
 }
 
@@ -200,6 +237,60 @@ func TestDomain(t *testing.T) {
 	}
 
 	defer func() { _ = os.Remove(fileName) }()
+}
+
+func TestGetDomainID(t *testing.T) {
+	tests := []struct {
+		name     string
+		config   *Config
+		expected string
+	}{
+		{
+			name: "configured domain ID",
+			config: &Config{
+				DomainID:     "configured-domain-id",
+				DomainClient: &golangsdk.ProviderClient{DomainID: "domain-client-id"},
+				HwClient:     &golangsdk.ProviderClient{DomainID: "project-client-id"},
+			},
+			expected: "configured-domain-id",
+		},
+		{
+			name: "domain client ID",
+			config: &Config{
+				DomainClient: &golangsdk.ProviderClient{DomainID: "domain-client-id"},
+				HwClient:     &golangsdk.ProviderClient{DomainID: "project-client-id"},
+			},
+			expected: "domain-client-id",
+		},
+		{
+			name: "AK/SK resolved domain ID",
+			config: &Config{
+				DomainClient: &golangsdk.ProviderClient{
+					AKSKAuthOptions: golangsdk.AKSKAuthOptions{DomainID: "aksk-domain-id"},
+				},
+				HwClient: &golangsdk.ProviderClient{DomainID: "project-client-id"},
+			},
+			expected: "aksk-domain-id",
+		},
+		{
+			name: "project client fallback",
+			config: &Config{
+				HwClient: &golangsdk.ProviderClient{DomainID: "project-client-id"},
+			},
+			expected: "project-client-id",
+		},
+		{
+			name:     "missing domain ID",
+			config:   &Config{},
+			expected: "",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			th.AssertEquals(t, test.expected, test.config.GetDomainID())
+		})
+	}
 }
 
 func testRequestRetry(t *testing.T, count int) {
