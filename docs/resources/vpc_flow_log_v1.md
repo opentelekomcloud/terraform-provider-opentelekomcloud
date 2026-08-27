@@ -8,7 +8,7 @@ description: |-
 ---
 
 Up-to-date reference of API arguments for VPC flow log you can get at
-[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/vpc_flow_log)
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/vpc_apis_v1_v2/vpc_flow_log/index.html)
 
 # opentelekomcloud_vpc_flow_log_v1
 
@@ -39,6 +39,8 @@ resource "opentelekomcloud_vpc_flow_log_v1" "flowlog1" {
   traffic_type  = "all"
   log_group_id  = opentelekomcloud_logtank_group_v2.log_group1.id
   log_topic_id  = opentelekomcloud_logtank_topic_v2.log_topic1.id
+  index_enabled = true
+  enabled       = true
 }
 ```
 
@@ -49,7 +51,7 @@ The following arguments are supported:
 * `name` - (Optional) Specifies the flow log name.
   The value is a string of 1 to 64 characters that can contain letters, digits, underscores (_), hyphens (-) and periods (.).
 
-* `description` - (Optinal) Provides supplementary information about the VPC flow log.
+* `description` - (Optional) Provides supplementary information about the VPC flow log.
   The value is a string of no more than 255 characters and cannot contain angle brackets (< or >).
 
 * `resource_type` - (Required) Specifies the type of resource on which to create the VPC flow log.
@@ -67,6 +69,11 @@ The following arguments are supported:
 
 * `log_topic_id` - (Required) Specifies the log topic ID.
   Changing this creates a new VPC flow log.
+
+* `index_enabled` - (Optional) Whether to enable the log index. Defaults to `false`.
+  Changing this creates a new VPC flow log.
+
+* `enabled` - (Optional) Whether to enable the VPC flow log function. Defaults to `true`.
 
 ## Attributes Reference
 
@@ -88,14 +95,20 @@ The following attributes are exported:
 
 * `log_topic_id` - See Argument Reference above.
 
+* `enabled` - See Argument Reference above.
+
+* `tenant_id` - The project ID that owns the VPC flow log.
+
 * `status` - The status of the flow log. The value can be `ACTIVE`, `DOWN` or `ERROR`.
 
-* `admin_state` - Whether to enable the VPC flow log function.
+* `created_at` - The time when the VPC flow log was created.
+
+* `updated_at` - The time when the VPC flow log was last updated.
 
 ## Import
 
 VPC flow logs can be imported using the `id`, e.g.
 
 ```sh
-terraform import opentelekomcloud_vpc_flow log_v1 ab76d479-9ef8-4034-88c4-4ab82fc87572
+terraform import opentelekomcloud_vpc_flow_log_v1.flow_log ab76d479-9ef8-4034-88c4-4ab82fc87572
 ```

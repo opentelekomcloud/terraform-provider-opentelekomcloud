@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    **[VPC]** Add ``data_source/opentelekomcloud_vpc_flow_logs_v1`` (`#3528 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3528>`_)
+enhancements:
+  - |
+    **[VPC]** Migrate ``resource/opentelekomcloud_vpc_flow_log_v1`` to the modern SDK API (`#3528 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3528>`_)

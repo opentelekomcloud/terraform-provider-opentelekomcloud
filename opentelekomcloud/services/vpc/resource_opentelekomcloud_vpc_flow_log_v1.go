@@ -11,7 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/flowlogs"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/flow_logs"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -41,9 +42,9 @@ func ResourceVpcFlowLogV1() *schema.Resource {
 				ValidateFunc: common.ValidateName,
 			},
 			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: false,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(0, 255),
 			},
 			"resource_type": {
 				Type:     schema.TypeString,
@@ -74,16 +75,33 @@ func ResourceVpcFlowLogV1() *schema.Resource {
 			"log_topic_id": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: false,
+				ForceNew: true,
 			},
-			"admin_state": {
+			"index_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Computed: true,
+				Default:  false,
+				ForceNew: true,
+			},
+			"enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
 			},
 			"status": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
+			},
+			"tenant_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -98,7 +116,7 @@ func resourceVpcFlowLogV1Create(ctx context.Context, d *schema.ResourceData, met
 		return fmterr.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
-	createOpts := flowlogs.CreateOpts{
+	createOpts := flow_logs.CreateOpts{
 		Name:         d.Get("name").(string),
 		Description:  d.Get("description").(string),
 		ResourceType: d.Get("resource_type").(string),
@@ -107,14 +125,21 @@ func resourceVpcFlowLogV1Create(ctx context.Context, d *schema.ResourceData, met
 		LogGroupID:   d.Get("log_group_id").(string),
 		LogTopicID:   d.Get("log_topic_id").(string),
 	}
+	createOpts.IndexEnabled = pointerto.Bool(d.Get("index_enabled").(bool))
 
 	log.Printf("[DEBUG] Create VPC Flow Log Options: %#v", createOpts)
-	fl, err := flowlogs.Create(vpcClient, createOpts).Extract()
+	fl, err := flow_logs.Create(vpcClient, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud VPC flow log: %s", err)
 	}
 
 	d.SetId(fl.ID)
+	_, err = flow_logs.Update(vpcClient, d.Id(), flow_logs.UpdateOpts{
+		AdminState: pointerto.Bool(d.Get("enabled").(bool)),
+	})
+	if err != nil {
+		return fmterr.Errorf("error setting OpenTelekomCloud VPC flow log admin state: %s", err)
+	}
 	return resourceVpcFlowLogV1Read(ctx, d, config)
 }
 
@@ -125,7 +150,7 @@ func resourceVpcFlowLogV1Read(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
-	fl, err := flowlogs.Get(vpcClient, d.Id()).Extract()
+	fl, err := flow_logs.Get(vpcClient, d.Id())
 	if err != nil {
 		// ignore ErrDefault404
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -144,8 +169,11 @@ func resourceVpcFlowLogV1Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("traffic_type", fl.TrafficType),
 		d.Set("log_group_id", fl.LogGroupID),
 		d.Set("log_topic_id", fl.LogTopicID),
-		d.Set("admin_state", fl.AdminState),
+		d.Set("enabled", fl.AdminState),
 		d.Set("status", fl.Status),
+		d.Set("tenant_id", fl.TenantID),
+		d.Set("created_at", fl.CreatedAt),
+		d.Set("updated_at", fl.UpdatedAt),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
@@ -161,16 +189,19 @@ func resourceVpcFlowLogV1Update(ctx context.Context, d *schema.ResourceData, met
 		return fmterr.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
-	var updateOpts flowlogs.UpdateOpts
+	var updateOpts flow_logs.UpdateOpts
 
 	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
+		updateOpts.Name = pointerto.String(d.Get("name").(string))
 	}
 	if d.HasChange("description") {
-		updateOpts.Description = d.Get("description").(string)
+		updateOpts.Description = pointerto.String(d.Get("description").(string))
+	}
+	if d.HasChange("enabled") {
+		updateOpts.AdminState = pointerto.Bool(d.Get("enabled").(bool))
 	}
 
-	_, err = flowlogs.Update(vpcClient, d.Id(), updateOpts).Extract()
+	_, err = flow_logs.Update(vpcClient, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud VPC flow log: %s", err)
 	}
@@ -185,7 +216,7 @@ func resourceVpcFlowLogV1Delete(_ context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
-	err = flowlogs.Delete(vpcClient, d.Id()).ExtractErr()
+	err = flow_logs.Delete(vpcClient, d.Id())
 	if err != nil {
 		// ignore ErrDefault404
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
