@@ -83,11 +83,13 @@ func ResourceVpcSecGroupRuleV3() *schema.Resource {
 			"action": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"priority": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"created_at": {
