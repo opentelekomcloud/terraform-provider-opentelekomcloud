@@ -131,40 +131,54 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
 
 ```
 
-### CCE coredns addon with data sources with stub_domains and upstream_nameservers
+### CCE CoreDNS addon with stub domains and upstream nameservers
+
 ```hcl
 variable "vpc_id" {}
 variable "network_id" {}
 
-resource opentelekomcloud_cce_cluster_v3 cluster_1 {
+data "opentelekomcloud_cce_addon_template_v3" "coredns" {
+  addon_name    = "coredns"
+  addon_version = "1.30.67"
+}
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "my_cluster"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.medium"
   vpc_id                  = var.vpc_id
   subnet_id               = var.network_id
-  cluster_version         = "v1.27"
+  cluster_version         = "v1.34"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   no_addons               = true
 }
 
 resource "opentelekomcloud_cce_addon_v3" "coredns" {
-  template_name    = "coredns"
-  template_version = "1.28.4"
+  template_name    = data.opentelekomcloud_cce_addon_template_v3.coredns.addon_name
+  template_version = data.opentelekomcloud_cce_addon_template_v3.coredns.addon_version
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
     basic = {
-      "swr_addr" : "100.125.7.25:20202",
-      "swr_user" : "hwofficial"
+      cluster_ip    = data.opentelekomcloud_cce_addon_template_v3.coredns.cluster_ip
+      image_version = data.opentelekomcloud_cce_addon_template_v3.coredns.image_version
+      swr_addr      = data.opentelekomcloud_cce_addon_template_v3.coredns.swr_addr
+      swr_user      = data.opentelekomcloud_cce_addon_template_v3.coredns.swr_user
     }
-    custom = {
-      "stub_domains" : "{\"test\":[\"10.10.40.10\"], \"test2\":[\"10.10.40.20\"]}"
-      "upstream_nameservers" : "[\"8.8.8.8\",\"8.8.4.4\"]"
-    }
+    custom_json = jsonencode({
+      stub_domains = {
+        test  = ["10.10.40.10"]
+        test2 = ["10.10.40.20"]
+      }
+      upstream_nameservers = ["8.8.8.8", "8.8.4.4"]
+    })
   }
 }
 ```
+
+CoreDNS templates use nested JSON types for `stub_domains` and `upstream_nameservers`.
+Use `custom_json` for these parameters so they are sent as an object and an array instead of JSON-encoded strings.
 
 ### CCE metric-server addon with nested data structures in custom values
 ```hcl
