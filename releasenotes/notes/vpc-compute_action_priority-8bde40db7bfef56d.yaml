@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix to make action and priority fields of secgroup_rule_v3 computed and prevent unnecessary resource recreation (`#3529 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3529>`_)
