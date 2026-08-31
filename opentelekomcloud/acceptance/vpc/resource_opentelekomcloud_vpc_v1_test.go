@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/vpcs"
 	VpcV3 "github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v3/vpcs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
@@ -17,12 +17,12 @@ import (
 const resourceVPCName = "opentelekomcloud_vpc_v1.vpc_1"
 
 func getVpcV1ResourceFunc(conf *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
-	client, err := conf.NetworkingV1Client(env.OS_REGION_NAME)
+	client, err := conf.VpcV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return nil, fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
+		return nil, fmt.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
-	return vpcs.Get(client, state.Primary.ID).Extract()
+	return vpcs.Get(client, state.Primary.ID)
 }
 
 func TestAccVpcV1_basic(t *testing.T) {
@@ -45,6 +45,10 @@ func TestAccVpcV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceVPCName, "cidr", "192.168.0.0/16"),
 					resource.TestCheckResourceAttr(resourceVPCName, "status", "OK"),
 					resource.TestCheckResourceAttr(resourceVPCName, "shared", "true"),
+					resource.TestCheckResourceAttr(resourceVPCName, "enterprise_project_id", "0"),
+					resource.TestCheckResourceAttrSet(resourceVPCName, "tenant_id"),
+					resource.TestCheckResourceAttrSet(resourceVPCName, "created_at"),
+					resource.TestCheckResourceAttrSet(resourceVPCName, "updated_at"),
 					resource.TestCheckResourceAttr(resourceVPCName, "tags.foo", "bar"),
 					resource.TestCheckResourceAttr(resourceVPCName, "tags.key", "value"),
 				),
@@ -190,10 +194,11 @@ func TestAccVpcV1_timeout(t *testing.T) {
 
 const testAccVpcV1Basic = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name        = "terraform_provider_test"
-  description = "simple description"
-  cidr        = "192.168.0.0/16"
-  shared      = true
+  name                  = "terraform_provider_test"
+  description           = "simple description"
+  cidr                  = "192.168.0.0/16"
+  shared                = true
+  enterprise_project_id = "0"
 
   tags = {
     foo = "bar"

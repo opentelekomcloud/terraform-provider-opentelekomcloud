@@ -36,6 +36,11 @@ func TestAccVpcV1DataSource_basic(t *testing.T) {
 					testAccDataSourceVpcV1Check(dataSourceNameByName, name, cidr),
 					resource.TestCheckResourceAttr(dataSourceNameByID, "shared", "false"),
 					resource.TestCheckResourceAttr(dataSourceNameByID, "status", "OK"),
+					resource.TestCheckResourceAttr(dataSourceNameByID, "description", "data source description"),
+					resource.TestCheckResourceAttrSet(dataSourceNameByID, "enterprise_project_id"),
+					resource.TestCheckResourceAttrSet(dataSourceNameByID, "tenant_id"),
+					resource.TestCheckResourceAttrSet(dataSourceNameByID, "created_at"),
+					resource.TestCheckResourceAttrSet(dataSourceNameByID, "updated_at"),
 				),
 			},
 		},
@@ -74,8 +79,9 @@ func testAccDataSourceVpcV1Check(n, name, cidr string) resource.TestCheckFunc {
 func testAccDataSourceVpcV1Config(name, cidr string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name = "%s"
-  cidr = "%s"
+  name        = "%s"
+  description = "data source description"
+  cidr        = "%s"
 }
 
 data "opentelekomcloud_vpc_v1" "by_id" {

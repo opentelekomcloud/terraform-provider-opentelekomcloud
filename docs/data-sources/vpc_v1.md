@@ -8,7 +8,7 @@ description: |-
 ---
 
 Up-to-date reference of API arguments for VPC you can get at
-[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/virtual_private_cloud/querying_vpcs.html#vpc-api01-0003)
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/vpc_apis_v1_v2/virtual_private_cloud/querying_vpcs.html#vpc-api01-0003)
 
 # opentelekomcloud_vpc_v1
 
@@ -39,11 +39,14 @@ The given filters must match exactly one VPC whose data will be exported as attr
   Can be either `CREATING`, `OK`, `DOWN`, `PENDING_UPDATE`, `PENDING_DELETE`, or `ERROR`.
 
 * `name` - (Optional) A unique name for the VPC. The name must be unique for a tenant.
-  The value is a string of no more than 64 characters and can contain digits, letters, underscores (_), and hyphens (-).
+  The value is a string of no more than 64 characters and can contain digits, letters, underscores (_), hyphens (-),
+  and periods (.).
 
 * `cidr` - (Optional) The cidr block of the desired VPC.
 
 * `shared` - (Optional) Enable SNAT (In order to let instances without an EIP access the internet).
+
+* `enterprise_project_id` - (Optional) The enterprise project ID used to filter VPCs.
 
 ## Attributes Reference
 
@@ -53,6 +56,8 @@ The following attributes are exported:
 
 * `name` -  See Argument Reference above.
 
+* `description` - The VPC description.
+
 * `status` - See Argument Reference above.
 
 * `cidr` - See Argument Reference above.
@@ -60,3 +65,11 @@ The following attributes are exported:
 * `routes` - The list of route information with `destination` and `nexthop` fields.
 
 * `shared` - Specifies whether the cross-tenant sharing is supported.
+
+* `enterprise_project_id` - The enterprise project ID associated with the VPC.
+
+* `tenant_id` - The project ID that owns the VPC.
+
+* `created_at` - The UTC creation timestamp.
+
+* `updated_at` - The UTC last-update timestamp.

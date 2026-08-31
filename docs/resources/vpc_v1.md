@@ -8,7 +8,7 @@ description: |-
 ---
 
 Up-to-date reference of API arguments for VPC service you can get at
-[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/virtual_private_cloud)
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/vpc_apis_v1_v2/virtual_private_cloud/index.html)
 
 # opentelekomcloud_vpc_v1
 
@@ -61,9 +61,13 @@ The following arguments are supported:
   Please use resource `opentelekomcloud_vpc_secondary_cidr_v3` instead.
 
 * `name` - (Required) The name of the VPC. The name must be unique for a tenant. The value is a string of
-  no more than `64` characters and can contain digits, letters, underscores (`_`), and hyphens (`-`).
+  no more than `64` characters and can contain digits, letters, underscores (`_`), hyphens (`-`), and periods (`.`).
 
 * `description` - (Optional) A description of the VPC.
+
+* `enterprise_project_id` - (Optional) The enterprise project ID associated with the VPC.
+  Changing this creates a new VPC. If omitted, the provider-level enterprise project ID is used,
+  or `0` for the default enterprise project.
 
 * `shared` - (Optional) Specifies whether the shared SNAT should be used or not. Is also
   required for cross-tenant sharing. Shared SNAT only avadilable in eu-de region.
@@ -78,6 +82,15 @@ All above argument parameters can be exported as attribute parameters.
 
 * `status` - The current status of the desired VPC. Can be either `CREATING`,
   `OK`, `DOWN`, `PENDING_UPDATE`, `PENDING_DELETE` or `ERROR`.
+
+* `routes` - The VPC routes. Each entry contains `destination` and `nexthop`.
+  Manage custom routes with the dedicated VPC route resources.
+
+* `tenant_id` - The project ID that owns the VPC.
+
+* `created_at` - The UTC creation timestamp.
+
+* `updated_at` - The UTC last-update timestamp.
 
 ## Import
 
