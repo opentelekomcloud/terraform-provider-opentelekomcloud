@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -13,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/vpcs"
 	VpcV3 "github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v3/vpcs"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -51,11 +52,22 @@ func ResourceVirtualPrivateCloudV1() *schema.Resource {
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ValidateFunc: validation.All(
+					validation.StringLenBetween(0, 255),
+					validation.StringMatch(regexp.MustCompile("^[^<>]*$"),
+						"description cannot contain angle brackets"),
+				),
 			},
 			"cidr": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.IsCIDR,
+			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
 			},
 			"secondary_cidr": {
 				Type:         schema.TypeString,
@@ -70,6 +82,19 @@ func ResourceVirtualPrivateCloudV1() *schema.Resource {
 				Deprecated: "VPC Shared SNAT End of Life from 01.03.2024",
 			},
 			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"routes": vpcRoutesSchema(),
+			"tenant_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -155,19 +180,20 @@ func readNetworkingTags(d *schema.ResourceData, config *cfg.Config, resource str
 func resourceVirtualPrivateCloudV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV1Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
 	createOpts := vpcs.CreateOpts{
-		Name:        d.Get("name").(string),
-		Description: d.Get("description").(string),
-		CIDR:        d.Get("cidr").(string),
+		Name:                d.Get("name").(string),
+		Description:         d.Get("description").(string),
+		CIDR:                d.Get("cidr").(string),
+		EnterpriseProjectID: config.GetEnterpriseProjectID(d, "0"),
 	}
 
-	n, err := vpcs.Create(client, createOpts).Extract()
+	n, err := vpcs.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud VPC: %w", err)
 	}
@@ -195,9 +221,9 @@ func resourceVirtualPrivateCloudV1Create(ctx context.Context, d *schema.Resource
 		updateOpts := vpcs.UpdateOpts{
 			EnableSharedSnat: &snat,
 		}
-		_, err = vpcs.Update(client, d.Id(), updateOpts).Extract()
+		_, err = vpcs.Update(client, d.Id(), updateOpts)
 		if err != nil {
-			log.Printf("[WARN] Error updating shared SNAT for OpenTelekomCloud VPC: %s", err)
+			return fmterr.Errorf("error updating shared SNAT for OpenTelekomCloud VPC: %w", err)
 		}
 	}
 
@@ -220,13 +246,13 @@ func resourceVirtualPrivateCloudV1Create(ctx context.Context, d *schema.Resource
 func resourceVirtualPrivateCloudV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV1Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
-	n, err := vpcs.Get(client, d.Id()).Extract()
+	n, err := vpcs.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "vpc")
 	}
@@ -237,6 +263,11 @@ func resourceVirtualPrivateCloudV1Read(ctx context.Context, d *schema.ResourceDa
 		d.Set("cidr", n.CIDR),
 		d.Set("status", n.Status),
 		d.Set("shared", n.EnableSharedSnat),
+		d.Set("enterprise_project_id", n.EnterpriseProjectID),
+		d.Set("routes", flattenVpcRoutes(n.Routes)),
+		d.Set("tenant_id", n.TenantId),
+		d.Set("created_at", n.CreatedAt),
+		d.Set("updated_at", n.UpdatedAt),
 		d.Set("region", config.GetRegion(d)),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -256,32 +287,38 @@ func resourceVirtualPrivateCloudV1Read(ctx context.Context, d *schema.ResourceDa
 func resourceVirtualPrivateCloudV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV1Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
 	var updateOpts vpcs.UpdateOpts
+	hasVpcUpdate := false
 
 	if d.HasChange("name") {
 		updateOpts.Name = d.Get("name").(string)
+		hasVpcUpdate = true
 	}
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		updateOpts.Description = &description
+		hasVpcUpdate = true
 	}
 	if d.HasChange("cidr") {
 		updateOpts.CIDR = d.Get("cidr").(string)
+		hasVpcUpdate = true
 	}
 	if d.HasChange("shared") {
 		snat := d.Get("shared").(bool)
 		updateOpts.EnableSharedSnat = &snat
+		hasVpcUpdate = true
 	}
 
-	_, err = vpcs.Update(client, d.Id(), updateOpts).Extract()
-	if err != nil {
-		return fmterr.Errorf("error updating OpenTelekomCloud VPC: %s", err)
+	if hasVpcUpdate {
+		if _, err = vpcs.Update(client, d.Id(), updateOpts); err != nil {
+			return fmterr.Errorf("error updating OpenTelekomCloud VPC: %s", err)
+		}
 	}
 
 	// update tags
@@ -333,10 +370,10 @@ func resourceVirtualPrivateCloudV1Update(ctx context.Context, d *schema.Resource
 func resourceVirtualPrivateCloudV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV1Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -359,7 +396,7 @@ func resourceVirtualPrivateCloudV1Delete(ctx context.Context, d *schema.Resource
 
 func waitForVpcActive(client *golangsdk.ServiceClient, vpcID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := vpcs.Get(client, vpcID).Extract()
+		n, err := vpcs.Get(client, vpcID)
 		if err != nil {
 			return nil, "", err
 		}
@@ -379,7 +416,7 @@ func waitForVpcActive(client *golangsdk.ServiceClient, vpcID string) resource.St
 
 func waitForVpcDelete(client *golangsdk.ServiceClient, vpcID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		r, err := vpcs.Get(client, vpcID).Extract()
+		r, err := vpcs.Get(client, vpcID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[INFO] Successfully deleted OpenTelekomCloud VPC %s", vpcID)
@@ -388,7 +425,7 @@ func waitForVpcDelete(client *golangsdk.ServiceClient, vpcID string) resource.St
 			return r, "ACTIVE", err
 		}
 
-		if err = vpcs.Delete(client, vpcID).ExtractErr(); err != nil {
+		if err = vpcs.Delete(client, vpcID); err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[INFO] Successfully deleted OpenTelekomCloud VPC %s", vpcID)
 				return r, "DELETED", nil
