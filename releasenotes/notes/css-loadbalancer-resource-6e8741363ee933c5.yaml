@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CSS]** New resource ``resource/opentelekomcloud_css_loadbalancer_v1`` (`#3138 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3138>`_)
