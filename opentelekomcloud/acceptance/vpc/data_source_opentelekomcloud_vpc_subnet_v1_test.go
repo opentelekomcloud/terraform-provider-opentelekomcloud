@@ -39,6 +39,12 @@ func TestAccVpcSubnetV1DataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(dataSourceNameByID, "dhcp_enable", "true"),
 					resource.TestCheckResourceAttr(dataSourceNameByID, "ipv6_enable", "true"),
 					resource.TestCheckResourceAttrSet(dataSourceNameByID, "subnet_id_v6"),
+					resource.TestCheckResourceAttr(dataSourceNameByID, "description", "data source description"),
+					resource.TestCheckResourceAttr(dataSourceNameByID, "ntp_addresses", "10.100.0.33"),
+					resource.TestCheckResourceAttrSet(dataSourceNameByID, "scope"),
+					resource.TestCheckResourceAttrSet(dataSourceNameByID, "tenant_id"),
+					resource.TestCheckResourceAttrSet(dataSourceNameByID, "created_at"),
+					resource.TestCheckResourceAttrSet(dataSourceNameByID, "updated_at"),
 				),
 			},
 		},
@@ -88,11 +94,13 @@ resource "opentelekomcloud_vpc_v1" "vpc_1" {
 
 resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
   name              = "test_subnet_ds_sn"
+  description       = "data source description"
   cidr              = "10.0.1.0/24"
   gateway_ip        = "10.0.1.1"
   vpc_id            = opentelekomcloud_vpc_v1.vpc_1.id
   availability_zone = "eu-de-02"
   ipv6_enable       = true
+  ntp_addresses     = "10.100.0.33"
 }
 
 data "opentelekomcloud_vpc_subnet_v1" "by_id" {

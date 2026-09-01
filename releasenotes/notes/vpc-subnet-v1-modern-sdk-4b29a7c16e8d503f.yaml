@@ -1,0 +1,13 @@
+---
+features:
+  - |
+    **[VPC]** Add description, NTP, scope, tenant, and timestamp attributes to
+    ``data-source/opentelekomcloud_vpc_subnet_v1`` and expose subnet scope,
+    tenant, and timestamps on ``resource/opentelekomcloud_vpc_subnet_v1``.
+fixes:
+  - |
+    **[VPC]** Migrate ``resource/opentelekomcloud_vpc_subnet_v1`` and
+    ``data-source/opentelekomcloud_vpc_subnet_v1`` to modern VPC v1 SDK operations.
+  - |
+    **[VPC]** Migrate ``data-source/opentelekomcloud_vpc_subnet_ids_v1`` to the
+    modern VPC v1 subnet list operation.

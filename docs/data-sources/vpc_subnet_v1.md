@@ -8,7 +8,7 @@ description: |-
 ---
 
 Up-to-date reference of API arguments for VPC subnet you can get at
-[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/subnet/querying_subnets.html#vpc-subnet01-0003)
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/vpc_apis_v1_v2/subnet/querying_subnets.html#vpc-subnet01-0003)
 
 # opentelekomcloud_vpc_subnet_v1
 
@@ -40,6 +40,8 @@ subnet whose data will be exported as attributes.
 
 * `name` - (Optional) The name of the specific subnet to retrieve.
 
+* `description` - (Optional) The description of the specific subnet to retrieve.
+
 * `cidr` - (Optional) The network segment of specific subnet to retrieve. The value must be in CIDR format.
 
 * `status` - (Optional) The value can be ACTIVE, DOWN, UNKNOWN, or ERROR.
@@ -53,6 +55,10 @@ subnet whose data will be exported as attributes.
 * `secondary_dns` - (Optional) The IP address of DNS server 2 on the specific subnet.
 
 * `availability_zone` - (Optional) The availability zone (AZ) to which the subnet should belong.
+
+* `ntp_addresses` - (Optional) The comma-separated NTP server addresses configured for the subnet.
+
+* `scope` - (Optional) The subnet usage scope, such as `center`.
 
 ## Attributes Reference
 
@@ -70,3 +76,9 @@ the selected subnet.
 * `subnet_id_v6` - Specifies the OpenStack IPv6 subnet ID. Only returned if subnet is IPV6 enabled.
 
 * `network_id` - Specifies the OpenStack network ID.
+
+* `tenant_id` - The project ID that owns the subnet.
+
+* `created_at` - The UTC creation timestamp.
+
+* `updated_at` - The UTC last-update timestamp.

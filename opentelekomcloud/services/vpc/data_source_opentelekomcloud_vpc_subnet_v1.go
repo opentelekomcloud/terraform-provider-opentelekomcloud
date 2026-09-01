@@ -3,12 +3,13 @@ package vpc
 import (
 	"context"
 	"log"
+	"regexp"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/subnets"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -34,6 +35,16 @@ func DataSourceVpcSubnetV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.All(
+					validation.StringLenBetween(0, 255),
+					validation.StringMatch(regexp.MustCompile("^[^<>]*$"),
+						"description cannot contain angle brackets"),
+				),
 			},
 			"cidr": {
 				Type:     schema.TypeString,
@@ -104,33 +115,58 @@ func DataSourceVpcSubnetV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"ntp_addresses": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"scope": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"tenant_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
 
 func dataSourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := config.VpcV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(errCreationV1Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
-	listOpts := subnets.ListOpts{
+	// The API can repeat a page when vpc_id and marker are combined, so apply all filters client-side.
+	allSubnets, err := subnets.List(client, subnets.ListOpts{})
+	if err != nil {
+		return fmterr.Errorf("unable to retrieve subnets: %w", err)
+	}
+	refinedSubnets := filterSubnets(allSubnets, subnetFilters{
 		ID:               d.Get("id").(string),
 		Name:             d.Get("name").(string),
+		Description:      d.Get("description").(string),
 		CIDR:             d.Get("cidr").(string),
 		Status:           d.Get("status").(string),
 		GatewayIP:        d.Get("gateway_ip").(string),
 		PrimaryDNS:       d.Get("primary_dns").(string),
 		SecondaryDNS:     d.Get("secondary_dns").(string),
 		AvailabilityZone: d.Get("availability_zone").(string),
+		NtpAddresses:     d.Get("ntp_addresses").(string),
+		Scope:            d.Get("scope").(string),
 		VpcID:            d.Get("vpc_id").(string),
-	}
-
-	refinedSubnets, err := subnets.List(client, listOpts)
-	if err != nil {
-		return fmterr.Errorf("unable to retrieve subnets: %w", err)
-	}
+	})
 
 	if len(refinedSubnets) == 0 {
 		return fmterr.Errorf("no matching subnet found. Please change your search criteria and try again")
@@ -147,6 +183,7 @@ func dataSourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta i
 
 	mErr := multierror.Append(
 		d.Set("name", subnet.Name),
+		d.Set("description", subnet.Description),
 		d.Set("cidr", subnet.CIDR),
 		d.Set("dns_list", subnet.DNSList),
 		d.Set("status", subnet.Status),
@@ -162,6 +199,11 @@ func dataSourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("ipv6_enable", subnet.EnableIpv6),
 		d.Set("cidr_ipv6", subnet.CidrV6),
 		d.Set("gateway_ipv6", subnet.GatewayIpV6),
+		d.Set("ntp_addresses", subnetNtpAddresses(subnet.ExtraDHCPOpts)),
+		d.Set("scope", subnet.Scope),
+		d.Set("tenant_id", subnet.TenantID),
+		d.Set("created_at", subnet.CreatedAt),
+		d.Set("updated_at", subnet.UpdatedAt),
 		d.Set("region", config.GetRegion(d)),
 	)
 	if mErr.ErrorOrNil() != nil {
@@ -169,4 +211,63 @@ func dataSourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta i
 	}
 
 	return nil
+}
+
+type subnetFilters struct {
+	ID               string
+	Name             string
+	Description      string
+	CIDR             string
+	Status           string
+	GatewayIP        string
+	PrimaryDNS       string
+	SecondaryDNS     string
+	AvailabilityZone string
+	NtpAddresses     string
+	Scope            string
+	VpcID            string
+}
+
+func filterSubnets(allSubnets []subnets.Subnet, filters subnetFilters) []subnets.Subnet {
+	refined := make([]subnets.Subnet, 0, len(allSubnets))
+	for _, subnet := range allSubnets {
+		if filters.ID != "" && subnet.ID != filters.ID {
+			continue
+		}
+		if filters.Name != "" && subnet.Name != filters.Name {
+			continue
+		}
+		if filters.Description != "" && subnet.Description != filters.Description {
+			continue
+		}
+		if filters.CIDR != "" && subnet.CIDR != filters.CIDR {
+			continue
+		}
+		if filters.Status != "" && subnet.Status != filters.Status {
+			continue
+		}
+		if filters.GatewayIP != "" && subnet.GatewayIP != filters.GatewayIP {
+			continue
+		}
+		if filters.PrimaryDNS != "" && subnet.PrimaryDNS != filters.PrimaryDNS {
+			continue
+		}
+		if filters.SecondaryDNS != "" && subnet.SecondaryDNS != filters.SecondaryDNS {
+			continue
+		}
+		if filters.AvailabilityZone != "" && subnet.AvailabilityZone != filters.AvailabilityZone {
+			continue
+		}
+		if filters.NtpAddresses != "" && subnetNtpAddresses(subnet.ExtraDHCPOpts) != filters.NtpAddresses {
+			continue
+		}
+		if filters.Scope != "" && subnet.Scope != filters.Scope {
+			continue
+		}
+		if filters.VpcID != "" && subnet.VpcID != filters.VpcID {
+			continue
+		}
+		refined = append(refined, subnet)
+	}
+	return refined
 }

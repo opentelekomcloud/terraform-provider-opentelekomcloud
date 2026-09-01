@@ -12,9 +12,7 @@ Up-to-date reference of API arguments for VPC subnet you can get at
 
 # opentelekomcloud_vpc_subnet_ids_v1
 
-Use this data source to get a list of subnet ids for a vpc_id
-
-This resource can be useful for getting back a list of subnet ids for a VPC.
+Use this data source to get a list of subnet IDs for a VPC.
 
 ## Example Usage
 
@@ -45,4 +43,4 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `ids` - A list of all the subnet ids found. This data source will fail if none are found.
+* `ids` - A set of all subnet IDs found. This data source will fail if none are found.

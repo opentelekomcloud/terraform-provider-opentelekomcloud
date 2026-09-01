@@ -5,8 +5,8 @@ import (
 	"sort"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/networkipavailabilities"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/subnets"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -42,20 +42,18 @@ func DataSourceVpcSubnetIdsV1() *schema.Resource {
 
 func dataSourceVpcSubnetIdsV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := config.VpcV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
 	vpcID := d.Get("vpc_id").(string)
-	listOpts := subnets.ListOpts{
-		VpcID: vpcID,
-	}
-
-	refinedSubnets, err := subnets.List(client, listOpts)
+	// The API can repeat a page when vpc_id and marker are combined, so filter the complete result locally.
+	allSubnets, err := subnets.List(client, subnets.ListOpts{})
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve subnets: %w", err)
 	}
+	refinedSubnets := filterSubnets(allSubnets, subnetFilters{VpcID: vpcID})
 
 	if len(refinedSubnets) == 0 {
 		return fmterr.Errorf("no matching subnet found for vpc with id %s", vpcID)
@@ -71,6 +69,9 @@ func dataSourceVpcSubnetIdsV1Read(_ context.Context, d *schema.ResourceData, met
 		net, err := networkipavailabilities.Get(networkingClient, subnet.ID).Extract()
 		if err != nil {
 			return fmterr.Errorf("error retrieving NetworkIP availabilities: %w", err)
+		}
+		if len(net.SubnetIPAvailabilities) == 0 {
+			return fmterr.Errorf("no NetworkIP availability found for subnet %s", subnet.ID)
 		}
 		subnetIPAvail := net.SubnetIPAvailabilities[0]
 		newSubnet := SubnetIP{

@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/subnets"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -41,6 +41,10 @@ func TestAccVpcSubnetV1Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceVPCSubnetName, "tags.foo", "bar"),
 					resource.TestCheckResourceAttr(resourceVPCSubnetName, "tags.key", "value"),
 					resource.TestCheckResourceAttr(resourceVPCSubnetName, "status", "ACTIVE"),
+					resource.TestCheckResourceAttrSet(resourceVPCSubnetName, "scope"),
+					resource.TestCheckResourceAttrSet(resourceVPCSubnetName, "tenant_id"),
+					resource.TestCheckResourceAttrSet(resourceVPCSubnetName, "created_at"),
+					resource.TestCheckResourceAttrSet(resourceVPCSubnetName, "updated_at"),
 				),
 			},
 			{
@@ -155,9 +159,9 @@ func TestAccVpcSubnetV1DnsList(t *testing.T) {
 
 func testAccCheckVpcSubnetV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+	client, err := config.VpcV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
+		return fmt.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -165,7 +169,7 @@ func testAccCheckVpcSubnetV1Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := subnets.Get(client, rs.Primary.ID).Extract()
+		_, err := subnets.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("subnet still exists")
 		}
@@ -185,12 +189,12 @@ func testAccCheckVpcSubnetV1Exists(n string, subnet *subnets.Subnet) resource.Te
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+		client, err := config.VpcV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
+			return fmt.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 		}
 
-		found, err := subnets.Get(client, rs.Primary.ID).Extract()
+		found, err := subnets.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
