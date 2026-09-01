@@ -3,11 +3,14 @@ features:
   - |
     **[VPC]** Add description, NTP, scope, tenant, and timestamp attributes to
     ``data-source/opentelekomcloud_vpc_subnet_v1`` and expose subnet scope,
-    tenant, and timestamps on ``resource/opentelekomcloud_vpc_subnet_v1``.
+    tenant, and timestamps on ``resource/opentelekomcloud_vpc_subnet_v1``
+    (`#3534 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3534>`_)
 fixes:
   - |
     **[VPC]** Migrate ``resource/opentelekomcloud_vpc_subnet_v1`` and
     ``data-source/opentelekomcloud_vpc_subnet_v1`` to modern VPC v1 SDK operations.
+    (`#3534 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3534>`_)
   - |
     **[VPC]** Migrate ``data-source/opentelekomcloud_vpc_subnet_ids_v1`` to the
     modern VPC v1 subnet list operation.
+    (`#3534 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3534>`_)
