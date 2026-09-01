@@ -148,8 +148,10 @@ func dataSourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
-	// The API can repeat a page when vpc_id and marker are combined, so apply all filters client-side.
-	allSubnets, err := subnets.List(client, subnets.ListOpts{})
+	listOpts := subnets.ListOpts{
+		VpcID: d.Get("vpc_id").(string),
+	}
+	allSubnets, err := subnets.List(client, listOpts)
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve subnets: %w", err)
 	}
@@ -165,7 +167,6 @@ func dataSourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta i
 		AvailabilityZone: d.Get("availability_zone").(string),
 		NtpAddresses:     d.Get("ntp_addresses").(string),
 		Scope:            d.Get("scope").(string),
-		VpcID:            d.Get("vpc_id").(string),
 	})
 
 	if len(refinedSubnets) == 0 {
@@ -225,7 +226,6 @@ type subnetFilters struct {
 	AvailabilityZone string
 	NtpAddresses     string
 	Scope            string
-	VpcID            string
 }
 
 func filterSubnets(allSubnets []subnets.Subnet, filters subnetFilters) []subnets.Subnet {
@@ -262,9 +262,6 @@ func filterSubnets(allSubnets []subnets.Subnet, filters subnetFilters) []subnets
 			continue
 		}
 		if filters.Scope != "" && subnet.Scope != filters.Scope {
-			continue
-		}
-		if filters.VpcID != "" && subnet.VpcID != filters.VpcID {
 			continue
 		}
 		refined = append(refined, subnet)

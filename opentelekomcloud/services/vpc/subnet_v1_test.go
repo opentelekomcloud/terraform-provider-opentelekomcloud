@@ -32,7 +32,7 @@ func TestFilterSubnets(t *testing.T) {
 		{
 			ID: "first", Name: "match", Description: "description", CIDR: "192.168.0.0/24",
 			Status: "ACTIVE", GatewayIP: "192.168.0.1", PrimaryDNS: "100.125.4.25",
-			SecondaryDNS: "100.125.129.199", AvailabilityZone: "eu-de-01", Scope: "center", VpcID: "vpc-id",
+			SecondaryDNS: "100.125.129.199", AvailabilityZone: "eu-de-01", Scope: "center",
 			ExtraDHCPOpts: []subnets.ExtraDHCPOpt{{OptName: "ntp", OptValue: "10.100.0.33"}},
 		},
 		{ID: "second", Name: "other", CIDR: "10.0.0.0/24", Status: "ACTIVE", VpcID: "other-vpc"},
@@ -50,15 +50,9 @@ func TestFilterSubnets(t *testing.T) {
 		AvailabilityZone: "eu-de-01",
 		NtpAddresses:     "10.100.0.33",
 		Scope:            "center",
-		VpcID:            "vpc-id",
 	})
 	if len(filtered) != 1 || filtered[0].ID != "first" {
 		t.Fatalf("unexpected filtered subnets: %#v", filtered)
-	}
-
-	filtered = filterSubnets(input, subnetFilters{VpcID: "other-vpc"})
-	if len(filtered) != 1 || filtered[0].ID != "second" {
-		t.Fatalf("unexpected VPC-filtered subnets: %#v", filtered)
 	}
 }
 

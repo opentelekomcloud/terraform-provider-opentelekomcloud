@@ -48,12 +48,13 @@ func dataSourceVpcSubnetIdsV1Read(_ context.Context, d *schema.ResourceData, met
 	}
 
 	vpcID := d.Get("vpc_id").(string)
-	// The API can repeat a page when vpc_id and marker are combined, so filter the complete result locally.
-	allSubnets, err := subnets.List(client, subnets.ListOpts{})
+	listOpts := subnets.ListOpts{
+		VpcID: vpcID,
+	}
+	refinedSubnets, err := subnets.List(client, listOpts)
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve subnets: %w", err)
 	}
-	refinedSubnets := filterSubnets(allSubnets, subnetFilters{VpcID: vpcID})
 
 	if len(refinedSubnets) == 0 {
 		return fmterr.Errorf("no matching subnet found for vpc with id %s", vpcID)
