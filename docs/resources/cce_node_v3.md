@@ -81,6 +81,9 @@ The following arguments are supported:
 
 * `subnet_id` - (Optional, ForceNew, String) The ID of the subnet to which the NIC belongs. Changing this parameter will create a new resource.
 
+* `ecs_group_id` - (Optional, ForceNew, String) Specifies the ECS group ID. If this parameter is specified, the node is created in the specified ECS group.
+  -> **NOTE:** This parameter is not supported when you add a node to a node pool or use CCE Turbo cluster.
+
 * `labels` - (Optional, ForceNew, Map) Node tag, key/value pair format. Changing this parameter will create a new resource.
 
 * `tags` - (Optional, Map) The field is alternative to `labels`, key/value pair format.
