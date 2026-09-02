@@ -30,6 +30,8 @@ func TestAccVpcEipV1DataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(dataSourceNameByID, "type", "5_bgp"),
 					resource.TestCheckResourceAttr(dataSourceNameByID, "bandwidth_share_type", "PER"),
 					resource.TestCheckResourceAttr(dataSourceNameByID, "status", "DOWN"),
+					resource.TestCheckResourceAttrSet(dataSourceNameByID, "enterprise_project_id"),
+					resource.TestCheckResourceAttrSet(dataSourceNameByID, "public_border_group"),
 					resource.TestCheckResourceAttr(dataSourceNameByTags, "type", "5_bgp"),
 					resource.TestCheckResourceAttr(dataSourceNameByTags, "bandwidth_share_type", "PER"),
 					resource.TestCheckResourceAttr(dataSourceNameByTags, "status", "DOWN"),

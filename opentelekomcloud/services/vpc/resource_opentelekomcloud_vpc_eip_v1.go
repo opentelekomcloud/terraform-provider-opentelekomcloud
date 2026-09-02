@@ -4,15 +4,18 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/bandwidths"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
+	legacyEips "github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/publicips"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -58,6 +61,13 @@ func ResourceVpcEIPV1() *schema.Resource {
 							Optional: true,
 							Computed: true,
 							ForceNew: true,
+						},
+						"ip_version": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Computed:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.IntInSlice([]int{4, 6}),
 						},
 						"port_id": {
 							Type:     schema.TypeString,
@@ -117,6 +127,21 @@ func ResourceVpcEIPV1() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"public_border_group": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"allow_share_bandwidth_types": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 			"tags": common.TagsSchema(),
 			"unbind_port": {
 				Type:     schema.TypeBool,
@@ -129,38 +154,82 @@ func ResourceVpcEIPV1() *schema.Resource {
 func resourceVpcEIPV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV1Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
-	createOpts := EIPCreateOpts{
-		eips.ApplyOpts{
-			IP:        resourcePublicIP(d),
-			Bandwidth: resourceBandWidth(d),
-		},
-		common.MapValueSpecs(d),
-	}
-
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	eip, err := eips.Apply(client, createOpts).Extract()
+	bandwidth, err := resourceBandwidth(d, config)
 	if err != nil {
-		return fmterr.Errorf("error allocating EIP: %w", err)
+		return diag.FromErr(err)
 	}
 
-	log.Printf("[DEBUG] Waiting for EIP %#v to become available.", eip)
+	var eipID string
+	valueSpecs := common.MapValueSpecs(d)
+	if len(valueSpecs) > 0 {
+		if _, ok := valueSpecs["enterprise_project_id"]; !ok {
+			valueSpecs["enterprise_project_id"] = config.GetEnterpriseProjectID(d, "0")
+		}
+		legacyClient, err := config.NetworkingV1Client(config.GetRegion(d))
+		if err != nil {
+			return fmterr.Errorf(errCreationV1Client, err)
+		}
+		publicIPOpts := resourcePublicIP(d)
+		var ipVersion string
+		if publicIPOpts.IPVersion != 0 {
+			ipVersion = strconv.Itoa(publicIPOpts.IPVersion)
+		}
+		createOpts := EIPCreateOpts{
+			ApplyOpts: legacyEips.ApplyOpts{
+				IP: legacyEips.PublicIpOpts{
+					Name:    publicIPOpts.Alias,
+					Type:    publicIPOpts.Type,
+					Address: publicIPOpts.IpAddress,
+					Version: ipVersion,
+				},
+				Bandwidth: legacyEips.BandwidthOpts{
+					Id:         bandwidth.ID,
+					Name:       bandwidth.Name,
+					Size:       bandwidth.Size,
+					ShareType:  bandwidth.ShareType,
+					ChargeMode: bandwidth.ChargeMode,
+				},
+			},
+			ValueSpecs: valueSpecs,
+		}
+		log.Printf("[DEBUG] Legacy EIP create options for value_specs compatibility: %#v", createOpts)
+		eip, err := legacyEips.Apply(legacyClient, createOpts).Extract()
+		if err != nil {
+			return fmterr.Errorf("error allocating EIP: %w", err)
+		}
+		eipID = eip.ID
+	} else {
+		createOpts := publicips.CreateOpts{
+			Publicip:            resourcePublicIP(d),
+			Bandwidth:           bandwidth,
+			EnterpriseProjectId: config.GetEnterpriseProjectID(d, "0"),
+		}
+		log.Printf("[DEBUG] Create Options: %#v", createOpts)
+		eip, err := publicips.Create(client, createOpts)
+		if err != nil {
+			return fmterr.Errorf("error allocating EIP: %w", err)
+		}
+		eipID = eip.ID
+	}
+
+	d.SetId(eipID)
+
+	log.Printf("[DEBUG] Waiting for EIP %s to become available.", eipID)
 
 	timeout := d.Timeout(schema.TimeoutCreate)
-	if err := WaitForEIPActive(ctx, client, eip.ID, timeout); err != nil {
-		return fmterr.Errorf("error waiting for EIP (%s) to become ready: %w", eip.ID, err)
+	if err := WaitForEIPActive(ctx, client, eipID, timeout); err != nil {
+		return fmterr.Errorf("error waiting for EIP (%s) to become ready: %w", eipID, err)
 	}
 
-	if err := bindToPort(ctx, d, eip.ID, client, timeout); err != nil {
-		return fmterr.Errorf("error binding eip: %s to port: %w", eip.ID, err)
+	if err := bindToPort(ctx, d, eipID, client, timeout); err != nil {
+		return fmterr.Errorf("error binding eip: %s to port: %w", eipID, err)
 	}
-
-	d.SetId(eip.ID)
 
 	if err := addNetworkingTags(d, config, "publicips"); err != nil {
 		return diag.FromErr(err)
@@ -173,28 +242,33 @@ func resourceVpcEIPV1Create(ctx context.Context, d *schema.ResourceData, meta in
 func resourceVpcEIPV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV1Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
-	eip, err := eips.Get(client, d.Id()).Extract()
+	eip, err := publicips.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "eIP")
 	}
-	bandWidth, err := bandwidths.Get(client, eip.BandwidthID).Extract()
+	bandwidthClient, err := config.NetworkingV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf(errCreationV1Client, err)
+	}
+	bandWidth, err := bandwidths.Get(bandwidthClient, eip.BandwidthId).Extract()
 	if err != nil {
 		return fmterr.Errorf("error fetching bandwidth: %w", err)
 	}
 
 	// Set public ip
-	publicIP := []map[string]string{
+	publicIP := []map[string]interface{}{
 		{
 			"type":       eip.Type,
-			"ip_address": eip.PublicAddress,
-			"port_id":    eip.PortID,
-			"name":       eip.Name,
+			"ip_address": eip.PublicIpAddress,
+			"ip_version": eip.IPVersion,
+			"port_id":    eip.PortId,
+			"name":       eip.Alias,
 		},
 	}
 	if err := d.Set("publicip", publicIP); err != nil {
@@ -217,6 +291,15 @@ func resourceVpcEIPV1Read(ctx context.Context, d *schema.ResourceData, meta inte
 	if err := d.Set("region", config.GetRegion(d)); err != nil {
 		return diag.FromErr(err)
 	}
+	if err := d.Set("enterprise_project_id", eip.EnterpriseProjectId); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("public_border_group", eip.PublicBorderGroup); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("allow_share_bandwidth_types", eip.AllowShareBandwidthTypes); err != nil {
+		return diag.FromErr(err)
+	}
 
 	if err := readNetworkingTags(d, config, "publicips"); err != nil {
 		return diag.FromErr(err)
@@ -228,14 +311,18 @@ func resourceVpcEIPV1Read(ctx context.Context, d *schema.ResourceData, meta inte
 func resourceVpcEIPV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV1Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
 	// Update bandwidth change
 	if d.HasChange("bandwidth") {
+		bandwidthClient, err := config.NetworkingV1Client(config.GetRegion(d))
+		if err != nil {
+			return fmterr.Errorf(errCreationV1Client, err)
+		}
 		var updateOpts bandwidths.UpdateOpts
 
 		newBWList := d.Get("bandwidth").([]interface{})
@@ -245,11 +332,11 @@ func resourceVpcEIPV1Update(ctx context.Context, d *schema.ResourceData, meta in
 
 		log.Printf("[DEBUG] Bandwidth Update Options: %#v", updateOpts)
 
-		eip, err := eips.Get(client, d.Id()).Extract()
+		eip, err := publicips.Get(client, d.Id())
 		if err != nil {
-			return common.CheckDeletedDiag(d, err, "Error deleting eip")
+			return common.CheckDeletedDiag(d, err, "eIP")
 		}
-		_, err = bandwidths.Update(client, eip.BandwidthID, updateOpts).Extract()
+		_, err = bandwidths.Update(bandwidthClient, eip.BandwidthId, updateOpts).Extract()
 		if err != nil {
 			return fmterr.Errorf("error updating bandwidth: %s", err)
 		}
@@ -264,13 +351,13 @@ func resourceVpcEIPV1Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if d.HasChange("publicip") {
-		var updateOpts eips.UpdateOpts
+		var updateOpts publicips.UpdateOpts
 		newIPList := d.Get("publicip").([]interface{})
 		newMap := newIPList[0].(map[string]interface{})
-		updateOpts.PortID = newMap["port_id"].(string)
+		updateOpts.PortId = newMap["port_id"].(string)
 
 		log.Printf("[DEBUG] PublicIP Update Options: %#v", updateOpts)
-		_, err = eips.Update(client, d.Id(), updateOpts).Extract()
+		_, err = publicips.Update(client, d.Id(), updateOpts)
 		if err != nil {
 			return fmterr.Errorf("error updating publicip: %s", err)
 		}
@@ -295,10 +382,10 @@ func resourceVpcEIPV1Update(ctx context.Context, d *schema.ResourceData, meta in
 func resourceVpcEIPV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV1Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
@@ -306,7 +393,7 @@ func resourceVpcEIPV1Delete(ctx context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("error unbinding eip: %s to port: %w", d.Id(), err)
 	}
 
-	if err := eips.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := publicips.Delete(client, d.Id()); err != nil {
 		return fmterr.Errorf("error deleting VPC EIPv1: %s", err)
 	}
 
@@ -329,28 +416,42 @@ func resourceVpcEIPV1Delete(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourcePublicIP(d *schema.ResourceData) eips.PublicIpOpts {
+func resourcePublicIP(d *schema.ResourceData) publicips.PublicIPRequest {
 	publicIPRaw := d.Get("publicip").([]interface{})[0].(map[string]interface{})
 
-	publicIpOpts := eips.PublicIpOpts{
-		Name:    publicIPRaw["name"].(string),
-		Type:    publicIPRaw["type"].(string),
-		Address: publicIPRaw["ip_address"].(string),
+	publicIpOpts := publicips.PublicIPRequest{
+		Alias:     publicIPRaw["name"].(string),
+		Type:      publicIPRaw["type"].(string),
+		IpAddress: publicIPRaw["ip_address"].(string),
+		IPVersion: publicIPRaw["ip_version"].(int),
 	}
 	return publicIpOpts
 }
 
-func resourceBandWidth(d *schema.ResourceData) eips.BandwidthOpts {
+func resourceBandwidth(d *schema.ResourceData, config *cfg.Config) (publicips.BandWidth, error) {
 	bandwidthRaw := d.Get("bandwidth").([]interface{})[0].(map[string]interface{})
 
-	bandwidthOpts := eips.BandwidthOpts{
-		Id:         bandwidthRaw["id"].(string),
+	bandwidthOpts := publicips.BandWidth{
+		ID:         bandwidthRaw["id"].(string),
 		Name:       bandwidthRaw["name"].(string),
 		Size:       bandwidthRaw["size"].(int),
 		ShareType:  bandwidthRaw["share_type"].(string),
 		ChargeMode: bandwidthRaw["charge_mode"].(string),
 	}
-	return bandwidthOpts
+	if bandwidthOpts.ShareType == "WHOLE" && bandwidthOpts.ID != "" {
+		client, err := config.NetworkingV1Client(config.GetRegion(d))
+		if err != nil {
+			return publicips.BandWidth{}, fmt.Errorf(errCreationV1Client, err)
+		}
+		bandwidth, err := bandwidths.Get(client, bandwidthOpts.ID).Extract()
+		if err != nil {
+			return publicips.BandWidth{}, fmt.Errorf("error fetching shared bandwidth: %w", err)
+		}
+		bandwidthOpts.Name = bandwidth.Name
+		bandwidthOpts.Size = bandwidth.Size
+		bandwidthOpts.ChargeMode = bandwidth.ChargeMode
+	}
+	return bandwidthOpts, nil
 }
 
 func bindToPort(ctx context.Context, d *schema.ResourceData, eipID string, client *golangsdk.ServiceClient, timeout time.Duration) error {
@@ -363,8 +464,8 @@ func bindToPort(ctx context.Context, d *schema.ResourceData, eipID string, clien
 	pd := portID.(string)
 	log.Printf("[DEBUG] Bind eip: %s to port: %s", eipID, pd)
 
-	updateOpts := eips.UpdateOpts{PortID: pd}
-	_, err := eips.Update(client, eipID, updateOpts).Extract()
+	updateOpts := publicips.UpdateOpts{PortId: pd}
+	_, err := publicips.Update(client, eipID, updateOpts)
 	if err != nil {
 		return err
 	}
@@ -381,14 +482,25 @@ func unbindToPort(ctx context.Context, d *schema.ResourceData, eipID string, cli
 	pd := portID.(string)
 	log.Printf("[DEBUG] Unbind eip: %s to port: %s", eipID, pd)
 
-	updateOpts := eips.UpdateOpts{
-		PortID: "",
-	}
-	_, err := eips.Update(client, eipID, updateOpts).Extract()
-	if err != nil {
+	if err := updateEIPPort(client, eipID, ""); err != nil {
 		return fmt.Errorf("error unbinding port from EIP: %w", err)
 	}
 	return WaitForEIPActive(ctx, client, eipID, timeout)
+}
+
+func updateEIPPort(client *golangsdk.ServiceClient, eipID, portID string) error {
+	if portID != "" {
+		_, err := publicips.Update(client, eipID, publicips.UpdateOpts{PortId: portID})
+		return err
+	}
+
+	body := map[string]interface{}{
+		"publicip": map[string]interface{}{"port_id": ""},
+	}
+	_, err := client.Put(client.ServiceURL(client.ProjectID, "publicips", eipID), body, nil, &golangsdk.RequestOpts{
+		OkCodes: []int{200},
+	})
+	return err
 }
 
 func WaitForEIPActive(ctx context.Context, client *golangsdk.ServiceClient, eipID string, timeout time.Duration) error {
@@ -406,7 +518,7 @@ func WaitForEIPActive(ctx context.Context, client *golangsdk.ServiceClient, eipI
 
 func getEIPStatus(client *golangsdk.ServiceClient, eipID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		eip, err := eips.Get(client, eipID).Extract()
+		eip, err := publicips.Get(client, eipID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return eip, "DELETED", nil
@@ -414,8 +526,11 @@ func getEIPStatus(client *golangsdk.ServiceClient, eipID string) resource.StateR
 			return nil, "", err
 		}
 
-		if eip.Status == "DOWN" || eip.Status == "ACTIVE" {
+		if eip.Status == "DOWN" || eip.Status == "ACTIVE" || eip.Status == "ELB" || eip.Status == "VPN" {
 			return eip, "ACTIVE", nil
+		}
+		if eip.Status == "BIND_ERROR" || eip.Status == "ERROR" {
+			return nil, "", fmt.Errorf("EIP status: %s", eip.Status)
 		}
 
 		return eip, "", nil

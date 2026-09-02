@@ -93,3 +93,9 @@ All the argument attributes are also exported as result attributes.
 * `type` - Specifies the elastic IP type.
 
 * `name` - Specifies the elastic IP Name.
+
+* `enterprise_project_id` - Specifies the enterprise project associated with the EIP.
+
+* `public_border_group` - Specifies whether the EIP is located at the central site or an edge site.
+
+* `allow_share_bandwidth_types` - Lists shared-bandwidth types to which the EIP can be added.

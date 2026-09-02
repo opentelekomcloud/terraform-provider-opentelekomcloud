@@ -7,9 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/publicips"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
-
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -19,7 +19,7 @@ import (
 const resourceVPCEIPName = "opentelekomcloud_vpc_eip_v1.eip_1"
 
 func TestAccVpcV1EIP_basic(t *testing.T) {
-	var eip eips.PublicIp
+	var eip publicips.PublicIP
 	t.Parallel()
 	quotas.BookOne(t, quotas.FloatingIP)
 
@@ -34,6 +34,9 @@ func TestAccVpcV1EIP_basic(t *testing.T) {
 					testAccCheckVpcV1EIPExists(resourceVPCEIPName, &eip),
 					resource.TestCheckResourceAttr(resourceVPCEIPName, "bandwidth.0.name", "acc-band"),
 					resource.TestCheckResourceAttr(resourceVPCEIPName, "publicip.0.name", "my_ip"),
+					resource.TestCheckResourceAttr(resourceVPCEIPName, "publicip.0.ip_version", "4"),
+					resource.TestCheckResourceAttrSet(resourceVPCEIPName, "enterprise_project_id"),
+					resource.TestCheckResourceAttrSet(resourceVPCEIPName, "public_border_group"),
 				),
 			},
 			{
@@ -50,7 +53,7 @@ func TestAccVpcV1EIP_basic(t *testing.T) {
 }
 
 func TestAccVpcV1EIP_UnAssing(t *testing.T) {
-	var eip eips.PublicIp
+	var eip publicips.PublicIP
 	t.Parallel()
 	quotas.BookOne(t, quotas.FloatingIP)
 
@@ -78,7 +81,7 @@ func TestAccVpcV1EIP_UnAssing(t *testing.T) {
 }
 
 func TestAccVpcV1EIP_timeout(t *testing.T) {
-	var eip eips.PublicIp
+	var eip publicips.PublicIP
 	t.Parallel()
 	quotas.BookOne(t, quotas.FloatingIP)
 
@@ -98,7 +101,7 @@ func TestAccVpcV1EIP_timeout(t *testing.T) {
 }
 
 func TestAccVpcV1EIP_shared(t *testing.T) {
-	var eip eips.PublicIp
+	var eip publicips.PublicIP
 	t.Parallel()
 	quotas.BookOne(t, quotas.FloatingIP)
 	const resourceVPCEIPSharedName = "opentelekomcloud_vpc_eip_v1.shared_1"
@@ -122,9 +125,9 @@ func TestAccVpcV1EIP_shared(t *testing.T) {
 
 func testAccCheckVpcV1EIPDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+	client, err := config.VpcV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("eror creating NetworkingV1 client: %s", err)
+		return fmt.Errorf("error creating VPC v1 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -132,16 +135,19 @@ func testAccCheckVpcV1EIPDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := eips.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err := publicips.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("EIP still exists")
+		}
+		if _, ok := err.(golangsdk.ErrDefault404); !ok {
+			return fmt.Errorf("error checking EIP deletion: %w", err)
 		}
 	}
 
 	return nil
 }
 
-func testAccCheckVpcV1EIPExists(n string, eip *eips.PublicIp) resource.TestCheckFunc {
+func testAccCheckVpcV1EIPExists(n string, eip *publicips.PublicIP) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -153,12 +159,12 @@ func testAccCheckVpcV1EIPExists(n string, eip *eips.PublicIp) resource.TestCheck
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+		client, err := config.VpcV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating networkingV1 client: %s", err)
+			return fmt.Errorf("error creating VPC v1 client: %s", err)
 		}
 
-		found, err := eips.Get(client, rs.Primary.ID).Extract()
+		found, err := publicips.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -167,7 +173,7 @@ func testAccCheckVpcV1EIPExists(n string, eip *eips.PublicIp) resource.TestCheck
 			return fmt.Errorf("EIP not found")
 		}
 
-		eip = found
+		*eip = *found
 
 		return nil
 	}
