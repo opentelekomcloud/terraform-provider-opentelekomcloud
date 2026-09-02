@@ -8,7 +8,7 @@ description: |-
 ---
 
 Up-to-date reference of API arguments for VPC subnet you can get at
-[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/subnet)
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/vpc_apis_v1_v2/subnet/index.html)
 
 # opentelekomcloud_vpc_subnet_v1
 
@@ -77,7 +77,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_v6" {
 The following arguments are supported:
 
 * `name` - (Required) The subnet name. The value is a string of `1` to `64` characters that can contain letters,
-  digits, underscores (`_`), and hyphens (`-`).
+  digits, underscores (`_`), hyphens (`-`), and periods (`.`).
 
 * `description` - (Optional) A description of the VPC subnet.
 
@@ -131,9 +131,17 @@ All the argument attributes are also exported as result attributes:
 
 * `network_id` - Specifies the OpenStack network ID.
 
-* `cidr_v6` - Specifies the IPv6 subnet CIDR block. If the subnet is an IPv4 subnet, this parameter is not returned.
+* `cidr_ipv6` - Specifies the IPv6 subnet CIDR block. If the subnet is an IPv4 subnet, this parameter is not returned.
 
-* `gateway_ip_v6` - Specifies the IPv6 subnet gateway. If the subnet is an IPv4 subnet, this parameter is not returned.
+* `gateway_ipv6` - Specifies the IPv6 subnet gateway. If the subnet is an IPv4 subnet, this parameter is not returned.
+
+* `scope` - Specifies where the subnet is used in an edge-cloud scenario.
+
+* `tenant_id` - The project ID that owns the subnet.
+
+* `created_at` - The UTC creation timestamp.
+
+* `updated_at` - The UTC last-update timestamp.
 
 ## Import
 

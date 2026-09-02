@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -12,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/subnets"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -48,6 +49,11 @@ func ResourceVpcSubnetV1() *schema.Resource {
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ValidateFunc: validation.All(
+					validation.StringLenBetween(0, 255),
+					validation.StringMatch(regexp.MustCompile("^[^<>]*$"),
+						"description cannot contain angle brackets"),
+				),
 			},
 			"cidr": {
 				Type:         schema.TypeString,
@@ -132,6 +138,22 @@ func ResourceVpcSubnetV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"scope": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"tenant_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -139,10 +161,10 @@ func ResourceVpcSubnetV1() *schema.Resource {
 func resourceVpcSubnetV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV1Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
 	primaryDNS := d.Get("primary_dns").(string)
@@ -179,10 +201,11 @@ func resourceVpcSubnetV1Create(ctx context.Context, d *schema.ResourceData, meta
 		createOpts.ExtraDHCPOpts = extraDhcpRequests
 	}
 
-	subnet, err := subnets.Create(client, createOpts).Extract()
+	subnet, err := subnets.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud VPC subnet: %w", err)
 	}
+	d.SetId(subnet.ID)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"CREATING"},
@@ -198,8 +221,6 @@ func resourceVpcSubnetV1Create(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf("error waiting for Subnet (%s) to become ACTIVE: %w", subnet.ID, err)
 	}
 
-	d.SetId(subnet.ID)
-
 	if err := addNetworkingTags(d, config, "subnets"); err != nil {
 		return diag.FromErr(err)
 	}
@@ -211,13 +232,13 @@ func resourceVpcSubnetV1Create(ctx context.Context, d *schema.ResourceData, meta
 func resourceVpcSubnetV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV1Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
-	subnet, err := subnets.Get(client, d.Id()).Extract()
+	subnet, err := subnets.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "vpc subnet")
 	}
@@ -240,15 +261,13 @@ func resourceVpcSubnetV1Read(ctx context.Context, d *schema.ResourceData, meta i
 		d.Set("subnet_id_v6", subnet.SubnetIDV6),
 		d.Set("network_id", subnet.NetworkID),
 		d.Set("status", subnet.Status),
+		d.Set("ntp_addresses", subnetNtpAddresses(subnet.ExtraDHCPOpts)),
+		d.Set("scope", subnet.Scope),
+		d.Set("tenant_id", subnet.TenantID),
+		d.Set("created_at", subnet.CreatedAt),
+		d.Set("updated_at", subnet.UpdatedAt),
 		d.Set("region", config.GetRegion(d)),
 	)
-
-	for _, opt := range subnet.ExtraDHCPOpts {
-		if opt.OptName == "ntp" {
-			mErr = multierror.Append(mErr, d.Set("ntp_addresses", opt.OptValue))
-			break
-		}
-	}
 
 	if mErr.ErrorOrNil() != nil {
 		return fmterr.Errorf("error setting subnet fields: %w", mErr)
@@ -264,10 +283,10 @@ func resourceVpcSubnetV1Read(ctx context.Context, d *schema.ResourceData, meta i
 func resourceVpcSubnetV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV1Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
 	var updateOpts subnets.UpdateOpts
@@ -303,12 +322,12 @@ func resourceVpcSubnetV1Update(ctx context.Context, d *schema.ResourceData, meta
 			OptValue: d.Get("ntp_addresses").(string),
 		}
 		extraDhcpRequests = append(extraDhcpRequests, extraDhcpReq)
-		updateOpts.ExtraDhcpOpts = extraDhcpRequests
+		updateOpts.ExtraDHCPOpts = extraDhcpRequests
 	}
 
 	vpcID := d.Get("vpc_id").(string)
 
-	_, err = subnets.Update(client, vpcID, d.Id(), updateOpts).Extract()
+	_, err = subnets.Update(client, vpcID, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud VPC Subnet: %w", err)
 	}
@@ -332,10 +351,10 @@ func resourceVpcSubnetV1Update(ctx context.Context, d *schema.ResourceData, meta
 func resourceVpcSubnetV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV1Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v1 client: %w", err)
 	}
 
 	vpcID := d.Get("vpc_id").(string)
@@ -360,7 +379,7 @@ func resourceVpcSubnetV1Delete(ctx context.Context, d *schema.ResourceData, meta
 
 func waitForVpcSubnetActive(client *golangsdk.ServiceClient, subnetID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		subnet, err := subnets.Get(client, subnetID).Extract()
+		subnet, err := subnets.Get(client, subnetID)
 		if err != nil {
 			return nil, "", err
 		}
@@ -370,7 +389,7 @@ func waitForVpcSubnetActive(client *golangsdk.ServiceClient, subnetID string) re
 		}
 
 		// If subnet status is other than Active, send error
-		if subnet.Status == "DOWN" || subnet.Status == "error" {
+		if subnet.Status == "DOWN" || subnet.Status == "ERROR" {
 			return nil, "", fmt.Errorf("subnet status: %s", subnet.Status)
 		}
 
@@ -380,7 +399,7 @@ func waitForVpcSubnetActive(client *golangsdk.ServiceClient, subnetID string) re
 
 func waitForVpcSubnetDelete(client *golangsdk.ServiceClient, vpcID string, subnetID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		subnet, err := subnets.Get(client, subnetID).Extract()
+		subnet, err := subnets.Get(client, subnetID)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[INFO] Successfully deleted OpenTelekomCloud subnet %s", subnetID)
@@ -389,7 +408,7 @@ func waitForVpcSubnetDelete(client *golangsdk.ServiceClient, vpcID string, subne
 			return subnet, "ACTIVE", err
 		}
 
-		if err := subnets.Delete(client, vpcID, subnetID).ExtractErr(); err != nil {
+		if err := subnets.Delete(client, vpcID, subnetID); err != nil {
 			switch err.(type) {
 			case golangsdk.ErrDefault404, golangsdk.ErrDefault400:
 				log.Printf("[INFO] Successfully deleted OpenTelekomCloud subnet %s", subnetID)
@@ -403,4 +422,13 @@ func waitForVpcSubnetDelete(client *golangsdk.ServiceClient, vpcID string, subne
 
 		return subnet, "ACTIVE", nil
 	}
+}
+
+func subnetNtpAddresses(opts []subnets.ExtraDHCPOpt) string {
+	for _, opt := range opts {
+		if opt.OptName == "ntp" {
+			return opt.OptValue
+		}
+	}
+	return ""
 }

@@ -169,12 +169,8 @@ github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce h1:RPclfga2SEJmgMmz2k
 github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce/go.mod h1:uFMI8w+ref4v2r9jz+c9i1IfIttS/OkmLfrk1jne5hs=
 github.com/oklog/run v1.0.0 h1:Ru7dDtJNOyC66gQ5dQmaCa0qIsAUFY3sFpK1Xk8igrw=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
-github.com/opentelekomcloud/gophertelekomcloud v0.9.9-0.20260825122042-b2d050443dd9 h1:60FNqOFvHEgxIeLYy5HJax57yx5sDd7EB/y0Kpee+4w=
-github.com/opentelekomcloud/gophertelekomcloud v0.9.9-0.20260825122042-b2d050443dd9/go.mod h1:la8cQVYopRoEbNe2L7HlGTdLxUQOwIqHp1VHtjE/5qA=
-github.com/opentelekomcloud/gophertelekomcloud v0.9.9-0.20260826145728-e49b564f4cba h1:LYp5x7ZUQeu7e9QCI2rNkfTqGMCyIrnkwfOXQJmq0Ag=
-github.com/opentelekomcloud/gophertelekomcloud v0.9.9-0.20260826145728-e49b564f4cba/go.mod h1:la8cQVYopRoEbNe2L7HlGTdLxUQOwIqHp1VHtjE/5qA=
-github.com/opentelekomcloud/gophertelekomcloud v0.9.9-0.20260831085549-3aac627f4d8b h1:1ogiOgqtN7kvqPqrSjwQ2GGyMUVHC7BaiIZFuD0k8LY=
-github.com/opentelekomcloud/gophertelekomcloud v0.9.9-0.20260831085549-3aac627f4d8b/go.mod h1:la8cQVYopRoEbNe2L7HlGTdLxUQOwIqHp1VHtjE/5qA=
+github.com/opentelekomcloud/gophertelekomcloud v0.9.9-0.20260901104958-3bfaa8b781ed h1:O+5atkN5e9Opn3uE25dc9S0CKnOXB2+oFDGQDT5j5K4=
+github.com/opentelekomcloud/gophertelekomcloud v0.9.9-0.20260901104958-3bfaa8b781ed/go.mod h1:la8cQVYopRoEbNe2L7HlGTdLxUQOwIqHp1VHtjE/5qA=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

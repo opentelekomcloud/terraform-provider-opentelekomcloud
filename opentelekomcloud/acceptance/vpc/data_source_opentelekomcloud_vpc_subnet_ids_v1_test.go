@@ -11,7 +11,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccVpcSubnetIdsV2DataSource_basic(t *testing.T) {
+func TestAccVpcSubnetIdsV1DataSource_basic(t *testing.T) {
 	t.Parallel()
 	qts := vpcSubnetQuotas()
 	quotas.BookMany(t, qts)
@@ -26,14 +26,21 @@ func TestAccVpcSubnetIdsV2DataSource_basic(t *testing.T) {
 			{
 				Config: testAccSubnetIdV2DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccSubnetIdV2DataSourceID("data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids"),
+					testAccSubnetIdV1DataSourceID("data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids"),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids", "ids.#", "1"),
+					resource.TestCheckTypeSetElemAttrPair(
+						"data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids",
+						"ids.*",
+						"opentelekomcloud_vpc_subnet_v1.subnet_1",
+						"id",
+					),
 				),
 			},
 		},
 	})
 }
-func testAccSubnetIdV2DataSourceID(n string) resource.TestCheckFunc {
+
+func testAccSubnetIdV1DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
