@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CCE]** Add argument ``ecs_group_id`` in ``resource/opentelekomcloud_cce_node_v3`` (`#3535 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3535>`_)

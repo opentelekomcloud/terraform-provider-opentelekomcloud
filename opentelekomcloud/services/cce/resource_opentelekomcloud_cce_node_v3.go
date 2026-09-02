@@ -267,6 +267,11 @@ func ResourceCCENodeV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"ecs_group_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"order_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -573,9 +578,10 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 				DockerLVMConfigOverride: d.Get("docker_lvm_config_override").(string),
 				AgencyName:              d.Get("agency_name").(string),
 			},
-			UserTags: resourceCCENodeTags(d),
-			K8sTags:  resourceCCENodeK8sTags(d),
-			Taints:   resourceCCENodeTaints(d),
+			EcsGroupID: d.Get("ecs_group_id").(string),
+			UserTags:   resourceCCENodeTags(d),
+			K8sTags:    resourceCCENodeK8sTags(d),
+			Taints:     resourceCCENodeTaints(d),
 		},
 	}
 
@@ -709,6 +715,7 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 		d.Set("flavor_id", node.Spec.Flavor),
 		d.Set("os", node.Spec.Os),
 		d.Set("availability_zone", node.Spec.Az),
+		d.Set("ecs_group_id", node.Spec.EcsGroupID),
 		d.Set("billing_mode", node.Spec.BillingMode),
 		d.Set("key_pair", node.Spec.Login.SshKey),
 		d.Set("server_id", serverID),

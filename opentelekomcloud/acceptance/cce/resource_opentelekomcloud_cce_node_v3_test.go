@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/apparentlymart/go-cidr/cidr"
@@ -514,6 +515,38 @@ func TestAccResourceCCENodesV3_extendParams(t *testing.T) {
 	})
 }
 
+func TestAccResourceCCENodesV3_ECSGroup(t *testing.T) {
+	ecsGroupId := os.Getenv("OS_ECS_GROUP_ID")
+	if ecsGroupId == "" {
+		t.Skip("Test requires env var OS_ECS_GROUP_ID")
+	}
+	var node nodes.Nodes
+
+	rc := common.InitResourceCheck(
+		resourceNameNode,
+		&node,
+		getCceNodeResourceFunc,
+	)
+
+	shared.BookCluster(t)
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodeV3_EcsGroup(ecsGroupId),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceNameNode, "ecs_group_id", ecsGroupId),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckCCENodeV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.CceV3Client(env.OS_REGION_NAME)
@@ -984,4 +1017,36 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   private_ip = "%s"
 }
 `, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
+}
+
+func testAccCCENodeV3_EcsGroup(ecsGroupId string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_cce_node_v3" "node_1" {
+  cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
+  name       = "test-node"
+  flavor_id  = "s2.large.2"
+
+  availability_zone = "%s"
+  key_pair          = "%s"
+  runtime           = "containerd"
+  os                = "EulerOS 2.9"
+
+  root_volume {
+    size       = 40
+    volumetype = "SAS"
+  }
+
+  data_volumes {
+    size       = 100
+    volumetype = "SSD"
+    extend_params = {
+      "useType" = "docker"
+    }
+  }
+
+  ecs_group_id = "%s"
+}
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, ecsGroupId)
 }
