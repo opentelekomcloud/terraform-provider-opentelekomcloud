@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    **[VPC]** Add IP version, enterprise project, public border group, and
+    allowed shared-bandwidth type attributes to
+    ``resource/opentelekomcloud_vpc_eip_v1`` and
+    ``data-source/opentelekomcloud_vpc_eip_v1``.
+    (`#3536 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3536>`_)
+fixes:
+  - |
+    **[VPC]** Migrate ``resource/opentelekomcloud_vpc_eip_v1`` and
+    ``data-source/opentelekomcloud_vpc_eip_v1`` to modern VPC v1 public IP
+    SDK operations.
+    (`#3536 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3536>`_)
