@@ -38,6 +38,13 @@ The following arguments are supported:
   The specific range may vary depending on the configuration in each region.
   You can see the available bandwidth range on the management console.
 
+* `enterprise_project_id` - (Optional) Specifies the enterprise project associated
+  with the shared bandwidth. If omitted, the provider-level enterprise project or
+  the default enterprise project (`0`) is used. Changing this creates a new resource.
+
+* `public_border_group` - (Optional) Specifies whether the shared bandwidth is
+  located at the central site or an edge site. Changing this creates a new resource.
+
 ## Attributes Reference
 
 In addition, the following attributes are exported:
@@ -45,6 +52,27 @@ In addition, the following attributes are exported:
 * `id` - Specifies the bandwidth ID, which uniquely identifies the bandwidth.
 
 * `status` - Specifies the bandwidth status.
+
+* `share_type` - Indicates whether the bandwidth is shared or dedicated.
+
+* `bandwidth_type` - Specifies the bandwidth type.
+
+* `charge_mode` - Specifies the bandwidth charging mode.
+
+* `billing_info` - Specifies yearly/monthly billing information, when applicable.
+
+* `tenant_id` - Specifies the project ID.
+
+* `created_at` - Specifies when the bandwidth was created.
+
+* `updated_at` - Specifies when the bandwidth was last updated.
+
+* `publicip_info` - Lists EIPs associated with the bandwidth:
+  * `id` - EIP ID.
+  * `address` - IPv4 address.
+  * `ipv6_address` - IPv6 address, when available.
+  * `ip_version` - IP address version.
+  * `type` - EIP type.
 
 ## Import
 

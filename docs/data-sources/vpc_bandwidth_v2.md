@@ -26,9 +26,19 @@ data "opentelekomcloud_vpc_bandwidth_v2" "bandwidth_1" {
 The arguments of this data source act as filters for querying the available
 bandwidth in the current tenant. The following arguments are supported:
 
-* `name` - (Optional) The name of the Shared Bandwidth to retrieve.
+* `id` - (Optional) The ID of the shared bandwidth to retrieve.
 
-* `size` - (Optional) The size of the Shared Bandwidth to retrieve.
+* `name` - (Optional) The name of the shared bandwidth to retrieve.
+
+* `size` - (Optional) The size of the shared bandwidth to retrieve.
+
+* `share_type` - (Optional) Indicates whether the bandwidth is shared or dedicated.
+
+* `enterprise_project_id` - (Optional) Specifies the enterprise project associated
+  with the bandwidth.
+
+* `public_border_group` - (Optional) Specifies whether the bandwidth is located at
+  the central site or an edge site.
 
 ## Attributes Reference
 
@@ -47,3 +57,18 @@ The following attributes are exported:
 * `charge_mode` - Specifies that the bandwidth is billed by bandwidth. The value can be traffic.
 
 * `status` - Indicates the bandwidth status.
+
+* `billing_info` - Specifies yearly/monthly billing information, when applicable.
+
+* `tenant_id` - Specifies the project ID.
+
+* `created_at` - Specifies when the bandwidth was created.
+
+* `updated_at` - Specifies when the bandwidth was last updated.
+
+* `publicip_info` - Lists EIPs associated with the bandwidth:
+  * `id` - EIP ID.
+  * `address` - IPv4 address.
+  * `ipv6_address` - IPv6 address, when available.
+  * `ip_version` - IP address version.
+  * `type` - EIP type.

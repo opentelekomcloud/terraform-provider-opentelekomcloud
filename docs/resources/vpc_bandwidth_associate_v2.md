@@ -14,6 +14,7 @@ Up-to-date reference of API arguments for VPC bandwidth association you can get 
 
 Provides a resource to associate floating IP with a shared bandwidth within Open Telekom Cloud.
 The resource can also associate an ECS NIC `port_id` when it represents the IPv6 public path.
+Associations are managed through the VPC v2 shared-bandwidth API.
 
 ## Example Usage
 
