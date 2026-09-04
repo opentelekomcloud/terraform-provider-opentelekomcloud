@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/bandwidths"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/bandwidths"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -15,7 +15,7 @@ import (
 const resourceBandwidthAssociateName = "opentelekomcloud_vpc_bandwidth_associate_v2.associate"
 
 func TestBandwidthAssociateV2_basic(t *testing.T) {
-	var b bandwidths.Bandwidth
+	var b bandwidths.BandWidth
 
 	t.Parallel()
 	qts := quotas.MultipleQuotas{
@@ -48,7 +48,7 @@ func TestBandwidthAssociateV2_basic(t *testing.T) {
 }
 
 func TestBandwidthAssociateV2_EIPv1(t *testing.T) {
-	var b bandwidths.Bandwidth
+	var b bandwidths.BandWidth
 
 	t.Parallel()
 	qts := quotas.MultipleQuotas{
@@ -106,7 +106,7 @@ func TestBandwidthAssociateV2_EcsIpv6PortID(t *testing.T) {
 		t.Skip("TestBandwidthAssociateV2_EcsIpv6PortID requires OS_IPV6_ENABLED_NETWORK_ID to continue.")
 	}
 
-	var b bandwidths.Bandwidth
+	var b bandwidths.BandWidth
 
 	t.Parallel()
 	qts := quotas.MultipleQuotas{

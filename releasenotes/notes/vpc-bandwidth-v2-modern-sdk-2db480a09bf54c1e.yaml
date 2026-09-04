@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    **[VPC]** Add enterprise project, public border group, billing, timestamp,
+    and associated EIP attributes to ``resource/opentelekomcloud_vpc_bandwidth_v2``
+    and ``data-source/opentelekomcloud_vpc_bandwidth_v2``.
+    (`#3537 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3537>`_)
+fixes:
+  - |
+    **[VPC]** Migrate shared bandwidth creation, deletion, EIP association,
+    EIP removal, and detail queries to modern VPC SDK operations for
+    ``resource/opentelekomcloud_vpc_bandwidth_v2`` and
+    ``resource/opentelekomcloud_vpc_bandwidth_associate_v2``.
+    (`#3537 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3537>`_)

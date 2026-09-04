@@ -856,6 +856,13 @@ func (c *Config) VpcV1Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) VpcV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewVpcV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) NetworkingV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewNetworkV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
