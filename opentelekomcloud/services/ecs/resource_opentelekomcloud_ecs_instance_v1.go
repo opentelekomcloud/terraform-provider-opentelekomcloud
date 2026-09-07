@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -20,11 +21,14 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v3/volumes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
+	vpcBandwidths "github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/bandwidths"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
+
+const allGrantedEnterpriseProjects = "all_granted_eps"
 
 func ResourceEcsInstanceV1() *schema.Resource {
 	return &schema.Resource{
@@ -125,6 +129,22 @@ func ResourceEcsInstanceV1() *schema.Resource {
 						"ipv6_address": {
 							Type:     schema.TypeString,
 							Computed: true,
+						},
+						"ipv6_bandwidth": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Required: true,
+										ForceNew: true,
+									},
+								},
+							},
 						},
 						"mac_address": {
 							Type:     schema.TypeString,
@@ -858,6 +878,11 @@ func resourceInstanceNicsV1(d *schema.ResourceData) []cloudservers.Nic {
 			IpAddress:  nic["ip_address"].(string),
 			Ipv6Enable: nic["ipv6_enable"].(bool),
 		}
+		if ipv6Bandwidth := nic["ipv6_bandwidth"].([]interface{}); len(ipv6Bandwidth) > 0 {
+			nicRequest.Ipv6Bandwidth = cloudservers.Ipv6Bandwidth{
+				Id: ipv6Bandwidth[0].(map[string]interface{})["id"].(string),
+			}
+		}
 
 		nicRequests = append(nicRequests, nicRequest)
 	}
@@ -983,11 +1008,13 @@ func flattenInstanceNicsV1(d *schema.ResourceData, meta interface{}, addresses m
 			}
 
 			p, err := ports.Get(networkingClient, addr.PortID).Extract()
+			var ipv6BandwidthID string
 			if err != nil {
 				network = ""
 				log.Printf("[DEBUG] flattenInstanceNicsV1: failed to fetch port %s", addr.PortID)
 			} else {
 				network = p.NetworkID
+				ipv6BandwidthID = p.Ipv6BandwidthId
 			}
 
 			if addr.Version == "4" {
@@ -999,6 +1026,11 @@ func flattenInstanceNicsV1(d *schema.ResourceData, meta interface{}, addresses m
 					"type":         addr.Type,
 					"ipv6_enable":  false,
 					"ipv6_address": "",
+				}
+				if ipv6BandwidthID != "" {
+					v["ipv6_bandwidth"] = []map[string]interface{}{
+						{"id": ipv6BandwidthID},
+					}
 				}
 				nics = append(nics, v)
 			}
@@ -1019,6 +1051,58 @@ func flattenInstanceNicsV1(d *schema.ResourceData, meta interface{}, addresses m
 		}
 	}
 
+	resolveIPv6Bandwidth := newIPv6BandwidthResolver(d, config)
+	for _, nic := range nics {
+		if nic["ipv6_enable"] != true {
+			continue
+		}
+		if _, ok := nic["ipv6_bandwidth"]; ok {
+			continue
+		}
+		if id := resolveIPv6Bandwidth(nic["port_id"].(string)); id != "" {
+			nic["ipv6_bandwidth"] = []map[string]interface{}{
+				{"id": id},
+			}
+		}
+	}
+
 	log.Printf("[DEBUG] flattenInstanceNicsV1: %#v", nics)
 	return nics
+}
+
+func newIPv6BandwidthResolver(d *schema.ResourceData, config *cfg.Config) func(portID string) string {
+	var (
+		once             sync.Once
+		bandwidthsByPort map[string]string
+	)
+
+	return func(portID string) string {
+		once.Do(func() {
+			bandwidthsByPort = make(map[string]string)
+
+			client, err := config.VpcV1Client(config.GetRegion(d))
+			if err != nil {
+				log.Printf("[DEBUG] error creating OpenTelekomCloud VPC v1 client: %s", err)
+				return
+			}
+
+			bandwidths, err := vpcBandwidths.List(client, vpcBandwidths.ListOpts{
+				EnterpriseProjectId: config.GetEnterpriseProjectID(d, allGrantedEnterpriseProjects),
+			})
+			if err != nil {
+				log.Printf("[DEBUG] error listing IPv6 shared bandwidths: %s", err)
+				return
+			}
+
+			for _, bandwidth := range bandwidths {
+				for _, publicIP := range bandwidth.PublicipInfo {
+					if publicIP.IPVersion == 6 {
+						bandwidthsByPort[publicIP.PublicipId] = bandwidth.ID
+					}
+				}
+			}
+		})
+
+		return bandwidthsByPort[portID]
+	}
 }
