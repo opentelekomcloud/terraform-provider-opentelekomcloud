@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[VPC]** Add ``opentelekomcloud_vpc_quotas_v1`` data source

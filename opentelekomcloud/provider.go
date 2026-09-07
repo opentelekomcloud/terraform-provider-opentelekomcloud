@@ -472,6 +472,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_vpc_flow_logs_v1":                    vpc.DataSourceVpcFlowLogsV1(),
 			"opentelekomcloud_vpc_subnet_v1":                       vpc.DataSourceVpcSubnetV1(),
 			"opentelekomcloud_vpc_subnet_ids_v1":                   vpc.DataSourceVpcSubnetIdsV1(),
+			"opentelekomcloud_vpc_quotas_v1":                       vpc.DataSourceVpcQuotasV1(),
 			"opentelekomcloud_vpnaas_service_v2":                   vpn.DataSourceVpnServiceV2(),
 			"opentelekomcloud_enterprise_vpn_connection_v5":        vpn.DataSourceEnterpriseConnection(),
 			"opentelekomcloud_enterprise_vpn_customer_gateway_v5":  vpn.DataSourceEnterpriseCustomerGateway(),
