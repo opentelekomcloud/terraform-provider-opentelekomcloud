@@ -26,7 +26,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = var.cluster_id
   availability_zone = var.availability_zone
 
-  os          = "EulerOS 2.9"
+  os          = "HCE OS 2.0"
   flavor_id   = "s2.large.2"
   key_pair    = var.ssh_key
   runtime     = "containerd"
@@ -71,7 +71,6 @@ The following arguments are supported:
   | :----------- | :----------------- |
   | HCE OS 2.0   | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
   | Ubuntu 22.04 | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
-  | EulerOS release 2.9 | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
 
   For detailed information, visit the CCE node operating systems [reference document](https://docs.otc.t-systems.com/cloud-container-engine/umn/nodes/node_oss.html).
 

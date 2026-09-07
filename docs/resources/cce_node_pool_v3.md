@@ -26,7 +26,7 @@ variable "availability_zone" {}
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool_1" {
   cluster_id         = var.cluster_id
   name               = "opentelekomcloud-cce-node-pool-test"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.xlarge.2"
   initial_node_count = 2
   availability_zone  = var.availability_zone
@@ -69,7 +69,7 @@ variable "availability_zone" {}
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = var.cluster_id
   name               = "opentelekomcloud-cce-node-pool"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 1
   key_pair           = var.ssh_key
@@ -157,7 +157,6 @@ the AZ based on the AZ sequence. For more details see
   | :----------- | :----------------- |
   | HCE OS 2.0   | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
   | Ubuntu 22.04 | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
-  | EulerOS release 2.9 | `v1.30`, `v1.29`, `v1.28`, `v1.27` |
 
   For detailed information, visit the CCE node operating systems [reference document](https://docs.otc.t-systems.com/cloud-container-engine/umn/nodes/node_oss.html).
 

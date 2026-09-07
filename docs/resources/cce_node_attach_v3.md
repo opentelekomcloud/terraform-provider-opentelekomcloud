@@ -63,7 +63,7 @@ resource "opentelekomcloud_cce_node_attach_v3" "test" {
   cluster_id = var.cluster_id
   server_id  = opentelekomcloud_ecs_instance_v1.instance_1.id
   key_pair   = var.keypair_name
-  os         = "EulerOS 2.5"
+  os         = "HCE OS 2.0"
 
   tags = {
     foo = "bar"
@@ -85,7 +85,7 @@ The following arguments are supported:
   resource.
 
 * `os` - (Required, String) Specifies the operating System of the node. Changing this parameter will reset the node.
-  The value can be **EulerOS 2.5**, **EulerOS 2.9**, **Ubuntu 22.04**, or **HCE OS 2.0**. For more details,
+  The value can be **Ubuntu 22.04** or **HCE OS 2.0**. For more details,
   please see [documentation](https://docs.otc.t-systems.com/cloud-container-engine/umn/nodes/node_oss.html).
 
 * `key_pair` - (Optional, String) Specifies the key pair name when logging in to select the key pair mode.
