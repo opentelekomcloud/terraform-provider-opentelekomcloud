@@ -49,12 +49,17 @@ func ResourceLoadBalancerV3() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				AtLeastOneOf: []string{"subnet_id"},
+				AtLeastOneOf: []string{"subnet_id", "subnet_id_ipv6"},
 			},
 			"subnet_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				AtLeastOneOf: []string{"router_id"},
+				AtLeastOneOf: []string{"router_id", "subnet_id_ipv6"},
+			},
+			"subnet_id_ipv6": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				AtLeastOneOf: []string{"router_id", "subnet_id"},
 			},
 			"network_ids": {
 				Type:     schema.TypeSet,
@@ -87,6 +92,11 @@ func ResourceLoadBalancerV3() *schema.Resource {
 				Optional:     true,
 				Default:      true,
 				ValidateFunc: common.ValidateTrueOnly,
+			},
+			"ipv6_bandwidth_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 			},
 			"public_ip": {
 				Type:     schema.TypeList,
@@ -172,6 +182,14 @@ func ResourceLoadBalancerV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"ipv6_vip_address": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"ipv6_vip_port_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -227,6 +245,7 @@ func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, m
 		Description:              d.Get("description").(string),
 		VipAddress:               d.Get("vip_address").(string),
 		VipSubnetCidrID:          d.Get("subnet_id").(string),
+		IpV6VipSubnetID:          d.Get("subnet_id_ipv6").(string),
 		L4Flavor:                 d.Get("l4_flavor").(string),
 		VpcID:                    d.Get("router_id").(string),
 		AvailabilityZoneList:     common.ExpandToStringSlice(d.Get("availability_zones").(*schema.Set).List()),
@@ -236,6 +255,12 @@ func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, m
 		ElbSubnetIDs:             common.ExpandToStringSlice(d.Get("network_ids").(*schema.Set).List()),
 		IpTargetEnable:           &ipTargetEnable,
 		DeletionProtectionEnable: &deletionProtection,
+	}
+
+	if v, ok := d.GetOk("ipv6_bandwidth_id"); ok {
+		createOpts.IPV6Bandwidth = &loadbalancers.BandwidthRef{
+			ID: v.(string),
+		}
 	}
 
 	// currently API supports only a single EIP
@@ -321,6 +346,18 @@ func resourceLoadBalancerV3Update(ctx context.Context, d *schema.ResourceData, m
 	if d.HasChange("subnet_id") {
 		subnetID := d.Get("subnet_id").(string)
 		updateOpts.VipSubnetCidrID = &subnetID
+		updateRequired = true
+	}
+	if d.HasChange("subnet_id_ipv6") {
+		subnetIDIpv6 := d.Get("subnet_id_ipv6").(string)
+		updateOpts.IpV6VipSubnetID = &subnetIDIpv6
+		updateRequired = true
+	}
+	if d.HasChange("ipv6_bandwidth_id") {
+		ipv6Bandwidth := loadbalancers.BandwidthRef{
+			ID: d.Get("ipv6_bandwidth_id").(string),
+		}
+		updateOpts.IpV6Bandwidth = &ipv6Bandwidth
 		updateRequired = true
 	}
 	if d.HasChange("ip_target_enable") {
@@ -410,6 +447,10 @@ func setLoadBalancerFields(d *schema.ResourceData, meta interface{}, lb *loadbal
 		d.Set("admin_state_up", lb.AdminStateUp),
 		d.Set("router_id", lb.VpcID),
 		d.Set("subnet_id", lb.VipSubnetCidrID),
+		d.Set("subnet_id_ipv6", lb.IpV6VipSubnetID),
+		d.Set("ipv6_bandwidth_id", lb.IpV6Bandwidth.ID),
+		d.Set("ipv6_vip_address", lb.IpV6VipAddress),
+		d.Set("ipv6_vip_port_id", lb.IpV6VipPortID),
 		d.Set("ip_target_enable", lb.IpTargetEnable),
 		d.Set("l4_flavor", lb.L4FlavorID),
 		d.Set("l7_flavor", lb.L7FlavorID),

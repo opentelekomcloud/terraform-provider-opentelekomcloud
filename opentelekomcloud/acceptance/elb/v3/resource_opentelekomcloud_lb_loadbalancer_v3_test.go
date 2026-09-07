@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -124,6 +125,33 @@ func TestAccLBV3LoadBalancer_import(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"public_ip.0._managed"},
+			},
+		},
+	})
+}
+
+func TestAccLBV3LoadBalancer_IPV6(t *testing.T) {
+	subnetIPv6 := os.Getenv("OS_SUBNET_ID_IPV6")
+	if subnetIPv6 == "" {
+		t.Skip("OS_SUBNET_ID_IPV6 must be set for IPv6 LB acceptance tests")
+	}
+	var lb loadbalancers.LoadBalancer
+
+	qts := lbQuotas()
+	t.Parallel()
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV3LoadBalancerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV3LoadBalancerConfigIpv6,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3LoadBalancerExists(resourceLBName, &lb),
+					resource.TestCheckResourceAttr(resourceLBName, "subnet_id_ipv6", subnetIPv6),
+				),
 			},
 		},
 	})
@@ -340,4 +368,23 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
 
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3LoadBalancerConfigIpv6 = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name        = "loadbalancer_1"
+  subnet_id_ipv6   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id_v6
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+
+  public_ip {
+    ip_type              = "5_bgp"
+    bandwidth_name       = "lb_band"
+    bandwidth_size       = 10
+    bandwidth_share_type = "PER"
+  }
+}
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
