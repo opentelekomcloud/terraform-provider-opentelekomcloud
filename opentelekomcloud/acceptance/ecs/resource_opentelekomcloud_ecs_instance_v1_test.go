@@ -119,6 +119,7 @@ func TestAccEcsV1InstanceIpv6(t *testing.T) {
 	}
 	var instance cloudservers.CloudServer
 	qts := serverQuotas(10+4, "s2.medium.1")
+	qts = append(qts, &quotas.ExpectedQuota{Q: quotas.SharedBandwidth, Count: 1})
 	t.Parallel()
 	quotas.BookMany(t, qts)
 
@@ -140,7 +141,18 @@ func TestAccEcsV1InstanceIpv6(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
 					resource.TestCheckResourceAttrSet(resourceInstanceV1Name, "nics.0.port_id"),
 					resource.TestCheckResourceAttrSet(resourceInstanceV1Name, "nics.0.ipv6_address"),
+					resource.TestCheckResourceAttrPair(
+						resourceInstanceV1Name, "nics.0.ipv6_bandwidth.0.id",
+						"opentelekomcloud_vpc_bandwidth_v2.ipv6", "id",
+					),
+					resource.TestCheckResourceAttr(
+						"data.opentelekomcloud_vpc_bandwidth_v2.ipv6", "publicip_info.#", "1",
+					),
 				),
+			},
+			{
+				Config:   testAccEcsV1InstanceIpv6(networkId),
+				PlanOnly: true,
 			},
 		},
 	})
@@ -838,6 +850,11 @@ data "opentelekomcloud_vpc_subnet_v1" "sub_1" {
   id = "%s"
 }
 
+resource "opentelekomcloud_vpc_bandwidth_v2" "ipv6" {
+  name = "ecs-ipv6-bandwidth"
+  size = 5
+}
+
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
@@ -847,6 +864,10 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   nics {
     network_id  = data.opentelekomcloud_vpc_subnet_v1.sub_1.network_id
     ipv6_enable = true
+
+    ipv6_bandwidth {
+      id = opentelekomcloud_vpc_bandwidth_v2.ipv6.id
+    }
   }
 
   data_disks {
@@ -857,6 +878,12 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   password                    = "Password@123"
   availability_zone           = "%s"
   delete_disks_on_termination = true
+}
+
+data "opentelekomcloud_vpc_bandwidth_v2" "ipv6" {
+  depends_on = [opentelekomcloud_ecs_instance_v1.instance_1]
+
+  id = opentelekomcloud_vpc_bandwidth_v2.ipv6.id
 }
 	`, common.DataSourceImage, networkID, env.OS_AVAILABILITY_ZONE)
 }

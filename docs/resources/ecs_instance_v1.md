@@ -151,6 +151,34 @@ resource "opentelekomcloud_networking_floatingip_associate_v2" "this" {
 }
 ```
 
+### Instance With IPv6 Shared Bandwidth
+
+```hcl
+resource "opentelekomcloud_vpc_bandwidth_v2" "ipv6" {
+  name = "ipv6-shared-bandwidth"
+  size = 5
+}
+
+resource "opentelekomcloud_ecs_instance_v1" "this" {
+  name     = "server_1"
+  image_id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
+  flavor   = "s2.large.2"
+  vpc_id   = "8eed4fc7-e5e5-44a2-b5f2-23b3e5d46235"
+
+  nics {
+    network_id  = "55534eaa-533a-419d-9b40-ec427ea7195a"
+    ipv6_enable = true
+
+    ipv6_bandwidth {
+      id = opentelekomcloud_vpc_bandwidth_v2.ipv6.id
+    }
+  }
+
+  availability_zone = "eu-de-01"
+  key_name          = "KeyPair-test"
+}
+```
+
 ### Instance with User Data (cloud-init)
 
 ```hcl
@@ -323,6 +351,17 @@ The `nics` block supports:
 
   -> **NOTE:**
   IPV6 enable requires the subnet to have IPV6 enabled as well.
+
+* `ipv6_bandwidth` - (Optional, List, ForceNew) The shared bandwidth to associate with the NIC's IPv6 address.
+  This argument requires `ipv6_enable = true`. The structure is documented below.
+
+  -> **NOTE:**
+  Removing this block from the configuration does not detach the shared bandwidth: the value is kept as
+  reported by the API. Detaching requires the instance to be re-created.
+
+The `ipv6_bandwidth` block supports:
+
+* `id` - (Required, String, ForceNew) The ID of an existing shared bandwidth.
 
 The `metadata` block supports:
 
