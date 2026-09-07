@@ -62,3 +62,5 @@ VPC route can be imported using the `id`, e.g.
 ```sh
 terraform import opentelekomcloud_vpc_route_v2.vpc_route 2c7fs9f3-712b-18d1-940c-b50384177ee1
 ```
+
+-> NOTE: The internal `id` is not visible in the OTC UI. If you want to import an existing opentelekomcloud_vpc_route_v2, you can query the routes from `https://vpc.eu-de.otc.t-systems.com/v2.0/vpc/routes?vpc_id=<vpc_id>` to find the internal id. (see [API Reference: Querying VPC Routes](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/vpc_route/querying_vpc_routes.html#vpc-route-0001) for more details on that API)
