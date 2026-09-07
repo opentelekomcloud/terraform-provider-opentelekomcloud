@@ -4,8 +4,11 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_vpc_quotas_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-vpc-quotas-v1"
 description: |-
-  Query VPC network resource quotas from OpenTelekomCloud.
+  Query VPC network resource quotas from T-Cloud Public (former OpenTelekomCloud).
 ---
+
+Up-to-date reference of API arguments for VPC Peering Connections you can get at
+[documentation portal](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/vpc_apis_v1_v2/quota/index.html)
 
 # opentelekomcloud_vpc_quotas_v1
 
