@@ -2,4 +2,4 @@
 fixes:
   - |
     **[CTS]** Fix ``resource/opentelekomcloud_cts_tracker_v3`` resetting the whole tracker configuration when a
-    single argument is changed (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    single argument is changed (`#3548 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3548>`_)

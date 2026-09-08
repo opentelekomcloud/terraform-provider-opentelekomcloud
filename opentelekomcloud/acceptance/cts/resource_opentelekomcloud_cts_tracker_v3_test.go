@@ -65,10 +65,12 @@ func TestAccCTSTrackerV3_supportValidate(t *testing.T) {
 		CheckDestroy:      testAccCheckCTSTrackerV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCTSTrackerV3SupportValidate(bucketName, false),
+				Config: testAccCTSTrackerV3SupportValidate(bucketName, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCTSTrackerV3Exists(trackerV3Resource, &ctsTracker, env.OS_TENANT_NAME),
 					resource.TestCheckResourceAttr(trackerV3Resource, "bucket_name", bucketName),
+					resource.TestCheckResourceAttr(trackerV3Resource, "file_prefix_name", "yO8Q"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "compress_type", "gzip"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "is_lts_enabled", "true"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "is_support_validate", "false"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "is_sort_by_service", "false"),
@@ -78,13 +80,30 @@ func TestAccCTSTrackerV3_supportValidate(t *testing.T) {
 			{
 				// enabling `is_support_validate` alone must not reset the rest of
 				// the tracker configuration, see #3541
-				Config: testAccCTSTrackerV3SupportValidate(bucketName, true),
+				Config: testAccCTSTrackerV3SupportValidate(bucketName, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCTSTrackerV3Exists(trackerV3Resource, &ctsTracker, env.OS_TENANT_NAME),
 					resource.TestCheckResourceAttr(trackerV3Resource, "bucket_name", bucketName),
+					resource.TestCheckResourceAttr(trackerV3Resource, "file_prefix_name", "yO8Q"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "compress_type", "gzip"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "is_lts_enabled", "true"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "is_support_validate", "true"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "is_sort_by_service", "false"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "status", "enabled"),
+				),
+			},
+			{
+				// the other half of the #3541 loop: changing an unrelated argument
+				// must not reset `is_support_validate` back to `false`
+				Config: testAccCTSTrackerV3SupportValidate(bucketName, true, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCTSTrackerV3Exists(trackerV3Resource, &ctsTracker, env.OS_TENANT_NAME),
+					resource.TestCheckResourceAttr(trackerV3Resource, "bucket_name", bucketName),
+					resource.TestCheckResourceAttr(trackerV3Resource, "file_prefix_name", "yO8Q"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "compress_type", "gzip"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "is_lts_enabled", "true"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "is_support_validate", "true"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "is_sort_by_service", "true"),
 					resource.TestCheckResourceAttr(trackerV3Resource, "status", "enabled"),
 				),
 			},
@@ -164,6 +183,10 @@ func testAccCheckCTSTrackerV3Exists(n string, trackers *tracker.Tracker, project
 			return err
 		}
 
+		if len(ctsTracker) == 0 {
+			return fmt.Errorf("CTS tracker not found")
+		}
+
 		if ctsTracker[0].TrackerName != rs.Primary.ID {
 			return fmt.Errorf("CTS tracker not found")
 		}
@@ -212,7 +235,7 @@ resource "opentelekomcloud_cts_tracker_v3" "tracker_v3" {
 `, bucketName)
 }
 
-func testAccCTSTrackerV3SupportValidate(bucketName string, supportValidate bool) string {
+func testAccCTSTrackerV3SupportValidate(bucketName string, supportValidate, sortByService bool) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket        = "%s"
@@ -222,13 +245,15 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 
 resource "opentelekomcloud_cts_tracker_v3" "tracker_v3" {
   bucket_name         = opentelekomcloud_obs_bucket.bucket.bucket
+  file_prefix_name    = "yO8Q"
+  compress_type       = "gzip"
   is_lts_enabled      = true
   is_obs_created      = false
-  is_sort_by_service  = false
+  is_sort_by_service  = %t
   is_support_validate = %t
   status              = "enabled"
 }
-`, bucketName, supportValidate)
+`, bucketName, sortByService, supportValidate)
 }
 
 func testAccCTSTrackerV3ImportBasic(bucketName string) string {

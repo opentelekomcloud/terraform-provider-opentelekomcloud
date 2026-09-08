@@ -179,7 +179,13 @@ func resourceCTSTrackerV3Read(_ context.Context, d *schema.ResourceData, meta in
 
 	ctsTracker, err := tracker.List(client, trackerName)
 	if err != nil {
-		return fmterr.Errorf("error retrieving cts tracker: %w", err)
+		// a tracker deleted outside of terraform answers with 404 CTS.0214
+		return common.CheckDeletedDiag(d, err, "error retrieving cts tracker")
+	}
+
+	if len(ctsTracker) == 0 {
+		d.SetId("")
+		return nil
 	}
 
 	if len(ctsTracker) > 1 {
