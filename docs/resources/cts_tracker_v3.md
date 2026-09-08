@@ -37,7 +37,9 @@ The following arguments are supported:
 
 * `is_lts_enabled` - (Optional, Boolean) Specifies whether to enable trace analysis.
 
-* `is_support_validate` (Optional, Boolean) Specifies whether trace file verification is enabled for trace transfer. When this function is enabled, integrity verification will be performed to check whether trace files in OBS buckets have been tampered with.
+* `is_support_validate` - (Optional, Boolean) Specifies whether trace file verification is enabled for trace transfer.
+  When this function is enabled, integrity verification will be performed to check whether trace files in OBS buckets
+  have been tampered with.
 
 * `bucket_name` - (Optional, String) The OBS bucket name for a tracker.
 
@@ -46,7 +48,7 @@ The following arguments are supported:
 * `is_obs_created` - (Optional, Boolean) Specifies whether the OBS bucket is automatically created by the tracker.
 
 * `is_sort_by_service` - (Optional, Boolean) Specifies whether to sort the path by cloud service. If this option is enabled,
-  the cloud service name is added to the transfer file path. Default: `true`.
+  the cloud service name is added to the transfer file path. If omitted, the value currently set on the tracker is kept.
 
 * `compress_type` - (Optional, String) Specifies the compression type. Default value is `gzip`.
   The valid values are as follows:
