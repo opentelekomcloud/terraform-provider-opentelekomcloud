@@ -144,17 +144,30 @@ func resourceCTSTrackerV3Create(ctx context.Context, d *schema.ResourceData, met
 	d.SetId(ctsTracker.TrackerName)
 
 	if d.Get("status").(string) == "disabled" {
-		_, err = tracker.Update(client, tracker.UpdateOpts{
-			TrackerType: trackerName,
-			TrackerName: trackerName,
-			Status:      "disabled",
-		})
-		if err != nil {
+		updateOpts := ctsTrackerV3UpdateOpts(d)
+		updateOpts.Status = "disabled"
+		if _, err = tracker.Update(client, updateOpts); err != nil {
 			return fmterr.Errorf("error setting CTS tracker status: %w", err)
 		}
 	}
 
 	return resourceCTSTrackerV3Read(ctx, d, meta)
+}
+
+func ctsTrackerV3UpdateOpts(d *schema.ResourceData) tracker.UpdateOpts {
+	return tracker.UpdateOpts{
+		TrackerType:       trackerName,
+		TrackerName:       trackerName,
+		IsLtsEnabled:      pointerto.Bool(d.Get("is_lts_enabled").(bool)),
+		IsSupportValidate: pointerto.Bool(d.Get("is_support_validate").(bool)),
+		ObsInfo: tracker.ObsInfo{
+			BucketName:      d.Get("bucket_name").(string),
+			FilePrefixName:  d.Get("file_prefix_name").(string),
+			IsObsCreated:    pointerto.Bool(d.Get("is_obs_created").(bool)),
+			CompressType:    d.Get("compress_type").(string),
+			IsSortByService: pointerto.Bool(d.Get("is_sort_by_service").(bool)),
+		},
+	}
 }
 
 func resourceCTSTrackerV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -204,65 +217,28 @@ func resourceCTSTrackerV3Update(ctx context.Context, d *schema.ResourceData, met
 	if err != nil {
 		return fmterr.Errorf(clientError, err)
 	}
-	updateOpts := tracker.UpdateOpts{
-		TrackerType: trackerName,
-		TrackerName: trackerName,
-	}
-
-	oldStatus, newStatus := d.GetChange("status")
-	if oldStatus.(string) == "disabled" {
-		// tracker needs to be enabled for other parameters to be applied
+	// a disabled tracker has to be enabled first, otherwise other parameters are not applied
+	if oldStatus, _ := d.GetChange("status"); oldStatus.(string) == "disabled" {
 		_, err = tracker.Update(client, tracker.UpdateOpts{
 			TrackerType: trackerName,
 			TrackerName: trackerName,
 			Status:      "enabled",
 		})
 		if err != nil {
-			return fmterr.Errorf("error updating CTS tracker: %w", err)
+			return fmterr.Errorf("error enabling CTS tracker: %w", err)
 		}
 	}
 
-	if d.HasChange("status") {
-		updateOpts.Status = d.Get("status").(string)
-	}
-	if d.HasChange("is_lts_enabled") {
-		updateOpts.IsLtsEnabled = pointerto.Bool(d.Get("is_lts_enabled").(bool))
-	}
-	if d.HasChange("is_support_validate") {
-		updateOpts.IsSupportValidate = pointerto.Bool(d.Get("is_support_validate").(bool))
-	}
-	if d.HasChange("bucket_name") {
-		updateOpts.ObsInfo.BucketName = d.Get("bucket_name").(string)
-	}
-	if d.HasChange("file_prefix_name") {
-		updateOpts.ObsInfo.FilePrefixName = d.Get("file_prefix_name").(string)
-		updateOpts.ObsInfo.BucketName = d.Get("bucket_name").(string)
-	}
-	if d.HasChange("is_obs_created") {
-		updateOpts.ObsInfo.IsObsCreated = pointerto.Bool(d.Get("is_obs_created").(bool))
-	}
+	updateOpts := ctsTrackerV3UpdateOpts(d)
+	updateOpts.Status = "enabled"
 
-	if d.HasChange("is_sort_by_service") {
-		updateOpts.ObsInfo.IsSortByService = pointerto.Bool(d.Get("is_sort_by_service").(bool))
-	}
-
-	if d.HasChange("compress_type") {
-		updateOpts.ObsInfo.CompressType = d.Get("compress_type").(string)
-	}
-
-	_, err = tracker.Update(client, updateOpts)
-	if err != nil {
+	if _, err = tracker.Update(client, updateOpts); err != nil {
 		return fmterr.Errorf("error updating CTS tracker: %w", err)
 	}
 
-	// disable tracker in case when status changed from enabled to disabled
-	if oldStatus.(string) != newStatus.(string) && newStatus.(string) == "disabled" {
-		_, err = tracker.Update(client, tracker.UpdateOpts{
-			TrackerType: trackerName,
-			TrackerName: trackerName,
-			Status:      "disabled",
-		})
-		if err != nil {
+	if d.Get("status").(string) == "disabled" {
+		updateOpts.Status = "disabled"
+		if _, err = tracker.Update(client, updateOpts); err != nil {
 			return fmterr.Errorf("error updating CTS tracker: %w", err)
 		}
 	}

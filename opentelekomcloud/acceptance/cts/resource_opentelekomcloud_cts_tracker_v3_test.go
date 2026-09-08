@@ -55,6 +55,43 @@ func TestAccCTSTrackerV3_basic(t *testing.T) {
 	})
 }
 
+func TestAccCTSTrackerV3_supportValidate(t *testing.T) {
+	var ctsTracker tracker.Tracker
+	var bucketName = fmt.Sprintf("terra-test-%s", acctest.RandString(5))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCTSTrackerV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCTSTrackerV3SupportValidate(bucketName, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCTSTrackerV3Exists(trackerV3Resource, &ctsTracker, env.OS_TENANT_NAME),
+					resource.TestCheckResourceAttr(trackerV3Resource, "bucket_name", bucketName),
+					resource.TestCheckResourceAttr(trackerV3Resource, "is_lts_enabled", "true"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "is_support_validate", "false"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "is_sort_by_service", "false"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "status", "enabled"),
+				),
+			},
+			{
+				// enabling `is_support_validate` alone must not reset the rest of
+				// the tracker configuration, see #3541
+				Config: testAccCTSTrackerV3SupportValidate(bucketName, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCTSTrackerV3Exists(trackerV3Resource, &ctsTracker, env.OS_TENANT_NAME),
+					resource.TestCheckResourceAttr(trackerV3Resource, "bucket_name", bucketName),
+					resource.TestCheckResourceAttr(trackerV3Resource, "is_lts_enabled", "true"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "is_support_validate", "true"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "is_sort_by_service", "false"),
+					resource.TestCheckResourceAttr(trackerV3Resource, "status", "enabled"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccCTSTrackerV3_importBasic(t *testing.T) {
 	var bucketName = fmt.Sprintf("terra-test-%s", acctest.RandString(5))
 
@@ -173,6 +210,25 @@ resource "opentelekomcloud_cts_tracker_v3" "tracker_v3" {
   is_support_validate = true
 }
 `, bucketName)
+}
+
+func testAccCTSTrackerV3SupportValidate(bucketName string, supportValidate bool) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket        = "%s"
+  acl           = "public-read"
+  force_destroy = true
+}
+
+resource "opentelekomcloud_cts_tracker_v3" "tracker_v3" {
+  bucket_name         = opentelekomcloud_obs_bucket.bucket.bucket
+  is_lts_enabled      = true
+  is_obs_created      = false
+  is_sort_by_service  = false
+  is_support_validate = %t
+  status              = "enabled"
+}
+`, bucketName, supportValidate)
 }
 
 func testAccCTSTrackerV3ImportBasic(bucketName string) string {
