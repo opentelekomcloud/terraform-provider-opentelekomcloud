@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[SDK]** Provider client per-request retry budget (`#3547 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3547>`_)
