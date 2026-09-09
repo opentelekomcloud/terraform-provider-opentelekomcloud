@@ -12,8 +12,7 @@ import (
 )
 
 func TestAccOpenTelekomCloudIdentityAuthScopeV3DataSource_basic(t *testing.T) {
-	userName := os.Getenv("OS_USERNAME")
-	projectName := os.Getenv("OS_PROJECT_NAME")
+	const dsName = "data.opentelekomcloud_identity_auth_scope_v3.token"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -22,15 +21,21 @@ func TestAccOpenTelekomCloudIdentityAuthScopeV3DataSource_basic(t *testing.T) {
 			{
 				Config: testAccOpenTelekomCloudIdentityAuthScopeV3DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityAuthScopeV3DataSourceID("data.opentelekomcloud_identity_auth_scope_v3.token"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_identity_auth_scope_v3.token", "user_name", userName),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_identity_auth_scope_v3.token", "project_name", projectName),
+					testAccCheckIdentityAuthScopeV3DataSourceID(dsName),
+					resource.TestCheckResourceAttrSet(dsName, "user_id"),
+					checkAttrEqualsEnvOrSet(dsName, "user_name", "OS_USERNAME"),
+					checkAttrEqualsEnvOrSet(dsName, "project_name", "OS_PROJECT_NAME"),
 				),
 			},
 		},
 	})
+}
+
+func checkAttrEqualsEnvOrSet(name, key, envVar string) resource.TestCheckFunc {
+	if expected := os.Getenv(envVar); expected != "" {
+		return resource.TestCheckResourceAttr(name, key, expected)
+	}
+	return resource.TestCheckResourceAttrSet(name, key)
 }
 
 func testAccCheckIdentityAuthScopeV3DataSourceID(n string) resource.TestCheckFunc {
