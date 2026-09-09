@@ -26,8 +26,20 @@ data "opentelekomcloud_identity_auth_scope_v3" "scope" {
 * `name` - (Required) The name of the scope. This is an arbitrary name which is
   only used as a unique identifier so an actual token isn't used as the ID.
 
--> This data source requires `token` in order to get authentication information.
-You need to set `OS_TOKEN` env variable or fill it in terraform config.
+## Authentication
+
+The data source supports token, username/password, and permanent AK/SK authentication.
+
+With token or username/password authentication, the attributes are populated from the
+token representing the current authentication scope. Project attributes are empty for
+a domain-scoped token, and domain attributes are empty for a project-scoped token.
+
+With AK/SK authentication, no token is issued. The current user is resolved from the
+configured `access_key`, while the project and user domain attributes are obtained from
+the provider authentication context. The `roles`, `domain_id`, and `domain_name`
+attributes are empty because AK/SK authentication is project-scoped.
+
+-> Temporary AK/SK credentials configured with `security_token` are not supported.
 
 ## Attributes Reference
 
@@ -40,6 +52,10 @@ You need to set `OS_TOKEN` env variable or fill it in terraform config.
 * `user_domain_name` - The domain name of the user.
 
 * `user_domain_id` - The domain ID of the user.
+
+* `domain_name` - The domain name of the scope. Only set for a domain-scoped token, empty otherwise.
+
+* `domain_id` - The domain ID of the scope. Only set for a domain-scoped token, empty otherwise.
 
 * `project_name` - The project name of the scope.
 

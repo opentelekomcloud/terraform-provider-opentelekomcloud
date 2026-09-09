@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    **[IAM]** ``data_source/opentelekomcloud_identity_auth_scope_v3`` now works with username/password and AK/SK
+    authentication instead of requiring a token (`#3553 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3553>`_)
