@@ -84,6 +84,12 @@ func ResourceImsDataImageV2() *schema.Resource {
 				ForceNew:      true,
 				ConflictsWith: []string{"volume_id"},
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			// following are additional attributes
 			"visibility": {
 				Type:     schema.TypeString,
@@ -132,7 +138,8 @@ func resourceImsDataImageV2Create(ctx context.Context, d *schema.ResourceData, m
 
 		dataImages = append(dataImages, dataImageOpts)
 		createOpts := images.CreateImageFromECSOpts{
-			DataImages: dataImages,
+			DataImages:          dataImages,
+			EnterpriseProjectId: config.GetEnterpriseProjectID(d),
 		}
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
 		v, err = images.CreateImageFromECS(client, createOpts)
@@ -150,12 +157,13 @@ func resourceImsDataImageV2Create(ctx context.Context, d *schema.ResourceData, m
 		}
 
 		createOpts := images.CreateImageFromOBSOpts{
-			Name:        d.Get("name").(string),
-			Description: d.Get("description").(string),
-			ImageUrl:    d.Get("image_url").(string),
-			MinDisk:     d.Get("min_disk").(int),
-			OsType:      d.Get("os_type").(string),
-			CmkId:       d.Get("cmk_id").(string),
+			Name:                d.Get("name").(string),
+			Description:         d.Get("description").(string),
+			ImageUrl:            d.Get("image_url").(string),
+			MinDisk:             d.Get("min_disk").(int),
+			OsType:              d.Get("os_type").(string),
+			CmkId:               d.Get("cmk_id").(string),
+			EnterpriseProjectId: config.GetEnterpriseProjectID(d),
 		}
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
 		v, err = images.CreateImageFromOBS(v1Client, createOpts)
@@ -219,6 +227,7 @@ func resourceImsDataImageV2Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("data_origin", img.DataOrigin),
 		d.Set("disk_format", img.DiskFormat),
 		d.Set("image_size", img.ImageSize),
+		d.Set("enterprise_project_id", img.EnterpriseProjectId),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)

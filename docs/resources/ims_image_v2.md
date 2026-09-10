@@ -109,6 +109,9 @@ The following arguments are supported:
 * `cmk_id` - (Optional, String, ForceNew) The master key used for encrypting an image.
   Changing this creates a new image.
 
+* `enterprise_project_id` - (Optional, String, ForceNew) The ID of the enterprise project to which
+  the image belongs. If omitted, the provider-level enterprise project ID is used.
+
 * `type` - (Optional, String, ForceNew) The image type. Must be one of `ECS`, `FusionCompute`,
   `Ironic` or `IsoImage`. Changing this creates a new image.
 
@@ -129,6 +132,8 @@ In additin to the arguments defined above, the following attributes are exported
 * `image_size` - The size(bytes) of the image file format.
 
 * `file` - The URL for uploading and downloading the image file.
+
+* `enterprise_project_id` - The ID of the enterprise project to which the image belongs.
 
 ## Import
 

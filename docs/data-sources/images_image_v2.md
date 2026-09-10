@@ -45,6 +45,8 @@ data "opentelekomcloud_images_image_v2" "latest-debian" {
 
 * `owner` - (Optional, String) The owner (UUID) of the image.
 
+* `enterprise_project_id` - (Optional, String) The ID of the enterprise project to use when querying images.
+
 * `size_min` - (Optional, Integer) The minimum size (in bytes) of the image to return.
 
 * `size_max` - (Optional, Integer) The maximum size (in bytes) of the image to return.

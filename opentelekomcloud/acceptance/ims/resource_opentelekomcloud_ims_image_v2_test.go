@@ -72,6 +72,30 @@ func TestAccImsImageV2_volume(t *testing.T) {
 	})
 }
 
+func TestAccImsImageV2_enterpriseProject(t *testing.T) {
+	if env.OS_ENTERPRISE_PROJECT_ID == "" {
+		t.Skip("OS_ENTERPRISE_PROJECT_ID must be set to test IMS enterprise project support")
+	}
+
+	var image images.ImageInfo
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckImsImageV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccImsImageV2EnterpriseProject,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckImsImageV2Exists(resourceImageName, &image),
+					resource.TestCheckResourceAttr(
+						resourceImageName, "enterprise_project_id", env.OS_ENTERPRISE_PROJECT_ID),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckImsImageV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
@@ -244,3 +268,24 @@ resource "opentelekomcloud_ims_image_v2" "image_1" {
   }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccImsImageV2EnterpriseProject = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name              = "instance_1"
+  security_groups   = ["default"]
+  availability_zone = "%s"
+  image_name        = "Standard_Debian_10_latest"
+
+  network {
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+}
+
+resource "opentelekomcloud_ims_image_v2" "image_1" {
+  name                  = "TFTest_image_enterprise_project"
+  instance_id           = opentelekomcloud_compute_instance_v2.instance_1.id
+  enterprise_project_id = "%s"
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_ENTERPRISE_PROJECT_ID)

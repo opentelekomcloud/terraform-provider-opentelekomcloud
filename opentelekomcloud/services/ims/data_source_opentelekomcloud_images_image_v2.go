@@ -42,6 +42,11 @@ func DataSourceImagesImageV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"size_min": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -243,15 +248,16 @@ func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta
 	}
 
 	listOpts := images.ListImagesOpts{
-		Name:       d.Get("name").(string),
-		Visibility: d.Get("visibility").(string),
-		Owner:      d.Get("owner").(string),
-		Status:     "active",
-		SizeMin:    int64(d.Get("size_min").(int)),
-		SizeMax:    int64(d.Get("size_max").(int)),
-		SortKey:    d.Get("sort_key").(string),
-		SortDir:    d.Get("sort_direction").(string),
-		Tag:        d.Get("tag").(string),
+		Name:                d.Get("name").(string),
+		Visibility:          d.Get("visibility").(string),
+		Owner:               d.Get("owner").(string),
+		EnterpriseProjectId: d.Get("enterprise_project_id").(string),
+		Status:              "active",
+		SizeMin:             int64(d.Get("size_min").(int)),
+		SizeMax:             int64(d.Get("size_max").(int)),
+		SortKey:             d.Get("sort_key").(string),
+		SortDir:             d.Get("sort_direction").(string),
+		Tag:                 d.Get("tag").(string),
 	}
 
 	log.Printf("[DEBUG] List Options: %#v", listOpts)
