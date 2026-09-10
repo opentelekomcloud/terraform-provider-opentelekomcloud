@@ -12,9 +12,11 @@ import (
 
 func TestAccDataSourceGroups_basic(t *testing.T) {
 	var (
-		dataSource = "data.opentelekomcloud_lts_groups_v2.test"
-		rName      = fmt.Sprintf("lts_groups%s", acctest.RandString(5))
-		dc         = common.InitDataSourceCheck(dataSource)
+		dataSource       = "data.opentelekomcloud_lts_groups_v2.test"
+		dataSourceByID   = "data.opentelekomcloud_lts_groups_v2.by_id"
+		dataSourceByName = "data.opentelekomcloud_lts_groups_v2.by_name"
+		rName            = fmt.Sprintf("lts_groups%s", acctest.RandString(5))
+		dc               = common.InitDataSourceCheck(dataSource)
 	)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -35,6 +37,12 @@ func TestAccDataSourceGroups_basic(t *testing.T) {
 						regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}?(Z|([+-]\d{2}:\d{2}))$`)),
 					resource.TestCheckOutput("is_exist_log_group", "true"),
 					resource.TestCheckOutput("is_eps_return_and_matched", "true"),
+					resource.TestCheckResourceAttr(dataSourceByID, "groups.#", "1"),
+					resource.TestCheckResourceAttrPair(
+						dataSourceByID, "groups.0.id", "opentelekomcloud_lts_group_v2.group", "id",
+					),
+					resource.TestCheckResourceAttr(dataSourceByName, "groups.#", "1"),
+					resource.TestCheckResourceAttr(dataSourceByName, "groups.0.name", rName),
 				),
 			},
 		},
@@ -49,6 +57,14 @@ data "opentelekomcloud_lts_groups_v2" "test" {
   depends_on = [
     opentelekomcloud_lts_group_v2.group
   ]
+}
+
+data "opentelekomcloud_lts_groups_v2" "by_id" {
+  group_id = opentelekomcloud_lts_group_v2.group.id
+}
+
+data "opentelekomcloud_lts_groups_v2" "by_name" {
+  name = opentelekomcloud_lts_group_v2.group.group_name
 }
 
 output "is_exist_log_group" {

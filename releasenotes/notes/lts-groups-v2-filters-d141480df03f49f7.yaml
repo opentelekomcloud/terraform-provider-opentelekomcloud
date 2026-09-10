@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[LTS]** Add optional ``group_id`` and ``name`` filters to the
+    ``opentelekomcloud_lts_groups_v2`` data source
