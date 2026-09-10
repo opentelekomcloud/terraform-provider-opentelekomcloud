@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[VPC]** Add ``opentelekomcloud_vpc_subnet_private_ip_v1`` resource and data source (`#3552 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3552>`_)
