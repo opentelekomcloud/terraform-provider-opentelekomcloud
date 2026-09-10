@@ -20,6 +20,16 @@ Use this data source to get the list of LTS log groups.
 data "opentelekomcloud_lts_groups_v2" "test" {}
 ```
 
+## Argument Reference
+
+The following arguments are supported:
+
+* `group_id` - (Optional, String) Specifies the exact log group ID to match.
+
+* `name` - (Optional, String) Specifies the exact log group name to match.
+
+If both arguments are specified, a log group must match both values.
+
 ## Attribute Reference
 
 In addition to all arguments above, the following attributes are exported:

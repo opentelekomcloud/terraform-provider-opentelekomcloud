@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/lts/v2/groups"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -18,6 +19,16 @@ func DataSourceLtsGroupsV2() *schema.Resource {
 		ReadContext: dataSourceLtsGroupsRead,
 
 		Schema: map[string]*schema.Schema{
+			"group_id": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(36, 36),
+			},
+			"name": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(1, 64),
+			},
 			"groups": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -70,6 +81,7 @@ func dataSourceLtsGroupsRead(_ context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	requestResp = filterLtsGroups(requestResp, d.Get("group_id").(string), d.Get("name").(string))
 
 	id, err := uuid.GenerateUUID()
 	if err != nil {
@@ -100,4 +112,22 @@ func dataSourceLtsGroupsRead(_ context.Context, d *schema.ResourceData, meta int
 	}
 
 	return nil
+}
+
+func filterLtsGroups(allGroups []groups.LogGroup, id, name string) []groups.LogGroup {
+	if id == "" && name == "" {
+		return allGroups
+	}
+
+	result := make([]groups.LogGroup, 0, len(allGroups))
+	for _, group := range allGroups {
+		if id != "" && group.LogGroupId != id {
+			continue
+		}
+		if name != "" && group.LogGroupName != name {
+			continue
+		}
+		result = append(result, group)
+	}
+	return result
 }

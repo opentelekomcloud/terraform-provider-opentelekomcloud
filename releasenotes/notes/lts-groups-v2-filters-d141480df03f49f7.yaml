@@ -1,0 +1,6 @@
+---
+enhancements:
+  - |
+    **[LTS]** Add optional ``group_id`` and ``name`` filters to the
+    ``opentelekomcloud_lts_groups_v2`` data source
+    (`#3556 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3556>`_)
