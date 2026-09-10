@@ -79,6 +79,11 @@ The following arguments are supported:
 * `cmk_id` - (Optional) The master key used for encrypting an image.
   Changing this creates a new image.
 
+* `enterprise_project_id` - (Optional, String, ForceNew) The ID of the enterprise project to which
+  the image belongs. If omitted, the provider-level enterprise project ID is used. If neither is set,
+  the image belongs to the default enterprise project. Required when only enterprise project authorization
+  is used.
+
 
 ## Attributes Reference
 
@@ -109,6 +114,8 @@ The following attributes are exported:
 * `disk_format` - The image file format. The value can be `vhd`, `zvhd`, `raw`, `zvhd2`, or `qcow2`.
 
 * `image_size` - The size(bytes) of the image file format.
+
+* `enterprise_project_id` - The ID of the enterprise project to which the image belongs.
 
 ## Import
 

@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[IMS]** Added Enterprise Project support for IMS sources (`#3554 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3554>`_)

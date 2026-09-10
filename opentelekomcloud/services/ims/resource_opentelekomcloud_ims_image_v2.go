@@ -106,6 +106,12 @@ func ResourceImsImageV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"type": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -114,6 +120,7 @@ func ResourceImsImageV2() *schema.Resource {
 			"hw_firmware_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"bios", "uefi",
 				}, true),
@@ -180,25 +187,27 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	switch {
 	case common.HasFilledOpt(d, "instance_id"):
 		createOpts := images.CreateImageFromECSOpts{
-			Name:        d.Get("name").(string),
-			Description: d.Get("description").(string),
-			InstanceId:  d.Get("instance_id").(string),
-			MaxRam:      d.Get("max_ram").(int),
-			MinRam:      d.Get("min_ram").(int),
-			ImageTags:   imageTags,
+			Name:                d.Get("name").(string),
+			Description:         d.Get("description").(string),
+			InstanceId:          d.Get("instance_id").(string),
+			MaxRam:              d.Get("max_ram").(int),
+			MinRam:              d.Get("min_ram").(int),
+			ImageTags:           imageTags,
+			EnterpriseProjectId: config.GetEnterpriseProjectID(d),
 		}
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
 		jobId, err = images.CreateImageFromECS(client, createOpts)
 	case common.HasFilledOpt(d, "volume_id"):
 		createOpts := images.CreateImageFromDiskOpts{
-			Name:        d.Get("name").(string),
-			Description: d.Get("description").(string),
-			VolumeId:    d.Get("volume_id").(string),
-			OsVersion:   d.Get("os_version").(string),
-			Type:        d.Get("type").(string),
-			MaxRam:      d.Get("max_ram").(int),
-			MinRam:      d.Get("min_ram").(int),
-			ImageTags:   imageTags,
+			Name:                d.Get("name").(string),
+			Description:         d.Get("description").(string),
+			VolumeId:            d.Get("volume_id").(string),
+			OsVersion:           d.Get("os_version").(string),
+			Type:                d.Get("type").(string),
+			MaxRam:              d.Get("max_ram").(int),
+			MinRam:              d.Get("min_ram").(int),
+			ImageTags:           imageTags,
+			EnterpriseProjectId: config.GetEnterpriseProjectID(d),
 		}
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
 		jobId, err = images.CreateImageFromDisk(client, createOpts)
@@ -208,17 +217,18 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		createOpts := images.CreateImageFromOBSOpts{
-			Name:        d.Get("name").(string),
-			Description: d.Get("description").(string),
-			ImageUrl:    d.Get("image_url").(string),
-			MinDisk:     d.Get("min_disk").(int),
-			MaxRam:      d.Get("max_ram").(int),
-			MinRam:      d.Get("min_ram").(int),
-			OsVersion:   d.Get("os_version").(string),
-			IsConfig:    d.Get("is_config").(bool),
-			CmkId:       d.Get("cmk_id").(string),
-			Type:        d.Get("type").(string),
-			ImageTags:   imageTags,
+			Name:                d.Get("name").(string),
+			Description:         d.Get("description").(string),
+			ImageUrl:            d.Get("image_url").(string),
+			MinDisk:             d.Get("min_disk").(int),
+			MaxRam:              d.Get("max_ram").(int),
+			MinRam:              d.Get("min_ram").(int),
+			OsVersion:           d.Get("os_version").(string),
+			IsConfig:            d.Get("is_config").(bool),
+			CmkId:               d.Get("cmk_id").(string),
+			Type:                d.Get("type").(string),
+			ImageTags:           imageTags,
+			EnterpriseProjectId: config.GetEnterpriseProjectID(d),
 		}
 		log.Printf("[DEBUG] Create Options: %#v", createOpts)
 		jobId, err = images.CreateImageFromOBS(client, createOpts)
@@ -295,6 +305,7 @@ func resourceImsImageV2Read(_ context.Context, d *schema.ResourceData, meta inte
 		d.Set("disk_format", img.DiskFormat),
 		d.Set("image_size", img.ImageSize),
 		d.Set("hw_firmware_type", img.HwFirmwareType),
+		d.Set("enterprise_project_id", img.EnterpriseProjectId),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
