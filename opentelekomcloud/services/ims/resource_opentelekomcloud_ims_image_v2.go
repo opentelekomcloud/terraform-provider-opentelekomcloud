@@ -120,6 +120,7 @@ func ResourceImsImageV2() *schema.Resource {
 			"hw_firmware_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"bios", "uefi",
 				}, true),

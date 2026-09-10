@@ -191,7 +191,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   security_groups   = ["default"]
   availability_zone = "%s"
-  image_name        = "Standard_Debian_10_latest"
+  image_name        = "%s"
   metadata = {
     foo = "bar"
   }
@@ -210,7 +210,7 @@ resource "opentelekomcloud_ims_image_v2" "image_1" {
     key = "value"
   }
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsImageName)
 
 var testAccImsImageV2Update = fmt.Sprintf(`
 %s
@@ -219,7 +219,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   security_groups   = ["default"]
   availability_zone = "%s"
-  image_name        = "Standard_Debian_10_latest"
+  image_name        = "%s"
   metadata = {
     foo = "bar"
   }
@@ -239,7 +239,7 @@ resource "opentelekomcloud_ims_image_v2" "image_1" {
     key2 = "value2"
   }
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsImageName)
 
 var testAccImsImageV2Volume = fmt.Sprintf(`
 %s
@@ -247,7 +247,7 @@ var testAccImsImageV2Volume = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   security_groups   = ["default"]
-  image_name        = "Standard_Debian_10_latest"
+  image_name        = "%s"
   availability_zone = "%s"
   metadata = {
     foo = "bar"
@@ -267,16 +267,20 @@ resource "opentelekomcloud_ims_image_v2" "image_1" {
     key = "value"
   }
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsImageName)
 
 var testAccImsImageV2EnterpriseProject = fmt.Sprintf(`
-%s
+provider "opentelekomcloud" {
+  enterprise_project_id = "%[3]s"
+}
+
+%[1]s
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   security_groups   = ["default"]
-  availability_zone = "%s"
-  image_name        = "Standard_Debian_10_latest"
+  availability_zone = "%[2]s"
+  image_name        = "%[4]s"
 
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -286,6 +290,6 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 resource "opentelekomcloud_ims_image_v2" "image_1" {
   name                  = "TFTest_image_enterprise_project"
   instance_id           = opentelekomcloud_compute_instance_v2.instance_1.id
-  enterprise_project_id = "%s"
+  enterprise_project_id = "%[3]s"
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_ENTERPRISE_PROJECT_ID)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_ENTERPRISE_PROJECT_ID, env.OsImageName)

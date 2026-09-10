@@ -110,7 +110,9 @@ The following arguments are supported:
   Changing this creates a new image.
 
 * `enterprise_project_id` - (Optional, String, ForceNew) The ID of the enterprise project to which
-  the image belongs. If omitted, the provider-level enterprise project ID is used.
+  the image belongs. If omitted, the provider-level enterprise project ID is used. If neither is set,
+  the image belongs to the default enterprise project. Required when only enterprise project authorization
+  is used.
 
 * `type` - (Optional, String, ForceNew) The image type. Must be one of `ECS`, `FusionCompute`,
   `Ironic` or `IsoImage`. Changing this creates a new image.
