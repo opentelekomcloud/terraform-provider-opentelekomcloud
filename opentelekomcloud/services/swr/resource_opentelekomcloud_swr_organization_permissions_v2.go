@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/swr/v2/organizations"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -76,17 +77,26 @@ func resourceSwrOrganizationPermissionsV2Read(_ context.Context, d *schema.Resou
 
 	perms, err := organizations.GetPermissions(client, organization(d))
 	if err != nil {
-		return fmterr.Errorf("error getting organization permissions: %w", err)
+		return common.CheckDeletedDiag(d, err, "error getting organization permissions")
 	}
+
+	// Permissions of the user the provider authenticates as are reported in
+	// `self_auth`, those of everyone else in `others_auths`.
+	auths := make([]organizations.Auth, 0, len(perms.OthersAuth)+1)
+	auths = append(auths, perms.OthersAuth...)
+	auths = append(auths, perms.SelfAuth)
+
 	var found *organizations.Auth
-	for _, auth := range perms.OthersAuth {
+	for _, auth := range auths {
 		if auth.UserID == d.Id() {
 			found = &auth
 			break
 		}
 	}
 	if found == nil {
-		return diag.Errorf("no permissions for user %s are found", d.Id())
+		// Permissions were revoked outside of Terraform.
+		d.SetId("")
+		return nil
 	}
 
 	mErr := multierror.Append(
@@ -127,7 +137,7 @@ func resourceSwrOrganizationPermissionsV2Delete(_ context.Context, d *schema.Res
 	}
 
 	err = organizations.DeletePermissions(client, organization(d), d.Id())
-	if err != nil {
+	if err != nil && !alreadyGone(err) {
 		return fmterr.Errorf("error deleting organization permissions: %w", err)
 	}
 

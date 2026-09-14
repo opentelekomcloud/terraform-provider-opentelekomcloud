@@ -31,6 +31,45 @@ func TestSwrOrganizationV2_basic(t *testing.T) {
 	})
 }
 
+// TestSwrOrganizationV2_recreateAfterManualDelete covers GH-3551: an organization
+// removed outside of Terraform has to be re-created instead of failing the refresh.
+func TestSwrOrganizationV2_recreateAfterManualDelete(t *testing.T) {
+	orgName := fmt.Sprintf("test-organization-gone-%d", tools.RandomInt(0, 99))
+	config := fmt.Sprintf(testSwrOrganizationV2BasicTemplate, orgName)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testSwrOrganizationV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "auth", "7"),
+				),
+			},
+			{
+				PreConfig: func() { testSwrOrganizationV2DeleteOutOfBand(t, orgName) },
+				Config:    config,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "auth", "7"),
+				),
+			},
+		},
+	})
+}
+
+func testSwrOrganizationV2DeleteOutOfBand(t *testing.T, orgName string) {
+	config := common.TestAccProvider.Meta().(*cfg.Config)
+	client, err := config.SwrV2Client(env.OS_REGION_NAME)
+	if err != nil {
+		t.Fatalf("error creating SWR V2 client: %s", err)
+	}
+	if err := organizations.Delete(client, orgName); err != nil {
+		t.Fatalf("error deleting SWR organization out of band: %s", err)
+	}
+}
+
 func TestSwrOrganizationV2_validateName(t *testing.T) {
 	names := []string{"1-start-with-number", "end-with-2-dot.", "biGger-3-one"}
 	steps := make([]resource.TestStep, len(names))

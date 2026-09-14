@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/swr/v2/domains"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -119,7 +120,13 @@ func resourceSwrDomainRead(_ context.Context, d *schema.ResourceData, meta inter
 	}
 	domain, err := domains.Get(client, opts)
 	if err != nil {
-		return fmterr.Errorf("error reading domain: %w", err)
+		return common.CheckDeletedDiag(d, err, "error reading domain")
+	}
+	// This endpoint reports whether the shared account exists instead of
+	// answering 404, so an absent access domain arrives as 200 `exist: false`.
+	if !domain.Exist {
+		d.SetId("")
+		return nil
 	}
 
 	mErr := multierror.Append(
@@ -177,8 +184,8 @@ func resourceSwrDomainDelete(_ context.Context, d *schema.ResourceData, meta int
 		AccessDomain: d.Get("access_domain").(string),
 	}
 	err = domains.Delete(client, opts)
-	if err != nil {
-		fmterr.Errorf("error deleting domain: %w", err)
+	if err != nil && !alreadyGone(err) {
+		return fmterr.Errorf("error deleting domain: %w", err)
 	}
 
 	return nil
