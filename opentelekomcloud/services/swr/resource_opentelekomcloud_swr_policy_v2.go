@@ -125,7 +125,7 @@ func resourcePolicyRead(_ context.Context, d *schema.ResourceData, meta interfac
 	repository := d.Get("repository").(string)
 	retPolicy, err := policy.Get(client, namespace, repository, d.Id())
 	if err != nil {
-		return fmterr.Errorf("error reading retention policy: %w", err)
+		return common.CheckDeletedDiag(d, err, "error reading retention policy")
 	}
 
 	mErr := multierror.Append(
@@ -171,8 +171,8 @@ func resourcePolicyDelete(_ context.Context, d *schema.ResourceData, meta interf
 	namespace := d.Get("organization").(string)
 	repository := d.Get("repository").(string)
 	err = policy.Delete(client, namespace, repository, d.Id())
-	if err != nil {
-		fmterr.Errorf("error deleting retention policy: %w", err)
+	if err != nil && !alreadyGone(err) {
+		return fmterr.Errorf("error deleting retention policy: %w", err)
 	}
 
 	return nil

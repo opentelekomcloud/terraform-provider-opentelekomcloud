@@ -34,8 +34,28 @@ func TestSwrOrganizationPermissionsV2_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourcePermissionsName, "auth", "3"),
 				),
 			},
+			{
+				// GH-3551: permissions revoked outside of Terraform have to be
+				// re-created instead of failing the refresh.
+				PreConfig: func() { testSwrOrganizationPermissionsV2RevokeOutOfBand(t, name, userID) },
+				Config:    fmt.Sprintf(testSwrOrganizationPermissionV2BasicTemplate, name, userID, username),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourcePermissionsName, "auth", "3"),
+				),
+			},
 		},
 	})
+}
+
+func testSwrOrganizationPermissionsV2RevokeOutOfBand(t *testing.T, org, userID string) {
+	config := common.TestAccProvider.Meta().(*cfg.Config)
+	client, err := config.SwrV2Client(env.OS_REGION_NAME)
+	if err != nil {
+		t.Fatalf("error creating SWR V2 client: %s", err)
+	}
+	if err := organizations.DeletePermissions(client, org, userID); err != nil {
+		t.Fatalf("error revoking SWR organization permissions out of band: %s", err)
+	}
 }
 
 func testSwrOrganizationPermissionsV2Destroy(s *terraform.State) error {
@@ -59,7 +79,11 @@ func testSwrOrganizationPermissionsV2Destroy(s *terraform.State) error {
 			return fmt.Errorf("error retrieving organization permissions: %w", err)
 		}
 
-		for _, a := range perms.OthersAuth {
+		auths := make([]organizations.Auth, 0, len(perms.OthersAuth)+1)
+		auths = append(auths, perms.OthersAuth...)
+		auths = append(auths, perms.SelfAuth)
+
+		for _, a := range auths {
 			if a.UserID == rs.Primary.ID {
 				return fmt.Errorf("expected permission to be deleted, but it exist")
 			}

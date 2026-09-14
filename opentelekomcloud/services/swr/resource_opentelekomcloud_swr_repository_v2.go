@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/swr/v2/repositories"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -125,7 +126,7 @@ func resourceRepositoryRead(_ context.Context, d *schema.ResourceData, meta inte
 
 	repo, err := repositories.Get(client, organization(d), repository(d.Id()))
 	if err != nil {
-		return fmterr.Errorf("error reading repository: %w", err)
+		return common.CheckDeletedDiag(d, err, "error reading repository")
 	}
 
 	mErr := multierror.Append(
@@ -176,8 +177,8 @@ func resourceRepositoryDelete(_ context.Context, d *schema.ResourceData, meta in
 	}
 
 	err = repositories.Delete(client, organization(d), repository(d.Id()))
-	if err != nil {
-		fmterr.Errorf("error deleting repository: %w", err)
+	if err != nil && !alreadyGone(err) {
+		return fmterr.Errorf("error deleting repository: %w", err)
 	}
 
 	return nil
