@@ -1,7 +1,6 @@
 package acceptance
 
 import (
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -21,8 +20,29 @@ func TestAccVpcPeeringConnectionAcceptorV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckVpcPeeringConnectionAcceptorDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccVpcPeeringConnectionAcceptorV2Basic, // TODO: Research why normal scenario with peer tenant id is not working in acceptance tests
-				ExpectError: regexp.MustCompile(`VPC peering action not permitted: Can not accept/reject peering request not in PENDING_ACCEPTANCE state.`),
+				Config: testAccVpcPeeringConnectionAcceptorV2Basic,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_peering_connection_accepter_v2.peer", "status", "ACTIVE",
+					),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_peering_connection_accepter_v2.peer", "accept", "true",
+					),
+					resource.TestCheckResourceAttrSet(
+						"opentelekomcloud_vpc_peering_connection_accepter_v2.peer", "vpc_tenant_id",
+					),
+					resource.TestCheckResourceAttrSet(
+						"opentelekomcloud_vpc_peering_connection_accepter_v2.peer", "created_at",
+					),
+					resource.TestCheckResourceAttrSet(
+						"opentelekomcloud_vpc_peering_connection_accepter_v2.peer", "updated_at",
+					),
+				),
+			},
+			{
+				ResourceName:      "opentelekomcloud_vpc_peering_connection_accepter_v2.peer",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

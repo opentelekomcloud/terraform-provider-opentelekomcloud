@@ -32,6 +32,8 @@ The following arguments are supported:
 
 * `vpc_id` - (Optional) The ID of the requester VPC to filter by.
 
+* `vpc_tenant_id` - (Optional) The project ID of the requester VPC to filter by.
+
 * `peer_vpc_id` - (Optional) The ID of the accepter/peer VPC to filter by.
 
 * `peer_tenant_id` - (Optional) The tenant ID of the accepter/peer VPC to filter by.
@@ -59,3 +61,7 @@ In addition to all arguments above, the following attributes are exported:
   * `peer_vpc_id` - The ID of the accepter/peer VPC.
 
   * `peer_tenant_id` - The project ID the accepter VPC belongs to.
+
+  * `created_at` - The UTC time when the VPC peering connection was created.
+
+  * `updated_at` - The UTC time when the VPC peering connection was last updated.

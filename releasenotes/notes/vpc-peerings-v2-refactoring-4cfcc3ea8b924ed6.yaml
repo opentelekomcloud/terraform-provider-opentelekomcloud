@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    **[VPC]** Refactor VPC peering resources and data sources to the modern VPC v2 SDK,
+    add requester tenant and creation/update timestamps, and preserve peer-side filtering.

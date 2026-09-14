@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/peerings"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v2/peerings"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -33,6 +33,9 @@ func TestAccVpcPeeringConnectionV2_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceVPCPeeringName, "name", "opentelekomcloud_peering"),
 					resource.TestCheckResourceAttr(resourceVPCPeeringName, "description", "test vpc peering"),
 					resource.TestCheckResourceAttr(resourceVPCPeeringName, "status", "ACTIVE"),
+					resource.TestCheckResourceAttrSet(resourceVPCPeeringName, "vpc_tenant_id"),
+					resource.TestCheckResourceAttrSet(resourceVPCPeeringName, "created_at"),
+					resource.TestCheckResourceAttrSet(resourceVPCPeeringName, "updated_at"),
 				),
 			},
 			{
@@ -89,7 +92,7 @@ func TestAccVpcPeeringConnectionV2_timeout(t *testing.T) {
 
 func testAccCheckOTCVpcPeeringConnectionV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	peeringClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	peeringClient, err := config.VpcV2Client(env.OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud Peering client: %s", err)
 	}
@@ -99,7 +102,7 @@ func testAccCheckOTCVpcPeeringConnectionV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := peerings.Get(peeringClient, rs.Primary.ID).Extract()
+		_, err := peerings.Get(peeringClient, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("vpc Peering Connection still exists")
 		}
@@ -120,12 +123,12 @@ func testAccCheckOTCVpcPeeringConnectionV2Exists(n string, peering *peerings.Pee
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		peeringClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		peeringClient, err := config.VpcV2Client(env.OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud Peering client: %s", err)
 		}
 
-		found, err := peerings.Get(peeringClient, rs.Primary.ID).Extract()
+		found, err := peerings.Get(peeringClient, rs.Primary.ID)
 		if err != nil {
 			return err
 		}

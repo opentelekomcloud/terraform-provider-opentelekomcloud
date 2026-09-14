@@ -57,3 +57,7 @@ In addition to all arguments above, the following attributes are exported:
 * `description` - The description of the VPC peering connection.
 
 * `vpc_tenant_id` - The project ID the requester VPC belongs to.
+
+* `created_at` - The UTC time when the VPC peering connection was created.
+
+* `updated_at` - The UTC time when the VPC peering connection was last updated.
