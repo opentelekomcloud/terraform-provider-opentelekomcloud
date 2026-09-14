@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[SWR]** Fixed SWR resources failing the plan when deleted outside of Terraform (`#3551 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3551>`_)

@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/swr/v2/organizations"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -89,7 +90,7 @@ func resourceOrganizationRead(_ context.Context, d *schema.ResourceData, meta in
 	}
 	org, err := organizations.Get(client, d.Id())
 	if err != nil {
-		return fmterr.Errorf("error reading SWR organization: %w", err)
+		return common.CheckDeletedDiag(d, err, "error reading SWR organization")
 	}
 	mErr := multierror.Append(
 		d.Set("name", org.Name),
@@ -110,7 +111,7 @@ func resourceOrganizationDelete(_ context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf(ClientError, err)
 	}
 	err = organizations.Delete(client, d.Id())
-	if err != nil {
+	if err != nil && !alreadyGone(err) {
 		return fmterr.Errorf("error deleting SWR organization: %w", err)
 	}
 	return nil
