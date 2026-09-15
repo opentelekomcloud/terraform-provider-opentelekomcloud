@@ -155,7 +155,7 @@ func resourceVpcIPAddressGroupV3Read(ctx context.Context, d *schema.ResourceData
 	for _, v := range addressGroup.IPExtraSet {
 		ipExtraSet = append(ipExtraSet, map[string]interface{}{
 			"ip":      v.IP,
-			"remarks": v.Remark,
+			"remarks": v.Remarks,
 		})
 	}
 
