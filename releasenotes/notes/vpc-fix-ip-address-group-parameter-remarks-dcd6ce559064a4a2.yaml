@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix response parameter `remarks` in ``resource/opentelekomcloud_vpc_ip_address_group_v3`` (`#3562 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3562>`_)
+  - |
+    **[VPC]** Fix response parameter `remarks` in ``data-source/opentelekomcloud_vpc_ip_address_group_v3`` (`#3562 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3562>`_)
