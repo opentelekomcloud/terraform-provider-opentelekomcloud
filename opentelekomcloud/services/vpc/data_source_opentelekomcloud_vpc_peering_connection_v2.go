@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/go-multierror"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/peerings"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v2/peerings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -26,8 +26,9 @@ func DataSourceVpcPeeringConnectionV2() *schema.Resource {
 				Computed: true,
 			},
 			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"name": {
 				Type:         schema.TypeString,
@@ -43,20 +44,30 @@ func DataSourceVpcPeeringConnectionV2() *schema.Resource {
 				Optional: true,
 			},
 			"vpc_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"vpc_tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"peer_vpc_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"peer_tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -64,24 +75,31 @@ func DataSourceVpcPeeringConnectionV2() *schema.Resource {
 
 func dataSourceVpcPeeringConnectionV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	peeringClient, err := config.VpcV2Client(config.GetRegion(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	listOpts := peerings.ListOpts{
-		ID:         d.Get("id").(string),
-		Name:       d.Get("name").(string),
-		Status:     d.Get("status").(string),
-		TenantId:   d.Get("peer_tenant_id").(string),
-		VpcId:      d.Get("vpc_id").(string),
-		Peer_VpcId: d.Get("peer_vpc_id").(string),
+		ID:       d.Get("id").(string),
+		Name:     d.Get("name").(string),
+		Status:   d.Get("status").(string),
+		TenantID: d.Get("peer_tenant_id").(string),
+		VpcID:    d.Get("vpc_id").(string),
 	}
 
 	refinedPeering, err := peerings.List(peeringClient, listOpts)
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve vpc peering connections: %s", err)
 	}
+
+	refinedPeering = filterVpcPeerings(
+		refinedPeering,
+		d.Get("vpc_id").(string),
+		d.Get("vpc_tenant_id").(string),
+		d.Get("peer_vpc_id").(string),
+		d.Get("peer_tenant_id").(string),
+	)
 
 	if len(refinedPeering) < 1 {
 		return fmterr.Errorf("your query returned no results. " +
@@ -98,17 +116,7 @@ func dataSourceVpcPeeringConnectionV2Read(_ context.Context, d *schema.ResourceD
 	log.Printf("[INFO] Retrieved Vpc peering Connections using given filter %s: %+v", Peering.ID, Peering)
 	d.SetId(Peering.ID)
 
-	mErr := multierror.Append(
-		d.Set("name", Peering.Name),
-		d.Set("description", Peering.Description),
-		d.Set("status", Peering.Status),
-		d.Set("vpc_id", Peering.RequestVpcInfo.VpcId),
-		d.Set("vpc_tenant_id", Peering.RequestVpcInfo.TenantId),
-		d.Set("peer_vpc_id", Peering.AcceptVpcInfo.VpcId),
-		d.Set("peer_tenant_id", Peering.AcceptVpcInfo.TenantId),
-		d.Set("region", config.GetRegion(d)),
-	)
-	if err := mErr.ErrorOrNil(); err != nil {
+	if err := setVpcPeeringV2Fields(d, &Peering, config.GetRegion(d)); err != nil {
 		return fmterr.Errorf("error setting VPC peering attributes: %w", err)
 	}
 

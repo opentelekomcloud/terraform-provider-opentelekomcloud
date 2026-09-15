@@ -40,6 +40,9 @@ func TestAccVpcPeeringConnectionsV2DataSource_basic(t *testing.T) {
 					dcByName.CheckResourceExists(),
 					resource.TestCheckResourceAttr(dataSourceVpcPeeringsNameByName, "peering_connections.#", "1"),
 					resource.TestCheckResourceAttr(dataSourceVpcPeeringsNameByName, "peering_connections.0.name", "opentelekomcloud_peerings_ds_1"),
+					resource.TestCheckResourceAttrSet(dataSourceVpcPeeringsNameByName, "peering_connections.0.vpc_tenant_id"),
+					resource.TestCheckResourceAttrSet(dataSourceVpcPeeringsNameByName, "peering_connections.0.created_at"),
+					resource.TestCheckResourceAttrSet(dataSourceVpcPeeringsNameByName, "peering_connections.0.updated_at"),
 
 					dcByStatus.CheckResourceExists(),
 					resource.TestCheckResourceAttrSet(dataSourceVpcPeeringsNameByStatus, "peering_connections.0.status"),

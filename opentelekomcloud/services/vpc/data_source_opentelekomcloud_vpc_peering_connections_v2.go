@@ -2,16 +2,18 @@ package vpc
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/peerings"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v2/peerings"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 )
 
 func DataSourceVpcPeeringConnectionsV2() *schema.Resource {
@@ -33,12 +35,18 @@ func DataSourceVpcPeeringConnectionsV2() *schema.Resource {
 				Optional: true,
 			},
 			"vpc_id": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.IsUUID,
+			},
+			"vpc_tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"peer_vpc_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"peer_tenant_id": {
 				Type:     schema.TypeString,
@@ -81,6 +89,14 @@ func DataSourceVpcPeeringConnectionsV2() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"created_at": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"updated_at": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -90,17 +106,16 @@ func DataSourceVpcPeeringConnectionsV2() *schema.Resource {
 
 func dataSourceVpcPeeringConnectionsV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.VpcV2Client(config.GetRegion(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	listOpts := peerings.ListOpts{
-		Name:       d.Get("name").(string),
-		Status:     d.Get("status").(string),
-		VpcId:      d.Get("vpc_id").(string),
-		Peer_VpcId: d.Get("peer_vpc_id").(string),
-		TenantId:   d.Get("peer_tenant_id").(string),
+		Name:     d.Get("name").(string),
+		Status:   d.Get("status").(string),
+		VpcID:    d.Get("vpc_id").(string),
+		TenantID: d.Get("peer_tenant_id").(string),
 	}
 
 	peeringList, err := peerings.List(client, listOpts)
@@ -108,11 +123,24 @@ func dataSourceVpcPeeringConnectionsV2Read(_ context.Context, d *schema.Resource
 		return fmterr.Errorf("unable to retrieve VPC peering connections: %s", err)
 	}
 
-	uID, err := uuid.GenerateUUID()
-	if err != nil {
-		return diag.Errorf("unable to generate ID: %s", err)
+	peeringList = filterVpcPeerings(
+		peeringList,
+		d.Get("vpc_id").(string),
+		d.Get("vpc_tenant_id").(string),
+		d.Get("peer_vpc_id").(string),
+		d.Get("peer_tenant_id").(string),
+	)
+
+	stateParts := []string{
+		config.GetRegion(d),
+		d.Get("name").(string),
+		d.Get("status").(string),
+		d.Get("vpc_id").(string),
+		d.Get("vpc_tenant_id").(string),
+		d.Get("peer_vpc_id").(string),
+		d.Get("peer_tenant_id").(string),
 	}
-	d.SetId(uID)
+	d.SetId(fmt.Sprintf("vpc-peerings-%s", hashcode.Strings(stateParts)))
 
 	mErr := multierror.Append(nil,
 		d.Set("region", config.GetRegion(d)),
@@ -120,25 +148,4 @@ func dataSourceVpcPeeringConnectionsV2Read(_ context.Context, d *schema.Resource
 	)
 
 	return diag.FromErr(mErr.ErrorOrNil())
-}
-
-func flattenPeeringConnections(peeringList []peerings.Peering) []interface{} {
-	if peeringList == nil {
-		return nil
-	}
-
-	result := make([]interface{}, len(peeringList))
-	for i, p := range peeringList {
-		result[i] = map[string]interface{}{
-			"id":             p.ID,
-			"name":           p.Name,
-			"description":    p.Description,
-			"status":         p.Status,
-			"vpc_id":         p.RequestVpcInfo.VpcId,
-			"vpc_tenant_id":  p.RequestVpcInfo.TenantId,
-			"peer_vpc_id":    p.AcceptVpcInfo.VpcId,
-			"peer_tenant_id": p.AcceptVpcInfo.TenantId,
-		}
-	}
-	return result
 }

@@ -48,6 +48,12 @@ In addition to all arguments above, the following attributes are exported:
 
 * `status` - The VPC peering connection status. The value can be `PENDING_ACCEPTANCE`, `REJECTED`, `EXPIRED`, `DELETED`, or `ACTIVE`.
 
+* `vpc_tenant_id` - The project ID of the requester VPC.
+
+* `created_at` - The UTC time when the VPC peering connection was created.
+
+* `updated_at` - The UTC time when the VPC peering connection was last updated.
+
 -> **Note:** If you create a VPC peering connection with another VPC of your own, the connection is created without the need for you to accept the connection.
 
 ## Import

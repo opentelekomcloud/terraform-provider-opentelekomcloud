@@ -2,15 +2,17 @@ package vpc
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/peerings"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v2/peerings"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -46,27 +48,42 @@ func ResourceVpcPeeringConnectionV2() *schema.Resource {
 				ValidateFunc: common.ValidateName,
 			},
 			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(0, 255),
 			},
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"vpc_id": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IsUUID,
+			},
+			"vpc_tenant_id": {
 				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"peer_vpc_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"peer_tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -76,32 +93,29 @@ func ResourceVpcPeeringConnectionV2() *schema.Resource {
 func resourceVPCPeeringV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV2Client(config.GetRegion(d))
+		return config.VpcV2Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV2Client, err)
-	}
-
-	requestvpcinfo := peerings.VpcInfo{
-		VpcId: d.Get("vpc_id").(string),
-	}
-
-	acceptvpcinfo := peerings.VpcInfo{
-		VpcId:    d.Get("peer_vpc_id").(string),
-		TenantId: d.Get("peer_tenant_id").(string),
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v2 client: %w", err)
 	}
 
 	createOpts := peerings.CreateOpts{
-		Name:           d.Get("name").(string),
-		Description:    d.Get("description").(string),
-		RequestVpcInfo: requestvpcinfo,
-		AcceptVpcInfo:  acceptvpcinfo,
+		Name:        d.Get("name").(string),
+		Description: d.Get("description").(string),
+		RequestVpcInfo: peerings.VpcInfo{
+			VpcID: d.Get("vpc_id").(string),
+		},
+		AcceptVpcInfo: peerings.VpcInfo{
+			VpcID:    d.Get("peer_vpc_id").(string),
+			TenantID: d.Get("peer_tenant_id").(string),
+		},
 	}
 
-	n, err := peerings.Create(client, createOpts).Extract()
+	n, err := peerings.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
+	d.SetId(n.ID)
 
 	log.Printf("[INFO] Vpc Peering Connection ID: %s", n.ID)
 
@@ -119,10 +133,8 @@ func resourceVPCPeeringV2Create(ctx context.Context, d *schema.ResourceData, met
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("error waiting for VIP to become active: %w", err)
+		return fmterr.Errorf("error waiting for VPC peering connection to become available: %w", err)
 	}
-
-	d.SetId(n.ID)
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
 	return resourceVPCPeeringV2Read(clientCtx, d, meta)
@@ -131,27 +143,18 @@ func resourceVPCPeeringV2Create(ctx context.Context, d *schema.ResourceData, met
 func resourceVPCPeeringV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV2Client(config.GetRegion(d))
+		return config.VpcV2Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV2Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v2 client: %w", err)
 	}
 
-	n, err := peerings.Get(client, d.Id()).Extract()
+	n, err := peerings.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "peering")
 	}
 
-	mErr := multierror.Append(
-		d.Set("name", n.Name),
-		d.Set("description", n.Description),
-		d.Set("status", n.Status),
-		d.Set("vpc_id", n.RequestVpcInfo.VpcId),
-		d.Set("peer_vpc_id", n.AcceptVpcInfo.VpcId),
-		d.Set("peer_tenant_id", n.AcceptVpcInfo.TenantId),
-		d.Set("region", config.GetRegion(d)),
-	)
-	if err := mErr.ErrorOrNil(); err != nil {
+	if err := setVpcPeeringV2Fields(d, n, config.GetRegion(d)); err != nil {
 		return fmterr.Errorf("error setting VPC peering attributes: %w", err)
 	}
 
@@ -161,18 +164,21 @@ func resourceVPCPeeringV2Read(ctx context.Context, d *schema.ResourceData, meta 
 func resourceVPCPeeringV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV2Client(config.GetRegion(d))
+		return config.VpcV2Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV2Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v2 client: %w", err)
 	}
 
-	updateOpts := peerings.UpdateOpts{
-		Name:        d.Get("name").(string),
-		Description: d.Get("description").(string),
+	updateOpts := peerings.UpdateOpts{}
+	if d.HasChange("name") {
+		updateOpts.Name = pointerto.String(d.Get("name").(string))
+	}
+	if d.HasChange("description") {
+		updateOpts.Description = pointerto.String(d.Get("description").(string))
 	}
 
-	_, err = peerings.Update(client, d.Id(), updateOpts).Extract()
+	_, err = peerings.Update(client, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
@@ -184,10 +190,10 @@ func resourceVPCPeeringV2Update(ctx context.Context, d *schema.ResourceData, met
 func resourceVPCPeeringV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV2Client(config.GetRegion(d))
+		return config.VpcV2Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return fmterr.Errorf(errCreationV2Client, err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC v2 client: %w", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -211,13 +217,18 @@ func resourceVPCPeeringV2Delete(ctx context.Context, d *schema.ResourceData, met
 
 func waitForVpcPeeringActive(client *golangsdk.ServiceClient, peeringId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := peerings.Get(client, peeringId).Extract()
+		n, err := peerings.Get(client, peeringId)
 		if err != nil {
 			return nil, "", err
 		}
 
 		if n.Status == "PENDING_ACCEPTANCE" || n.Status == "ACTIVE" {
 			return n, n.Status, nil
+		}
+		if n.Status == "REJECTED" || n.Status == "EXPIRED" || n.Status == "DELETED" {
+			return n, n.Status, fmt.Errorf(
+				"VPC peering connection entered terminal status %s while being created", n.Status,
+			)
 		}
 
 		return n, "CREATING", nil
@@ -226,7 +237,7 @@ func waitForVpcPeeringActive(client *golangsdk.ServiceClient, peeringId string) 
 
 func waitForVpcPeeringDelete(client *golangsdk.ServiceClient, peeringId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		r, err := peerings.Get(client, peeringId).Extract()
+		r, err := peerings.Get(client, peeringId)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[INFO] Successfully deleted OpenTelekomCloud vpc peering connection %s", peeringId)
@@ -235,7 +246,7 @@ func waitForVpcPeeringDelete(client *golangsdk.ServiceClient, peeringId string) 
 			return r, "ACTIVE", err
 		}
 
-		err = peerings.Delete(client, peeringId).ExtractErr()
+		err = peerings.Delete(client, peeringId)
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[INFO] Successfully deleted OpenTelekomCloud vpc peering connection %s", peeringId)

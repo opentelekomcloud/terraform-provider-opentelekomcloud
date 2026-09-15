@@ -89,12 +89,20 @@ All of the argument attributes except accept are also exported as result attribu
 
 * `name` - 	The VPC peering connection name.
 
+* `description` - The VPC peering connection description.
+
 * `id` - The VPC peering connection ID.
 
 * `status` - The VPC peering connection status.
 
 * `vpc_id` - The ID of requester VPC involved in a VPC peering connection.
 
+* `vpc_tenant_id` - The project ID of the requester VPC.
+
 * `peer_vpc_id` - The VPC ID of the accepter tenant.
 
 * `peer_tenant_id` - The Tenant Id of the accepter tenant.
+
+* `created_at` - The UTC time when the VPC peering connection was created.
+
+* `updated_at` - The UTC time when the VPC peering connection was last updated.
