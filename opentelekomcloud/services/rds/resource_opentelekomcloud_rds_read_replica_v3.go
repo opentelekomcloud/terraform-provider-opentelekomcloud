@@ -186,13 +186,32 @@ func resourceRdsReadReplicaV3Create(ctx context.Context, d *schema.ResourceData,
 		Region:           d.Get("region").(string),
 		AvailabilityZone: d.Get("availability_zone").(string),
 	}
-	job, err := instances.CreateReplica(client, *opts)
+	timeoutSeconds := d.Timeout(schema.TimeoutCreate).Seconds()
+	replicaOfID := d.Get("replica_of_id").(string)
+
+	// The primary can still be busy right after its own creation (e.g. the initial
+	// backup), in which case the API answers 409, so wait for it and retry.
+	var job *instances.CreateRds
+	err = resource.RetryContext(ctx, d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+		if err := instances.WaitForStateAvailable(client, int(timeoutSeconds), replicaOfID); err != nil {
+			return resource.NonRetryableError(fmt.Errorf("error waiting for primary instance %s: %w", replicaOfID, err))
+		}
+		created, err := instances.CreateReplica(client, *opts)
+		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault409); ok {
+				log.Printf("[DEBUG] primary instance %s is busy, retrying read replica creation: %s", replicaOfID, err)
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		job = created
+		return nil
+	})
 	if err != nil {
 		return fmterr.Errorf("error creating read replica: %w", err)
 	}
 	d.SetId(job.Instance.Id)
 
-	timeoutSeconds := d.Timeout(schema.TimeoutCreate).Seconds()
 	err = instances.WaitForJobCompleted(client, int(timeoutSeconds), job.JobId)
 	if err != nil {
 		return fmterr.Errorf("error waiting for read replica to complete creation: %w", err)

@@ -93,6 +93,85 @@ func TestAccRdsReadReplicaV3SSL(t *testing.T) {
 	})
 }
 
+func TestAccRdsReadReplicaV3Gpssd2(t *testing.T) {
+	postfix := tools.RandomString("rr", 3)
+	var rdsInstance instances.InstanceResponse
+
+	resName := "opentelekomcloud_rds_read_replica_v3.replica"
+
+	secondAZ := "eu-de-03"
+
+	if env.OS_AVAILABILITY_ZONE == secondAZ {
+		t.Skip("OS_AVAILABILITY_ZONE should be set to value !=", secondAZ)
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsReadReplicaV3Gpssd2(postfix, 3000, 125),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(resName, &rdsInstance),
+					resource.TestCheckResourceAttr(resName, "availability_zone", secondAZ),
+					resource.TestCheckResourceAttr(resName, "volume.0.type", "GPSSD2"),
+					resource.TestCheckResourceAttr(resName, "volume.0.size", "40"),
+					resource.TestCheckResourceAttr(resName, "volume.0.iops", "3000"),
+					resource.TestCheckResourceAttr(resName, "volume.0.throughput", "125"),
+				),
+			},
+		},
+	})
+}
+
+func testAccRdsReadReplicaV3Gpssd2(postfix string, iops, throughput int) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "17"
+    port     = "8635"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  volume {
+    type       = "GPSSD2"
+    size       = 40
+    iops       = %[5]d
+    throughput = %[6]d
+  }
+  flavor = "rds.pg.n1.large.4"
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = 1
+  }
+}
+
+resource "opentelekomcloud_rds_read_replica_v3" "replica" {
+  name          = "test-replica-%[3]s"
+  replica_of_id = opentelekomcloud_rds_instance_v3.instance.id
+  flavor_ref    = "${opentelekomcloud_rds_instance_v3.instance.flavor}.rr"
+
+  availability_zone = "eu-de-03"
+
+  volume {
+    type       = "GPSSD2"
+    iops       = %[5]d
+    throughput = %[6]d
+  }
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE, iops, throughput)
+}
+
 func testAccRdsReadReplicaV3Basic(postfix string) string {
 	return fmt.Sprintf(`
 %s
