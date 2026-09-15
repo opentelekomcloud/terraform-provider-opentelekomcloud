@@ -90,6 +90,15 @@ The `volume` block supports:
   following and is case-sensitive.
   * `CLOUDSSD`: indicates cloud SSD storage.
   * `ESSD`: indicates the extreme SSD type.
+  * `GPSSD2`: indicates the flexible SSD type (general-purpose SSD V2).
+
+* `iops` - (Optional, Int) Specifies the IOPS of the volume. This parameter is available only when `type` is set to
+  `GPSSD2`, where it is mandatory. The value ranges from 3,000 to 128,000 and must be no greater than 500 times the
+  volume size. Changing this parameter will create a new resource.
+
+* `throughput` - (Optional, Int) Specifies the throughput of the volume, in MiB/s. This parameter is available only
+  when `type` is set to `GPSSD2`, where it is mandatory. The value ranges from 125 to 1,000 and must be no greater
+  than `iops` divided by 4. Changing this parameter will create a new resource.
 
 ## Attributes Reference
 

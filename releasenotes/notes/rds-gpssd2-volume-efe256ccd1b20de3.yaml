@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **[RDS]** Added support for the ``GPSSD2`` volume type with ``iops`` and ``throughput``
+    to ``resource/opentelekomcloud_rds_instance_v3``, ``resource/opentelekomcloud_rds_read_replica_v3``
+    and ``data-source/opentelekomcloud_rds_instance_v3`` (`#3561 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3561>`_)

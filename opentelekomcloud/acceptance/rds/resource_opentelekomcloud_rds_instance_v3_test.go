@@ -194,6 +194,28 @@ func TestAccRdsInstanceV3HA(t *testing.T) {
 	})
 }
 
+func TestAccRdsInstanceV3Gpssd2(t *testing.T) {
+	postfix := acctest.RandString(3)
+	var rdsInstance instances.InstanceResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsInstanceV3Gpssd2(postfix, 3000, 125),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.type", "GPSSD2"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.iops", "3000"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.throughput", "125"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccRdsInstanceV3OptionalParams(t *testing.T) {
 	postfix := acctest.RandString(3)
 	var rdsInstance instances.InstanceResponse
@@ -557,6 +579,38 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   lower_case_table_names = "0"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccRdsInstanceV3Gpssd2(postfix string, iops, throughput int) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "17"
+    port     = "8635"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  volume {
+    type       = "GPSSD2"
+    size       = 40
+    iops       = %d
+    throughput = %d
+  }
+  flavor = "rds.pg.n1.large.4"
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = 1
+  }
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE, iops, throughput)
 }
 
 func testAccRdsInstanceV3Update(postfix string) string {
