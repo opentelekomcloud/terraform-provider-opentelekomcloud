@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/routetables"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/routetables"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -97,7 +97,7 @@ func TestAccVpcRouteTableRouteV1_duplicateDestination(t *testing.T) {
 
 func testAccCheckRouteTableRouteV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+	client, err := config.VpcV1Client(env.OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %s", err)
 	}

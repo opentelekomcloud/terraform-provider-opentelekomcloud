@@ -4,10 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/routetables"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/routetables"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
@@ -31,6 +30,10 @@ func DataSourceVPCRouteTableV1() *schema.Resource {
 				Computed: true,
 			},
 			"description": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -71,13 +74,21 @@ func DataSourceVPCRouteTableV1() *schema.Resource {
 					},
 				},
 			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
 
 func dataSourceVpcRouteTableV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := config.VpcV1Client(config.GetRegion(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -96,23 +107,13 @@ func dataSourceVpcRouteTableV1Read(_ context.Context, d *schema.ResourceData, me
 			"Please change your search criteria and try again.")
 	}
 
-	var routeTable *routetables.RouteTable
-	if v, ok := d.GetOk("name"); ok {
-		filterName := v.(string)
-		for _, rtb := range allRouteTables {
-			if filterName == rtb.Name {
-				routeTable = &rtb
-				break
-			}
-		}
-	} else {
-		// find the default route table if name was not specified
-		for _, rtb := range allRouteTables {
-			if rtb.Default {
-				routeTable = &rtb
-				break
-			}
-		}
+	routeTable, err := selectVpcRouteTableV1(
+		allRouteTables,
+		d.Get("id").(string),
+		d.Get("name").(string),
+	)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	if routeTable == nil {
@@ -123,17 +124,10 @@ func dataSourceVpcRouteTableV1Read(_ context.Context, d *schema.ResourceData, me
 	log.Printf("[DEBUG] Retrieved VPC route table %s: %+v", routeTable.ID, routeTable)
 	d.SetId(routeTable.ID)
 
-	mErr := multierror.Append(nil,
-		d.Set("region", config.GetRegion(d)),
-		d.Set("vpc_id", routeTable.VpcID),
-		d.Set("name", routeTable.Name),
-		d.Set("description", routeTable.Description),
-		d.Set("default", routeTable.Default),
-		d.Set("subnets", expandRouteTableSubnets(routeTable.Subnets)),
-		d.Set("route", expandRouteTableRoutes(routeTable.Routes)),
-	)
-
-	if err := mErr.ErrorOrNil(); err != nil {
+	if err := d.Set("id", routeTable.ID); err != nil {
+		return diag.Errorf("error saving OpenTelekomCloud VPC route table ID: %s", err)
+	}
+	if err := setVpcRouteTableV1Fields(d, routeTable, config.GetRegion(d)); err != nil {
 		return diag.Errorf("error saving OpenTelekomCloud VPC route table: %s", err)
 	}
 

@@ -2,14 +2,13 @@ package vpc
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/routetables"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/routetables"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
@@ -61,6 +60,14 @@ func DataSourceVpcRouteTablesV1() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"created_at": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"updated_at": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"subnets": {
 							Type:     schema.TypeSet,
 							Computed: true,
@@ -101,7 +108,7 @@ func DataSourceVpcRouteTablesV1() *schema.Resource {
 
 func dataSourceRouteTablesV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := config.VpcV1Client(config.GetRegion(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -117,32 +124,7 @@ func dataSourceRouteTablesV1Read(_ context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf("unable to retrieve route tables: %w", err)
 	}
 
-	var routeTables []map[string]interface{}
-	for _, rtb := range routeTablesList {
-		var nonLocalRoutes []routetables.Route
-		for _, route := range rtb.Routes {
-			if route.Type != "local" {
-				nonLocalRoutes = append(nonLocalRoutes, route)
-			}
-		}
-
-		rtb.Routes = nonLocalRoutes
-
-		b, _ := json.Marshal(&rtb)
-		m := make(map[string]interface{})
-		_ = json.Unmarshal(b, &m)
-
-		delete(m, "created_at")
-		delete(m, "updated_at")
-
-		var subnetIds []string
-		for _, subnet := range rtb.Subnets {
-			subnetIds = append(subnetIds, subnet.ID)
-		}
-		m["subnets"] = subnetIds
-
-		routeTables = append(routeTables, m)
-	}
+	routeTables := flattenVpcRouteTablesV1(routeTablesList)
 
 	v, e := d.GetOk("id")
 	if e {

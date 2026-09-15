@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/routetables"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/routetables"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -29,6 +29,10 @@ func TestAccVpcRouteTableV1_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRouteTableV1Exists(resourceVPCRouteTableName, &rtb),
 					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "description", "created by terraform"),
+					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "default", "false"),
+					resource.TestCheckResourceAttrSet(resourceVPCRouteTableName, "tenant_id"),
+					resource.TestCheckResourceAttrSet(resourceVPCRouteTableName, "created_at"),
+					resource.TestCheckResourceAttrSet(resourceVPCRouteTableName, "updated_at"),
 					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "route.#", "0"),
 					resource.TestCheckResourceAttr(resourceVPCRouteTableName, "subnets.#", "0"),
 				),
@@ -109,7 +113,7 @@ func TestAccVpcRouteTableV1_er(t *testing.T) {
 
 func testAccCheckRouteTableV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+	client, err := config.VpcV1Client(env.OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
@@ -140,7 +144,7 @@ func testAccCheckRouteTableV1Exists(n string, route *routetables.RouteTable) res
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+		client, err := config.VpcV1Client(env.OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %s", err)
 		}

@@ -236,7 +236,13 @@ The `route` block supports:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The resource ID in UUID format.
+
+* `default` - Indicates whether the route table is the default route table.
+
+* `tenant_id` - The project ID to which the route table belongs.
+
 * `created_at` - Specifies the time (UTC) when the route table is created.
+
 * `updated_at` - Specifies the time (UTC) when the route table is updated.
 
 ## Timeouts

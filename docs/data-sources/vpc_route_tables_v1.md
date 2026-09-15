@@ -31,12 +31,12 @@ data "opentelekomcloud_vpc_route_tables_v1" "vpc_route_tables" {
 }
 
 # get a list that includes single specific route table
-data "opentelekomcloud_vpc_route_table_v1" "single_route_table" {
+data "opentelekomcloud_vpc_route_tables_v1" "single_route_table" {
   id = var.route_table_id
 }
 
 # get a list of route table associated with a specific subnet
-data "opentelekomcloud_vpc_route_table_v1" "subnet_route_table" {
+data "opentelekomcloud_vpc_route_tables_v1" "subnet_route_table" {
   subnet_id = var.subnet_network_id
 }
 ```
@@ -64,6 +64,10 @@ The `routetable` object has the following attributes:
 
 * `description` - Route table description.
 
+* `created_at` - The time (UTC) when the route table was created.
+
+* `updated_at` - The time (UTC) when the route table was last updated.
+
 * `subnets` - An array of subnets associating with the route table.
 
 * `tenant_id` - Project id to which route table belongs.
@@ -77,7 +81,7 @@ The `routetable` object has the following attributes:
 <a name="route_object"></a>
 The `route` object has the following attributes:
 
-- `type` - The route type. Check [API reference](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/route_table/creating_a_route_table.html) for supperted types.
+- `type` - The route type. Check [API reference](https://docs.otc.t-systems.com/virtual-private-cloud/api-ref/apis/route_table/creating_a_route_table.html) for supported types.
 
 - `destination` - The destination address in the CIDR notation format
 
