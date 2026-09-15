@@ -194,6 +194,20 @@ func ResourceRdsInstanceV3() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 						},
+						"iops": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Computed:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.IntBetween(3000, 128000),
+						},
+						"throughput": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Computed:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.IntBetween(125, 1000),
+						},
 						"limit_size": {
 							Type:         schema.TypeInt,
 							Optional:     true,
@@ -371,8 +385,10 @@ func resourceRDSDataStore(d *schema.ResourceData) *instances.Datastore {
 func resourceRDSVolume(d *schema.ResourceData) *instances.Volume {
 	volumeRaw := d.Get("volume").([]interface{})[0].(map[string]interface{})
 	volume := instances.Volume{
-		Type: volumeRaw["type"].(string),
-		Size: volumeRaw["size"].(int),
+		Type:       volumeRaw["type"].(string),
+		Size:       volumeRaw["size"].(int),
+		Iops:       volumeRaw["iops"].(int),
+		Throughput: volumeRaw["throughput"].(int),
 	}
 	return &volume
 }
@@ -1346,6 +1362,16 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 	volume["size"] = rdsInstance.Volume.Size
 	volume["type"] = rdsInstance.Volume.Type
 	volume["disk_encryption_id"] = rdsInstance.DiskEncryptionId
+	// `iops`/`throughput` only exist for GPSSD2 volumes and aren't returned for the other
+	// storage types, so keep whatever is in the state instead of resetting it to zero.
+	volume["iops"] = rdsInstance.Volume.Iops
+	if rdsInstance.Volume.Iops == 0 {
+		volume["iops"] = d.Get("volume.0.iops").(int)
+	}
+	volume["throughput"] = rdsInstance.Volume.Throughput
+	if rdsInstance.Volume.Throughput == 0 {
+		volume["throughput"] = d.Get("volume.0.throughput").(int)
+	}
 
 	if region != "eu-ch2" {
 		resp, err := instances.GetAutoScaling(client, d.Id())

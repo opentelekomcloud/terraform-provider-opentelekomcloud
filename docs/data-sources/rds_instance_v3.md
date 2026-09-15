@@ -85,6 +85,10 @@ The following attributes are exported:
 
 * `volume_type` - Indicates the volume type.
 
+* `volume_iops` - Indicates the IOPS of the volume. Only returned for `GPSSD2` volumes.
+
+* `volume_throughput` - Indicates the throughput of the volume, in MiB/s. Only returned for `GPSSD2` volumes.
+
 * `backup_strategy/start_time` - Indicates the backup time.
 
 * `backup_strategy/keep_days` - Indicates the backup retention period.

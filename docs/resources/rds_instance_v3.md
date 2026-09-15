@@ -429,14 +429,30 @@ The `volume` block supports:
 * `size` - (Required) Specifies the volume size. Its value range is from 40 GB to 4000
   GB. The value must be a multiple of 10. Changing this resize the volume.
 
-* `type` - (Required, ForceNew) Specifies the volume type. Changing this resize the volume. Its value can be any of the following
-  and is case-sensitive:
+* `type` - (Required, ForceNew) Specifies the volume type. Changing this parameter will create a new resource.
+  Its value can be any of the following and is case-sensitive:
   * `CLOUDSSD`: indicates cloud SSD storage.
   * `ESSD`: indicates the extreme SSD type.
+  * `GPSSD2`: indicates the flexible SSD type (general-purpose SSD V2).
 
 -> Note
-  The MySQL, PostgreSQL and SQLServer DB engines support the following volume types: CLOUDSSD and ESSD.
+  The MySQL, PostgreSQL and SQLServer DB engines support the following volume types: CLOUDSSD, ESSD and GPSSD2.
   However, ESSD is not supported for MySQL DB Single instances and PostgreSQL DB Single instances.
+  GPSSD2 is supported only with general-purpose and dedicated DB instances.
+
+* `iops` - (Optional, Int, ForceNew) Specifies the IOPS of the volume. This parameter is available only
+  when `type` is set to `GPSSD2`, where it is mandatory. The value ranges from 3,000 to 128,000 and
+  must be no greater than 500 times the volume `size`.
+  Changing this parameter will create a new resource.
+
+* `throughput` - (Optional, Int, ForceNew) Specifies the throughput of the volume, in MiB/s. This
+  parameter is available only when `type` is set to `GPSSD2`, where it is mandatory. The value ranges
+  from 125 to 1,000 and must be no greater than `iops` divided by 4.
+  Changing this parameter will create a new resource.
+
+-> Note
+  `iops` and `throughput` are not returned by the RDS query API, so they are only tracked from the
+  configuration. Changing them in place is not supported by the provider.
 
 ~> **Warning** Specifying both `limit_size` and `trigger_threshold` will enable autoscaling for RDS instance.
   Once autoscaling is activated, the `size` parameter for the volume will be ignored to prevent discrepancies

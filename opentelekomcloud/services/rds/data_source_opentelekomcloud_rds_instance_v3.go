@@ -109,6 +109,14 @@ func DataSourceRdsInstanceV3() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"volume_iops": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"volume_throughput": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 			"backup_strategy": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -250,6 +258,8 @@ func dataSourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta
 		d.Set("updated", rdsInstance.Updated),
 		d.Set("volume_type", rdsInstance.Volume.Type),
 		d.Set("volume_size", rdsInstance.Volume.Size),
+		d.Set("volume_iops", rdsInstance.Volume.Iops),
+		d.Set("volume_throughput", rdsInstance.Volume.Throughput),
 		d.Set("timezone", rdsInstance.TimeZone),
 		d.Set("private_ips", rdsInstance.PrivateIps),
 		d.Set("public_ips", rdsInstance.PublicIps),
