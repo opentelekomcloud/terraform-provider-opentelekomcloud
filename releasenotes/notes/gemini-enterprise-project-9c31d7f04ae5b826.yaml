@@ -1,6 +1,0 @@
----
-features:
-  - |
-    **Updated Resource:** ``resource/opentelekomcloud_gemini_instance_v3``: Add ``enterprise_project_id`` support (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
-  - |
-    **Updated Data Source:** ``data_source/opentelekomcloud_gemini_instances_v3``: Add ``datastore_type`` and ``mode`` filters (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
