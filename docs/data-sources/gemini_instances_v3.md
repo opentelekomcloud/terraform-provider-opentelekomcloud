@@ -9,12 +9,21 @@ description: |-
 
 # opentelekomcloud_gemini_instances_v3
 
-Use this data source to get available OpenTelekomCloud GeminiDB Cassandra instances.
+Use this data source to get available OpenTelekomCloud GeminiDB Cassandra and GeminiDB Influx instances.
 
 ## Example Usage
+
+### Get an instance by name
 ```hcl
 data "opentelekomcloud_gemini_instances_v3" "this" {
   name = "gemini-instance"
+}
+```
+
+### Get all GeminiDB Influx instances
+```hcl
+data "opentelekomcloud_gemini_instances_v3" "influx" {
+  datastore_type = "influxdb"
 }
 ```
 
@@ -25,6 +34,12 @@ data "opentelekomcloud_gemini_instances_v3" "this" {
 * `vpc_id` - (Optional, String) Specifies the VPC ID.
 
 * `subnet_id` - (Optional, String) Specifies the network ID of a subnet.
+
+* `datastore_type` - (Optional, String) Specifies the compatible API of the instances to query. The value can be
+  `cassandra` (GeminiDB Cassandra) or `influxdb` (GeminiDB Influx). All instances are queried when not set.
+
+* `mode` - (Optional, String) Specifies the DB instance type. The value can be `Cluster` (GeminiDB Cassandra) or
+  `CloudNativeCluster` (GeminiDB Influx). This filter is ignored by the API unless `datastore_type` is set.
 
 ## Attribute Reference
 

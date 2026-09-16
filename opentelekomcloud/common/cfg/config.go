@@ -803,6 +803,14 @@ func (c *Config) GeminiDBV3Client(region string) (*golangsdk.ServiceClient, erro
 	})
 }
 
+// GeminiDBV31Client - provides the v3.1 GeminiDB client used by the specification APIs
+func (c *Config) GeminiDBV31Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewGeminiDBV3Spec(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) IdentityV3Client(_ ...string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewIdentityV3(c.DomainClient, golangsdk.EndpointOpts{
 		Availability: c.getEndpointType(),

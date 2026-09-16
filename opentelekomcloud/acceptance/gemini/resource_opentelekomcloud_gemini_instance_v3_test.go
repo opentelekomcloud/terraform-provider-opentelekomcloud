@@ -80,6 +80,60 @@ func TestAccGeminiDBInstance_withTemplate(t *testing.T) {
 	})
 }
 
+func TestAccGeminiDBInstance_influx(t *testing.T) {
+	var inst instance.ListResult
+
+	rName := fmt.Sprintf("tf-acc-test-%s", acctest.RandString(5))
+	resourceName := "opentelekomcloud_gemini_instance_v3.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckGeminiDBInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGeminiDBInstanceConfigInflux(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGeminiDBInstanceExists(resourceName, &inst),
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "status", "normal"),
+					resource.TestCheckResourceAttr(resourceName, "datastore.0.engine", "influxdb"),
+					resource.TestCheckResourceAttr(resourceName, "datastore.0.version", "1.7"),
+					resource.TestCheckResourceAttr(resourceName, "flavor", "geminidb.influxdb-geminifs.xlarge.4"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccGeminiDBInstance_enterpriseProject(t *testing.T) {
+	if env.OS_ENTERPRISE_PROJECT_ID == "" {
+		t.Skip("OS_ENTERPRISE_PROJECT_ID must be set to test GeminiDB enterprise project support")
+	}
+
+	var inst instance.ListResult
+
+	rName := fmt.Sprintf("tf-acc-test-%s", acctest.RandString(5))
+	resourceName := "opentelekomcloud_gemini_instance_v3.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckGeminiDBInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGeminiDBInstanceConfigEnterpriseProject(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGeminiDBInstanceExists(resourceName, &inst),
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(
+						resourceName, "enterprise_project_id", env.OS_ENTERPRISE_PROJECT_ID),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckGeminiDBInstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.GeminiDBV3Client(env.OS_REGION_NAME)
@@ -246,4 +300,51 @@ resource "opentelekomcloud_gemini_instance_v3" "test" {
   }
 }
 `, common.DataSourceSubnet, common.DataSourceSecGroupDefault, rName, rName)
+}
+
+func testAccGeminiDBInstanceConfigInflux(rName string) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource "opentelekomcloud_gemini_instance_v3" "test" {
+  name        = "%s"
+  password    = "Test@12345678"
+  flavor      = "geminidb.influxdb-geminifs.xlarge.4"
+  volume_size = 100
+  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  node_num    = 3
+
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  availability_zone = "eu-de-01,eu-de-02,eu-de-03"
+
+  datastore {
+    engine         = "influxdb"
+    version        = "1.7"
+    storage_engine = "rocksDB"
+  }
+}
+`, common.DataSourceSubnet, common.DataSourceSecGroupDefault, rName)
+}
+
+func testAccGeminiDBInstanceConfigEnterpriseProject(rName string) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource "opentelekomcloud_gemini_instance_v3" "test" {
+  name        = "%s"
+  password    = "Test@12345678"
+  flavor      = "geminidb.cassandra.xlarge.8"
+  volume_size = 100
+  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  node_num    = 3
+
+  security_group_id     = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  availability_zone     = "eu-de-01,eu-de-02,eu-de-03"
+  enterprise_project_id = "%s"
+}
+`, common.DataSourceSubnet, common.DataSourceSecGroupDefault, rName, env.OS_ENTERPRISE_PROJECT_ID)
 }

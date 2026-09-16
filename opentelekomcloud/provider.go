@@ -358,6 +358,8 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_er_route_tables_v3":                  er.DataSourceRouteTablesV2(),
 			"opentelekomcloud_evs_volumes_v2":                      evs.DataSourceEvsVolumesV2(),
 			"opentelekomcloud_fgs_functions_v2":                    fgs.DataSourceFunctionsV2(),
+			"opentelekomcloud_gemini_datastores_v3":                gemini.DataSourceGeminiDatastoresV3(),
+			"opentelekomcloud_gemini_flavors_v3":                   gemini.DataSourceGeminiFlavorsV3(),
 			"opentelekomcloud_gemini_instances_v3":                 gemini.DataSourceGeminiDBInstancesV3(),
 			"opentelekomcloud_gemini_instance_template_v3":         gemini.DataSourceGeminiDBV3InstanceTemplate(),
 			"opentelekomcloud_gemini_quotas_v3":                    gemini.DataSourceGeminiQuotasV3(),

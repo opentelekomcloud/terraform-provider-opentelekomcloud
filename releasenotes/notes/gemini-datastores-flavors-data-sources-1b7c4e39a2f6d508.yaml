@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **New Data Source:** ``data_source/opentelekomcloud_gemini_datastores_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  - |
+    **New Data Source:** ``data_source/opentelekomcloud_gemini_flavors_v3`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)

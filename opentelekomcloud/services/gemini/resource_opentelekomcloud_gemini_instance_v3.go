@@ -90,6 +90,12 @@ func ResourceGeminiDBInstanceV3() *schema.Resource {
 				Computed: true,
 				Optional: true,
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"datastore": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -207,14 +213,33 @@ func ResourceGeminiDBInstanceV3() *schema.Resource {
 	}
 }
 
-func resourceGaussDBCassandraInstanceCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+// geminiDBDefaults returns the datastore defaults of an instance. GeminiDB Cassandra is assumed
+// unless the `datastore` block says otherwise, so that GeminiDB Influx instances are handled
+// with their own engine name, version and instance type.
+func geminiDBDefaults(d *schema.ResourceData) defaultValues {
 	defaults := defaultValues{
 		Mode:      "Cluster",
 		dbType:    "cassandra",
 		dbVersion: "3.11",
 		logName:   "cassandra",
 	}
-	return resourceGeminiDBInstanceV3Create(ctx, d, meta, defaults)
+	if engine, ok := d.GetOk("datastore.0.engine"); ok {
+		defaults.dbType = engine.(string)
+		defaults.logName = engine.(string)
+	}
+	if version, ok := d.GetOk("datastore.0.version"); ok {
+		defaults.dbVersion = version.(string)
+	}
+	// GeminiDB Influx is only offered as a performance-enhanced cluster backed by cloud
+	// native storage, while GeminiDB Cassandra is only offered as a classic storage cluster.
+	if defaults.dbType == "influxdb" {
+		defaults.Mode = "CloudNativeCluster"
+	}
+	return defaults
+}
+
+func resourceGaussDBCassandraInstanceCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return resourceGeminiDBInstanceV3Create(ctx, d, meta, geminiDBDefaults(d))
 }
 
 func resourceGeminiDBDataStore(d *schema.ResourceData, defaults defaultValues) instance.DataStoreOpt {
@@ -295,6 +320,9 @@ func resourceGeminiDBInstanceV3Create(ctx context.Context, d *schema.ResourceDat
 		DataStore:        resourceGeminiDBDataStore(d, defaults),
 		BackupStrategy:   resourceGeminiDBBackupStrategy(d),
 	}
+	if epsID, ok := d.GetOk("enterprise_project_id"); ok {
+		createOpts.EnterpriseProjectId = pointerto.String(epsID.(string))
+	}
 	if ssl := d.Get("ssl").(bool); ssl {
 		createOpts.SslOption = pointerto.String("1")
 	}
@@ -369,6 +397,7 @@ func resourceGeminiDBInstanceV3Read(_ context.Context, d *schema.ResourceData, m
 		d.Set("vpc_id", inst.VpcId),
 		d.Set("subnet_id", inst.SubnetId),
 		d.Set("security_group_id", inst.SecurityGroupId),
+		d.Set("enterprise_project_id", inst.EnterpriseProjectId),
 		d.Set("mode", inst.Mode),
 		d.Set("db_user_name", inst.DbUserName),
 		d.Set("tags", d.Get("tags")),
@@ -484,13 +513,7 @@ func resourceGeminiDBInstanceV3Delete(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceGaussDBCassandraInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaults := defaultValues{
-		Mode:      "Cluster",
-		dbType:    "cassandra",
-		dbVersion: "3.11",
-		logName:   "cassandra",
-	}
-	return resourceGeminiDBInstanceV3Update(ctx, d, meta, defaults)
+	return resourceGeminiDBInstanceV3Update(ctx, d, meta, geminiDBDefaults(d))
 }
 
 func resourceGeminiDBInstanceV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}, defaults defaultValues) diag.Diagnostics {
