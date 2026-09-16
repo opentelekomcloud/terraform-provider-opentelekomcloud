@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/gemini/v3/instance"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -32,6 +33,20 @@ func DataSourceGeminiDBInstancesV3() *schema.Resource {
 			"subnet_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"datastore_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"cassandra", "influxdb",
+				}, false),
+			},
+			"mode": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"Cluster", "CloudNativeCluster",
+				}, false),
 			},
 			"instances": {
 				Type:     schema.TypeList,
@@ -193,9 +208,11 @@ func dataSourceGeminiDBInstancesRead(_ context.Context, d *schema.ResourceData, 
 	var mErr *multierror.Error
 
 	listOpts := instance.ListGeminiDBOpts{
-		Name:     d.Get("name").(string),
-		VpcId:    d.Get("vpc_id").(string),
-		SubnetId: d.Get("subnet_id").(string),
+		Name:          d.Get("name").(string),
+		VpcId:         d.Get("vpc_id").(string),
+		SubnetId:      d.Get("subnet_id").(string),
+		DataStoreType: d.Get("datastore_type").(string),
+		Mode:          d.Get("mode").(string),
 	}
 
 	allInstances, err := instance.ListGeminiDB(client, listOpts)
