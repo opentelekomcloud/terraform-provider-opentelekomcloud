@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/routetables"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/routetables"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -79,7 +79,7 @@ func ResourceVPCRouteTableRouteV1() *schema.Resource {
 func resourceVpcRouteTableRouteCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
@@ -104,13 +104,13 @@ func resourceVpcRouteTableRouteCreate(ctx context.Context, d *schema.ResourceDat
 	}
 
 	updateOpts := routetables.UpdateOpts{
-		Routes: map[string][]routetables.RouteOpts{
-			"add": {routeOpts},
+		Routes: &routetables.RouteAction{
+			Add: []routetables.RouteOpts{routeOpts},
 		},
 	}
 
 	log.Printf("[DEBUG] OpenTelekomCloud VPC route table route create: rtb=%s, %#v", routeTableID, updateOpts)
-	if err := routetables.Update(client, routeTableID, updateOpts); err != nil {
+	if _, err := routetables.Update(client, routeTableID, updateOpts); err != nil {
 		if strings.Contains(err.Error(), "VPC.2812") {
 			return diag.Errorf("route with destination %s already exists in route table %s — use `terraform import` to manage it", destination, routeTableID)
 		}
@@ -126,7 +126,7 @@ func resourceVpcRouteTableRouteCreate(ctx context.Context, d *schema.ResourceDat
 func resourceVpcRouteTableRouteRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
@@ -170,7 +170,7 @@ func resourceVpcRouteTableRouteRead(ctx context.Context, d *schema.ResourceData,
 func resourceVpcRouteTableRouteUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
@@ -190,13 +190,13 @@ func resourceVpcRouteTableRouteUpdate(ctx context.Context, d *schema.ResourceDat
 	}
 
 	updateOpts := routetables.UpdateOpts{
-		Routes: map[string][]routetables.RouteOpts{
-			"mod": {routeOpts},
+		Routes: &routetables.RouteAction{
+			Mod: []routetables.RouteOpts{routeOpts},
 		},
 	}
 
 	log.Printf("[DEBUG] OpenTelekomCloud VPC route table route update: rtb=%s, %#v", routeTableID, updateOpts)
-	if err := routetables.Update(client, routeTableID, updateOpts); err != nil {
+	if _, err := routetables.Update(client, routeTableID, updateOpts); err != nil {
 		return diag.Errorf("error updating OpenTelekomCloud VPC route table route: %s", err)
 	}
 
@@ -207,7 +207,7 @@ func resourceVpcRouteTableRouteUpdate(ctx context.Context, d *schema.ResourceDat
 func resourceVpcRouteTableRouteDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
@@ -218,20 +218,20 @@ func resourceVpcRouteTableRouteDelete(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	routeOpts := routetables.RouteOpts{
+	routeOpts := routetables.DeleteRouteOpts{
 		Destination: destination,
 		Type:        d.Get("type").(string),
 		NextHop:     d.Get("nexthop").(string),
 	}
 
 	updateOpts := routetables.UpdateOpts{
-		Routes: map[string][]routetables.RouteOpts{
-			"del": {routeOpts},
+		Routes: &routetables.RouteAction{
+			Del: []routetables.DeleteRouteOpts{routeOpts},
 		},
 	}
 
 	log.Printf("[DEBUG] OpenTelekomCloud VPC route table route delete: rtb=%s, %#v", routeTableID, updateOpts)
-	if err := routetables.Update(client, routeTableID, updateOpts); err != nil {
+	if _, err := routetables.Update(client, routeTableID, updateOpts); err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			log.Printf("[WARN] Route table %s already deleted, removing route from state", routeTableID)
 			return nil

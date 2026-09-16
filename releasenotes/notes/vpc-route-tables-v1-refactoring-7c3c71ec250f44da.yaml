@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    **[VPC]** Refactor VPC route table resources and data sources to the modern
+    VPC v1 SDK and expose route table project, default, and timestamp metadata.

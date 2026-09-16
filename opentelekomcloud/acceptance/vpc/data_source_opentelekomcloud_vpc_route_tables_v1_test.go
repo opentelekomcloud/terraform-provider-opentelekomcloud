@@ -28,11 +28,13 @@ func TestAccVpcRouteTablesV1DataSource_basic(t *testing.T) {
 			{
 				Config: testAccRouteTablesV1RouteTablesFull(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceRTVpc1, "routetables.#", "1"),
-					resource.TestCheckResourceAttr(resourceRTVpc2, "routetables.#", "1"),
+					resource.TestCheckResourceAttr(resourceRTVpc1, "routetables.#", "2"),
+					resource.TestCheckResourceAttr(resourceRTVpc2, "routetables.#", "2"),
 					resource.TestCheckResourceAttr(resourceRTBySubnetId, "routetables.#", "1"),
 					resource.TestCheckResourceAttr(resourceRTById, "routetables.#", "1"),
 					resource.TestCheckResourceAttr(resourceRTById, "routetables.0.routes.0.type", "nat"),
+					resource.TestCheckResourceAttrSet(resourceRTById, "routetables.0.created_at"),
+					resource.TestCheckResourceAttrSet(resourceRTById, "routetables.0.updated_at"),
 					testAccRouteTablesV1DataSourceID(resourceRTById),
 				),
 			},
@@ -127,14 +129,20 @@ resource "opentelekomcloud_vpc_route_table_v1" "vpc_2_table_1" {
 
 data "opentelekomcloud_vpc_route_tables_v1" "vpc_1_rtbs" {
   vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+
+  depends_on = [opentelekomcloud_vpc_route_table_v1.vpc_1_table_1]
 }
 
 data "opentelekomcloud_vpc_route_tables_v1" "vpc_2_rtbs" {
   vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
+
+  depends_on = [opentelekomcloud_vpc_route_table_v1.vpc_2_table_1]
 }
 
 data "opentelekomcloud_vpc_route_tables_v1" "vpc_1_rtb_by_subnet_id" {
   subnet_id = opentelekomcloud_vpc_subnet_v1.vpc_1_subnet_1.network_id
+
+  depends_on = [opentelekomcloud_vpc_route_table_v1.vpc_1_table_1]
 }
 
 data "opentelekomcloud_vpc_route_tables_v1" "vpc_1_rtb_by_id" {

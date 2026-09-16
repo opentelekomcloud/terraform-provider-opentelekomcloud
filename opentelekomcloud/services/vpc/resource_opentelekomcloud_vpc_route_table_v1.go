@@ -2,17 +2,15 @@ package vpc
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"regexp"
 	"time"
 
-	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/routetables"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/routetables"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -63,6 +61,14 @@ func ResourceVPCRouteTableV1() *schema.Resource {
 						"The angle brackets (< and >) are not allowed."),
 				),
 			},
+			"default": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"tenant_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"subnets": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -110,7 +116,7 @@ func ResourceVPCRouteTableV1() *schema.Resource {
 func resourceVpcRouteTableCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
@@ -145,13 +151,13 @@ func resourceVpcRouteTableCreate(ctx context.Context, d *schema.ResourceData, me
 
 	if len(allRouteOpts) > MaxCreateRoutes {
 		updateOpts := routetables.UpdateOpts{
-			Routes: map[string][]routetables.RouteOpts{
-				"add": allRouteOpts,
+			Routes: &routetables.RouteAction{
+				Add: allRouteOpts,
 			},
 		}
 
 		log.Printf("[DEBUG] add routes to OpenTelekomCloud VPC route table %s: %#v", d.Id(), updateOpts)
-		err = routetables.Update(client, d.Id(), updateOpts)
+		_, err = routetables.Update(client, d.Id(), updateOpts)
 		if err != nil {
 			return diag.Errorf("error creating OpenTelekomCloud VPC route: %s", err)
 		}
@@ -164,7 +170,7 @@ func resourceVpcRouteTableCreate(ctx context.Context, d *schema.ResourceData, me
 func resourceVpcRouteTableRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
@@ -175,18 +181,7 @@ func resourceVpcRouteTableRead(ctx context.Context, d *schema.ResourceData, meta
 		return common.CheckDeletedDiag(d, err, "OpenTelekomCloud VPC route table")
 	}
 
-	mErr := multierror.Append(nil,
-		d.Set("region", config.GetRegion(d)),
-		d.Set("vpc_id", routeTable.VpcID),
-		d.Set("name", routeTable.Name),
-		d.Set("description", routeTable.Description),
-		d.Set("route", expandRouteTableRoutes(routeTable.Routes)),
-		d.Set("subnets", expandRouteTableSubnets(routeTable.Subnets)),
-		d.Set("created_at", routeTable.CreatedAt),
-		d.Set("updated_at", routeTable.UpdatedAt),
-	)
-
-	if err := mErr.ErrorOrNil(); err != nil {
+	if err := setVpcRouteTableV1Fields(d, routeTable, config.GetRegion(d)); err != nil {
 		return diag.Errorf("error saving OpenTelekomCloud VPC route table: %s", err)
 	}
 
@@ -196,7 +191,7 @@ func resourceVpcRouteTableRead(ctx context.Context, d *schema.ResourceData, meta
 func resourceVpcRouteTableUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
@@ -213,23 +208,23 @@ func resourceVpcRouteTableUpdate(ctx context.Context, d *schema.ResourceData, me
 
 	if d.HasChange("route") {
 		changed = true
-		routesOpts := map[string][]routetables.RouteOpts{}
+		routesOpts := &routetables.RouteAction{}
 
 		oldR, newR := d.GetChange("route")
 		add := newR.(*schema.Set).Difference(oldR.(*schema.Set))
 		del := oldR.(*schema.Set).Difference(newR.(*schema.Set))
 
 		if delLen := del.Len(); delLen > 0 {
-			delRouteOpts := make([]routetables.RouteOpts, delLen)
+			delRouteOpts := make([]routetables.DeleteRouteOpts, delLen)
 			for i, item := range del.List() {
 				opts := item.(map[string]interface{})
-				delRouteOpts[i] = routetables.RouteOpts{
+				delRouteOpts[i] = routetables.DeleteRouteOpts{
 					Type:        opts["type"].(string),
 					NextHop:     opts["nexthop"].(string),
 					Destination: opts["destination"].(string),
 				}
 			}
-			routesOpts["del"] = delRouteOpts
+			routesOpts.Del = delRouteOpts
 		}
 
 		if addLen := add.Len(); addLen > 0 {
@@ -244,14 +239,14 @@ func resourceVpcRouteTableUpdate(ctx context.Context, d *schema.ResourceData, me
 					Description: &desc,
 				}
 			}
-			routesOpts["add"] = addRouteOpts
+			routesOpts.Add = addRouteOpts
 		}
 		updateOpts.Routes = routesOpts
 	}
 
 	if changed {
 		log.Printf("[DEBUG] OpenTelekomCloud VPC route table update options: %#v", updateOpts)
-		if err := routetables.Update(client, d.Id(), updateOpts); err != nil {
+		if _, err := routetables.Update(client, d.Id(), updateOpts); err != nil {
 			return diag.Errorf("error updating OpenTelekomCloud VPC route table: %s", err)
 		}
 	}
@@ -285,7 +280,7 @@ func resourceVpcRouteTableUpdate(ctx context.Context, d *schema.ResourceData, me
 func resourceVpcRouteTableDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
@@ -294,6 +289,10 @@ func resourceVpcRouteTableDelete(ctx context.Context, d *schema.ResourceData, me
 		subnets := common.ExpandToStringSlice(v.(*schema.Set).List())
 		err = disassociateRouteTableSubnets(client, d.Id(), subnets)
 		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
+				d.SetId("")
+				return nil
+			}
 			if _, ok := err.(golangsdk.ErrDefault400); !ok {
 				return diag.Errorf("error disassociating subnets with OpenTelekomCloud VPC route table %s: %s", d.Id(), err)
 			}
@@ -303,6 +302,10 @@ func resourceVpcRouteTableDelete(ctx context.Context, d *schema.ResourceData, me
 
 	err = routetables.Delete(client, d.Id())
 	if err != nil {
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
+			d.SetId("")
+			return nil
+		}
 		return diag.Errorf("error deleting OpenTelekomCloud VPC route table: %s", err)
 	}
 
@@ -311,30 +314,12 @@ func resourceVpcRouteTableDelete(ctx context.Context, d *schema.ResourceData, me
 }
 
 func associateRouteTableSubnets(client *golangsdk.ServiceClient, id string, subnets []string) error {
-	return routeTableSubnetsAction(client, id, "associate", subnets)
+	_, err := routetables.Associate(client, id, routetables.AssociateOpts{Subnets: subnets})
+	return err
 }
 
 func disassociateRouteTableSubnets(client *golangsdk.ServiceClient, id string, subnets []string) error {
-	return routeTableSubnetsAction(client, id, "disassociate", subnets)
-}
-
-func routeTableSubnetsAction(client *golangsdk.ServiceClient, id, action string, subnets []string) error {
-	var opts routetables.ActionSubnetsOpts
-	switch action {
-	case "associate":
-		opts.Associate = subnets
-	case "disassociate":
-		opts.Disassociate = subnets
-	default:
-		return fmt.Errorf("action should be associate or disassociate, but got %s", action)
-	}
-
-	actionOpts := routetables.ActionOpts{
-		Subnets: opts,
-	}
-
-	log.Printf("[DEBUG] %s subnets %v with OpenTelekomCloud VPC route table %s", action, subnets, id)
-	_, err := routetables.Action(client, id, actionOpts)
+	_, err := routetables.Disassociate(client, id, routetables.DisassociateOpts{Subnets: subnets})
 	return err
 }
 

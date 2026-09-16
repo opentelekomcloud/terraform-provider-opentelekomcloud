@@ -49,9 +49,15 @@ In addition to all arguments above, the following attributes are exported:
 
 * `description` - The supplementary information about the route table.
 
+* `tenant_id` - The project ID to which the route table belongs.
+
 * `subnets` - An array of one or more subnets associating with the route table.
 
 * `region` - The region in which belongs the vpc route table.
+
+* `created_at` - The time (UTC) when the route table was created.
+
+* `updated_at` - The time (UTC) when the route table was last updated.
 
 * `route` - The route object list. The [route object](#route_object) is documented below.
 

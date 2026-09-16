@@ -25,7 +25,11 @@ func TestAccVpcRouteTableDataSource_basic(t *testing.T) {
 				Config: testAccDataSourceRouteTable_default(rName),
 				Check: resource.ComposeTestCheckFunc(
 					dc.CheckResourceExists(),
+					resource.TestCheckResourceAttrSet(dataSourceName, "id"),
 					resource.TestCheckResourceAttr(dataSourceName, "default", "true"),
+					resource.TestCheckResourceAttrSet(dataSourceName, "tenant_id"),
+					resource.TestCheckResourceAttrSet(dataSourceName, "created_at"),
+					resource.TestCheckResourceAttrSet(dataSourceName, "updated_at"),
 					resource.TestCheckResourceAttr(dataSourceName, "subnets.#", "1"),
 				),
 			},
@@ -34,7 +38,20 @@ func TestAccVpcRouteTableDataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					dc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(dataSourceName, "default", "false"),
+					resource.TestCheckResourceAttrSet(dataSourceName, "tenant_id"),
+					resource.TestCheckResourceAttrSet(dataSourceName, "created_at"),
+					resource.TestCheckResourceAttrSet(dataSourceName, "updated_at"),
 					resource.TestCheckResourceAttr(dataSourceName, "subnets.#", "0"),
+				),
+			},
+			{
+				Config: testAccDataSourceRouteTable_customByID(rName),
+				Check: resource.ComposeTestCheckFunc(
+					dc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(dataSourceName, "default", "false"),
+					resource.TestCheckResourceAttrSet(dataSourceName, "tenant_id"),
+					resource.TestCheckResourceAttrSet(dataSourceName, "created_at"),
+					resource.TestCheckResourceAttrSet(dataSourceName, "updated_at"),
 				),
 			},
 		},
@@ -82,6 +99,23 @@ data "opentelekomcloud_vpc_route_table_v1" "drtb" {
   name   = "%[2]s"
 
   depends_on = [opentelekomcloud_vpc_route_table_v1.rtb]
+}
+`, testAccDataSourceRouteTable_base(rName), rName)
+}
+
+func testAccDataSourceRouteTable_customByID(rName string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_vpc_route_table_v1" "rtb" {
+  name        = "%[2]s"
+  vpc_id      = opentelekomcloud_vpc_v1.vpc.id
+  description = "created by terraform"
+}
+
+data "opentelekomcloud_vpc_route_table_v1" "drtb" {
+  vpc_id = opentelekomcloud_vpc_v1.vpc.id
+  id     = opentelekomcloud_vpc_route_table_v1.rtb.id
 }
 `, testAccDataSourceRouteTable_base(rName), rName)
 }

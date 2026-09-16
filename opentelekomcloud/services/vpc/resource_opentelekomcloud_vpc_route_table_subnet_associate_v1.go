@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/routetables"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/routetables"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -54,7 +54,7 @@ func ResourceVPCRouteTableSubnetAssociateV1() *schema.Resource {
 func resourceVpcRouteTableSubnetAssociateCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
@@ -63,14 +63,8 @@ func resourceVpcRouteTableSubnetAssociateCreate(ctx context.Context, d *schema.R
 	rtID := d.Get("route_table_id").(string)
 	subnetID := d.Get("subnet_id").(string)
 
-	actionOpts := routetables.ActionOpts{
-		Subnets: routetables.ActionSubnetsOpts{
-			Associate: []string{subnetID},
-		},
-	}
-
 	log.Printf("[DEBUG] OpenTelekomCloud VPC route table subnet associate: rtb=%s subnet=%s", rtID, subnetID)
-	_, err = routetables.Action(client, rtID, actionOpts)
+	_, err = routetables.Associate(client, rtID, routetables.AssociateOpts{Subnets: []string{subnetID}})
 	if err != nil {
 		return diag.Errorf("error associating subnet %s with route table %s: %s", subnetID, rtID, err)
 	}
@@ -84,7 +78,7 @@ func resourceVpcRouteTableSubnetAssociateCreate(ctx context.Context, d *schema.R
 func resourceVpcRouteTableSubnetAssociateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
@@ -123,7 +117,7 @@ func resourceVpcRouteTableSubnetAssociateRead(ctx context.Context, d *schema.Res
 func resourceVpcRouteTableSubnetAssociateDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClientV1, func() (*golangsdk.ServiceClient, error) {
-		return config.NetworkingV1Client(config.GetRegion(d))
+		return config.VpcV1Client(config.GetRegion(d))
 	})
 	if err != nil {
 		return fmterr.Errorf(errCreationV1Client, err)
@@ -134,14 +128,8 @@ func resourceVpcRouteTableSubnetAssociateDelete(ctx context.Context, d *schema.R
 		return diag.FromErr(err)
 	}
 
-	actionOpts := routetables.ActionOpts{
-		Subnets: routetables.ActionSubnetsOpts{
-			Disassociate: []string{subnetID},
-		},
-	}
-
 	log.Printf("[DEBUG] OpenTelekomCloud VPC route table subnet disassociate: rtb=%s subnet=%s", rtID, subnetID)
-	_, err = routetables.Action(client, rtID, actionOpts)
+	_, err = routetables.Disassociate(client, rtID, routetables.DisassociateOpts{Subnets: []string{subnetID}})
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			log.Printf("[WARN] Route table %s already deleted, removing association from state", rtID)
