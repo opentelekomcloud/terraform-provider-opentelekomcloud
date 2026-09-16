@@ -1,14 +1,14 @@
 ---
 features:
   - |
-    **New Data Source:** ``data_source/opentelekomcloud_gemini_datastores_v3`` (`#3558 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3558>`_)
+    **New Data Source:** ``data_source/opentelekomcloud_gemini_datastores_v3`` (`#3566 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3566>`_)
   - |
-    **New Data Source:** ``data_source/opentelekomcloud_gemini_flavors_v3`` (`#3558 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3558>`_)
+    **New Data Source:** ``data_source/opentelekomcloud_gemini_flavors_v3`` (`#3566 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3566>`_)
   - |
-    **Updated Resource:** ``resource/opentelekomcloud_gemini_instance_v3``: Add ``enterprise_project_id`` support (`#3559 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3559>`_)
+    **Updated Resource:** ``resource/opentelekomcloud_gemini_instance_v3``: Add ``enterprise_project_id`` support (`#3566 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3566>`_)
   - |
-    **Updated Data Source:** ``data_source/opentelekomcloud_gemini_instances_v3``: Add ``datastore_type`` and ``mode`` filters (`#3558 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3558>`_)
+    **Updated Data Source:** ``data_source/opentelekomcloud_gemini_instances_v3``: Add ``datastore_type`` and ``mode`` filters (`#3566 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3566>`_)
 fixes:
   - |
     **Fixed:** ``resource/opentelekomcloud_gemini_instance_v3``: Derive the engine, version and DB instance type
-    from the ``datastore`` block, so that GeminiDB Influx instances can be created (`#3557 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3557>`_)
+    from the ``datastore`` block, so that GeminiDB Influx instances can be created (`#3566 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3566>`_)
