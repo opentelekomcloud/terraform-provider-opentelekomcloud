@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    **[ELB]** Modernize ``resource/opentelekomcloud_lb_loadbalancer_v3`` and
+    ``data-source/opentelekomcloud_lb_loadbalancer_v3`` for the latest ELB v3
+    load balancer API, including additional lifecycle fields, filters, and
+    response metadata.

@@ -185,7 +185,180 @@ func ResourceLoadBalancerV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"ipv6_vip_subnet_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"ipv6_bandwidth_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"guaranteed": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"waf_failure_action": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"charge_mode": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"protection_status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"protection_reason": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"provisioning_status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"operating_status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"provider_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"project_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"pools": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"listeners": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"ipv6_vip_address": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"ipv6_vip_port_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"l4_scale_flavor": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"l7_scale_flavor": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"elb_subnet_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"frozen_scene": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"billing_info": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"public_border_group": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"loadbalancer_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"gateway_flavor_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"instance_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"instance_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"log_group_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"log_topic_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"service_lb_mode": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"eips":        loadBalancerIPInfoSchema("eip_id", "eip_address"),
+			"global_eips": loadBalancerIPInfoSchema("global_eip_id", "global_eip_address"),
+			"autoscaling": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"enable":           {Type: schema.TypeBool, Computed: true},
+					"min_l7_flavor_id": {Type: schema.TypeString, Computed: true},
+				}},
+			},
+			"custom_qos_limit": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"l4_connection": {Type: schema.TypeInt, Computed: true},
+					"l4_cps":        {Type: schema.TypeInt, Computed: true},
+					"l7_connection": {Type: schema.TypeInt, Computed: true},
+					"l7_cps":        {Type: schema.TypeInt, Computed: true},
+				}},
+			},
+			"proxy_protocol_extensions": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"vip_address":      {Type: schema.TypeString, Computed: true},
+					"ipv6_vip_address": {Type: schema.TypeString, Computed: true},
+					"endpoint_id":      {Type: schema.TypeString, Computed: true},
+					"endpoint_service_id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+				}},
+			},
 		},
+	}
+}
+
+func loadBalancerIPInfoSchema(idField, addressField string) *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+			idField:      {Type: schema.TypeString, Computed: true},
+			addressField: {Type: schema.TypeString, Computed: true},
+			"ip_version": {Type: schema.TypeInt, Computed: true},
+		}},
 	}
 }
 
@@ -236,6 +409,18 @@ func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, m
 		ElbSubnetIDs:             common.ExpandToStringSlice(d.Get("network_ids").(*schema.Set).List()),
 		IpTargetEnable:           &ipTargetEnable,
 		DeletionProtectionEnable: &deletionProtection,
+		IpV6VipSubnetID:          d.Get("ipv6_vip_subnet_id").(string),
+		EnterpriseProjectID:      d.Get("enterprise_project_id").(string),
+		ChargeMode:               d.Get("charge_mode").(string),
+		ProtectionStatus:         d.Get("protection_status").(string),
+		ProtectionReason:         d.Get("protection_reason").(string),
+	}
+	if bandwidthID := d.Get("ipv6_bandwidth_id").(string); bandwidthID != "" {
+		createOpts.IPV6Bandwidth = &loadbalancers.BandwidthRef{ID: bandwidthID}
+	}
+	if common.IsAttrSet(d, "guaranteed") {
+		guaranteed := d.Get("guaranteed").(bool)
+		createOpts.Guaranteed = &guaranteed
 	}
 
 	// currently API supports only a single EIP
@@ -247,7 +432,7 @@ func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	lb, err := loadbalancers.Create(client, createOpts).Extract()
+	lb, err := loadbalancers.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating LoadBalancerV3: %w", err)
 	}
@@ -267,7 +452,7 @@ func resourceLoadBalancerV3Read(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
-	lb, err := loadbalancers.Get(client, d.Id()).Extract()
+	lb, err := loadbalancers.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "loadbalancerV3")
 	}
@@ -333,10 +518,27 @@ func resourceLoadBalancerV3Update(ctx context.Context, d *schema.ResourceData, m
 		updateOpts.DeletionProtectionEnable = &deletionProtection
 		updateRequired = true
 	}
+	if d.HasChange("ipv6_vip_subnet_id") {
+		subnetID := d.Get("ipv6_vip_subnet_id").(string)
+		updateOpts.IpV6VipSubnetID = &subnetID
+		updateRequired = true
+	}
+	if d.HasChange("ipv6_bandwidth_id") {
+		updateOpts.IpV6Bandwidth = &loadbalancers.BandwidthRef{ID: d.Get("ipv6_bandwidth_id").(string)}
+		updateRequired = true
+	}
+	if d.HasChange("protection_status") {
+		updateOpts.ProtectionStatus = d.Get("protection_status").(string)
+		updateRequired = true
+	}
+	if d.HasChange("protection_reason") {
+		updateOpts.ProtectionReason = d.Get("protection_reason").(string)
+		updateRequired = true
+	}
 
 	if updateRequired {
 		log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
-		_, err = loadbalancers.Update(client, d.Id(), updateOpts).Extract()
+		_, err = loadbalancers.Update(client, d.Id(), updateOpts)
 		if err != nil {
 			return fmterr.Errorf("unable to update LoadBalancerV3 %s: %s", d.Id(), err)
 		}
@@ -368,7 +570,7 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
-	if err := loadbalancers.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := loadbalancers.Delete(client, d.Id()); err != nil {
 		return fmterr.Errorf("unable to delete LoadBalancerV3 %s: %s", d.Id(), err)
 	}
 
@@ -401,6 +603,33 @@ func setLoadBalancerFields(d *schema.ResourceData, meta interface{}, lb *loadbal
 		publicIpInfo[0] = info
 	}
 	tagMap := common.TagsToMap(lb.Tags)
+	pools := make([]string, len(lb.Pools))
+	for i, pool := range lb.Pools {
+		pools[i] = pool.ID
+	}
+	listeners := make([]string, len(lb.Listeners))
+	for i, listener := range lb.Listeners {
+		listeners[i] = listener.ID
+	}
+	eips := make([]map[string]interface{}, len(lb.Eips))
+	for i, eip := range lb.Eips {
+		eips[i] = map[string]interface{}{
+			"eip_id": eip.EipID, "eip_address": eip.EipAddress, "ip_version": eip.IpVersion,
+		}
+	}
+	globalEips := make([]map[string]interface{}, len(lb.GlobalEips))
+	for i, eip := range lb.GlobalEips {
+		globalEips[i] = map[string]interface{}{
+			"global_eip_id": eip.GlobalEipID, "global_eip_address": eip.GlobalEipAddress, "ip_version": eip.IpVersion,
+		}
+	}
+	proxyExtensions := make([]map[string]interface{}, len(lb.ProxyProtocolExtensions))
+	for i, extension := range lb.ProxyProtocolExtensions {
+		proxyExtensions[i] = map[string]interface{}{
+			"vip_address": extension.VipAddress, "ipv6_vip_address": extension.IpV6VipAddress,
+			"endpoint_id": extension.Extension.EpID, "endpoint_service_id": extension.Extension.EpServiceID,
+		}
+	}
 
 	mErr := multierror.Append(
 		d.Set("name", lb.Name),
@@ -420,6 +649,45 @@ func setLoadBalancerFields(d *schema.ResourceData, meta interface{}, lb *loadbal
 		d.Set("created_at", lb.CreatedAt),
 		d.Set("updated_at", lb.UpdatedAt),
 		d.Set("deletion_protection", lb.DeletionProtectionEnable),
+		d.Set("ipv6_vip_subnet_id", lb.IpV6VipSubnetID),
+		d.Set("ipv6_bandwidth_id", lb.IpV6Bandwidth.ID),
+		d.Set("guaranteed", lb.Guaranteed),
+		d.Set("enterprise_project_id", lb.EnterpriseProjectID),
+		d.Set("waf_failure_action", lb.WafFailureAction),
+		d.Set("charge_mode", lb.ChargeMode),
+		d.Set("protection_status", lb.ProtectionStatus),
+		d.Set("protection_reason", lb.ProtectionReason),
+		d.Set("provisioning_status", lb.ProvisioningStatus),
+		d.Set("operating_status", lb.OperatingStatus),
+		d.Set("provider_name", lb.Provider),
+		d.Set("project_id", lb.ProjectID),
+		d.Set("pools", pools),
+		d.Set("listeners", listeners),
+		d.Set("ipv6_vip_address", lb.IpV6VipAddress),
+		d.Set("ipv6_vip_port_id", lb.IpV6VipPortID),
+		d.Set("l4_scale_flavor", lb.L4ScaleFlavorID),
+		d.Set("l7_scale_flavor", lb.L7ScaleFlavorID),
+		d.Set("elb_subnet_type", lb.ElbSubnetType),
+		d.Set("frozen_scene", lb.FrozenScene),
+		d.Set("billing_info", lb.BillingInfo),
+		d.Set("public_border_group", lb.PublicBorderGroup),
+		d.Set("loadbalancer_type", lb.LoadbalancerType),
+		d.Set("gateway_flavor_id", lb.GwFlavorID),
+		d.Set("instance_type", lb.InstanceType),
+		d.Set("instance_id", lb.InstanceID),
+		d.Set("log_group_id", lb.LogGroupID),
+		d.Set("log_topic_id", lb.LogTopicID),
+		d.Set("service_lb_mode", lb.ServiceLBMode),
+		d.Set("eips", eips),
+		d.Set("global_eips", globalEips),
+		d.Set("autoscaling", []map[string]interface{}{{
+			"enable": lb.Autoscaling.Enable, "min_l7_flavor_id": lb.Autoscaling.MinL7FlavorID,
+		}}),
+		d.Set("custom_qos_limit", []map[string]interface{}{{
+			"l4_connection": lb.CustomQosLimit.L4.Connection, "l4_cps": lb.CustomQosLimit.L4.CPS,
+			"l7_connection": lb.CustomQosLimit.L7.Connection, "l7_cps": lb.CustomQosLimit.L7.CPS,
+		}}),
+		d.Set("proxy_protocol_extensions", proxyExtensions),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
