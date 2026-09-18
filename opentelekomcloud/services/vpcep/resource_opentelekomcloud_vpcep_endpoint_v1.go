@@ -82,6 +82,12 @@ func ResourceVPCEPEndpointV1() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"enable_whitelist": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -174,6 +180,9 @@ func resourceVPCEPEndpointCreate(ctx context.Context, d *schema.ResourceData, me
 		PortIP:      d.Get("port_ip").(string),
 		EnableDNS:   d.Get("enable_dns").(bool),
 		Description: d.Get("description").(string),
+		EnterpriseProjectID: config.GetEnterpriseProjectID(
+			d, "0",
+		),
 		Tags: common.ExpandResourceTags(
 			d.Get("tags").(map[string]interface{}),
 		),
@@ -245,6 +254,7 @@ func resourceVPCEPEndpointRead(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("service_name", onlyServiceName(endpoint.ServiceName)),
 		d.Set("service_type", endpoint.ServiceType),
 		d.Set("project_id", endpoint.ProjectID),
+		d.Set("enterprise_project_id", endpoint.EnterpriseProjectID),
 		d.Set("enable_dns", endpoint.EnableDNS),
 		d.Set("dns_names", endpoint.DNSNames),
 		d.Set("port_ip", endpoint.IP),

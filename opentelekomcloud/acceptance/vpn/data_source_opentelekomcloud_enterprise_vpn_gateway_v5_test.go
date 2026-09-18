@@ -22,6 +22,7 @@ func TestAccVpnEnterpriseGatewayV5DataSource_basic(t *testing.T) {
 					testAccCheckVPNEnterpriseGatewayDataSourceID(dataVPNEnterpriseGatewayName),
 					resource.TestCheckResourceAttrSet(dataVPNEnterpriseGatewayName, "name"),
 					resource.TestCheckResourceAttrSet(dataVPNEnterpriseGatewayName, "vpc_id"),
+					resource.TestCheckResourceAttrSet(dataVPNEnterpriseGatewayName, "enterprise_project_id"),
 				),
 			},
 		},

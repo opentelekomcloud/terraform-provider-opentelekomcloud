@@ -110,6 +110,12 @@ func ResourceEnterpriseConnection() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"tags": common.TagsSchema(),
 			"status": {
 				Type:     schema.TypeString,
@@ -310,7 +316,10 @@ func resourceEvpnConnectionCreate(ctx context.Context, d *schema.ResourceData, m
 		IkePolicy:          buildConnectionIkePolicy(d),
 		IpSecPolicy:        buildConnectionIpSecPolicy(d),
 		HaRole:             d.Get("ha_role").(string),
-		Tags:               tagSlice,
+		EnterpriseProjectId: config.GetEnterpriseProjectID(
+			d, "0",
+		),
+		Tags: tagSlice,
 	}
 
 	if enableNqa, ok := d.GetOk("enable_nqa"); ok {
@@ -463,6 +472,7 @@ func resourceEvpnConnectionRead(ctx context.Context, d *schema.ResourceData, met
 		d.Set("tunnel_peer_address", gw.TunnelPeerAddress),
 		d.Set("enable_nqa", gw.EnableNqa),
 		d.Set("ha_role", gw.HaRole),
+		d.Set("enterprise_project_id", gw.EnterpriseProjectId),
 		d.Set("created_at", gw.CreatedAt),
 		d.Set("updated_at", gw.UpdatedAt),
 		d.Set("status", gw.Status),

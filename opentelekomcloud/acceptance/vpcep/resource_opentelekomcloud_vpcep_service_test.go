@@ -48,6 +48,7 @@ func TestVPCEPService_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceVPCEPServiceName, "name", srvName),
+					resource.TestCheckResourceAttrSet(resourceVPCEPServiceName, "enterprise_project_id"),
 					resource.TestCheckResourceAttr(resourceVPCEPServiceName, "port.#", "1"),
 					resource.TestCheckResourceAttr(resourceVPCEPServiceName, "server_type", "LB"),
 					resource.TestCheckResourceAttr(resourceVPCEPServiceName, "service_type", "interface"),

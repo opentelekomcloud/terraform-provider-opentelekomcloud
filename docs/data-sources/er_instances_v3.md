@@ -33,6 +33,8 @@ The following arguments are supported:
 
 * `status` - (Optional, String) Specifies the status used to filter the ER instances.
 
+* `enterprise_project_id` - (Optional, String) Specifies the enterprise project ID used to filter the ER instances.
+
 * `tags` - (Optional, Map) Specifies the key/value pairs used to filter the ER instances.
 
 ## Attribute Reference
@@ -74,5 +76,7 @@ The `instances` block supports:
 * `default_association_route_table_id` - The ID of the default association route table.
 
 * `availability_zones` - The availability zone list where the ER instance is located.
+
+* `enterprise_project_id` - The enterprise project ID of the ER instance.
 
 * `region` - The region where the ER instances are located.

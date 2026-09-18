@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    **[ER]** Add ``enterprise_project_id`` support to ER v3 instances and flow log queries.
+  - |
+    **[VPN]** Add ``enterprise_project_id`` support to Enterprise VPN v5 gateways and connections.
+  - |
+    **[VPCEP]** Add ``enterprise_project_id`` support to VPC endpoint and endpoint service resources and data sources.

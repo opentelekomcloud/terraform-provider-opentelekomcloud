@@ -147,6 +147,9 @@ The following arguments are supported:
   `active-standby`. The default value is `active-active`.
   Changing this parameter will create a new resource.
 
+* `enterprise_project_id` - (Optional, String, ForceNew) Specifies the enterprise project ID of the VPN gateway.
+  Changing this parameter creates a new resource.
+
 * `delete_eip` - (Optional, Bool) Specifies whether to delete eips on resource deletion when`network_type` is `public`.
   Default: `false`.
 

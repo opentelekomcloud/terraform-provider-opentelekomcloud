@@ -49,6 +49,7 @@ func TestVPCEndpoint_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceEndpointName, "enable_dns", "true"),
 					resource.TestCheckResourceAttr(resourceEndpointName, "dns_names.#", "1"),
 					resource.TestCheckResourceAttr(resourceEndpointName, "service_name", name),
+					resource.TestCheckResourceAttrSet(resourceEndpointName, "enterprise_project_id"),
 				),
 			},
 			{

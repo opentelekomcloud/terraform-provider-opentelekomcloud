@@ -56,6 +56,8 @@ In addition to all arguments above, the following attributes are exported:
 
 * `project_id` - Specifies the project ID.
 
+* `enterprise_project_id` - Specifies the enterprise project ID of the VPC endpoint service.
+
 * `ports` - Lists the port mappings opened to the VPC endpoint service.
 
 * `tags` - Map of the resource tags.

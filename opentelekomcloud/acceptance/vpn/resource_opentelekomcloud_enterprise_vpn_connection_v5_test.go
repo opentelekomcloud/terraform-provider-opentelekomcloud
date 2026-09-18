@@ -45,6 +45,7 @@ func TestAccConnection_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(rName, "name", name),
+					resource.TestCheckResourceAttrSet(rName, "enterprise_project_id"),
 					resource.TestCheckResourceAttr(rName, "vpn_type", "STATIC"),
 					resource.TestCheckResourceAttr(rName, "ikepolicy.0.authentication_algorithm", "sha2-256"),
 					resource.TestCheckResourceAttr(rName, "ikepolicy.0.encryption_algorithm", "aes-128"),

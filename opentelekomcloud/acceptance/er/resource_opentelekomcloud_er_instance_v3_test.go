@@ -53,6 +53,7 @@ func TestAccInstance_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(rName, "status"),
 					resource.TestCheckResourceAttrSet(rName, "created_at"),
 					resource.TestCheckResourceAttrSet(rName, "updated_at"),
+					resource.TestCheckResourceAttrSet(rName, "enterprise_project_id"),
 					resource.TestCheckResourceAttr(rName, "enable_default_propagation", "true"),
 					resource.TestCheckResourceAttr(rName, "enable_default_association", "false"),
 					resource.TestCheckResourceAttr(rName, "auto_accept_shared_attachments", "true"),

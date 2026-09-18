@@ -31,6 +31,10 @@ func DataSourceErInstancesV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"tags": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -99,6 +103,10 @@ func DataSourceErInstancesV3() *schema.Resource {
 							Computed: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
+						"enterprise_project_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -110,11 +118,12 @@ func DataSourceErInstancesV3() *schema.Resource {
 	}
 }
 
-func buildInstanceListOpts(d *schema.ResourceData) instance.ListOpts {
+func buildInstanceListOpts(d *schema.ResourceData, enterpriseProjectID string) instance.ListOpts {
 	return instance.ListOpts{
-		State:   common.StringSliceIgnoreEmpty(d.Get("status").(string)),
-		ID:      common.StringSliceIgnoreEmpty(d.Get("instance_id").(string)),
-		SortKey: []string{"name"},
+		State:               common.StringSliceIgnoreEmpty(d.Get("status").(string)),
+		ID:                  common.StringSliceIgnoreEmpty(d.Get("instance_id").(string)),
+		EnterpriseProjectId: common.StringSliceIgnoreEmpty(enterpriseProjectID),
+		SortKey:             []string{"name"},
 	}
 }
 
@@ -125,7 +134,7 @@ func dataSourceErInstancesV3Read(_ context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf(errCreationV3Client, err)
 	}
 
-	resp, err := instance.List(client, buildInstanceListOpts(d))
+	resp, err := instance.List(client, buildInstanceListOpts(d, config.GetEnterpriseProjectID(d)))
 	if err != nil {
 		return diag.Errorf("error retrieving OpenTelekomCloud ER v3 instances: %s", err)
 	}
@@ -173,6 +182,7 @@ func flattenInstances(instances []instance.RouterInstance) []map[string]interfac
 			"default_propagation_route_table_id": item.DefaultPropagationRouteTableID,
 			"default_association_route_table_id": item.DefaultAssociationRouteTableID,
 			"availability_zones":                 item.AvailabilityZoneIDs,
+			"enterprise_project_id":              item.EnterpriseProjectId,
 		}
 	}
 	return result
