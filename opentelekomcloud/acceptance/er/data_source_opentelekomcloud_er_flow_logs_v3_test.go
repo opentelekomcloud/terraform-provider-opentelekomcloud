@@ -76,9 +76,8 @@ func testAccDataSourceErFlowLogsV3_basic(name string) string {
 %s
 
 data "opentelekomcloud_er_flow_logs_v3" "test" {
-  depends_on            = [opentelekomcloud_er_flow_log_v3.test]
-  instance_id           = opentelekomcloud_er_instance_v3.test.id
-  enterprise_project_id = opentelekomcloud_er_instance_v3.test.enterprise_project_id
+  depends_on  = [opentelekomcloud_er_flow_log_v3.test]
+  instance_id = opentelekomcloud_er_instance_v3.test.id
 }
 
 locals {
