@@ -1,8 +1,8 @@
 ---
 features:
   - |
-    **[ER]** Add ``enterprise_project_id`` support to ER v3 instances and flow log queries.
+    **[ER]** Add ``enterprise_project_id`` support to ER v3 instances and flow log queries. (`#3568 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3568>`_)
   - |
-    **[VPN]** Add ``enterprise_project_id`` support to Enterprise VPN v5 gateways and connections.
+    **[VPN]** Add ``enterprise_project_id`` support to Enterprise VPN v5 gateways and connections. (`#3568 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3568>`_)
   - |
-    **[VPCEP]** Add ``enterprise_project_id`` support to VPC endpoint and endpoint service resources and data sources.
+    **[VPCEP]** Add ``enterprise_project_id`` support to VPC endpoint and endpoint service resources and data sources. (`#3568 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3568>`_)
