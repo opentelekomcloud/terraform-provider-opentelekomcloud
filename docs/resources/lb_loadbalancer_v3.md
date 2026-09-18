@@ -224,6 +224,21 @@ The `public_ip` block supports:
   `true`: Enable deletion protection.
   `false` (default): Disable deletion protection.
 
+* `ipv6_vip_subnet_id` - (Optional) The ID of the IPv6 subnet where the load balancer resides.
+
+* `ipv6_bandwidth_id` - (Optional) The ID of the shared bandwidth used by the public IPv6 address.
+
+* `guaranteed` - (Optional) Whether the load balancer is a dedicated load balancer.
+  Changing this creates a new load balancer.
+
+* `enterprise_project_id` - (Optional) The enterprise project ID. Changing this creates a new load balancer.
+
+* `charge_mode` - (Optional) The load balancer billing mode. Changing this creates a new load balancer.
+
+* `protection_status` - (Optional) The modification protection status.
+
+* `protection_reason` - (Optional) The reason for enabling modification protection.
+
 * `tags` - (Optional, Map) Tags key/value pairs to associate with the load balancer.
 
 ## Attributes Reference
@@ -235,6 +250,61 @@ In addition to all arguments above, the following attributes are exported:
 * `created_at` - The time the LoadBalancer was created.
 
 * `updated_at` - The time the LoadBalancer was last updated.
+
+* `provisioning_status` - The provisioning status of the load balancer.
+
+* `operating_status` - The operating status of the load balancer.
+
+* `provider_name` - The load balancer provider.
+
+* `project_id` - The project ID of the load balancer.
+
+* `pools` - IDs of backend server groups associated with the load balancer.
+
+* `listeners` - IDs of listeners associated with the load balancer.
+
+* `ipv6_vip_address` - The private IPv6 address of the load balancer.
+
+* `ipv6_vip_port_id` - The port ID associated with the private IPv6 address.
+
+* `l4_scale_flavor` - The ID of the Layer-4 elastic flavor.
+
+* `l7_scale_flavor` - The ID of the Layer-7 elastic flavor.
+
+* `eips` - EIPs associated with the load balancer, including `eip_id`, `eip_address`, and `ip_version`.
+
+* `global_eips` - Global EIPs associated with the load balancer, including `global_eip_id`,
+  `global_eip_address`, and `ip_version`.
+
+* `elb_subnet_type` - The IP version supported by the load balancer subnet.
+
+* `frozen_scene` - The scenario in which the load balancer was frozen.
+
+* `billing_info` - Billing information for the load balancer.
+
+* `autoscaling` - Autoscaling information, including `enable` and `min_l7_flavor_id`.
+
+* `public_border_group` - The public border group of the load balancer.
+
+* `waf_failure_action` - The action taken when WAF is unavailable.
+
+* `loadbalancer_type` - The load balancer type.
+
+* `gateway_flavor_id` - The gateway flavor ID.
+
+* `instance_type` - The load balancer instance type.
+
+* `instance_id` - The load balancer instance ID.
+
+* `log_group_id` - The LTS log group ID.
+
+* `log_topic_id` - The LTS log stream ID.
+
+* `custom_qos_limit` - Custom Layer-4 and Layer-7 connection and CPS limits.
+
+* `service_lb_mode` - The service load balancer mode.
+
+* `proxy_protocol_extensions` - Proxy protocol extension endpoint information.
 
 ## Import
 

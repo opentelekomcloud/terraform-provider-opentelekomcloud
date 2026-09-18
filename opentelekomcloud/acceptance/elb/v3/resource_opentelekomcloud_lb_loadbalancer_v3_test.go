@@ -34,6 +34,10 @@ func TestAccLBV3LoadBalancer_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV3LoadBalancerExists(resourceLBName, &lb),
 					resource.TestCheckResourceAttr(resourceLBName, "deletion_protection", "true"),
+					resource.TestCheckResourceAttr(resourceLBName, "provisioning_status", "ACTIVE"),
+					resource.TestCheckResourceAttr(resourceLBName, "operating_status", "ONLINE"),
+					resource.TestCheckResourceAttrSet(resourceLBName, "project_id"),
+					resource.TestCheckResourceAttrSet(resourceLBName, "provider_name"),
 					resource.TestCheckResourceAttr(resourceLBName, "tags.muh", "value-create"),
 					resource.TestCheckResourceAttr(resourceLBName, "tags.kuh", "value-create"),
 				),
@@ -141,7 +145,7 @@ func testAccCheckLBV3LoadBalancerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := loadbalancers.Get(client, rs.Primary.ID).Extract()
+		_, err := loadbalancers.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("loadBalancer still exists: %s", rs.Primary.ID)
 		}
@@ -167,7 +171,7 @@ func testAccCheckLBV3LoadBalancerExists(n string, lb *loadbalancers.LoadBalancer
 			return fmt.Errorf(elbv3.ErrCreateClient, err)
 		}
 
-		found, err := loadbalancers.Get(client, rs.Primary.ID).Extract()
+		found, err := loadbalancers.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
