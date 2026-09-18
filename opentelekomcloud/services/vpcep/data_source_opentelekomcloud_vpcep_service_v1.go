@@ -69,6 +69,10 @@ func DataSourceVPCEPServiceV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"port": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -142,6 +146,7 @@ func dataSourceVPCEPServiceV1Read(_ context.Context, d *schema.ResourceData, met
 		d.Set("created_at", svc.CreatedAt),
 		d.Set("updated_at", svc.UpdatedAt),
 		d.Set("project_id", svc.ProjectID),
+		d.Set("enterprise_project_id", svc.EnterpriseProjectID),
 		d.Set("port", portsSlice(svc.Ports)),
 		d.Set("tags", common.TagsToMap(svc.Tags)),
 		d.Set("connection_count", svc.ConnectionCount),

@@ -100,6 +100,12 @@ func ResourceEnterpriseVpnGateway() *schema.Resource {
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"active-active", "active-standby"}, false),
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"eip1": {
 				Type:         schema.TypeList,
 				MaxItems:     1,
@@ -277,6 +283,7 @@ func resourceEvpnGatewayCreate(ctx context.Context, d *schema.ResourceData, meta
 		HaMode:              d.Get("ha_mode").(string),
 		AccessPrivateIp1:    d.Get("access_private_ip_1").(string),
 		AccessPrivateIp2:    d.Get("access_private_ip_2").(string),
+		EnterpriseProjectId: config.GetEnterpriseProjectID(d, "0"),
 		Tags:                tagSlice,
 	}
 
@@ -380,6 +387,7 @@ func resourceEvpnGatewayRead(ctx context.Context, d *schema.ResourceData, meta i
 		d.Set("access_private_ip_1", gw.AccessPrivateIp1),
 		d.Set("access_private_ip_2", gw.AccessPrivateIp2),
 		d.Set("er_attachment_id", gw.ErAttachmentId),
+		d.Set("enterprise_project_id", gw.EnterpriseProjectId),
 		d.Set("tags", tagsMap),
 	)
 

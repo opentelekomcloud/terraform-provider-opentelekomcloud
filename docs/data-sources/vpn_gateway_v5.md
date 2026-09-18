@@ -57,6 +57,8 @@ In addition to all arguments above, the following attributes are exported:
 
 * `ha_mode` - Indicates the HA mode of VPN gateway.
 
+* `enterprise_project_id` - Indicates the enterprise project ID of the VPN gateway.
+
 * `access_vpc_id` - Indicates the access VPC ID.
 
 * `access_subnet_id` - Indicates the access subnet ID.

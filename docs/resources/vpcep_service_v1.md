@@ -56,6 +56,9 @@ The following arguments are supported:
 
 * `description` - (Optional, String) Specifies the description of the VPC endpoint service.
 
+* `enterprise_project_id` - (Optional, String, ForceNew) Specifies the enterprise project ID of the VPC endpoint
+  service. Changing this parameter creates a new resource.
+
 * `port_id` - (Required, String) Specifies the ID for identifying the backend resource of the VPC endpoint service.
   The value is as follows:
   * If the backend service is an enhanced load balancer, the value is the ID of the port bound to the private IP address of the load balancer.

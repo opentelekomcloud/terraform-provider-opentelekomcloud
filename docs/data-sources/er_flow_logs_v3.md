@@ -36,6 +36,8 @@ The following arguments are supported:
 
 * `resource_id` - (Optional, String) Specifies the ID of the attachment to which the flow logs belong.
 
+* `enterprise_project_id` - (Optional, String) Specifies the enterprise project ID used to filter flow logs.
+
 * `flow_log_id` - (Optional, String) Specifies the ID of the flow log.
 
 * `name` - (Optional, String) Specifies the name of the flow log.

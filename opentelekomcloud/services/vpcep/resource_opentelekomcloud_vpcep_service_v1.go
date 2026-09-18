@@ -140,6 +140,12 @@ func ResourceVPCEPServiceV1() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -194,12 +200,15 @@ func resourceVPCEPServiceCreate(ctx context.Context, d *schema.ResourceData, met
 
 	approvalEnabled := d.Get("approval_enabled").(bool)
 	opts := services.CreateOpts{
-		PortID:          d.Get("port_id").(string),
-		PoolID:          d.Get("pool_id").(string),
-		VIPPortID:       d.Get("vip_port_id").(string),
-		ServiceName:     d.Get("name").(string),
-		VpcId:           d.Get("vpc_id").(string),
-		Description:     d.Get("description").(string),
+		PortID:      d.Get("port_id").(string),
+		PoolID:      d.Get("pool_id").(string),
+		VIPPortID:   d.Get("vip_port_id").(string),
+		ServiceName: d.Get("name").(string),
+		VpcId:       d.Get("vpc_id").(string),
+		Description: d.Get("description").(string),
+		EnterpriseProjectID: config.GetEnterpriseProjectID(
+			d, "0",
+		),
 		ApprovalEnabled: &approvalEnabled,
 		ServiceType:     services.ServiceType(d.Get("service_type").(string)),
 		ServerType:      services.ServerType(d.Get("server_type").(string)),
@@ -269,6 +278,7 @@ func resourceVPCEPServiceRead(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("service_type", svc.ServiceType),
 		d.Set("server_type", svc.ServerType),
 		d.Set("description", svc.Description),
+		d.Set("enterprise_project_id", svc.EnterpriseProjectID),
 		d.Set("port", portsSlice(svc.Ports)),
 		d.Set("tags", common.TagsToMap(svc.Tags)),
 		d.Set("whitelist", whitelistSlice(*whitelist)),

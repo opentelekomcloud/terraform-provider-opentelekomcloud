@@ -29,6 +29,10 @@ func DataSourceErFlowLogsV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"flow_log_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -125,9 +129,10 @@ func dataSourceErFlowLogsV3Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	resp, err := fl.List(client, d.Get("instance_id").(string), fl.ListOpts{
-		ResourceType: d.Get("resource_type").(string),
-		ResourceID:   common.StringSliceIgnoreEmpty(d.Get("resource_id").(string)),
-		SortKey:      []string{"name"},
+		ResourceType:        d.Get("resource_type").(string),
+		ResourceID:          common.StringSliceIgnoreEmpty(d.Get("resource_id").(string)),
+		EnterpriseProjectId: common.StringSliceIgnoreEmpty(config.GetEnterpriseProjectID(d)),
+		SortKey:             []string{"name"},
 	})
 	if err != nil {
 		return diag.Errorf("error retrieving OpenTelekomCloud ER v3 flow logs: %s", err)

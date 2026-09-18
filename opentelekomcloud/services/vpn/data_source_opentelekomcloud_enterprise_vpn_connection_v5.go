@@ -79,6 +79,10 @@ func DataSourceEnterpriseConnection() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"tags": common.TagsSchema(),
 			"status": {
 				Type:     schema.TypeString,
@@ -266,6 +270,7 @@ func dataSourceEvpnConnectionRead(ctx context.Context, d *schema.ResourceData, m
 		d.Set("tunnel_peer_address", gw.TunnelPeerAddress),
 		d.Set("enable_nqa", gw.EnableNqa),
 		d.Set("ha_role", gw.HaRole),
+		d.Set("enterprise_project_id", gw.EnterpriseProjectId),
 		d.Set("created_at", gw.CreatedAt),
 		d.Set("updated_at", gw.UpdatedAt),
 		d.Set("status", gw.Status),

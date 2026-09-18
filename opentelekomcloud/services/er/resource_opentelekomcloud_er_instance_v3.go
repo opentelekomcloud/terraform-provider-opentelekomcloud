@@ -56,6 +56,12 @@ func ResourceErInstanceV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"enable_default_propagation": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -126,6 +132,7 @@ func resourceErInstanceV3Create(ctx context.Context, d *schema.ResourceData, met
 		EnableDefaultAssociation:    pointerto.Bool(d.Get("enable_default_association").(bool)),
 		AvailabilityZoneIDs:         getAvailabilityZones(d),
 		AutoAcceptSharedAttachments: pointerto.Bool(d.Get("auto_accept_shared_attachments").(bool)),
+		EnterpriseProjectId:         config.GetEnterpriseProjectID(d, "0"),
 		Tags:                        common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 	}
 
@@ -185,6 +192,7 @@ func resourceErInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("default_association_route_table_id", getResp.Instance.DefaultAssociationRouteTableID),
 		d.Set("availability_zones", getResp.Instance.AvailabilityZoneIDs),
 		d.Set("auto_accept_shared_attachments", getResp.Instance.AutoAcceptSharedAttachments),
+		d.Set("enterprise_project_id", getResp.Instance.EnterpriseProjectId),
 		d.Set("tags", tagsMap),
 	)
 

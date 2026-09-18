@@ -28,6 +28,7 @@ func TestAccConnectionDataSource_basic(t *testing.T) {
 					testAccCheckVPNEnterpriseConnectionDataSourceID(dataConnectionName),
 					resource.TestCheckResourceAttrSet(dataConnectionName, "name"),
 					resource.TestCheckResourceAttrSet(dataConnectionName, "customer_gateway_id"),
+					resource.TestCheckResourceAttrSet(dataConnectionName, "enterprise_project_id"),
 				),
 			},
 		},

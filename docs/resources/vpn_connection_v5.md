@@ -129,6 +129,9 @@ The [policy_rules](#Connection_PolicyRule) structure is documented below.
 
   Changing this parameter will create a new resource.
 
+* `enterprise_project_id` - (Optional, String, ForceNew) Specifies the enterprise project ID of the VPN connection.
+  Changing this parameter creates a new resource.
+
 <a name="Connection_CreateRequestIkePolicy"></a>
 The `ikepolicy` block supports:
 

@@ -48,6 +48,7 @@ func TestAccGateway_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceEvpnGatewayName, "name", name),
+					resource.TestCheckResourceAttrSet(resourceEvpnGatewayName, "enterprise_project_id"),
 					resource.TestCheckResourceAttr(resourceEvpnGatewayName, "ha_mode", "active-active"),
 					resource.TestCheckResourceAttr(resourceEvpnGatewayName, "status", "ACTIVE"),
 					resource.TestCheckResourceAttrPair(resourceEvpnGatewayName, "eip1.0.id", resourceEvpnGatewayEip1Name, "id"),

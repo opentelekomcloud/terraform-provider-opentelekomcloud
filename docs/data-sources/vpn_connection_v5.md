@@ -65,6 +65,8 @@ The [policy_rules](#Connection_PolicyRule) structure is documented below.
 
 * `ha_role` - Specifies the mode of the VPN connection.
 
+* `enterprise_project_id` - Specifies the enterprise project ID of the VPN connection.
+
 * `status` - The status of the VPN connection.
 
 * `created_at` - The create time.

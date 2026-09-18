@@ -78,6 +78,9 @@ the VPC route table cannot overlap with the CIDR block `198.19.128.0/20`.
 * `description` - (Optional, String, ForceNew) Specifies the description of the VPC endpoint. The value can contain
   characters such as letters and digits, but cannot contain less than signs (<) and great than signs (>).
 
+* `enterprise_project_id` - (Optional, String, ForceNew) Specifies the enterprise project ID of the VPC endpoint.
+  Changing this parameter creates a new resource.
+
 * `route_tables` - (Optional, List, ForceNew) Lists the IDs of route tables.
 
 * `port_ip` - (Optional, String, ForceNew) Specifies the IP address for accessing the associated VPC endpoint service.

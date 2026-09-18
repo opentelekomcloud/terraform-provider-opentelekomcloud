@@ -30,6 +30,7 @@ func TestDataSourceVPCEPService(t *testing.T) {
 				Config: testServiceDSBasic(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(dataSourceServiceName, "name", name),
+					resource.TestCheckResourceAttrSet(dataSourceServiceName, "enterprise_project_id"),
 					resource.TestCheckResourceAttr(dataSourceServiceName, "port.#", "1"),
 					resource.TestCheckResourceAttr(dataSourceServiceName, "server_type", "LB"),
 					resource.TestCheckResourceAttr(dataSourceServiceName, "service_type", "interface"),

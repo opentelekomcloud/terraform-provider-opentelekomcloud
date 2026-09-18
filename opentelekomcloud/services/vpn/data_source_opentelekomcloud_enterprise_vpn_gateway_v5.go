@@ -115,6 +115,10 @@ func DataSourceEnterpriseVpnGateway() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"region": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -207,6 +211,7 @@ func dataSourceEvpnGatewayRead(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("network_type", gw.NetworkType),
 		d.Set("access_private_ip_1", gw.AccessPrivateIp1),
 		d.Set("access_private_ip_2", gw.AccessPrivateIp2),
+		d.Set("enterprise_project_id", gw.EnterpriseProjectId),
 	)
 
 	return diag.FromErr(mErr.ErrorOrNil())

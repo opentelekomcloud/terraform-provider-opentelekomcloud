@@ -46,6 +46,7 @@ func TestAccDataSourceInstances_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(byInstanceId, "instances.0.asn", "opentelekomcloud_er_instance_v3.test", "asn"),
 					resource.TestCheckResourceAttrPair(byInstanceId, "instances.0.name", "opentelekomcloud_er_instance_v3.test", "name"),
 					resource.TestCheckResourceAttrPair(byInstanceId, "instances.0.description", "opentelekomcloud_er_instance_v3.test", "description"),
+					resource.TestCheckResourceAttrSet(byInstanceId, "instances.0.enterprise_project_id"),
 					resource.TestCheckResourceAttr(byInstanceId, "instances.0.tags.%", "2"),
 					resource.TestCheckResourceAttr(byInstanceId, "instances.0.tags.foo", "bar"),
 					resource.TestCheckResourceAttr(byInstanceId, "instances.0.tags.key", "value"),

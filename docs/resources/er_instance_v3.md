@@ -54,6 +54,9 @@ The following arguments are supported:
 * `description` - (Optional, String) The description of the ER instance.
   The description contain a maximum of 255 characters, and the angle brackets (< and >) are not allowed.
 
+* `enterprise_project_id` - (Optional, String, ForceNew) The enterprise project ID of the ER instance.
+  Changing this parameter creates a new resource.
+
 * `enable_default_propagation` - (Optional, Bool) Whether to enable the propagation of the default route table.
   The default value is **false**.
 
