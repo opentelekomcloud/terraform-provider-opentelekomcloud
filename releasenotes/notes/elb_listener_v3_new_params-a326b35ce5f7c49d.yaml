@@ -5,3 +5,4 @@ features:
     and ``tracing_config`` attributes to ``resource/opentelekomcloud_lb_listener_v3`` and
     ``data-source/opentelekomcloud_lb_listener_v3``, and ``member_instance_id``/``protection_status`` query
     filters and the ``TERMINATED_HTTPS`` protocol value.
+    (`#3569 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3569>`_)
