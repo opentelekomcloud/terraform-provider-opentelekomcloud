@@ -171,6 +171,101 @@ func DataSourceListenerV3() *schema.Resource {
 					},
 				},
 			},
+			"member_instance_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"protection_status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"protection_reason": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"access_log_customized_headers_config": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enable": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"include_headers": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"exclude_headers": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
+			"quic_config": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"quic_listener_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"enable_quic_upgrade": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+					},
+				},
+			},
+			"gzip_enable": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"cps": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"max_connections": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"nat64_enable": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"proxy_protocol_enable": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"tracing_config": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"tracing_enable": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"tracing_strategy": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"tracing_sample": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"tracing_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -183,7 +278,7 @@ func dataSourceListenerV3Read(_ context.Context, d *schema.ResourceData, meta in
 	}
 
 	if id := d.Get("id"); id != "" {
-		listener, err := listeners.Get(client, id.(string)).Extract()
+		listener, err := listeners.Get(client, id.(string))
 		if err != nil {
 			return fmterr.Errorf("error finding listener by ID: %w", err)
 		}
@@ -206,14 +301,12 @@ func dataSourceListenerV3Read(_ context.Context, d *schema.ResourceData, meta in
 		MemberTimeout:           common.IntSlice(d.Get("member_timeout")),
 		ClientTimeout:           common.IntSlice(d.Get("client_timeout")),
 		KeepAliveTimeout:        common.IntSlice(d.Get("keep_alive_timeout")),
+		MemberInstanceID:        common.StrSlice(d.Get("member_instance_id")),
+		ProtectionStatus:        common.StrSlice(d.Get("protection_status")),
 	}
-	pages, err := listeners.List(client, opts).AllPages()
+	listenerSlice, err := listeners.List(client, opts)
 	if err != nil {
 		return fmterr.Errorf("error listing LB listeners v3: %w", err)
-	}
-	listenerSlice, err := listeners.ExtractListeners(pages)
-	if err != nil {
-		return fmterr.Errorf("error extracting listeners: %w", err)
 	}
 	if len(listenerSlice) < 1 {
 		return common.DataSourceTooFewDiag

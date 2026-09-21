@@ -155,6 +155,21 @@ The following arguments are supported:
     `white` (default): A whitelist will be configured. Only IP addresses in the whitelist can access the listener.
     `black`: A blacklist will be configured. IP addresses in the blacklist are not allowed to access the listener.
 
+* `protection_status` - (Optional, String) Specifies the protection status. Value options: `nonProtection`
+  (default, not protected), `consoleProtection` (modification protection is enabled on the console).
+
+* `protection_reason` - (Optional, String) Specifies why the modification protection is enabled. Valid only
+  when `protection_status` is set to `consoleProtection`. The value can contain a maximum of 255 Unicode
+  characters, excluding angle brackets (`<>`).
+
+* `access_log_customized_headers_config` - (Optional, List) Specifies the custom headers to be recorded in
+  access logs. You can specify which headers to be or not to be recorded in the access logs of a load balancer.
+  * `enable` - (Optional, Bool) Specifies whether to enable custom access log headers.
+  * `include_headers` - (Optional, List) Specifies the custom headers that will be recorded in access logs.
+    If this parameter is specified, only the specified headers will be recorded in access logs.
+  * `exclude_headers` - (Optional, List) Specifies the headers that will not be recorded in access logs.
+    If this parameter is specified, the specified headers will not be recorded in access logs.
+
 ## Attributes Reference
 
 In addition, the following attributes are exported:
@@ -162,6 +177,31 @@ In addition, the following attributes are exported:
 * `updated_at` - Indicates the update time.
 
 * `created_at` - Indicates the creation time.
+
+* `quic_config` - Specifies the QUIC configuration for the current listener. Valid only when `protocol` is
+  set to `HTTPS`.
+  * `quic_listener_id` - Specifies the ID of the QUIC listener.
+  * `enable_quic_upgrade` - Specifies whether QUIC upgrade is enabled.
+
+* `gzip_enable` - Specifies whether GZIP compression is enabled for the load balancer.
+
+* `cps` - Specifies the maximum number of new connections that a listener can handle per second.
+
+* `max_connections` - Specifies the maximum number of concurrent connections that a listener can handle per second.
+
+* `nat64_enable` - Specifies whether to translate between IPv4 and IPv6 addresses. This option allows a client
+  to access IPv4 or IPv6 backend servers by accessing the IPv4 or IPv6 address of a load balancer.
+
+* `proxy_protocol_enable` - Specifies whether ProxyProtocol is enabled to pass the source IP addresses of the
+  clients to backend servers.
+
+* `tracing_config` - Specifies the open tracing configuration.
+  * `tracing_enable` - Specifies whether open tracing is enabled.
+  * `tracing_strategy` - Specifies the sampling mode. Value options: `full` (full sampling), `ratio`
+    (sampling by ratio).
+  * `tracing_sample` - Specifies the sampling rate. Values between `1` and `10000` represent sampling rates
+    ranging from 0.01% to 100%.
+  * `tracing_type` - Specifies the tracing type. Value: `W3CTraceContext`.
 
 ## Import
 

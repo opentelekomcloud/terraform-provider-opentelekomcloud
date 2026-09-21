@@ -71,7 +71,7 @@ func ResourceListenerV3() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"TCP", "HTTP", "UDP", "HTTPS",
+					"TCP", "HTTP", "UDP", "HTTPS", "TERMINATED_HTTPS",
 				}, false),
 			},
 			"protocol_port": {
@@ -200,6 +200,109 @@ func ResourceListenerV3() *schema.Resource {
 					},
 				},
 			},
+			"protection_status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"nonProtection", "consoleProtection",
+				}, false),
+			},
+			"protection_reason": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringLenBetween(0, 255),
+			},
+			"access_log_customized_headers_config": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enable": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"include_headers": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"exclude_headers": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
+			// quic_config, gzip_enable, cps, connection, nat64_enable, proxy_protocol_enable, and
+			// tracing_config are read-only: the SDK CreateOpts/UpdateOpts do not expose them for writing.
+			"quic_config": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"quic_listener_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"enable_quic_upgrade": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+					},
+				},
+			},
+			"gzip_enable": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"cps": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"max_connections": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"nat64_enable": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"proxy_protocol_enable": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"tracing_config": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"tracing_enable": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"tracing_strategy": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"tracing_sample": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"tracing_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -234,6 +337,52 @@ func getInsertHeaders(d *schema.ResourceData) *listeners.InsertHeaders {
 	}
 }
 
+func getAccessLogCustomizedHeadersConfigCreateOpts(d *schema.ResourceData) *listeners.AccessLogCustomizedHeadersOpts {
+	if d.Get("access_log_customized_headers_config.#").(int) == 0 {
+		return nil
+	}
+	raw := d.Get("access_log_customized_headers_config.0").(map[string]interface{})
+	enable := raw["enable"].(bool)
+	return &listeners.AccessLogCustomizedHeadersOpts{
+		Enable:         &enable,
+		IncludeHeaders: common.ExpandToStringSlice(raw["include_headers"].([]interface{})),
+		ExcludeHeaders: common.ExpandToStringSlice(raw["exclude_headers"].([]interface{})),
+	}
+}
+
+func flattenAccessLogCustomizedHeadersConfig(cfg listeners.AccessLogCustomizedHeadersConfig) []map[string]interface{} {
+	return []map[string]interface{}{
+		{
+			"enable":          cfg.Enable,
+			"include_headers": cfg.IncludeHeaders,
+			"exclude_headers": cfg.ExcludeHeaders,
+		},
+	}
+}
+
+func flattenQuicConfig(cfg *listeners.QuicConfig) []map[string]interface{} {
+	if cfg == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"quic_listener_id":    cfg.QuicListenerID,
+			"enable_quic_upgrade": cfg.EnableQuicUpgrade,
+		},
+	}
+}
+
+func flattenTracingConfig(cfg listeners.TracingConfig) []map[string]interface{} {
+	return []map[string]interface{}{
+		{
+			"tracing_enable":   cfg.TracingEnable,
+			"tracing_strategy": cfg.TracingStrategy,
+			"tracing_sample":   cfg.TracingSample,
+			"tracing_type":     cfg.TracingType,
+		},
+	}
+}
+
 func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
@@ -247,25 +396,26 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	protocol := listeners.Protocol(d.Get("protocol").(string))
 
 	opts := listeners.CreateOpts{
-		AdminStateUp:           &adminStateUp,
-		CAContainerRef:         d.Get("client_ca_tls_container_ref").(string),
-		DefaultPoolID:          d.Get("default_pool_id").(string),
-		DefaultTlsContainerRef: d.Get("default_tls_container_ref").(string),
-		Description:            d.Get("description").(string),
-		LoadbalancerID:         d.Get("loadbalancer_id").(string),
-		Name:                   d.Get("name").(string),
-		Protocol:               listeners.Protocol(d.Get("protocol").(string)),
-		ProtocolPort:           d.Get("protocol_port").(int),
-		SniContainerRefs:       common.ExpandToStringSlice(d.Get("sni_container_refs").(*schema.Set).List()),
-		Tags:                   common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
-		TlsCiphersPolicy:       d.Get("tls_ciphers_policy").(string),
-		KeepAliveTimeout:       d.Get("keep_alive_timeout").(int),
-		ClientTimeout:          d.Get("client_timeout").(int),
-		MemberTimeout:          d.Get("member_timeout").(int),
-		InsertHeaders:          getInsertHeaders(d),
-		SniMatchAlgo:           d.Get("sni_match_algo").(string),
-		SecurityPolicy:         d.Get("security_policy_id").(string),
-		IpGroup:                getIpGroup(d),
+		AdminStateUp:                     &adminStateUp,
+		CAContainerRef:                   d.Get("client_ca_tls_container_ref").(string),
+		DefaultPoolID:                    d.Get("default_pool_id").(string),
+		DefaultTlsContainerRef:           d.Get("default_tls_container_ref").(string),
+		Description:                      d.Get("description").(string),
+		LoadbalancerID:                   d.Get("loadbalancer_id").(string),
+		Name:                             d.Get("name").(string),
+		Protocol:                         listeners.Protocol(d.Get("protocol").(string)),
+		ProtocolPort:                     d.Get("protocol_port").(int),
+		SniContainerRefs:                 common.ExpandToStringSlice(d.Get("sni_container_refs").(*schema.Set).List()),
+		Tags:                             common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
+		TlsCiphersPolicy:                 d.Get("tls_ciphers_policy").(string),
+		KeepAliveTimeout:                 d.Get("keep_alive_timeout").(int),
+		ClientTimeout:                    d.Get("client_timeout").(int),
+		MemberTimeout:                    d.Get("member_timeout").(int),
+		InsertHeaders:                    getInsertHeaders(d),
+		SniMatchAlgo:                     d.Get("sni_match_algo").(string),
+		SecurityPolicy:                   d.Get("security_policy_id").(string),
+		IpGroup:                          getIpGroup(d),
+		AccessLogCustomizedHeadersConfig: getAccessLogCustomizedHeadersConfigCreateOpts(d),
 	}
 
 	forwardingInput := common.CheckNull("advanced_forwarding", d)
@@ -284,12 +434,28 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", opts)
-	lb, err := listeners.Create(client, opts).Extract()
+	lb, err := listeners.Create(client, opts)
 	if err != nil {
 		return fmterr.Errorf("error creating LoadBalancerV3: %w", err)
 	}
 
 	d.SetId(lb.ID)
+
+	// The live ELB v3 API rejects `protection_status`/`protection_reason` on
+	// create ("Unrecognized attribute(s)"), even though they are documented
+	// and modeled on CreateOpts. Apply them with a follow-up update instead.
+	protectionStatus := d.Get("protection_status").(string)
+	protectionReason := d.Get("protection_reason").(string)
+	if protectionStatus != "" || protectionReason != "" {
+		updateOpts := listeners.UpdateOpts{
+			ProtectionStatus: protectionStatus,
+			ProtectionReason: protectionReason,
+		}
+		log.Printf("[DEBUG] Updating listener %s with protection options: %#v", d.Id(), updateOpts)
+		if _, err := listeners.Update(client, d.Id(), updateOpts); err != nil {
+			return fmterr.Errorf("error setting protection status/reason for LoadBalancerV3 %s: %w", d.Id(), err)
+		}
+	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)
 	return resourceListenerV3Read(clientCtx, d, meta)
@@ -304,7 +470,7 @@ func resourceListenerV3Read(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(err)
 	}
 
-	listener, err := listeners.Get(client, d.Id()).Extract()
+	listener, err := listeners.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "listenerV3")
 	}
@@ -357,6 +523,16 @@ func setLBListenerFields(d *schema.ResourceData, listener *listeners.Listener) d
 		d.Set("sni_match_algo", listener.SniMatchAlgo),
 		d.Set("security_policy_id", listener.SecurityPolicy),
 		d.Set("ip_group", ipGroup),
+		d.Set("protection_status", listener.ProtectionStatus),
+		d.Set("protection_reason", listener.ProtectionReason),
+		d.Set("access_log_customized_headers_config", flattenAccessLogCustomizedHeadersConfig(listener.AccessLogCustomizedHeadersConfig)),
+		d.Set("quic_config", flattenQuicConfig(listener.QuicConfig)),
+		d.Set("gzip_enable", listener.GzipEnable),
+		d.Set("cps", listener.CPS),
+		d.Set("max_connections", listener.Connection),
+		d.Set("nat64_enable", listener.Nat64Enable),
+		d.Set("proxy_protocol_enable", listener.ProxyProtocolEnable),
+		d.Set("tracing_config", flattenTracingConfig(listener.TracingConfig)),
 	)
 
 	switch listeners.Protocol(listener.Protocol) {
@@ -451,9 +627,18 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 			updateOpts.IpGroup = &listeners.IpGroupUpdate{}
 		}
 	}
+	if d.HasChange("protection_status") {
+		updateOpts.ProtectionStatus = d.Get("protection_status").(string)
+	}
+	if d.HasChange("protection_reason") {
+		updateOpts.ProtectionReason = d.Get("protection_reason").(string)
+	}
+	if d.HasChange("access_log_customized_headers_config") {
+		updateOpts.AccessLogCustomizedHeadersConfig = getAccessLogCustomizedHeadersConfigCreateOpts(d)
+	}
 
 	log.Printf("[DEBUG] Updating listener %s with options: %#v", d.Id(), updateOpts)
-	_, err = listeners.Update(client, d.Id(), updateOpts).Extract()
+	_, err = listeners.Update(client, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("unable to update ListenerV3 %s: %s", d.Id(), err)
 	}
@@ -472,7 +657,7 @@ func resourceListenerV3Delete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	log.Printf("[DEBUG] Deleting listener: %s", d.Id())
-	if err := listeners.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := listeners.Delete(client, d.Id()); err != nil {
 		return fmterr.Errorf("unable to delete ListenerV3 %s: %s", d.Id(), err)
 	}
 
