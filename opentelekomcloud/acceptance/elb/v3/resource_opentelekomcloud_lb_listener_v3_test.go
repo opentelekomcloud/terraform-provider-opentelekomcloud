@@ -132,6 +132,45 @@ func TestAccLBV3Listener_HTTP_to_TCP(t *testing.T) {
 	})
 }
 
+func TestAccLBV3Listener_protectionAndAccessLog(t *testing.T) {
+	var listener listeners.Listener
+
+	t.Parallel()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LoadBalancer, Count: 1},
+		{Q: quotas.LbListener, Count: 1},
+	}
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV3ListenerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV3ListenerConfigProtectionAndAccessLog,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3ListenerExists(resourceListenerName, &listener),
+					resource.TestCheckResourceAttr(resourceListenerName, "protection_status", "consoleProtection"),
+					resource.TestCheckResourceAttr(resourceListenerName, "protection_reason", "managed by terraform"),
+					resource.TestCheckResourceAttr(resourceListenerName, "access_log_customized_headers_config.#", "1"),
+					resource.TestCheckResourceAttr(resourceListenerName, "access_log_customized_headers_config.0.enable", "true"),
+					resource.TestCheckResourceAttr(resourceListenerName, "access_log_customized_headers_config.0.include_headers.#", "1"),
+					resource.TestCheckResourceAttr(resourceListenerName, "access_log_customized_headers_config.0.include_headers.0", "X-Forwarded-For"),
+				),
+			},
+			{
+				Config: testAccLBV3ListenerConfigProtectionAndAccessLogUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3ListenerExists(resourceListenerName, &listener),
+					resource.TestCheckResourceAttr(resourceListenerName, "protection_status", "nonProtection"),
+					resource.TestCheckResourceAttr(resourceListenerName, "access_log_customized_headers_config.0.enable", "false"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccLBV3Listener_ipGroup(t *testing.T) {
 	var listener listeners.Listener
 
@@ -220,7 +259,7 @@ func testAccCheckLBV3ListenerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := listeners.Get(client, rs.Primary.ID).Extract()
+		_, err := listeners.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("listener still exists: %s", rs.Primary.ID)
 		}
@@ -246,7 +285,7 @@ func testAccCheckLBV3ListenerExists(n string, listener *listeners.Listener) reso
 			return fmt.Errorf(elbv3.ErrCreateClient, err)
 		}
 
-		found, err := listeners.Get(client, rs.Primary.ID).Extract()
+		found, err := listeners.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -363,6 +402,58 @@ resource "opentelekomcloud_lb_listener_v3" "listener_1" {
   loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.id
   protocol        = "TCP"
   protocol_port   = 5360
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3ListenerConfigProtectionAndAccessLog = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name        = "loadbalancer_1"
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+}
+
+resource "opentelekomcloud_lb_listener_v3" "listener_1" {
+  name            = "listener_1"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.id
+  protocol        = "TCP"
+  protocol_port   = 5000
+
+  protection_status = "consoleProtection"
+  protection_reason = "managed by terraform"
+
+  access_log_customized_headers_config {
+    enable          = true
+    include_headers = ["X-Forwarded-For"]
+  }
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3ListenerConfigProtectionAndAccessLogUpdate = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name        = "loadbalancer_1"
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+}
+
+resource "opentelekomcloud_lb_listener_v3" "listener_1" {
+  name            = "listener_1"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.id
+  protocol        = "TCP"
+  protocol_port   = 5000
+
+  protection_status = "nonProtection"
+
+  access_log_customized_headers_config {
+    enable = false
+  }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 

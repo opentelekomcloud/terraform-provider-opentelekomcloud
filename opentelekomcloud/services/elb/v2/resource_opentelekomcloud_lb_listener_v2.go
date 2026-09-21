@@ -435,7 +435,7 @@ func readV3parameters(d *schema.ResourceData, config *cfg.Config) error {
 	if err != nil {
 		return fmt.Errorf(v3.ErrCreateClient, err)
 	}
-	listener, err := v3listeners.Get(client, d.Id()).Extract()
+	listener, err := v3listeners.Get(client, d.Id())
 	if err != nil {
 		return err
 	}
@@ -473,7 +473,7 @@ func updateTransparentIPEnable(d *schema.ResourceData, config *cfg.Config) error
 	}
 
 	opts := v3listeners.UpdateOpts{TransparentClientIP: &enable}
-	_, err = v3listeners.Update(client, d.Id(), opts).Extract()
+	_, err = v3listeners.Update(client, d.Id(), opts)
 	return err
 }
 
@@ -499,7 +499,7 @@ func updateIpGroup(d *schema.ResourceData, config *cfg.Config, action string) er
 	}
 
 	log.Printf("[DEBUG] Updating listener %s with options: %#v", d.Id(), opts)
-	_, err = v3listeners.Update(client, d.Id(), opts).Extract()
+	_, err = v3listeners.Update(client, d.Id(), opts)
 	if err != nil {
 		return fmt.Errorf("unable to update Listener %s: %s", d.Id(), err)
 	}

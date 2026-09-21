@@ -63,6 +63,12 @@ The following arguments are supported:
 * `member_device_id` - (Optional) Specifies the ID of the cloud server that serves as a backend server.
   This parameter is used only as a query condition and is not included in the response.
 
+* `member_instance_id` - (Optional) Specifies the backend server ID. This parameter is used only as a query
+  condition and is not included in the response.
+
+* `protection_status` - (Optional) Specifies the protection status. Value options: `nonProtection`
+  (not protected), `consoleProtection` (modification protection is enabled on the console).
+
 ## Attributes Reference
 
 In addition, the following attributes are exported:
@@ -99,6 +105,34 @@ In addition, the following attributes are exported:
 * `tags` - Tags key/value pairs to associate with the loadbalancer listener.
 
 * `http2_enable` - Specifies whether to use HTTP/2.
+
+* `protection_reason` - Specifies why the modification protection is enabled.
+
+* `access_log_customized_headers_config` - Specifies the custom headers to be recorded in access logs.
+  * `enable` - Specifies whether custom access log headers are enabled.
+  * `include_headers` - Specifies the custom headers that will be recorded in access logs.
+  * `exclude_headers` - Specifies the headers that will not be recorded in access logs.
+
+* `quic_config` - Specifies the QUIC configuration for the current listener.
+  * `quic_listener_id` - Specifies the ID of the QUIC listener.
+  * `enable_quic_upgrade` - Specifies whether QUIC upgrade is enabled.
+
+* `gzip_enable` - Specifies whether GZIP compression is enabled for the load balancer.
+
+* `cps` - Specifies the maximum number of new connections that a listener can handle per second.
+
+* `max_connections` - Specifies the maximum number of concurrent connections that a listener can handle per second.
+
+* `nat64_enable` - Specifies whether to translate between IPv4 and IPv6 addresses.
+
+* `proxy_protocol_enable` - Specifies whether ProxyProtocol is enabled to pass the source IP addresses of the
+  clients to backend servers.
+
+* `tracing_config` - Specifies the open tracing configuration.
+  * `tracing_enable` - Specifies whether open tracing is enabled.
+  * `tracing_strategy` - Specifies the sampling mode.
+  * `tracing_sample` - Specifies the sampling rate.
+  * `tracing_type` - Specifies the tracing type.
 
 * `updated_at` - Indicates the update time.
 

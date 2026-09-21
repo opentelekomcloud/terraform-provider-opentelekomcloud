@@ -1,0 +1,7 @@
+features:
+  - |
+    **[ELB]** Add ``protection_status``, ``protection_reason``, ``access_log_customized_headers_config``,
+    ``quic_config``, ``gzip_enable``, ``cps``, ``max_connections``, ``nat64_enable``, ``proxy_protocol_enable``,
+    and ``tracing_config`` attributes to ``resource/opentelekomcloud_lb_listener_v3`` and
+    ``data-source/opentelekomcloud_lb_listener_v3``, and ``member_instance_id``/``protection_status`` query
+    filters and the ``TERMINATED_HTTPS`` protocol value.
