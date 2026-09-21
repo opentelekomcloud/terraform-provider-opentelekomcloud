@@ -416,10 +416,26 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   availability_zones = ["%s"]
 }
 
+resource "opentelekomcloud_lts_group_v2" "group_1" {
+  group_name  = "lb-listener-v3-acc-test-group"
+  ttl_in_days = 1
+}
+
+resource "opentelekomcloud_lts_stream_v2" "stream_1" {
+  group_id    = opentelekomcloud_lts_group_v2.group_1.id
+  stream_name = "lb-listener-v3-acc-test-stream"
+}
+
+resource "opentelekomcloud_lb_lts_log_v3" "log_1" {
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.id
+  log_group_id    = opentelekomcloud_lts_group_v2.group_1.id
+  log_stream_id   = opentelekomcloud_lts_stream_v2.stream_1.id
+}
+
 resource "opentelekomcloud_lb_listener_v3" "listener_1" {
   name            = "listener_1"
   loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.id
-  protocol        = "TCP"
+  protocol        = "HTTP"
   protocol_port   = 5000
 
   protection_status = "consoleProtection"
@@ -429,6 +445,8 @@ resource "opentelekomcloud_lb_listener_v3" "listener_1" {
     enable          = true
     include_headers = ["X-Forwarded-For"]
   }
+
+  depends_on = [opentelekomcloud_lb_lts_log_v3.log_1]
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
@@ -443,10 +461,26 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   availability_zones = ["%s"]
 }
 
+resource "opentelekomcloud_lts_group_v2" "group_1" {
+  group_name  = "lb-listener-v3-acc-test-group"
+  ttl_in_days = 1
+}
+
+resource "opentelekomcloud_lts_stream_v2" "stream_1" {
+  group_id    = opentelekomcloud_lts_group_v2.group_1.id
+  stream_name = "lb-listener-v3-acc-test-stream"
+}
+
+resource "opentelekomcloud_lb_lts_log_v3" "log_1" {
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.id
+  log_group_id    = opentelekomcloud_lts_group_v2.group_1.id
+  log_stream_id   = opentelekomcloud_lts_stream_v2.stream_1.id
+}
+
 resource "opentelekomcloud_lb_listener_v3" "listener_1" {
   name            = "listener_1"
   loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.id
-  protocol        = "TCP"
+  protocol        = "HTTP"
   protocol_port   = 5000
 
   protection_status = "nonProtection"
@@ -454,6 +488,8 @@ resource "opentelekomcloud_lb_listener_v3" "listener_1" {
   access_log_customized_headers_config {
     enable = false
   }
+
+  depends_on = [opentelekomcloud_lb_lts_log_v3.log_1]
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 

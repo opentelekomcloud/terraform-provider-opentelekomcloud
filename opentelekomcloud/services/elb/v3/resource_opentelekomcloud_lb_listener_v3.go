@@ -415,8 +415,6 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		SniMatchAlgo:                     d.Get("sni_match_algo").(string),
 		SecurityPolicy:                   d.Get("security_policy_id").(string),
 		IpGroup:                          getIpGroup(d),
-		ProtectionStatus:                 d.Get("protection_status").(string),
-		ProtectionReason:                 d.Get("protection_reason").(string),
 		AccessLogCustomizedHeadersConfig: getAccessLogCustomizedHeadersConfigCreateOpts(d),
 	}
 
@@ -442,6 +440,22 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId(lb.ID)
+
+	// The live ELB v3 API rejects `protection_status`/`protection_reason` on
+	// create ("Unrecognized attribute(s)"), even though they are documented
+	// and modeled on CreateOpts. Apply them with a follow-up update instead.
+	protectionStatus := d.Get("protection_status").(string)
+	protectionReason := d.Get("protection_reason").(string)
+	if protectionStatus != "" || protectionReason != "" {
+		updateOpts := listeners.UpdateOpts{
+			ProtectionStatus: protectionStatus,
+			ProtectionReason: protectionReason,
+		}
+		log.Printf("[DEBUG] Updating listener %s with protection options: %#v", d.Id(), updateOpts)
+		if _, err := listeners.Update(client, d.Id(), updateOpts); err != nil {
+			return fmterr.Errorf("error setting protection status/reason for LoadBalancerV3 %s: %w", d.Id(), err)
+		}
+	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)
 	return resourceListenerV3Read(clientCtx, d, meta)
