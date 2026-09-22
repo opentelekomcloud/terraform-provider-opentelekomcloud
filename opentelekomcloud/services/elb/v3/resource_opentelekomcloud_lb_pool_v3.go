@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/structs"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/pools"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -109,9 +110,49 @@ func ResourceLBPoolV3() *schema.Resource {
 					},
 				},
 			},
+			"slow_start": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enable": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"duration": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Default:      30,
+							ValidateFunc: validation.IntBetween(30, 1200),
+						},
+					},
+				},
+			},
 			"ip_version": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"healthmonitor_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"listener_ids": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"loadbalancer_ids": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"member_ids": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"member_deletion_protection": {
 				Type:     schema.TypeBool,
@@ -126,6 +167,28 @@ func ResourceLBPoolV3() *schema.Resource {
 			"type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
+			},
+			"protection_status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"nonProtection", "consoleProtection",
+				}, false),
+			},
+			"protection_reason": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringLenBetween(0, 255),
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -152,14 +215,19 @@ func resourceLBPoolV3Create(ctx context.Context, d *schema.ResourceData, meta in
 		DeletionProtectionEnable: &deletionProtection,
 		Type:                     d.Get("type").(string),
 		VpcId:                    d.Get("vpc_id").(string),
+		ProtectionStatus:         d.Get("protection_status").(string),
+		ProtectionReason:         d.Get("protection_reason").(string),
 	}
 
 	if d.Get("session_persistence.#").(int) > 0 {
 		persistMap := d.Get("session_persistence.0").(map[string]interface{})
 		opts.Persistence = mapToPersistence(persistMap)
 	}
+	if d.Get("slow_start.#").(int) > 0 {
+		opts.SlowStart = expandPoolSlowStart(d.Get("slow_start"))
+	}
 
-	pool, err := pools.Create(client, opts).Extract()
+	pool, err := pools.Create(client, opts)
 	if err != nil {
 		return fmterr.Errorf("error creating LB Pool v3: %w", err)
 	}
@@ -178,11 +246,15 @@ func resourceLBPoolV3Read(ctx context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
-	pool, err := pools.Get(client, d.Id()).Extract()
+	pool, err := pools.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "error viewing details of LB Pool v3")
 	}
 
+	return setLBPoolV3Fields(d, pool)
+}
+
+func setLBPoolV3Fields(d *schema.ResourceData, pool *pools.Pool) diag.Diagnostics {
 	mErr := multierror.Append(
 		d.Set("name", pool.Name),
 		d.Set("description", pool.Description),
@@ -190,10 +262,19 @@ func resourceLBPoolV3Read(ctx context.Context, d *schema.ResourceData, meta inte
 		d.Set("project_id", pool.ProjectID),
 		d.Set("protocol", pool.Protocol),
 		d.Set("session_persistence", expandPersistence(pool.Persistence)),
+		d.Set("slow_start", flattenPoolSlowStart(pool.SlowStart)),
 		d.Set("ip_version", pool.IpVersion),
+		d.Set("healthmonitor_id", pool.MonitorID),
+		d.Set("listener_ids", poolRefIDs(pool.Listeners)),
+		d.Set("loadbalancer_ids", poolRefIDs(pool.Loadbalancers)),
+		d.Set("member_ids", poolRefIDs(pool.Members)),
 		d.Set("member_deletion_protection", pool.DeletionProtectionEnable),
 		d.Set("type", pool.Type),
 		d.Set("vpc_id", pool.VpcId),
+		d.Set("protection_status", pool.ProtectionStatus),
+		d.Set("protection_reason", pool.ProtectionReason),
+		d.Set("created_at", pool.CreatedAt),
+		d.Set("updated_at", pool.UpdatedAt),
 	)
 	if len(pool.Loadbalancers) > 0 {
 		mErr = multierror.Append(mErr, d.Set("loadbalancer_id", pool.Loadbalancers[0].ID))
@@ -205,6 +286,7 @@ func resourceLBPoolV3Read(ctx context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf("error setting LB Pool v3 fields: %w", err)
 	}
 
+	d.SetId(pool.ID)
 	return nil
 }
 
@@ -226,6 +308,36 @@ func mapToPersistence(src map[string]interface{}) *pools.SessionPersistence {
 		CookieName:         src["cookie_name"].(string),
 		PersistenceTimeout: src["persistence_timeout"].(int),
 	}
+}
+
+func expandPoolSlowStart(raw interface{}) *pools.SlowStart {
+	items := raw.([]interface{})
+	if len(items) == 0 || items[0] == nil {
+		return nil
+	}
+	item := items[0].(map[string]interface{})
+	return &pools.SlowStart{
+		Enable:   item["enable"].(bool),
+		Duration: item["duration"].(int),
+	}
+}
+
+func flattenPoolSlowStart(slowStart *pools.SlowStart) []interface{} {
+	if slowStart == nil {
+		return nil
+	}
+	return []interface{}{map[string]interface{}{
+		"enable":   slowStart.Enable,
+		"duration": slowStart.Duration,
+	}}
+}
+
+func poolRefIDs(refs []structs.ResourceRef) []string {
+	ids := make([]string, len(refs))
+	for i, ref := range refs {
+		ids[i] = ref.ID
+	}
+	return ids
 }
 
 func resourceLBPoolV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -250,12 +362,26 @@ func resourceLBPoolV3Update(ctx context.Context, d *schema.ResourceData, meta in
 		opts.LBMethod = d.Get("lb_algorithm").(string)
 	}
 	if d.HasChange("session_persistence") {
-		persistMap := d.Get("session_persistence.0").(map[string]interface{})
-		opts.Persistence = mapToPersistence(persistMap)
+		if d.Get("session_persistence.#").(int) > 0 {
+			persistMap := d.Get("session_persistence.0").(map[string]interface{})
+			opts.Persistence = mapToPersistence(persistMap)
+		}
+	}
+	if d.HasChange("slow_start") {
+		opts.SlowStart = expandPoolSlowStart(d.Get("slow_start"))
+		if opts.SlowStart == nil {
+			opts.SlowStart = &pools.SlowStart{Enable: false, Duration: 30}
+		}
 	}
 	if d.HasChange("member_deletion_protection") {
 		memberDeletionProtection := d.Get("member_deletion_protection").(bool)
 		opts.DeletionProtectionEnable = &memberDeletionProtection
+	}
+	if d.HasChange("protection_status") {
+		opts.ProtectionStatus = d.Get("protection_status").(string)
+	}
+	if d.HasChange("protection_reason") {
+		opts.ProtectionReason = d.Get("protection_reason").(string)
 	}
 	// https://jira.tsi-dev.otc-service.com/browse/BM-1642
 	// if d.HasChange("type") {
@@ -265,7 +391,7 @@ func resourceLBPoolV3Update(ctx context.Context, d *schema.ResourceData, meta in
 	// 	opts.VpcId = d.Get("vpc_id").(string)
 	// }
 
-	_, err = pools.Update(client, d.Id(), opts).Extract()
+	_, err = pools.Update(client, d.Id(), opts)
 	if err != nil {
 		return fmterr.Errorf("error updating LB Pool v3: %w", err)
 	}
@@ -283,7 +409,7 @@ func resourceLBPoolV3Delete(ctx context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
-	if err := pools.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := pools.Delete(client, d.Id()); err != nil {
 		return fmterr.Errorf("error deleting LB Pool v3: %w", err)
 	}
 

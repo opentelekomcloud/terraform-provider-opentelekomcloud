@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    **[ELB]** Add slow start, modification protection, timestamps, and related resource IDs to
+    ``opentelekomcloud_lb_pool_v3``.
+  - |
+    **[ELB]** Add the ``opentelekomcloud_lb_pool_v3`` data source with supported backend server group filters.
+upgrade:
+  - |
+    **[ELB]** Modernize ELB v3 pool operations for the action-oriented gophertelekomcloud SDK API.

@@ -94,6 +94,15 @@ The `session_persistence` block supports:
   * If the protocol of the backend server group is HTTP or HTTPS, the value ranges from `1` to `1440`,
   and the default value is `1440`.
 
+* `slow_start` - (Optional) Specifies the slow start configuration. This block is supported only for backend
+  server groups using the `HTTP` or `HTTPS` protocol.
+
+The `slow_start` block supports:
+
+* `enable` - (Optional) Specifies whether slow start is enabled.
+
+* `duration` - (Optional) Specifies the slow start duration, in seconds. The value ranges from `30` to `1200`.
+
 * `member_deletion_protection` - (Optional) Specifies whether to enable removal protection for the pool members.
   `true`: Enable removal protection.
   `false` (default): Disable removal protection.
@@ -102,6 +111,11 @@ The `session_persistence` block supports:
 
 * `type` - (Optional) Specifies the type of the backend server group.
 
+* `protection_status` - (Optional) Specifies the modification protection status. Valid values are `nonProtection`
+  and `consoleProtection`.
+
+* `protection_reason` - (Optional) Specifies why modification protection is enabled. This value is valid only when
+  `protection_status` is `consoleProtection`.
 
 ## Attributes Reference
 
@@ -110,6 +124,18 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - Specifies the backend server group ID.
 
 * `ip_version` - Specifies the IP version supported by the backend server group.
+
+* `healthmonitor_id` - Specifies the ID of the health monitor associated with the backend server group.
+
+* `listener_ids` - Lists the IDs of listeners associated with the backend server group.
+
+* `loadbalancer_ids` - Lists the IDs of load balancers associated with the backend server group.
+
+* `member_ids` - Lists the IDs of backend servers in the backend server group.
+
+* `created_at` - Specifies the time when the backend server group was created.
+
+* `updated_at` - Specifies the time when the backend server group was last updated.
 
 ## Import
 
