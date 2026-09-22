@@ -39,6 +39,9 @@ func TestLBPoolV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourcePoolName, "ip_version", "dualstack"),
 					resource.TestCheckResourceAttr(resourcePoolName, "type", "instance"),
 					resource.TestCheckResourceAttr(resourcePoolName, "member_deletion_protection", "true"),
+					resource.TestCheckResourceAttr(resourcePoolName, "loadbalancer_ids.#", "1"),
+					resource.TestCheckResourceAttrSet(resourcePoolName, "created_at"),
+					resource.TestCheckResourceAttrSet(resourcePoolName, "updated_at"),
 				),
 			},
 			{
@@ -55,27 +58,9 @@ func TestLBPoolV3_basic(t *testing.T) {
 					testLBPoolV3Exists(resourcePoolName, &pool),
 					resource.TestCheckResourceAttr(resourcePoolName, "name", ""),
 					resource.TestCheckResourceAttr(resourcePoolName, "protocol", "HTTPS"),
+					resource.TestCheckResourceAttr(resourcePoolName, "slow_start.0.enable", "true"),
+					resource.TestCheckResourceAttr(resourcePoolName, "slow_start.0.duration", "30"),
 				),
-			},
-		},
-	})
-}
-
-func TestLBPoolV3_import(t *testing.T) {
-	t.Parallel()
-	qts := []*quotas.ExpectedQuota{
-		{Q: quotas.LbPool, Count: 1},
-		{Q: quotas.LoadBalancer, Count: 1},
-	}
-	quotas.BookMany(t, qts)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testLBPoolV3Destroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testLBPoolV3Basic,
 			},
 			{
 				ResourceName:      resourcePoolName,
@@ -103,7 +88,7 @@ func testLBPoolV3Exists(n string, pool *pools.Pool) resource.TestCheckFunc {
 			return fmt.Errorf(elbv3.ErrCreateClient, err)
 		}
 
-		found, err := pools.Get(client, rs.Primary.ID).Extract()
+		found, err := pools.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -130,7 +115,7 @@ func testLBPoolV3Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := pools.Get(client, rs.Primary.ID).Extract()
+		_, err := pools.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("LB Pool still exists: %s", rs.Primary.ID)
 		}
@@ -211,6 +196,11 @@ resource "opentelekomcloud_lb_pool_v3" "pool" {
 
   session_persistence {
     type = "HTTP_COOKIE"
+  }
+
+  slow_start {
+    enable   = true
+    duration = 30
   }
 
   member_deletion_protection = false

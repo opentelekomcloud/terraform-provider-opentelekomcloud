@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    **[ELB]** Add slow start, modification protection, timestamps, and related resource IDs to
+    ``opentelekomcloud_lb_pool_v3``.
+    (`#3570 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3570>`_)
+  - |
+    **[ELB]** Add the ``opentelekomcloud_lb_pool_v3`` data source with supported backend server group filters.
+    (`#3570 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3570>`_)
