@@ -62,26 +62,6 @@ func TestLBPoolV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourcePoolName, "slow_start.0.duration", "30"),
 				),
 			},
-		},
-	})
-}
-
-func TestLBPoolV3_import(t *testing.T) {
-	t.Parallel()
-	qts := []*quotas.ExpectedQuota{
-		{Q: quotas.LbPool, Count: 1},
-		{Q: quotas.LoadBalancer, Count: 1},
-	}
-	quotas.BookMany(t, qts)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testLBPoolV3Destroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testLBPoolV3Basic,
-			},
 			{
 				ResourceName:      resourcePoolName,
 				ImportState:       true,
