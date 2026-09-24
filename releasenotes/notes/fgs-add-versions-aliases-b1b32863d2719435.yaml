@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **[FGS]** Add new resource ``opentelekomcloud_fgs_publish_version_v2`` (`#3572 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3572>`_)
+  - |
+    **[FGS]** Add new resource ``opentelekomcloud_fgs_alias_v2`` (`#3572 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3572#3572>`_)
