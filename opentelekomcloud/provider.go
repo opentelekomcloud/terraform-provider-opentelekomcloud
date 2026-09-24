@@ -612,6 +612,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_er_vpc_attachment_v3":                      er.ResourceErVpcAttachmentV3(),
 			"opentelekomcloud_evs_snapshot_v2":                           evs.ResourceEvsSnapshotV2(),
 			"opentelekomcloud_evs_volume_v3":                             evs.ResourceEvsStorageVolumeV3(),
+			"opentelekomcloud_fgs_alias_v2":                              fgs.ResourceFgsAliasV2(),
 			"opentelekomcloud_fgs_async_invoke_config_v2":                fgs.ResourceAsyncInvokeConfigurationV2(),
 			"opentelekomcloud_fgs_dependency_version_v2":                 fgs.ResourceDependencyVersionV2(),
 			"opentelekomcloud_fgs_event_v2":                              fgs.ResourceFgsEventV2(),
