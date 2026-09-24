@@ -24,39 +24,28 @@ func ResourcePublishVersionV2() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"function_urn": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "Specifies the URN of the function.",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"digest": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Specifies the digest of the function code.",
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
 			},
 			"version": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				ForceNew:    true,
-				Description: "Specifies the version of the function.",
-			},
-			"description": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Specifies the description of the version.",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"func_name": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Specifies the name of the function.",
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"last_modified": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Specifies the last modified time of the version.",
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -83,10 +72,9 @@ func resourcePublishVersionV2Create(ctx context.Context, d *schema.ResourceData,
 	}
 
 	createOpts := alias.PublishOpts{
-		FuncUrn:     d.Get("function_urn").(string),
-		Digest:      d.Get("digest").(string),
-		Version:     d.Get("version").(string),
-		Description: d.Get("description").(string),
+		FuncUrn: d.Get("function_urn").(string),
+		Digest:  d.Get("digest").(string),
+		Version: d.Get("version").(string),
 	}
 
 	createResp, err := alias.PublishVersion(fgsClient, createOpts)
@@ -127,7 +115,6 @@ func resourcePublishVersionV2Read(ctx context.Context, d *schema.ResourceData, m
 				d.Set("function_urn", funcUrn),
 				d.Set("version", v.Version),
 				d.Set("digest", v.Digest),
-				d.Set("description", v.Description),
 				d.Set("func_name", v.FuncName),
 				d.Set("last_modified", v.LastModified),
 			)
