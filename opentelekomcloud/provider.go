@@ -616,6 +616,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_fgs_dependency_version_v2":                 fgs.ResourceDependencyVersionV2(),
 			"opentelekomcloud_fgs_event_v2":                              fgs.ResourceFgsEventV2(),
 			"opentelekomcloud_fgs_function_v2":                           fgs.ResourceFgsFunctionV2(),
+			"opentelekomcloud_fgs_publish_version_v2":                    fgs.ResourcePublishVersionV2(),
 			"opentelekomcloud_fgs_trigger_v2":                            fgs.ResourceFgsTriggerV2(),
 			"opentelekomcloud_fw_firewall_group_v2":                      fw.ResourceFWFirewallGroupV2(),
 			"opentelekomcloud_fw_policy_v2":                              fw.ResourceFWPolicyV2(),
