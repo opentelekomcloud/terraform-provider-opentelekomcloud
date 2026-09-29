@@ -252,8 +252,6 @@ func ResourceCCEClusterV3() *schema.Resource {
 				ForceNew: true,
 				Optional: true,
 				Computed: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"ipvs", "iptables"}, true),
 			},
 			"multi_az": {
 				Type:          schema.TypeBool,

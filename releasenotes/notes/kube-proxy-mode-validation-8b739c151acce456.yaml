@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    [CCE] Removed validation for ``kube_proxy_mode`` in ``resource_opentelekomcloud_cce_cluster_v3`` (`#3574 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3574>`_)
