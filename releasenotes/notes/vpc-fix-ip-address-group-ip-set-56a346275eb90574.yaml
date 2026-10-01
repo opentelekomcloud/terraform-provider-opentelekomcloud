@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Set parameters `ip_set` and `ip_extra_set` as computed in ``resource/opentelekomcloud_vpc_ip_address_group_v3`` (`#3575 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3575>`_)
