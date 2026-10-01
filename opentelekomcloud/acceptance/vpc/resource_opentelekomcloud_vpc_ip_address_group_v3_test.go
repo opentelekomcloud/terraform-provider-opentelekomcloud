@@ -63,6 +63,55 @@ func TestAccVpcIPAddressGroupV3_basic(t *testing.T) {
 	})
 }
 
+func TestAccVpcIPAddressGroupV3_ipSet(t *testing.T) {
+	var group addressgroup.AddressGroup
+	rc := common.InitResourceCheck(
+		vpcIPAddressGroupResourceName,
+		&group,
+		getVpcIPAddressGroupV3,
+	)
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVpcIPAddressGroupV3IPSet,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(vpcIPAddressGroupResourceName, "name", "test-acc-ip-address-group-v3-ips"),
+					resource.TestCheckResourceAttr(vpcIPAddressGroupResourceName, "ip_version", "4"),
+					resource.TestCheckResourceAttr(vpcIPAddressGroupResourceName, "ip_set.#", "3"),
+					resource.TestCheckResourceAttr(vpcIPAddressGroupResourceName, "ip_set.0", "192.168.1.0/24"),
+					resource.TestCheckResourceAttr(vpcIPAddressGroupResourceName, "ip_set.1", "192.168.2.0/24"),
+					resource.TestCheckResourceAttr(vpcIPAddressGroupResourceName, "ip_set.2", "192.168.3.0/24"),
+				),
+			},
+			{
+				Config: testAccVpcIPAddressGroupV3IPSet,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(vpcIPAddressGroupResourceName, "ip_set.#", "3"),
+				),
+			},
+			{
+				Config: testAccVpcIPAddressGroupV3IPSetUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(vpcIPAddressGroupResourceName, "ip_set.#", "2"),
+					resource.TestCheckResourceAttr(vpcIPAddressGroupResourceName, "ip_set.0", "192.168.10.0/24"),
+					resource.TestCheckResourceAttr(vpcIPAddressGroupResourceName, "ip_set.1", "192.168.20.0/24"),
+				),
+			},
+			{
+				ResourceName:      vpcIPAddressGroupResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 var testAccVpcIPAddressGroupV3Basic = `
 resource "opentelekomcloud_vpc_ip_address_group_v3" "group_1" {
   name        = "test-acc-ip-address-group-v3"
@@ -76,5 +125,30 @@ resource "opentelekomcloud_vpc_ip_address_group_v3" "group_1" {
   name        = "test-acc-ip-address-group-v3"
   description = "updated"
   ip_version  = 4
+}
+`
+
+var testAccVpcIPAddressGroupV3IPSet = `
+resource "opentelekomcloud_vpc_ip_address_group_v3" "group_1" {
+  name        = "test-acc-ip-address-group-v3-ips"
+  description = "ip set test"
+  ip_version  = 4
+  ip_set = [
+    "192.168.1.0/24",
+    "192.168.2.0/24",
+    "192.168.3.0/24",
+  ]
+}
+`
+
+var testAccVpcIPAddressGroupV3IPSetUpdate = `
+resource "opentelekomcloud_vpc_ip_address_group_v3" "group_1" {
+  name        = "test-acc-ip-address-group-v3-ips"
+  description = "ip set test"
+  ip_version  = 4
+  ip_set = [
+    "192.168.10.0/24",
+    "192.168.20.0/24",
+  ]
 }
 `
