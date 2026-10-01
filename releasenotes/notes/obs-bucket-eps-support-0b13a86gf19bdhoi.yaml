@@ -1,0 +1,6 @@
+---
+enhancements:
+  - |
+    **[OBS]** Add `enterprise_project_id` attribute in ``resource/opentelekomcloud_obs_bucket`` (`#3576 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3576>`_)
+  - |
+    **[OBS]** Add `enterprise_project_id` attribute in``data-source/opentelekomcloud_obs_bucket`` (`#3576 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3576>`_)
