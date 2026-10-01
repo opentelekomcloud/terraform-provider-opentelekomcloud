@@ -413,6 +413,11 @@ The following arguments are supported:
   * If the name contains any periods (.), a security certificate verification message may appear when you access
     the bucket or its objects by entering a domain name.
 
+* `enterprise_project_id` - (Optional) Specifies the enterprise project ID of the bucket. Defaults to the
+  provider's enterprise project ID, or the default enterprise project (`0`) when none is configured.
+  Changing this value migrates the bucket to the target enterprise project through EPS without recreating it.
+  EPS permissions are required for updates. The `timeouts.update` setting defaults to 5 minutes.
+
 * `storage_class` - (Optional) Specifies the storage class of the bucket. OBS provides three storage classes:
   `STANDARD`, `WARM` (Infrequent Access) and `COLD` (Archive). Defaults to `STANDARD`.
 

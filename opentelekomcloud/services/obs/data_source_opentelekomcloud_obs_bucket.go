@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/s3"
@@ -17,6 +18,10 @@ func DataSourceObsBucket() *schema.Resource {
 		ReadContext: dataSourceObsBucketRead,
 
 		Schema: map[string]*schema.Schema{
+			"enterprise_project_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"region": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -296,7 +301,7 @@ func dataSourceObsBucketRead(_ context.Context, d *schema.ResourceData, meta int
 	bucket := d.Get("bucket").(string)
 
 	log.Printf("[DEBUG] Reading OBS bucket: %v", bucket)
-	out, err := client.HeadBucket(bucket)
+	out, err := client.GetBucketMetadata(&obs.GetBucketMetadataInput{Bucket: bucket})
 	if err != nil {
 		return fmterr.Errorf("failed getting OBS bucket (%s): %w", bucket, err)
 	}
@@ -307,6 +312,7 @@ func dataSourceObsBucketRead(_ context.Context, d *schema.ResourceData, meta int
 	mErr := multierror.Append(
 		d.Set("region", region),
 		d.Set("bucket", bucket),
+		d.Set("enterprise_project_id", out.Epid),
 		d.Set("bucket_domain_name", s3.BucketDomainName(bucket, region)),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
