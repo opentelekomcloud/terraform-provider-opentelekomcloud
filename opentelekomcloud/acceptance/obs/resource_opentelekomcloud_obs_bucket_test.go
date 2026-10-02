@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"io"
 	"regexp"
 	"testing"
 
@@ -382,6 +383,124 @@ func TestAccOBSBucket_VersioningObjectLockValidation(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccObsBucket_enterpriseProject(t *testing.T) {
+	if env.OS_ENTERPRISE_PROJECT_ID == "" || env.OS_ENTERPRISE_PROJECT_ID == "0" {
+		t.Skip("OS_ENTERPRISE_PROJECT_ID must specify a non-default enterprise project")
+	}
+
+	rInt := acctest.RandInt()
+	rName := "opentelekomcloud_obs_bucket.bucket"
+	dataSourceName := "data.opentelekomcloud_obs_bucket.bucket"
+	objectName := "opentelekomcloud_obs_bucket_object.object"
+	var original obs.GetObjectMetadataOutput
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketObjectDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObsBucketEnterpriseProject(rInt, ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(rName),
+					testAccCheckObsBucketObjectExists(objectName),
+					testAccCheckObsBucketMigrationObject(objectName, &original),
+					resource.TestCheckResourceAttr(rName, "id", testAccObsBucketName(rInt)),
+					resource.TestCheckResourceAttr(rName, "enterprise_project_id", "0"),
+					resource.TestCheckResourceAttr(dataSourceName, "enterprise_project_id", "0"),
+				),
+			},
+			{
+				Config: testAccObsBucketEnterpriseProject(rInt, env.OS_ENTERPRISE_PROJECT_ID),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(rName),
+					testAccCheckObsBucketObjectExists(objectName),
+					testAccCheckObsBucketMigrationObject(objectName, &original),
+					resource.TestCheckResourceAttr(rName, "id", testAccObsBucketName(rInt)),
+					resource.TestCheckResourceAttr(rName, "enterprise_project_id", env.OS_ENTERPRISE_PROJECT_ID),
+					resource.TestCheckResourceAttr(dataSourceName, "enterprise_project_id", env.OS_ENTERPRISE_PROJECT_ID),
+				),
+			},
+			{
+				ResourceName:            rName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccObsBucketEnterpriseProject(rInt, "0"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(rName),
+					testAccCheckObsBucketObjectExists(objectName),
+					testAccCheckObsBucketMigrationObject(objectName, &original),
+					resource.TestCheckResourceAttr(rName, "id", testAccObsBucketName(rInt)),
+					resource.TestCheckResourceAttr(rName, "enterprise_project_id", "0"),
+					resource.TestCheckResourceAttr(dataSourceName, "enterprise_project_id", "0"),
+				),
+			},
+			{
+				Config: testAccObsBucketEnterpriseProject(rInt, env.OS_ENTERPRISE_PROJECT_ID),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(rName),
+					testAccCheckObsBucketObjectExists(objectName),
+					testAccCheckObsBucketMigrationObject(objectName, &original),
+					resource.TestCheckResourceAttr(rName, "id", testAccObsBucketName(rInt)),
+					resource.TestCheckResourceAttr(rName, "enterprise_project_id", env.OS_ENTERPRISE_PROJECT_ID),
+					resource.TestCheckResourceAttr(dataSourceName, "enterprise_project_id", env.OS_ENTERPRISE_PROJECT_ID),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckObsBucketMigrationObject(n string, original *obs.GetObjectMetadataOutput) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("OBS object %s missing from state", n)
+		}
+
+		config := common.TestAccProvider.Meta().(*cfg.Config)
+		client, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("error creating OBS client: %w", err)
+		}
+
+		output, err := client.GetObject(&obs.GetObjectInput{
+			GetObjectMetadataInput: obs.GetObjectMetadataInput{
+				Bucket: rs.Primary.Attributes["bucket"],
+				Key:    rs.Primary.ID,
+			},
+		})
+		if err != nil {
+			return fmt.Errorf("error reading object during migration check: %w", err)
+		}
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+				return
+			}
+		}(output.Body)
+
+		body, err := io.ReadAll(output.Body)
+		if err != nil {
+			return fmt.Errorf("error reading OBS object content: %w", err)
+		}
+		if string(body) != rs.Primary.Attributes["content"] {
+			return fmt.Errorf("object content changed during enterprise project migration")
+		}
+		if original.ETag == "" {
+			*original = output.GetObjectMetadataOutput
+		} else if output.ETag != original.ETag || !output.LastModified.Equal(original.LastModified) {
+			return fmt.Errorf("object was modified during enterprise project migration")
+		}
+		if rs.Primary.ID != "migration-test.txt" {
+			return fmt.Errorf("object ID changed: got %q, want migration-test.txt", rs.Primary.ID)
+		}
+		return nil
+	}
 }
 
 func testAccCheckObsBucketDestroy(s *terraform.State) error {
@@ -1052,4 +1171,33 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
   ]
 }
 `, randInt)
+}
+
+func testAccObsBucketEnterpriseProject(randInt int, projectID string) string {
+	assignment := ""
+	if projectID != "" {
+		assignment = fmt.Sprintf("enterprise_project_id = %q", projectID)
+	}
+	return fmt.Sprintf(`
+provider "opentelekomcloud" {
+  enterprise_project_id = "0"
+}
+
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket        = "tf-test-bucket-%d"
+  storage_class = "STANDARD"
+  acl           = "private"
+  %s
+}
+
+resource "opentelekomcloud_obs_bucket_object" "object" {
+  bucket  = opentelekomcloud_obs_bucket.bucket.bucket
+  key     = "migration-test.txt"
+  content = "object content preserved during enterprise project migration"
+}
+
+data "opentelekomcloud_obs_bucket" "bucket" {
+  bucket = opentelekomcloud_obs_bucket.bucket.bucket
+}
+`, randInt, assignment)
 }

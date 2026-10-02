@@ -33,6 +33,8 @@ The following arguments are supported:
 
 The following attributes are exported:
 
+* `enterprise_project_id` - The enterprise project ID of the bucket.
+
 * `bucket_domain_name` - The bucket domain name. Will be of format `bucketname.obs.region.otc.t-systems.com`.
 
 * `region` - The region this bucket resides in.

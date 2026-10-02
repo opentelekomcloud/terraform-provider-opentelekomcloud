@@ -8,11 +8,15 @@ import (
 	"log"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/eps/v1/resources"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -31,8 +35,17 @@ func ResourceObsBucket() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: validateVersionObjLock,
+		Timeouts: &schema.ResourceTimeout{
+			Update: schema.DefaultTimeout(5 * time.Minute),
+		},
 
 		Schema: map[string]*schema.Schema{
+			"enterprise_project_id": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringIsNotEmpty,
+			},
 			"bucket": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -417,6 +430,7 @@ func resourceObsBucketCreate(ctx context.Context, d *schema.ResourceData, meta i
 		ACL:               obs.AclType(acl),
 		IsFSFileInterface: d.Get("parallel_fs").(bool),
 		StorageClass:      obs.StorageClassType(class),
+		Epid:              config.GetEnterpriseProjectID(d),
 	}
 	opts.Location = config.GetRegion(d)
 	log.Printf("[DEBUG] OBS bucket create opts: %#v", opts)
@@ -443,6 +457,11 @@ func resourceObsBucketUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	log.Printf("[DEBUG] Update OBS bucket %s", d.Id())
+	if d.HasChange("enterprise_project_id") && !d.IsNewResource() {
+		if err := resourceObsBucketEnterpriseProjectUpdate(ctx, client, d, config); err != nil {
+			return diag.FromErr(err)
+		}
+	}
 	if d.HasChange("acl") && !d.IsNewResource() {
 		if err := resourceObsBucketAclUpdate(client, d); err != nil {
 			return diag.FromErr(err)
@@ -519,6 +538,55 @@ func resourceObsBucketUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	return resourceObsBucketRead(ctx, d, meta)
+}
+
+func resourceObsBucketEnterpriseProjectUpdate(ctx context.Context, client *obs.ObsClient, d *schema.ResourceData, config *cfg.Config) error {
+	region := config.GetRegion(d)
+	epsClient, err := config.EpsV1Client(region)
+	if err != nil {
+		return fmt.Errorf("error creating EPS client: %w", err)
+	}
+	// OBS migration requires the regional IAM project ID even though buckets are global resources.
+	regionalClient, err := config.RegionIdentityV3Client(region)
+	if err != nil {
+		return fmt.Errorf("error creating regional identity client: %w", err)
+	}
+	target := d.Get("enterprise_project_id").(string)
+	return migrateObsBucketEnterpriseProject(ctx, epsClient, client, d.Id(), region, regionalClient.ProjectID, target, d.Timeout(schema.TimeoutUpdate))
+}
+
+func migrateObsBucketEnterpriseProject(ctx context.Context, epsClient *golangsdk.ServiceClient, client *obs.ObsClient,
+	bucket, region, projectID, target string, timeout time.Duration) error {
+	err := resources.Migrate(epsClient, target, resources.MigrateOpts{
+		ProjectID:    projectID,
+		ResourceID:   bucket,
+		ResourceType: "bucket",
+		RegionID:     region,
+	})
+	if err != nil {
+		return fmt.Errorf("error migrating OBS bucket %s to enterprise project %s: %w", bucket, target, err)
+	}
+	wait := &resource.StateChangeConf{
+		Pending:    []string{"Pending"},
+		Target:     []string{"Success"},
+		Timeout:    timeout,
+		MinTimeout: 5 * time.Second,
+		Refresh: func() (interface{}, string, error) {
+			output, err := client.GetBucketMetadata(&obs.GetBucketMetadataInput{Bucket: bucket})
+			if err != nil {
+				return nil, "", err
+			}
+			if output.Epid == target {
+				return output, "Success", nil
+			}
+			return output, "Pending", nil
+		},
+	}
+	_, err = wait.WaitForStateContext(ctx)
+	if err != nil {
+		return fmt.Errorf("error waiting for OBS bucket %s enterprise project migration: %w", bucket, err)
+	}
+	return nil
 }
 
 func resourceObsBucketRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -1717,6 +1785,7 @@ func setObsBucketMetadata(obsClient *obs.ObsClient, d *schema.ResourceData) erro
 
 	mErr := multierror.Append(
 		d.Set("bucket_version", output.Version),
+		d.Set("enterprise_project_id", output.Epid),
 	)
 
 	if output.FSStatus == "Enabled" {
