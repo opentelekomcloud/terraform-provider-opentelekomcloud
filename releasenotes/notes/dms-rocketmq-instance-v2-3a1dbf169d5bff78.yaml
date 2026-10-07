@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_instance_v2``
