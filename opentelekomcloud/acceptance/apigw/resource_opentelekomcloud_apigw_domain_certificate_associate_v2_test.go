@@ -94,9 +94,9 @@ EOT
 }
 
 resource "opentelekomcloud_apigw_domain_v2" "domain" {
-  gateway_id             = "%[1]s"
-  group_id               = opentelekomcloud_apigw_group_v2.group.id
-  name                   = "%[5]s"
+  gateway_id = "%[1]s"
+  group_id   = opentelekomcloud_apigw_group_v2.group.id
+  name       = "%[5]s"
 }
 
 resource "opentelekomcloud_apigw_domain_certificate_associate_v2" "assoc" {
