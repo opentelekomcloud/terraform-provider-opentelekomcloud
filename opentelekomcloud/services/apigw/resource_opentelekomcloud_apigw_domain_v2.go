@@ -25,7 +25,7 @@ func ResourceAPIDomainV2() *schema.Resource {
 		DeleteContext: resourceDomainV2Delete,
 
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceDomainV2ImportState,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -88,8 +88,7 @@ func resourceDomainV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		return diag.Errorf("error creating APIGW domain: %s", err)
 	}
-
-	d.SetId(fmt.Sprintf("%s/%s/%s", opts.GatewayID, opts.GroupID, resp.ID))
+	d.SetId(resp.ID)
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
 	return resourceDomainV2Read(clientCtx, d, meta)
@@ -104,11 +103,9 @@ func resourceDomainV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	gatewayId, groupId, domainId, err := ParseDomainV2Id(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	resp, err := GetDomain(client, gatewayId, groupId, domainId)
+	gatewayId := d.Get("gateway_id").(string)
+	groupId := d.Get("group_id").(string)
+	resp, err := GetDomain(client, gatewayId, groupId, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "APIGW domain")
 	}
@@ -138,21 +135,17 @@ func resourceDomainV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if d.HasChanges("min_ssl_version", "http_redirect_to_https") {
-		gatewayId, groupId, domainId, err := ParseDomainV2Id(d.Id())
-		if err != nil {
-			return diag.FromErr(err)
-		}
 		redirectToHTTPS := d.Get("http_redirect_to_https").(bool)
 		opts := domain.UpdateOpts{
-			GatewayID:             gatewayId,
-			GroupID:               groupId,
-			DomainID:              domainId,
+			GatewayID:             d.Get("gateway_id").(string),
+			GroupID:               d.Get("group_id").(string),
+			DomainID:              d.Id(),
 			MinSslVersion:         d.Get("min_ssl_version").(string),
 			IsHttpRedirectToHttps: &redirectToHTTPS,
 		}
 		_, err = domain.Update(client, opts)
 		if err != nil {
-			return diag.Errorf("error updating APIGW domain (%s): %s", domainId, err)
+			return diag.Errorf("error updating APIGW domain (%s): %s", d.Id(), err)
 		}
 	}
 
@@ -169,30 +162,29 @@ func resourceDomainV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	gatewayId, groupId, domainId, err := ParseDomainV2Id(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	opts := domain.DeleteOpts{
-		GatewayID: gatewayId,
-		GroupID:   groupId,
-		DomainID:  domainId,
+		GatewayID: d.Get("gateway_id").(string),
+		GroupID:   d.Get("group_id").(string),
+		DomainID:  d.Id(),
 	}
 	err = domain.Delete(client, opts)
 	if err != nil {
-		return common.CheckDeletedDiag(d, err, fmt.Sprintf("error deleting APIGW domain (%s): %s", domainId, err))
+		return common.CheckDeletedDiag(d, err, fmt.Sprintf("error deleting APIGW domain (%s): %s", d.Id(), err))
 	}
 	return nil
 }
 
-func ParseDomainV2Id(id string) (string, string, string, error) {
-	idParts := strings.Split(id, "/")
-	if len(idParts) < 3 {
-		return "", "", "", fmt.Errorf("unable to determine domain ID")
+func resourceDomainV2ImportState(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.SplitN(d.Id(), "/", 3)
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("invalid format specified for import ID, must be <gateway_id>/<group_id>/<domain_id>")
 	}
 
-	return idParts[0], idParts[1], idParts[2], nil
+	d.SetId(parts[2])
+	return []*schema.ResourceData{d}, multierror.Append(
+		d.Set("gateway_id", parts[0]),
+		d.Set("group_id", parts[1]),
+	).ErrorOrNil()
 }
 
 func GetDomain(client *golangsdk.ServiceClient, gatewayId, groupId, domainId string) (*group.UrlDomains, error) {

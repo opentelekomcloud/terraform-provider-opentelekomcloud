@@ -83,7 +83,7 @@ func resourceDomainCertificateAssociateV2Create(ctx context.Context, d *schema.R
 	}
 	err = cert.Bind(client, opts)
 	if err != nil {
-		return diag.Errorf("error binding OpenTelekomCloud apigw signature to the APIs: %s", err)
+		return diag.Errorf("error binding OpenTelekomCloud apigw cert to domain: %s", err)
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s/%s", gatewayId, groupId, domainId, certificateId))
