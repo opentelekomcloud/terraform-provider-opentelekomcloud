@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_instance_v2``
+    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_instance_v2`` (`#3579 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3579>`_)
