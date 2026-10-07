@@ -154,6 +154,9 @@ func resourceDomainCertificateAssociateV2Delete(ctx context.Context, d *schema.R
 	}
 
 	gatewayId, groupId, domainId, certificateId, err := ParseDomainCertificateAssociateId(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	opts := cert.BindOpts{
 		InstanceID:     gatewayId,
 		GroupID:        groupId,
