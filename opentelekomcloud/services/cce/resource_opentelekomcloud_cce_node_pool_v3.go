@@ -50,6 +50,7 @@ func ResourceCCENodePoolV3() *schema.Resource {
 			common.ValidateVolumeType("root_volume.*.volumetype"),
 			common.ValidateVolumeType("data_volumes.*.volumetype"),
 			common.ValidateSubnet("subnet_id"),
+			recreateOnInstallDiff,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -245,6 +246,11 @@ func ResourceCCENodePoolV3() *schema.Resource {
 				Computed:  true,
 				StateFunc: common.GetHashOrEmpty,
 			},
+			"recreate_on_install": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"max_pods": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -304,6 +310,20 @@ func ResourceCCENodePoolV3() *schema.Resource {
 			},
 		},
 	}
+}
+
+func recreateOnInstallDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if !d.Get("recreate_on_install").(bool) {
+		return nil
+	}
+	for _, field := range []string{"preinstall", "postinstall"} {
+		if d.HasChange(field) {
+			if err := d.ForceNew(field); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func resourceCCENodePoolUserTags(d *schema.ResourceData) []tags.ResourceTag {
