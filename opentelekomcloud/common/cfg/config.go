@@ -29,6 +29,7 @@ import (
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/gpfs"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/pathorcontents"
@@ -722,6 +723,55 @@ func obsProxyConf() (obs.Configurer, error) {
 			return proxyConfigure, err
 		}
 		return obs.WithProxyUrl(httpProxy), nil
+	}
+	return proxyConfigure, nil
+}
+
+// NewGPFSClient creates a client for the General Purpose File System (SFS3) API.
+// The SFS3 API is addressed via virtual-hosted domains and signed with AK/SK, so a
+// temporary AK/SK credential is required.
+func (c *Config) NewGPFSClient(region string) (*gpfs.Client, error) {
+	cred, err := c.issueTemporaryCredentials()
+	if err != nil {
+		return nil, fmt.Errorf("failed to construct GPFS client without AK/SK: %s", err)
+	}
+
+	client, err := openstack.NewSFSV3(c.HwClient, golangsdk.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getEndpointType(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	proxyConfigure, err := gpfsProxyConf()
+	if err != nil {
+		return nil, err
+	}
+
+	return gpfs.New(
+		cred.AccessKey, cred.SecretKey, client.Endpoint,
+		gpfs.WithSecurityToken(cred.SecurityToken), gpfs.WithSslVerify(!c.Insecure), proxyConfigure,
+	)
+}
+
+func gpfsProxyConf() (gpfs.Configurer, error) {
+	proxyConfigure := gpfs.WithProxyUrl("")
+	httpProxy := os.Getenv("HTTP_PROXY")
+	httpsProxy := os.Getenv("HTTPS_PROXY")
+
+	if httpsProxy != "" {
+		_, err := url.ParseRequestURI(httpsProxy)
+		if err != nil {
+			return proxyConfigure, err
+		}
+		return gpfs.WithProxyUrl(httpsProxy), nil
+	} else if httpProxy != "" {
+		_, err := url.ParseRequestURI(httpProxy)
+		if err != nil {
+			return proxyConfigure, err
+		}
+		return gpfs.WithProxyUrl(httpProxy), nil
 	}
 	return proxyConfigure, nil
 }
