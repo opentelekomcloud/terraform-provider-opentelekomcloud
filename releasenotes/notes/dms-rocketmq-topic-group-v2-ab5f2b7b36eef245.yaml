@@ -1,6 +1,6 @@
 ---
 features:
   - |
-    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_topic_v2`` (`#3581 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_topic_v2`` (`#3584 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3584>`_)
   - |
-    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_consumer_group_v2`` (`#3581 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_consumer_group_v2`` (`#3584 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3584>`_)
