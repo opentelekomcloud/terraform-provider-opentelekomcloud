@@ -2,6 +2,7 @@ package dms
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strings"
 )
@@ -25,4 +26,13 @@ func MarshalValue(i interface{}) string {
 	}
 
 	return strings.Trim(string(jsonRaw), `"`)
+}
+
+// parseRocketMQSubResourceID splits ID of a RocketMQ topic or consumer group in format <instance_id>/<name>.
+func parseRocketMQSubResourceID(id string) (string, string, error) {
+	parts := strings.SplitN(id, "/", 2)
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return "", "", fmt.Errorf("invalid ID format, want '<instance_id>/<name>', but '%s'", id)
+	}
+	return parts[0], parts[1], nil
 }
