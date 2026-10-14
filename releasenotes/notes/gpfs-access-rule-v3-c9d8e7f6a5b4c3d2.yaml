@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[GPFS]** New resource ``resource/opentelekomcloud_gpfs_access_rule_v3`` (`#3589 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3589>`_)
