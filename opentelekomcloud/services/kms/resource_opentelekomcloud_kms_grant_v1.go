@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/kms/v1/grants"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -50,6 +51,12 @@ func ResourceKmsGrantV1() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"grantee_principal_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"user", "domain"}, false),
+			},
 			"issuing_principal": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -77,11 +84,12 @@ func resourceKmsGrantV1Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	keyID := d.Get("key_id").(string)
 	createOpts := grants.CreateOpts{
-		KeyID:             keyID,
-		GranteePrincipal:  d.Get("grantee_principal").(string),
-		Operations:        operations,
-		Name:              d.Get("name").(string),
-		RetiringPrincipal: d.Get("retiring_principal").(string),
+		KeyID:                keyID,
+		GranteePrincipal:     d.Get("grantee_principal").(string),
+		GranteePrincipalType: d.Get("grantee_principal_type").(string),
+		Operations:           operations,
+		Name:                 d.Get("name").(string),
+		RetiringPrincipal:    d.Get("retiring_principal").(string),
 	}
 
 	createGrant, err := grants.Create(client, createOpts).Extract()
