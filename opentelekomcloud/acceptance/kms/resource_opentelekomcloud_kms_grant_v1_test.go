@@ -2,9 +2,9 @@ package acceptance
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/kms/v1/grants"
@@ -19,21 +19,16 @@ const resourceGrantName = "opentelekomcloud_kms_grant_v1.grant_1"
 func TestAccKmsGrantV1Basic(t *testing.T) {
 	var grant grants.Grant
 
-	granteePrincipal := os.Getenv("OS_USER_ID")
-	if granteePrincipal == "" {
-		t.Skip("OS_USER_ID must be set for acceptance test")
-	}
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckKmsV1GrantDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKmsGrantV1Basic(granteePrincipal),
+				Config: testAccKmsGrantV1Basic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKmsV1GrantExists(resourceGrantName, &grant),
-					resource.TestCheckResourceAttr(resourceGrantName, "key_id", env.OS_KMS_ID),
+					resource.TestCheckResourceAttrPair(resourceGrantName, "key_id", "opentelekomcloud_kms_key_v1.key_1", "id"),
 					resource.TestCheckResourceAttr(resourceGrantName, "name", "my_grant"),
 					resource.TestCheckResourceAttr(resourceGrantName, "grantee_principal_type", "user"),
 				),
@@ -64,18 +59,13 @@ func TestAccKmsGrantV1Domain(t *testing.T) {
 }
 
 func TestAccKmsV1GrantImportBasic(t *testing.T) {
-	granteePrincipal := os.Getenv("OS_USER_ID")
-	if granteePrincipal == "" {
-		t.Skip("OS_USER_ID must be set for acceptance test")
-	}
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckKmsV1GrantDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKmsGrantV1Basic(granteePrincipal),
+				Config: testAccKmsGrantV1Basic(),
 			},
 			{
 				ResourceName:      resourceGrantName,
@@ -173,30 +163,43 @@ func testAccCheckKmsV1GrantExists(n string, grant *grants.Grant) resource.TestCh
 	}
 }
 
-func testAccKmsGrantV1Basic(granteePrincipal string) string {
-	return fmt.Sprintf(`
-resource "opentelekomcloud_kms_grant_v1" "grant_1" {
-  key_id                 = "%s"
-  name                   = "my_grant"
-  grantee_principal      = "%s"
-  grantee_principal_type = "user"
-  operations             = ["describe-key", "create-datakey", "encrypt-datakey"]
-}
-`, env.OS_KMS_ID, granteePrincipal)
-}
-
-func testAccKmsGrantV1Domain() string {
+func testAccKmsGrantV1Base() string {
 	return fmt.Sprintf(`
 data "opentelekomcloud_identity_auth_scope_v3" "scope" {
   name = "scope"
 }
 
+resource "opentelekomcloud_kms_key_v1" "key_1" {
+  key_alias    = "%s"
+  pending_days = "7"
+}
+`, acctest.RandomWithPrefix("kms_grant"))
+}
+
+func testAccKmsGrantV1Basic() string {
+	return fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_kms_grant_v1" "grant_1" {
-  key_id                 = "%s"
+  key_id                 = opentelekomcloud_kms_key_v1.key_1.id
+  name                   = "my_grant"
+  grantee_principal      = data.opentelekomcloud_identity_auth_scope_v3.scope.user_id
+  grantee_principal_type = "user"
+  operations             = ["describe-key", "create-datakey", "encrypt-datakey"]
+}
+`, testAccKmsGrantV1Base())
+}
+
+func testAccKmsGrantV1Domain() string {
+	return fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_kms_grant_v1" "grant_1" {
+  key_id                 = opentelekomcloud_kms_key_v1.key_1.id
   name                   = "my_domain_grant"
   grantee_principal      = data.opentelekomcloud_identity_auth_scope_v3.scope.user_domain_id
   grantee_principal_type = "domain"
   operations             = ["describe-key", "create-datakey", "encrypt-datakey"]
 }
-`, env.OS_KMS_ID)
+`, testAccKmsGrantV1Base())
 }
