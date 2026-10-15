@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/pointerto"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v2/instances/management"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -178,7 +179,7 @@ func getPartitionReassignments(d *schema.ResourceData) []management.PartitionRea
 		for j := range assignmentsRaw {
 			assignmentRaw := assignmentsRaw[j].(map[string]interface{})
 			assignment := management.TopicAssignment{
-				Partition:        assignmentRaw["partition"].(int),
+				Partition:        pointerto.Int(assignmentRaw["partition"].(int)),
 				PartitionBrokers: fetchIntegerLists(assignmentRaw["partition_brokers"].([]interface{})),
 			}
 			assignments = append(assignments, &assignment)
