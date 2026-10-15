@@ -3,7 +3,9 @@ package iam
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -138,16 +140,18 @@ func buildRolePolicy(d *schema.ResourceData) (policies.CreatePolicy, error) {
 		}
 
 		resourceCheck := statement["resource"].([]interface{})
+		conditionCheck := statement["condition"].(string)
 
 		if len(resourceCheck) > 0 {
-			var refinedResource []string
-			for _, s := range resourceCheck {
-				refinedResource = append(refinedResource, s.(string))
+			resource, err := buildStatementResource(resourceCheck)
+			if err != nil {
+				return customPolicy, fmt.Errorf("statement %d: %w", i, err)
 			}
-			res[i].Resource = refinedResource
+			if _, isURI := resource.(map[string][]string); isURI && len(conditionCheck) > 0 {
+				return customPolicy, fmt.Errorf("statement %d: `condition` can't be used with URI resources", i)
+			}
+			res[i].Resource = resource
 		}
-
-		conditionCheck := statement["condition"].(string)
 
 		if len(conditionCheck) > 0 {
 			var refinedCondition policies.Condition
@@ -161,6 +165,28 @@ func buildRolePolicy(d *schema.ResourceData) (policies.CreatePolicy, error) {
 
 	customPolicy.Statement = res
 	return customPolicy, nil
+}
+
+// buildStatementResource converts `resource` values into the policy `Resource`.
+// Values starting with `/` (e.g. `/iam/agencies/<agency_id>`) are sent as `{"uri": [...]}`,
+// all other values are sent as a list of resource paths.
+func buildStatementResource(resources []interface{}) (interface{}, error) {
+	var paths, uris []string
+	for _, v := range resources {
+		s := v.(string)
+		if strings.HasPrefix(s, "/") {
+			uris = append(uris, s)
+		} else {
+			paths = append(paths, s)
+		}
+	}
+	if len(paths) > 0 && len(uris) > 0 {
+		return nil, fmt.Errorf("`resource` can't mix URIs (starting with `/`) and resource paths")
+	}
+	if len(uris) > 0 {
+		return map[string][]string{"uri": uris}, nil
+	}
+	return paths, nil
 }
 
 func resourceIdentityRoleV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

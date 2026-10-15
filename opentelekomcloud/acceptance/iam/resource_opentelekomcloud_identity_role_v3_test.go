@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -98,6 +99,70 @@ func TestAccIdentityV3Role_importBasic(t *testing.T) {
 				ResourceName:      resourceRoleName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccIdentityRoleV3_agencyResource(t *testing.T) {
+	var iamRole policies.Policy
+
+	name := "custom-role" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			acc.TestAccPreCheck(t)
+			acc.TestAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityRoleV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIdentityRoleV3_agencyResource(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityRoleV3Exists(resourceRoleName, &iamRole),
+					resource.TestCheckResourceAttr(resourceRoleName, "statement.0.action.0", "iam:agencies:assume"),
+					resource.TestCheckResourceAttr(resourceRoleName, "statement.0.resource.#", "1"),
+					testAccCheckIdentityRoleV3AgencyURI(resourceRoleName, "statement.0.resource.0",
+						"opentelekomcloud_identity_agency_v3.agency_1"),
+				),
+			},
+			{
+				Config: testAccIdentityRoleV3_agencyResourceUpdate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIdentityRoleV3Exists(resourceRoleName, &iamRole),
+					resource.TestCheckResourceAttr(resourceRoleName, "statement.0.resource.#", "2"),
+					testAccCheckIdentityRoleV3AgencyURI(resourceRoleName, "statement.0.resource.1",
+						"opentelekomcloud_identity_agency_v3.agency_2"),
+				),
+			},
+			{
+				ResourceName:      resourceRoleName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccIdentityRoleV3_agencyResourceInvalid(t *testing.T) {
+	name := "custom-role" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			acc.TestAccPreCheck(t)
+			acc.TestAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityRoleV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccIdentityRoleV3_agencyResourceMixed(name),
+				ExpectError: regexp.MustCompile("can't mix URIs"),
+			},
+			{
+				Config:      testAccIdentityRoleV3_agencyResourceCondition(name),
+				ExpectError: regexp.MustCompile("`condition` can't be used with URI resources"),
 			},
 		},
 	})
@@ -243,4 +308,103 @@ resource "opentelekomcloud_identity_role_v3" "role" {
     action = ["ecs:*:list*"]
   }
 }`, val)
+}
+
+const testAccIdentityRoleV3_agencies = `
+resource "opentelekomcloud_identity_agency_v3" "agency_1" {
+  name                  = "%[1]s-1"
+  delegated_domain_name = "op_svc_evs"
+  project_role {
+    all_projects = true
+    roles        = ["CCE ReadOnlyAccess"]
+  }
+}
+
+resource "opentelekomcloud_identity_agency_v3" "agency_2" {
+  name                  = "%[1]s-2"
+  delegated_domain_name = "op_svc_evs"
+  project_role {
+    all_projects = true
+    roles        = ["CCE ReadOnlyAccess"]
+  }
+}
+`
+
+func testAccIdentityRoleV3_agencyResource(val string) string {
+	return fmt.Sprintf(testAccIdentityRoleV3_agencies+`
+resource "opentelekomcloud_identity_role_v3" "role" {
+  description   = "assume agency"
+  display_name  = "%[1]s"
+  display_layer = "domain"
+  statement {
+    effect   = "Allow"
+    action   = ["iam:agencies:assume"]
+    resource = ["/iam/agencies/${opentelekomcloud_identity_agency_v3.agency_1.id}"]
+  }
+}`, val)
+}
+
+func testAccIdentityRoleV3_agencyResourceUpdate(val string) string {
+	return fmt.Sprintf(testAccIdentityRoleV3_agencies+`
+resource "opentelekomcloud_identity_role_v3" "role" {
+  description   = "assume agency"
+  display_name  = "%[1]s"
+  display_layer = "domain"
+  statement {
+    effect = "Allow"
+    action = ["iam:agencies:assume"]
+    resource = [
+      "/iam/agencies/${opentelekomcloud_identity_agency_v3.agency_1.id}",
+      "/iam/agencies/${opentelekomcloud_identity_agency_v3.agency_2.id}",
+    ]
+  }
+}`, val)
+}
+
+func testAccIdentityRoleV3_agencyResourceMixed(val string) string {
+	return fmt.Sprintf(testAccIdentityRoleV3_agencies+`
+resource "opentelekomcloud_identity_role_v3" "role" {
+  description   = "assume agency"
+  display_name  = "%[1]s"
+  display_layer = "domain"
+  statement {
+    effect = "Allow"
+    action = ["iam:agencies:assume"]
+    resource = [
+      "/iam/agencies/${opentelekomcloud_identity_agency_v3.agency_1.id}",
+      "OBS:*:*:bucket:*",
+    ]
+  }
+}`, val)
+}
+
+func testAccIdentityRoleV3_agencyResourceCondition(val string) string {
+	return fmt.Sprintf(testAccIdentityRoleV3_agencies+`
+resource "opentelekomcloud_identity_role_v3" "role" {
+  description   = "assume agency"
+  display_name  = "%[1]s"
+  display_layer = "domain"
+  statement {
+    effect    = "Allow"
+    action    = ["iam:agencies:assume"]
+    resource  = ["/iam/agencies/${opentelekomcloud_identity_agency_v3.agency_1.id}"]
+    condition = <<EOF
+{
+  "StringEquals": {
+    "g:ProjectName": ["eu-de"]
+  }
+}
+EOF
+  }
+}`, val)
+}
+
+func testAccCheckIdentityRoleV3AgencyURI(roleName, key, agencyName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		agency, ok := s.RootModule().Resources[agencyName]
+		if !ok {
+			return fmt.Errorf("not found: %s", agencyName)
+		}
+		return resource.TestCheckResourceAttr(roleName, key, "/iam/agencies/"+agency.Primary.ID)(s)
+	}
 }

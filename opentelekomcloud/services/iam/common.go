@@ -60,15 +60,65 @@ func buildStatementsSet(role *policies.Policy) ([]interface{}, error) {
 			}
 			condition = string(jsonOutput)
 		}
+		resource, err := flattenStatementResource(statement.Resource)
+		if err != nil {
+			return nil, fmt.Errorf("statement %d: %w", i, err)
+		}
 		statements[i] = map[string]interface{}{
 			"effect":    statement.Effect,
 			"action":    statement.Action,
-			"resource":  statement.Resource,
+			"resource":  resource,
 			"condition": condition,
 		}
 	}
 
 	return statements, nil
+}
+
+// flattenStatementResource converts the policy `Resource` into the `resource` field.
+// `Resource` is either a list of resource paths or an object like `{"uri": ["/iam/agencies/<id>"]}`,
+// in which case the URIs are returned as-is.
+func flattenStatementResource(raw interface{}) ([]interface{}, error) {
+	switch r := raw.(type) {
+	case nil:
+		return nil, nil
+	case []interface{}, []string:
+		return toInterfaceSlice(r)
+	case map[string]interface{}:
+		uris, ok := r["uri"]
+		if !ok || len(r) != 1 {
+			return nil, fmt.Errorf("unsupported Resource object: %v", r)
+		}
+		return toInterfaceSlice(uris)
+	case map[string][]string:
+		converted := make(map[string]interface{}, len(r))
+		for k, v := range r {
+			converted[k] = v
+		}
+		return flattenStatementResource(converted)
+	default:
+		return nil, fmt.Errorf("unsupported Resource type %T", r)
+	}
+}
+
+func toInterfaceSlice(raw interface{}) ([]interface{}, error) {
+	switch v := raw.(type) {
+	case []interface{}:
+		for _, item := range v {
+			if _, ok := item.(string); !ok {
+				return nil, fmt.Errorf("unsupported Resource item type %T", item)
+			}
+		}
+		return v, nil
+	case []string:
+		result := make([]interface{}, len(v))
+		for i, item := range v {
+			result[i] = item
+		}
+		return result, nil
+	default:
+		return nil, fmt.Errorf("unsupported Resource list type %T", v)
+	}
 }
 
 func findKeyByValue(m map[string]string, searchValue string) (string, bool) {
