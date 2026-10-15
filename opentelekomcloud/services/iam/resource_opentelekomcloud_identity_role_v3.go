@@ -195,7 +195,7 @@ func resourceIdentityRoleV3Create(ctx context.Context, d *schema.ResourceData, m
 		return config.IdentityV30Client()
 	})
 	if err != nil {
-		fmterr.Errorf(clientV30CreationFail, err)
+		return fmterr.Errorf(clientV30CreationFail, err)
 	}
 
 	roleType, fmtErr := buildRoleType(d)
