@@ -2,9 +2,13 @@ package dms
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
+	"slices"
 	"strings"
+
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 )
 
 const (
@@ -35,4 +39,20 @@ func parseRocketMQSubResourceID(id string) (string, string, error) {
 		return "", "", fmt.Errorf("invalid ID format, want '<instance_id>/<name>', but '%s'", id)
 	}
 	return parts[0], parts[1], nil
+}
+
+// convertRocketMQNotFound converts a RocketMQ 400 error with one of the given error codes into a 404 error,
+// as the RocketMQ API reports missing sub-resources this way.
+func convertRocketMQNotFound(err error, errCodes ...string) error {
+	var err400 golangsdk.ErrDefault400
+	if !errors.As(err, &err400) {
+		return err
+	}
+	var apiErr struct {
+		ErrorCode string `json:"error_code"`
+	}
+	if json.Unmarshal(err400.Body, &apiErr) == nil && slices.Contains(errCodes, apiErr.ErrorCode) {
+		return golangsdk.ErrDefault404{}
+	}
+	return err
 }
