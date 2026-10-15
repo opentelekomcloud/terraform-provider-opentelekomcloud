@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_user_v2`` (`#3592 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3592>`_)
+  - |
+    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_migration_task_v2`` (`#3592 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3592>`_)
