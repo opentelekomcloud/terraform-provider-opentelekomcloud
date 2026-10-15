@@ -1,8 +1,10 @@
 package acceptance
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
@@ -48,3 +50,38 @@ resource "opentelekomcloud_identity_role_v3" "role" {
   }
 }
 `
+
+func TestAccOpenStackIdentityV3CustomRoleDataSource_agencyResource(t *testing.T) {
+	dataSourceName := "data.opentelekomcloud_identity_role_custom_v3.role_1"
+	name := "custom-role" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccOpenStackIdentityV3CustomRoleDataSource_agencyResource(name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(dataSourceName, "display_name", name),
+					resource.TestCheckResourceAttr(dataSourceName, "statement.0.action.0", "iam:agencies:assume"),
+					resource.TestCheckResourceAttr(dataSourceName, "statement.0.resource.#", "1"),
+					testAccCheckIdentityRoleV3AgencyURI(dataSourceName, "statement.0.resource.0",
+						"opentelekomcloud_identity_agency_v3.agency_1"),
+				),
+			},
+		},
+	})
+}
+
+func testAccOpenStackIdentityV3CustomRoleDataSource_agencyResource(name string) string {
+	return fmt.Sprintf(`
+%s
+
+data "opentelekomcloud_identity_role_custom_v3" "role_1" {
+  display_name = opentelekomcloud_identity_role_v3.role.display_name
+}
+`, testAccIdentityRoleV3_agencyResource(name))
+}

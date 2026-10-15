@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    **[IAM]** Support agency URIs (``/iam/agencies/<agency_id>``) in ``statement.resource`` of ``resource/opentelekomcloud_identity_role_v3`` for agency-scoped ``iam:agencies:assume`` policies
+fixes:
+  - |
+    **[IAM]** Fix reading policies with an object ``Resource`` (e.g. ``{"uri": [...]}``) in ``resource/opentelekomcloud_identity_role_v3`` and ``data-source/opentelekomcloud_identity_role_custom_v3``
