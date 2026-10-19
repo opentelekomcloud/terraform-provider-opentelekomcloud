@@ -81,5 +81,6 @@ The `statement` block supports:
 * `resource` -  The resources which will be granted/denied accesses.
   Format: `Service:*:*:resource:resource_path`.
   Examples: `KMS:*:*:KeyId:your_key`, `OBS:*:*:bucket:your_bucket`, `OBS:*:*:object:your_object`.
+  For agency-scoped policies the agency URIs are returned, e.g. `/iam/agencies/<agency_id>`.
 
 * `condition` - The conditions for the permission to take effect.

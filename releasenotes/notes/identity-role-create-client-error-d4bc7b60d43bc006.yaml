@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IAM]** Return client creation error in ``resource/opentelekomcloud_identity_role_v3`` create

@@ -53,6 +53,30 @@ resource "opentelekomcloud_identity_role_v3" "role" {
 }
 ```
 
+### Allow assuming only specific agencies
+
+```hcl
+resource "opentelekomcloud_identity_agency_v3" "agency" {
+  name                  = "my_agency"
+  delegated_domain_name = "my_domain"
+  project_role {
+    all_projects = true
+    roles        = ["CCE ReadOnlyAccess"]
+  }
+}
+
+resource "opentelekomcloud_identity_role_v3" "assume_agency" {
+  description   = "Assume only my_agency"
+  display_name  = "assume_my_agency"
+  display_layer = "domain"
+  statement {
+    effect   = "Allow"
+    action   = ["iam:agencies:assume"]
+    resource = ["/iam/agencies/${opentelekomcloud_identity_agency_v3.agency.id}"]
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -88,6 +112,12 @@ The `statement` block supports:
 * `resource` - (Optional) The resources which will be granted/denied accesses.
   Format: `Service:*:*:resource:resource_path`.
   Examples: `KMS:*:*:KeyId:your_key`, `OBS:*:*:bucket:your_bucket`, `OBS:*:*:object:your_object`.
+  To restrict `iam:agencies:assume` to specific agencies, use agency URIs instead:
+  `/iam/agencies/<agency_id>` (the agency ID, not the name). Values starting with `/` are sent
+  to the API as `{"uri": [...]}`.
+
+-> URIs (starting with `/`) and resource paths can't be mixed in a single `statement`,
+  and `condition` can't be used together with URIs.
 
 * `condition` - (Optional) The conditions for the permission to take effect. A maximum of 10 conditions are allowed.
   Conditions should be provided as string as in example above.
