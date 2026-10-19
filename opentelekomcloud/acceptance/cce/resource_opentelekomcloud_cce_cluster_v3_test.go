@@ -191,6 +191,7 @@ func TestAccCCEClusterV3_turbo_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceClusterName, "kubernetes_svc_ip_range", "10.247.0.0/16"),
 					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_control"),
 					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_node"),
+					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_eni"),
 				),
 			},
 		},
@@ -608,6 +609,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   container_network_type  = "eni"
   kubernetes_svc_ip_range = "10.247.0.0/16"
+  kube_proxy_mode         = "iptables"
   ignore_addons           = true
   eni_subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
   eni_subnet_cidr         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.cidr

@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[CCE]** Added ``security_group_eni`` attribute to ``resource/opentelekomcloud_cce_cluster_v3``
+    (`#358 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/358>`_)
