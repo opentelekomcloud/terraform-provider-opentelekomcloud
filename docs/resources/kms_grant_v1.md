@@ -25,14 +25,29 @@ resource "opentelekomcloud_kms_grant_v1" "grant_1" {
 }
 ```
 
+### Grant to an account
+
+```hcl
+resource "opentelekomcloud_kms_grant_v1" "grant_1" {
+  key_id                 = var.kms_id
+  name                   = "my_domain_grant"
+  grantee_principal      = var.domain_id
+  grantee_principal_type = "domain"
+  operations             = ["describe-key", "create-datakey", "encrypt-datakey"]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
 * `key_id` - (Required) Indicates the ID of the KMS. Changing this creates new grant.
 
-* `grantee_principal` - (Required) Indicates the ID of the authorized user.
+* `grantee_principal` - (Required) Indicates the ID of the authorized user or account.
   Changing this creates new grant.
+
+* `grantee_principal_type` - (Optional) Authorization type. The valid values are: `user`, `domain`.
+  Defaults to `user` on the API side. Changing this creates new grant.
 
 * `operations` - (Required) Permissions that can be granted.
   The valid values are: `create-datakey`, `create-datakey-without-plaintext`,
@@ -63,4 +78,22 @@ KMS Grants can be imported using the `key_id/grant_id`, e.g.
 
 ```shell
 terraform import opentelekomcloud_kms_grant_v1.grant_1 4779ab1c-7c1a-44b1-a02e-93dfc361b32d/7056d636-ac60-4663-8a6c-82d3c32c1c64
+```
+
+Note that the imported state may not be identical to your resource definition, due to some attributes missing from the
+API response. The missing attributes include: `grantee_principal_type`.
+It is generally recommended running `terraform plan` after importing a grant.
+You can then decide if changes should be applied to the grant, or the resource definition should be updated to
+align with the grant. Also, you can ignore changes as below.
+
+```hcl
+resource "opentelekomcloud_kms_grant_v1" "grant_1" {
+  # ...
+
+  lifecycle {
+    ignore_changes = [
+      grantee_principal_type,
+    ]
+  }
+}
 ```
