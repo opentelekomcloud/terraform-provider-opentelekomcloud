@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -20,26 +21,25 @@ func geDmsTopicFunc(config *cfg.Config, state *terraform.ResourceState) (interfa
 	if err != nil {
 		return nil, fmt.Errorf("error creating DMS v2 client: %s", err)
 	}
-	var fTopic topics.Topic
+	const limit = 50
+	for offset := 0; ; offset += limit {
+		v, err := topics.List(client, state.Primary.Attributes["instance_id"], topics.ListOpts{
+			Offset: strconv.Itoa(offset),
+			Limit:  strconv.Itoa(limit),
+		})
+		if err != nil {
+			return nil, fmt.Errorf("error listing DMS topics: %s", err)
+		}
 
-	v, err := topics.List(client, state.Primary.Attributes["instance_id"])
-	if err != nil {
-		return nil, fmt.Errorf("provided topic doesn't exist")
-	}
-	found := false
-
-	for _, topic := range v.Topics {
-		if topic.Name == state.Primary.ID {
-			fTopic = topic
-			found = true
-			break
+		for _, topic := range v.Topics {
+			if topic.Name == state.Primary.ID {
+				return topic, nil
+			}
+		}
+		if len(v.Topics) < limit || offset+limit >= v.Total {
+			return nil, fmt.Errorf("provided topic doesn't exist")
 		}
 	}
-	if !found {
-		return nil, fmt.Errorf("provided topic doesn't exist")
-	}
-
-	return fTopic, nil
 }
 
 func TestAccDmsTopicsV2_basic(t *testing.T) {
@@ -103,7 +103,7 @@ data "opentelekomcloud_dms_az_v1" "az_1" {}
 data "opentelekomcloud_dms_product_v1" "product_1" {
   engine        = "kafka"
   instance_type = "cluster"
-  version       = "2.3.0"
+  version       = "2.7"
 }
 
 resource "opentelekomcloud_dms_instance_v1" "instance_1" {
