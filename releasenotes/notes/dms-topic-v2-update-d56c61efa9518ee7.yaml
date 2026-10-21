@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[DMS]** Update ``resource/opentelekomcloud_dms_topic_v2`` (`#3597 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3597>`_)
