@@ -402,6 +402,10 @@ func ResourceCCEClusterV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"security_group_eni": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"delete_efs": associateDeleteSchema,
 			"delete_eni": associateDeleteSchema,
 			"delete_evs": associateDeleteSchema,
@@ -763,9 +767,15 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 
 	var controlSecGroupID string
 	var nodeSecGroupID string
+	var eniSecGroupID string
 	for _, v := range securityGroups {
-		if controlSecGroupID != "" && nodeSecGroupID != "" {
+		if controlSecGroupID != "" && nodeSecGroupID != "" && eniSecGroupID != "" {
 			break
+		}
+		// ENI security group (CCE Turbo) is named {Cluster name}-cce-eni-{Random ID}
+		if strings.HasPrefix(v.Name, cluster.Metadata.Name+"-cce-eni-") {
+			eniSecGroupID = v.ID
+			continue
 		}
 		if !strings.Contains(v.Description, d.Id()) {
 			continue
@@ -794,6 +804,9 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 	if err := d.Set("security_group_node", nodeSecGroupID); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("security_group_eni", eniSecGroupID); err != nil {
 		return diag.FromErr(err)
 	}
 
