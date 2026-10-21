@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[CFW]** Add ``tags`` argument to ``resource/opentelekomcloud_cfw_firewall_v1``
+    and ``tags`` attribute to ``data-source/opentelekomcloud_cfw_firewall_v1``

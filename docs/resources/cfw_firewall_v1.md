@@ -24,6 +24,10 @@ resource "opentelekomcloud_cfw_firewall_v1" "firewall_1" {
   charge_info {
     charge_mode = "postPaid"
   }
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
 }
 ```
 
@@ -40,6 +44,9 @@ The following arguments are supported:
 
 * `charge_info` - (Required, List, ForceNew) Specifies the billing type, which can be yearly/monthly or pay-per-use (default setting).
   The [charge_info](#charge_info) structure is documented below.
+
+* `tags` - (Optional, Map) Specifies the key/value pairs to associate with the firewall instance.
+  Changing tags updates the firewall instance in place.
 
 <a name="flavor"></a>
 The `flavor` block supports:

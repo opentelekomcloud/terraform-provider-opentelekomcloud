@@ -30,6 +30,7 @@ func getFirewallFunc(conf *cfg.Config, state *terraform.ResourceState) (interfac
 
 func TestAccCFWFirewallV1_basic(t *testing.T) {
 	var firewall cfwmanagementv1.GetFirewallInstanceResponseRecord
+	var firewallID string
 	rc := common.InitResourceCheck(
 		firewallResourceName,
 		&firewall,
@@ -47,6 +48,23 @@ func TestAccCFWFirewallV1_basic(t *testing.T) {
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(firewallResourceName, "name", "test-acc-tf-firewall"),
 					resource.TestCheckResourceAttr(firewallResourceName, "service_type", "0"),
+					resource.TestCheckResourceAttr(firewallResourceName, "tags.%", "2"),
+					resource.TestCheckResourceAttr(firewallResourceName, "tags.muh", "value-create"),
+					resource.TestCheckResourceAttr(firewallResourceName, "tags.kuh", "value-create"),
+					func(s *terraform.State) error {
+						firewallID = s.RootModule().Resources[firewallResourceName].Primary.ID
+						return nil
+					},
+				),
+			},
+			{
+				Config: testAccCFWFirewallV1Update,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					// tags are updated in place, the firewall must not be recreated
+					resource.TestCheckResourceAttrPtr(firewallResourceName, "id", &firewallID),
+					resource.TestCheckResourceAttr(firewallResourceName, "tags.%", "1"),
+					resource.TestCheckResourceAttr(firewallResourceName, "tags.muh", "value-update"),
 				),
 			},
 			{
@@ -88,5 +106,23 @@ resource "opentelekomcloud_cfw_firewall_v1" "firewall_1" {
   }
   charge_info {
     charge_mode = "postPaid"
+  }
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}`
+
+var testAccCFWFirewallV1Update = `
+resource "opentelekomcloud_cfw_firewall_v1" "firewall_1" {
+  name = "test-acc-tf-firewall"
+  flavor {
+    version = "standard"
+  }
+  charge_info {
+    charge_mode = "postPaid"
+  }
+  tags = {
+    muh = "value-update"
   }
 }`

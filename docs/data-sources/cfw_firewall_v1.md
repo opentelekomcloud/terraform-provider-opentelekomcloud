@@ -53,6 +53,7 @@ In addition to the arguments mentioned above, the following attributes are expor
 * `resources` - Indicates the firewall resource list. The [resources](#resources) structure is documented below.
 * `resource_id` - Indicates the Firewall resource ID, which is the same as `id`.
 * `support_url_filtering` - Indicates whether website filtering is supported: true (yes), false (no).
+* `tags` - Indicates the key/value pairs associated with the firewall instance.
 
 <a name="flavor"></a>
 The `flavor` block supports:
