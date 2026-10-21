@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
@@ -129,25 +130,15 @@ func resourceDmsTopicsV2Read(ctx context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf(errCreationClientV2, err)
 	}
 
-	instanceId := d.Get("instance_id").(string)
+	instanceID := d.Get("instance_id").(string)
 
-	v, err := topics.List(DmsV2Client, instanceId)
+	fTopic, listResponse, err := findDmsTopicV2(DmsV2Client, instanceID, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "DMS topic")
 	}
-
-	var fTopic topics.Topic
-	found := false
-
-	for _, topic := range v.Topics {
-		if topic.Name == d.Id() {
-			fTopic = topic
-			found = true
-			break
-		}
-	}
-	if !found {
-		return fmterr.Errorf("Provided topic doesn't exist")
+	if fTopic == nil {
+		d.SetId("")
+		return nil
 	}
 
 	var mErr *multierror.Error
@@ -160,9 +151,9 @@ func resourceDmsTopicsV2Read(ctx context.Context, d *schema.ResourceData, meta i
 		d.Set("sync_replication", fTopic.SyncReplication),
 		d.Set("retention_time", fTopic.RetentionTime),
 		d.Set("sync_message_flush", fTopic.SyncMessageFlush),
-		d.Set("size", v.Size),
-		d.Set("remain_partitions", v.RemainPartitions),
-		d.Set("max_partitions", v.MaxPartitions),
+		d.Set("size", listResponse.Size),
+		d.Set("remain_partitions", listResponse.RemainPartitions),
+		d.Set("max_partitions", listResponse.MaxPartitions),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -170,6 +161,30 @@ func resourceDmsTopicsV2Read(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	return nil
+}
+
+func findDmsTopicV2(client *golangsdk.ServiceClient, instanceID, topicName string) (*topics.Topic, *topics.ListResponse, error) {
+	const limit = 50
+
+	for offset := 0; ; offset += limit {
+		response, err := topics.List(client, instanceID, topics.ListOpts{
+			Offset: strconv.Itoa(offset),
+			Limit:  strconv.Itoa(limit),
+		})
+		if err != nil {
+			return nil, nil, err
+		}
+
+		for i := range response.Topics {
+			if response.Topics[i].Name == topicName {
+				return &response.Topics[i], response, nil
+			}
+		}
+
+		if len(response.Topics) < limit || offset+limit >= response.Total {
+			return nil, response, nil
+		}
+	}
 }
 
 func resourceDmsTopicsV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -182,14 +197,34 @@ func resourceDmsTopicsV2Delete(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	deleteOpts := []string{d.Id()}
-	_, err = topics.Delete(DmsV2Client, d.Get("instance_id").(string), deleteOpts)
+	response, err := topics.Delete(DmsV2Client, d.Get("instance_id").(string), deleteOpts)
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud topic: %s", err)
+	}
+	if err := validateDmsTopicV2DeleteResponse(response, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Dms topic %s deactivated.", d.Id())
 	d.SetId("")
 	return nil
+}
+
+func validateDmsTopicV2DeleteResponse(response *topics.DeleteResponse, topicName string) error {
+	if response == nil {
+		return fmt.Errorf("DMS topic deletion response was empty for topic %q", topicName)
+	}
+
+	for _, result := range response.Topics {
+		if result.Name == topicName {
+			if !result.Success {
+				return fmt.Errorf("DMS topic %q was not deleted", topicName)
+			}
+			return nil
+		}
+	}
+
+	return fmt.Errorf("DMS topic deletion response did not contain topic %q", topicName)
 }
 
 func resourceDmsTopicV2ImportState(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData,

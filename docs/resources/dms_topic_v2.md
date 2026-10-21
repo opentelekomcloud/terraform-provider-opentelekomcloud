@@ -4,17 +4,17 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_dms_topic_v2"
 sidebar_current: "docs-opentelekomcloud-resource-dms-topic-v2"
 description: |-
-  Manages a DMS Topic V2 resource within OpenTelekomCloud.
+  Manages a DMS Kafka topic resource within OpenTelekomCloud.
 ---
 
-Up-to-date reference of API arguments for DMS topic you can get at
-[documentation portal](https://docs.otc.t-systems.com/distributed-message-service/api-ref/apis_v2_recommended/topic_management/index.html#topic-300000004)
+For an up-to-date reference of the underlying DMS topic API, see the
+[documentation portal](https://docs.otc.t-systems.com/distributed-message-service/api-ref/apis_v2_recommended/topic_management/index.html#topic-300000004).
 
 # opentelekomcloud_dms_topic_v2
 
-Manages a DMS topic V2 in the OpenTelekomCloud DMS Service (Kafka Premium/Platinum).
+Manages a topic in an Open Telekom Cloud DMS for Kafka instance.
 
-## Example Usage: creating dms instance with topic
+## Example Usage: Creating a DMS Instance with a Topic
 
 ```hcl
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
@@ -28,7 +28,7 @@ data "opentelekomcloud_dms_az_v1" "az_1" {
 
 data "opentelekomcloud_dms_product_v1" "product_1" {
   engine            = "kafka"
-  version           = "2.3.0"
+  version           = "2.7"
   instance_type     = "cluster"
   partition_num     = 300
   storage           = 600
@@ -53,7 +53,7 @@ resource "opentelekomcloud_dms_instance_v2" "instance_1" {
 }
 
 resource "opentelekomcloud_dms_topic_v2" "topic_1" {
-  instance_id      = resource.opentelekomcloud_dms_instance_v1.instance_1.id
+  instance_id      = opentelekomcloud_dms_instance_v2.instance_1.id
   name             = "topic-test"
   partition        = 10
   replication      = 2
@@ -66,9 +66,9 @@ resource "opentelekomcloud_dms_topic_v2" "topic_1" {
 
 The following arguments are supported:
 
-* `instance_id` - (Required, String, ForceNew) Indicates the ID of primary DMS instance.
+* `instance_id` - (Required, String, ForceNew) Specifies the ID of the DMS for Kafka instance.
 
-* `name` - (Required, String, ForceNew) Indicates the name of a topic.
+* `name` - (Required, String, ForceNew) Specifies the topic name.
 
 * `partition` - (Optional, Int, ForceNew) Indicates the number of topic partitions,
   which is used to set the number of concurrently consumed messages.
@@ -82,22 +82,21 @@ The following arguments are supported:
   After this function is enabled, the `acks` parameter on the producer client must be set to `–1`.
   Otherwise, this parameter does not take effect.
 
-* `retention_time` - (Optional, Int, ForceNew) Indicates the retention period of a message. Its default value is `72`.
-  Value range: `1–720`. Default value: `72`. Unit: `hour`.
+* `retention_time` - (Optional, Int, ForceNew) Specifies the message retention period, in hours.
+  Value range: `1–720`. Default value: `72`.
 
 * `sync_message_flush` - (Optional, Bool, ForceNew) Indicates whether to enable synchronous flushing.
   Default value: `false`. Synchronous flushing compromises performance.
 
-
 ## Attributes Reference
 
-All above argument parameters can be exported as attribute parameters along with attribute reference.
+In addition to the arguments above, the following attributes are exported:
 
-* `size` - The partition size of the topic.
+* `size` - Maximum number of topic records returned on an API response page.
 
-* `remain_partitions` - Number of remaining partitions.
+* `remain_partitions` - Number of partitions that can still be allocated in the DMS instance.
 
-* `max_partitions` - Total partitions number.
+* `max_partitions` - Maximum total number of partitions supported by the DMS instance.
 
 ## Import
 
