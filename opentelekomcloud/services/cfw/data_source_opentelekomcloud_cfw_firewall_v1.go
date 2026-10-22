@@ -185,6 +185,11 @@ func DataSourceCfwFirewallV1() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"tags": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -210,9 +215,15 @@ func dataSourceCFWFirewallV1Read(ctx context.Context, d *schema.ResourceData, me
 
 	log.Printf("[DEBUG] Retrieved instance %s: %#v", d.Id(), firewallInstance)
 
+	tags, err := flattenFirewallTags(firewallInstance.Tags)
+	if err != nil {
+		return fmterr.Errorf("error parsing CFW Firewall instance tags: %w", err)
+	}
+
 	serviceTypeStr := fmt.Sprintf("%d", firewallInstance.ServiceType)
 	mErr := multierror.Append(nil,
 		d.Set("id", firewallInstance.FwInstanceID),
+		d.Set("tags", tags),
 		d.Set("name", firewallInstance.FwInstanceName),
 		d.Set("enterprise_project_id", firewallInstance.EnterpriseProjectID),
 		d.Set("ha_type", firewallInstance.HAType),

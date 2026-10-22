@@ -25,6 +25,7 @@ func ResourceCfwFirewallV1() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceCFWFirewallV1Create,
 		ReadContext:   resourceCFWFirewallV1Read,
+		UpdateContext: resourceCFWFirewallV1Update,
 		DeleteContext: resourceCFWFirewallV1Delete,
 
 		Importer: &schema.ResourceImporter{
@@ -124,6 +125,7 @@ func ResourceCfwFirewallV1() *schema.Resource {
 					},
 				},
 			},
+			"tags": common.TagsSchema(),
 			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -258,6 +260,7 @@ func resourceCFWFirewallV1Create(ctx context.Context, d *schema.ResourceData, me
 		Flavor: cfwmanagementv2.CreateFlavor{
 			Version: flavor["version"].(string),
 		},
+		Tags: expandFirewallTags(d.Get("tags").(map[string]interface{})),
 	}
 
 	cfwFirewall, err := cfwmanagementv2.Create(clientV2, createOpts)
@@ -297,9 +300,15 @@ func resourceCFWFirewallV1Read(ctx context.Context, d *schema.ResourceData, meta
 
 	log.Printf("[DEBUG] Retrieved instance %s: %#v", d.Id(), firewallInstance)
 
+	tags, err := flattenFirewallTags(firewallInstance.Tags)
+	if err != nil {
+		return fmterr.Errorf("error parsing CFW Firewall instance tags: %w", err)
+	}
+
 	serviceTypeStr := fmt.Sprintf("%d", firewallInstance.ServiceType)
 	mErr := multierror.Append(nil,
 		d.Set("id", d.Id()),
+		d.Set("tags", tags),
 		d.Set("name", firewallInstance.FwInstanceName),
 		d.Set("enterprise_project_id", firewallInstance.EnterpriseProjectID),
 		d.Set("ha_type", firewallInstance.HAType),
@@ -370,6 +379,38 @@ func resourceCFWFirewallV1Read(ctx context.Context, d *schema.ResourceData, meta
 	)
 
 	return diag.FromErr(mErr.ErrorOrNil())
+}
+
+func resourceCFWFirewallV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	clientV2, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.CfwV2Client(config.GetRegion(d))
+	})
+	if err != nil {
+		return fmterr.Errorf(errCreationV2Client, err)
+	}
+
+	if d.HasChange("tags") {
+		oldTags, newTags := d.GetChange("tags")
+		if oldMap := oldTags.(map[string]interface{}); len(oldMap) > 0 {
+			err = cfwmanagementv2.DeleteTag(clientV2, d.Id(), cfwmanagementv2.DeleteTagOpts{
+				Tags: expandFirewallTags(oldMap),
+			})
+			if err != nil {
+				return fmterr.Errorf("error deleting OpenTelekomCloud CFW Firewall instance tags: %w", err)
+			}
+		}
+		if newMap := newTags.(map[string]interface{}); len(newMap) > 0 {
+			err = cfwmanagementv2.CreateTag(clientV2, d.Id(), cfwmanagementv2.CreateTagOpts{
+				Tags: expandFirewallTags(newMap),
+			})
+			if err != nil {
+				return fmterr.Errorf("error creating OpenTelekomCloud CFW Firewall instance tags: %w", err)
+			}
+		}
+	}
+
+	return resourceCFWFirewallV1Read(ctx, d, meta)
 }
 
 func resourceCFWFirewallV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

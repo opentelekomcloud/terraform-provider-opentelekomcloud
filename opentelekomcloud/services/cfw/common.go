@@ -1,11 +1,13 @@
 package cfw
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	cfwmanagementv1 "github.com/opentelekomcloud/gophertelekomcloud/openstack/cfw/v1/management"
+	cfwmanagementv2 "github.com/opentelekomcloud/gophertelekomcloud/openstack/cfw/v2/management"
 	cfwjob "github.com/opentelekomcloud/gophertelekomcloud/openstack/cfw/v3/job"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -68,6 +70,24 @@ func WaitForDeleteFirewall(client *golangsdk.ServiceClient, waitTime int, interv
 		time.Sleep(interval * time.Second)
 		return false, nil
 	})
+}
+
+func expandFirewallTags(tagMap map[string]interface{}) []cfwmanagementv2.CreateTags {
+	var tagList []cfwmanagementv2.CreateTags
+	for k, v := range tagMap {
+		tagList = append(tagList, cfwmanagementv2.CreateTags{Key: k, Value: v.(string)})
+	}
+	return tagList
+}
+
+// flattenFirewallTags parses tags returned by the API as a JSON string, e.g. "{"key":"value"}"
+func flattenFirewallTags(raw string) (map[string]string, error) {
+	var tagMap map[string]string
+	if raw == "" {
+		return tagMap, nil
+	}
+	err := json.Unmarshal([]byte(raw), &tagMap)
+	return tagMap, err
 }
 
 func InterfaceToIntPtr(i interface{}) *int {
