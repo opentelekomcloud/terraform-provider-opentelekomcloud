@@ -46,6 +46,8 @@ resource "opentelekomcloud_lb_member_v3" "member" {
 
 The following arguments are supported:
 
+* `pool_id` - (Required, String, ForceNew) Specifies the backend server group ID.
+
 * `address` - (Required) Specifies the IP address of the backend server.
 
   The IP address must be in the subnet specified by `subnet_id`, for example, `192.168.3.11`.
@@ -76,6 +78,15 @@ The following arguments are supported:
   This parameter is invalid when `lb_algorithm` is set to `SOURCE_IP` for the backend server group that contains the
   backend server.
 
+* `availability_zone` - (Optional, String) Specifies the AZ of an IP-address backend server. This parameter can be
+  set only for IP-address backends and must identify an available ECS AZ in the current region. It is required
+  when AZ affinity is enabled on the backend server group. The value can be updated to another non-empty AZ;
+  removing this argument leaves the current AZ unchanged.
+
+* `admin_state_up` - (Optional, Bool, ForceNew) Specifies the administrative state at creation. Both `true` and
+  `false` are supported. Changing this value recreates the member because administrative-state updates are
+  unsupported by the OTC API.
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
@@ -90,6 +101,24 @@ In addition to all arguments above, the following attributes are exported:
     * `OFFLINE`: The cloud server used as the backend server is stopped or does not exist.
 
 * `ip_version` - Version of IP based on the `address` parameter. The value can be `v4` or `v6`.
+
+* `created_at` - Creation time. Older resources may not return this value.
+
+* `updated_at` - Last update time. Older resources may not return this value.
+
+* `member_type` - Backend server type.
+
+* `instance_id` - ID of the associated ECS, if any.
+
+* `status` - Per-listener health status list. Each entry exports:
+  * `listener_id` - Listener ID.
+  * `operating_status` - Member health status for this listener.
+  * `created_at` - Status creation time.
+  * `updated_at` - Status update time.
+  * `reason` - Optional health-check failure details:
+    * `reason_code` - Failure code.
+    * `expected_response` - Expected health-check response code.
+    * `healthcheck_response` - Actual health-check response code.
 
 ## Import
 

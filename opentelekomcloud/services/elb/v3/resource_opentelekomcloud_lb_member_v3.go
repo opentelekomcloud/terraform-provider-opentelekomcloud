@@ -77,7 +77,59 @@ func ResourceLBMemberV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"availability_zone": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringLenBetween(1, 255),
+			},
+			// Administrative-state updates are unsupported in the reviewed OTC documentation.
+			"admin_state_up": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"member_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"instance_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"status": memberStatusSchema(),
 		},
+	}
+}
+
+func memberStatusSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+			"listener_id":      {Type: schema.TypeString, Computed: true},
+			"operating_status": {Type: schema.TypeString, Computed: true},
+			"created_at":       {Type: schema.TypeString, Computed: true},
+			"updated_at":       {Type: schema.TypeString, Computed: true},
+			"reason": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"reason_code":          {Type: schema.TypeString, Computed: true},
+					"expected_response":    {Type: schema.TypeString, Computed: true},
+					"healthcheck_response": {Type: schema.TypeString, Computed: true},
+				}},
+			},
+		}},
 	}
 }
 
@@ -91,11 +143,15 @@ func resourceLBMemberV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	opts := members.CreateOpts{
-		Address:      d.Get("address").(string),
-		ProtocolPort: d.Get("protocol_port").(int),
-		Name:         d.Get("name").(string),
-		ProjectID:    d.Get("project_id").(string),
-		SubnetID:     d.Get("subnet_id").(string),
+		Address:          d.Get("address").(string),
+		ProtocolPort:     d.Get("protocol_port").(int),
+		Name:             d.Get("name").(string),
+		ProjectID:        d.Get("project_id").(string),
+		SubnetID:         d.Get("subnet_id").(string),
+		AvailabilityZone: d.Get("availability_zone").(string),
+	}
+	if common.IsAttrSet(d, "admin_state_up") {
+		opts.AdminStateUp = pointerto.Bool(d.Get("admin_state_up").(bool))
 	}
 
 	weight := common.CheckNull("weight", d)
@@ -103,7 +159,7 @@ func resourceLBMemberV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		opts.Weight = pointerto.Int(d.Get("weight").(int))
 	}
 
-	member, err := members.Create(client, poolID(d), opts).Extract()
+	member, err := members.Create(client, poolID(d), opts)
 	if err != nil {
 		return fmterr.Errorf("error creating LB pool member v3: %w", err)
 	}
@@ -126,10 +182,14 @@ func resourceLBMemberV3Read(ctx context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
-	member, err := members.Get(client, poolID(d), memberID(d)).Extract()
+	member, err := members.Get(client, poolID(d), memberID(d))
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "error reading LB pool member v3")
 	}
+	return setLBMemberV3Fields(d, member)
+}
+
+func setLBMemberV3Fields(d *schema.ResourceData, member *members.Member) diag.Diagnostics {
 	mErr := multierror.Append(
 		d.Set("address", member.Address),
 		d.Set("name", member.Name),
@@ -139,12 +199,42 @@ func resourceLBMemberV3Read(ctx context.Context, d *schema.ResourceData, meta in
 		d.Set("protocol_port", member.ProtocolPort),
 		d.Set("weight", member.Weight),
 		d.Set("ip_version", member.IpVersion),
+		d.Set("availability_zone", member.AvailabilityZone),
+		d.Set("admin_state_up", member.AdminStateUp),
+		d.Set("created_at", member.CreatedAt),
+		d.Set("updated_at", member.UpdatedAt),
+		d.Set("member_type", member.MemberType),
+		d.Set("instance_id", member.InstanceID),
+		d.Set("status", flattenMemberStatus(member.Status)),
+		d.Set("member_id", member.ID),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting LB pool member fields: %w", err)
 	}
 
 	return nil
+}
+
+func flattenMemberStatus(statuses []members.MemberStatus) []interface{} {
+	result := make([]interface{}, len(statuses))
+	for i, status := range statuses {
+		reasons := make([]interface{}, 0, 1)
+		if status.Reason != nil {
+			reasons = append(reasons, map[string]interface{}{
+				"reason_code":          status.Reason.ReasonCode,
+				"expected_response":    status.Reason.ExpectedResponse,
+				"healthcheck_response": status.Reason.HealthcheckResponse,
+			})
+		}
+		result[i] = map[string]interface{}{
+			"listener_id":      status.ListenerID,
+			"operating_status": status.OperatingStatus,
+			"created_at":       status.CreatedAt,
+			"updated_at":       status.UpdatedAt,
+			"reason":           reasons,
+		}
+	}
+	return result
 }
 
 func resourceLBMemberV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -165,8 +255,11 @@ func resourceLBMemberV3Update(ctx context.Context, d *schema.ResourceData, meta 
 		weight := d.Get("weight").(int)
 		opts.Weight = &weight
 	}
+	if d.HasChange("availability_zone") {
+		opts.AvailabilityZone = d.Get("availability_zone").(string)
+	}
 
-	_, err = members.Update(client, poolID(d), memberID(d), opts).Extract()
+	_, err = members.Update(client, poolID(d), memberID(d), opts)
 	if err != nil {
 		return fmterr.Errorf("error updating LB pool member: %w", err)
 	}
@@ -184,9 +277,9 @@ func resourceLBMemberV3Delete(ctx context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
-	err = members.Delete(client, poolID(d), memberID(d)).ExtractErr()
+	err = members.Delete(client, poolID(d), memberID(d))
 	if err != nil {
-		return fmterr.Errorf("error deleting member: %w", err)
+		return common.CheckDeletedDiag(d, err, "error deleting LB pool member v3")
 	}
 
 	return nil
