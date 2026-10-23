@@ -1,10 +1,8 @@
 ---
 enhancements:
   - |
-    **[ELB]** Refactor ``opentelekomcloud_lb_member_v3`` for the action-oriented SDK.
-    Add availability zone configuration, creation-time administrative state, timestamps,
-    instance metadata, and per-listener health-check failure details.
+    **[ELB]** Refactor ``opentelekomcloud_lb_member_v3`` (`#3599 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3599>`_)
 features:
   - |
     **New Data Source:** ``opentelekomcloud_lb_member_v3`` with pool-scoped member lookup
-    by ID or supported filters.
+    by ID or supported filters (`#3599 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3599>`_)
