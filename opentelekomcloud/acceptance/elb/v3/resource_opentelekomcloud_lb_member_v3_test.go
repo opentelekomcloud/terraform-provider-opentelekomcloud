@@ -37,6 +37,7 @@ func TestLBMemberV3_basic(t *testing.T) {
 					testLBMemberV3Exists(resourceMemberName, &member),
 					resource.TestCheckResourceAttr(resourceMemberName, "name", "member-1"),
 					resource.TestCheckResourceAttr(resourceMemberName, "weight", "1"),
+					resource.TestCheckResourceAttrSet(resourceMemberName, "member_type"),
 				),
 			},
 			{
@@ -127,7 +128,7 @@ func testLBMemberV3Exists(n string, member *members.Member) resource.TestCheckFu
 		}
 
 		part := strings.Split(rs.Primary.ID, "/")
-		found, err := members.Get(client, part[0], part[1]).Extract()
+		found, err := members.Get(client, part[0], part[1])
 		if err != nil {
 			return err
 		}
@@ -155,7 +156,7 @@ func testLBMemberDestroy(s *terraform.State) error {
 		}
 
 		part := strings.Split(rs.Primary.ID, "/")
-		_, err := members.Get(client, part[0], part[1]).Extract()
+		_, err := members.Get(client, part[0], part[1])
 		if err == nil {
 			return fmt.Errorf("loadbalancer member still exists: %s", rs.Primary.ID)
 		}
