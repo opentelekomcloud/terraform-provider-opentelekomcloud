@@ -391,6 +391,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_lb_loadbalancer_v3":                  elbv3.DataSourceLoadBalancerV3(),
 			"opentelekomcloud_lb_listener_v3":                      elbv3.DataSourceListenerV3(),
 			"opentelekomcloud_lb_pool_v3":                          elbv3.DataSourceLBPoolV3(),
+			"opentelekomcloud_lb_member_v3":                        elbv3.DataSourceLBMemberV3(),
 			"opentelekomcloud_lb_member_ids_v2":                    elbv2.DataSourceLBMemberIDsV2(),
 			"opentelekomcloud_lts_groups_v2":                       lts.DataSourceLtsGroupsV2(),
 			"opentelekomcloud_lts_host_group_v3":                   lts.DataSourceHostGroupV3(),
