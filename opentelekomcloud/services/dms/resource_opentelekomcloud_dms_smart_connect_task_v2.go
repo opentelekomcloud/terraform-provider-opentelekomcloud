@@ -80,6 +80,54 @@ func ResourceDmsSmartConnectTaskV2() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"redis_address": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
+						"redis_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
+						"dcs_instance_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
+						"redis_password": {
+							Type:      schema.TypeString,
+							Optional:  true,
+							ForceNew:  true,
+							Sensitive: true,
+						},
+						"sync_mode": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
+						"full_sync_wait_ms": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
+						"full_sync_max_retry": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
+						"ratelimit": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
 						"current_instance_alias": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -192,6 +240,66 @@ func ResourceDmsSmartConnectTaskV2() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"redis_address": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
+						"redis_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
+						"dcs_instance_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
+						"redis_password": {
+							Type:      schema.TypeString,
+							Optional:  true,
+							ForceNew:  true,
+							Sensitive: true,
+						},
+						"target_db": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"obs_part_size": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"flush_size": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"timezone": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"schema_generator_class": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"partitioner_class": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"value_converter": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"key_converter": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"kv_delimiter": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						// Kafka to OBS
 						"access_key": {
 							Type:     schema.TypeString,
@@ -283,8 +391,8 @@ func resourceDmsV2SmartConnectTaskCreate(ctx context.Context, d *schema.Resource
 		SourceType:  d.Get("source_type").(string),
 		SinkType:    d.Get("destination_type").(string),
 		Topics:      changeListToStringWithCommasSplit(topics),
-		SourceTask:  buildSourceTaskRequestBody(d.Get("source_task").([]interface{})),
-		SinkTask:    buildSinkTaskRequestBody(d.Get("destination_task").([]interface{})),
+		SourceTask:  buildSourceTaskRequestBody(d.Get("source_task").([]interface{}), d.Get("source_type").(string)),
+		SinkTask:    buildSinkTaskRequestBody(d.Get("destination_task").([]interface{}), d.Get("destination_type").(string)),
 	}
 
 	createTaskResp, err := smart_connect.CreateTask(client, instanceId, createOpts)
@@ -311,12 +419,20 @@ func resourceDmsV2SmartConnectTaskCreate(ctx context.Context, d *schema.Resource
 	return resourceDmsV2SmartConnectTaskRead(ctx, d, meta)
 }
 
-func buildSourceTaskRequestBody(rawParams []interface{}) *smart_connect.SmartConnectTaskSourceConfig {
+func buildSourceTaskRequestBody(rawParams []interface{}, sourceType string) *smart_connect.SmartConnectTaskSourceConfig {
 	if len(rawParams) == 0 {
 		return nil
 	}
 	params := rawParams[0].(map[string]interface{})
 	rst := smart_connect.SmartConnectTaskSourceConfig{
+		RedisAddress:       params["redis_address"].(string),
+		RedisType:          params["redis_type"].(string),
+		DcsInstanceId:      params["dcs_instance_id"].(string),
+		RedisPassword:      params["redis_password"].(string),
+		SyncMode:           params["sync_mode"].(string),
+		FullSyncWaitMs:     params["full_sync_wait_ms"].(int),
+		FullSyncMaxRetry:   params["full_sync_max_retry"].(int),
+		Ratelimit:          params["ratelimit"].(int),
 		CurrentClusterName: params["current_instance_alias"].(string),
 		ClusterName:        params["peer_instance_alias"].(string),
 		InstanceId:         params["peer_instance_id"].(string),
@@ -337,6 +453,11 @@ func buildSourceTaskRequestBody(rawParams []interface{}) *smart_connect.SmartCon
 		TopicsMapping: changeListToStringWithCommasSplit(
 			params["topics_mapping"].(*schema.Set).List()),
 	}
+	if sourceType == "REDIS_REPLICATOR_SOURCE" {
+		rst.SyncConsumerOffsetsEnabled = nil
+		rst.RenameTopicEnabled = nil
+		rst.ProvenanceHeaderEnabled = nil
+	}
 	return &rst
 }
 
@@ -348,12 +469,16 @@ func changeListToStringWithCommasSplit(params []interface{}) string {
 	return strings.Join(strArray, ",")
 }
 
-func buildSinkTaskRequestBody(rawParams []interface{}) *smart_connect.SmartConnectTaskSinkConfig {
+func buildSinkTaskRequestBody(rawParams []interface{}, sinkType string) *smart_connect.SmartConnectTaskSinkConfig {
 	if len(rawParams) == 0 {
 		return nil
 	}
 	params := rawParams[0].(map[string]interface{})
 	rst := smart_connect.SmartConnectTaskSinkConfig{
+		RedisAddress:        params["redis_address"].(string),
+		RedisType:           params["redis_type"].(string),
+		DcsInstanceId:       params["dcs_instance_id"].(string),
+		RedisPassword:       params["redis_password"].(string),
 		ConsumerStrategy:    params["consumer_strategy"].(string),
 		AccessKey:           params["access_key"].(string),
 		SecretKey:           params["secret_key"].(string),
@@ -364,6 +489,9 @@ func buildSinkTaskRequestBody(rawParams []interface{}) *smart_connect.SmartConne
 		RecordDelimiter:     params["record_delimiter"].(string),
 		DestinationFileType: params["destination_file_type"].(string),
 		StoreKeys:           pointerto.Bool(params["store_keys"].(bool)),
+	}
+	if sinkType == "REDIS_REPLICATOR_SINK" {
+		rst.StoreKeys = nil
 	}
 
 	return &rst
@@ -390,8 +518,8 @@ func resourceDmsV2SmartConnectTaskRead(ctx context.Context, d *schema.ResourceDa
 		d.Set("topics_regex", getTask.TopicsRegex),
 		d.Set("source_type", getTask.SourceType),
 		d.Set("destination_type", getTask.SinkType),
-		d.Set("source_task", flattenSourceTaskResponse(d, *getTask.SourceTask)),
-		d.Set("destination_task", flattenSinkTaskResponse(d, *getTask.SinkTask)),
+		d.Set("source_task", flattenSourceTaskResponse(d, getTask.SourceTask)),
+		d.Set("destination_task", flattenSinkTaskResponse(d, getTask.SinkTask)),
 		d.Set("created_at", strconv.FormatInt(getTask.CreateTime, 10)),
 		d.Set("status", getTask.Status),
 	)
@@ -399,16 +527,24 @@ func resourceDmsV2SmartConnectTaskRead(ctx context.Context, d *schema.ResourceDa
 	return diag.FromErr(mErr.ErrorOrNil())
 }
 
-func flattenSourceTaskResponse(d *schema.ResourceData, rawParams smart_connect.SmartConnectTaskSourceConfig) []map[string]interface{} {
-	if reflect.DeepEqual(rawParams, smart_connect.SmartConnectTaskSourceConfig{}) {
+func flattenSourceTaskResponse(d *schema.ResourceData, rawParams *smart_connect.SmartConnectTaskRespSourceConfig) []map[string]interface{} {
+	if rawParams == nil || reflect.DeepEqual(*rawParams, smart_connect.SmartConnectTaskRespSourceConfig{}) {
 		return nil
 	}
 	rst := make([]map[string]interface{}, 1)
 	params := map[string]interface{}{
+		"redis_address":                 rawParams.RedisAddress,
+		"redis_type":                    rawParams.RedisType,
+		"dcs_instance_id":               rawParams.DcsInstanceId,
+		"redis_password":                d.Get("source_task.0.redis_password"),
+		"sync_mode":                     rawParams.SyncMode,
+		"full_sync_wait_ms":             rawParams.FullSyncWaitMs,
+		"full_sync_max_retry":           rawParams.FullSyncMaxRetry,
+		"ratelimit":                     rawParams.Ratelimit,
 		"current_instance_alias":        rawParams.CurrentClusterName,
 		"peer_instance_alias":           rawParams.ClusterName,
 		"peer_instance_id":              rawParams.InstanceId,
-		"peer_instance_address":         strings.Split(rawParams.BootstrapServers, ","),
+		"peer_instance_address":         flattenStringWithCommaSplitToSlice(rawParams.BootstrapServers),
 		"security_protocol":             rawParams.SecurityProtocol,
 		"user_name":                     rawParams.UserName,
 		"password":                      d.Get("source_task.0.password"),
@@ -427,22 +563,38 @@ func flattenSourceTaskResponse(d *schema.ResourceData, rawParams smart_connect.S
 	return rst
 }
 
-func flattenSinkTaskResponse(d *schema.ResourceData, rawParams smart_connect.SmartConnectTaskSinkConfig) []map[string]interface{} {
-	if reflect.DeepEqual(rawParams, smart_connect.SmartConnectTaskSinkConfig{}) {
+func flattenSinkTaskResponse(d *schema.ResourceData, rawParams *smart_connect.SmartConnectTaskRespSinkConfig) []map[string]interface{} {
+	if rawParams == nil || reflect.DeepEqual(*rawParams, smart_connect.SmartConnectTaskRespSinkConfig{}) {
 		return nil
 	}
 	rst := make([]map[string]interface{}, 1)
 	params := map[string]interface{}{
-		"access_key":            d.Get("destination_task.0.access_key"),
-		"secret_key":            d.Get("destination_task.0.secret_key"),
-		"consumer_strategy":     rawParams.ConsumerStrategy,
-		"destination_file_type": rawParams.DestinationFileType,
-		"obs_bucket_name":       rawParams.ObsBucketName,
-		"obs_path":              rawParams.ObsPath,
-		"partition_format":      rawParams.PartitionFormat,
-		"record_delimiter":      rawParams.RecordDelimiter,
-		"deliver_time_interval": rawParams.DeliverTimeInterval,
-		"store_keys":            rawParams.StoreKeys,
+		"redis_address":          rawParams.RedisAddress,
+		"redis_type":             rawParams.RedisType,
+		"dcs_instance_id":        rawParams.DcsInstanceId,
+		"redis_password":         d.Get("destination_task.0.redis_password"),
+		"target_db":              nil,
+		"obs_part_size":          rawParams.ObsPartSize,
+		"flush_size":             rawParams.FlushSize,
+		"timezone":               rawParams.Timezone,
+		"schema_generator_class": rawParams.SchemaGeneratorClass,
+		"partitioner_class":      rawParams.PartitionerClass,
+		"value_converter":        rawParams.ValueConverter,
+		"key_converter":          rawParams.KeyConverter,
+		"kv_delimiter":           rawParams.KvDelimiter,
+		"access_key":             d.Get("destination_task.0.access_key"),
+		"secret_key":             d.Get("destination_task.0.secret_key"),
+		"consumer_strategy":      rawParams.ConsumerStrategy,
+		"destination_file_type":  rawParams.DestinationFileType,
+		"obs_bucket_name":        rawParams.ObsBucketName,
+		"obs_path":               rawParams.ObsPath,
+		"partition_format":       rawParams.PartitionFormat,
+		"record_delimiter":       rawParams.RecordDelimiter,
+		"deliver_time_interval":  rawParams.DeliverTimeInterval,
+		"store_keys":             rawParams.StoreKeys,
+	}
+	if rawParams.TargetDB != nil {
+		params["target_db"] = *rawParams.TargetDB
 	}
 
 	rst[0] = params
@@ -467,7 +619,7 @@ func resourceDmsV2SmartConnectTaskDelete(ctx context.Context, d *schema.Resource
 
 	err = smart_connect.DeleteTask(client, d.Get("instance_id").(string), d.Id())
 	if err != nil {
-		return diag.Errorf("error deleting DMS kafka smart connect task: %v", err)
+		return common.CheckDeletedDiag(d, err, "error deleting DMS kafka smart connect task")
 	}
 
 	return nil

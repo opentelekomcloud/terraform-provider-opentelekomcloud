@@ -53,6 +53,8 @@ func TestAccDmsKafkav2SmartConnectTask_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "destination_task.0.deliver_time_interval", "300"),
 					resource.TestCheckResourceAttr(resourceName, "destination_task.0.obs_bucket_name", rName),
 					resource.TestCheckResourceAttr(resourceName, "destination_task.0.partition_format", "yyyy/MM/dd/HH/mm"),
+					resource.TestCheckResourceAttr(resourceName, "destination_task.0.obs_part_size", "5242880"),
+					resource.TestCheckResourceAttr(resourceName, "destination_task.0.kv_delimiter", ":"),
 					resource.TestCheckResourceAttrSet(resourceName, "status"),
 				),
 			},
