@@ -193,13 +193,6 @@ func (lrt *RoundTripper) formatJSON(raw []byte) string {
 	}
 
 	// Mask known password fields
-	for _, name := range []string{"source_task", "sink_task"} {
-		if task, ok := data[name].(map[string]interface{}); ok {
-			if _, ok := task["redis_password"]; ok {
-				task["redis_password"] = "***"
-			}
-		}
-	}
 	if v, ok := data["auth"].(map[string]interface{}); ok {
 		if v, ok := v["identity"].(map[string]interface{}); ok {
 			if v, ok := v["password"].(map[string]interface{}); ok {

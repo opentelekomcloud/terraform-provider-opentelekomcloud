@@ -9,5 +9,4 @@ fixes:
   - |
     **[DMS]** Handle null Smart Connect source and destination configurations
     without panicking, preserve request-only credentials during refresh, and
-    treat already-deleted tasks as removed. Redact Redis source and destination
-    passwords in HTTP debug logs.
+    treat already-deleted tasks as removed.
