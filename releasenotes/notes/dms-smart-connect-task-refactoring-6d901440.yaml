@@ -1,0 +1,13 @@
+---
+enhancements:
+  - |
+    **[DMS]** Refactor ``opentelekomcloud_dms_smart_connect_task_v2`` for the
+    modern Smart Connect SDK response types. Add Redis source and destination
+    configuration, Redis target database metadata, and read-only OBS task
+    metadata while preserving existing attributes and import IDs.
+fixes:
+  - |
+    **[DMS]** Handle null Smart Connect source and destination configurations
+    without panicking, preserve request-only credentials during refresh, and
+    treat already-deleted tasks as removed. Redact Redis source and destination
+    passwords in HTTP debug logs.

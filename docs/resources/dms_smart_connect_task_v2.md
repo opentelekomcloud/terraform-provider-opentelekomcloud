@@ -75,6 +75,50 @@ resource "opentelekomcloud_dms_smart_connect_task_v2" "test" {
 }
 ```
 
+### Create a Redis data replication task
+
+```hcl
+variable "instance_id" {}
+variable "source_redis_address" {}
+variable "destination_redis_address" {}
+variable "source_dcs_instance_id" {}
+variable "destination_dcs_instance_id" {}
+variable "source_redis_password" {
+  sensitive = true
+}
+variable "destination_redis_password" {
+  sensitive = true
+}
+
+resource "opentelekomcloud_dms_smart_connect_task_v2" "redis" {
+  instance_id      = var.instance_id
+  task_name        = "redis-replication"
+  topics           = ["redis-replication"]
+  source_type      = "REDIS_REPLICATOR_SOURCE"
+  destination_type = "REDIS_REPLICATOR_SINK"
+
+  source_task {
+    redis_address       = var.source_redis_address
+    redis_type          = "cluster"
+    dcs_instance_id     = var.source_dcs_instance_id
+    redis_password      = var.source_redis_password
+    sync_mode           = "RDB_ONLY"
+    full_sync_wait_ms   = 10000
+    full_sync_max_retry = 10
+    ratelimit           = -1
+  }
+
+  destination_task {
+    redis_address   = var.destination_redis_address
+    redis_type      = "standalone"
+    dcs_instance_id = var.destination_dcs_instance_id
+    redis_password  = var.destination_redis_password
+  }
+}
+```
+
+Smart Connect must be enabled on the Kafka instance before creating a task.
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -97,10 +141,12 @@ The following arguments are supported:
   Changing this parameter will create a new resource.
 
 * `source_type` - (Optional, String, ForceNew) Specifies the source type of the smart connect task. Valid values are
-  **KAFKA_REPLICATOR_SOURCE** and **NONE**. Changing this parameter will create a new resource.
+  **KAFKA_REPLICATOR_SOURCE**, **REDIS_REPLICATOR_SOURCE** and **NONE**.
+  Changing this parameter will create a new resource.
 
 * `destination_type` - (Optional, String, ForceNew) Specifies the destination type of the smart connect task.
-  Valid values are **OBS_SINK** and **NONE**. Changing this parameter will create a new resource.
+  Valid values are **OBS_SINK**, **REDIS_REPLICATOR_SINK** and **NONE**.
+  Changing this parameter will create a new resource.
 
 * `source_task` - (Optional, List, ForceNew) Specifies the source configuration of a smart connect task.
   The [source_task](#dms_source_task) structure is documented below.
@@ -112,6 +158,33 @@ The following arguments are supported:
 
 <a name="dms_source_task"></a>
 The `source_task` block supports:
+
+* `redis_address` - (Optional, String, ForceNew) Specifies the Redis source addresses, separated by commas.
+  Applicable when `source_type` is **REDIS_REPLICATOR_SOURCE**.
+
+* `redis_type` - (Optional, String, ForceNew) Specifies the Redis source instance type, for example,
+  **standalone** or **cluster**.
+
+* `dcs_instance_id` - (Optional, String, ForceNew) Specifies the source DCS instance ID.
+
+* `redis_password` - (Optional, String, ForceNew, Sensitive) Specifies the source Redis password.
+  The API does not return this value; the configured value is retained in state.
+
+* `sync_mode` - (Optional, String, ForceNew) Specifies Redis synchronization:
+  **RDB_ONLY** for full synchronization or **CUSTOM_OFFSET** for full and incremental synchronization.
+
+* `full_sync_wait_ms` - (Optional, Int, ForceNew) Specifies the interval between full synchronization
+  retries, in milliseconds.
+
+* `full_sync_max_retry` - (Optional, Int, ForceNew) Specifies the maximum number of full synchronization retries.
+
+* `ratelimit` - (Optional, Int, ForceNew) Specifies the Redis replication rate limit in KB/s.
+  Set to `-1` for no rate limit.
+
+The Redis fields apply only to Redis sources. Supply the connection and synchronization settings required
+by the source instance. Unspecified non-secret Redis fields are populated from the API.
+The SDK omits empty strings and zero-valued Redis integers from creation requests, leaving their defaults
+to the service. Changing any configurable Redis field creates a new resource.
 
 * `current_instance_alias` - (Optional, String, ForceNew) Specifies the current Kafka instance alias.
   Changing this parameter will create a new resource.
@@ -184,6 +257,20 @@ The `source_task` block supports:
 <a name="dms_destination_task"></a>
 The `destination_task` block supports:
 
+* `redis_address` - (Optional, String, ForceNew) Specifies the Redis destination addresses, separated by commas.
+  Applicable when `destination_type` is **REDIS_REPLICATOR_SINK**.
+
+* `redis_type` - (Optional, String, ForceNew) Specifies the Redis destination instance type, for example,
+  **standalone** or **cluster**.
+
+* `dcs_instance_id` - (Optional, String, ForceNew) Specifies the destination DCS instance ID.
+
+* `redis_password` - (Optional, String, ForceNew, Sensitive) Specifies the destination Redis password.
+  The API does not return this value; the configured value is retained in state.
+
+Supply the connection settings required by the Redis destination instance. Unspecified non-secret Redis
+fields are populated from the API. Changing any configurable Redis field creates a new resource.
+
 * `access_key` - (Optional, String, ForceNew) Specifies the access key used to access the OBS bucket.
   It's **required** when `destination_type` is **OBS_SINK**.
   Changing this parameter will create a new resource.
@@ -238,6 +325,30 @@ In addition to all arguments above, the following attributes are exported:
 
 * `region` - The region in which the resource is created.
 
+The `destination_task` block also exports these read-only attributes:
+
+* `target_db` - The Redis destination database, when returned by the API. The service default is `-1`;
+  database `0` is preserved.
+
+* `obs_part_size` - The OBS upload part size in bytes. The service default is `5242880`.
+
+* `flush_size` - The OBS flush size.
+
+* `timezone` - The time zone used by the OBS task.
+
+* `schema_generator_class` - The OBS schema generator class.
+
+* `partitioner_class` - The OBS partitioner class.
+
+* `value_converter` - The OBS value converter class.
+
+* `key_converter` - The OBS key converter class.
+
+* `kv_delimiter` - The OBS key/value delimiter.
+
+OBS attributes apply only to **OBS_SINK**. These response-only settings cannot be configured.
+Sensitive fields are hidden in Terraform output but are still stored in Terraform state; protect access
+to the state file.
 
 ## Timeouts
 
@@ -255,7 +366,8 @@ $ terraform import opentelekomcloud_dms_smart_connect_task_v2.test <instance_id>
 
 Note that the imported state may not be identical to your resource definition, due to some attributes missing from
 the API response. The missing attributes include: `start_later`, `destination_task.0.access_key`,
-`destination_task.0.secret_key` and `source_task.0.password`. It is generally recommended running `terraform plan`
+`destination_task.0.secret_key`, `source_task.0.password`, `source_task.0.redis_password`
+and `destination_task.0.redis_password`. It is generally recommended running `terraform plan`
 after importing a kafka smart connect task. You can then decide if changes should be applied to the kafka smart connect
 task, or the resource definition should be updated to align with the kafka smart connect task. Also you can ignore
 changes as below.
@@ -265,6 +377,7 @@ resource "opentelekomcloud_dms_smart_connect_task_v2" "test" {
   lifecycle {
     ignore_changes = [
       destination_task.0.access_key, destination_task.0.secret_key, source_task.0.password,
+      source_task.0.redis_password, destination_task.0.redis_password,
     ]
   }
 }
