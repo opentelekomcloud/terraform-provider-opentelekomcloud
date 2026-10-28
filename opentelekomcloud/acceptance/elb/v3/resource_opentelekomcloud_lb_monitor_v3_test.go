@@ -88,7 +88,7 @@ func checkMonitorDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := monitors.Get(client, rs.Primary.ID).Extract()
+		_, err := monitors.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("monitor still exists: %s", rs.Primary.ID)
 		}
@@ -113,7 +113,7 @@ func checkMonitorExists(n string, monitor *monitors.Monitor) resource.TestCheckF
 			return fmt.Errorf(elbv3.ErrCreateClient, err)
 		}
 
-		found, err := monitors.Get(client, rs.Primary.ID).Extract()
+		found, err := monitors.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -122,7 +122,7 @@ func checkMonitorExists(n string, monitor *monitors.Monitor) resource.TestCheckF
 			return fmt.Errorf("monitor not found")
 		}
 
-		monitor = found
+		*monitor = *found
 
 		return nil
 	}
@@ -145,6 +145,7 @@ resource "opentelekomcloud_lb_pool_v3" "pool" {
 }
 
 resource "opentelekomcloud_lb_monitor_v3" "monitor" {
+  name         = "tf-acc-monitor-${opentelekomcloud_lb_pool_v3.pool.id}"
   pool_id      = opentelekomcloud_lb_pool_v3.pool.id
   type         = "HTTP"
   delay        = 3
@@ -173,6 +174,7 @@ resource "opentelekomcloud_lb_pool_v3" "pool" {
 }
 
 resource "opentelekomcloud_lb_monitor_v3" "monitor" {
+  name         = "tf-acc-monitor-${opentelekomcloud_lb_pool_v3.pool.id}"
   pool_id      = opentelekomcloud_lb_pool_v3.pool.id
   type         = "TCP"
   delay        = 1

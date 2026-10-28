@@ -1,0 +1,7 @@
+---
+enhancements:
+  - |
+    **[ELB]** Refactor ``opentelekomcloud_lb_monitor_v3`` (`#3602 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3602>`_)
+features:
+  - |
+    **New Data Source:** ``opentelekomcloud_lb_monitor_v3`` (`#3602 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3602>`_)
