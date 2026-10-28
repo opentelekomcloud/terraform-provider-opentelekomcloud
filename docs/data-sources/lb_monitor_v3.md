@@ -32,7 +32,6 @@ All arguments are optional filters and are also exported as attributes:
 * `id` - The monitor ID. When configured, a direct lookup is performed and other filters are ignored.
 * `name` - The health monitor name.
 * `type` - The health check protocol: `TCP`, `UDP_CONNECT`, `HTTP`, or `HTTPS`.
-  The legacy `PING` value is also accepted for compatibility.
 * `admin_state_up` - Whether health checks are enabled. Explicit `false` is sent to the API;
   leaving this argument unset does not apply an administrative-state filter.
 * `delay` - The interval between health checks, in seconds, from 1 to 50.

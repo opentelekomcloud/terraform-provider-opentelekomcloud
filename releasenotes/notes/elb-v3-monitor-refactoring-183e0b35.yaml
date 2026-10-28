@@ -1,11 +1,7 @@
 ---
 enhancements:
   - |
-    **[ELB]** Refactor ``opentelekomcloud_lb_monitor_v3`` to use the modern
-    SDK operations and expose ``created_at`` and ``updated_at`` while retaining
-    existing attributes, API mappings, and monitor-ID imports.
+    **[ELB]** Refactor ``opentelekomcloud_lb_monitor_v3`` (`#3602 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3602>`_)
 features:
   - |
-    **New Data Source:** ``opentelekomcloud_lb_monitor_v3`` supports direct
-    monitor-ID lookup or supported health-check filters, including an explicit
-    false administrative state and uniqueness checks across all result pages.
+    **New Data Source:** ``opentelekomcloud_lb_monitor_v3`` (`#3602 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3602>`_)

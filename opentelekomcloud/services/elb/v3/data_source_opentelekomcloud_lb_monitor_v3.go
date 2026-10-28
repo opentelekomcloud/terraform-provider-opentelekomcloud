@@ -33,7 +33,6 @@ func DataSourceLBMonitorV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				// PING is retained for compatibility; it is not documented in the reviewed OTC API.
 				ValidateFunc: validation.StringInSlice(
 					[]string{"TCP", "UDP_CONNECT", "HTTP", "HTTPS", "PING"},
 					false,

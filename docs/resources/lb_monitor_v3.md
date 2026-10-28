@@ -60,8 +60,6 @@ The following arguments are supported:
 
   The value can be `TCP`, `UDP_CONNECT`, `HTTP`, `HTTPS`, or `PING`.
 
-  `PING` is retained for compatibility but is not documented in the reviewed OTC v3 API.
-
 * `delay` - (Required) Specifies the interval between health checks, in seconds.
 
   The value of this parameter ranges from 1 to 50.

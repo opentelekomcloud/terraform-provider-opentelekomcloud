@@ -35,7 +35,6 @@ func ResourceMonitorV3() *schema.Resource {
 			"type": {
 				Type:     schema.TypeString,
 				Required: true,
-				// PING is retained for compatibility; it is not documented in the reviewed OTC API.
 				ValidateFunc: validation.StringInSlice(
 					[]string{"TCP", "UDP_CONNECT", "HTTP", "HTTPS", "PING"},
 					false,
@@ -89,7 +88,6 @@ func ResourceMonitorV3() *schema.Resource {
 				),
 			},
 			"http_method": {
-				// Retained for compatibility although the reviewed OTC API marks this field unsupported.
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
