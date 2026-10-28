@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_instance_diagnosis_v2``
+  - |
+    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_message_offset_reset_v2``

@@ -600,6 +600,8 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_dms_rocketmq_topic_v2":                     dms.ResourceDmsRocketMQTopicV2(),
 			"opentelekomcloud_dms_rocketmq_user_v2":                      dms.ResourceDmsRocketMQUserV2(),
 			"opentelekomcloud_dms_rocketmq_migration_task_v2":            dms.ResourceDmsRocketMQMigrationTaskV2(),
+			"opentelekomcloud_dms_rocketmq_instance_diagnosis_v2":        dms.ResourceDmsRocketMQInstanceDiagnosisV2(),
+			"opentelekomcloud_dms_rocketmq_message_offset_reset_v2":      dms.ResourceDmsRocketMQMessageOffsetResetV2(),
 			"opentelekomcloud_dms_smart_connect_v2":                      dms.ResourceDmsSmartConnectV2(),
 			"opentelekomcloud_dms_smart_connect_task_v2":                 dms.ResourceDmsSmartConnectTaskV2(),
 			"opentelekomcloud_dms_smart_connect_task_action_v2":          dms.ResourceDmsSmartConnectTaskActionV2(),
