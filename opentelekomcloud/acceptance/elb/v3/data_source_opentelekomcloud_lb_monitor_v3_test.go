@@ -19,16 +19,7 @@ func TestLBMonitorV3DataSource_basic(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      checkMonitorDestroy,
 		Steps: []resource.TestStep{{
-			Config: testResourceMonitorBasic + `
-data "opentelekomcloud_lb_monitor_v3" "by_id" {
-  id = opentelekomcloud_lb_monitor_v3.monitor.id
-}
-
-data "opentelekomcloud_lb_monitor_v3" "by_name" {
-  name           = opentelekomcloud_lb_monitor_v3.monitor.name
-  admin_state_up = true
-}
-`,
+			Config: testLBMonitorV3DataSourceBasic,
 			Check: resource.ComposeTestCheckFunc(
 				resource.TestCheckResourceAttrPair("data.opentelekomcloud_lb_monitor_v3.by_id", "id", resourceMonitorName, "id"),
 				resource.TestCheckResourceAttrPair("data.opentelekomcloud_lb_monitor_v3.by_name", "id", resourceMonitorName, "id"),
@@ -41,3 +32,14 @@ data "opentelekomcloud_lb_monitor_v3" "by_name" {
 		}},
 	})
 }
+
+var testLBMonitorV3DataSourceBasic = testResourceMonitorBasic + `
+data "opentelekomcloud_lb_monitor_v3" "by_id" {
+  id = opentelekomcloud_lb_monitor_v3.monitor.id
+}
+
+data "opentelekomcloud_lb_monitor_v3" "by_name" {
+  name           = opentelekomcloud_lb_monitor_v3.monitor.name
+  admin_state_up = true
+}
+`

@@ -2,9 +2,11 @@ package v3
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/monitors"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -13,25 +15,113 @@ import (
 )
 
 func DataSourceLBMonitorV3() *schema.Resource {
-	fields := map[string]*schema.Schema{
-		"id": {Type: schema.TypeString, Optional: true, Computed: true},
-	}
-	resourceFields := ResourceMonitorV3().Schema
-	for _, key := range []string{
-		"name", "type", "delay", "timeout", "max_retries", "max_retries_down",
-		"monitor_port", "domain_name", "url_path", "expected_codes", "admin_state_up",
-	} {
-		field := *resourceFields[key]
-		field.Required, field.Optional, field.Computed, field.ForceNew = false, true, true, false
-		field.Default = nil
-		fields[key] = &field
-	}
-	for _, key := range []string{"pool_id", "project_id", "http_method", "created_at", "updated_at"} {
-		fields[key] = &schema.Schema{Type: schema.TypeString, Computed: true}
-	}
 	return &schema.Resource{
 		ReadContext: dataSourceLBMonitorV3Read,
-		Schema:      fields,
+		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"name": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringLenBetween(1, 0xff),
+			},
+			"type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				// PING is retained for compatibility; it is not documented in the reviewed OTC API.
+				ValidateFunc: validation.StringInSlice(
+					[]string{"TCP", "UDP_CONNECT", "HTTP", "HTTPS", "PING"},
+					false,
+				),
+			},
+			"admin_state_up": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"delay": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 50),
+			},
+			"timeout": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 50),
+			},
+			"max_retries": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 10),
+			},
+			"max_retries_down": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 10),
+			},
+			"monitor_port": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IsPortNumber,
+			},
+			"domain_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.All(
+					validation.StringLenBetween(1, 100),
+					validation.StringMatch(
+						regexp.MustCompile(`^[0-9a-zA-Z][0-9a-zA-Z.-]*$`),
+						"The value can contain only digits, letters, hyphens (-), and periods (.) and must start with a digit or letter.",
+					),
+				),
+			},
+			"url_path": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.All(
+					validation.StringLenBetween(1, 0xff),
+					validation.StringMatch(regexp.MustCompile(`^/.*$`), "value must start with slash"),
+				),
+			},
+			"expected_codes": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringLenBetween(1, 64),
+			},
+			"pool_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"project_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"http_method": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
 	}
 }
 

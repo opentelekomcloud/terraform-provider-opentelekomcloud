@@ -145,6 +145,44 @@ func TestMonitorV3Filters(t *testing.T) {
 	}
 }
 
+func TestMonitorV3DataSourceSchemaCompatibility(t *testing.T) {
+	resourceFields := ResourceMonitorV3().Schema
+	dataSourceFields := DataSourceLBMonitorV3().Schema
+	for _, key := range []string{
+		"name", "type", "delay", "timeout", "max_retries", "max_retries_down",
+		"monitor_port", "domain_name", "url_path", "expected_codes", "admin_state_up",
+	} {
+		t.Run(key, func(t *testing.T) {
+			r, ds := resourceFields[key], dataSourceFields[key]
+			if ds.Type != r.Type || !ds.Optional || !ds.Computed || ds.Required || ds.ForceNew || ds.Default != nil {
+				t.Fatal("data-source filter type or state semantics changed")
+			}
+			if r.ValidateFunc == nil {
+				if ds.ValidateFunc != nil {
+					t.Fatal("unexpected data-source validation")
+				}
+				return
+			}
+			if ds.ValidateFunc == nil {
+				t.Fatal("data-source filter validation removed")
+			}
+			var values []interface{}
+			if r.Type == schema.TypeInt {
+				values = []interface{}{-1, 0, 1, 10, 50, 51, 65535, 65536}
+			} else {
+				values = []interface{}{"", "PING", "HTTP", "value", "/health", "example.com", "-invalid", strings.Repeat("x", 256)}
+			}
+			for _, value := range values {
+				_, expected := r.ValidateFunc(value, key)
+				_, actual := ds.ValidateFunc(value, key)
+				if len(expected) != len(actual) {
+					t.Errorf("validation differs for %#v", value)
+				}
+			}
+		})
+	}
+}
+
 func TestMonitorV3Lifecycle(t *testing.T) {
 	d := schema.TestResourceDataRaw(t, ResourceMonitorV3().Schema, map[string]interface{}{
 		"pool_id": "pool", "type": "HTTP", "admin_state_up": false, "delay": 10, "timeout": 5,
