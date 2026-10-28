@@ -35,6 +35,7 @@ func ResourceMonitorV3() *schema.Resource {
 			"type": {
 				Type:     schema.TypeString,
 				Required: true,
+				// PING is retained for compatibility; it is not documented in the reviewed OTC API.
 				ValidateFunc: validation.StringInSlice(
 					[]string{"TCP", "UDP_CONNECT", "HTTP", "HTTPS", "PING"},
 					false,
@@ -88,6 +89,7 @@ func ResourceMonitorV3() *schema.Resource {
 				),
 			},
 			"http_method": {
+				// Retained for compatibility although the reviewed OTC API marks this field unsupported.
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -119,6 +121,14 @@ func ResourceMonitorV3() *schema.Resource {
 				Computed:     true,
 				ValidateFunc: validation.IsPortNumber,
 			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -148,7 +158,7 @@ func resourceMonitorV3Create(ctx context.Context, d *schema.ResourceData, meta i
 		Name:           d.Get("name").(string),
 		MonitorPort:    d.Get("monitor_port").(int),
 	}
-	monitor, err := monitors.Create(client, opts).Extract()
+	monitor, err := monitors.Create(client, opts)
 	if err != nil {
 		return fmterr.Errorf("error creating LB monitor v3: %w", err)
 	}
@@ -167,11 +177,15 @@ func resourceMonitorV3Read(ctx context.Context, d *schema.ResourceData, meta int
 		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
-	monitor, err := monitors.Get(client, d.Id()).Extract()
+	monitor, err := monitors.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "error reading LB monitor v3")
 	}
 
+	return setMonitorV3Fields(d, monitor)
+}
+
+func setMonitorV3Fields(d *schema.ResourceData, monitor *monitors.Monitor) diag.Diagnostics {
 	mErr := multierror.Append(
 		d.Set("admin_state_up", monitor.AdminStateUp),
 		d.Set("delay", monitor.Delay),
@@ -186,6 +200,8 @@ func resourceMonitorV3Read(ctx context.Context, d *schema.ResourceData, meta int
 		d.Set("timeout", monitor.Timeout),
 		d.Set("type", monitor.Type),
 		d.Set("url_path", monitor.URLPath),
+		d.Set("created_at", monitor.CreatedAt),
+		d.Set("updated_at", monitor.UpdatedAt),
 	)
 	if len(monitor.Pools) > 0 {
 		mErr = multierror.Append(mErr, d.Set("pool_id", monitor.Pools[0].ID))
@@ -220,7 +236,7 @@ func resourceMonitorV3Update(ctx context.Context, d *schema.ResourceData, meta i
 		Name:           d.Get("name").(string),
 		MonitorPort:    d.Get("monitor_port").(int),
 	}
-	_, err = monitors.Update(client, d.Id(), opts).Extract()
+	_, err = monitors.Update(client, d.Id(), opts)
 	if err != nil {
 		return fmterr.Errorf("error updating LB monitor v3: %w", err)
 	}
@@ -238,7 +254,7 @@ func resourceMonitorV3Delete(ctx context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
-	err = monitors.Delete(client, d.Id()).ExtractErr()
+	err = monitors.Delete(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "error deleting LB monitor v3")
 	}

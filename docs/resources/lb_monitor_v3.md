@@ -60,6 +60,8 @@ The following arguments are supported:
 
   The value can be `TCP`, `UDP_CONNECT`, `HTTP`, `HTTPS`, or `PING`.
 
+  `PING` is retained for compatibility but is not documented in the reviewed OTC v3 API.
+
 * `delay` - (Required) Specifies the interval between health checks, in seconds.
 
   The value of this parameter ranges from 1 to 50.
@@ -92,7 +94,7 @@ The following arguments are supported:
 
 * `domain_name` - (Optional) Specifies the domain name that HTTP requests are sent to during the health check.
 
-  This parameter is available only when type is set to `HTTP`.
+  This parameter is available only when type is set to `HTTP` or `HTTPS`.
 
   The value is left blank by default, indicating that the virtual IP address of the load balancer is used as the
   destination address of HTTP requests.
@@ -103,10 +105,10 @@ The following arguments are supported:
 
   The value must start with a slash (/), and the default value is `/`.
 
-  This parameter is available only when `type` is set to `HTTP`.
+  This parameter is available only when `type` is set to `HTTP` or `HTTPS`.
 
 * `expected_codes` - (Optional) Specifies the expected HTTP status code. This parameter will take effect only
-  when `type` is set to HTTP.
+  when `type` is set to `HTTP` or `HTTPS`.
 
   The value options are as follows:
   * A specific value, for example, `200`
@@ -117,6 +119,9 @@ The following arguments are supported:
 
 * `http_method` - (Optional) Specifies the HTTP method.
 
+  This existing attribute and its API mapping are retained for compatibility although the reviewed OTC
+  documentation marks the parameter unsupported.
+
   The value can be `GET`, `HEAD`, `POST`, `PUT`, `DELETE`, `TRACE`, `OPTIONS`, `CONNECT`, or `PATCH`.
 
   This parameter will take effect only when type is set to `HTTP`.
@@ -126,6 +131,14 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - Specifies the health check (monitor) ID.
+
+* `created_at` - The time the health check was created, in UTC format `yyyy-MM-dd'T'HH:mm:ss'Z'`.
+
+* `updated_at` - The time the health check was last updated, in UTC format `yyyy-MM-dd'T'HH:mm:ss'Z'`.
+
+The timestamp fields can be empty for older dedicated load balancers and for shared load balancers.
+The SDK's new HTTP-version and content-verification fields are not exposed because the reviewed OTC API
+marks them unsupported.
 
 ## Import
 
