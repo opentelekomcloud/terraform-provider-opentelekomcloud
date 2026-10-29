@@ -30,8 +30,10 @@ func TestAccDmsUsersV2_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDmsV2UserExists(resourceUserV2Name, user),
 					resource.TestCheckResourceAttr(resourceUserV2Name, "username", "Test-user"),
+					resource.TestCheckResourceAttr(resourceUserV2Name, "description", "Kafka application user"),
 					resource.TestCheckResourceAttr(resourceUserV2Name, "default_app", "false"),
 					resource.TestCheckResourceAttr(resourceUserV2Name, "role", "guest"),
+					resource.TestCheckResourceAttrSet(resourceUserV2Name, "creation_time"),
 				),
 			},
 			{
@@ -39,8 +41,10 @@ func TestAccDmsUsersV2_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDmsV2UserExists(resourceUserV2Name, user),
 					resource.TestCheckResourceAttr(resourceUserV2Name, "username", "Test-user"),
+					resource.TestCheckResourceAttr(resourceUserV2Name, "description", "Kafka application user"),
 					resource.TestCheckResourceAttr(resourceUserV2Name, "default_app", "false"),
 					resource.TestCheckResourceAttr(resourceUserV2Name, "role", "guest"),
+					resource.TestCheckResourceAttrSet(resourceUserV2Name, "creation_time"),
 				),
 			},
 		},
@@ -116,6 +120,7 @@ resource "opentelekomcloud_dms_instance_v2" "instance_1" {
 resource "opentelekomcloud_dms_user_v2" "user_1" {
   instance_id = opentelekomcloud_dms_instance_v2.instance_1.id
   username    = "Test-user"
+  description = "Kafka application user"
   password    = "Dmstest@123"
 }
 
@@ -153,6 +158,7 @@ resource "opentelekomcloud_dms_instance_v2" "instance_1" {
 resource "opentelekomcloud_dms_user_v2" "user_1" {
   instance_id = opentelekomcloud_dms_instance_v2.instance_1.id
   username    = "Test-user"
+  description = "Kafka application user"
   password    = "Dmstest@123@"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, instanceUpdate)

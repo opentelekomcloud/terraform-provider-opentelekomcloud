@@ -1,0 +1,10 @@
+---
+enhancements:
+  - |
+    **[DMS]** Add creation-time ``description`` support to
+    ``opentelekomcloud_dms_user_v2`` and read it from the user list.
+fixes:
+  - |
+    **[DMS]** Adapt user password resets to the updated SDK options while
+    preserving sensitive password handling and the existing ``creation_time``
+    attribute and numeric type.

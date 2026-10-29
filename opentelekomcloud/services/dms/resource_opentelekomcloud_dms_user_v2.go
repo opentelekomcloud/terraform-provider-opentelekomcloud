@@ -50,6 +50,12 @@ func ResourceDmsUsersV2() *schema.Resource {
 				Sensitive: true,
 				Required:  true,
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"role": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -75,6 +81,7 @@ func resourceDmsUsersV2Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	createOpts := users.CreateOpts{
 		UserName:   d.Get("username").(string),
+		UserDesc:   d.Get("description").(string),
 		UserPasswd: d.Get("password").(string),
 	}
 
@@ -109,9 +116,11 @@ func resourceDmsUsersV2Read(_ context.Context, d *schema.ResourceData, meta inte
 
 	mErr := multierror.Append(
 		d.Set("username", readUser.UserName),
+		d.Set("description", readUser.UserDesc),
 		d.Set("role", readUser.Role),
 		d.Set("default_app", readUser.DefaultApp),
-		d.Set("creation_time", readUser.CreatedTime),
+		// Preserve the existing Terraform float type for the SDK's integer timestamp.
+		d.Set("creation_time", float64(readUser.CreatedTime)),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -129,7 +138,9 @@ func resourceDmsUsersV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("password") {
 		password := d.Get("password").(string)
-		err = users.ResetPassword(client, d.Get("instance_id").(string), d.Id(), password)
+		err = users.ResetPassword(client, d.Get("instance_id").(string), d.Id(), users.ResetPasswordOpts{
+			NewPassword: password,
+		})
 		if err != nil {
 			return fmterr.Errorf("error updating OpenTelekomCloud DMSv2 User password: %s", err)
 		}
