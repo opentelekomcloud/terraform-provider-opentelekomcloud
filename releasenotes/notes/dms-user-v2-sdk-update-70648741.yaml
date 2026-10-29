@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[DMS]** Add ``description`` attribute to
+    ``opentelekomcloud_dms_user_v2`` (`#3604 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3604>`_)

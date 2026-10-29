@@ -25,6 +25,7 @@ variable "instance_id" {}
 resource "opentelekomcloud_dms_user_v2" "user_1" {
   instance_id = instance_id
   username    = "Test-user"
+  description = "Kafka application user"
   password    = "Dmstest@123@"
 }
 ```
@@ -42,6 +43,11 @@ The following arguments are supported:
   must meet the following complexity requirements: Must be 8 to 32 characters long.
   Must contain at least 2 of the following character types: lowercase letters, uppercase
   letters, digits, and special characters (`~!@#$%^&*()-_=+\|[{}]:'",<.>/?`).
+  This argument is sensitive. Changing it resets the user password in place.
+
+* `description` - (Optional) Specifies the user description. If omitted, the current
+  description is read from the API. Changing this creates a new user because the
+  API only accepts a description when creating a user.
 
 ## Attributes Reference
 
@@ -51,4 +57,5 @@ All above argument parameters can be exported as attribute parameters along with
 
 * `default_app` - Specifies whether an application is the default application.
 
-* `creation_time` - Specifies the time when a user was created.
+* `creation_time` - Specifies the time when a user was created, as a Unix timestamp
+  in milliseconds.
