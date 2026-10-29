@@ -119,7 +119,6 @@ func resourceDmsUsersV2Read(_ context.Context, d *schema.ResourceData, meta inte
 		d.Set("description", readUser.UserDesc),
 		d.Set("role", readUser.Role),
 		d.Set("default_app", readUser.DefaultApp),
-		// Preserve the existing Terraform float type for the SDK's integer timestamp.
 		d.Set("creation_time", float64(readUser.CreatedTime)),
 	)
 

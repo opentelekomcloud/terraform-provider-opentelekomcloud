@@ -99,7 +99,7 @@ data "opentelekomcloud_dms_az_v1" "az_1" {}
 data "opentelekomcloud_dms_product_v1" "product_1" {
   engine        = "kafka"
   instance_type = "cluster"
-  version       = "2.3.0"
+  version       = "2.7"
 }
 
 resource "opentelekomcloud_dms_instance_v2" "instance_1" {
@@ -138,7 +138,7 @@ data "opentelekomcloud_dms_az_v1" "az_1" {}
 data "opentelekomcloud_dms_product_v1" "product_1" {
   engine        = "kafka"
   instance_type = "cluster"
-  version       = "2.3.0"
+  version       = "2.7"
 }
 
 resource "opentelekomcloud_dms_instance_v2" "instance_1" {

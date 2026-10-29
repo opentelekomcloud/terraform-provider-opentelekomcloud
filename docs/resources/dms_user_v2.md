@@ -58,4 +58,4 @@ All above argument parameters can be exported as attribute parameters along with
 * `default_app` - Specifies whether an application is the default application.
 
 * `creation_time` - Specifies the time when a user was created, as a Unix timestamp
-  in milliseconds. The existing Terraform numeric representation is preserved.
+  in milliseconds.
