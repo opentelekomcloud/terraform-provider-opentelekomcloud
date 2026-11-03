@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[ECS]** Exclude system-managed tags prefixed with ``_sys`` from
+    ``opentelekomcloud_compute_instance_v2`` state to prevent unwanted tag
+    removal and HTTP 403 errors during updates (`#3608 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3608>`_)
