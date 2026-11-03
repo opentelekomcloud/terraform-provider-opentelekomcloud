@@ -103,7 +103,7 @@ func resourceCertificateV3Create(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	cert, err := certificates.Create(client, createOpts).Extract()
+	cert, err := certificates.Create(client, createOpts)
 	if err != nil {
 		return fmterr.Errorf("error creating LoadBalancer Certificate: %w", err)
 	}
@@ -124,7 +124,7 @@ func resourceCertificateV3Read(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
-	cert, err := certificates.Get(client, d.Id()).Extract()
+	cert, err := certificates.Get(client, d.Id())
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "certificateV3")
 	}
@@ -179,7 +179,7 @@ func resourceCertificateV3Update(ctx context.Context, d *schema.ResourceData, me
 
 	log.Printf("[DEBUG] Updating certificate %s with options: %#v", d.Id(), updateOpts)
 
-	_, err = certificates.Update(client, d.Id(), updateOpts).Extract()
+	_, err = certificates.Update(client, d.Id(), updateOpts)
 	if err != nil {
 		return fmterr.Errorf("error updating the certificate: %w", err)
 	}
@@ -198,7 +198,7 @@ func resourceCertificateV3Delete(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	log.Printf("[DEBUG] Deleting certificate: %s", d.Id())
-	if err := certificates.Delete(client, d.Id()).ExtractErr(); err != nil {
+	if err := certificates.Delete(client, d.Id()); err != nil {
 		return fmterr.Errorf("error deleting the certificate: %w", err)
 	}
 

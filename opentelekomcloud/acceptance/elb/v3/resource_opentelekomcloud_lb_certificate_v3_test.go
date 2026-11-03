@@ -133,7 +133,7 @@ func testAccCheckLBV3CertificateDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := certificates.Get(client, rs.Primary.ID).Extract()
+		_, err := certificates.Get(client, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("certificate still exists: %s", rs.Primary.ID)
 		}
@@ -159,7 +159,7 @@ func testAccCheckLBV2CertificateExists(n string, cert *certificates.Certificate)
 			return fmt.Errorf(elbv3.ErrCreateClient, err)
 		}
 
-		found, err := certificates.Get(client, rs.Primary.ID).Extract()
+		found, err := certificates.Get(client, rs.Primary.ID)
 		if err != nil {
 			return err
 		}

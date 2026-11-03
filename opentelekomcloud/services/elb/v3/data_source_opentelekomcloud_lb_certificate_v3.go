@@ -80,7 +80,7 @@ func dataSourceCertificateV3Read(_ context.Context, d *schema.ResourceData, meta
 
 	id := d.Get("id").(string)
 	if id != "" {
-		cert, err := certificates.Get(client, id).Extract()
+		cert, err := certificates.Get(client, id)
 		if err != nil {
 			return fmterr.Errorf("error getting ELBv3 certificate: %w", err)
 		}
@@ -93,13 +93,9 @@ func dataSourceCertificateV3Read(_ context.Context, d *schema.ResourceData, meta
 		Domain: common.StrSlice(d.Get("domain").(string)),
 	}
 
-	pages, err := certificates.List(client, listOpts).AllPages()
+	certList, err := certificates.List(client, listOpts)
 	if err != nil {
 		return fmterr.Errorf("error listing ELBv3 certificates: %w", err)
-	}
-	certList, err := certificates.ExtractCertificates(pages)
-	if err != nil {
-		return fmterr.Errorf("error extracting ELBv3 certificates: %w", err)
 	}
 
 	if len(certList) > 1 {
