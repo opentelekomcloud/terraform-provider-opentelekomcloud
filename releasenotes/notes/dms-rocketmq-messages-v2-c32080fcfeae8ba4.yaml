@@ -1,8 +1,8 @@
 ---
 features:
   - |
-    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_message_send_v2`` (`#XXXX <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/XXXX>`_)
+    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_message_send_v2`` (`#3609 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3609>`_)
   - |
-    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_dead_letter_resend_v2`` (`#XXXX <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/XXXX>`_)
+    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_dead_letter_resend_v2`` (`#3609 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3609>`_)
   - |
-    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_consumption_verify_v2`` (`#XXXX <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/XXXX>`_)
+    **[DMS]** Add new resource ``opentelekomcloud_dms_rocketmq_consumption_verify_v2`` (`#3609 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3609>`_)
