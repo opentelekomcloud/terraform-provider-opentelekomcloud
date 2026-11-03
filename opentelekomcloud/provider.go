@@ -8,6 +8,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/antiddos"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/aom"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/apigw"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/as"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/asm"
@@ -489,6 +490,7 @@ func Provider() *schema.Provider {
 
 		ResourcesMap: map[string]*schema.Resource{
 			"opentelekomcloud_antiddos_v1":                               antiddos.ResourceAntiDdosV1(),
+			"opentelekomcloud_aom_alarm_action_rule_v2":                  aom.ResourceAlarmActionRuleV2(),
 			"opentelekomcloud_apigw_acl_policy_v2":                       apigw.ResourceAPIAclPolicyV2(),
 			"opentelekomcloud_apigw_acl_policy_associate_v2":             apigw.ResourceAclPolicyAssociateV2(),
 			"opentelekomcloud_apigw_api_v2":                              apigw.ResourceAPIApiV2(),
