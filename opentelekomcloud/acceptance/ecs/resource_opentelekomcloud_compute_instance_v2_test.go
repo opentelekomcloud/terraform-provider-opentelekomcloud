@@ -593,12 +593,14 @@ func testAccCheckComputeV2InstanceBootVolumeAttachment(instance *servers.Server)
 var testAccComputeV2InstanceBasic = fmt.Sprintf(`
 %s
 
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   description       = "my_desc"
   availability_zone = "%s"
 
-  image_name = "Standard_Debian_11_latest"
+  image_name = data.opentelekomcloud_images_image_v2.latest_image.name
   flavor_id  = "s3.large.2"
 
   metadata = {
@@ -616,7 +618,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 
   stop_before_destroy = true
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
 func testAccComputeV2InstanceCreateError(flavorID string) string {
 	return fmt.Sprintf(`
@@ -660,13 +662,15 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 var testAccComputeV2InstanceUpdate = fmt.Sprintf(`
 %s
 
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_2"
   security_groups   = ["default"]
   availability_zone = "%s"
   description       = "my_desc_updated"
 
-  image_name = "Standard_Debian_11_latest"
+  image_name = data.opentelekomcloud_images_image_v2.latest_image.name
   flavor_id  = "s3.large.2"
 
   network {
@@ -679,7 +683,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 
   stop_before_destroy = true
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
 var testAccComputeV2InstanceMultiSecgroup = fmt.Sprintf(`
 %s

@@ -36,6 +36,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const systemManagedTagPrefix = "_sys"
+
 func ResourceComputeInstanceV2() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceComputeInstanceV2Create,
@@ -712,6 +714,11 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 		return fmterr.Errorf("error fetching OpenTelekomCloud CloudServers tags: %w", err)
 	}
 	tagMap := common.TagsToMap(resourceTags)
+	for key := range tagMap {
+		if strings.HasPrefix(key, systemManagedTagPrefix) {
+			delete(tagMap, key)
+		}
+	}
 	mErr = multierror.Append(mErr, d.Set("tags", tagMap))
 
 	// Set win instance password
