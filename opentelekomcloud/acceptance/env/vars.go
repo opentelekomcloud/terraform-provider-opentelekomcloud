@@ -34,6 +34,13 @@ var (
 	OS_ENTERPRISE_PROJECT_NAME = os.Getenv("OS_ENTERPRISE_PROJECT_NAME")
 )
 
+var (
+	OS_DMS_ROCKETMQ_INSTANCE_ID = os.Getenv("OS_DMS_ROCKETMQ_INSTANCE_ID")
+	OS_DMS_ROCKETMQ_GROUP       = os.Getenv("OS_DMS_ROCKETMQ_GROUP")
+	OS_DMS_ROCKETMQ_TOPIC       = os.Getenv("OS_DMS_ROCKETMQ_TOPIC")
+	OS_DMS_ROCKETMQ_CLIENT_ID   = os.Getenv("OS_DMS_ROCKETMQ_CLIENT_ID")
+)
+
 func flavorID() string {
 	if f := os.Getenv("OS_FLAVOR_ID"); f != "" {
 		return f
