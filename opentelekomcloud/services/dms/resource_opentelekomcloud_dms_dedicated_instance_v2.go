@@ -207,6 +207,11 @@ func ResourceDmsDedicatedInstanceV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"ipv6_connect_addresses": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 			"port": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -550,7 +555,8 @@ func resourceDmsKafkaInstanceRead(ctx context.Context, d *schema.ResourceData, m
 		d.Set("vpc_id", v.VPCID),
 		d.Set("security_group_id", v.SecurityGroupID),
 		d.Set("network_id", v.SubnetID),
-		d.Set("ipv6_enable", v.EnablePublicIP),
+		d.Set("ipv6_enable", v.IPv6Enable),
+		d.Set("ipv6_connect_addresses", v.IPv6ConnectAddresses),
 		d.Set("available_zones", v.AvailableZones),
 		d.Set("broker_num", v.BrokerNum),
 		d.Set("maintain_begin", strings.TrimSuffix(v.MaintainBegin, ":00")),

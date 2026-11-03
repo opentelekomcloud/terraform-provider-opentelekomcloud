@@ -233,6 +233,8 @@ In addition to all arguments above, the following attributes are exported:
 * `user_id` - Indicates the ID of the user who created the DMS Kafka instance
 * `user_name` - Indicates the name of the user who created the DMS Kafka instance
 * `connect_address` - Indicates the IP address of the DMS Kafka instance.
+* `ipv6_connect_addresses` - Indicates the IPv6 connection addresses of the DMS Kafka instance.
+  Populated only when `ipv6_enable` is **true**.
 * `cross_vpc_accesses` - Indicates the Access information of cross-VPC. The structure is documented below.
 * `public_ip_address` - Indicates the public IP addresses list of the instance.
 * `connector_node_num` - Indicates the number of connector node.
