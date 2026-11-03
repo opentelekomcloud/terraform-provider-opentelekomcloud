@@ -120,6 +120,16 @@ func TestAccPreCheckDcHostedConnection(t *testing.T) {
 	}
 }
 
+// TestAccPreCheckDmsRocketMQConsumer requires a RocketMQ instance with an online consumer of the group,
+// as the API rejects message resending for groups without online consumers.
+func TestAccPreCheckDmsRocketMQConsumer(t *testing.T) {
+	if env.OS_DMS_ROCKETMQ_INSTANCE_ID == "" || env.OS_DMS_ROCKETMQ_GROUP == "" ||
+		env.OS_DMS_ROCKETMQ_TOPIC == "" || env.OS_DMS_ROCKETMQ_CLIENT_ID == "" {
+		t.Skip("OS_DMS_ROCKETMQ_INSTANCE_ID, OS_DMS_ROCKETMQ_GROUP, OS_DMS_ROCKETMQ_TOPIC and " +
+			"OS_DMS_ROCKETMQ_CLIENT_ID must be set for this acceptance test")
+	}
+}
+
 func TestLtsPreCheckLts(t *testing.T) {
 	if env.OS_ACCESS_KEY == "" || env.OS_SECRET_KEY == "" || env.OS_PROJECT_ID == "" {
 		t.Skip("OS_ACCESS_KEY, OS_SECRET_KEY and OS_PROJECT_ID must be set for LTS acceptance tests")

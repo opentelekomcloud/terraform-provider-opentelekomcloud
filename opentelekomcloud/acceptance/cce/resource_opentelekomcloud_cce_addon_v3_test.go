@@ -493,29 +493,34 @@ func testAccCCEAddonV3StubDomains(name string) string {
 %s
 %s
 
+data "opentelekomcloud_cce_addon_template_v3" "coredns" {
+  addon_name    = "coredns"
+  addon_version = "1.30.67"
+}
+
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.medium"
   vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  cluster_version         = "v1.30"
+  cluster_version         = "v1.34"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   no_addons               = true
 }
 
 resource "opentelekomcloud_cce_addon_v3" "coredns" {
-  template_name    = "coredns"
-  template_version = "1.30.33"
+  template_name    = data.opentelekomcloud_cce_addon_template_v3.coredns.addon_name
+  template_version = data.opentelekomcloud_cce_addon_template_v3.coredns.addon_version
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
     basic = {
-      "cluster_ip" : "10.247.3.10",
-      "image_version" : "1.30.33",
-      "swr_addr" : "100.125.7.25:20202",
-      "swr_user" : "cce-addons"
+      cluster_ip    = data.opentelekomcloud_cce_addon_template_v3.coredns.cluster_ip
+      image_version = data.opentelekomcloud_cce_addon_template_v3.coredns.image_version
+      swr_addr      = data.opentelekomcloud_cce_addon_template_v3.coredns.swr_addr
+      swr_user      = data.opentelekomcloud_cce_addon_template_v3.coredns.swr_user
     }
     custom_json = jsonencode({
       stub_domains = {
