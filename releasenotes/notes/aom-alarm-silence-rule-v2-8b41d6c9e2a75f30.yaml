@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[AOM]** Add new resource ``resource/opentelekomcloud_aom_alarm_silence_rule_v2`` (`#3612 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3612>`_)
