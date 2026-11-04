@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[AOM]** Add new resource ``resource/opentelekomcloud_aom_service_discovery_rule_v1`` (`#3613 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3613>`_)
