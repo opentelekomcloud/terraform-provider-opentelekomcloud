@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    **[DMS]** Add new data source ``opentelekomcloud_dms_rocketmq_instances_v2`` (`#3611 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3611>`_)
+  - |
+    **[DMS]** Add new data source ``opentelekomcloud_dms_rocketmq_flavors_v2`` (`#3611 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3611>`_)
+  - |
+    **[DMS]** Add new data source ``opentelekomcloud_dms_rocketmq_topics_v2`` (`#3611 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3611>`_)
+  - |
+    **[DMS]** Add new data source ``opentelekomcloud_dms_rocketmq_consumer_groups_v2`` (`#3611 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3611>`_)
