@@ -1,0 +1,7 @@
+---
+enhancements:
+  - |
+    **[DMS]** Add `ipv6_connect_addresses` attribute to ``resource/opentelekomcloud_dms_dedicated_instance_v2``
+fixes:
+  - |
+    **[DMS]** Fix `ipv6_enable` being read from `enable_publicip` in ``resource/opentelekomcloud_dms_dedicated_instance_v2``
