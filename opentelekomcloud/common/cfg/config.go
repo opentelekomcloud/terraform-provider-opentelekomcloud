@@ -1376,6 +1376,13 @@ func (c *Config) DwsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) AomV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewAOMV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) AomV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewAOMV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,

@@ -496,6 +496,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_antiddos_v1":                               antiddos.ResourceAntiDdosV1(),
 			"opentelekomcloud_aom_alarm_action_rule_v2":                  aom.ResourceAlarmActionRuleV2(),
 			"opentelekomcloud_aom_alarm_silence_rule_v2":                 aom.ResourceAlarmSilenceRuleV2(),
+			"opentelekomcloud_aom_service_discovery_rule_v1":             aom.ResourceServiceDiscoveryRuleV1(),
 			"opentelekomcloud_apigw_acl_policy_v2":                       apigw.ResourceAPIAclPolicyV2(),
 			"opentelekomcloud_apigw_acl_policy_associate_v2":             apigw.ResourceAclPolicyAssociateV2(),
 			"opentelekomcloud_apigw_api_v2":                              apigw.ResourceAPIApiV2(),
