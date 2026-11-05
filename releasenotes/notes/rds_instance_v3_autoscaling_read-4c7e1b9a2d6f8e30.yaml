@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[RDS]** Fix regional diff on ``volume.limit_size`` and ``volume.trigger_threshold`` in ``resource/opentelekomcloud_rds_instance_v3``: the storage autoscaling configuration is now also read back in the ``eu-ch2`` (Swiss) region

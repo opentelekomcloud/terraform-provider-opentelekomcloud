@@ -1373,18 +1373,16 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		volume["throughput"] = d.Get("volume.0.throughput").(int)
 	}
 
-	if region != "eu-ch2" {
-		resp, err := instances.GetAutoScaling(client, d.Id())
+	resp, err := instances.GetAutoScaling(client, d.Id())
+	if err != nil {
+		log.Printf("[ERROR] error query automatic expansion configuration of the instance storage: %s", err)
+	} else if resp.SwitchOption {
+		err = d.Set("autoscaling_enabled", true)
 		if err != nil {
-			log.Printf("[ERROR] error query automatic expansion configuration of the instance storage: %s", err)
-		} else if resp.SwitchOption {
-			err = d.Set("autoscaling_enabled", true)
-			if err != nil {
-				return diag.FromErr(err)
-			}
-			volume["limit_size"] = resp.LimitSize
-			volume["trigger_threshold"] = resp.TriggerThreshold
+			return diag.FromErr(err)
 		}
+		volume["limit_size"] = resp.LimitSize
+		volume["trigger_threshold"] = resp.TriggerThreshold
 	}
 
 	// in case when autoscaling was enabled even once size will be overwritten by data from schema
