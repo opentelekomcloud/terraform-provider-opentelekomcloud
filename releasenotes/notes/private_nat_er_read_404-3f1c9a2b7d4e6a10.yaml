@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[NAT]** Remove ``resource/opentelekomcloud_private_nat_gateway_v3``, ``resource/opentelekomcloud_private_nat_snat_rule_v3``, ``resource/opentelekomcloud_private_nat_dnat_rule_v3`` and ``resource/opentelekomcloud_private_nat_transit_ip_v3`` from state when they were deleted outside of Terraform, instead of failing the refresh
+  - |
+    **[ER]** Remove ``resource/opentelekomcloud_er_instance_v3`` from state when it was deleted outside of Terraform, instead of failing the refresh

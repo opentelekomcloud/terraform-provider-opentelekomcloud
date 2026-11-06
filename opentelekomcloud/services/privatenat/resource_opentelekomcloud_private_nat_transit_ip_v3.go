@@ -126,7 +126,7 @@ func resourcePrivateNatTransitIpV3Read(ctx context.Context, d *schema.ResourceDa
 
 	getResp, err := transitip.Get(client, d.Id())
 	if err != nil {
-		return fmterr.Errorf("error fetching private NAT Transit IP : %w", err)
+		return common.CheckDeletedDiag(d, err, "error fetching private NAT Transit IP")
 	}
 
 	natTransitIp := getResp.TransitIp

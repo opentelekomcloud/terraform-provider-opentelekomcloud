@@ -148,7 +148,7 @@ func resourcePrivateNatDnatRuleV3Read(ctx context.Context, d *schema.ResourceDat
 
 	getResp, err := dnatrules.Get(client, d.Id())
 	if err != nil {
-		return fmterr.Errorf("error fetching private NAT DNAT rule : %w", err)
+		return common.CheckDeletedDiag(d, err, "error fetching private NAT DNAT rule")
 	}
 
 	natDnatRule := getResp.DnatRule
