@@ -238,12 +238,14 @@ func ResourceCCENodePoolV3() *schema.Resource {
 				Optional:  true,
 				Computed:  true,
 				StateFunc: common.GetHashOrEmpty,
+				ForceNew:  true,
 			},
 			"postinstall": {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Computed:  true,
 				StateFunc: common.GetHashOrEmpty,
+				ForceNew:  true,
 			},
 			"max_pods": {
 				Type:     schema.TypeInt,
