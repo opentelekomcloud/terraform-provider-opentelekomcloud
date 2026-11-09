@@ -1,14 +1,17 @@
 package er
 
 import (
+	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/er/v3/instance"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+	providercommon "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -79,6 +82,65 @@ func TestAccInstance_basic(t *testing.T) {
 				ResourceName:      rName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccInstance_disappears(t *testing.T) {
+	var obj interface{}
+	var deletedID string
+	rName := "opentelekomcloud_er_instance_v3.test"
+	config := testInstance_basic_step1(
+		"er-acc-disappears-"+acctest.RandString(5),
+		acctest.RandIntRange(64512, 65534),
+	)
+	rc := common.InitResourceCheck(rName, &obj, getInstanceResourceFunc)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config:             config,
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					func(s *terraform.State) error {
+						deletedID = s.RootModule().Resources[rName].Primary.ID
+						conf := common.TestAccProvider.Meta().(*cfg.Config)
+						client, err := conf.ErV3Client(env.OS_REGION_NAME)
+						if err != nil {
+							return err
+						}
+						if err := instance.Delete(client, deletedID); err != nil {
+							return fmt.Errorf("deleting ER instance outside Terraform: %w", err)
+						}
+						return resource.RetryContext(context.Background(), 10*time.Minute, func() *resource.RetryError {
+							_, err := instance.Get(client, deletedID)
+							if providercommon.IsResourceNotFound(err) {
+								return nil
+							}
+							if err != nil {
+								return resource.NonRetryableError(err)
+							}
+							return resource.RetryableError(fmt.Errorf("ER instance %s still exists", deletedID))
+						})
+					},
+				),
+			},
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					func(s *terraform.State) error {
+						if s.RootModule().Resources[rName].Primary.ID == deletedID {
+							return fmt.Errorf("ER instance %s was not recreated", deletedID)
+						}
+						return nil
+					},
+				),
 			},
 		},
 	})
