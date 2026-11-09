@@ -171,7 +171,7 @@ func resourceErInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta 
 
 	getResp, err := instance.Get(client, d.Id())
 	if err != nil {
-		return diag.Errorf("error retrieving er instance (%s): %s", d.Id(), err)
+		return common.CheckDeletedDiag(d, err, "error retrieving ER instance")
 	}
 	tagsMap := make(map[string]string)
 	for _, tag := range getResp.Instance.Tags {

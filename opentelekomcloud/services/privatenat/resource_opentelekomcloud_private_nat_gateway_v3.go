@@ -158,7 +158,7 @@ func resourcePrivateNatGatewayV3Read(ctx context.Context, d *schema.ResourceData
 
 	getResp, err := natgateway.Get(client, d.Id())
 	if err != nil {
-		return fmterr.Errorf("error fetching private nat gateway : %w", err)
+		return common.CheckDeletedDiag(d, err, "error fetching private NAT gateway")
 	}
 
 	natGateway := getResp.Gateway
