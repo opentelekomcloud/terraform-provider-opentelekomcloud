@@ -116,7 +116,7 @@ func resourceEvpnCustomerGatewayRead(ctx context.Context, d *schema.ResourceData
 
 	gw, err := cgw.Get(client, d.Id())
 	if err != nil {
-		return diag.Errorf("error retrieving OpenTelekomCloud EVPN customer gateway (%s): %s", d.Id(), err)
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud EVPN customer gateway")
 	}
 
 	tagsMap := make(map[string]string)

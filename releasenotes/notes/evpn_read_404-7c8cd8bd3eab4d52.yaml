@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPN]** Remove ``resource/opentelekomcloud_enterprise_vpn_gateway_v5``, ``resource/opentelekomcloud_enterprise_vpn_customer_gateway_v5``, ``resource/opentelekomcloud_enterprise_vpn_connection_v5`` and ``resource/opentelekomcloud_enterprise_vpn_connection_monitor_v5`` from state when they were deleted outside of Terraform, instead of failing the refresh
