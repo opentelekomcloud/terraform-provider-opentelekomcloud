@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[SDRS]** Remove ``resource/opentelekomcloud_sdrs_replication_pair_v1`` from state when it was deleted outside of Terraform, instead of failing the refresh
