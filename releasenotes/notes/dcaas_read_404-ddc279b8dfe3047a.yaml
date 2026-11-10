@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DCaaS]** Remove ``resource/opentelekomcloud_dc_endpoint_group_v2`` and ``resource/opentelekomcloud_direct_connect_v2`` from state when they were deleted outside of Terraform, instead of failing the refresh

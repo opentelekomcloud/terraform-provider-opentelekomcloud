@@ -106,7 +106,7 @@ func resourceDCEndpointGroupV2Read(ctx context.Context, d *schema.ResourceData, 
 
 	eg, err := dceg.Get(client, d.Id())
 	if err != nil {
-		return fmterr.Errorf("error reading DC endpoint group: %s", err)
+		return common.CheckDeletedDiag(d, err, "error reading DC endpoint group")
 	}
 	log.Printf("[DEBUG] DC endpoint group V2 read: %+v", eg)
 

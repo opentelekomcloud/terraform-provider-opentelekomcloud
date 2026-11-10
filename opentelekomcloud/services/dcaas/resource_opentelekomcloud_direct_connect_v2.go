@@ -336,7 +336,7 @@ func resourceDirectConnectV2Read(ctx context.Context, d *schema.ResourceData, me
 
 	directConnect, err := dcaas.Get(client, d.Id())
 	if err != nil {
-		return fmterr.Errorf("error reading direct connect: %s", err)
+		return common.CheckDeletedDiag(d, err, "error reading direct connect")
 	}
 	log.Printf("[DEBUG] Direct Connect read result: %#v", directConnect)
 
