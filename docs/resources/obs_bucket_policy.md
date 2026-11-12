@@ -63,11 +63,3 @@ Import an existing OBS bucket policy using the bucket name:
 ```shell
 terraform import opentelekomcloud_obs_bucket_policy.policy bucket-name
 ```
-
-Import reads the existing policy and restores both `bucket` and `policy` in state.
-The credentials must have permission to read the bucket policy. Include the
-matching bucket name and policy JSON in your configuration before applying.
-
-A bucket must have an existing policy to import this resource. A private bucket
-without a custom policy returns `NoSuchBucketPolicy` and has no policy resource
-to import. WORM retention is separate and belongs to `opentelekomcloud_obs_bucket`.
