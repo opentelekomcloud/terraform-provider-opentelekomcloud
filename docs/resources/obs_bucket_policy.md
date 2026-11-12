@@ -55,3 +55,11 @@ The following arguments are supported:
 * `bucket` - (Required) The name of the bucket to which to apply the policy.
 
 * `policy` - (Required) The text of the policy.
+
+## Import
+
+Import an existing OBS bucket policy using the bucket name:
+
+```shell
+terraform import opentelekomcloud_obs_bucket_policy.policy bucket-name
+```

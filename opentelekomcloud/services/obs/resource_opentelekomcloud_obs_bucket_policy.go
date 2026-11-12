@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,6 +22,9 @@ func ResourceObsBucketPolicy() *schema.Resource {
 		ReadContext:   resourceObsBucketPolicyRead,
 		UpdateContext: resourceObsBucketPolicyPut,
 		DeleteContext: resourceObsBucketPolicyDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -87,10 +91,20 @@ func resourceObsBucketPolicyRead(_ context.Context, d *schema.ResourceData, meta
 	pol, err := client.GetBucketPolicy(d.Id())
 
 	if err != nil {
-		return fmterr.Errorf("error getting bucket policy")
+		if obsErr, ok := err.(obs.ObsError); ok && obsErr.StatusCode == 404 &&
+			(obsErr.Code == "NoSuchBucketPolicy" || obsErr.Code == "NoSuchBucket") {
+			log.Printf("[WARN] OBS bucket policy for bucket %s not found", d.Id())
+			d.SetId("")
+			return nil
+		}
+		return fmterr.Errorf("error getting OBS bucket policy for bucket %s: %w", d.Id(), err)
 	}
 
-	if err := d.Set("policy", pol.Policy); err != nil {
+	mErr := multierror.Append(
+		d.Set("bucket", d.Id()),
+		d.Set("policy", pol.Policy),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
 	}
 
