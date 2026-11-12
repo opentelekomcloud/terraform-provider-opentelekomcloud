@@ -126,7 +126,7 @@ func resourceSDRSReplicationPairV1Read(ctx context.Context, d *schema.ResourceDa
 
 	n, err := replications.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(err)
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud SDRS replication pair")
 	}
 
 	volumes := strings.Split(n.VolumeIDs, ",")
