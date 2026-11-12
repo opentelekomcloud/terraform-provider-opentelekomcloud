@@ -333,11 +333,31 @@ func TestAccObsBucket_WormPolicy(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config:   testAccObsBucketWormPolicyBasic(rInt),
+				PlanOnly: true,
+			},
+			{
 				Config: testAccObsBucketWormPolicyUpdate(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObsBucketExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "worm_policy.0.years", "1"),
 				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config:   testAccObsBucketWormPolicyUpdate(rInt),
+				PlanOnly: true,
 			},
 		},
 	})

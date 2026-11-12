@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[OBS]** Read the default WORM retention policy during bucket refresh and
+    import without requiring an existing ``worm_policy`` block in state (`#3622 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3622>`_)

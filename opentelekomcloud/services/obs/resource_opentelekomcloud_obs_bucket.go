@@ -679,10 +679,8 @@ func resourceObsBucketRead(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	// Read object lock
-	if d.Get("worm_policy.#") != 0 {
-		if err := setObsBucketObjLock(client, d); err != nil {
-			return diag.FromErr(err)
-		}
+	if err := setObsBucketObjLock(client, d); err != nil {
+		return diag.FromErr(err)
 	}
 
 	if err := setObsBucketUserDomainNames(client, d); err != nil {
@@ -1808,23 +1806,51 @@ func setObsBucketObjLock(obsClient *obs.ObsClient, d *schema.ResourceData) error
 	output, err := obsClient.GetWORMPolicy(bucket)
 
 	if err != nil {
+		// The object-lock GET API returns this error when WORM is disabled.
+		if obsError, ok := err.(obs.ObsError); ok && obsError.StatusCode == 400 && obsError.Code == "InvalidRequest" {
+			log.Printf("[DEBUG] object lock is disabled for OBS bucket %s", bucket)
+			return d.Set("worm_policy", nil)
+		}
 		return fmt.Errorf("error getting object lock of OBS bucket '%s': %w", bucket, err)
 	}
 	log.Printf("[DEBUG] getting object lock info of OBS bucket %s: %#v", bucket, output)
+	if output.ObjectLockEnabled != "Enabled" {
+		return fmt.Errorf("invalid object lock response of OBS bucket %s: expected ObjectLockEnabled to be Enabled", bucket)
+	}
 
 	var objLock []map[string]interface{}
-	theLock := make(map[string]interface{}, 1)
-
-	if output.Days != "" && output.Days != "0" {
-		days, _ := strconv.Atoi(output.Days)
-		theLock["days"] = days
-	} else {
-		years, _ := strconv.Atoi(output.Years)
-		theLock["years"] = years
+	if output.Days != "" || output.Years != "" || output.Mode != "" {
+		theLock := make(map[string]interface{}, 1)
+		for _, period := range []struct {
+			key   string
+			value string
+			max   int
+		}{
+			{"days", output.Days, 36500},
+			{"years", output.Years, 100},
+		} {
+			if period.value == "" {
+				continue
+			}
+			value, err := strconv.Atoi(period.value)
+			if err != nil {
+				return fmt.Errorf("error parsing WORM %s of OBS bucket %s: %w", period.key, bucket, err)
+			}
+			if value < 0 || value > period.max {
+				return fmt.Errorf("invalid WORM %s of OBS bucket %s: must be between 1 and %d, or 0 for the unused period",
+					period.key, bucket, period.max)
+			}
+			if value > 0 {
+				theLock[period.key] = value
+			}
+		}
+		if len(theLock) != 1 {
+			return fmt.Errorf("invalid WORM retention of OBS bucket %s: exactly one positive days or years value is required", bucket)
+		}
+		objLock = append(objLock, theLock)
 	}
-	objLock = append(objLock, theLock)
 
-	log.Printf("[DEBUG] saving lobject lock info of OBS bucket: %s: %#v", bucket, objLock)
+	log.Printf("[DEBUG] saving object lock info of OBS bucket: %s: %#v", bucket, objLock)
 
 	if err := d.Set("worm_policy", objLock); err != nil {
 		return fmt.Errorf("error saving worm policy of OBS bucket %s: %s", bucket, err)
