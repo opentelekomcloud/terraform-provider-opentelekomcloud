@@ -16,6 +16,7 @@ import (
 )
 
 const resourceName = "opentelekomcloud_obs_bucket.bucket"
+const bucketPolicyResourceName = "opentelekomcloud_obs_bucket_policy.bucket"
 
 func TestAccObsBucketPolicyBasic(t *testing.T) {
 	name := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
@@ -51,7 +52,17 @@ func TestAccObsBucketPolicyBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObsBucketExists(resourceName),
 					testAccCheckObsBucketHasPolicy(resourceName, expectedPolicyText),
+					resource.TestCheckResourceAttr(bucketPolicyResourceName, "bucket", name),
 				),
+			},
+			{
+				ResourceName:      bucketPolicyResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config:   testAccObsBucketPolicyConfig(name),
+				PlanOnly: true,
 			},
 		},
 	})
@@ -86,7 +97,17 @@ func TestAccObsBucketPolicyUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObsBucketExists(resourceName),
 					testAccCheckObsBucketHasPolicy(resourceName, expectedPolicyText2),
+					resource.TestCheckResourceAttr(bucketPolicyResourceName, "bucket", name),
 				),
+			},
+			{
+				ResourceName:      bucketPolicyResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config:   testAccObsBucketPolicyConfigUpdated(name),
+				PlanOnly: true,
 			},
 		},
 	})

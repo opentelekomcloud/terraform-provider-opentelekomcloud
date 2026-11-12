@@ -1,0 +1,9 @@
+---
+enhancements:
+  - |
+    **[OBS]** Support importing ``opentelekomcloud_obs_bucket_policy`` by bucket
+    name, restoring both the bucket name and policy JSON in state.
+fixes:
+  - |
+    **[OBS]** Remove missing bucket policies from state during refresh and retain
+    the underlying API error in diagnostics for failed policy reads.
