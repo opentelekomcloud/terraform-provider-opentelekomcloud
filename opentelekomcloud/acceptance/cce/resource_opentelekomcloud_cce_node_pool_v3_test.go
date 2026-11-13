@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -325,6 +326,34 @@ func TestAccCCENodePoolsV3StorageJsonEncode(t *testing.T) {
 	})
 }
 
+func TestAccCCENodePoolsV3HostnameConfig(t *testing.T) {
+	clusterId := os.Getenv("OS_CLUSTER_ID")
+	if clusterId == "" {
+		t.Skip("OS_CLUSTER_ID must be set for the hostname_config_type acceptance test")
+	}
+	var nodePool nodepools.NodePool
+	rc := common.InitResourceCheck(
+		nodePoolResourceName,
+		&nodePool,
+		getNodePoolFunc,
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodePoolV3HostnameConfig(clusterId),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "hostname_config_type", "cceNodeName"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCCENodePoolV3Basic(preinstall, postinstall string) string {
 	return fmt.Sprintf(`
 %s
@@ -370,6 +399,31 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     effect = "NoSchedule"
   }
 }`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, preinstall, postinstall)
+}
+
+func testAccCCENodePoolV3HostnameConfig(clusterId string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
+  cluster_id         = "%s"
+  name               = "opentelekomcloud-cce-node-pool-hn"
+  os                 = "EulerOS 2.9"
+  flavor             = "s2.large.2"
+  initial_node_count = 1
+  availability_zone  = "%s"
+  key_pair           = "%s"
+
+  hostname_config_type = "cceNodeName"
+
+  root_volume {
+    size       = 40
+    volumetype = "SSD"
+  }
+
+  data_volumes {
+    size       = 100
+    volumetype = "SSD"
+  }
+}`, clusterId, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 }
 
 func testAccCCENodePoolV3Update(preinstall, postinstall string) string {

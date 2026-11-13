@@ -34,6 +34,7 @@ func TestAccCCENodesV3DataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(dataSourceNodesName, "name", cceNodeName),
 					resource.TestCheckResourceAttr(dataSourceNodesName, "flavor_id", "s2.large.2"),
 					resource.TestCheckResourceAttr(dataSourceNodesName, "runtime", "docker"),
+					resource.TestCheckResourceAttr(dataSourceNodesName, "hostname_config_type", "cceNodeName"),
 				),
 			},
 		},
@@ -73,6 +74,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     size       = 100
     volumetype = "SATA"
   }
+  hostname_config_type = "cceNodeName"
 }
 `, shared.DataSourceCluster, cceNodeName, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 }
@@ -95,6 +97,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     size       = 100
     volumetype = "SATA"
   }
+  hostname_config_type = "cceNodeName"
 }
 data "opentelekomcloud_cce_node_v3" "nodes" {
   cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
