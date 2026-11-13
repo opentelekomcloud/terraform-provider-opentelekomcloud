@@ -243,7 +243,7 @@ func resourceDdmSchemaV1Read(ctx context.Context, d *schema.ResourceData, meta i
 	ddmInstanceId := d.Get("instance_id").(string)
 	sc, err := schemas.QuerySchemaDetails(client, ddmInstanceId, schemaName)
 	if err != nil {
-		return fmterr.Errorf("error fetching DDM schema: %w", err)
+		return common.CheckDeletedDiag(d, err, "error fetching DDM schema")
 	}
 
 	log.Printf("[DEBUG] Retrieved schema %s: %#v", schemaName, sc.Database)

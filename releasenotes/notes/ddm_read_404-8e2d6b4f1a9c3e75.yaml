@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DDM]** Remove ``resource/opentelekomcloud_ddm_instance_v1`` and ``resource/opentelekomcloud_ddm_schema_v1`` from state when they were deleted outside of Terraform, instead of failing the refresh
