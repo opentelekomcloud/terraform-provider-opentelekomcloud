@@ -308,7 +308,7 @@ func resourceCBRVaultV3Read(_ context.Context, d *schema.ResourceData, meta inte
 
 	vault, err := vaults.Get(client, d.Id())
 	if err != nil {
-		return fmterr.Errorf("error getting vault details: %s", err)
+		return common.CheckDeletedDiag(d, err, "error getting vault details")
 	}
 
 	var resourceInfo []map[string]interface{}
