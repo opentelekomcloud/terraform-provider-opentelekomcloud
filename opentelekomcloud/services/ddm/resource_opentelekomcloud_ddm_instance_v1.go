@@ -232,7 +232,7 @@ func resourceDdmInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 
 	instance, err := ddmv1instances.QueryInstanceDetails(client, d.Id())
 	if err != nil {
-		return fmterr.Errorf("error fetching DDM instance: %w", err)
+		return common.CheckDeletedDiag(d, err, "error fetching DDM instance")
 	}
 
 	log.Printf("[DEBUG] Retrieved instance %s: %#v", d.Id(), instance)
