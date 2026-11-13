@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IMS]** Remove ``resource/opentelekomcloud_ims_image_v2`` and ``resource/opentelekomcloud_ims_data_image_v2`` from state when the image was deleted outside of Terraform, instead of failing the refresh with ``unable to retrieve images: %!s(<nil>)``

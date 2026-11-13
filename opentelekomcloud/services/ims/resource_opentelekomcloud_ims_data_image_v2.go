@@ -2,6 +2,7 @@ package ims
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -216,7 +217,7 @@ func resourceImsDataImageV2Read(_ context.Context, d *schema.ResourceData, meta 
 
 	img, err := GetCloudImage(client, d.Id())
 	if err != nil {
-		return fmterr.Errorf("image %s not found: %s", d.Id(), err)
+		return common.CheckDeletedDiag(d, err, fmt.Sprintf("error retrieving image %s", d.Id()))
 	}
 	log.Printf("[DEBUG] Retrieved Image %s: %#v", d.Id(), img)
 
