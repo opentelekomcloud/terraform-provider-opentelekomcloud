@@ -276,8 +276,11 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 
 func GetCloudImage(client *golangsdk.ServiceClient, id string) (*images.ImageInfo, error) {
 	imgs, err := images.ListImages(client, images.ListImagesOpts{Id: id})
-	if err != nil || len(imgs) < 1 {
-		return nil, fmt.Errorf("unable to retrieve images: %s", err)
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve images: %w", err)
+	}
+	if len(imgs) < 1 {
+		return nil, golangsdk.ErrDefault404{}
 	}
 	img := imgs[0]
 	log.Printf("[DEBUG] Retrieved Image %s: %#v", id, img)
@@ -293,7 +296,7 @@ func resourceImsImageV2Read(_ context.Context, d *schema.ResourceData, meta inte
 
 	img, err := GetCloudImage(client, d.Id())
 	if err != nil {
-		return fmterr.Errorf("image %s not found: %s", d.Id(), err)
+		return common.CheckDeletedDiag(d, err, fmt.Sprintf("error retrieving image %s", d.Id()))
 	}
 	log.Printf("[DEBUG] Retrieved Image %s: %#v", d.Id(), img)
 
