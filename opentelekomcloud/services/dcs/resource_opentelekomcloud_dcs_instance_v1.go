@@ -514,7 +514,7 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 	v, err := lifecycle.Get(client, d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return common.CheckDeletedDiag(d, err, "error reading DCS instance")
 	}
 
 	log.Printf("[DEBUG] DCS instance %s: %+v", d.Id(), v)

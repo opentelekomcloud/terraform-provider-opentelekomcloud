@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DCS]** Remove ``resource/opentelekomcloud_dcs_instance_v1`` from state when the instance was deleted outside of Terraform, instead of failing the refresh with ``Resource not found``
