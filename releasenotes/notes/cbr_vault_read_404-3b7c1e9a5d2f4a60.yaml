@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CBR]** Remove ``resource/opentelekomcloud_cbr_vault_v3`` from state when it was deleted outside of Terraform, instead of failing the refresh
