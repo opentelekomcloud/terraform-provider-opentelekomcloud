@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -102,8 +103,7 @@ func BuildRequest(opts interface{}, parent string) (map[string]interface{}, erro
 // CheckDeleted checks the error to see if it's a 404 (Not Found) and, if so,
 // sets the resource ID to the empty string instead of throwing an error.
 func CheckDeleted(d *schema.ResourceData, err error, msg string) error {
-	_, ok := err.(golangsdk.ErrDefault404)
-	if ok {
+	if isNotFoundError(err) {
 		d.SetId("")
 		return nil
 	}
@@ -114,12 +114,17 @@ func CheckDeleted(d *schema.ResourceData, err error, msg string) error {
 // CheckDeletedDiag checks the error to see if it's a 404 (Not Found) and, if so,
 // sets the resource ID to the empty string instead of throwing an error.
 func CheckDeletedDiag(d *schema.ResourceData, err error, msg string) diag.Diagnostics {
-	if _, ok := err.(golangsdk.ErrDefault404); ok {
+	if isNotFoundError(err) {
 		d.SetId("")
 		return nil
 	}
 
 	return fmterr.Errorf("%s: %s", msg, err)
+}
+
+func isNotFoundError(err error) bool {
+	var notFound golangsdk.ErrDefault404
+	return errors.As(err, &notFound)
 }
 
 // AddValueSpecs expands the 'value_specs' object and removes 'value_specs'
