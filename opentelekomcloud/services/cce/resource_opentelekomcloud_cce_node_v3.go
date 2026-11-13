@@ -404,6 +404,15 @@ func ResourceCCENodeV3() *schema.Resource {
 					"docker", "containerd",
 				}, false),
 			},
+			"hostname_config_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"privateIp", "cceNodeName",
+				}, false),
+			},
 		},
 	}
 }
@@ -591,6 +600,12 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
+	if v, ok := d.GetOk("hostname_config_type"); ok {
+		createOpts.Spec.HostNameConfig = nodes.HostNameConfig{
+			Type: v.(string),
+		}
+	}
+
 	if ip := d.Get("private_ip").(string); ip != "" {
 		createOpts.Spec.NodeNicSpec.PrimaryNic.FixedIPs = []string{ip}
 	}
@@ -730,6 +745,10 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 
 	if node.Spec.Runtime.Name != "" {
 		mErr = multierror.Append(mErr, d.Set("runtime", node.Spec.Runtime.Name))
+	}
+
+	if node.Spec.HostNameConfig.Type != "" {
+		mErr = multierror.Append(mErr, d.Set("hostname_config_type", node.Spec.HostNameConfig.Type))
 	}
 
 	if err := mErr.ErrorOrNil(); err != nil {

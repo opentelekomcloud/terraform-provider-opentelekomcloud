@@ -101,6 +101,10 @@ func DataSourceCceNodesV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"hostname_config_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"billing_mode": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -212,6 +216,7 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("eip_count", Node.Spec.PublicIP.Count),
 		d.Set("eip_ids", Node.Spec.PublicIP.Ids),
 		d.Set("runtime", Node.Spec.Runtime.Name),
+		d.Set("hostname_config_type", Node.Spec.HostNameConfig.Type),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {

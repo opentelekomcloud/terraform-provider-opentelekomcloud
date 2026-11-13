@@ -214,6 +214,15 @@ func ResourceCCENodePoolV3() *schema.Resource {
 					"docker", "containerd",
 				}, false),
 			},
+			"hostname_config_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"privateIp", "cceNodeName",
+				}, false),
+			},
 			"key_pair": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -403,6 +412,12 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
+	if v, ok := d.GetOk("hostname_config_type"); ok {
+		createOpts.Spec.NodeTemplate.HostNameConfig = nodes.HostNameConfig{
+			Type: v.(string),
+		}
+	}
+
 	clusterID := d.Get("cluster_id").(string)
 	clusterStateConf := &resource.StateChangeConf{
 		Target:     []string{"Available"},
@@ -503,6 +518,10 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 
 	if s.Spec.NodeTemplate.Runtime.Name != "" {
 		mErr = multierror.Append(mErr, d.Set("runtime", s.Spec.NodeTemplate.Runtime.Name))
+	}
+
+	if s.Spec.NodeTemplate.HostNameConfig.Type != "" {
+		mErr = multierror.Append(mErr, d.Set("hostname_config_type", s.Spec.NodeTemplate.HostNameConfig.Type))
 	}
 
 	if s.Spec.Autoscaling.Enable {
@@ -640,9 +659,10 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 					DockerLVMConfigOverride: d.Get("docker_lvm_config_override").(string),
 					AgencyName:              d.Get("agency_name").(string),
 				},
-				Taints:   resourceCCENodeTaints(d),
-				K8sTags:  resourceCCENodeK8sTags(d),
-				UserTags: resourceCCENodePoolUserTags(d),
+				HostNameConfig: currentPool.Spec.NodeTemplate.HostNameConfig,
+				Taints:         resourceCCENodeTaints(d),
+				K8sTags:        resourceCCENodeK8sTags(d),
+				UserTags:       resourceCCENodePoolUserTags(d),
 			},
 		},
 	}
