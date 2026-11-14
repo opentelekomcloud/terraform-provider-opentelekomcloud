@@ -90,7 +90,7 @@ func resourceSmnMessageTemplateReadV2(ctx context.Context, d *schema.ResourceDat
 
 	getMessageTemplate, err := templates.Get(client, d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return common.CheckDeletedDiag(d, err, "error retrieving SMN message template")
 	}
 
 	mErr = multierror.Append(

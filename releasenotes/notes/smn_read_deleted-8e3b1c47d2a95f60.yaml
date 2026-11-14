@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[SMN]** ``resource/opentelekomcloud_smn_subscription_v2`` now reads the subscription from its topic, following every page of the list, and is removed from state when the subscription or its topic was deleted outside of Terraform. Before, only the first page of the project-wide list was checked and a missing subscription stayed in state with stale values.
+  - |
+    **[SMN]** Remove ``resource/opentelekomcloud_smn_message_template_v2`` from state when the template was deleted outside of Terraform, instead of failing the refresh with ``Resource not found``.
