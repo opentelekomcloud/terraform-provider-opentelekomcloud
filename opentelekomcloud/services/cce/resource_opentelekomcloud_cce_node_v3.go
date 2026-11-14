@@ -52,6 +52,7 @@ var (
 
 	predefinedTaints = []string{
 		"node.kubernetes.io/unreachable",
+		"node.kubernetes.io/route-unreachable",
 		"node.cloudprovider.kubernetes.io/shutdown",
 	}
 )
@@ -404,6 +405,15 @@ func ResourceCCENodeV3() *schema.Resource {
 					"docker", "containerd",
 				}, false),
 			},
+			"hostname_config_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"privateIp", "cceNodeName",
+				}, false),
+			},
 		},
 	}
 }
@@ -591,6 +601,12 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
+	if v, ok := d.GetOk("hostname_config_type"); ok {
+		createOpts.Spec.HostNameConfig = nodes.HostNameConfig{
+			Type: v.(string),
+		}
+	}
+
 	if ip := d.Get("private_ip").(string); ip != "" {
 		createOpts.Spec.NodeNicSpec.PrimaryNic.FixedIPs = []string{ip}
 	}
@@ -709,9 +725,21 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	serverID := node.Status.ServerID
+	// with `cceNodeName` the API may store a different name than configured
+	// (a random 5-char suffix is appended to keep kubernetes node names
+	// unique) and the name can not be changed afterwards - keep the name
+	// from the state so the plan stays stable; on import the state is empty
+	// and the name from the API is used. With the default `privateIp` type
+	// the name is not touched by the API, so normal drift detection applies.
+	nodeName := node.Metadata.Name
+	if node.Spec.HostNameConfig.Type == "cceNodeName" {
+		if stateName := d.Get("name").(string); stateName != "" {
+			nodeName = stateName
+		}
+	}
 	mErr := multierror.Append(
 		d.Set("region", config.GetRegion(d)),
-		d.Set("name", node.Metadata.Name),
+		d.Set("name", nodeName),
 		d.Set("flavor_id", node.Spec.Flavor),
 		d.Set("os", node.Spec.Os),
 		d.Set("availability_zone", node.Spec.Az),
@@ -730,6 +758,10 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 
 	if node.Spec.Runtime.Name != "" {
 		mErr = multierror.Append(mErr, d.Set("runtime", node.Spec.Runtime.Name))
+	}
+
+	if node.Spec.HostNameConfig.Type != "" {
+		mErr = multierror.Append(mErr, d.Set("hostname_config_type", node.Spec.HostNameConfig.Type))
 	}
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -791,7 +823,15 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 		return fmterr.Errorf("error saving tags of CCE node: %w", err)
 	}
 
-	if err := setK8sNodeFields(d, config, clusterID, node.Status.PrivateIP); err != nil {
+	// the kubernetes node name is the private IP for the default `privateIp`
+	// hostname config type, but the CCE node name for `cceNodeName` - the v1
+	// API looks the node up by its kubernetes name, so the name as stored by
+	// the API (which may carry a collision-avoidance suffix) must be used
+	k8sNodeName := node.Status.PrivateIP
+	if node.Spec.HostNameConfig.Type == "cceNodeName" {
+		k8sNodeName = node.Metadata.Name
+	}
+	if err := setK8sNodeFields(d, config, clusterID, k8sNodeName); err != nil {
 		return diag.FromErr(err)
 	}
 

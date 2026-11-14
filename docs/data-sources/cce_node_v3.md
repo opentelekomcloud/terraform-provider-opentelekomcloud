@@ -33,6 +33,10 @@ The following arguments are supported:
 * `cluster_id` - (Required) The id of container cluster.
 
 * `name` - (Optional) Name of the node.
+  -> **NOTE:** Nodes with hostname config type `cceNodeName` are stored by the API with a random
+  suffix appended to their name (a hyphen followed by five random lowercase letters and digits,
+  e.g. `my-node-abc12`), so searching such a node by its configured name returns no results.
+  Look the node up by `node_id` instead.
 
 * `node_id` - (Optional) The id of the node.
 
@@ -77,3 +81,5 @@ All above argument parameters can be exported as attribute parameters along with
   * `kms_id` - The Encryption KMS ID of the data volume.
 
 * `runtime` - The runtime of the node.
+
+* `hostname_config_type` - The Kubernetes node name configuration type of the node.

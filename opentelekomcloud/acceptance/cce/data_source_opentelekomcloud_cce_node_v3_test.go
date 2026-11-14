@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -31,9 +32,13 @@ func TestAccCCENodesV3DataSource_basic(t *testing.T) {
 				Config: testAccCCENodeV3DataSourceBasic(cceNodeName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodeV3DataSourceID(dataSourceNodesName),
-					resource.TestCheckResourceAttr(dataSourceNodesName, "name", cceNodeName),
+					// with `cceNodeName` the API appends a 5-char random suffix
+					// to the node name - the data source reflects the actual
+					// name stored by the API, not the configured one
+					resource.TestMatchResourceAttr(dataSourceNodesName, "name",
+						regexp.MustCompile(fmt.Sprintf("^%s(-[a-z0-9]{5})?$", cceNodeName))),
 					resource.TestCheckResourceAttr(dataSourceNodesName, "flavor_id", "s2.large.2"),
-					resource.TestCheckResourceAttr(dataSourceNodesName, "runtime", "docker"),
+					resource.TestCheckResourceAttr(dataSourceNodesName, "hostname_config_type", "cceNodeName"),
 				),
 			},
 		},
@@ -67,12 +72,13 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   key_pair          = "%s"
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
+  hostname_config_type = "cceNodeName"
 }
 `, shared.DataSourceCluster, cceNodeName, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 }
@@ -89,12 +95,13 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   key_pair          = "%s"
   root_volume {
     size       = 40
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
   data_volumes {
     size       = 100
-    volumetype = "SATA"
+    volumetype = "SAS"
   }
+  hostname_config_type = "cceNodeName"
 }
 data "opentelekomcloud_cce_node_v3" "nodes" {
   cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id

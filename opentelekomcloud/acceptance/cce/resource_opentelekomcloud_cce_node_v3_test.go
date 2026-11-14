@@ -515,6 +515,37 @@ func TestAccResourceCCENodesV3_extendParams(t *testing.T) {
 	})
 }
 
+func TestAccResourceCCENodesV3_hostnameConfig(t *testing.T) {
+	clusterId := os.Getenv("OS_CLUSTER_ID")
+	if clusterId == "" {
+		t.Skip("OS_CLUSTER_ID must be set for the hostname_config_type acceptance test")
+	}
+	var node nodes.Nodes
+	rc := common.InitResourceCheck(
+		resourceNameNode,
+		&node,
+		getCceNodeResourceFunc,
+	)
+
+	quotas.BookMany(t, singleNodeQuotas)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodeV3HostnameConfig(clusterId),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceNameNode, "name", "test-node"),
+					resource.TestCheckResourceAttr(resourceNameNode, "hostname_config_type", "cceNodeName"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceCCENodesV3_ECSGroup(t *testing.T) {
 	ecsGroupId := os.Getenv("OS_ECS_GROUP_ID")
 	if ecsGroupId == "" {
@@ -974,6 +1005,30 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   max_pods         = 16
   docker_base_size = 30
 }`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+
+func testAccCCENodeV3HostnameConfig(clusterId string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_cce_node_v3" "node_1" {
+  cluster_id = "%s"
+  name       = "test-node"
+  flavor_id  = "s2.large.2"
+
+  availability_zone = "%s"
+  key_pair          = "%s"
+
+  root_volume {
+    size       = 40
+    volumetype = "SAS"
+  }
+
+  data_volumes {
+    size       = 100
+    volumetype = "SAS"
+  }
+
+  hostname_config_type = "cceNodeName"
+}`, clusterId, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+}
 
 func testAccCCENodeV3Agency(privateIP string) string {
 	return fmt.Sprintf(`

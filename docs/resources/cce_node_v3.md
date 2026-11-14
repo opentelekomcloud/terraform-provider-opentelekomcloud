@@ -96,6 +96,20 @@ The following arguments are supported:
               `docker` - Docker
               `containerd` - Containerd
 
+* `hostname_config_type` - (Optional, ForceNew, String) Kubernetes node name configuration type.
+              Changing this parameter will create a new resource. Defaults to `privateIp`. Options are:
+              `privateIp` - Use the private node IP address as the Kubernetes node name.
+              `cceNodeName` - Use the CCE node name as the Kubernetes node name.
+  -> **NOTE:** When set to `cceNodeName`, the CCE node name, the Kubernetes node name and the VM name
+  are all the same and the name must be unique within the cluster. The API automatically appends a
+  suffix to the node name (a hyphen followed by five random lowercase letters and digits, e.g.
+  `my-node-abc12`), so the Kubernetes node name may differ from the configured one. Terraform keeps
+  the configured name in the state of the node resource; data sources report the actual name stored
+  by the API.
+
+  -> **NOTE:** Node names of nodes configured with `cceNodeName` cannot be changed after creation.
+  A rename of the VM on the ECS console is not synchronized back to the CCE node either.
+
 * `agency_name` - (Optional) IAM agency name. Changing this parameter will create a new resource.
   -> **NOTE:** The IAM agency requires `tms:resourceTags:list` in order to properly read resource state.
 
