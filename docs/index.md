@@ -200,11 +200,6 @@ provider "opentelekomcloud" {
 
 `cloud` should be the name of cloud in `clouds.yaml`
 
-The `auth.user_domain_name` setting in `clouds.yaml` is supported for
-username/password authentication, including project-scoped SMN and CTS clients.
-The provider resolves the account's domain ID internally; you do not need to
-add `domain_id` alongside a configured domain name.
-
 See [OpenStack configuration documentation](https://docs.openstack.org/python-openstackclient/latest/configuration/index.html) for details.
 
 

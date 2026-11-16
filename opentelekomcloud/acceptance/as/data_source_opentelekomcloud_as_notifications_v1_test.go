@@ -10,7 +10,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccASNotificationsV1_basic(t *testing.T) {
+func TestAccDsASNotificationsV1_basic(t *testing.T) {
 	var notification notifications.Notification
 	name := common.RandomAccResourceName()
 	dataSourceName := "data.opentelekomcloud_as_notifications_v1.test"

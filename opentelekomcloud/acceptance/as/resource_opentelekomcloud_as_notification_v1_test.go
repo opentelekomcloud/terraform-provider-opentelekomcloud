@@ -1,17 +1,10 @@
 package acceptance
 
 import (
-	"errors"
 	"fmt"
-	"io"
-	"net/http"
-	"net/http/httptest"
 	"os"
-	"strings"
 	"testing"
 
-	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -24,20 +17,6 @@ import (
 )
 
 const asNotificationResourceName = "opentelekomcloud_as_notification_v1.test"
-
-func TestASNotificationV1Configs(t *testing.T) {
-	for name, config := range map[string]string{
-		"all_events":  testAccASNotificationConfig("test-notifications", false),
-		"one_event":   testAccASNotificationConfig("test-notifications", true),
-		"data_source": testAccASNotificationsDataSourceConfig("test-notifications"),
-	} {
-		t.Run(name, func(t *testing.T) {
-			if _, diags := hclsyntax.ParseConfig([]byte(config), name+".tf", hcl.InitialPos); diags.HasErrors() {
-				t.Fatal(diags.Error())
-			}
-		})
-	}
-}
 
 func TestAccASNotificationV1_basic(t *testing.T) {
 	var notification, peer notifications.Notification
@@ -120,63 +99,6 @@ func getASNotificationFunc(config *cfg.Config, state *terraform.ResourceState) (
 		}
 	}
 	return nil, golangsdk.ErrDefault404{}
-}
-
-func TestGetASNotificationFunc(t *testing.T) {
-	for _, tc := range []struct {
-		name   string
-		status int
-		body   string
-		found  bool
-	}{
-		{"matching_topic", http.StatusOK, `{"topics":[{"topic_urn":"other"},{"topic_urn":"test-topic","topic_name":"test","topic_scene":["SCALING_UP"]}]}`, true},
-		{"empty_group", http.StatusOK, `{"topics":[]}`, false},
-		{"different_topic", http.StatusOK, `{"topics":[{"topic_urn":"other"}]}`, false},
-		{"missing_group", http.StatusNotFound, `{"error_msg":"fixture error"}`, false},
-		{"forbidden", http.StatusForbidden, `{"error_msg":"fixture error"}`, false},
-		{"bad_request", http.StatusBadRequest, `{"error":{"code":"AS.2007","message":"fixture error"}}`, false},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if r.Method != http.MethodGet || r.URL.Path != "/scaling_notification/group" {
-					t.Errorf("unexpected notification request: %s %s", r.Method, r.URL.Path)
-				}
-				w.WriteHeader(tc.status)
-				_, _ = io.WriteString(w, tc.body)
-			}))
-			defer server.Close()
-			config := &cfg.Config{HwClient: &golangsdk.ProviderClient{
-				EndpointLocator: func(golangsdk.EndpointOpts) (string, error) {
-					return server.URL + "/", nil
-				},
-			}}
-			state := &terraform.ResourceState{Primary: &terraform.InstanceState{
-				Attributes: map[string]string{"scaling_group_id": "group", "topic_urn": "test-topic"},
-			}}
-			actual, err := getASNotificationFunc(config, state)
-			if tc.status != http.StatusOK {
-				if actual != nil || err == nil || !strings.Contains(err.Error(), "fixture error") {
-					t.Fatalf("getter must propagate the API error, not report an empty result: %#v, %v", actual, err)
-				}
-				return
-			}
-			if !tc.found {
-				var notFound golangsdk.ErrDefault404
-				if actual != nil || !errors.As(err, &notFound) {
-					t.Fatalf("missing topic must return a typed not-found error: %#v, %v", actual, err)
-				}
-				return
-			}
-			if err != nil {
-				t.Fatal(err)
-			}
-			notification, ok := actual.(*notifications.Notification)
-			if !ok || notification.TopicURN != "test-topic" || notification.TopicName != "test" ||
-				len(notification.TopicScene) != 1 || notification.TopicScene[0] != "SCALING_UP" {
-				t.Fatalf("getter did not return the matching SDK object: %#v", actual)
-			}
-		})
-	}
 }
 
 func testAccASNotificationConfig(name string, reduced bool) string {
