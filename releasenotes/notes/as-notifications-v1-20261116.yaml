@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    **New Resource:** ``opentelekomcloud_as_notification_v1`` manages Auto Scaling
+    notifications through an SMN topic and supports importing existing configurations.
+  - |
+    **New Data Source:** ``opentelekomcloud_as_notifications_v1`` retrieves the
+    notification configurations of an Auto Scaling group.
