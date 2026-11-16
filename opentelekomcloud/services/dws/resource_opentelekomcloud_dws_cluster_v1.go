@@ -272,7 +272,7 @@ func resourceDwsClusterV1Read(_ context.Context, d *schema.ResourceData, meta in
 
 	v, err := cluster.ListClusterDetails(client, d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return common.CheckDeletedDiag(d, err, "error reading DWS cluster")
 	}
 
 	log.Printf("[DEBUG] DWS cluster %s: %+v", d.Id(), v)

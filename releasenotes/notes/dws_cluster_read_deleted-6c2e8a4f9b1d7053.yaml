@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DWS]** Remove ``resource/opentelekomcloud_dws_cluster_v1`` from state when the cluster was deleted outside of Terraform, instead of failing the refresh with ``Resource not found``
