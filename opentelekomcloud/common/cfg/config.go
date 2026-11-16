@@ -1554,6 +1554,11 @@ func reconfigProjectName(src Config, projectName ProjectName) (*Config, error) {
 	if err := copier.Copy(config, &src); err != nil {
 		return nil, err
 	}
+	// Password authentication requires one domain selector. Reload explicit IDs
+	// rather than passing an ID resolved by the previous authentication as well.
+	if config.DomainName != "" && config.Token == "" && (config.AccessKey == "" || config.SecretKey == "") {
+		config.DomainID = ""
+	}
 	config.TenantName = string(projectName)
 	if err := config.LoadAndValidate(); err != nil {
 		return nil, err

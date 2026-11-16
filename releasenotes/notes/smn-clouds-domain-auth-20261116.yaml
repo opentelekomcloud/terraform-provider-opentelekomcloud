@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[SMN]** Fix project-scoped client authentication with a domain name from
+    ``clouds.yaml`` by avoiding conflicting authentication-derived domain IDs
+    when reloading credentials. The shared fix also applies to CTS clients.
