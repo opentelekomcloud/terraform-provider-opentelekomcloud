@@ -5,23 +5,29 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/notifications"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
 func TestAccASNotificationsV1_basic(t *testing.T) {
+	var notification notifications.Notification
 	name := common.RandomAccResourceName()
+	dataSourceName := "data.opentelekomcloud_as_notifications_v1.test"
+	rc := common.InitResourceCheck(asNotificationResourceName, &notification, getASNotificationFunc)
+	dc := common.InitDataSourceCheck(dataSourceName)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccASNotificationPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckASNotificationsDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccASNotificationsDataSourceConfig(name),
 				Check: resource.ComposeTestCheckFunc(
-					common.InitDataSourceCheck("data.opentelekomcloud_as_notifications_v1.test").CheckResourceExists(),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_as_notifications_v1.test", "notifications.#", "2"),
-					resource.TestCheckResourceAttrPair("data.opentelekomcloud_as_notifications_v1.test", "id",
+					rc.CheckResourceExists(),
+					dc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(dataSourceName, "notifications.#", "2"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "id",
 						"opentelekomcloud_as_group_v1.test", "id"),
 					resource.TestCheckOutput("notification_fields_match", "true"),
 				),

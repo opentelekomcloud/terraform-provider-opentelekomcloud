@@ -1,10 +1,13 @@
 package acceptance
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/hcl/v2"
@@ -37,16 +40,20 @@ func TestASNotificationV1Configs(t *testing.T) {
 }
 
 func TestAccASNotificationV1_basic(t *testing.T) {
+	var notification, peer notifications.Notification
 	name := common.RandomAccResourceName()
+	rc := common.InitResourceCheck(asNotificationResourceName, &notification, getASNotificationFunc)
+	peerRC := common.InitResourceCheck("opentelekomcloud_as_notification_v1.peer", &peer, getASNotificationFunc)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccASNotificationPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckASNotificationsDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccASNotificationConfig(name, false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckASNotificationExists(asNotificationResourceName),
+					rc.CheckResourceExists(),
+					peerRC.CheckResourceExists(),
 					resource.TestCheckResourceAttr(asNotificationResourceName, "topic_scene.#", "5"),
 					resource.TestCheckResourceAttr(asNotificationResourceName, "topic_name", name+"-a"),
 					resource.TestCheckResourceAttrPair(asNotificationResourceName, "scaling_group_id",
@@ -67,8 +74,8 @@ func TestAccASNotificationV1_basic(t *testing.T) {
 			{
 				Config: testAccASNotificationConfig(name, true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckASNotificationExists(asNotificationResourceName),
-					testAccCheckASNotificationExists("opentelekomcloud_as_notification_v1.peer"),
+					rc.CheckResourceExists(),
+					peerRC.CheckResourceExists(),
 					resource.TestCheckResourceAttr(asNotificationResourceName, "topic_scene.#", "1"),
 					resource.TestCheckTypeSetElemAttr(asNotificationResourceName, "topic_scene.*", "SCALING_DOWN"),
 				),
@@ -98,68 +105,78 @@ func testAccASNotificationPreCheck(t *testing.T) {
 	})
 }
 
-func testAccCheckASNotificationExists(name string) resource.TestCheckFunc {
-	return func(state *terraform.State) error {
-		rs, ok := state.RootModule().Resources[name]
-		if !ok {
-			return fmt.Errorf("AS notification %s not found in state", name)
-		}
-		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
-		if err != nil {
-			return err
-		}
-		items, err := notifications.List(client, rs.Primary.Attributes["scaling_group_id"])
-		if err != nil {
-			return err
-		}
-		for _, item := range items {
-			if item.TopicURN == rs.Primary.Attributes["topic_urn"] {
-				return nil
-			}
-		}
-		return fmt.Errorf("AS notification %s not found remotely", rs.Primary.ID)
-	}
-}
-
-func testAccCheckASNotificationsDestroy(state *terraform.State) error {
-	config := common.TestAccProvider.Meta().(*cfg.Config)
+func getASNotificationFunc(config *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
 	client, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("error creating Auto Scaling v1 client: %w", err)
 	}
-	for _, rs := range state.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_as_notification_v1" {
-			continue
-		}
-		items, err := notifications.List(client, rs.Primary.Attributes["scaling_group_id"])
-		var notFound golangsdk.ErrDefault404
-		if errors.As(err, &notFound) {
-			continue
-		}
-		var badRequest golangsdk.ErrDefault400
-		if errors.As(err, &badRequest) {
-			var body struct {
-				ErrorCode string `json:"error_code"`
-				Error     struct {
-					Code string `json:"code"`
-				} `json:"error"`
-			}
-			if json.Unmarshal(badRequest.Body, &body) == nil &&
-				(body.Error.Code == "AS.2007" || body.ErrorCode == "AS.2007") {
-				continue
-			}
-		}
-		if err != nil {
-			return err
-		}
-		for _, item := range items {
-			if item.TopicURN == rs.Primary.Attributes["topic_urn"] {
-				return fmt.Errorf("AS notification %s still exists", rs.Primary.ID)
-			}
+	items, err := notifications.List(client, state.Primary.Attributes["scaling_group_id"])
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range items {
+		if item.TopicURN == state.Primary.Attributes["topic_urn"] {
+			return &item, nil
 		}
 	}
-	return nil
+	return nil, golangsdk.ErrDefault404{}
+}
+
+func TestGetASNotificationFunc(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		status int
+		body   string
+		found  bool
+	}{
+		{"matching_topic", http.StatusOK, `{"topics":[{"topic_urn":"other"},{"topic_urn":"test-topic","topic_name":"test","topic_scene":["SCALING_UP"]}]}`, true},
+		{"empty_group", http.StatusOK, `{"topics":[]}`, false},
+		{"different_topic", http.StatusOK, `{"topics":[{"topic_urn":"other"}]}`, false},
+		{"missing_group", http.StatusNotFound, `{"error_msg":"fixture error"}`, false},
+		{"forbidden", http.StatusForbidden, `{"error_msg":"fixture error"}`, false},
+		{"bad_request", http.StatusBadRequest, `{"error":{"code":"AS.2007","message":"fixture error"}}`, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet || r.URL.Path != "/scaling_notification/group" {
+					t.Errorf("unexpected notification request: %s %s", r.Method, r.URL.Path)
+				}
+				w.WriteHeader(tc.status)
+				_, _ = io.WriteString(w, tc.body)
+			}))
+			defer server.Close()
+			config := &cfg.Config{HwClient: &golangsdk.ProviderClient{
+				EndpointLocator: func(golangsdk.EndpointOpts) (string, error) {
+					return server.URL + "/", nil
+				},
+			}}
+			state := &terraform.ResourceState{Primary: &terraform.InstanceState{
+				Attributes: map[string]string{"scaling_group_id": "group", "topic_urn": "test-topic"},
+			}}
+			actual, err := getASNotificationFunc(config, state)
+			if tc.status != http.StatusOK {
+				if actual != nil || err == nil || !strings.Contains(err.Error(), "fixture error") {
+					t.Fatalf("getter must propagate the API error, not report an empty result: %#v, %v", actual, err)
+				}
+				return
+			}
+			if !tc.found {
+				var notFound golangsdk.ErrDefault404
+				if actual != nil || !errors.As(err, &notFound) {
+					t.Fatalf("missing topic must return a typed not-found error: %#v, %v", actual, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			notification, ok := actual.(*notifications.Notification)
+			if !ok || notification.TopicURN != "test-topic" || notification.TopicName != "test" ||
+				len(notification.TopicScene) != 1 || notification.TopicScene[0] != "SCALING_UP" {
+				t.Fatalf("getter did not return the matching SDK object: %#v", actual)
+			}
+		})
+	}
 }
 
 func testAccASNotificationConfig(name string, reduced bool) string {
