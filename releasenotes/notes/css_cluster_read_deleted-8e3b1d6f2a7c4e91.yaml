@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CSS]** Remove ``resource/opentelekomcloud_css_cluster_v1`` from state when the cluster was deleted outside of Terraform (404, or 403 with ``CSS.0015``), instead of failing the refresh with ``error reading cluster value``

@@ -419,7 +419,9 @@ func resourceCssClusterV1Read(_ context.Context, d *schema.ResourceData, meta in
 
 	cluster, err := clusters.Get(client, d.Id())
 	if err != nil {
-		return fmterr.Errorf("error reading cluster value: %s", err)
+		// The cluster does not exist, http code is 403, key/value of error code is errCode/CSS.0015
+		return common.CheckDeletedDiag(d,
+			common.ConvertExpected403ErrInto404Err(err, "errCode", "CSS.0015"), "error reading cluster value")
 	}
 
 	mErr := multierror.Append(
