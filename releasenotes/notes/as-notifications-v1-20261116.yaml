@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    **New Resource:** ``opentelekomcloud_as_notification_v1`` (`#3635 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3635>`_)
+  - |
+    **New Data Source:** ``opentelekomcloud_as_notifications_v1`` (`#3635 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3635>`_)
+fixes:
+  - |
+    **[SMN]** Fix project-scoped client authentication with a domain name from
+    ``clouds.yaml`` by avoiding conflicting authentication-derived domain IDs
+    (`#3635 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3635>`_)
