@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cts/v3/keyevent"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
@@ -254,9 +255,11 @@ func resourceCTSEventNotificationCreate(ctx context.Context, d *schema.ResourceD
 	return resourceCTSEventNotificationRead(ctx, d, meta)
 }
 
-func resourceCTSEventNotificationRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCTSEventNotificationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CtsV3Client(config.GetProjectName(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.CtsV3Client(config.GetProjectName(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(clientError, err)
 	}
@@ -271,21 +274,34 @@ func resourceCTSEventNotificationRead(_ context.Context, d *schema.ResourceData,
 		return fmterr.Errorf("error retrieving cts event notification: %w", err)
 	}
 
-	operations := buildOperationsSet(ctsNotification[0].Operations)
-	userList := buildUserList(ctsNotification[0].NotifyUserList)
+	var notification *keyevent.NotificationResponse
+	for i := range ctsNotification {
+		if ctsNotification[i].NotificationName == eventName {
+			notification = &ctsNotification[i]
+			break
+		}
+	}
+	if notification == nil {
+		log.Printf("[WARN] CTS event notification %s not found, removing from state", eventName)
+		d.SetId("")
+		return nil
+	}
+
+	operations := buildOperationsSet(notification.Operations)
+	userList := buildUserList(notification.NotifyUserList)
 
 	mErr := multierror.Append(
-		d.Set("notification_id", ctsNotification[0].NotificationId),
-		d.Set("notification_name", ctsNotification[0].NotificationName),
-		d.Set("notification_type", ctsNotification[0].NotificationType),
-		d.Set("operation_type", ctsNotification[0].OperationType),
+		d.Set("notification_id", notification.NotificationId),
+		d.Set("notification_name", notification.NotificationName),
+		d.Set("notification_type", notification.NotificationType),
+		d.Set("operation_type", notification.OperationType),
 		d.Set("operations", operations),
 		d.Set("notify_user_list", userList),
-		d.Set("topic_id", ctsNotification[0].TopicId),
-		d.Set("project_id", ctsNotification[0].ProjectId),
-		d.Set("create_time", ctsNotification[0].CreateTime),
-		d.Set("status", ctsNotification[0].Status),
-		d.Set("filter", flattenNotificationFilter(&ctsNotification[0].Filter)),
+		d.Set("topic_id", notification.TopicId),
+		d.Set("project_id", notification.ProjectId),
+		d.Set("create_time", notification.CreateTime),
+		d.Set("status", notification.Status),
+		d.Set("filter", flattenNotificationFilter(&notification.Filter)),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting CTS event notifications fields: %w", err)
