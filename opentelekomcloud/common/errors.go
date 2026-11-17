@@ -56,3 +56,27 @@ func ConvertExpected403ErrInto404Err(err error, errCodeKey string, specErrCodes 
 	log.Printf("[WARN] Unable to recognize expected error code (%v), want %v", errCode, specErrCodes)
 	return err
 }
+
+// ConvertExpected400ErrInto404Err works like ConvertExpected403ErrInto404Err for services that answer a request
+// for a missing object with 400 and a dedicated error code, e.g. CFW returns 400 'CFW.00200005' for a deleted
+// address group or service group.
+func ConvertExpected400ErrInto404Err(err error, errCodeKey string, specErrCodes ...string) error {
+	var err400 golangsdk.ErrDefault400
+	if !errors.As(err, &err400) {
+		return err
+	}
+	var apiError interface{}
+	if jsonErr := json.Unmarshal(err400.Body, &apiError); jsonErr != nil {
+		return err
+	}
+
+	errCode := PathSearch(errCodeKey, apiError, nil)
+	if errCode == nil {
+		return err
+	}
+	if len(specErrCodes) < 1 || StrSliceContains(specErrCodes, fmt.Sprint(errCode)) {
+		log.Printf("[INFO] Identified 400 error with code '%v' and parsed it as 404 error", errCode)
+		return golangsdk.ErrDefault404{}
+	}
+	return err
+}

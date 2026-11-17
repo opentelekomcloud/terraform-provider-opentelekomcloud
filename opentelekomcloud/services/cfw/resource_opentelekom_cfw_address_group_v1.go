@@ -109,7 +109,9 @@ func resourceCFWAddressGroupV1Read(ctx context.Context, d *schema.ResourceData, 
 
 	addressGroup, err := group.GetAddressGroup(client, d.Id())
 	if err != nil {
-		return fmterr.Errorf("error fetching CFW Address Group: %w", err)
+		// a deleted group answers with 400 CFW.00200005 "Object not found."
+		return common.CheckDeletedDiag(d,
+			common.ConvertExpected400ErrInto404Err(err, "error_code", errCodeObjectNotFound), "error fetching CFW Address Group")
 	}
 
 	log.Printf("[DEBUG] Retrieved address group %s: %#v", d.Id(), addressGroup)
