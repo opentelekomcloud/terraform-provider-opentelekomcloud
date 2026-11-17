@@ -241,7 +241,7 @@ func resourceVPCEPEndpointRead(_ context.Context, d *schema.ResourceData, meta i
 
 	endpoint, err := endpoints.Get(client, d.Id())
 	if err != nil {
-		return fmterr.Errorf("error getting VPC Endpoint: %w", err)
+		return common.CheckDeletedDiag(d, err, "error getting VPC Endpoint")
 	}
 
 	policyStatements, err := json.Marshal(endpoint.PolicyStatement)
