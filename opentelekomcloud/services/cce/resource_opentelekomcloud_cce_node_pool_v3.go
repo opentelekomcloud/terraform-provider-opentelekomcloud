@@ -412,11 +412,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	if v, ok := d.GetOk("hostname_config_type"); ok {
-		createOpts.Spec.NodeTemplate.HostNameConfig = nodes.HostNameConfig{
-			Type: v.(string),
-		}
-	}
+	createOpts.Spec.NodeTemplate.HostNameConfig = resourceCCENodeHostnameConfig(d)
 
 	clusterID := d.Get("cluster_id").(string)
 	clusterStateConf := &resource.StateChangeConf{

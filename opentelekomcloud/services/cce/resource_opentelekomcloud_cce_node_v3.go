@@ -418,6 +418,15 @@ func ResourceCCENodeV3() *schema.Resource {
 	}
 }
 
+func resourceCCENodeHostnameConfig(d *schema.ResourceData) nodes.HostNameConfig {
+	// An unset SDK value struct still serializes hostnameConfig, which requires a type.
+	hostnameType := "privateIp"
+	if v, ok := d.GetOk("hostname_config_type"); ok {
+		hostnameType = v.(string)
+	}
+	return nodes.HostNameConfig{Type: hostnameType}
+}
+
 func resourceCCENodeLabelsV2(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
 	for key, val := range d.Get("labels").(map[string]interface{}) {
@@ -601,11 +610,7 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
-	if v, ok := d.GetOk("hostname_config_type"); ok {
-		createOpts.Spec.HostNameConfig = nodes.HostNameConfig{
-			Type: v.(string),
-		}
-	}
+	createOpts.Spec.HostNameConfig = resourceCCENodeHostnameConfig(d)
 
 	if ip := d.Get("private_ip").(string); ip != "" {
 		createOpts.Spec.NodeNicSpec.PrimaryNic.FixedIPs = []string{ip}

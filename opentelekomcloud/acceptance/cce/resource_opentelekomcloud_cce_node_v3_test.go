@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/apparentlymart/go-cidr/cidr"
+	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
@@ -57,15 +59,23 @@ func TestAccResourceCCENodesV3Basic(t *testing.T) {
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceNameNode, "name", "test-node"),
 					resource.TestCheckResourceAttr(resourceNameNode, "flavor_id", "s2.large.2"),
-					resource.TestCheckResourceAttr(resourceNameNode, "os", "EulerOS 2.9"),
+					resource.TestCheckResourceAttr(resourceNameNode, "os", "HCE OS 2.0"),
 					resource.TestCheckResourceAttr(resourceNameNode, "private_ip", privateIP),
+					resource.TestCheckResourceAttr(resourceNameNode, "hostname_config_type", "privateIp"),
 					resource.TestCheckResourceAttr(resourceNameNode, "data_volumes.0.extend_params.useType", "docker"),
 				),
 			},
 			{
+				Config:             testAccCCENodeV3Basic(privateIP),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+			{
 				Config: testAccCCENodeV3Update(privateIP),
 				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceNameNode, "name", "test-node2"),
+					resource.TestCheckResourceAttr(resourceNameNode, "hostname_config_type", "privateIp"),
 					resource.TestCheckResourceAttr(resourceNameNode, "data_volumes.0.extend_params.useType", "docker"),
 				),
 			},
@@ -77,6 +87,11 @@ func TestAccResourceCCENodesV3Basic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{
 					"taints", "extend_params",
 				},
+			},
+			{
+				Config:             testAccCCENodeV3Update(privateIP),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
 			},
 		},
 	})
@@ -121,7 +136,7 @@ func TestAccResourceCCENodesV3Agency(t *testing.T) {
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceNameNode, "name", "test-node"),
 					resource.TestCheckResourceAttr(resourceNameNode, "flavor_id", "s2.large.2"),
-					resource.TestCheckResourceAttr(resourceNameNode, "os", "EulerOS 2.9"),
+					resource.TestCheckResourceAttr(resourceNameNode, "os", "HCE OS 2.0"),
 					resource.TestCheckResourceAttr(resourceNameNode, "private_ip", privateIP),
 					resource.TestCheckResourceAttr(resourceNameNode, "data_volumes.0.extend_params.useType", "docker"),
 				),
@@ -201,7 +216,7 @@ func TestAccResourceCCENodesV3OS(t *testing.T) {
 				Config: testAccCCENodeV3OS,
 				Check: resource.ComposeTestCheckFunc(
 					rc2.CheckResourceExists(),
-					resource.TestCheckResourceAttr(resourceNameNode2, "os", "EulerOS 2.9"),
+					resource.TestCheckResourceAttr(resourceNameNode2, "os", "HCE OS 2.0"),
 					rc3.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceNameNode3, "os", "Ubuntu 22.04"),
 				),
@@ -542,8 +557,31 @@ func TestAccResourceCCENodesV3_hostnameConfig(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameNode, "hostname_config_type", "cceNodeName"),
 				),
 			},
+			{
+				Config:             testAccCCENodeV3HostnameConfig(clusterId),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
 		},
 	})
+}
+
+func TestCCENodeHostnameConfigs(t *testing.T) {
+	for name, config := range map[string]string{
+		"node_basic":    testAccCCENodeV3Basic("192.0.2.10"),
+		"node_update":   testAccCCENodeV3Update("192.0.2.10"),
+		"node_hostname": testAccCCENodeV3HostnameConfig("cluster"),
+		"pool_basic":    testAccCCENodePoolV3Basic("", ""),
+		"pool_update":   testAccCCENodePoolV3Update("", ""),
+		"pool_hostname": testAccCCENodePoolV3HostnameConfig("cluster"),
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, diags := hclsyntax.ParseConfig([]byte(config), name+".tf", hcl.InitialPos)
+			if diags.HasErrors() {
+				t.Fatal(diags.Error())
+			}
+		})
+	}
 }
 
 func TestAccResourceCCENodesV3_ECSGroup(t *testing.T) {
@@ -611,7 +649,7 @@ resource "opentelekomcloud_cce_node_v3" "node_2" {
   cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name       = "test-node-euler"
   flavor_id  = "s2.large.2"
-  os         = "EulerOS 2.9"
+  os         = "HCE OS 2.0"
 
   availability_zone = "%[2]s"
   key_pair          = "%[3]s"
@@ -660,7 +698,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   availability_zone = "%s"
   key_pair          = "%s"
   runtime           = "containerd"
-  os                = "EulerOS 2.9"
+  os                = "HCE OS 2.0"
 
   root_volume {
     size       = 40
@@ -1053,7 +1091,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   availability_zone = "%s"
   key_pair          = "%s"
   runtime           = "containerd"
-  os                = "EulerOS 2.9"
+  os                = "HCE OS 2.0"
   agency_name       = opentelekomcloud_identity_agency_v3.agency_1.name
 
   root_volume {
@@ -1086,7 +1124,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   availability_zone = "%s"
   key_pair          = "%s"
   runtime           = "containerd"
-  os                = "EulerOS 2.9"
+  os                = "HCE OS 2.0"
 
   root_volume {
     size       = 40

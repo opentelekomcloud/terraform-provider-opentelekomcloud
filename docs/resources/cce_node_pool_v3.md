@@ -207,10 +207,12 @@ the AZ based on the AZ sequence. For more details see
               `docker` - Docker
               `containerd` - Containerd
 
-* `hostname_config_type` - (Optional, String, ForceNew) Kubernetes node name configuration type.
+* `hostname_config_type` - (Optional, Computed, String, ForceNew) Kubernetes node name configuration type.
               Changing this parameter will create a new resource. Defaults to `privateIp`. Options are:
               `privateIp` - Use the private node IP address as the Kubernetes node name.
               `cceNodeName` - Use the CCE node name as the Kubernetes node name.
+  When omitted for a new node pool, the provider explicitly requests `privateIp`.
+  For existing and imported node pools, an omitted argument preserves the API-reported type.
 
 * `agency_name` - (Optional, String, ForceNew) IAM agency name. Changing this parameter will create a new resource.
 

@@ -72,7 +72,8 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "name", "opentelekomcloud-cce-node-pool"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "flavor", "s2.large.2"),
-					resource.TestCheckResourceAttr(nodePoolResourceName, "os", "EulerOS 2.9"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "os", "HCE OS 2.0"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "hostname_config_type", "privateIp"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "preinstall", cmn.GetHashOrEmpty(initialPreInstall)),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "postinstall", cmn.GetHashOrEmpty(initialPostInstall)),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "muh"),
@@ -83,9 +84,16 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 				),
 			},
 			{
+				Config:             testAccCCENodePoolV3Basic(initialPreInstall, initialPostInstall),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+			{
 				Config: testAccCCENodePoolV3Update(updatedPreInstall, updatedPostInstall),
 				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "initial_node_count", "2"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "hostname_config_type", "privateIp"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "preinstall", cmn.GetHashOrEmpty(updatedPreInstall)),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "postinstall", cmn.GetHashOrEmpty(updatedPostInstall)),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "kuh"),
@@ -105,6 +113,11 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 					"scale_down_cooldown_time", "initial_node_count",
 					"root_volume", "taints",
 				},
+			},
+			{
+				Config:             testAccCCENodePoolV3Update(updatedPreInstall, updatedPostInstall),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
 			},
 		},
 	})
@@ -138,7 +151,7 @@ func TestAccCCENodePoolsV3_agency(t *testing.T) {
 					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "name", "opentelekomcloud-cce-node-pool"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "flavor", "s2.large.2"),
-					resource.TestCheckResourceAttr(nodePoolResourceName, "os", "EulerOS 2.9"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "os", "HCE OS 2.0"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "muh"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "data_volumes.0.extend_params.useType", "docker"),
 				),
@@ -350,6 +363,11 @@ func TestAccCCENodePoolsV3HostnameConfig(t *testing.T) {
 					resource.TestCheckResourceAttr(nodePoolResourceName, "hostname_config_type", "cceNodeName"),
 				),
 			},
+			{
+				Config:             testAccCCENodePoolV3HostnameConfig(clusterId),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
 		},
 	})
 }
@@ -361,7 +379,7 @@ func testAccCCENodePoolV3Basic(preinstall, postinstall string) string {
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 1
   availability_zone  = "%s"
@@ -406,7 +424,7 @@ func testAccCCENodePoolV3HostnameConfig(clusterId string) string {
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = "%s"
   name               = "opentelekomcloud-cce-node-pool-hn"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 1
   availability_zone  = "%s"
@@ -433,7 +451,7 @@ func testAccCCENodePoolV3Update(preinstall, postinstall string) string {
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 2
   availability_zone  = "%s"
@@ -477,7 +495,7 @@ var testAccCCENodePoolV3RandomAZ = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 1
   key_pair           = "%s"
@@ -505,7 +523,7 @@ var testAccCCENodePoolV3Encrypted = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 1
   key_pair           = "%s"
@@ -535,7 +553,7 @@ var testAccCCENodePoolV3ExtendParams = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 1
   key_pair           = "%s"
@@ -571,7 +589,7 @@ resource "opentelekomcloud_identity_agency_v3" "agency_1" {
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 1
   availability_zone  = "%s"
@@ -608,7 +626,7 @@ var testAccCCENodePoolV3Storage = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 1
   key_pair           = "%[2]s"
@@ -670,7 +688,7 @@ var testAccCCENodePoolV3StorageJsonEncode = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 1
   key_pair           = "%[2]s"
@@ -882,7 +900,7 @@ var testAccCCENodePoolV3AutoscalerBug_basic = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "autoscaler-bug-test"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 1
   availability_zone  = "%s"
@@ -915,7 +933,7 @@ var testAccCCENodePoolV3AutoscalerBug_updateTags = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "autoscaler-bug-test"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 1
   availability_zone  = "%s"
@@ -1003,7 +1021,7 @@ var testAccCCENodePoolV3UserTags_basic = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool-tags"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 1
   availability_zone  = "%s"
@@ -1030,7 +1048,7 @@ var testAccCCENodePoolV3UserTags_update = fmt.Sprintf(`
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool-tags"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 1
   availability_zone  = "%s"
@@ -1068,7 +1086,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "test2" {
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
-  os                 = "EulerOS 2.9"
+  os                 = "HCE OS 2.0"
   flavor             = "s2.large.2"
   initial_node_count = 1
   availability_zone  = "%s"
