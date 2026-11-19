@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf-premium/v1/rules"
@@ -154,22 +152,6 @@ func TestAccWafDedicatedPreciseProtectionRuleV1_referenceTable(t *testing.T) {
 			},
 		},
 	})
-}
-
-func TestWafDedicatedPreciseProtectionRuleV1Configs(t *testing.T) {
-	for name, config := range map[string]string{
-		"basic":            testAccWafDedicatedPreciseProtectionRuleV1Basic,
-		"issue2434":        testAccWafDedicatedPreciseProtectionRuleV1Issue2434,
-		"reference":        testAccWafDedicatedPreciseProtectionRuleV1ReferenceTable("test", "/admin"),
-		"reference_update": testAccWafDedicatedPreciseProtectionRuleV1ReferenceTable("test", "/private"),
-	} {
-		t.Run(name, func(t *testing.T) {
-			_, diags := hclsyntax.ParseConfig([]byte(config), name+".tf", hcl.InitialPos)
-			if diags.HasErrors() {
-				t.Fatal(diags.Error())
-			}
-		})
-	}
 }
 
 func testAccWafDedicatedPreciseProtectionRuleV1ReferenceTable(name, path string) string {

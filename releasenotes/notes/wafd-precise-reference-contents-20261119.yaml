@@ -4,5 +4,5 @@ fixes:
     **[WAF]** Fix perpetual replacement of
     ``opentelekomcloud_waf_dedicated_precise_protection_rule_v1`` when using a
     reference table without explicit ``conditions.contents``. API-returned
-    contents are now computed when omitted; changes to explicitly configured
-    contents still require replacement.
+    contents are now computed when omitted
+    (`#3637 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3637>`_)

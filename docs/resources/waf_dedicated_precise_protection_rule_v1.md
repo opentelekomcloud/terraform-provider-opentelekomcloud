@@ -68,8 +68,6 @@ The following arguments are supported:
     + If the category is `params`, `header`, and `cookie`, the optional operations are: `contain`, `not_contain`, `equal`, `not_equal`, `prefix`, `not_prefix`, `suffix`, `not_suffix`, `contain_any`, `not_contain_all`, `equal_any`, `not_equal_all`, `equal_any`, `not_equal_all`, `prefix_any`, `not_prefix_all`, `suffix_any`, `not_suffix_all`, `len_greater`, `len_less`, `len_equal`, `len_not_equal`, `num_greater`, `num_less`, `num_equal`, `num_not_equal`, `exist` and `not_exist`
 
   + `contents` - (Optional, Computed, ForceNew, List) Content of the conditions. This parameter is mandatory when the suffix of `logic_operation` is not `any` or `all`.
-    When using `value_list_id`, omit `contents` to let the reference table manage the matching values.
-    API-returned contents are retained as computed state when this argument is omitted.
     Changing explicitly configured contents creates a new rule.
 
   + `value_list_id` - (Optional, ForceNew, String) Reference table ID. This parameter is mandatory when the suffix of `logic_operation` is `any` or `all`. The reference table type must be the same as the category type. Changing this creates a new rule.
