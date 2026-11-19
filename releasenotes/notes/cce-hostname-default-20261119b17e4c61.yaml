@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[CCE]** Fix node and node pool creation when ``hostname_config_type`` is
+    omitted by explicitly requesting the documented ``privateIp`` default.
+    (`#3638 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3638>`_)
