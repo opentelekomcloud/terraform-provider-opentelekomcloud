@@ -82,6 +82,7 @@ func ResourceWafDedicatedPreciseProtectionRuleV1() *schema.Resource {
 						"contents": {
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							ForceNew: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
