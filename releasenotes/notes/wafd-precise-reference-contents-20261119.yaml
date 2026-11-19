@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    **[WAF]** Fix perpetual replacement of
+    ``opentelekomcloud_waf_dedicated_precise_protection_rule_v1`` when using a
+    reference table without explicit ``conditions.contents``. API-returned
+    contents are now computed when omitted; changes to explicitly configured
+    contents still require replacement.
