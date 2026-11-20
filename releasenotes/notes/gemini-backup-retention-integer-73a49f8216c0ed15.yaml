@@ -5,4 +5,6 @@ fixes:
     retention values by updating the SDK. Backup retention is now sent as an
     integer, preserving explicit ``keep_days = 0`` to disable automated backups
     and omitted retention to use the service default.
+    Inactive backup window diff suppression now applies only to existing
+    instances, preserving the required backup window in create requests.
     (`#3643 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3643>`_)

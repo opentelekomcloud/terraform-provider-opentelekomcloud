@@ -133,6 +133,9 @@ func ResourceGeminiDBInstanceV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 							DiffSuppressFunc: func(_, _, _ string, d *schema.ResourceData) bool {
+								if d.Id() == "" {
+									return false
+								}
 								strategy := resourceGeminiDBBackupStrategy(d)
 								return strategy != nil && strategy.KeepDays != nil && *strategy.KeepDays == 0
 							},
