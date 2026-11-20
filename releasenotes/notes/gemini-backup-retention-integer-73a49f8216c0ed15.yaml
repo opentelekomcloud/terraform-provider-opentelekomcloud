@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    **[GeminiDB]** Fixed instance creation failing to decode numeric backup
+    retention values by updating the SDK. Backup retention is now sent as an
+    integer, preserving explicit ``keep_days = 0`` to disable automated backups
+    and omitted retention to use the service default.

@@ -264,9 +264,12 @@ func resourceGeminiDBBackupStrategy(d *schema.ResourceData) *instance.BackupStra
 		opt := &instance.BackupStrategyOpt{
 			StartTime: d.Get("backup_strategy.0.start_time").(string),
 		}
-		// The default value of keepdays is 7, but empty value of keepdays will be converted to 0.
-		if v, ok := d.GetOk("backup_strategy.0.keep_days"); ok {
-			opt.KeepDays = strconv.Itoa(v.(int))
+		// An explicit zero disables backups; an omitted retention uses the API default.
+		if common.IsAttrSet(d, "backup_strategy") {
+			keepDays := d.GetRawConfig().GetAttr("backup_strategy").AsValueSlice()[0].GetAttr("keep_days")
+			if keepDays.IsKnown() && !keepDays.IsNull() {
+				opt.KeepDays = pointerto.Int(d.Get("backup_strategy.0.keep_days").(int))
+			}
 		}
 		return opt
 	}
