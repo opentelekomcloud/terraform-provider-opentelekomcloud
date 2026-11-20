@@ -188,8 +188,6 @@ The `backup_strategy` block supports:
 * `keep_days` - (Optional, Int) Specifies the number of days to retain the generated backup files. The value ranges from
   0 to 35. If this parameter is set to 0, the automated backup policy is not set. If this parameter is not transferred,
   the automated backup policy is enabled by default. Backup files are stored for seven days by default.
-  The provider sends configured values as JSON integers, including an explicit `0`. Omit this argument to use the
-  service default when creating an instance.
 
 ## Attribute Reference
 

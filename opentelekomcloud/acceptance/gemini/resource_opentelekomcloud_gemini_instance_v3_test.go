@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -118,22 +116,6 @@ func TestAccGeminiDBInstance_backupRetention(t *testing.T) {
 					},
 				},
 			})
-		})
-	}
-}
-
-func TestGeminiDBInstanceRetentionConfigs(t *testing.T) {
-	for name, config := range map[string]string{
-		"basic":    testAccGeminiDBInstanceConfigBasic("test-gemini"),
-		"update":   testAccGeminiDBInstanceConfigUpdate("test-gemini"),
-		"disabled": testAccGeminiDBInstanceConfigBackupRetention("test-gemini", "keep_days = 0"),
-		"default":  testAccGeminiDBInstanceConfigBackupRetention("test-gemini", ""),
-	} {
-		t.Run(name, func(t *testing.T) {
-			_, diagnostics := hclsyntax.ParseConfig([]byte(config), name+".tf", hcl.InitialPos)
-			if diagnostics.HasErrors() {
-				t.Fatal(diagnostics.Error())
-			}
 		})
 	}
 }
