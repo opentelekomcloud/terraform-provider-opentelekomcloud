@@ -1,0 +1,9 @@
+---
+fixes:
+  - |
+    **[APIGW]** Fix ``function_urn`` version handling in ``resource/opentelekomcloud_apigw_custom_authorizer_v2`` so the version suffix is sent via ``authorizer_version`` and read back without drift
+    (`#3644 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3644>`_)
+enhancements:
+  - |
+    **[APIGW]** Add ``function_version`` and ``function_alias_uri`` arguments to ``resource/opentelekomcloud_apigw_custom_authorizer_v2``
+    (`#3644 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3644>`_)

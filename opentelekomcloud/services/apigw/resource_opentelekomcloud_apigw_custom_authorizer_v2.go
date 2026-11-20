@@ -36,6 +36,8 @@ func ResourceAPICustomAuthorizerV2() *schema.Resource {
 			StateContext: resourceCustomAuthorizerImportState,
 		},
 
+		CustomizeDiff: customAuthorizerFunctionVersionDiff,
+
 		Schema: map[string]*schema.Schema{
 			"gateway_id": {
 				Type:     schema.TypeString,
@@ -52,8 +54,18 @@ func ResourceAPICustomAuthorizerV2() *schema.Resource {
 				),
 			},
 			"function_urn": {
+				Type:             schema.TypeString,
+				Required:         true,
+				DiffSuppressFunc: suppressCustomAuthorizerFunctionUrnDiff,
+			},
+			"function_version": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Computed: true,
+			},
+			"function_alias_uri": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"type": {
 				Type:     schema.TypeString,
@@ -136,12 +148,21 @@ func buildCustomAuthorizerOpts(d *schema.ResourceData) (authorizer.CreateOpts, e
 		return authorizer.CreateOpts{}, fmt.Errorf("the identities can only be set when the type is 'FRONTEND'")
 	}
 
+	// The API stores the function URN without version and the version in a separate field,
+	// so the version suffix (if any) is stripped from the URN and sent as `authorizer_version`.
+	functionUrn, urnVersion := parseFunctionUrn(d.Get("function_urn").(string))
+	configuredVersion, isConfigured := getConfiguredFunctionVersion(d)
+	functionVersion := resolveFunctionVersion(configuredVersion, isConfigured, urnVersion,
+		d.Get("function_version").(string))
+
 	return authorizer.CreateOpts{
 		GatewayID:      d.Get("gateway_id").(string),
 		Name:           d.Get("name").(string),
 		Type:           d.Get("type").(string),
 		AuthorizerType: "FUNC", // The custom authorizer only support 'FUNC'.
-		FunctionUrn:    d.Get("function_urn").(string),
+		FunctionUrn:    functionUrn,
+		Version:        functionVersion,
+		AliasUrn:       d.Get("function_alias_uri").(string),
 		NeedBody:       pointerto.Bool(d.Get("is_body_send").(bool)),
 		Ttl:            pointerto.Int(d.Get("ttl").(int)),
 		UserData:       d.Get("user_data").(string),
@@ -186,7 +207,9 @@ func resourceCustomAuthorizerV2Read(ctx context.Context, d *schema.ResourceData,
 	mErr := multierror.Append(nil,
 		d.Set("region", config.GetRegion(d)),
 		d.Set("name", resp.Name),
-		d.Set("function_urn", resp.FunctionUrn),
+		d.Set("function_urn", flattenCustomAuthorizerFunctionUrn(d.Get("function_urn").(string), resp)),
+		d.Set("function_version", resp.Version),
+		d.Set("function_alias_uri", resp.AliasUrn),
 		d.Set("type", resp.Type),
 		d.Set("is_body_send", resp.NeedBody),
 		d.Set("ttl", resp.Ttl),
@@ -259,19 +282,104 @@ func resourceCustomAuthorizerImportState(ctx context.Context, d *schema.Resource
 	opts := authorizer.ListOpts{
 		GatewayID: gatewayId,
 		Name:      name,
+		Limit:     500,
 	}
 	resp, err := authorizer.List(client, opts)
 	if err != nil {
 		return []*schema.ResourceData{d}, fmt.Errorf("error retrieving OpenTelekomCloud APIGW custom authorizer: %s", err)
 	}
 
-	if len(resp) < 1 {
-		return []*schema.ResourceData{d}, fmt.Errorf("unable to find OpenTelekomCloud APIGW custom authorizer (%s) form server: %s",
-			name, err)
+	// The name filter may not be applied by the server, so the result is filtered by the exact name.
+	for _, item := range resp {
+		if item.Name == name {
+			d.SetId(item.ID)
+			return []*schema.ResourceData{d}, d.Set("gateway_id", gatewayId)
+		}
 	}
-	d.SetId(resp[0].ID)
 
-	return []*schema.ResourceData{d}, d.Set("gateway_id", gatewayId)
+	return []*schema.ResourceData{d}, fmt.Errorf("unable to find OpenTelekomCloud APIGW custom authorizer (%s) from server", name)
+}
+
+// The function URN format is: urn:fss:<region>:<project_id>:function:<package>:<function_name>[:<version>]
+var functionUrnWithVersionRegex = regexp.MustCompile(`^(urn:[^:]+:[^:]+:[^:]+:function:[^:]+:[^:]+):([^:]+)$`)
+
+// parseFunctionUrn splits the function URN into the URN without version and the version (or alias).
+// If the URN does not contain a version, the original value and an empty version are returned.
+func parseFunctionUrn(urn string) (string, string) {
+	if matches := functionUrnWithVersionRegex.FindStringSubmatch(urn); len(matches) == 3 {
+		return matches[1], matches[2]
+	}
+	return urn, ""
+}
+
+// getConfiguredFunctionVersion returns the function version from the configuration and whether it is configured.
+func getConfiguredFunctionVersion(d *schema.ResourceData) (string, bool) {
+	rawConfig := d.GetRawConfig()
+	if rawConfig.IsNull() || !rawConfig.IsKnown() || !rawConfig.Type().IsObjectType() ||
+		!rawConfig.Type().HasAttribute("function_version") {
+		return "", false
+	}
+	v := rawConfig.GetAttr("function_version")
+	if v.IsNull() || !v.IsKnown() {
+		return "", false
+	}
+	return v.AsString(), true
+}
+
+// resolveFunctionVersion determines the function version which will be sent to the API:
+//  1. the explicitly configured `function_version`;
+//  2. the version suffix of `function_urn` (backward compatibility);
+//  3. the current `function_version` value (e.g. read from the API after import).
+func resolveFunctionVersion(configuredVersion string, isConfigured bool, urnVersion, currentVersion string) string {
+	if isConfigured && configuredVersion != "" {
+		return configuredVersion
+	}
+	if urnVersion != "" {
+		return urnVersion
+	}
+	return currentVersion
+}
+
+// suppressCustomAuthorizerFunctionUrnDiff suppresses the difference between the function URN with version suffix and
+// the URN without version, when the version suffix is the same as the `function_version` value.
+// The API always returns the function URN without version and the version in a separate field.
+func suppressCustomAuthorizerFunctionUrnDiff(_, o, n string, d *schema.ResourceData) bool {
+	if o == "" || n == "" || o == n {
+		return false
+	}
+	oldUrn, oldVersion := parseFunctionUrn(o)
+	newUrn, newVersion := parseFunctionUrn(n)
+	if oldUrn != newUrn || (oldVersion != "" && newVersion != "") {
+		return false
+	}
+	version := oldVersion + newVersion // only one of them is not empty
+	return version == d.Get("function_version").(string)
+}
+
+// customAuthorizerFunctionVersionDiff updates the planned `function_version` value when it is omitted and
+// the version is specified as the suffix of the `function_urn`.
+func customAuthorizerFunctionVersionDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if !d.HasChange("function_urn") {
+		return nil
+	}
+	if rawConfig := d.GetRawConfig(); !rawConfig.IsNull() && rawConfig.IsKnown() &&
+		rawConfig.Type().IsObjectType() && rawConfig.Type().HasAttribute("function_version") &&
+		!rawConfig.GetAttr("function_version").IsNull() {
+		return nil
+	}
+	if _, version := parseFunctionUrn(d.Get("function_urn").(string)); version != "" {
+		return d.SetNew("function_version", version)
+	}
+	return nil
+}
+
+// flattenCustomAuthorizerFunctionUrn keeps the function URN with the version suffix in the state, if it is equivalent to
+// the URN and version returned by the API, to avoid differences for the configurations with the version suffix.
+func flattenCustomAuthorizerFunctionUrn(currentUrn string, resp *authorizer.AuthorizerResp) string {
+	if urn, version := parseFunctionUrn(currentUrn); version != "" && urn == resp.FunctionUrn && version == resp.Version {
+		return currentUrn
+	}
+	return resp.FunctionUrn
 }
 
 func flattenCustomAuthorizerIdentities(identities []authorizer.Identity) []map[string]interface{} {
