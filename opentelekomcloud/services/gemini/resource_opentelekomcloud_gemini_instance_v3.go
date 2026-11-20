@@ -132,6 +132,10 @@ func ResourceGeminiDBInstanceV3() *schema.Resource {
 						"start_time": {
 							Type:     schema.TypeString,
 							Required: true,
+							DiffSuppressFunc: func(_, _, _ string, d *schema.ResourceData) bool {
+								strategy := resourceGeminiDBBackupStrategy(d)
+								return strategy != nil && strategy.KeepDays != nil && *strategy.KeepDays == 0
+							},
 						},
 						"keep_days": {
 							Type:     schema.TypeInt,
@@ -824,9 +828,11 @@ func resourceGeminiDBInstanceV3Update(ctx context.Context, d *schema.ResourceDat
 		rawMap := backupRaw[0].(map[string]interface{})
 		keepDays := rawMap["keep_days"].(int)
 		updateOpts.BackupPolicy.KeepDays = keepDays
-		updateOpts.BackupPolicy.StartTime = rawMap["start_time"].(string)
-		// Fixed to "1,2,3,4,5,6,7"
-		updateOpts.BackupPolicy.Period = "1,2,3,4,5,6,7"
+		if keepDays > 0 {
+			updateOpts.BackupPolicy.StartTime = rawMap["start_time"].(string)
+			// Fixed to "1,2,3,4,5,6,7"
+			updateOpts.BackupPolicy.Period = "1,2,3,4,5,6,7"
+		}
 		updateOpts.InstanceId = instanceId
 		log.Printf("[DEBUG] update backup_strategy: %#v", updateOpts)
 
