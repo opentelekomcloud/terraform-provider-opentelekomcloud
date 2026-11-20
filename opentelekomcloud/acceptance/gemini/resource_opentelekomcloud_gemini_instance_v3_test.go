@@ -23,27 +23,35 @@ func TestAccGeminiDBInstance_basic(t *testing.T) {
 	rName := fmt.Sprintf("tf-acc-test-%s", acctest.RandString(5))
 	rNameUpdate := fmt.Sprintf("tf-acc-test-%s", acctest.RandString(5))
 	resourceName := "opentelekomcloud_gemini_instance_v3.test"
+	rc := common.InitResourceCheck(resourceName, &inst, getGeminiDBInstanceFunc)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckGeminiDBInstanceDestroy,
+		CheckDestroy:      rc.CheckResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGeminiDBInstanceConfigBasic(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGeminiDBInstanceExists(resourceName, &inst),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "status", "normal"),
 					resource.TestCheckResourceAttr(resourceName, "node_num", "4"),
 					resource.TestCheckResourceAttr(resourceName, "volume_size", "100"),
 					resource.TestCheckResourceAttr(resourceName, "flavor", "geminidb.cassandra.xlarge.8"),
+					resource.TestCheckResourceAttr(resourceName, "backup_strategy.0.start_time", "03:00-04:00"),
+					resource.TestCheckResourceAttr(resourceName, "backup_strategy.0.keep_days", "14"),
 				),
+			},
+			{
+				Config:             testAccGeminiDBInstanceConfigBasic(rName),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
 			},
 			{
 				Config: testAccGeminiDBInstanceConfigUpdate(rNameUpdate),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGeminiDBInstanceExists(resourceName, &inst),
+					rc.CheckResourceExists(),
 					resource.TestCheckResourceAttr(resourceName, "name", rNameUpdate),
 					resource.TestCheckResourceAttr(resourceName, "node_num", "5"),
 					resource.TestCheckResourceAttr(resourceName, "volume_size", "120"),
@@ -51,8 +59,88 @@ func TestAccGeminiDBInstance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "backup_strategy.0.keep_days", "21"),
 				),
 			},
+			{
+				Config:             testAccGeminiDBInstanceConfigUpdate(rNameUpdate),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "availability_zone"},
+			},
 		},
 	})
+}
+
+func getGeminiDBInstanceFunc(config *cfg.Config, state *terraform.ResourceState) (interface{}, error) {
+	client, err := config.GeminiDBV3Client(env.OS_REGION_NAME)
+	if err != nil {
+		return nil, fmt.Errorf("error creating GeminiDB client: %s", err)
+	}
+	return gemini.GetInstanceByID(client, state.Primary.ID)
+}
+
+func TestAccGeminiDBInstance_backupRetention(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		retention string
+		expected  string
+	}{
+		{"disabled", "keep_days = 0", "0"},
+		{"default", "", "7"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var inst instance.ListResult
+			name := fmt.Sprintf("tf-acc-test-%s", acctest.RandString(5))
+			resourceName := "opentelekomcloud_gemini_instance_v3.test"
+			rc := common.InitResourceCheck(resourceName, &inst, getGeminiDBInstanceFunc)
+			config := testAccGeminiDBInstanceConfigBackupRetention(name, tc.retention)
+			resource.ParallelTest(t, resource.TestCase{
+				PreCheck:          func() { common.TestAccPreCheck(t) },
+				ProviderFactories: common.TestAccProviderFactories,
+				CheckDestroy:      rc.CheckResourceDestroy(),
+				Steps: []resource.TestStep{
+					{
+						Config: config,
+						Check: resource.ComposeTestCheckFunc(
+							rc.CheckResourceExists(),
+							resource.TestCheckResourceAttr(resourceName, "backup_strategy.0.keep_days", tc.expected),
+						),
+					},
+					{
+						Config:             config,
+						PlanOnly:           true,
+						ExpectNonEmptyPlan: false,
+					},
+				},
+			})
+		})
+	}
+}
+
+func testAccGeminiDBInstanceConfigBackupRetention(name, retention string) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource "opentelekomcloud_gemini_instance_v3" "test" {
+  name              = "%s"
+  password          = "Test@12345678"
+  flavor            = "geminidb.cassandra.xlarge.8"
+  volume_size       = 100
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  availability_zone = "eu-de-01,eu-de-02,eu-de-03"
+
+  backup_strategy {
+    start_time = "03:00-04:00"
+    %s
+  }
+}
+`, common.DataSourceSubnet, common.DataSourceSecGroupDefault, name, retention)
 }
 
 func TestAccGeminiDBInstance_withTemplate(t *testing.T) {
