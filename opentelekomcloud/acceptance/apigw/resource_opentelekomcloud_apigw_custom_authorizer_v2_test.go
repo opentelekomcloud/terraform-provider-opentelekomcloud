@@ -51,6 +51,9 @@ func TestAccCustomAuthorizer_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceApigwAuthorizerName, "is_body_send", "true"),
 					resource.TestCheckResourceAttr(resourceApigwAuthorizerName, "ttl", "60"),
 					resource.TestCheckResourceAttr(resourceApigwAuthorizerName, "identity.#", "1"),
+					resource.TestCheckResourceAttr(resourceApigwAuthorizerName, "function_version", "latest"),
+					resource.TestCheckResourceAttrPair(resourceApigwAuthorizerName, "function_urn",
+						"opentelekomcloud_fgs_function_v2.test", "urn"),
 				),
 			},
 			{
@@ -111,6 +114,9 @@ func TestAccCustomAuthorizer_backend(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceApigwAuthorizerName, "type", "BACKEND"),
 					resource.TestCheckResourceAttr(resourceApigwAuthorizerName, "is_body_send", "false"),
 					resource.TestCheckResourceAttr(resourceApigwAuthorizerName, "ttl", "45"),
+					resource.TestCheckResourceAttr(resourceApigwAuthorizerName, "function_version", "latest"),
+					resource.TestCheckResourceAttrPair(resourceApigwAuthorizerName, "function_urn",
+						"opentelekomcloud_fgs_function_v2.test", "urn"),
 				),
 			},
 			{
@@ -118,6 +124,54 @@ func TestAccCustomAuthorizer_backend(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccCustomAuthorizerImportStateFunc(),
+			},
+		},
+	})
+}
+
+// The version is specified as the suffix of the function URN (backward compatibility).
+func TestAccCustomAuthorizer_urnWithVersion(t *testing.T) {
+	var auth authorizer.AuthorizerResp
+
+	name := fmt.Sprintf("apigw_acc_authorizer%s", acctest.RandString(5))
+
+	rc := common.InitResourceCheck(
+		resourceApigwAuthorizerName,
+		&auth,
+		getCustomAuthorizerFunc,
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      rc.CheckResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCustomAuthorizer_urnWithVersion(name, 60),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceApigwAuthorizerName, "name", name),
+					resource.TestCheckResourceAttr(resourceApigwAuthorizerName, "function_version", "latest"),
+					resource.TestCheckResourceAttr(resourceApigwAuthorizerName, "ttl", "60"),
+				),
+			},
+			{
+				Config: testAccCustomAuthorizer_urnWithVersion(name, 45),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(resourceApigwAuthorizerName, "function_version", "latest"),
+					resource.TestCheckResourceAttr(resourceApigwAuthorizerName, "ttl", "45"),
+				),
+			},
+			{
+				ResourceName:      resourceApigwAuthorizerName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccCustomAuthorizerImportStateFunc(),
+				// The API returns the function URN without the version suffix.
+				ImportStateVerifyIgnore: []string{"function_urn"},
 			},
 		},
 	})
@@ -186,12 +240,13 @@ func testAccCustomAuthorizer_front(name string) string {
 %[1]s
 
 resource "opentelekomcloud_apigw_custom_authorizer_v2" "authorizer" {
-  gateway_id   = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name         = "%[2]s"
-  function_urn = opentelekomcloud_fgs_function_v2.test.urn
-  type         = "FRONTEND"
-  is_body_send = true
-  ttl          = 60
+  gateway_id       = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name             = "%[2]s"
+  function_urn     = opentelekomcloud_fgs_function_v2.test.urn
+  function_version = "latest"
+  type             = "FRONTEND"
+  is_body_send     = true
+  ttl              = 60
 
   identity {
     name     = "user_name"
@@ -206,10 +261,11 @@ func testAccCustomAuthorizer_frontUpdate(name string) string {
 %[1]s
 
 resource "opentelekomcloud_apigw_custom_authorizer_v2" "authorizer" {
-  gateway_id   = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name         = "%[2]s"
-  function_urn = opentelekomcloud_fgs_function_v2.test.urn
-  type         = "FRONTEND"
+  gateway_id       = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name             = "%[2]s"
+  function_urn     = opentelekomcloud_fgs_function_v2.test.urn
+  function_version = "latest"
+  type             = "FRONTEND"
 }
 `, testAccCustomAuthorizer_base(name), name)
 }
@@ -219,11 +275,12 @@ func testAccCustomAuthorizer_backend(name string) string {
 %[1]s
 
 resource "opentelekomcloud_apigw_custom_authorizer_v2" "authorizer" {
-  gateway_id   = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name         = "%[2]s"
-  function_urn = opentelekomcloud_fgs_function_v2.test.urn
-  type         = "BACKEND"
-  ttl          = 60
+  gateway_id       = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name             = "%[2]s"
+  function_urn     = opentelekomcloud_fgs_function_v2.test.urn
+  function_version = "latest"
+  type             = "BACKEND"
+  ttl              = 60
 }
 `, testAccCustomAuthorizer_base(name), name)
 }
@@ -233,11 +290,26 @@ func testAccCustomAuthorizer_backendUpdate(name string) string {
 %[1]s
 
 resource "opentelekomcloud_apigw_custom_authorizer_v2" "authorizer" {
-  gateway_id   = opentelekomcloud_apigw_gateway_v2.gateway.id
-  name         = "%[2]s"
-  function_urn = opentelekomcloud_fgs_function_v2.test.urn
-  type         = "BACKEND"
-  ttl          = 45
+  gateway_id       = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name             = "%[2]s"
+  function_urn     = opentelekomcloud_fgs_function_v2.test.urn
+  function_version = "latest"
+  type             = "BACKEND"
+  ttl              = 45
 }
 `, testAccCustomAuthorizer_base(name), name)
+}
+
+func testAccCustomAuthorizer_urnWithVersion(name string, ttl int) string {
+	return fmt.Sprintf(`
+%[1]s
+
+resource "opentelekomcloud_apigw_custom_authorizer_v2" "authorizer" {
+  gateway_id   = opentelekomcloud_apigw_gateway_v2.gateway.id
+  name         = "%[2]s"
+  function_urn = "${opentelekomcloud_fgs_function_v2.test.urn}:latest"
+  type         = "BACKEND"
+  ttl          = %[3]d
+}
+`, testAccCustomAuthorizer_base(name), name, ttl)
 }

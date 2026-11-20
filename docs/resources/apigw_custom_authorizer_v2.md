@@ -22,11 +22,12 @@ variable "authorizer_name" {}
 variable "function_urn" {}
 
 resource "opentelekomcloud_apigw_custom_authorizer_v2" "test" {
-  gateway_id   = var.gateway_id
-  name         = var.authorizer_name
-  function_urn = var.function_urn
-  type         = "FRONTEND"
-  ttl          = 60
+  gateway_id       = var.gateway_id
+  name             = var.authorizer_name
+  function_urn     = var.function_urn
+  function_version = "latest"
+  type             = "FRONTEND"
+  ttl              = 60
 
   identity {
     name     = "user_name"
@@ -47,7 +48,19 @@ The following arguments are supported:
   The custom authorizer name consists of `3` to `64` characters, starting with a letter.
   Only letters, digits and underscores `_` are allowed.
 
-* `function_urn` - (Required, String) Specifies the uniform function URN of the function graph resource.
+* `function_urn` - (Required, String) Specifies the uniform function URN of the function graph resource,
+  without version, e.g. `urn:fss:eu-de:{project_id}:function:default:{function_name}`.
+
+  -> **NOTE:** For backward compatibility, the function version can also be specified as the URN suffix
+  (e.g. `urn:fss:eu-de:{project_id}:function:default:{function_name}:latest`). In this case, the suffix is
+  sent to the API as the function version when `function_version` is omitted.
+
+* `function_version` - (Optional, String) Specifies the version of the function graph resource, e.g. `latest`.
+  If omitted, the version suffix of `function_urn` is used.
+
+* `function_alias_uri` - (Optional, String) Specifies the version alias URN of the function graph resource.
+  If both `function_alias_uri` and `function_version` are specified, the alias URN is used and the version
+  is ignored.
 
 * `type` - (Optional, String, ForceNew) Specifies the custom authorize type.
   The valid values are `FRONTEND` and `BACKEND`. Defaults to `FRONTEND`.

@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    **[APIGW]** Fix ``function_urn`` version handling in ``resource/opentelekomcloud_apigw_custom_authorizer_v2`` so the version suffix is sent via ``authorizer_version`` and read back without drift
+enhancements:
+  - |
+    **[APIGW]** Add ``function_version`` and ``function_alias_uri`` arguments to ``resource/opentelekomcloud_apigw_custom_authorizer_v2``
