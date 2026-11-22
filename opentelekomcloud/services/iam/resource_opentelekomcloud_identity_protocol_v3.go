@@ -204,7 +204,7 @@ func resourceIdentityProtocolV3Read(ctx context.Context, d *schema.ResourceData,
 	}
 	prot, err := protocols.Get(client, provider(d), protocol(d)).Extract()
 	if err != nil {
-		return fmterr.Errorf("error reading protocol: %w", err)
+		return common.CheckDeletedDiag(d, err, "error reading protocol")
 	}
 
 	mErr := multierror.Append(
