@@ -132,6 +132,13 @@ func ResourceGeminiDBInstanceV3() *schema.Resource {
 						"start_time": {
 							Type:     schema.TypeString,
 							Required: true,
+							DiffSuppressFunc: func(_, _, _ string, d *schema.ResourceData) bool {
+								if d.Id() == "" {
+									return false
+								}
+								strategy := resourceGeminiDBBackupStrategy(d)
+								return strategy != nil && strategy.KeepDays != nil && *strategy.KeepDays == 0
+							},
 						},
 						"keep_days": {
 							Type:     schema.TypeInt,
@@ -264,9 +271,12 @@ func resourceGeminiDBBackupStrategy(d *schema.ResourceData) *instance.BackupStra
 		opt := &instance.BackupStrategyOpt{
 			StartTime: d.Get("backup_strategy.0.start_time").(string),
 		}
-		// The default value of keepdays is 7, but empty value of keepdays will be converted to 0.
-		if v, ok := d.GetOk("backup_strategy.0.keep_days"); ok {
-			opt.KeepDays = strconv.Itoa(v.(int))
+		// An explicit zero disables backups; an omitted retention uses the API default.
+		if common.IsAttrSet(d, "backup_strategy") {
+			keepDays := d.GetRawConfig().GetAttr("backup_strategy").AsValueSlice()[0].GetAttr("keep_days")
+			if keepDays.IsKnown() && !keepDays.IsNull() {
+				opt.KeepDays = pointerto.Int(d.Get("backup_strategy.0.keep_days").(int))
+			}
 		}
 		return opt
 	}
@@ -821,9 +831,11 @@ func resourceGeminiDBInstanceV3Update(ctx context.Context, d *schema.ResourceDat
 		rawMap := backupRaw[0].(map[string]interface{})
 		keepDays := rawMap["keep_days"].(int)
 		updateOpts.BackupPolicy.KeepDays = keepDays
-		updateOpts.BackupPolicy.StartTime = rawMap["start_time"].(string)
-		// Fixed to "1,2,3,4,5,6,7"
-		updateOpts.BackupPolicy.Period = "1,2,3,4,5,6,7"
+		if keepDays > 0 {
+			updateOpts.BackupPolicy.StartTime = rawMap["start_time"].(string)
+			// Fixed to "1,2,3,4,5,6,7"
+			updateOpts.BackupPolicy.Period = "1,2,3,4,5,6,7"
+		}
 		updateOpts.InstanceId = instanceId
 		log.Printf("[DEBUG] update backup_strategy: %#v", updateOpts)
 
