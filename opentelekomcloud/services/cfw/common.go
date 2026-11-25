@@ -19,6 +19,8 @@ const (
 	keyClientV1         = "cfw-v1-client"
 	keyClientV2         = "cfw-v2-client"
 	keyClientV3         = "cfw-v3-client"
+
+	errCodeObjectNotFound = "CFW.00200005"
 )
 
 func WaitForJobCompleted(client *golangsdk.ServiceClient, waitTime int, interval time.Duration, jobID string) error {
