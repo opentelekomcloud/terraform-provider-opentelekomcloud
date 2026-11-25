@@ -602,6 +602,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_dds_lts_log_v3":                            dds.ResourceDdsLtsLogV3(),
 			"opentelekomcloud_dds_public_ip_associate_v3":                dds.ResourceDdsPublicIpAssociateV3(),
 			"opentelekomcloud_deh_host_v1":                               deh.ResourceDeHHostV1(),
+			"opentelekomcloud_dns_endpoint_v2":                           dns.ResourceDNSEndpointV2(),
 			"opentelekomcloud_dns_ptrrecord_v2":                          dns.ResourceDNSPtrRecordV2(),
 			"opentelekomcloud_dns_recordset_v2":                          dns.ResourceDNSRecordSetV2(),
 			"opentelekomcloud_dns_zone_v2":                               dns.ResourceDNSZoneV2(),
