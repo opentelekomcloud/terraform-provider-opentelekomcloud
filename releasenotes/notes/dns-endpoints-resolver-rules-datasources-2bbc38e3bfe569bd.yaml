@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **New Data Source:** ``opentelekomcloud_dns_endpoints_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+  - |
+    **New Data Source:** ``opentelekomcloud_dns_resolver_rules_v2`` (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
