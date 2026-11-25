@@ -12,13 +12,14 @@ require (
 	github.com/hashicorp/go-multierror v1.1.2-0.20250313123807-1ee6e1a1957a
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/go-version v1.6.0
+	github.com/hashicorp/hcl/v2 v2.15.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.1
 	github.com/jen20/awspolicyequivalence v1.1.0
 	github.com/jinzhu/copier v0.3.5
 	github.com/jmespath/go-jmespath v0.4.0
 	github.com/keybase/go-crypto v0.0.0-20200123153347-de78d2cb44f4
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/opentelekomcloud/gophertelekomcloud v0.9.10-0.20261120122901-ec514364a248
+	github.com/opentelekomcloud/gophertelekomcloud v0.9.10-0.20261124170356-8cf048cff160
 	github.com/unknwon/com v1.0.1
 	golang.org/x/crypto v0.52.0
 	golang.org/x/sync v0.20.0
@@ -37,7 +38,6 @@ require (
 	github.com/hashicorp/go-hclog v1.2.1 // indirect
 	github.com/hashicorp/go-plugin v1.4.6 // indirect
 	github.com/hashicorp/hc-install v0.4.0 // indirect
-	github.com/hashicorp/hcl/v2 v2.15.0 // indirect
 	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/hashicorp/terraform-exec v0.17.3 // indirect
 	github.com/hashicorp/terraform-json v0.14.0 // indirect
