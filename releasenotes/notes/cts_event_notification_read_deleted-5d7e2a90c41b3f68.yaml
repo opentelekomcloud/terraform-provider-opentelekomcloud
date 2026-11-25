@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CTS]** ``resource/opentelekomcloud_cts_event_notification_v3`` no longer panics with ``index out of range`` when the notification was deleted outside of Terraform: it is removed from state, and the notification matching ``notification_name`` is read instead of the first one returned
