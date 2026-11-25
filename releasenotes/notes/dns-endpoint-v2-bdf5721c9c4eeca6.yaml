@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **New Resource:** ``opentelekomcloud_dns_endpoint_v2`` (`#3596 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3596>`_)
+    **New Resource:** ``opentelekomcloud_dns_endpoint_v2`` (`#3649 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3649>`_)
