@@ -74,37 +74,3 @@ Import the complete existing ACL using the file-system name:
 ```sh
 terraform import opentelekomcloud_gpfs_acl_v3.example example-fs-01
 ```
-
-The imported state includes every statement, not just one VPC grant. Match the
-configuration to the live ACL, including the imported statement order, and review
-the plan before applying.
-
-## Migration from single-VPC access-rule resources
-
-Do **not** simply remove the old resources and apply: their destroy operation
-deletes the entire ACL, including grants managed by other resources.
-
-1. Stop concurrent Terraform runs and other ACL writers. Back up Terraform state
-   and retrieve the live ACL. Prepare one ACL resource containing every grant that
-   must be preserved; previously overwritten grants may need to be restored.
-2. Remove the old resource configurations and detach their state without deleting
-   the remote ACL. With Terraform 1.7 or later, replace each old resource with a
-   `removed` block using `lifecycle { destroy = false }`. Alternatively, run
-   `terraform state rm` for every old resource address and remove their configuration
-   before any subsequent apply. Do not use ordinary destroy or a cross-type `moved`
-   block to combine several rule resources.
-3. Import the existing ACL into the new resource once. Inspect the plan and apply
-   only after confirming that no required VPC grant will be revoked.
-
-Example detachment and import for two legacy resources:
-
-```sh
-terraform state pull > before-gpfs-acl-migration.tfstate
-terraform state rm opentelekomcloud_gpfs_access_rule_v3.vpc_a opentelekomcloud_gpfs_access_rule_v3.vpc_b
-terraform import opentelekomcloud_gpfs_acl_v3.example example-fs-01
-terraform plan
-```
-
-Before running these commands, replace the legacy configuration with the complete
-ACL configuration. Protect the state backup because Terraform state can contain
-sensitive values.
