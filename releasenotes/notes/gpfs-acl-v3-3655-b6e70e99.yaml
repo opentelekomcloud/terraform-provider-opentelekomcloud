@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    **[GPFS]** Add ``opentelekomcloud_gpfs_acl_v3`` to manage all VPC grants in
+    one file-system ACL, with in-place statement updates and whole-ACL import
+    (`#3656 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/3656>`_).

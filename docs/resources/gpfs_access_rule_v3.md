@@ -1,5 +1,5 @@
 ---
-subcategory: "Scalable File Service"
+subcategory: "General Purpose File System (GPFS)"
 layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_gpfs_access_rule_v3"
 sidebar_current: "docs-opentelekomcloud-resource-gpfs-access-rule-v3"
@@ -16,6 +16,13 @@ Configuring rules replaces the current file system access-rule configuration.
 
 -> **Note:** Deleting this resource removes **all** access rules of the file system —
 the API does not support deleting a single rule.
+
+-> **Note:** Do not use multiple access-rule resources for the same file system:
+each create replaces the entire ACL, and deleting or replacing one rule revokes
+all grants. For multi-VPC access, use
+[`opentelekomcloud_gpfs_acl_v3`](gpfs_acl_v3.md). Follow its migration instructions
+to detach existing rule state without triggering ACL-wide deletion. Do not manage
+the same ACL with both resource types.
 
 Up-to-date reference of API arguments for General Purpose File System service you can get at
 [documentation portal](https://docs.otc.t-systems.com/scalable-file-service/api-ref/general_purpose_file_system_apis_beta/file_system_access_rules/index.html)
