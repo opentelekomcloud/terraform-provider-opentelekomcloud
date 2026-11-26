@@ -221,8 +221,8 @@ func ResourceGeminiDBInstanceV3() *schema.Resource {
 }
 
 // geminiDBDefaults returns the datastore defaults of an instance. GeminiDB Cassandra is assumed
-// unless the `datastore` block says otherwise, so that GeminiDB Influx instances are handled
-// with their own engine name, version and instance type.
+// unless the `datastore` block says otherwise, so that GeminiDB Influx and DynamoDB-Compatible
+// instances are handled with their own engine name, version and instance type.
 func geminiDBDefaults(d *schema.ResourceData) defaultValues {
 	defaults := defaultValues{
 		Mode:      "Cluster",
@@ -237,9 +237,9 @@ func geminiDBDefaults(d *schema.ResourceData) defaultValues {
 	if version, ok := d.GetOk("datastore.0.version"); ok {
 		defaults.dbVersion = version.(string)
 	}
-	// GeminiDB Influx is only offered as a performance-enhanced cluster backed by cloud
+	// GeminiDB Influx and DynamoDB-Compatible are only offered as clusters backed by cloud
 	// native storage, while GeminiDB Cassandra is only offered as a classic storage cluster.
-	if defaults.dbType == "influxdb" {
+	if defaults.dbType == "influxdb" || defaults.dbType == "dynamodb" {
 		defaults.Mode = "CloudNativeCluster"
 	}
 	return defaults

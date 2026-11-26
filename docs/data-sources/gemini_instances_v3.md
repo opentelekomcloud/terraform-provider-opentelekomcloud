@@ -36,10 +36,12 @@ data "opentelekomcloud_gemini_instances_v3" "influx" {
 * `subnet_id` - (Optional, String) Specifies the network ID of a subnet.
 
 * `datastore_type` - (Optional, String) Specifies the compatible API of the instances to query. The value can be
-  `cassandra` (GeminiDB Cassandra) or `influxdb` (GeminiDB Influx). All instances are queried when not set.
+  `cassandra` (GeminiDB Cassandra and DynamoDB-Compatible) or `influxdb` (GeminiDB Influx). All instances are
+  queried when not set.
 
 * `mode` - (Optional, String) Specifies the DB instance type. The value can be `Cluster` (GeminiDB Cassandra) or
-  `CloudNativeCluster` (GeminiDB Influx). This filter is ignored by the API unless `datastore_type` is set.
+  `CloudNativeCluster` (GeminiDB Influx, or GeminiDB DynamoDB-Compatible with `datastore_type = "cassandra"`).
+  This filter is ignored by the API unless `datastore_type` is set.
 
 ## Attribute Reference
 

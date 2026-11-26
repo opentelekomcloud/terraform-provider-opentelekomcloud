@@ -194,6 +194,54 @@ func TestAccGeminiDBInstance_influx(t *testing.T) {
 	})
 }
 
+func TestAccGeminiDBInstance_dynamodb(t *testing.T) {
+	var inst instance.ListResult
+
+	rName := fmt.Sprintf("tf-acc-test-%s", acctest.RandString(5))
+	resourceName := "opentelekomcloud_gemini_instance_v3.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckGeminiDBInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGeminiDBInstanceConfigDynamoDB(rName, 3, 100),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGeminiDBInstanceExists(resourceName, &inst),
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "status", "normal"),
+					resource.TestCheckResourceAttr(resourceName, "mode", "CloudNativeCluster"),
+					resource.TestCheckResourceAttr(resourceName, "datastore.0.engine", "dynamodb"),
+					resource.TestCheckResourceAttr(resourceName, "datastore.0.version", "3.11"),
+					resource.TestCheckResourceAttrPair(resourceName, "flavor",
+						"data.opentelekomcloud_gemini_flavors_v3.dynamodb", "flavors.0.spec_code"),
+					resource.TestCheckResourceAttr(resourceName, "node_num", "3"),
+					resource.TestCheckResourceAttr(resourceName, "volume_size", "100"),
+				),
+			},
+			{
+				Config: testAccGeminiDBInstanceConfigDynamoDB(rName, 4, 200),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGeminiDBInstanceExists(resourceName, &inst),
+					resource.TestCheckResourceAttr(resourceName, "node_num", "4"),
+					resource.TestCheckResourceAttr(resourceName, "nodes.#", "4"),
+					resource.TestCheckResourceAttr(resourceName, "volume_size", "200"),
+				),
+			},
+			{
+				Config: testAccGeminiDBInstanceConfigDynamoDB(rName, 3, 200),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGeminiDBInstanceExists(resourceName, &inst),
+					resource.TestCheckResourceAttr(resourceName, "node_num", "3"),
+					resource.TestCheckResourceAttr(resourceName, "nodes.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "volume_size", "200"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccGeminiDBInstance_enterpriseProject(t *testing.T) {
 	if env.OS_ENTERPRISE_PROJECT_ID == "" {
 		t.Skip("OS_ENTERPRISE_PROJECT_ID must be set to test GeminiDB enterprise project support")
@@ -414,6 +462,37 @@ resource "opentelekomcloud_gemini_instance_v3" "test" {
   }
 }
 `, common.DataSourceSubnet, common.DataSourceSecGroupDefault, rName)
+}
+
+func testAccGeminiDBInstanceConfigDynamoDB(rName string, nodeNum, volumeSize int) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+data "opentelekomcloud_gemini_flavors_v3" "dynamodb" {
+  engine_name = "cassandra"
+  mode        = "CloudNativeCluster"
+}
+
+resource "opentelekomcloud_gemini_instance_v3" "test" {
+  name        = "%s"
+  password    = "Test@12345678"
+  flavor      = data.opentelekomcloud_gemini_flavors_v3.dynamodb.flavors[0].spec_code
+  volume_size = %d
+  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  node_num    = %d
+
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  availability_zone = "eu-de-01,eu-de-02,eu-de-03"
+
+  datastore {
+    engine         = "dynamodb"
+    version        = "3.11"
+    storage_engine = "rocksDB"
+  }
+}
+`, common.DataSourceSubnet, common.DataSourceSecGroupDefault, rName, volumeSize, nodeNum)
 }
 
 func testAccGeminiDBInstanceConfigEnterpriseProject(rName string) string {

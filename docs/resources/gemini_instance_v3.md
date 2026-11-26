@@ -14,18 +14,23 @@ Up-to-date reference of API arguments for GeminiDB you can get at
 
 GeminiDB instance management within OpenTelekomCloud.
 
-Both GeminiDB variants are managed by this resource, the `datastore` block selects the compatible API:
+All GeminiDB variants are managed by this resource, the `datastore` block selects the compatible API:
 
-| Compatible API | `datastore.engine` | `datastore.version` | DB instance type                                | Flavor prefix                  |
-|----------------|--------------------|---------------------|-------------------------------------------------|--------------------------------|
-| Cassandra      | `cassandra`        | `3.11`              | Cluster (classic storage)                       | `geminidb.cassandra.`          |
-| InfluxDB       | `influxdb`         | `1.7`               | Cluster with cloud native storage (performance-enhanced) | `geminidb.influxdb-geminifs.` |
+| Compatible API      | `datastore.engine` | `datastore.version` | DB instance type                                         | Flavors                                                      |
+|---------------------|--------------------|---------------------|----------------------------------------------------------|--------------------------------------------------------------|
+| Cassandra           | `cassandra`        | `3.11`              | Cluster (classic storage)                                | `geminidb.cassandra.*`                                       |
+| InfluxDB            | `influxdb`         | `1.7`               | Cluster with cloud native storage (performance-enhanced) | `geminidb.influxdb-geminifs.*`                               |
+| DynamoDB-Compatible | `dynamodb`         | `3.11`              | Cluster with cloud native storage                        | `engine_name = "cassandra"`, `mode = "CloudNativeCluster"` |
 
 If the `datastore` block is omitted, a GeminiDB Cassandra instance is created. The DB instance type is derived
 from the engine, as each compatible API is offered with a single storage type.
 
 Use the `opentelekomcloud_gemini_datastores_v3` and `opentelekomcloud_gemini_flavors_v3` data sources to look up
 the versions and flavors that are actually available in your region.
+
+-> GeminiDB DynamoDB-Compatible flavors are listed by the specification API under the `cassandra` engine, query them
+with `engine_name = "cassandra"` and `mode = "CloudNativeCluster"` of the `opentelekomcloud_gemini_flavors_v3`
+data source.
 
 ## Example Usage
 
@@ -87,6 +92,31 @@ resource "opentelekomcloud_gemini_instance_v3" "influx_instance" {
 }
 ```
 
+### Create a GeminiDB DynamoDB-Compatible instance
+```hcl
+data "opentelekomcloud_gemini_flavors_v3" "dynamodb" {
+  engine_name = "cassandra"
+  mode        = "CloudNativeCluster"
+}
+
+resource "opentelekomcloud_gemini_instance_v3" "dynamodb_instance" {
+  name              = "gemini_dynamodb_instance_1"
+  password          = var.password
+  flavor            = data.opentelekomcloud_gemini_flavors_v3.dynamodb.flavors[0].spec_code
+  volume_size       = 100
+  vpc_id            = var.vpc_id
+  subnet_id         = var.subnet_id
+  security_group_id = var.secgroup_id
+  availability_zone = var.availability_zone
+
+  datastore {
+    engine         = "dynamodb"
+    version        = "3.11"
+    storage_engine = "rocksDB"
+  }
+}
+```
+
 ### Create a GeminiDB Cassandra instance in an enterprise project
 ```hcl
 resource "opentelekomcloud_gemini_instance_v3" "instance_1" {
@@ -123,17 +153,19 @@ The following arguments are supported:
 
 * `flavor` - (Required, String) Specifies the instance specifications, for example
   `geminidb.cassandra.xlarge.8` or `geminidb.influxdb-geminifs.xlarge.4`. The flavor must match the engine
-  selected in the `datastore` block. The available values can be queried with the
+  and the DB instance type selected in the `datastore` block. The available values can be queried with the
   `opentelekomcloud_gemini_flavors_v3` data source, for details see
   [DB Instance Specifications](https://docs.otc.t-systems.com/geminidb/api-ref/apis_v3.1/api_versions_and_specifications/querying_instance_specifications.html).
 
-* `node_num` - (Optional, Int) Specifies the number of nodes, ranges from 3 to 200. Defaults to 3.
+* `node_num` - (Optional, Int) Specifies the number of nodes. Defaults to 3. The value ranges from 3 to 200 for
+  GeminiDB Cassandra, from 2 to 9 for GeminiDB Influx and from 2 to 12 for GeminiDB DynamoDB-Compatible.
 
-  -> Nodes can only be removed from a GeminiDB Cassandra instance. Decreasing `node_num` of a GeminiDB Influx
-  instance is rejected by the service.
+  -> Nodes can only be removed from GeminiDB Cassandra and DynamoDB-Compatible instances. Decreasing `node_num` of a
+  DynamoDB-Compatible instance below the number of nodes it was created with, or decreasing `node_num` of a GeminiDB
+  Influx instance, is rejected by the service.
 
-* `volume_size` - (Required, Int) Specifies the storage space in GB. The value must be a multiple of 10. For both
-  GeminiDB Cassandra and GeminiDB Influx DB instances, the minimum storage space is 100 GB, and the maximum storage
+* `volume_size` - (Required, Int) Specifies the storage space in GB. The value must be a multiple of 10. For all
+  GeminiDB DB instances, the minimum storage space is 100 GB, and the maximum storage
   space is related to the instance performance specifications.
 
 * `password` - (Required, String) Specifies the database password. The value must be 8 to 32 characters in length,
@@ -167,16 +199,17 @@ The following arguments are supported:
 The `datastore` block supports:
 
 * `engine` - (Required, String, ForceNew) Specifies the compatible API. The value can be `cassandra` for a
-  GeminiDB Cassandra instance or `influxdb` for a GeminiDB Influx instance. Defaults to `cassandra` when the
+  GeminiDB Cassandra instance, `influxdb` for a GeminiDB Influx instance or `dynamodb` for a GeminiDB
+  DynamoDB-Compatible instance. Defaults to `cassandra` when the
   `datastore` block is omitted. Changing this parameter will create a new resource.
 
 * `version` - (Required, String, ForceNew) Specifies the database version. Use `3.11` for GeminiDB Cassandra and
-  `1.7` for GeminiDB Influx. The versions actually available in your region can be queried with the
+  GeminiDB DynamoDB-Compatible, and `1.7` for GeminiDB Influx. The versions actually available in your region can be queried with the
   `opentelekomcloud_gemini_datastores_v3` data source. Defaults to `3.11` when the `datastore` block is omitted.
   Changing this parameter will create a new resource.
 
 * `storage_engine` - (Required, String, ForceNew) Specifies the storage engine. Only `rocksDB` is supported now,
-  for both compatible APIs. Changing this parameter will create a new resource.
+  for all compatible APIs. Changing this parameter will create a new resource.
 
 The `backup_strategy` block supports:
 
@@ -202,7 +235,7 @@ In addition to all arguments above, the following attributes are exported:
 * `port` - Indicates the database port.
 
 * `mode` - Indicates the DB instance type. `Cluster` for GeminiDB Cassandra and `CloudNativeCluster` for
-  GeminiDB Influx.
+  GeminiDB Influx and GeminiDB DynamoDB-Compatible.
 
 * `db_user_name` - Indicates the default username.
 

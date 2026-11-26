@@ -48,6 +48,14 @@ resource "opentelekomcloud_gemini_instance_v3" "influx" {
 }
 ```
 
+### List GeminiDB DynamoDB-Compatible flavors
+```hcl
+data "opentelekomcloud_gemini_flavors_v3" "dynamodb" {
+  engine_name = "cassandra"
+  mode        = "CloudNativeCluster"
+}
+```
+
 ### Filter flavors by availability zone
 ```hcl
 data "opentelekomcloud_gemini_flavors_v3" "this" {
@@ -59,18 +67,20 @@ data "opentelekomcloud_gemini_flavors_v3" "this" {
 ## Argument Reference
 
 * `engine_name` - (Optional, String) Specifies the compatible API of the flavors to query. The value can be
-  `cassandra` or `influxdb`. Defaults to `cassandra`.
+  `cassandra` or `influxdb`. Defaults to `cassandra`. GeminiDB DynamoDB-Compatible flavors are listed under
+  `cassandra`, see `mode`.
 
 * `mode` - (Optional, String) Specifies the DB instance type. The only supported value is `CloudNativeCluster`,
   which returns the specifications of instances with cloud native storage. If this parameter is not set, the
-  specifications of all instances with classic storage are returned.
+  specifications of all instances with classic storage are returned. With `engine_name = "cassandra"`, the
+  `CloudNativeCluster` value returns the GeminiDB DynamoDB-Compatible flavors.
 
   -> GeminiDB Influx is only offered as a performance-enhanced cluster with cloud native storage. When
   `engine_name` is `influxdb` and `mode` is not set, `CloudNativeCluster` is used, so that its flavors are
   returned without having to set `mode` explicitly.
 
 * `engine_version` - (Optional, String) Specifies the database version used to filter the flavors, for example
-  `3.11` for GeminiDB Cassandra or `1.7` for GeminiDB Influx.
+  `3.11` for GeminiDB Cassandra and DynamoDB-Compatible or `1.7` for GeminiDB Influx.
 
 * `vcpus` - (Optional, Int) Specifies the number of vCPUs used to filter the flavors.
 
