@@ -121,15 +121,20 @@ func resourceIdentityRoleAssignmentV3Read(ctx context.Context, d *schema.Resourc
 
 	if !d.Get("all_projects").(bool) {
 		roleAssignmentId, err = getRoleAssignment(identityClient, d)
+		if err != nil {
+			return common.CheckDeletedDiag(d, err, "error getting role assignment")
+		}
+		if roleAssignmentId == "" {
+			log.Printf("[WARN] Role assignment %s not found, removing from state", d.Id())
+			d.SetId("")
+			return nil
+		}
 	} else {
 		err = getAllProjectsRoleAssignment(identityClient, d)
 		if err != nil {
-			diag.FromErr(err)
+			return common.CheckDeletedDiag(d, err, "error getting role assignment")
 		}
 		_, _, _, roleAssignmentId = ExtractRoleAssignmentID(d.Id())
-	}
-	if err != nil {
-		return fmterr.Errorf("error getting role assignment: %s", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved OpenStack role assignment ID: %s", roleAssignmentId)

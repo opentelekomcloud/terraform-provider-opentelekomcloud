@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IAM]** Remove ``resource/opentelekomcloud_identity_protocol_v3`` and ``resource/opentelekomcloud_identity_role_assignment_v3`` from state when they were deleted outside of Terraform, instead of failing the refresh with ``Resource not found`` (role assignments also when the role is no longer in the group's list)
