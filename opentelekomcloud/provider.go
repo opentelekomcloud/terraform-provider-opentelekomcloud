@@ -659,6 +659,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_gemini_instance_v3":                        gemini.ResourceGeminiDBInstanceV3(),
 			"opentelekomcloud_gemini_template_v3":                        gemini.ResourceGeminiDBParameterTemplateV3(),
 			"opentelekomcloud_gpfs_access_rule_v3":                       gpfs.ResourceGPFSAccessRuleV3(),
+			"opentelekomcloud_gpfs_acl_v3":                               gpfs.ResourceGPFSACLV3(),
 			"opentelekomcloud_gpfs_file_system_v3":                       gpfs.ResourceGPFSFileSystemV3(),
 			"opentelekomcloud_hss_host_group_v5":                         hss.ResourceHostGroup(),
 			"opentelekomcloud_hss_host_protection_v5":                    hss.ResourceHostProtection(),
