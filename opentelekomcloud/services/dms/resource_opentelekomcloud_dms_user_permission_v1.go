@@ -19,6 +19,7 @@ func ResourceDmsUsersPermissionV1() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceDmsUserPermissionV1Create,
 		ReadContext:   resourceDmsUserPermissionV1Read,
+		UpdateContext: resourceDmsUserPermissionV1Update,
 		DeleteContext: resourceDmsUserPermissionV1Delete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -38,18 +39,15 @@ func ResourceDmsUsersPermissionV1() *schema.Resource {
 			"policies": {
 				Type:     schema.TypeList,
 				Required: true,
-				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"username": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: true,
 						},
 						"access_policy": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"all", "pub", "sub",
 							}, false),
@@ -132,6 +130,29 @@ func resourceDmsUserPermissionV1Read(_ context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+func resourceDmsUserPermissionV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	client, err := config.DmsV11Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf(errCreationClient, err)
+	}
+
+	// The request takes all policies of the topic, so they do not have to be cleared first.
+	updateOpts := permissions.CreateOpts{
+		Name:     d.Get("topic_name").(string),
+		Policies: getPolicy(d),
+	}
+
+	err = permissions.Create(client, d.Get("instance_id").(string), []permissions.CreateOpts{
+		updateOpts,
+	})
+	if err != nil {
+		return fmterr.Errorf("error updating OpenTelekomCloud DMSv1 permissions: %w", err)
+	}
+
+	return resourceDmsUserPermissionV1Read(ctx, d, meta)
 }
 
 func resourceDmsUserPermissionV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

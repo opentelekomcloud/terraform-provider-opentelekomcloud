@@ -54,10 +54,13 @@ resource "opentelekomcloud_dms_user_permission_v1" "perm_1" {
 The following arguments are supported:
 
 * `instance_id` - (Required) Indicates the ID of primary DMS instance.
+  Changing this creates a new resource.
 
 * `topic_name` - (Required) Indicates the name of a topic.
+  Changing this creates a new resource.
 
 * `policies` - (Required) Indicates policy configuration for the topic.
+  Changing this replaces the policies of the topic in place.
   Supported fields:
   * `username` - (Required) DMS instance user name.
   * `access_policy` - (Required) Permission type. Possible values:

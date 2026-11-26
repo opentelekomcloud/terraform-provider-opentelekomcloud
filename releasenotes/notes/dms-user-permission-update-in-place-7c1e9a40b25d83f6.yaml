@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[DMS]** Update ``policies`` in-place in ``resource/opentelekomcloud_dms_user_permission_v1`` instead of removing all permissions of the topic first
+    (`#3652 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3652>`_)
