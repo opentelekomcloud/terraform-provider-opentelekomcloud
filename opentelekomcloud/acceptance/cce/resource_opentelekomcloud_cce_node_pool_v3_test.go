@@ -119,6 +119,14 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
 			},
+			{
+				Config: testAccCCENodePoolV3Basic(initialPreInstall, initialPostInstall),
+				Check: resource.ComposeTestCheckFunc(
+					rc.CheckResourceExists(),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "scale_enable", "false"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "initial_node_count", "1"),
+				),
+			},
 		},
 	})
 }
