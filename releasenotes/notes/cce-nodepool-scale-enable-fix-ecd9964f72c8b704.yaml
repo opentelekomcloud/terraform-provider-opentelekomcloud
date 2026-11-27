@@ -2,4 +2,4 @@
 fixes:
   - |
     **[CCE]** Fix ``scale_enable = false`` not disabling autoscaling in ``resource/opentelekomcloud_cce_node_pool_v3``
-    (`# <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/>`_)
+    (`#3658 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/3658>`_)
